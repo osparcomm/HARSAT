@@ -1,0 +1,15 @@
+species,determinand,min_value,max_value
+Nucella lapillus,VDSI,0,6
+Nucella lapillus,VDS,0,6
+Ocenebra erinaceus,VDSI,0,6
+Ocenebra erinaceus,VDS,0,6
+Neptunea antiqua,VDSI,0,4
+Neptunea antiqua,VDS,0,4
+Tritia nitida / reticulata,VDSI,0,4
+Tritia nitida / reticulata,VDS,0,4
+Peringia ulvae,VDSI,0,6
+Peringia ulvae,VDS,0,6
+Littorina littorea,INTSI,0,4
+Littorina littorea,INTS,0,4
+Buccinum undatum,VDSI,0,4
+Buccinum undatum,VDS,0,4

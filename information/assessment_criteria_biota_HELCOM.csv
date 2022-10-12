@@ -1,0 +1,12 @@
+determinand,sub.family,basis.BAC,basis.MPC,basis.EQS,basis.EAC,BAC,MPC,EQS,EAC
+CD,"Fish,Mussel,Oyster,Clam,Scallop",,,W,,,,160,
+HG,"Fish,Mussel,Oyster,Clam,Scallop",,,W,,,,20,
+PB,Fish,W,,W,,26,,110,
+PB,"Mussel,Oyster,Clam,Scallop",,,W,,,,110,
+SCB6,Fish,,L,,,,75,,
+SBDE6,Fish,,,L,,,,0.0085,
+HBCD,Fish,,,L,,,,167,
+PFOS,Fish,,,W,,,,9.1,
+TEQDFP,Fish,,,L,,,,0.0065,
+FLU,"Mussel,Oyster,Clam,Scallop",,,W,,,,30,
+BAP,"Mussel,Oyster,Clam,Scallop",,,W,,,,5,
