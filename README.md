@@ -29,8 +29,10 @@ All datasets can be run with the same directory structure (although some of the 
 The oddities directory will be created automatically when running the code.
 
 ![Alt text](images/fig1.jpg?raw=true "Required Project File Structure for OSPAR dataset.")
+Figure 1. Required Project File Structure for OSPAR dataset.
 
 ![Alt text](images/fig2.jpg?raw=true "Required Project File Structure for HELCOM dataset.")
+Figure 2. Required Project File Structure for HELCOM dataset.
 
 All R functions from the GitHub code repository should be moved to ‘functions’, and csv files with the reference tables should go to ‘information’. 
 It is recommended that the R files with examples, and the data and output directories should be in the same (project) directory e.g.
@@ -42,14 +44,16 @@ The ‘functions’ and ‘information’ directories can be anywhere (although 
 Data required for OSPAR:
  
 ![Alt text](images/fig3.jpg?raw=true "OSPAR data.")
+Figure 3. OSPAR data.
 
 Data required for HELCOM:
  
 ![Alt text](images/fig4.jpg?raw=true "HELCOM data.") 
+Figure 4. HELCOM data.
 
 HELCOM dataset requires additional R files to work, and different reference tables for ‘assessment criteria biota.csv’ and ‘assessment criteria sediment.csv’.
 HELCOM also requires different information functions from the repository with a different version that has HELCOM specific functions (‘information functions v2_68.r’).
 
 ![Alt text](images/fig5.jpg?raw=true "Additional R files required for HELCOM dataset.") 
-
+Figure 5. Additional R files required for HELCOM dataset.
 
