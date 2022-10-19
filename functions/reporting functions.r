@@ -1,26 +1,3 @@
-# edit history ----
-
-# 2_61
-# change to reflect new determinand group names
-# ctsm.summary.table: 
-#   write to csv format (size limitations) - old code still accessible
-#   re-order and re-name columns for OSPAR
-#   inlude_all = TRUE exports all variables in summary file
-# ctsm_OHAT_legends: schema for Hans
-
-# 2_64 
-# ctsm.xml.AC update and ensure only picks up AC in info 
-# ctsm_OHAT_legends: correct bug (upwards / downwards wrong way round)
-# ctsm.summary.table: write out files in UTF-8-BOM
-
-# 2_65 (OSPAR 2022 preliminary assessment)
-# ctsm.summary.table: change due to use of characters rather than factors
-
-# 2_67 (CSSEG 2020 assessment)
-# Based on old 'xml functions' file, but all requirement for xml (flash) removed
-# ctsm.set.setup moved from graphics file
-
-
 # web construction ----
 
 ctsm.web.initialise <- function(
@@ -460,15 +437,12 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 # summary table ----
 
 ctsm.summary.table <- function(
-  assessments, determinandGroups, path = ".", export = TRUE, symbol_path = "..", 
+  assessments, determinandGroups, path = ".", export = TRUE,  
   include_all = FALSE, collapse_AC = TRUE) {
 
   # get summary files
   
   # path is for output
-  # symbol_path is for up and down arrow symbols
-  
-  # require(xlsx)
 
   require(dplyr)
 
@@ -603,13 +577,6 @@ ctsm.summary.table <- function(
     overview <- overview[c(station.var, wk[order(wk.group, wk.det)])]
 
     if (!export) return(list(summary = summary, overview = overview))
-    
-    # outfile <- file.path(path, "summary", paste0(tolower(x), "_summary.xlsx"))
-  
-    # ctsm.write.series.summary(overview, station.var, outfile, path = symbol_path)
-  
-    # write.xlsx(summary, outfile, sheetName = "by series", row.names = FALSE, 
-    #            showNA = FALSE, append = TRUE)
     
     summary <- rename(
       summary, 
@@ -746,7 +713,7 @@ ctsm.summary.table <- function(
 
     }
     
-    outfile <- file.path(path, "summary", paste0(tolower(x), "_summary.csv"))
+    outfile <- file.path(path, paste0(tolower(x), "_summary.csv"))
      
     readr::write_excel_csv(summary, outfile, na = "")
   })  
