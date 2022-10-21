@@ -1,0 +1,1148 @@
+---
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    code_folding: hide
+    
+pagetitle: "biota adjustments"
+---
+
+<style type="text/css">
+
+body{ /* Normal  */
+  font-size: 16px;
+}
+  
+</style>  
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+options(width = 104)
+
+library("tidyverse", quietly = TRUE)
+
+DT_options <- list(
+  initComplete = htmlwidgets::JS(
+    "function(settings, json) {",
+    paste0("$(this.api().table().container()).css({'font-size': '", "10pt", "'});"),
+    "}")
+) 
+
+```
+
+
+<p style = "font-size:30px"><b>OSPAR 2022 Assessment: changes to biota data</p></b>
+
+### Introduction
+
+This report describes the ad-hoc changes that are made to the mercury biota data extracted from the ICES data base for the OSPAR 2022 assessment. This includes monitoring data up to 2020 and is based on an extraction on `r biota_data$info$extraction`.
+
+<br>
+
+
+### France: species
+
+Some French data are submitted with species "Mytilus", which is ambiguous.  Here is a summary of the number of measurements in species beginning with Mytilus by year
+
+```{r France_species_1}
+
+biota_data$data %>% 
+  filter(
+    country == "France",
+    grepl("Mytilus", species)
+  ) %>% 
+  with(table(species, year)) %>% 
+  print(zero.print = ".")
+```
+
+<br>
+
+The three Mytilus records in 2019 are from Aulne Rive droite, where a genetics project identified the sample to be M. edulis and M. galloprovincialis hybrids (Aourell 23/11/2021). The records are consequently deleted. Note that this station has only ever been sampled for mussels in 2019 and both edulis and galloprovincialis samples (presumably non-hybids) were identified there (see table below). 
+
+```{r France_species_2}
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  .drop = country == "France" & species == "Mytilus"
+)
+
+wk <- filter(biota_data$data, .drop)
+
+if (!all(wk$station_name %in% "Aulne Rive droite" & wk$year == 2019))
+  stop("something has changed - need to investigate")
+
+biota_data$data %>% 
+  filter(
+    station_name %in% "Aulne Rive droite", 
+    grepl("^Mytilus", species)
+  ) %>% 
+  with(table(species, year))
+
+biota_data$data <- biota_data$data %>% 
+  filter(!.drop) %>% 
+  mutate(.drop = NULL)
+
+```
+
+<br>
+
+
+### Iceland: species
+
+Some Icelandic data are submitted with species "Mytilus", which is ambiguous.  Here is a summary of the number of measurements in species beginning with Mytilus by year
+
+```{r Iceland_species_1}
+
+biota_data$data %>% 
+  filter(
+    country == "Iceland",
+    grepl("Mytilus", species)
+  ) %>% 
+  with(table(species, year)) %>% 
+  print(zero.print = ".")
+```
+
+Have assumed these to be Mytilus edulis.
+
+```{r Iceland_species_2}
+
+biota_data$data <- mutate(
+  biota_data$data,
+  .change = country == "Iceland" & species == "Mytilus"
+)
+
+if (sum(biota_data$data$.change) == 0)
+  message("good news: appears to have been sorted")
+
+biota_data$data <- mutate(
+  biota_data$data,
+  species = if_else(.change, "Mytilus edulis", species),
+  .change = NULL
+)
+```
+
+<br>
+
+
+### Ireland: station issues
+
+Some Irish stations have not been correctly matched to the station dictionary.  Here is a summary of the number of measurements from these stations by year (in the last six monitoring years).
+
+```{r Ireland_stations_1}
+
+wk_data <- biota_data$data %>% 
+  filter(
+    country == "Ireland",
+    is.na(station_name),
+    year %in% biota_data$info$recentYears
+  ) 
+
+wk_data %>% 
+  with(table(submitted.station, year)) %>% 
+  print(zero.print = ".")
+```
+<br>
+
+* Inch Lough needs to be marked as for temporal monitoring
+
+```{r Ireland_stations_2}
+wk_stations <- wk_data$submitted.station %>%  unique()
+
+if (!identical(wk_stations, "Inch Lough"))
+  warning("situation has changed - investigate")
+
+biota_data$stations %>% 
+  filter(
+    country == "Ireland", 
+    station %in% wk_stations
+  ) %>% 
+  select(station, dataType, startYear, endYear, PURPM)
+
+```      
+
+<br>
+
+This is all resolved in the code below. 
+
+```{r Irish_stations_3}
+
+# sort out data
+
+wk_data <- wk_data %>% 
+  select(country, submitted.station, station_name, station_code) %>% 
+  distinct() %>% 
+  mutate(
+    station_name = submitted.station,
+  station_code = get_station_code(station_name, "Ireland", biota_data$stations)
+)
+
+biota_data$data <- left_join(
+  biota_data$data,
+  wk_data,
+  by = c("country", "submitted.station"),
+  suffix = c("", ".new")
+)
+ 
+# need sd_name and sd_code as well so one of the checking routines works ok
+
+biota_data$data <- biota_data$data %>% 
+  mutate(
+    station_name = if_else(!is.na(station_name.new), station_name.new, station_name),
+    station_code = if_else(!is.na(station_code.new), station_code.new, station_code),
+    sd_name = if_else(!is.na(station_name.new), station_name.new, sd_name),
+    sd_code = if_else(!is.na(station_code.new), station_code.new, sd_code)
+  ) %>%
+  select(-station_name.new, - station_code.new)
+
+# update station dictionary
+
+biota_data$stations <- biota_data$stations %>%
+  mutate(
+    .id = code %in% wk_data$station_code,
+    .T = str_split(PURPM, "~") %>% sapply(function(x) "T" %in% x),
+    .EF = str_split(dataType, "~") %>% sapply(function(x) "EF" %in% x),
+    PURPM = if_else(.id & !.T, paste0(PURPM, "~T"), PURPM),
+    dataType = if_else(.id & !.EF, paste0(dataType, "~EF"), dataType),
+  ) %>%
+  select(-.id, -.T, -.EF)
+
+rm(wk_data, wk_stations)
+```
+
+
+### Ireland: HG uncertainty
+
+Mercury data in 2016 have been reported with an implausibly tight uncertainty, which causes problems with the assessment later on.  Here is a plot of the relative uncertainties by year (from 2015.
+
+```{r Ireland_uncrt_1}
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  .id = country == "Ireland" & 
+    matrix %in% "SB" & 
+    year >= 2015 & 
+    determinand %in% "HG"
+)
+  
+wk_data <- biota_data$data %>% 
+  filter(.id) %>% 
+  mutate(
+    relative_uncertainty = case_when(
+      methodUncertainty == "SD" ~ 100 * uncertainty / value,
+      methodUncertainty == "U2" ~ 100 * uncertainty / (2 * value),
+      TRUE                      ~ uncertainty
+    ),
+    value = convert.units(value, from = unit, to = "ug/kg")
+  )
+
+lattice::xyplot(
+  jitter(relative_uncertainty) ~ value | as.factor(year), 
+  data = wk_data, 
+  ylab = "relative uncertainty (%)",
+  xlab = "concentration (ug/kg)", 
+  scales = list(alternating = FALSE), 
+  pch = 16, col = "black")
+
+```
+
+The suspicion is that the method of uncertainty has been incorrectly reported as % and should be U2 (as for the other data). Have converted all method of uncertainties to U2 and the relative uncertainties look far more consistent.
+
+```{r Ireland_uncrt_2}
+
+wk_data %>%  
+  with(table(methodUncertainty, year, useNA = "ifany")) %>% 
+  print(zero.print = ".")
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  methodUncertainty = if_else(.id, "U2", methodUncertainty)
+)
+
+# check
+
+wk_data <- biota_data$data %>% 
+  filter(.id) %>% 
+  mutate(
+    relative_uncertainty = 100 * uncertainty / (2 * value),
+    value = convert.units(value, from = unit, to = "ug/kg")
+  )
+
+lattice::xyplot(
+  jitter(relative_uncertainty) ~ value | as.factor(year), 
+  data = wk_data, 
+  ylab = "relative uncertainty (%)",
+  xlab = "concentration (ug/kg)", 
+  scales = list(alternating = FALSE), 
+  pch = 16, col = "black")
+
+biota_data$data <- mutate(biota_data$data, .id = NULL)
+
+rm(wk_data)
+```
+
+
+### Spain: hake mercury
+
+Mercury in hake muscle was measured on a wet weight basis until 2011 (along with dry weight content). However, in 2016 mercury was measured on a dry weight basis (and dry weight content was not measured). The inability to convert these data to a wet weight basis means that the time series will not be used and spatial coverage will be reduced. 
+
+The dry weight content from 2007-2011 was pretty consistent so has been used to convert the mercury measurements from 2016 to a wet weight basis. Note that the uncertainty of the converted wet weight measurements should be increased to account for the variation in dry weight content between fish, but for expediency this has not been done. Also, the conversion to wet weight assumes that there is no trend in dry weight content, an assumption that becomes increasingly difficult to justify over time.
+
+Here are the number of mercury and dry weight measurements by year
+
+```{r hake_1}
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  .id = country == "Spain" &
+    species == "Merluccius merluccius" & 
+    matrix == "MU" &
+    year >= 2000
+) 
+
+wk_data <- filter(
+  biota_data$data, 
+  .id & determinand %in% c("HG", "DRYWT%")
+)
+
+if (any(wk_data$determinand %in% "HG" & wk_data$basis %in% "D" & wk_data$year != 2016))
+  stop("something has changed - investigate")
+
+if (!all(na.omit(wk_data$methodUncertainty) %in% "U2"))
+  stop("something has changed - investigate")
+
+wk_data %>% 
+  with(table(determinand, year)) %>% 
+  print(zero.print = ".")
+```
+
+<br> 
+
+And the number of mercury measurements by year and basis.
+
+```{r Spain_hake_2}
+
+wk_data %>% 
+  filter(determinand %in% "HG") %>% 
+  with(table(basis, year)) %>% 
+  print(zero.print = ".")
+```
+
+<br>
+
+Here is a plot of dry weight content by station and year.
+
+```{r Spain_hake_3}
+wk_data <- filter(wk_data, determinand %in% "DRYWT%")
+
+lattice::xyplot(
+  value ~ year | station_name, 
+  wk_data,
+  pch = 16, 
+  col = "black", 
+  scales = list(alternating = FALSE)
+)
+```
+
+<br>
+
+The median dry weight content is very similar across stations:
+
+```{r Spain_hake_4}
+wk_dw <- median(wk_data$value)
+
+with(wk_data, tapply(value, station_name, median))
+```
+
+<br>
+
+Therefore use the median value across the whole data set (`r wk_dw`%) to convert. Also have to convert uncertainty (which has been reported as U2). Limits of detection and quantification are set to missing so they do not affect the calculations for imputing missing uncertainties.  
+
+```{r Spain_hake_5}
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  .id = .id & 
+    determinand %in% "HG" & 
+    basis %in% "D",
+  value = convert.basis(value, basis, "W", wk_dw, "", exclude = !.id),
+  uncertainty = convert.basis(uncertainty, basis, "W", wk_dw, "", exclude = !.id),
+  limit_detection = if_else(.id, NA_real_, limit_detection),
+  limit_quantification = if_else(.id, NA_real_, limit_quantification), 
+  basis = if_else(.id, "W", basis),
+  .id = NULL
+) 
+
+rm(wk_data, wk_dw)
+
+```
+
+<br>
+
+
+### Sweden: station names 
+
+Two legacy station names have been replaced but it is difficult to resolve this using the station dictionary because the replacement station depends on the species type  
+
+* B-R06 has been replaced by E/W FLADEN (fish) and Nidingen (mytilus) 
+* B-R07 has been replaced by Fjallbacka (mytilus) and Vaderoarna (fish) 
+
+Note that eelpout is also sampled at Fjallbacka (so it is not just a shellfish station).  Here's a summary of the measurements that need to be changed. 
+
+```{r Sweden_stations_1}
+
+biota_data$data %>%
+  filter(
+    country %in% "Sweden", 
+    submitted.station %in% c("B-R06", "B-R07")
+  ) %>%
+  select(year, submitted.station, station_name, station_code, speciestype) %>%
+  with(table(speciestype, year, submitted.station)) %>% 
+  print(zero.print = ".")
+```
+
+<br>
+
+Here are the station codes for the correct stations
+
+```{r Sweden_stations_2}
+
+# station codes are hard wired 
+
+wk <- biota_data$stations %>%
+  filter(
+    country %in% "Sweden",
+    grepl("CF", dataType),
+    station %in% c("E/W FLADEN", "Nidingen") |
+      grepl("llbacka", station) | 
+      (grepl("V", station) & grepl("arna", station))
+  ) %>%
+  select(code, station) %>%
+  column_to_rownames("code")
+
+wk
+
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  
+  .id = country %in% "Sweden" & submitted.station %in% "B-R06",
+  
+  .change = .id & speciestype %in% "Fish",
+  station_name = if_else(.change, "E/W FLADEN", station_name),
+  station_code = if_else(.change, "6299", station_code),
+  
+  .change = .id & speciestype %in% "Bivalve",
+  station_name = if_else(.change, "Nidingen", station_name),
+  station_code = if_else(.change, "5955", station_code),
+  
+  .id = country %in% "Sweden" & submitted.station %in% "B-R07",
+  
+  .change = .id & speciestype %in% "Fish",
+  station_name = if_else(.change, wk["6141", "station"], station_name),
+  station_code = if_else(.change, "6141", station_code),
+  
+  .change = .id & speciestype %in% "Bivalve",
+  station_name = if_else(.change, wk["5747", "station"], station_name),
+  station_code = if_else(.change, "5747", station_code),
+  
+  .id = NULL,
+  .change = NULL
+)
+
+```
+
+And here is a summary of the measurements at the correct stations.
+
+```{r Sweden_stations_3}
+
+biota_data$data %>%
+  filter(station_code %in% row.names(wk)) %>%
+  select(year, submitted.station, station_name, station_code, speciestype) %>%
+  with(table(speciestype, year, station_name)) %>% 
+  print(zero.print = ".")
+
+rm(wk)
+```
+
+<br>
+
+### UK: SEPA dry weights
+
+SEPA have incorrectly submitted dry weight information for shellfish using matrix SH rather than SB. Here is a summary of the relevant years.
+
+```{r UK_drywt_1}
+
+biota_data$data <- mutate(
+  biota_data$data,  
+  .change = country == "United Kingdom" & 
+    matrix %in% "SH" & 
+    determinand %in% "DRYWT%"
+)
+ 
+if (sum(biota_data$data$.change) == 0)
+  message("all good - delete code")
+
+biota_data$data %>% 
+  filter(.change) %>% 
+  with(table(alabo, year)) %>% 
+  print(zero.print = ".")
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  matrix = if_else(.change, "SB", matrix),
+  .change = NULL
+)
+```
+
+<br>
+
+
+### UK: SEPA metals
+
+The following mercury data in fish collected by SEPA from 2008 and before are inconsistent with the rest of the time series so are deleted. The arguments below aren't too convincing for mercury, but when other metals are also considered, they become persuasive.
+
+<br>
+
+#### Part 1
+
+Here is a plot of mercury data at Clyde_ClydeEstuaryOuter_fi02 with the SEPA data from 2008 and before in red. All units are ug/kg ww. The data from 2006 are suspicious and are deleted. 
+
+```{r UK_SEPA_1, eval = FALSE}
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  .station = station_name %in% wk_station,
+  .id = .station & determinand %in% "HG",
+  .drop = .id & year <= 2008
+)
+
+
+wk_data <- biota_data$data %>% 
+  mutate(.matrix = if_else(determinand %in% c("HG", "AS"), "MU", "LI")) %>% 
+  filter(.id & matrix == .matrix) %>%
+  mutate(value = convert.units(value, unit, "ug/kg"))
+
+wk_dry <- biota_data$data %>% 
+  filter(.station & determinand %in% "DRYWT%") %>% 
+  select(sub.sample, matrix, value) %>% 
+  rename(dry_weight = value)
+
+wk_lipid <- biota_data$data %>% 
+  filter(.station & determinand %in% "LIPIDWT%") %>% 
+  select(sub.sample, matrix, value) %>% 
+  rename(lipid_weight = value)
+
+wk_data <- left_join(wk_data, wk_dry, by = c("sub.sample", "matrix"))
+wk_data <- left_join(wk_data, wk_lipid, by = c("sub.sample", "matrix"))
+
+wk_n <- nrow(wk_data)
+
+wk_data <- mutate(
+  wk_data,
+  value = convert.basis(
+    value, basis, rep("W", wk_n),
+    dry_weight, rep("", wk_n),
+    lipid_weight, rep("", wk_n)
+  )
+)
+
+lattice::xyplot(
+  value ~ year | determinand, data = wk_data,
+  ylab = "",
+  scales = list(y = list(log = TRUE, equispaced.log = FALSE, relation = "free"), alternating = FALSE),
+  panel = function(x, y, subscripts) {
+    data <- wk_data[subscripts, ]
+    .id <- data$.drop
+    lattice::lpoints(x[!.id], y[!.id], col = "black", pch = 16)
+    lattice::lpoints(x[.id], y[.id], col = "red", pch = 16)
+  }
+)
+
+biota_data$data <- biota_data$data %>%
+  filter(!.drop) %>%
+  mutate(
+    .station = NULL,
+    .id = NULL,
+    .drop = NULL
+  )  
+
+rm(wk_dry, wk_lipid, wk_n, wk_data, wk_station)
+
+```
+
+```{r UK_SEPA_2}
+wk_station <- "Clyde_ClydeEstuaryOuter_fi02"
+```
+
+```{r UK_SEPA_3, ref.label = "UK_SEPA_1"}
+```
+
+<br>
+
+#### Part 2
+
+Here is a plot of mercury data at Forth_LowerForthEstuary_fi01 with the SEPA data from 2008 and before in red. The SEPA data from 1999 and 2001 are deleted because it is unclear whether any differences over time are environmental or analytical. 
+
+```{r UK_SEPA_4}
+wk_station <- "Forth_LowerForthEstuary_fi01"
+```
+
+```{r UK_SEPA_5, ref.label = "UK_SEPA_1"}
+```
+
+<br>
+
+
+
+
+
+### UK: EA units 
+
+There are mercury unit errors at five EA stations in 2006 (Anglia_ThamesMid_fi01, Anglia_ThamesLw_fi02, Anglia_Medway_fi02, HumWash_HumberLow_fi01 and IrishSea_Ribble_fi01.)  Here is a plot of the timeseries of mercury concentrations in muscle at these stations with the 2006 data in red. All concentrations are in ug/kg ww.  As it turns out, this is a legacy issue, since fish are no longer monitored at these stations.
+
+```{r UK_EA_1}
+
+biota_data$data <- mutate(
+  biota_data$data,
+  .id = country %in% "United Kingdom" & 
+    station_name %in% c(
+      "Anglia_ThamesMid_fi01", "Anglia_ThamesLw_fi02", "Anglia_Medway_fi02", 
+      "HumWash_HumberLow_fi01", "IrishSea_Ribble_fi01") &
+    matrix %in% "MU" & 
+    determinand %in% "HG",
+  .change = .id & year == 2006
+)
+
+wk_data <- biota_data$data %>% 
+  filter(.id) %>% 
+  mutate(value = convert.units(value, unit, "ug/kg"))
+
+if (!all(wk_data$basis %in% "W"))
+  warning("need to convert basis")
+
+if (!all(wk_data$unit %in% "ug/kg"))
+  warning("need to investigate units")
+
+if (any(wk_data$year >= 2015))
+  warning("new data submitted - need to investigate")
+
+lattice::xyplot(
+  value ~ year | station_name, data = wk_data,
+  ylab = "",
+  scales = list(y = list(log = TRUE, equispaced.log = FALSE, relation = "free"), alternating = FALSE),
+  panel = function(x, y, subscripts) {
+    data <- wk_data[subscripts, ]
+    .id <- data$.change
+    lattice::lpoints(x[!.id], y[!.id], col = "black", pch = 16)
+    lattice::lpoints(x[.id], y[.id], col = "red", pch = 16)
+  }
+)
+```
+
+The data are corrected by changing the units to mg/kg in the data file. Here is a plot of the corrected data.
+
+```{r UK_EA_2}
+
+biota_data$data <- mutate(
+  biota_data$data,
+  unit = if_else(.change, "mg/kg", unit)
+)
+
+wk_data <- biota_data$data %>% 
+  filter(.id) %>% 
+  mutate(value = convert.units(value, unit, "ug/kg"))
+
+lattice::xyplot(
+  value ~ year | station_name, data = wk_data,
+  ylab = "",
+  scales = list(y = list(log = TRUE, equispaced.log = FALSE, relation = "free"), alternating = FALSE),
+  panel = function(x, y, subscripts) {
+    data <- wk_data[subscripts, ]
+    .id <- data$.change
+    lattice::lpoints(x[!.id], y[!.id], col = "black", pch = 16)
+    lattice::lpoints(x[.id], y[.id], col = "red", pch = 16)
+  }
+)
+  
+biota_data$data <- mutate(
+  biota_data$data, 
+  .id = NULL,
+  .change = NULL
+)  
+```  
+  
+<br>  
+  
+
+### AMAP preparation
+
+The following changes are required to reliably merge the ICES data with the AMAP mercury data. These need to be built into the core routines. (Some of them are already there, but are only implemented after the merge takes place, which is too late!)
+
+<br>
+
+#### Data outside OSPAR area
+
+Drop data from outside the OSPAR area 
+
+```{r AMAP_1}
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !is.na(OSPARregion)
+) 
+
+```
+
+<br>
+
+#### PURPM and Governance
+
+Stations submitted for AMAP (but not OSPAR) will not be identifed as valid stations by code unless OSPAR is added to the programGovernance field and PURPM is set to T
+
+```{r AMAP_2}
+
+biota_data$stations <- mutate(
+  biota_data$stations, 
+
+  .id = strsplit(programGovernance, "~") %>% 
+      sapply(function(x) ("AMAP" %in% x) & !("OSPAR" %in% x)),
+  programGovernance = if_else(
+    .id, 
+    paste0(programGovernance, "~OSPAR"),
+    programGovernance
+  ),
+    
+  PURPM = if_else(.id & is.na(PURPM), "T", PURPM),
+    
+  .T = strsplit(PURPM, "~") %>% sapply(function(x) "T" %in% x),
+  PURPM = if_else(.id & !.T, paste0(PURPM, "~T"), PURPM),
+
+  .id = NULL,
+  .T = NULL
+)
+```
+
+<br>
+
+#### Mammal sub-groups
+
+Add a column to allow the creation of different mammal groups based on age (size) and sex. 
+
+```{r AMAP_3}
+
+biota_data$data$AMAP_group <- "Not_applicable"
+
+```
+
+<br>
+
+
+### Faroes: data corrections
+
+These data are scheduled for resubmission so the changes below are not described in detail. 
+
+<br>
+
+#### Delete rlabo HFSF
+
+Data from reporting lab HFSF is deleted as it is legacy data. 
+
+```{r Faroes_1}
+
+biota_data$data <- filter(
+  biota_data$data,
+  !(country %in% "Denmark" & 
+      region %in% "Greenland-Scotland ridge" & 
+      rlabo %in% "HFSF"
+  )
+) 
+
+```
+
+<br>
+
+
+#### Pilot whale stations
+
+Here is a table of pilot whale measurements by submitted station and by station name (if recognised by the station dictionary).
+
+```{r Faroes_2}
+
+wk_data <- filter(
+  biota_data$data,
+  country %in% "Denmark",
+  region %in% "Greenland-Scotland ridge",
+  species %in% "Globicephala melas"
+) 
+
+with(wk_data, table(submitted.station)) %>% 
+  print(zero.print = ".")
+
+with(wk_data, table(station_name)) %>% 
+  print(zero.print = ".")
+
+```
+```{r Faroes_3}
+
+wk_station <- biota_data$stations %>% 
+  filter(code == "902") %>% 
+  pull(station)
+```
+
+For assessment purposes these data are all taken to come from a single station covering the waters around Faroes: specifically `r wk_station`. Here is a summary of the number of measurements by year.
+
+```{r Faroes_4}
+
+biota_data$data <- mutate(
+  biota_data$data,
+  .id = country %in% "Denmark" & 
+    region %in% "Greenland-Scotland ridge" & 
+    species %in% "Globicephala melas",
+  station_name = if_else(.id, wk_station, station_name),
+  station_code = if_else(.id, "902", station_code),
+)
+
+biota_data$data %>% 
+  filter(.id) %>% 
+  with(table(station_name, year))
+
+biota_data$data$.id <- NULL
+rm(wk_station)
+
+```
+
+<br>
+
+#### Guillemot stations 
+
+Here is a table of black guillemot measurements by submitted station and station name (if recognised by the station dictionary). 
+
+```{r Faroes_5}
+
+wk_data <- filter(
+  biota_data$data,
+  country %in% "Denmark",
+  region %in% "Greenland-Scotland ridge",
+  species %in% "Cepphus grylle"
+) 
+
+with(wk_data, table(submitted.station, station_name, useNA = "ifany")) %>% 
+  print(zero.print = ".")
+
+wk_station <- biota_data$stations %>% 
+  filter(code == "916") %>% 
+  pull(station)
+```
+
+Somehow everything seems to have matched up, apart for data submitted with station Skuvoy, which needs to be changed to `r wk_station`.
+
+```{r Faroes_6}
+
+biota_data$data <- mutate(
+  biota_data$data,
+  .id = country %in% "Denmark" & 
+    region %in% "Greenland-Scotland ridge" & 
+    species %in% "Cepphus grylle" &
+    submitted.station %in% "Skuvoy",
+  station_name = if_else(.id, wk_station, station_name),
+  station_code = if_else(.id, "916", station_code),
+  .id = NULL
+)
+
+biota_data$data %>% 
+  filter(
+    country %in% "Denmark",
+    region %in% "Greenland-Scotland ridge", 
+    species %in% "Cepphus grylle" 
+  ) %>% 
+  with(table(station_name, year))
+
+rm(wk_station)
+```
+
+Note that data for cod and northern fulmar are correctly matched up.
+
+```{r Faroes_7}
+
+wk_data <- filter(
+  biota_data$data,
+  country %in% "Denmark",
+  region %in% "Greenland-Scotland ridge",
+  species %in% c("Gadus morhua", "Fulmarus glacialis")
+) 
+
+with(wk_data, table(species, year)) %>% 
+  print(zero.print = ".")
+
+with(wk_data, table(submitted.station, station_name, useNA = "ifany")) %>% 
+  print(zero.print = ".")
+```
+
+<br>
+
+
+### Faroes: extra
+
+The following sections attempt to make the treatment of data from the ICES extraction consistent with the treatment of mercury data in the AMAP mercury assessment (Birgitta). Not many changes are made here, but is good to retain these reflections for when the data have been resubmitted.
+
+This is the sort of thing that I have to do when there are data in both the ICES extraction and the external data. The code below was written for the full data set (i.e. other metals and organics), but illustrates the lengths involved.  It is not really needed for this mercury example.
+
+```{r Faroes_AMAP_1}
+
+# read in AMAP mercury data - note this has been filtered from the original file where more information can be found.
+
+wk_AMAP <-
+  file.path("data", "example_external_data", "AMAP_MIME_data.xlsx") %>%
+  readxl::read_excel(
+    col_types = rep(
+      c("guess", "skip", "guess", "skip", "guess", "skip"), 
+      times = c(7, 3, 1, 6, 1, 1)
+    )
+  ) %>% 
+  filter(
+    country %in% "Denmark", 
+    species %in% c(
+      "Cepphus grylle", "Fulmarus glacialis", "Gadus morhua", "Globicephala melas"
+    )
+  )  
+
+```
+
+<br>
+
+
+#### Remove Hg data 
+
+Remove the mercury data in the ICES extraction for those stations and years (2017 and earlier) that are also in the AMAP data set. This is because of the better data quality control applied to the AMAP data set before the AMAP mercury assessment.
+
+As it turns out, there aren't any mercury data in the ICES extraction after 2017. In practice, this means that mercury assessments are based on the AMAP data set and the assessment of all other contaminants is based on the ICES extraction.
+
+```{r Faroes_Hg_1}
+
+# check station_names and species in both the AMAP and ICES data sets are identical (i.e. no extra time series lurking about that haven't been accounted for)
+
+biota_data$data <- mutate(
+  biota_data$data,
+  .id = country %in% "Denmark" & 
+    region %in% "Greenland-Scotland ridge" &
+    species %in% c(
+      "Cepphus grylle", "Fulmarus glacialis", "Gadus morhua", "Globicephala melas"
+    )
+)
+
+wk_data <- biota_data$data %>% 
+  filter(.id) %>% 
+  select(station_name, species) %>% 
+  distinct() %>% 
+  arrange(station_name)
+
+wk_AMAP2 <- wk_AMAP %>% 
+  select(station_name, species) %>%
+  distinct() %>% 
+  arrange(station_name)
+
+if (!(identical(wk_data$station_name, wk_AMAP2$station_name) & 
+      identical(wk_data$species, wk_AMAP2$species))
+) warning("time series inconsistencies - look at what has changed")
+
+biota_data$data <- biota_data$data %>%
+  mutate(.id = .id & determinand %in% "HG" & year <= 2017) %>% 
+  filter(!.id) %>% 
+  mutate(.id = NULL)
+
+rm(wk_AMAP2)
+
+```
+
+<br>
+
+#### Cod lengths
+
+In the AMAP mercury assessment, cod were grouped into 'medium' and 'undefined' lengths and each group was assessed separately. The medium lengths were from 50 to 60 cm (see below) and the undefined lengths ranged from 23 cm to 109 cm with a median of 61 cm.
+
+In the MIME assessment, only the medium group is assessed, since the undefined group does not make sense biologically.
+
+```{r Faroes_cod_1}
+
+wk_AMAP %>%
+  filter(
+    species %in% "Gadus morhua",
+    determinand %in% "LNMEA"
+  ) %>%
+  pull(value) %>% 
+  summary()
+
+```
+
+<br>
+
+The lengths in the ICES extraction have a much narrower range (see below). All these lengths are included in the assessment, since length is likely to have a smaller effect on the contaminants in the ICES extraction (i.e. not mercury).
+
+```{r Faroes_cod_2}
+
+biota_data$data %>%
+  filter(
+    species %in% "Gadus morhua",
+    station_code %in% "911",
+    determinand %in% "LNMEA"
+  ) %>%
+  pull(value) %>%
+  summary()
+```
+
+<br>
+
+#### Fulmar age
+
+The fulmar mercury data were identified as pullus by Birgitta, but there are no age data in either the AMAP data or the ICES extraction to confirm this (nor is there suitable classification information in any other record that I can see)
+
+<br>
+
+#### Pilot whale: mammal group
+
+In the AMAP mercury assessment, the data were grouped into adults or juvenile males:  
+
+* adults: females $\ge$ 375cm or males $\ge$ 495cm 
+* juvenile males: males with lengths between 320 and 494cm
+
+(I have a note that 325 or 500 might be more sensible values for the males - don't know why, but might be worth re-investigating the length distributions.)
+
+The same groupings are applied for the assessment of the other contaminants in the ICES extraction
+
+```{r Faroes_pw_1}
+
+# This shows the minimum length in each group by sex 
+
+# wk_AMAP %>%
+#   filter(
+#     species %in% "Globicephala melas",
+#     determinand %in% "LNMEA"
+#   ) %>%
+#   with(tapply(value, list(sex, AMAP_group), min))
+
+
+wk_length <- biota_data$data %>% 
+  filter(determinand %in% "LNMEA") %>% 
+  select(sub.sample, value) %>% 
+  rename(.length = value) %>% 
+  distinct() 
+
+if (anyDuplicated(wk_length$sub.sample))
+  stop("duplicate sub samples - investigate")
+
+biota_data$data <- 
+  left_join(biota_data$data, wk_length, by = "sub.sample") %>% 
+  mutate(
+    .id = station_code %in% "902" & species %in% "Globicephala melas",
+    AMAP_group = case_when(
+      .id & sex %in% "F" & .length >= 375 ~ "Adult",
+      .id & sex %in% "M" & .length >= 495 ~ "Adult",
+      .id & sex %in% "M" & .length >= 320 ~ "Juvenile_male",
+      .id                                 ~ NA_character_,
+      TRUE                                ~ AMAP_group
+    ),
+    .id = NULL,
+    .length = NULL
+  ) %>% 
+  drop_na(AMAP_group)
+
+```
+
+<br>
+
+
+#### Guillemot: juveniles 
+
+The guillemot time series in the mercury AMAP data set are grouped as juvenile and undefined:  
+
+* Tindhólmur: all juveniles
+* Sveipur: most juvenile and a few undefined (which were discarded)
+* Koltur: all undefined
+* Skúvoy: all undefined
+
+However, there are no supporting data to show how these selections were made. Have used all available data in the ICES extraction. 
+
+<br>
+
+
+### Greenland
+
+Data from Greenland should theoretically be the same in both the ICES extraction and the AMAP external data file. However, the data submitted to ICES are not correct. So drop all Greenland data from the ICES extraction.
+
+```{r Greenland_c1}
+
+biota_data$data <- biota_data$data %>% 
+  filter(! ices_ecoregion %in% "Greenland Sea") %>% 
+  mutate(.id = NULL)
+
+```
+
+
+
+### Non-marine species
+
+Drop Arctic char, Arctic fox, northern pike, brown trout, rock ptarmigan because they are not marine species. These could be omitted in the species information file, but it is more explicit to do it here, and there is some ambiguity about whether e.g. char should be included or not.
+
+```{r non_marine_species}
+
+biota_data$data <- filter(
+  biota_data$data,  
+  !species %in% c(
+    "Salvelinus alpinus", 
+    "Vulpes lagopus", 
+    "Esox lucius", 
+    "Salmo trutta", 
+    "Lagopus muta"
+  )
+) 
+
+```
+
+<br>
+
+### AMAP external data
+
+#### Data input
+
+Merge data file with external AMAP file used for AMAP mercury assessment. Note that some pre-processing of the AMAP data has already been done (elsewhere) to e.g. remove stations not in the OSPAR area. A different data set was used in the last AMAP assessment.
+
+```{r AMAP_4}
+
+# pre-processing to remove Region 0 data and weird groups 
+# this was done in 2021 assessment and the data files have just been copied across
+
+# source("OSPAR 2021 AMAP preparation.r")
+
+# read in non-ICES data and stations 
+
+biota_data <- add_non_ICES_data(
+  biota_data, "AMAP_MIME_data.xlsx", "AMAP_MIME_stations.xlsx",
+  keep = "all", 
+  path = file.path("data", "example_external_data")
+)
+```
+
+<br>
+
+#### Svalbard edits
+
+Remove polar bear data for years up to 1994 inclusive (Simon 30/12/2021).
+
+```{r AMAP_5}
+
+biota_data$data <- biota_data$data %>% 
+  mutate(
+    .id = species %in% "Ursus maritimus" & 
+      country %in% "Norway" &
+      station_code %in% "A47001" &
+      year <= 1994
+  ) %>% 
+  filter(!.id) %>% 
+  mutate(.id = NULL)
+
+```
+
+<br>
+

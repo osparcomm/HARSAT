@@ -1,12 +1,9 @@
-# 2_61 (OSPAR 2020 assessment)
-# ensure pargroup is populated - should do this dynamically in future
-# make programme governance same as info$purpose
+# function to read in external data
+# based on AMAP mercury data
 
-# 2_65 (OSPAR 2022 preliminary run)
-# adjust because ICES data no longer contains factors and QA file has changed
-# structure
-
-add_non_ICES_data <- function(ICES_data, AMAP_data, AMAP_stations, keep = c("all", "AMAP")) {
+add_non_ICES_data <- function(
+  ICES_data, AMAP_data, AMAP_stations, 
+  keep = c("all", "AMAP"), path = ".") {
 
   require("dplyr")
   require("readxl")
@@ -22,7 +19,7 @@ add_non_ICES_data <- function(ICES_data, AMAP_data, AMAP_stations, keep = c("all
 
   # read in AMAP data
   
-  file_id <- file.path("data", AMAP_data)
+  file_id <- file.path(path, AMAP_data)
   
   id <- read_excel(file_id, n_max = 0)
   id <- names(id)
@@ -139,7 +136,7 @@ add_non_ICES_data <- function(ICES_data, AMAP_data, AMAP_stations, keep = c("all
   
   # read in AMAP stations
 
-  file_id <- file.path("data", AMAP_stations)
+  file_id <- file.path(path, AMAP_stations)
   
   id <- read_excel(file_id, n_max = 0)
   id <- names(id)
