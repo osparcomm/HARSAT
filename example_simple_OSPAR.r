@@ -99,7 +99,7 @@ biota_assessment <- ctsm.assessment.setup(
 )
 
 
-biota_fit <- ctsm.assessment(
+biota_assessment$assessment <- ctsm.assessment(
   biota_assessment, 
   determinandID = unlist(determinands$Biota)
 )
@@ -107,13 +107,10 @@ biota_fit <- ctsm.assessment(
 
 # check convergence - no errors this time
 
-ctsm_check_convergence(biota_fit)
+ctsm_check_convergence(biota_assessment$assessment)
 
 
 # tidy up 
-
-biota_assessment$assessment[names(biota_fit)] <- biota_fit
-
 
 # make timeSeries factor levels more interpretable
 
