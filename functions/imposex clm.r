@@ -1,9 +1,4 @@
-# 2_60 
-# imposex.clm.fit update p_nonlinear, p_linear and p_overall for consistency with other fits
-
-# 2_63 (HELCOM 2021)
-# don't add MASS to path as conflict with dplyr::select
-
+# cumulative proportional odds model for imposex data
 
 imposex.VDS.p.calc <- function(theta, cumulate = FALSE) {
   if (cumulate) theta <- cumsum(theta)
@@ -205,11 +200,12 @@ imposex.clm.predict <- function(clmFit, theta, data) {
 
 
 
-imposex.assess.clm <- function(data, theta, annualIndex, species, recent.trend = 20, max.year) {
+imposex_assess_clm <- function(
+    data, theta, annualIndex, species, recent.trend = 20, max.year) {
 
   output <- list()
   summary <- list()
-
+  
   # decide whether there are sufficient years to model data
   # appropriate type of fit depends on total number of years and 
   # number of years with intermediate values (i.e between 0 and max(VDS))
@@ -219,7 +215,7 @@ imposex.assess.clm <- function(data, theta, annualIndex, species, recent.trend =
   if (nYear <= 2) {
     summary$meanLY <- tail(annualIndex$index, 1)
     summary$clLY <- tail(annualIndex$upper, 1)
-    summary$class = imposex.class(species, summary$clLY)
+    summary$class = imposex_class(species, summary$clLY)
     return(list(summary = data.frame(summary)))
   }
   
@@ -503,7 +499,7 @@ imposex.assess.clm <- function(data, theta, annualIndex, species, recent.trend =
   summary$meanLY <- tail(output$pred$fit, 1)
   summary$clLY <- tail(output$pred$ci.upper, 1)
 
-  summary$class <- imposex.class(species, summary$clLY)
+  summary$class <- imposex_class(species, summary$clLY)
    
   summary <- within(summary, {
     # round for ease of interpretation

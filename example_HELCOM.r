@@ -454,10 +454,8 @@ biota_Metabolites <- ctsm.assessment(
 biota_Imposex <- ctsm.assessment(
   biota_assessment, 
   determinandID = determinands$Biota$Imposex,
-  clusterID = wk.cluster
 )
 
-saveRDS(biota_Imposex, file.path("Rdata", "biota Imposex.rds"))
 
 
 ### check convergence ----
@@ -544,7 +542,6 @@ biota_assessment <- local({
 })
 
 # saveRDS(biota_assessment, file.path("RData", "biota assessment.rds"))
-
 
 
 ## water ----

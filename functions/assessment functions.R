@@ -1,55 +1,4 @@
-# Edit history ----
-
-# 17/11/2014 get.index.biota... transformation now derived from info.determinand file
-# 17/11/2014 ctsm.anyyear high or low = good.status now derived from info.determinand file
-# 17/11/2014 ctsm.anyyear streamline code for summary output
-# 15/12/2014 ctsm.anyyear change to variable window, with flexible smoothing selection
-# 19/10/2015 ctsm.assessment make recent.trend part of info and main argument
-# 01/01/2016 radical rewrite to fit using proper mixed model and less than technology
-# 19/01/2016 create assessment object in first step and then populate it by e.g. group
-# 30/01/2016 ctsm.assessment - ad hoc fix to estimate missing uncertainties for unruly determinands
-# 08/02/2016 ctsm.assessment - ensure noinp and %FEMALEPOP gets passed to imposex index function
-# 13/02/2016 ctsm.anyyear.lmm - fix bug in summary when parametric model cannot be fitted
-# 23/05/2016 ctsm.assessment - pass relevant info to imposex assessment function for individual fits
-# 24/05/2016 ctsm.assessment - add cl to annualIndex for imposex indices based on individuals
-# 15/06/2016 ctsm.assessment - remove assessment.year variable
-# 12/07/2016 ctsm.assessment - ensure assess.imposex has CMA for CSSEG and country + region for MIME
-# 03/11/2016 ctsm.assessment - pick up analytical variance (on original scale) from uncertainty, 
-#            not aweight
-# 04/11/2016 ctsm.assessment - pick up revised names of biota.VDS.estimates
-# 06/11/2016 ctsm.assessment - send to multiple cores
-# 19/01/2017 add in water index calculation
-# 20/01/2017 ctsm.test.below - now only looks at most recent five years of data
-# 28/10.2017 ctsm.assessment - wrap each assessment in try to trap errors
-# 30/10/2017 ctsm.anyyyear.lmm - choose_model argument for use in emergency when a model has overfit
-# 22/11/2017 get index functions for water
-# 01/12/2017 add function to check convergence
-# 28/02/2019 use pbapply to monitor convergence
-# 18/10/2019 various - allow assessment to run when no AC
-# 21/10/2019 ctsm.anyyearlmm - add variance components to output list; estimate dtrend using power 
-#            function rather than 0.41 multiplier
-# 22/10/2019 ctsm.anyyear.lmm - introduce p_overall, p_nonlinear and p_linear, and make pltrend 
-#            comparable to prtrend
-# 06/11/2019 various - qflag can now be <, D, Q
-# 28/02/2020 ctsm.anyyear.lmm - first year of timeseries now in assessment summary
-
-# 2_60 
-# ctsm.anyyear.lmm - temporary fix to delay coding some esoteric bioeffects until 
-#   four years of data
-
-# 2_61
-# ctsm.assessment - get basis from timeSeries structure
-# get.index.[...] - changes for new group names
-
-# 2_66
-# ctsm.assessment, ctsm.anyyear.lmm - bespoke code for time-to-event data NRR, LP  
-#   and SURVT (distribution = survival), beta data %DNATAIL and negative binomial
-#   data MNC
-# ctsm.assessment - missing uncertainties now only hardwired for SFG
-# get.index.default - computes median log concentration for lognormal data and 
-#   median concentration for all other distributions (previously only normal data)
-# get.index.biota.Effects - major revision to deal with new distributions
-
+# main assessment functions
 
 # Set up functions ----
 
@@ -179,18 +128,21 @@ ctsm.assessment <- function(
       
       
 
-      # if any individual data, then need to augment annual indices with confidence intervals
+      # if any individual data, need to augment annual indices with confidence 
+      # intervals
       
       indiID <- with(x, tapply(noinp, year, function(y) all(y == 1)))
       
-      if (any(indiID) & determinand == "VDS" & thetaID %in% names(biota.VDS.estimates)) {
+      if (any(indiID) & thetaID %in% names(biota.VDS.estimates)) {
 
         out$annualIndex[c("lower", "upper")] <- NA
         
         clID <- paste(station, names(indiID)[indiID], species)
-        out$annualIndex[indiID, c("lower", "upper")] <- biota.VDS.cl[clID, c("lower", "upper")]
+        out$annualIndex[indiID, c("lower", "upper")] <- 
+          biota.VDS.cl[clID, c("lower", "upper")]
         
-        # adjust when indices are zero or max (had to add an observation with a 1 or n-1 to get a fit)
+        # adjust when indices are zero or max (had to add an observation with a 
+        # 1 or n-1 to get a fit)
         
         ntheta <- biota.VDS.estimates[[thetaID]]$K
         theta <- biota.VDS.estimates[[thetaID]]$par
@@ -202,7 +154,7 @@ ctsm.assessment <- function(
         })  
       }  
       
-      c(out, assess.imposex(
+      c(out, assess_imposex(
         data = x, 
         annualIndex = out$annualIndex, 
         AC = AC, 

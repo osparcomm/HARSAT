@@ -1,25 +1,4 @@
-# edit history
-
-# 03/01/14 assess.imposex extend to monotonic trend - some code added but commented out as only six of 379 time
-#          series showed evidence of singificant nonlinearity
-# 17/11/14 assess.imposex make summary names consistent with contaminants
-# 27/11/14 populate nyfit (= nyall) in summary output
-# 23/05/16 assess.imposex make arguments accept full data and supporting information; 
-#          preprocess as for contaminants
-# 27/06/16 ensure anova is present in output for use in html statistical summary files
-# 12/07/16 assess.imposex remove assessment.year variables
-# 12/07/16 assess.imposex adapt so thetaID passed from calling function for both CSEMP and MIME
-# 09/11/16 assess.imposex restrict VDS categories based on theta estimates
-# 07/02/17 imposex.assess.index deal with data when only first year has non zero values
-
-# 2_60 
-# assess.imposex, imposex.assess.index add in p_nonlinear, p_linear, p_overall for consistency
-
-# 2_61
-# rename get.index to reflect new group names
-
-# 2_63 
-# assess.imposex.index - fix crash when only positive index is in the last year
+# functions to assess imposex data
 
 get.index.biota.Imposex <- function(data, determinand) {
 
@@ -160,8 +139,10 @@ imposex.family <- list(
 
 
 
-assess.imposex <- function(data, annualIndex, AC, recent.years, determinand, species, 
+assess_imposex <- function(data, annualIndex, AC, recent.years, determinand, species, 
                            station, thetaID, max.year, recent.trend = 20) {
+  
+  # main assessment routine for imposex data (imposex functions)
   
   # order data
   
@@ -201,7 +182,7 @@ assess.imposex <- function(data, annualIndex, AC, recent.years, determinand, spe
   
   
   # if a mixture and the most recent three years of data are based on individuals
-  # them just model the recent individual data
+  # then just model the recent individual data
   
   if (any(indiID) & !all(indiID)) {
     indiRecent <- rev(cumprod(rev(indiID)) == 1)
@@ -232,7 +213,10 @@ assess.imposex <- function(data, annualIndex, AC, recent.years, determinand, spe
   
   indiID <- with(data, tapply(noinp, year, function(x) all(x == 1)))
   
-  if (all(indiID) & determinand == "VDS" & thetaID %in% names(biota.VDS.estimates)) {
+  # NB the following assumes that only a single imposex measure is assessed
+  # for each station / species combination - need to make this bullet proof
+  
+  if (all(indiID) & thetaID %in% names(biota.VDS.estimates)) {
     
     # get theta estimates for modelling
     
@@ -250,24 +234,27 @@ assess.imposex <- function(data, annualIndex, AC, recent.years, determinand, spe
       VDS <- factor(VDS, levels = 0:ntheta)
     })
   
-    assessment <- imposex.assess.clm(data, theta, annualIndex, species, recent.trend, max.year)
+    assessment <- imposex_assess_clm(
+      data, theta, annualIndex, species, recent.trend, max.year
+    )
   }
   else {
   
     assessment <- imposex.assess.index(annualIndex, species, determinand)
 
-    # ad-hoc adjustment if individuals reported in last monitoring year - needed to deal with steep 
-    # declines in imposex following the ban
-    # take reported index and confidence limit if cl exists (not all species and imposex measures)
-    # and cl is lower than that from reported trend 
+    # ad-hoc adjustment if individuals reported in last monitoring year 
+    # needed to deal with steep declines in imposex following the ban
+    # take reported index and confidence limit if cl exists (not all species and 
+    #   imposex measures) and cl is lower than that from reported trend 
 
     if ("upper" %in% names(annualIndex) && !is.na(tail(annualIndex$upper, 1))) {
       infoLY <- c(tail(annualIndex, 1))
-      if (!("clLY" %in% names(assessment$summary)) || infoLY$upper < assessment$summary$clLY) {
+      if (!("clLY" %in% names(assessment$summary)) || 
+          infoLY$upper < assessment$summary$clLY) {
         assessment$summary <- within(assessment$summary, {
           meanLY <- infoLY$index
           clLY <- infoLY$upper
-          class <- imposex.class(species, clLY)
+          class <- imposex_class(species, clLY)
         })
       }
     }
@@ -295,16 +282,46 @@ assess.imposex <- function(data, annualIndex, AC, recent.years, determinand, spe
 }
 
 
-imposex.class <- function(species, x)
+imposex_class <- function(species, x) {
+  
+  # calculates imposex class (imposex functions)
+
   switch(
     species, 
-    "Nucella lapillus" = if (x < 0.3) "A" else if (x < 2.0) "B" else if (x < 4) "C" else if (x <= 5) "D" else "E", 
-    "Tritia nitida / reticulata" = if (x < 0.3) "B" else if (x < 2.0) "C" else if (x <= 3.5) "D" else "F", 
-    "Buccinum undatum" = if (x < 0.3) "B" else if (x < 2.0) "C" else if (x <= 3.5) "D" else "F",
-    "Neptunea antiqua" = if (x < 0.3) "A" else if (x < 2.0) "B" else if (x <= 4) "C" else "F",
-    "Littorina littorea" = if (x < 0.3) "C" else if (x < 0.5) "D" else if (x <= 1.2) "E" else "F",  
-    NA)
-
+    "Nucella lapillus" = case_when(
+      x < 0.3  ~ "A", 
+      x < 2.0  ~ "B", 
+      x < 4.0  ~ "C", 
+      x <= 5.0 ~ "D",
+      TRUE     ~ "E"
+    ), 
+    "Tritia nitida / reticulata" = case_when(
+      x < 0.3  ~ "B",
+      x < 2.0  ~ "C",
+      x <= 3.5 ~ "D",
+      TRUE     ~ "F"
+    ), 
+    "Buccinum undatum" = case_when(
+      x < 0.3  ~ "B", 
+      x < 2.0  ~ "C", 
+      x <= 3.5 ~ "D",
+      TRUE     ~ "F"
+    ),
+    "Neptunea antiqua" = case_when(
+      x < 0.3  ~ "A",
+      x < 2.0  ~ "B",
+      x <= 4   ~ "C",
+      TRUE     ~ "F"
+    ),
+    "Littorina littorea" = case_when(
+      x < 0.3  ~ "C",
+      x < 0.5  ~ "D",
+      x <= 1.2 ~ "E", 
+      TRUE     ~ "F"
+    ),  
+    NA
+  )
+}
 
 
 
@@ -322,7 +339,7 @@ imposex.assess.index <- function(annualIndex, species, determinand) {
 
   if (nYear <= 2) {
     summary$meanLY <- max(value)
-    summary$class = imposex.class(species, max(value))
+    summary$class = imposex_class(species, max(value))
     return(list(summary = data.frame(summary)))
   }
 
@@ -336,7 +353,7 @@ imposex.assess.index <- function(annualIndex, species, determinand) {
     }
     summary$meanLY <- value[1]
     summary$clLY <- value[1]
-    summary$class <- imposex.class(species, value[1])
+    summary$class <- imposex_class(species, value[1])
 
     output$summary <- data.frame(summary)
         
@@ -407,7 +424,7 @@ imposex.assess.index <- function(annualIndex, species, determinand) {
   }
   summary$meanLY <- round(tail(pred$fit, 1), 3)
   summary$clLY <- round(tail(pred$ci.upper, 1), 3)
-  summary$class <- imposex.class(species, tail(pred$ci.upper, 1))
+  summary$class <- imposex_class(species, tail(pred$ci.upper, 1))
 
   output$summary <- data.frame(summary)
   
