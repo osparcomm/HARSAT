@@ -405,8 +405,8 @@ wk.cluster <- makeCluster(wk.cores - 1)
 clusterExport(
   wk.cluster, 
   c("biota_assessment", "determinands", "negTwiceLogLik", "convert.basis", 
-    "assess.imposex", "imposex.assess.index", "imposex.class", "imposex.family", 
-    "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", "imposex.assess.clm", 
+    "assess_imposex", "imposex.assess.index", "imposex_class", "imposex.family", 
+    "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", "imposex_assess_clm", 
     "imposex.clm.fit", "imposex.clm.X", "imposex.clm.loglik.calc", 
     "imposex.VDS.p.calc", "imposex.clm.predict", "imposex.clm.cl",
     "imposex.clm.contrast", 
