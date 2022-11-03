@@ -454,6 +454,7 @@ biota_Metabolites <- ctsm.assessment(
 biota_Imposex <- ctsm.assessment(
   biota_assessment, 
   determinandID = determinands$Biota$Imposex,
+  clusterID = wk.cluster
 )
 
 

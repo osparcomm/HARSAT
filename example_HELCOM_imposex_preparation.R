@@ -114,10 +114,10 @@ biota.VDS.estimates <- pblapply(
 
 all(sapply(biota.VDS.estimates, "[[", "convergence") == 0)
 
-saveRDS(
-  biota.VDS.estimates,
-  file.path("RData", "VDS estimates.rds")
-)
+# saveRDS(
+#   biota.VDS.estimates,
+#   file.path("RData", "VDS estimates.rds")
+# )
 
 
 # get confidence limits on estimated VDSI for each indexID
@@ -130,10 +130,10 @@ biota.VDS.cl <- do.call(rbind, biota.VDS.cl)
 row.names(biota.VDS.cl) <- do.call(paste, biota.VDS.cl[c("station", "year", "species")])
 summary(biota.VDS.cl)
 
-saveRDS(
-  biota.VDS.cl, 
-  file.path("RData", "VDS confidence limits.rds")
-)
+# saveRDS(
+#   biota.VDS.cl, 
+#   file.path("RData", "VDS confidence limits.rds")
+# )
 
 stopCluster(wk.cluster)
 
