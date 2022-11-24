@@ -13,12 +13,6 @@ swap.names <- function(data, old.names, new.names) {
 
 
 
-convert.html.characters <- function(x) {
-  for (i in 1:nrow(info.html)) x <- gsub(info.html$value[i], info.html$html1[i], x, fixed = TRUE)
-  x
-}
-
-
 pasteOmitNA <- function(..., sep = " ") {
   
   # paste but omit missing characters (rather than having "NA")
