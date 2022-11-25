@@ -1,115 +1,11 @@
-# main import function for OSPAR MIME and UK CSEMP monitoring data ----
+# main import and data processing functions ----
 
-# edit history from 2018:
-# 03/09/18 ctsm.clean.QA.CSEMP - combine AQC and BEAQC and check for no duplicates
-# 29/10/18 various - bring in limit of quantification information 
-# 29/10/18 ctsm.clean.stations.OSPAR - check outside OSPAR area now includes region 5;
-#          also checks OSPARregion / region combinations in station dictionary are correct
-# 29/10/18 ctsm.clean.contaminants.OSPAR - check whether submitted.stations have been matched to 
-#          stations for UK, Sweden, Denmark, Ireland, France, and Spain (2005 onwards)
-# 31/10/18 ctsm.create.timeSeries - replace species by recognised.species; for when there are 
-#          multiple names that are valid
-# 19/02/19 various - allow for grouped stations in both OSPAR dictionary and data
-# 05/06/19 add in TBTIN conversion functions - taken from ad hoc file in MIME 2019 assessment
-# 06/06/19 ctsm.create.timeSeries - for CSEMP bring in detectionLimit earlier from QA file
-# 29/07/19 various - adapt CSSEG QA routines to deal with species and matrix specific DETLI
-# 14/10/19 extend to allow purpose = AMAP
-# 15/10/19 OSPAR and AMAP - use code to match stations in data with those in station dictionary
-#          still some work to do on this - look at clean.stations
-# 18/10/19 various - allow for isotope ratio auxiliary variables - still some thought needed here
-# 21/10/19 ctsm.create.timeSeries, ctsm.import.value - pass basis to timeSeries structure as 
-#          required by AMAP, but also a good idea all round
-# 24/10/19 ctsm.import.value - allow for AGMEA
-# 29/10/19 various - rename detectionLimit and quant_limit as limit_detection and 
-#          limit__quantification and work with correct qflag types 
-# 29/10/19 TBT conversion functions - replace station with station_name
-# 27/11/19 ctsm.create.timeSeries - update merging with LNMEA to deal with various bird matrices
-# 19/01/20 ctsm.create.timeSeries - allow AMAP_group to split timeseries
-# 26/01/20 ctsm.read.stations - deal with new extraction format of ICES station dictionary
-# 27/01/20 ctsm.clean.stations - omit stations that have been 'replacedBy' and use dataType
-
-# 2_60 
-# ctsm.read.contaminants.CSEMP - include lat, long, time and (sediment only) lower depth
-# ctsm.read.QA.CSEMP - deal with taxon code rather than species
-# ctsm.import.value and ctsm.clean.contaminants - add date, latitude, longitude, depth to variables 
-#   retained in data component of the timeSeries objects; this was actioned after the assessment had 
-#   been run to produce the DOI so these variables are not present in the objects in the "RData backup" 
-#   folder
-
-# 2_61 (OSPAR 2020)
-# ctsm.read.contaminants.OSPAR & ctsm.read.stations.OSPAR - allow "/" in station name
-# ctsm.create.timeSeries
-# - introduce output argument to return data for uncertainty estimation
-# - tidy up checking of less than values
-# - determinands.control structure changed
-# - no restrictions on fish matrix in code (allow all that pass check.matrix.biota)
-# - account for changes in group name (and elsewhere)
-# ctsm.clean.[...].OSPAR - general tidy up - should make similar changes for AMAP and HELCOM
-# ctsm.clean.QA.OSPAR - moved from special character functions
-# ctsm.link.QA.OSPAR - ad-hoc ajustment to reduce inflation to 1 for AMAP imported data
-# ctsm.check.determinands and determinand.link functions overhaul to reflect new control structure
-# ctsm.import.value - return basis and unit
-# ctsm.estimate.uncertainty 
-# - operates on data rather than individual variables
-# - adjusts sd_constant to basis of assessment
-
-# 2_62 (OSPAR 2021 preliminary run)
-# ctsm.link.QA.OSPAR - inflation = 1 for years 2010 and onwards
-# determinand.link.sum - fix bug on reporting in special case when no records can 
-#   be summed
-
-# 2_63 (HELCOM 2021)
-# multiple HELCOM files updated
-# ctsm.read.QA.HELCOM - now just reads QA file from Hans
-# ctsm_read_data - simplified names of contaminnts, stations and QA arguments
-# ctsm.clean.QA.HELCOM - better checks and filtering - need to do the same for OSPAR
-# ctsm_normalise_sediment - massive rewrite - still needs more!
-# ctsm_create_timeSeries - get_basis now purpose specific
-
-# 2_64 (OSPAR 2021)
-# ctsm.clean.QA.OSPAR - changed to match HELCOM files
-# ctsm.clean.stations.OSPAR (and HELCOM) - make country capitalised consistently to 
-#   match data
-# determinand.link.sum - convert to a common unit if necessary
-# ctsm_create_timeSeries - miss out basis conversion for water - need to tidy up convert.basis
-# ctsm.link.QA.OSPAR - inflation = 1 for water (no quasimeme information)
-
-# 2_65 (CSSEG 2020 & prelim OSPAR 2022) 
-# ctsm_read_stations, ctsm_read_contaminants, ctsm_read_QA - tidy up to reflect 
-#   recent HELCOM and OSPAR changes, and retain characters rather than convert 
-#   to factors
-# ctsm.clean.contaminants - correct bug in call to ctsm.check
-# ctsm.read.QA.OSPAR, ctsm.clean.QA.OSPAR, ctsm.estimate.uncertainty - simplify
-#   as inflation factors no longer used
-
-# 2_66 (OSPAR 2022)
-# ctsm_read_contaminants, ctsm_read_stations, ctsm_read_QA - change file encoding
-#   to UTF-8 (from "UCS-2LE")
-# ctsm_normalise_sediment - add in French pivot values for Region II and allow
-#   exclusion as an argument (for e.g. Iberian Sea) rather than hard-wired
-
-# 2_67 (CSSEG 2020)
-# ctsm.clean.QA.CSEMP - remove limit_detection which has been moved to data in 
-#   ad-hoc adjustments
-# ctsm.link.QA.CSEMP - duplicate QA records no longer allowed - need to deal with
-#   in ad-hoc adjustments
-# ctsm.clean.contaminants.CSEMP - add time into the construction of sampleID + 
-#   general tidy up
-
-# 2_68 (HELCOM 2022) ----
-# ctsm_read_stations_HELCOM, ctsm_read_contaminants_HELCOM, ctsm_read_QA_HELCOM
-#   fileEncoding now "UTF-8-BOM"
-# ctsm_read_QA_HELCOM, ctsm_clean_QA_HELCOM, ctsm_link_QA_HELCOM now identical 
-#  to OSPAR equivalent
-# some tidying up of OSPAR and HELCOM read files to make more consistent
-# ctsm_create_timeSeries - introduce LOIGN (considerable streamlining possible)
-# ctsn_create_timeSeries - normalisation arguments made more flexible
 
 # read in data ---- 
 
 ctsm_read_data <- function(
   compartment = c("sediment", "biota", "water"), 
-  purpose = c("OSPAR", "HELCOM", "AMAP", "CSEMP"), 
+  purpose = c("OSPAR", "HELCOM", "AMAP"), 
   contaminants, stations, QA, path = "", 
   extraction, maxYear, reportingWindow = 6L) {
 
@@ -193,31 +89,6 @@ ctsm_read_stations <- function(purpose, infile, path) {
   do.call(paste("ctsm_read_stations", purpose, sep = "_"), list(infile = infile))
 }
 
-ctsm_read_stations_CSEMP <- function(infile) {
-  
-  # read station dictionary
-  # ensure it is a data frame 
-  
-  stations <- readxl::read_xlsx(infile, sheet = "Fixed Stations") 
-  stations <- as.data.frame(stations)
-  
-  # give more usable names
-  
-  dplyr::rename(
-    stations,
-    station = "New Station Code", 
-    name = "New Station Name", 
-    region = "Region Code", 
-    stratum = "Stratum Code", 
-    strategy = "Sampling Strategy", 
-    latitude = "Nominal Station Latitude", 
-    longitude = "Nominal Station Longitude", 
-    startYear = "Minimum Year", 
-    endYear = "Maximum Year", 
-    MSTAT = "ICES MSTAT", 
-    WLTYP = "ICES Station Type"
-  )
-}
 
 ctsm_read_stations_OSPAR <- function(infile) {
   
@@ -475,95 +346,6 @@ ctsm_read_contaminants_HELCOM <- function(infile, path) {
   data
 }
 
-ctsm_read_contaminants_CSEMP <- function(infile, path) {
-  
-  # read in data files
-  
-  # target column names and types
-  # Sample Start Date can be either character or date depending on how the file has been 
-  # exported!
-  
-  var <- list(
-    id = c(
-      "Station Number", "Sample Latitude", "Sample Longitude", "Depth Lower (Sediment)",
-      "Sample Start Date", "Sample Start Time", "Sample Number", "Sub Sample Number",
-      "Species Latin Name", "Number of Individuals in Sample(Bi)", "Sex Code SEXCO", 
-      "ICES Matrix Code", "Determinand Code", "Basis Code BASIS", "Unit Of Measure MUNIT", 
-      "Analytical Laboratory Code", "Determinand Qualifier QFLAG", "Result", "Uncertainty"), 
-    type = c(
-      "text", "numeric", "numeric", "numeric", "guess", "guess", 
-      rep("text", 3), "numeric", rep("text", 7), rep("numeric", 2)),
-    name = c(
-      "station", "latitude", "longitude", "depth", "date", "time", 
-      "sample", "sub.sample", "species", "noinp", "sex", "matrix", 
-      "determinand", "basis", "unit", "alabo", "qflag", "value", "uncertainty")
-  )
-  
-  
-  cat("\nReading contaminant and biological effects data from:\n")
-  
-  # ensure warnings are printed out as they occur so you can see which data file to look at
-  
-  options(warn = 1)   
-  
-  data <- do.call(rbind, lapply(infile$years, function(i) {
-    
-    infile <- file.path(path, paste0(infile$name, i, ".xlsx"))
-    cat("   ", infile, "'\n", sep = "")
-    
-    col_names <- readxl::read_xlsx(infile, n_max = 0)
-    col_names <- names(col_names)
-    
-    col_types <- rep("skip", length(col_names))
-    
-    ok <- var$id %in% col_names
-    pos <- match(var$id[ok], col_names)
-    col_types[pos] <- var$type[ok]
-    
-    out <- readxl::read_xlsx(infile, sheet = 1, col_types = col_types)
-    out <- as.data.frame(out)
-    
-    out$year <- rep(i, nrow(out))
-    
-    # class of Sample Start Date can be either character or POSIXt
-    
-    wk <- out[["Sample Start Date"]]
-    out[["Sample Start Date"]] <- switch(
-      class(wk)[1], 
-      character = lubridate::dmy(wk),
-      POSIXct = lubridate::ymd(wk)
-    )
-    
-    # check for character values that have slipped in by mistake: might not 
-    # be necessary now that col_types have been specified
-    
-    if (!is.numeric(out$Result))
-      warning ("must sort out MULTIVALUES in data file", call. = FALSE, immediate. = TRUE)
-    
-    out
-  }))
-  
-  options(warn = 0)
-  
-
-  # create more useful names
-  
-  ok <- var$id %in% names(data)
-  
-  data <- swap.names(data, var$id[ok], var$name[ok])
-  
-  
-  # ensure lower / upper case consistency
-  
-  data <- dplyr::mutate(
-    data, 
-    matrix = toupper(.data$matrix),  # to deal with SEDtot
-    determinand = toupper(.data$determinand),
-    unit = tolower(.data$unit)
-  )     
-  
-  data
-}
 
 
 ctsm_read_QA <- function(purpose, ...) {
@@ -612,151 +394,6 @@ ctsm_read_QA_AMAP <- ctsm_read_QA_OSPAR
 
 ctsm_read_QA_HELCOM <- ctsm_read_QA_OSPAR
 
-
-ctsm_read_QA_CSEMP <- function(QA, path) {
-  
-  # read in QA file(s) 
-  
-  cat("\nReading QA data from:\n")
-  
-  
-  # error checking
-  
-  stopifnot(names(QA) %in% c("AQC", "BEAQC"))
-  
-  
-  # read in core AQC file (BEAQC file for biota read in later)
-  
-  infile <- file.path(path, QA$AQC)
-  cat("   ", infile, "\n", sep = "")
-  
-  col_names <- readxl::read_xlsx(infile, sheet = 1, n_max = 0) 
-  col_names <- names(col_names)
-  
-  col_types <- rep("skip", length(col_names))
-  
-  id <- c(
-    "Monitoring Year", "Laboratory Code", "Determinand Code", 
-    "Extract Method Id METCX", "Analysis Method Id METOA", 
-    "Pretreatment Method Id METPT", "DETLI", "ICES Matrix Code", 
-    "Taxon Code TXC"
-  )
-  
-  stopifnot(id %in% col_names)
-  
-  pos <- match(id, col_names)
-  col_types[pos] <- c("guess", rep("text", 5), "numeric", "text", "text")  
-  
-  AQC <- readxl::read_xlsx(
-    infile, sheet = 1, col_types = col_types, na = c("", "NA")
-  )
-  AQC <- as.data.frame(AQC)
-
-  
-  # relate taxon code to species 
-  
-  col_names <- readxl::read_xlsx(infile, sheet = 2, n_max = 0)
-  col_names <- names(col_names)
-  col_types <- rep("skip", length(col_names))
-  
-  id_extra <- c("Species Latin Name", "Taxon Code TXC")
-  
-  stopifnot(id_extra %in% col_names)
-  
-  pos <- match(id_extra, col_names)
-  col_types[pos] <- c("text", "text")  
-  
-  taxon_info <- readxl::read_xlsx(
-    infile, sheet = 2, col_types = col_types, na = c("", "NA")
-  )  
-  taxon_info <- as.data.frame(taxon_info)
-  
-  AQC <- dplyr::left_join(AQC, taxon_info, by = "Taxon Code TXC")
-  
-  
-  # get more meaningful names
-  
-  id <- setdiff(id, "Taxon Code TXC")
-  id <- c(id, "Species Latin Name")
-  
-  AQC <- AQC[id]
-  names(AQC) <- c(
-    "year", "alabo", "determinand", "metcx", "metoa", "metpt", 
-    "limit_detection", "matrix", "species"
-  )
-  
-  out <- list(AQC = AQC)
-  
-  
-  # read in BEAQC file for biota
-  
-  if ("BEAQC" %in% names(QA)) {
-    
-    infile <- file.path(path, QA$BEAQC)
-    cat("   ", infile, "\n", sep = "")
-    
-    col_names <- readxl::read_xlsx(infile, sheet = 1, n_max = 0) 
-    col_names <- names(col_names) 
-
-    col_types <- rep("skip", length(col_names))
-    
-    id <- c("Analytical Year", "Analytical Laboratory", "Determinand Code",  
-            "Method of Analysis", "DETLI", "ICES Matrix Code")
-    stopifnot(id %in% col_names)
-    
-    pos <- match(id, col_names)
-    col_types[pos] <- c("guess", rep("text", 3), "guess", "text")  
-    
-    QA <- readxl::read_xlsx(infile, sheet = 1, col_types = col_types) 
-    QA <- as.data.frame(QA)
-    
-    QA <- QA[id]
-    names(QA) <- c(
-      "year", "alabo", "determinand", "metoa", "limit_detection", "matrix"
-    )
-    
-    # limit_detection might be read in as a text 
-    
-    if (is.character(QA$limit_detection)) {
-      QA <- dplyr::mutate(
-        QA, 
-        limit_detection = as.numeric(.data$limit_detection)
-      )
-    }
-    
-    # add in dummy species column
-    
-    QA <- dplyr::mutate(QA, species = "No Species Found")
-    
-    out$BEAQC <- QA
-  }
-  
-  
-  # convert to standard formats
-  
-  out <- lapply(out, function(QA) {
-    
-    # year read in as text
-    
-    if (is.character(QA$year)) {
-      QA <- dplyr::mutate(QA, year = as.numeric(.data$year))
-    }
-    
-    # make "NA" in matrix into NA
-    # make "Not applicable" and "No Species Found" in species into NA
-    
-    QA <- dplyr::mutate(
-      QA, 
-      matrix = dplyr::na_if(.data$matrix, "NA"),
-      species = dplyr::na_if(.data$species, "Not applicable"), 
-      species = dplyr::na_if(.data$species, "No Species Found")
-    )
-    
-    QA
-  })
-  
-  out
-}
 
 
 ctsm_create_timeSeries <- function(
@@ -1381,7 +1018,7 @@ ctsm_create_timeSeries <- function(
   # convert data to basis of assessment
   
 
-  if (info$purpose %in% c("CSEMP", "HELCOM", "OSPAR")) {
+  if (info$purpose %in% c("HELCOM", "OSPAR")) {
     
     cat("   Converting data to appropriate basis for statistical analysis", fill = TRUE)
 
@@ -1525,7 +1162,6 @@ ctsm_create_timeSeries <- function(
         month %in% switch(
           info$purpose, 
           AMAP = c("Apr", "May", "Jun", "Jul"),
-          CSEMP = c("May", "Jun", "Jul", "Aug", "Sep", "Oct"), 
           OSPAR = c("Apr", "May", "Jun", "Jul"),
           HELCOM = c("Apr", "May", "Jun", "Jul"))
     })
@@ -1534,7 +1170,6 @@ ctsm_create_timeSeries <- function(
       txt <- switch(
         info$purpose, 
         AMAP = "April through July",
-        CSEMP = "May through October", 
         OSPAR = "April through July", 
         HELCOM = "April through July")
       cat("   Dropping shellfish data from", txt, "(spawning season)\n")
@@ -1967,24 +1602,6 @@ ctsm.clean.stations <- function(purpose, ...) {
   do.call(paste("ctsm.clean.stations", purpose, sep = "."), list(...))
 }
 
-ctsm.clean.stations.CSEMP <- function(stations, compartment, ...) {
-
-  # restrict stations to biota or sediment stations 
-
-  type <- strsplit(as.character(stations$station), "_")
-  type <- sapply(type, tail, 1)
-  type <- substring(type, 1, 2)
-  
-  ok <- type %in% switch(compartment, biota = c("fi", "sh"), sediment = "se")
-  stations <- stations[ok, ]
-
-  rownames(stations) <- as.character(stations$station)
- 
-  stations <- stations[c("region", "stratum", "station", "name", "latitude", "longitude", "CMA", 
-                         "MSTAT", "WLTYP")]
-  stations <- droplevels(stations)
-  stations[with(stations, order(station)), ]
-}
 
 ctsm.clean.stations.OSPAR <- function(stations, compartment) {
 
@@ -2360,52 +1977,6 @@ ctsm.clean.contaminants.HELCOM <- function(data, compartment, ...) {
 }
 
 
-ctsm.clean.contaminants.CSEMP <- function(data, compartment, ...) {
-
-  cat("   Dropping opportunistic data\n")  
-  
-  data <- mutate(
-    data, 
-    .n = nchar(.data$station),
-    .pos = substring(.data$station, .n - 1, .n) %in% c("fi", "sh", "se", "wa")
-  )
-  
-  data <- filter(data, !.pos)
-  
-  data <- mutate(
-    data, 
-    .n = NULL,
-    .pos = NULL
-  ) 
-  
-  data <- droplevels(data)
-  
-
-  # create unique sampleID 
-  
-  id <- c("station", "date", "time", "sample")
-  
-  if (compartment == "biota") {
-    id <- c(id, "species", "sub.sample")
-  }
-
-  data <- unite(data, "sampleID", all_of(id), remove = FALSE)
-  data$sampleID <- factor(data$sampleID, labels = "")
-
-
-  # make methodUncertainty == "U2" for all determinands
-
-  data <- mutate(
-    data, 
-    methodUncertainty = if_else(
-      is.na(.data$uncertainty), 
-      NA_character_, 
-      "U2"
-    )
-  )
-  
-  data
-}
 
 
 
@@ -2465,33 +2036,6 @@ ctsm_clean_QA_HELCOM <- ctsm_clean_QA_OSPAR
 ctsm_clean_QA_AMAP <- ctsm_clean_QA_OSPAR
 
 
-ctsm_clean_QA_CSEMP <- function(QA, data, compartment) {
-
-  # turn list into data frame (combining AQC and BEAQC for biota)
-
-  QA <- lapply(QA, mutate_if, is.factor, as.character)
-  
-  QA <- bind_rows(QA)
-  
-
-  # check no duplicate values
-  # note that, for sediment, matrix and species are always NA
-  
-  if (any(duplicated(QA[c("year", "alabo", "determinand", "matrix", "species")])))
-    stop("duplicate information in QA file(s)")
-
-  
-  # only keep rows with relevant information
-  
-  ok <- !is.na(QA$metcx) | !is.na(QA$metoa) 
-  col_id <- c("year", "alabo", "determinand", "matrix", "species", "metcx", "metoa")
-  QA <- QA[ok, col_id]
-  
-  QA <- droplevels(QA)
-
-  ctsm_link_QA_CSEMP(QA, data, compartment)
-}
-
 
 ctsm_link_QA <- function(purpose, ...)
   do.call(paste("ctsm_link_QA", purpose, sep = "."), list(...))
@@ -2532,75 +2076,6 @@ ctsm_link_QA_AMAP <- ctsm_link_QA_OSPAR
 
 ctsm_link_QA_HELCOM <- ctsm_link_QA_OSPAR
 
-ctsm_link_QA_CSEMP <- function(QA, data, compartment) {
-
-  # create unique qaID to link data and QA files 
-  # - need to do this before deal with mess created by e.g. CHRTR
-  # NB ctsm.link.QA also deals with CHRTR issues
-
-  id.names <- c("determinand", "alabo", "year")
-  
-  id.extra <- switch(compartment, sediment = "matrix", biota = c("matrix", "species"))
-  id.names <- c(id.names, id.extra)
-  
-  data$qaID <- factor(do.call("paste", data[id.names]))
-  qaIDdata <- unique(data[c("qaID", id.names)])
-  
-  
-  # merge QA data files with the rows that are needed in qaIDdata, but only retain those which have 
-  # a matrix match (early AQC files do not differentiate AQC by matrix)
-  
-  # for sediment, this is a dummy procedure as there should be no matches - could code this explicitly
-  # but would need to formally check matrix column in QA is empty
-  
-  # for biota, it is actually the combination of matrix and species that provides the link 
-  # (although usually there is no variation between species)
-  
-  out <- merge(qaIDdata, QA)
-
-  if (any(duplicated(out$qaID))) {
-    stop("multiple matches in QA data")
-  }
-
-  # get remaining rows of qaIDdata (for which there is no specific matrix match) and match to QA
-  
-  matched <- qaIDdata$qaID %in% out$qaID 
-
-  out2 <- merge(qaIDdata[!matched, ], QA[setdiff(names(QA), id.extra)], all.x = TRUE)
-
-  if (any(duplicated(out2$qaID))) {
-    stop("multiple matches in QA data")
-  }
-
-
-  # merge data sets and final check that all qaIDs are dealt with
-  
-  out <- rbind(out, out2)
-  
-  if (any(duplicated(out$qaID)) | (nrow(out) != nrow(qaIDdata))) 
-    stop("matching of QA data has failed")
-  
-      
-  # sediment: get digestion method based on metcx 
-
-  if (compartment == "sediment")
-    out <- ctsm.link.QA.digestion(out, compartment)
-
-  
-  # need an inflation factor for compatability with OSPAR, but set this to unity as all data 
-  # have passed AQC filter
-
-  out$inflation <- 1
-
-  
-  # simplify data frame
-  
-  QA <- data.frame(out, row.names = "qaID") 
-  QA <- QA[setdiff(names(QA), id.names)]
-  QA <- droplevels(QA)
-  
-  list(QA = QA, data = data)
-}
 
 
 ctsm.link.QA.digestion <- function(data, compartment) {
