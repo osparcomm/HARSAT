@@ -7,39 +7,45 @@ ctsm_read_data <- function(
   compartment = c("sediment", "biota", "water"), 
   purpose = c("OSPAR", "HELCOM", "AMAP"), 
   contaminants, stations, QA, path = "", 
-  extraction, maxYear, reportingWindow = 6L) {
+  extraction, max_year, reporting_window = 6L) {
 
   # validate arguments
   
   compartment <- match.arg(compartment)
   purpose <- match.arg(purpose)
   
-  if (length(extraction) > 1) stop("extraction must be a single date")
+  if (length(extraction) > 1) {
+    stop("extraction must be a single date")
+  }
   extraction <- as.POSIXlt(extraction)
   
-  if (!is.character(path) | length(path) > 1) stop("path should be a single character string")
+  if (!is.character(path) | length(path) > 1) {
+    stop("path should be a single character string")
+  }
   
   
   # reporting Window is e.g. the MSFD 6 year reporting window
   
-  if (length(reportingWindow) != 1 |
-      !isTRUE(all.equal(reportingWindow, as.integer(reportingWindow))) |
-      reportingWindow <= 0) 
-    stop("reportingWindow must a positive integer")
+  if (length(reporting_window) != 1 |
+      !isTRUE(all.equal(reporting_window, as.integer(reporting_window))) |
+      reporting_window <= 0) { 
+    stop("reporting_window must a positive integer")
+  }
   
   
-  # maxYear is the maximum data year allowed - will print out a warning if losing some more recent data 
-  # because someone has submitted early
+  # max_year is the maximum data year allowed 
+  # print warning if there are more recent data which have been submitted 'early'
   
-  if (length(maxYear) != 1 |
-      !isTRUE(all.equal(maxYear, as.integer(maxYear))) |
-      maxYear <= 2000)
-    stop("maxYear must be a single year in this millenium")
+  if (length(max_year) != 1 |
+      !isTRUE(all.equal(max_year, as.integer(max_year))) |
+      max_year <= 2000) {
+    stop("max_year must be a single year in this millenium")
+  }
   
   
   # read in station dictionary, contaminant and biological effects data and QA data
   
-  station.dictionary <- ctsm_read_stations(purpose, stations, path)
+  station_dictionary <- ctsm_read_stations(purpose, stations, path)
 
   data <- ctsm_read_contaminants(purpose, contaminants, path)
   
@@ -48,35 +54,46 @@ ctsm_read_data <- function(
 
   # check no data after maxYear
   
-  if (any(data$year > maxYear)) 
-    warning("data submitted after maxYear", call. = FALSE)
-  if (!any(data$year == maxYear)) 
-    warning("no data in maxYear - possible error in function call", call. = FALSE)
+  if (any(data$year > max_year)) { 
+    warning("data submitted after max_year", call. = FALSE)
+  }
+  
+  if (!any(data$year == max_year)) { 
+    warning("no data in max_year - possible error in function call", call. = FALSE)
+  }
   
     
   # sort out extraction date
 
-  extraction.year <- as.numeric(format(extraction, "%Y"))
-  extraction.month <- as.numeric(format(extraction, "%m"))
+  extraction_year <- as.numeric(format(extraction, "%Y"))
+  extraction_month <- as.numeric(format(extraction, "%m"))
   
-  if (extraction.year < maxYear) stop("extraction predates some monitoring data")
+  if (extraction_year < max_year) {
+    stop("extraction predates some monitoring data")
+  }
 
-  extraction.text <- format(extraction, "%d %B %Y")
-  if (substring(extraction.text, 1, 1) == "0") 
-    extraction.text <- substring(extraction.text, 2)
+  extraction_text <- format(extraction, "%d %B %Y")
+  if (substring(extraction_text, 1, 1) == "0") { 
+    extraction_text <- substring(extraction_text, 2)
+  }
   
   
   # construct recent.years in which there must be some monitoring data
   
-  recent.years <- seq(maxYear - reportingWindow + 1, maxYear)
+  recent_years <- seq(max_year - reporting_window + 1, max_year)
   
   list(
     call = match.call(), 
     info = list(
-      compartment = compartment, purpose = purpose, extraction = extraction.text, 
-      maxYear = maxYear, recentYears = recent.years, reportingWindow = reportingWindow),
+      compartment = compartment, 
+      purpose = purpose, 
+      extraction = extraction_text, 
+      maxYear = max_year, 
+      recentYears = recent_years, 
+      reportingWindow = reporting_window
+    ),
     data = data, 
-    stations = station.dictionary, 
+    stations = station_dictionary, 
     QA = QA)
 }
 
@@ -94,7 +111,7 @@ ctsm_read_stations_OSPAR <- function(infile) {
   
   stations <- read.table(
     infile, strip.white = TRUE, sep = "\t",  header = TRUE, quote = "\"", 
-    na.strings = c("", "NULL"), fileEncoding = "UTF-8", comment.char = ""
+    na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
   )
   
   # rename columns to suit!
@@ -191,7 +208,7 @@ ctsm_read_contaminants_OSPAR <- function(infile, path) {
   
   data <- read.table(
     infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
-    na.strings = c("", "NULL"), fileEncoding = "UTF-8", comment.char = "")
+    na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = "")
   
   # create more useful names
   # for biota, tblsampleid is the species, tblebioid gives the subsample (individual) 

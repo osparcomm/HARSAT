@@ -85,7 +85,7 @@ biota_data <- ctsm_read_data(
   QA = "quality_assurance.txt",
   path = file.path("data", "example_HELCOM"), 
   extraction = "2022/10/06",
-  maxYear = 2021L
+  max_year = 2021L
 )  
 
 # saveRDS(biota_data, file.path("RData", "biota data.rds"))
@@ -101,7 +101,7 @@ sediment_data <- ctsm_read_data(
   QA = "quality_assurance.txt",
   path = file.path("data", "example_HELCOM"), 
   extraction = "2022/10/06",
-  maxYear = 2021L
+  max_year = 2021L
 )  
 
 # saveRDS(sediment_data, file = file.path("RData", "sediment data.rds"))
@@ -117,7 +117,7 @@ water_data <- ctsm_read_data(
   QA = "quality_assurance.txt",
   path = file.path("data", "example_HELCOM"), 
   extraction = "2022/10/06",
-  maxYear = 2021L
+  max_year = 2021L
 )  
 
 # saveRDS(water_data, file.path("RData", "water data.rds"))

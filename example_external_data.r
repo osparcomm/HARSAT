@@ -52,7 +52,7 @@ biota_data <- ctsm_read_data(
   QA = "quality_assurance.txt",
   path = file.path("data", "example_external_data"), 
   extraction = "2022/01/11",
-  maxYear = 2020L)  
+  max_year = 2020L)  
 
 # saveRDS(biota_data, file.path("RData", "biota data.rds"))
 
