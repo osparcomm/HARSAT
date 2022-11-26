@@ -48,11 +48,11 @@ ctsm_read_data <- function(
   
   # read in station dictionary, contaminant and biological effects data and QA data
   
-  station_dictionary <- ctsm_read_stations(purpose, stations, path)
-
+  station_dictionary <- ctsm_read_stations(stations, path, purpose)
+  
   data <- ctsm_read_contaminants(contaminants, path, purpose)
   
-  QA <- ctsm_read_QA(purpose, QA, path)
+  QA <- ctsm_read_QA(QA, path, purpose)
   
 
   # check no data after maxYear
@@ -115,25 +115,49 @@ ctsm_control <- function() {
 }
 
 
-ctsm_read_stations <- function(purpose, infile, path) {
+ctsm_read_stations <- function(infile, path, purpose) {
+
+  # import functions
+  # read in station dictionary
   
   infile <- file.path(path, infile)
   cat("Reading station dictionary from '", infile, "'\n", sep = "")
-  
-  do.call(paste("ctsm_read_stations", purpose, sep = "_"), list(infile = infile))
-}
 
-
-ctsm_read_stations_OSPAR <- function(infile) {
-  
   stations <- read.table(
     infile, strip.white = TRUE, sep = "\t",  header = TRUE, quote = "\"", 
     na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
   )
   
+  
   # rename columns to suit!
   
   names(stations) <- gsub("Station_", "", names(stations), fixed = TRUE)
+  
+  
+  # sort out purpose specific names
+  
+  if (purpose %in% c("OSPAR", "AMAP")) {
+
+    stations <- dplyr::rename(
+      stations, 
+      OSPARregion = OSPAR_region,
+      region = OSPAR_subregion,
+      offshore = OSPAR_shore
+    )    
+    
+  } else if (purpose %in% "HELCOM") {
+    
+    stations <- dplyr::rename(
+      stations, 
+      region = HELCOM_subbasin,
+      l3area = HELCOM_L3,
+      l4area = HELCOM_L4
+    )    
+    
+  }
+  
+  
+  # remaining names common to all
   
   stations <- dplyr::rename(
     stations, 
@@ -146,72 +170,33 @@ ctsm_read_stations_OSPAR <- function(infile) {
     longitude = Longitude,
     startYear = ActiveFromDate,
     endYear = ActiveUntilDate,
-    OSPARregion = OSPAR_region,
-    region = OSPAR_subregion,
-    offshore = OSPAR_shore,
     parent_code = AsmtMimeParent,
     replacedBy = ReplacedBy,
     programGovernance = ProgramGovernance,
     dataType = DataType
   )
   
-  
-  # turn OSPARregion (numeric identifiers) into a character 
-  # also code and parent_code
-  
-  id = c("OSPARregion", "code", "parent_code")
-  stations <- dplyr::mutate(
-    stations, 
-    dplyr::across(all_of(id), as.character)
-  )
-  
-  stations
-}
 
-
-
-
-ctsm_read_stations_AMAP <- ctsm_read_stations_OSPAR
-
-ctsm_read_stations_HELCOM <- function(infile) {
-  
-  stations <- read.table(
-    infile, strip.white = TRUE, sep = "\t",  header = TRUE, quote = "\"", 
-    na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
-  )
-  
-  # rename columns to suit!
-  
-  names(stations) <- gsub("Station_", "", names(stations), fixed = TRUE)
-  
-  stations <- dplyr::rename(
-    stations, 
-    code = Code,
-    country_ISO = Country,
-    country = Country_CNTRY,
-    station = Name,
-    name = LongName,
-    latitude = Latitude,
-    longitude = Longitude,
-    startYear = ActiveFromDate,
-    endYear = ActiveUntilDate,
-    region = HELCOM_subbasin,
-    l3area = HELCOM_L3,
-    l4area = HELCOM_L4,
-    parent_code = AsmtMimeParent,
-    replacedBy = ReplacedBy,
-    programGovernance = ProgramGovernance,
-    dataType = DataType
-  )
-  
-  # turn code and parent_code into a characterr
+  # turn code and parent_code into a character
   
   stations <- dplyr::mutate(
     stations, 
     dplyr::across(c("code", "parent_code"), as.character)
   )
   
-  stations   
+  
+    
+  # turn OSPARregion (numeric identifiers) into a character 
+  # also code and parent_code
+  
+  id = c("OSPARregion", "code", "parent_code")
+  
+  stations <- dplyr::mutate(
+    stations, 
+    dplyr::across(any_of(id), as.character)
+  )
+  
+  stations
 }
 
 
@@ -331,24 +316,16 @@ ctsm_read_contaminants <- function(infile, path, purpose) {
 }
 
 
-ctsm_read_QA <- function(purpose, ...) {
-  do.call(paste("ctsm_read_QA", purpose, sep = "_"), list(...))
-}
-
-ctsm_read_QA_OSPAR <- function(QA, path) {
+ctsm_read_QA <- function(QA, path, purpose) {
   
-  # argument checking
-  
-  stopifnot(
-    is.character(QA), 
-    length(QA) == 1
-  )
-  
+  # import functions
+  # read in method data (and additional crm information)
 
   # read in data
   
   infile <- file.path(path, QA)
   cat("\nReading QA data from '", infile, "'\n", sep = "")
+  
   crm <- read.table(
     infile, strip.white = TRUE, header = TRUE, quote = "\"" , sep = "\t",
     na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
@@ -372,10 +349,6 @@ ctsm_read_QA_OSPAR <- function(QA, path) {
   
   crm
 }
-
-ctsm_read_QA_AMAP <- ctsm_read_QA_OSPAR
-
-ctsm_read_QA_HELCOM <- ctsm_read_QA_OSPAR
 
 
 
