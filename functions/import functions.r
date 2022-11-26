@@ -6,8 +6,13 @@
 ctsm_read_data <- function(
   compartment = c("sediment", "biota", "water"), 
   purpose = c("OSPAR", "HELCOM", "AMAP"), 
-  contaminants, stations, QA, path = "", 
-  extraction, max_year, reporting_window = 6L) {
+  contaminants, 
+  stations, 
+  QA, 
+  path = "", 
+  extraction, 
+  max_year, 
+  control = list()) {
 
   # validate arguments
   
@@ -19,20 +24,12 @@ ctsm_read_data <- function(
   }
   extraction <- as.POSIXlt(extraction)
   
+
   if (!is.character(path) | length(path) > 1) {
     stop("path should be a single character string")
   }
   
-  
-  # reporting Window is e.g. the MSFD 6 year reporting window
-  
-  if (length(reporting_window) != 1 |
-      !isTRUE(all.equal(reporting_window, as.integer(reporting_window))) |
-      reporting_window <= 0) { 
-    stop("reporting_window must a positive integer")
-  }
-  
-  
+
   # max_year is the maximum data year allowed 
   # print warning if there are more recent data which have been submitted 'early'
   
@@ -43,11 +40,17 @@ ctsm_read_data <- function(
   }
   
   
+  # set up control structure 
+  # should probably be put in ctsm_create_timeSeries
+    
+  control <- modifyList(ctsm_control(), control)
+  
+  
   # read in station dictionary, contaminant and biological effects data and QA data
   
   station_dictionary <- ctsm_read_stations(purpose, stations, path)
 
-  data <- ctsm_read_contaminants(purpose, contaminants, path)
+  data <- ctsm_read_contaminants(contaminants, path, purpose)
   
   QA <- ctsm_read_QA(purpose, QA, path)
   
@@ -80,7 +83,7 @@ ctsm_read_data <- function(
   
   # construct recent.years in which there must be some monitoring data
   
-  recent_years <- seq(max_year - reporting_window + 1, max_year)
+  recent_years <- seq(max_year - control$reporting_window + 1, max_year)
   
   list(
     call = match.call(), 
@@ -90,11 +93,25 @@ ctsm_read_data <- function(
       extraction = extraction_text, 
       maxYear = max_year, 
       recentYears = recent_years, 
-      reportingWindow = reporting_window
+      reportingWindow = control$reporting_window
     ),
     data = data, 
     stations = station_dictionary, 
     QA = QA)
+}
+
+
+ctsm_control <- function() {
+  
+  # import functions
+  # sets up default values that control the assessment
+  
+  # reporting_window is set to 6 to match the MSFD reporting cycle
+  # series with no data in the most recent_window are excluded 
+  
+  list(
+    reporting_window = 6L
+  )
 }
 
 
@@ -151,6 +168,9 @@ ctsm_read_stations_OSPAR <- function(infile) {
   stations
 }
 
+
+
+
 ctsm_read_stations_AMAP <- ctsm_read_stations_OSPAR
 
 ctsm_read_stations_HELCOM <- function(infile) {
@@ -195,102 +215,14 @@ ctsm_read_stations_HELCOM <- function(infile) {
 }
 
 
-ctsm_read_contaminants <- function(purpose, ...)
-  do.call(paste("ctsm_read_contaminants", purpose, sep = "_"), list(...))
-
-ctsm_read_contaminants_OSPAR <- function(infile, path) {
+ctsm_read_contaminants <- function(infile, path, purpose) {
   
-  # read in data files
+  # import functions
+  # read in contaminant (and biological effects) data
   
   infile <- file.path(path, infile)
   cat("\nReading contaminant and biological effects data from '", infile, "'\n", 
       sep = "")
-  
-  data <- read.table(
-    infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
-    na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = "")
-  
-  # create more useful names
-  # for biota, tblsampleid is the species, tblebioid gives the subsample (individual) 
-  # which with matrix gives the unique sample id
-  # for sediment, tblsampleid and matrix give the unique sample id
-  
-  names(data) <- tolower(names(data))     # just in case!
-  
-  data <- dplyr::rename(
-    data, 
-    OSPARregion = ospar_region,
-    region = ospar_subregion,
-    offshore = ospar_shore,
-    submitted.station = stationname, 
-    sd_name = sd_stationname,
-    sd_code = sd_stationcode,
-    station_name = sd_asmt_stationname,
-    station_code = sd_asmt_stationcode,
-    year = myear, 
-    determinand = param, 
-    matrix = matrx, 
-    unit = munit, 
-    qalink = tblanalysisid,
-    uncertainty = uncrt,
-    methodUncertainty = metcu, 
-    replicate = tblparamid, 
-    sample = tblsampleid, 
-    limit_detection = detli,
-    limit_quantification = lmqnt,
-    upload = tbluploadid
-  )
-  
-  
-  var_id <- c("tblbioid", "sexco", "dephu")
-  replacement <- c("sub.sample", "sex", "depth")
-  
-  pos <- match(var_id, names(data), nomatch = 0)
-  
-  if (any(pos > 0)) {
-    ok <- pos > 0
-    pos <- pos[ok]
-    replacement <- replacement[ok]
-    names(data)[pos] <- replacement
-  }
-  
-
-  # ensure further consistency
-    
-  data <- dplyr::mutate(
-    data, 
-    determinand = toupper(.data$determinand),
-    unit = tolower(.data$unit)
-  )
-  
-  
-  id <- c(
-    "region", "OSPARregion", "species", "basis", "matrix", "qflag", "sample", 
-    "sub.sample", "alabo", "rlabo", "sd_code", "station_code"
-  )
-
-  data <- dplyr::mutate(
-    data, 
-    dplyr::across(any_of(id), as.character)
-  )
-  
-  data
-}
-
-
-ctsm_read_contaminants_AMAP <- ctsm_read_contaminants_OSPAR
-
-
-ctsm_read_contaminants_HELCOM <- function(infile, path) {
-  
-  # read in data files
-  
-  infile <- file.path(path, infile)
-  
-  cat(
-    "\nReading contaminant and biological effects data from '", infile, "'\n", 
-    sep = ""
-  )
   
   data <- read.table(
     infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
@@ -299,22 +231,53 @@ ctsm_read_contaminants_HELCOM <- function(infile, path) {
   
   
   # create more useful names
-  # for biota, tblsampleid is the species, tblebioid gives the subsample (individual) 
+  # for biota, tblsampleid is the species, tblbioid gives the subsample (individual) 
   # which with matrix gives the unique sample id
   # for sediment, tblsampleid and matrix give the unique sample id
+  # to streamline, could make sample = tblbioid (biota) or tblsampleid (sediment)
   
   names(data) <- tolower(names(data))     # just in case!
+
+  
+  # purpose specific regional information and inconsistent extractions
+  # can be rationalised when extraction is formalised
+  # AMAP is identical to OSPAR so that the example with external data will run
+  
+  if (purpose %in% c("OSPAR", "AMAP")) {
+    
+    data <- dplyr::rename(
+      data,
+      OSPARregion = ospar_region,
+      region = ospar_subregion,
+      offshore = ospar_shore,
+      submitted.station = stationname, 
+      sd_name = sd_stationname,
+      sd_code = sd_stationcode,
+      station_name = sd_asmt_stationname,
+      station_code = sd_asmt_stationcode,
+    )
+    
+  } else if (purpose %in% "HELCOM") {
+    
+    data <- dplyr::rename(
+      data,
+      region = helcom_subbasin,
+      l3area = helcom_l3, 
+      l4area = helcom_l4, 
+      submitted.station = statn, 
+      sd_name = sd_stationname,
+      sd_code = sd_stationcode,
+      station_name = sd_replacedby_stationname,
+      station_code = sd_replacedby_stationcode,
+    )
+    
+  } 
+  
+  
+  # variables common across purpose and compartment
   
   data <- dplyr::rename(
     data, 
-    region = helcom_subbasin,
-    l3area = helcom_l3, 
-    l4area = helcom_l4, 
-    submitted.station = statn, 
-    sd_name = sd_stationname,
-    sd_code = sd_stationcode,
-    station_name = sd_replacedby_stationname,
-    station_code = sd_replacedby_stationcode,
     year = myear, 
     determinand = param, 
     matrix = matrx, 
@@ -329,6 +292,9 @@ ctsm_read_contaminants_HELCOM <- function(infile, path) {
     upload = tbluploadid
   )
   
+
+  # compartment specific variables
+    
   var_id <- c("tblbioid", "sexco", "dephu")
   replacement <- c("sub.sample", "sex", "depth")
   
@@ -342,7 +308,7 @@ ctsm_read_contaminants_HELCOM <- function(infile, path) {
   }
   
   
-  # ensure further consistency 
+  # ensure further consistency
   
   data <- dplyr::mutate(
     data, 
@@ -350,9 +316,10 @@ ctsm_read_contaminants_HELCOM <- function(infile, path) {
     unit = tolower(.data$unit)
   )
   
+  
   id <- c(
-    "region", "l3area", "l4area", "species", "basis", "matrix", "qflag", "sample", 
-    "sub.sample", "alabo", "rlabo", "sd_code", "station_code"
+    "region", "OSPARregion", "l3area", "l4area", "qflag", "sample", 
+    "sub.sample", "sd_code", "station_code", "sd_name", "station_name"
   )
   
   data <- dplyr::mutate(
@@ -362,7 +329,6 @@ ctsm_read_contaminants_HELCOM <- function(infile, path) {
   
   data
 }
-
 
 
 ctsm_read_QA <- function(purpose, ...) {

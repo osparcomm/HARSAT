@@ -66,7 +66,8 @@ biota_data <- ctsm_read_data(
   QA = "quality_assurance.txt",
   path = file.path("data", "example_simple_OSPAR"), 
   extraction = "2022/01/11",
-  max_year = 2020L)  
+  max_year = 2020L
+)  
 
 
 # Construct timeseries ----
