@@ -11,8 +11,9 @@ wk_data <- wk_timeSeries$data %>%
   select(c("seriesID", "station", "year", "species", "determinand", "concentration", 
            "noinp", "%FEMALEPOP"))
 
-wk_data[c("country", "region")] <- 
-  wk_timeSeries$stations[as.character(wk_data$station), ][c("country", "region")]
+wk_id <- c("country", "HELCOM_subbasin")
+wk_data[wk_id] <- 
+  wk_timeSeries$stations[as.character(wk_data$station), ][wk_id]
 
 rm(wk_timeSeries)
 
@@ -131,7 +132,7 @@ row.names(biota.VDS.cl) <- do.call(paste, biota.VDS.cl[c("station", "year", "spe
 summary(biota.VDS.cl)
 
 # saveRDS(
-#   biota.VDS.cl, 
+#   biota.VDS.cl,
 #   file.path("RData", "VDS confidence limits.rds")
 # )
 

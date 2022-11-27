@@ -467,8 +467,10 @@ ctsm.summary.table <- function(
     
     if (!include_all) {
       notok <- match(
-        c("stationID", "level6element", "level6name", "level7element", "level7name", "level2element", 
-          "level2name", "level3element", "level3name", "fileName", "offshore"), 
+        c("stationID", 
+          "level6element", "level6name", "level7element", "level7name", 
+          "level2element", "level2name", "level3element", "level3name", 
+          "fileName", "offshore"), 
         names(summary)
       )
       notok <- na.omit(notok)
@@ -479,7 +481,7 @@ ctsm.summary.table <- function(
   
     wk <- c(
       "series", 
-      "OSPARregion", "region", "ICES_ecoregion", "l3area", "l4area", "stratum", 
+      assessment$info$region_id,  
       "country", "CMA", 
       "code", "station", "stationName", "latitude", "longitude", "MSTAT", "WLTYP", 
       "determinand", "detGroup", "species", "filtered",
@@ -489,7 +491,7 @@ ctsm.summary.table <- function(
     summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
 
     sortID <- intersect(
-      c("OSPARregion", "region", "l3area", "l4area", "stratum", "country", "CMA", "station", 
+      c(assessment$info$region_id, "country", "CMA", "station", 
         "species", "detGroup", "determinand", "matrix"), 
       names(summary)
     )
@@ -500,7 +502,8 @@ ctsm.summary.table <- function(
     # now streamline to get colour coded fit
     
     wk <- c(
-      "OSPARregion", "region", "l3area", "l4area", "stratum", "country", "CMA", 
+      assessment$info$region_id, 
+      "country", "CMA", 
       "station", "stationName", "latitude", "longitude", "determinand", "detGroup", 
       "species", "matrix", "sex", "metoa", "AMAP_group", "filtered", "shape", "colour", 
       "nyfit", "nypos"
@@ -543,8 +546,11 @@ ctsm.summary.table <- function(
     if ("filtered" %in% names(overview)) overview <- within(overview, id <- paste(id, filtered))
     
     
-    station.var <- c("OSPARregion", "region", "l3area", "l4area", "stratum", "country", "CMA", 
-                     "station", "stationName", "latitude", "longitude", "species", "filtered")
+    station.var <- c(
+      assessment$info$region_id, 
+      "country", "CMA", 
+      "station", "stationName", "latitude", "longitude", "species", "filtered"
+    )
     station.var <- station.var[station.var %in% names(summary)]
     
     overview <- overview[c(station.var, "determinand2", "summary", "id")] 
@@ -560,7 +566,7 @@ ctsm.summary.table <- function(
     # order both rows and columns
 
     sortID <- intersect(
-      c("OSPARregion", "region", "l3area", "l4area", "stratum", "CMA", "station"), 
+      c(assessment$info$region_id, "CMA", "station"), 
       names(overview)
     )
     overview <- overview[do.call(order, overview[sortID]), ]
@@ -568,11 +574,15 @@ ctsm.summary.table <- function(
     wk <- setdiff(names(overview), station.var)
     wk.det <- sapply(strsplit(wk, " "), "[[", 1)
     wk.group <- get.info("determinand", wk.det, "group", assessment$info$compartment)
-    wk.group <- droplevels(factor(wk.group, levels = 
-      c("Metals", "Organotins", "PAH_parent", "PAH_alkylated", "PAH_metabolites", "PBDEs", "Organobromines", 
-      "Organofluorines", "Chlorobiphenyls", "Dioxins", "Organochlorines", "Imposex", "Effects")
-    ))  
-  
+    wk.group <- factor(
+      wk.group, 
+      levels = c(
+        "Metals", "Organotins", "PAH_parent", "PAH_alkylated", "PAH_metabolites", 
+        "PBDEs", "Organobromines", "Organofluorines", "Chlorobiphenyls", 
+        "Dioxins", "Organochlorines", "Imposex", "Effects"
+      )
+    )  
+    wk.group <- droplevels(wk.group)
     
     overview <- overview[c(station.var, wk[order(wk.group, wk.det)])]
 
@@ -688,8 +698,8 @@ ctsm.summary.table <- function(
       
       summary <- rename(
         summary, 
-        region = OSPARregion,
-        subregion = region,
+        region = OSPAR_region,
+        subregion = OSPAR_subregion,
         station_code = code,
         station_name = station,
         station_long_name = stationName,
@@ -704,12 +714,13 @@ ctsm.summary.table <- function(
       
       summary <- rename(
         summary, 
+        subbasin = HELCOM_subbasin,
+        L3 = HELCOM_L3,
+        L4 = HELCOM_L4,
         station_code = code,
         station_name = station,
         station_long_name = stationName,
       )
-
-      names(summary) <- gsub("EQS.HELCOM", "EQS", names(summary))
 
     }
     

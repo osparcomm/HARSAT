@@ -79,9 +79,9 @@ ctsm_read_data <- function(
     
   # read in station dictionary, contaminant and biological effects data and QA data
   
-  station_dictionary <- ctsm_read_stations(stations, path, purpose)
+  stations <- ctsm_read_stations(stations, path, info$purpose, info$region_id)
   
-  data <- ctsm_read_contaminants(contaminants, path, purpose)
+  data <- ctsm_read_contaminants(contaminants, path, info$purpose, info$region_id)
   
   QA <- ctsm_read_QA(QA, path, purpose)
   
@@ -101,7 +101,7 @@ ctsm_read_data <- function(
     call = match.call(), 
     info = info,
     data = data, 
-    stations = station_dictionary, 
+    stations = stations, 
     QA = QA)
 }
 
@@ -114,19 +114,27 @@ ctsm_control <- function(purpose) {
   # reporting_window is set to 6 to match the MSFD reporting cycle
   # series with no data in the most recent_window are excluded 
   
+  # all_in_region is a logical that determines whether all data (and stations)
+  # must be in a region
+
+  region_id <- switch(
+    purpose, 
+    OSPAR = c("OSPAR_region", "OSPAR_subregion"),
+    HELCOM = c("HELCOM_subbasin", "HELCOM_L3", "HELCOM_L4"),
+    NULL
+  )
+  
+  all_in_region <- !is.null(region_id)
+    
   list(
     reporting_window = 6L, 
-    region_ID = switch(
-      purpose, 
-      OSPAR = c("OSPAR_region", "OSPAR_subregion"),
-      HELCOM = c("HELCOM_subbasin", "HELCOM_l3", "HELCOM_l4"),
-      NULL
-    )
+    region_id = region_id,
+    all_in_region = all_in_region
   )
 }
 
 
-ctsm_read_stations <- function(infile, path, purpose) {
+ctsm_read_stations <- function(infile, path, purpose, region_id) {
 
   # import functions
   # read in station dictionary
@@ -143,33 +151,7 @@ ctsm_read_stations <- function(infile, path, purpose) {
   # rename columns to suit!
   
   names(stations) <- gsub("Station_", "", names(stations), fixed = TRUE)
-  
-  
-  # sort out purpose specific names
-  
-  if (purpose %in% c("OSPAR", "AMAP")) {
 
-    stations <- dplyr::rename(
-      stations, 
-      OSPARregion = OSPAR_region,
-      region = OSPAR_subregion,
-      offshore = OSPAR_shore
-    )    
-    
-  } else if (purpose %in% "HELCOM") {
-    
-    stations <- dplyr::rename(
-      stations, 
-      region = HELCOM_subbasin,
-      l3area = HELCOM_L3,
-      l4area = HELCOM_L4
-    )    
-    
-  }
-  
-  
-  # remaining names common to all
-  
   stations <- dplyr::rename(
     stations, 
     code = Code,
@@ -186,21 +168,16 @@ ctsm_read_stations <- function(infile, path, purpose) {
     programGovernance = ProgramGovernance,
     dataType = DataType
   )
-  
 
-  # turn code and parent_code into a character
-  
-  stations <- dplyr::mutate(
-    stations, 
-    dplyr::across(c("code", "parent_code"), as.character)
-  )
-  
-  
-    
-  # turn OSPARregion (numeric identifiers) into a character 
-  # also code and parent_code
-  
-  id = c("OSPARregion", "code", "parent_code")
+  if (purpose %in% c("OSPAR", "AMAP")) {
+    stations <- dplyr::rename(stations, offshore = OSPAR_shore)
+  }  
+
+  # turn following variables into a character
+  # code and parent code could be kept as integers, but safer to leave as 
+  # characters until have decided how we are going to merge with non-ICES data
+
+  id <- c(region_id, "code", "parent_code")
   
   stations <- dplyr::mutate(
     stations, 
@@ -211,7 +188,7 @@ ctsm_read_stations <- function(infile, path, purpose) {
 }
 
 
-ctsm_read_contaminants <- function(infile, path, purpose) {
+ctsm_read_contaminants <- function(infile, path, purpose, region_id) {
   
   # import functions
   # read in contaminant (and biological effects) data
@@ -232,10 +209,17 @@ ctsm_read_contaminants <- function(infile, path, purpose) {
   # for sediment, tblsampleid and matrix give the unique sample id
   # to streamline, could make sample = tblbioid (biota) or tblsampleid (sediment)
   
-  names(data) <- tolower(names(data))     # just in case!
+  # convert names to lower case, apart from the regional names
+  
+  pos <- names(data) %in% region_id
+  if (sum(pos) != length(region_id)) {
+    stop("not all regional identifiers are in the data extraction")
+  }
+  
+  names(data)[!pos] <- tolower(names(data)[!pos])     # just in case!
 
   
-  # purpose specific regional information and inconsistent extractions
+  # deal with inconsistent extractions
   # can be rationalised when extraction is formalised
   # AMAP is identical to OSPAR so that the example with external data will run
   
@@ -243,8 +227,6 @@ ctsm_read_contaminants <- function(infile, path, purpose) {
     
     data <- dplyr::rename(
       data,
-      OSPARregion = ospar_region,
-      region = ospar_subregion,
       offshore = ospar_shore,
       submitted.station = stationname, 
       sd_name = sd_stationname,
@@ -257,9 +239,6 @@ ctsm_read_contaminants <- function(infile, path, purpose) {
     
     data <- dplyr::rename(
       data,
-      region = helcom_subbasin,
-      l3area = helcom_l3, 
-      l4area = helcom_l4, 
       submitted.station = statn, 
       sd_name = sd_stationname,
       sd_code = sd_stationcode,
@@ -312,10 +291,10 @@ ctsm_read_contaminants <- function(infile, path, purpose) {
     unit = tolower(.data$unit)
   )
   
-  
+
   id <- c(
-    "region", "OSPARregion", "l3area", "l4area", "qflag", "sample", 
-    "sub.sample", "sd_code", "station_code", "sd_name", "station_name"
+    region_id, "qflag", "sample", "sub.sample", "sd_code", "station_code", 
+    "sd_name", "station_name"
   )
   
   data <- dplyr::mutate(
@@ -1634,7 +1613,7 @@ ctsm.clean.stations.OSPAR <- function(stations, compartment) {
   # should probably do this in a single function call later on, but low priority
 
   ctsm.check(
-    stations, is.na(OSPARregion) | is.na(region), action = "warning", 
+    stations, is.na(OSPAR_region) | is.na(OSPAR_subregion), action = "warning", 
     message = "Stations outside OSPAR region", 
     fileName = "stations outside area", merge.stations = FALSE)
     
@@ -1643,28 +1622,32 @@ ctsm.clean.stations.OSPAR <- function(stations, compartment) {
   # local shape file errors
   
   ok <- local({
-    id1 <- as.character(stations$OSPARregion)
-    region <- as.character(stations$region)
-    id2 <- info.regions[["OSPAR"]][region, "OSPARregion"]
+    id1 <- stations$OSPAR_region
+    id2 <- info.regions[["OSPAR"]][stations$OSPAR_subregion, "OSPAR_region"]
     (is.na(id1) & is.na(id2)) | id1 == id2
   })
   
   ctsm.check(
     stations, !ok, action = "warning", 
-    message = "Region in wrong OSPAR region", 
+    message = "OSPAR subregion in wrong OSPAR region", 
     fileName = "Region information incorrect", merge.stations = FALSE)
   
 
   # tidy up output
   
-  stations <- stations %>% 
-    droplevels() %>% 
-    arrange(.data$OSPARregion, .data$region, .data$country, .data$station) %>% 
-    column_to_rownames("stationID")
+  stations <- arrange(
+    stations, 
+    .data$OSPAR_region, 
+    .data$OSPAR_subregion, 
+    .data$country, 
+    .data$station
+  )  
+    
+  stations <- column_to_rownames(stations, "stationID")
 
   col_id <- c(
-    "OSPARregion", "region", "country", "station", "code", "name", "latitude", "longitude", 
-    "offshore", "MSTAT", "WLTYP", "ICES_ecoregion"
+    "OSPAR_region", "OSPAR_subregion", "country", "station", "code", "name", 
+    "latitude", "longitude", "offshore", "MSTAT", "WLTYP"
   )
   stations <- stations[col_id]
 
@@ -1775,7 +1758,7 @@ ctsm.clean.stations.HELCOM <- function(stations, compartment) {
   
   # restrict to stations that have a HELCOM region
   
-  stations <- drop_na(stations, .data$region)
+  stations <- drop_na(stations, .data$HELCOM_subbasin)
   
   
   # ensure country is consistent
@@ -1792,9 +1775,15 @@ ctsm.clean.stations.HELCOM <- function(stations, compartment) {
   
   # create station ID and remove stations that have been replaced
   
-  stations <- stations %>% 
-    unite(stationID, .data$country, .data$station, remove = FALSE) %>% 
-    filter(is.na(.data$replacedBy))
+  stations <- unite(
+    stations, 
+    stationID, 
+    .data$country, 
+    .data$station, 
+    remove = FALSE
+  ) 
+  
+  stations <- filter(stations, is.na(.data$replacedBy))
   
 
   # check whether any remaining duplicated stations 
@@ -1814,13 +1803,20 @@ ctsm.clean.stations.HELCOM <- function(stations, compartment) {
 
   # tidy up output
 
-  stations <- stations %>% 
-    droplevels() %>% 
-    arrange(.data$region, .data$l3area, .data$l4area, .data$country, .data$station) %>% 
-    column_to_rownames("stationID")
+  stations <- arrange(
+    stations,
+    .data$HELCOM_subbasin, 
+    .data$HELCOM_L3, 
+    .data$HELCOM_L4, 
+    .data$country, 
+    .data$station
+  ) 
+  
+  stations <- column_to_rownames(stations, "stationID")
   
   col_id <- c(
-    "region", "l3area", "l4area", "country", "station", "code", "name", "latitude", "longitude",
+    "HELCOM_subbasin", "HELCOM_L3", "HELCOM_L4", 
+    "country", "station", "code", "name", "latitude", "longitude",
     "MSTAT", "WLTYP"
   )
   stations <- stations[col_id]
@@ -2912,7 +2908,7 @@ ctsm_normalise_sediment <- function(data, QA, station_dictionary, control) {
             "France" %in% station_dictionary$country) {
           
           station_id <- station_dictionary$country %in% "France" & 
-            station_dictionary$OSPARregion %in% "2"
+            station_dictionary$OSPAR_region %in% "2"
           station_id <- row.names(station_dictionary)[station_id]
           id <- as.character(data$station) %in% station_id
           

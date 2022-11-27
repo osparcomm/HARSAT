@@ -1,40 +1,3 @@
-# Edit history ----
-
-# 29/01/16  fix bug in get.info.imposex - don't know how long it has been there :(
-# 15/06/16  read in uncertainty estimates
-# 22/08/16  make basis of Perca and Zoarces assessment identical to Clupea
-# 02/11/16  get.basis and convert.basis - make these work with all groups (not just contaminants)
-# 07/11/16  convert.units.engine - add in "umol/min/mg protein"
-# 16/11/16  PFOS in herring is assessed on a wet weight basis
-# 18/01/17  convert.units - deal with water and ug/l
-# 17/05/17  add in assessment criteria for new biological effects
-# 21/11/17  get assessment criteria for other groups in water
-# 04/12/17  convert.units allow TBSN+ conversion for water
-# 07/12/17  convert.units allow TEQ conversions
-# 19/02/18  allow TM conversion for shrimp Assessment Concentrations
-# 30/10/18  read in OSPAR region information
-# 30/10/18  turn purpose related info into lists
-# 05/06/19  ensure pick up correct species and uncertainty files (year specific)
-# 21/10/19  write get.basis.AMAP to choose most frequently submitted basis
-# 02/11/19  convert.basis extend to include qflag = D or Q
-
-# v2_61
-# get_RECO function to read in data exported from ICES RECO
-# get_station_code function to identify station code from station name
-# get_basis overhaul - need to make this purpose specific, added a determinand argument
-# info_TEQ - structure to store WHO TEQ (DFP)
-# get.AC.biota overhaul
-
-# v2_63 (HELCOM 2021)
-# make get_basis purpose specific - still need to ensure consistency of arguments
-
-# v2_65 (CSSEG 2020, prelim OSPAR 2022)
-# remove factors from information files (where possible)
-
-# v2_66 (OSpAR 2022)
-# update get.AC.biota.imposex for Buccinum
-
-
 # Species and determinand information and uncertainty estimates ----
 
 info.path <- sub("functions", "information", function_path)
@@ -1502,11 +1465,17 @@ info.matrix <- read.csv(info.file("matrix.csv"), row.names = "matrix", stringsAs
 # Regions ----
 
 info.regions <- sapply(
-  c("CSEMP", "HELCOM", "OSPAR"), 
+  c("AMAP", "HELCOM", "OSPAR"), 
   function(x) {
     infile <-info.file(paste(x, "regions.csv"))
+    row_names_id <- switch(
+      x,
+      OSPAR = "OSPAR_subregion",
+      HELCOM = "HELCOM_L4",
+      AMAP = NULL
+    )
     if (file.exists(infile))
-      read.csv(infile, row.names = "region", stringsAsFactors = FALSE)
+      read.csv(infile, row.names = row_names_id)
     else 
       NULL
   },

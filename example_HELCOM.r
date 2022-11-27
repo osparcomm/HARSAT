@@ -457,6 +457,15 @@ biota_Imposex <- ctsm.assessment(
   clusterID = wk.cluster
 )
 
+biota_Imposex <- ctsm.assessment(
+  biota_assessment, 
+  determinandID = determinands$Biota$Imposex
+)
+
+
+stopCluster(wk.cluster)
+
+
 
 
 ### check convergence ----

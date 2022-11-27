@@ -120,7 +120,7 @@ ctsm.assessment <- function(
       thetaID <- switch(
         info$purpose, 
         CSEMP = as.character(stations[station, "CMA"]),
-        OSPAR = paste(seriesInfo$country, stations[station, "region"]),
+        OSPAR = paste(seriesInfo$country, stations[station, "OSPAR_subregion"]),
         HELCOM = seriesInfo$country
       )
 
@@ -163,7 +163,7 @@ ctsm.assessment <- function(
         species = species,
         station = station,
         thetaID = thetaID, 
-        max.year = info$maxYear, 
+        max.year = info$max_year, 
         recent.trend = info$recent.trend)
       )
     }

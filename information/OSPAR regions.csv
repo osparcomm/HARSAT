@@ -1,4 +1,4 @@
-region,label,OSPARregion,order
+OSPAR_subregion,label,OSPAR_region,order
 Barents Sea,Barents Sea,1,17
 Northern Bay of Biscay,Bay of Biscay (Northern),4,4
 Celtic Sea,Celtic Sea,3,5
