@@ -302,7 +302,7 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
     ylim <- c(do.call("plot.data.ylim", args.list))
   }
     
-  xlim <- plot.data.xlim(data$year, info$recentYears)
+  xlim <- plot.data.xlim(data$year, info$recent_years)
 
   plot.formula <- data$concentration ~ data$year
 
@@ -690,7 +690,7 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
   
   data <- within(data, type <- ordered(type, levels = auxiliary))
 
-  xlim <- range(data$year, info$recentYears)
+  xlim <- range(data$year, info$recent_years)
 
   is.data <- unlist(with(data, tapply(value, type, function(i) !all(is.na(i)))))
   data <- within(data, value[type %in% names(is.data[!is.data])] <- 0)
@@ -959,7 +959,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   })
 
   args.list <- sapply(info$seriesID[is.data], simplify = FALSE, function(i) data[[i]]$year)
-  args.list <- c(args.list, info$recentYears)
+  args.list <- c(args.list, info$recent_years)
   xlim <- do.call("plot.data.xlim", args.list)
 
   plot.formula <- data$concentration ~ data$year
@@ -1160,11 +1160,11 @@ plot.multidata <- function(data, info,  ...) {
   # situation where a determinand has only a single value and a range can't be calculated - could be done
   # much more elegantly
 
-#  if (max(data$year) < max(info$recentYears) | min(data$year) > min(info$recentYears)) 
+#  if (max(data$year) < max(info$recent_years) | min(data$year) > min(info$recent_years)) 
 #  {
 #    last.id <- nrow(data) + c(1, 2)
 #    data[last.id,] <- NA
-#    data[last.id, "year"] <- range(info$recentYears)
+#    data[last.id, "year"] <- range(info$recent_years)
 #  }
 
   # varnames doesn't appear to work in splom, so make sure we give the columns the names
@@ -1178,7 +1178,7 @@ plot.multidata <- function(data, info,  ...) {
 
   pscales <- lapply(names(plot.data), function(i) {
     if (i == "year") 
-      limits <- plot.data.xlim(plot.data[i], info$recentYears) 
+      limits <- plot.data.xlim(plot.data[i], info$recent_years) 
     else 
       limits <- plot.data.ylim(plot.data[i])
     
@@ -1644,7 +1644,7 @@ plot.ratio <- function(data, info, ...) {
   })
   
   args.list <- sapply(ratio_id, simplify = FALSE, function(i) data[[i]]$year)
-  args.list <- c(args.list, info$recentYears)
+  args.list <- c(args.list, info$recent_years)
   xlim <- do.call("plot.data.xlim", args.list)
   
   plot.formula <- data$ratio ~ data$year

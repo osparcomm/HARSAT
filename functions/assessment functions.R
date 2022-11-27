@@ -158,7 +158,7 @@ ctsm.assessment <- function(
         data = x, 
         annualIndex = out$annualIndex, 
         AC = AC, 
-        recent.years = info$recentYears,
+        recent.years = info$recent_years,
         determinand = determinand, 
         species = species,
         station = station,
@@ -190,9 +190,9 @@ ctsm.assessment <- function(
         data = x, 
         annualIndex = annualIndex,
         AC = AC, 
-        recent.years = info$recentYears, 
+        recent.years = info$recent_years, 
         determinand = determinand, 
-        max.year = info$maxYear, 
+        max.year = info$max_year, 
         recent.trend = info$recent.trend)
       
       args.list <- c(args.list, list(...))

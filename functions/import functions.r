@@ -19,33 +19,64 @@ ctsm_read_data <- function(
   compartment <- match.arg(compartment)
   purpose <- match.arg(purpose)
   
+  if (!is.character(path) | length(path) > 1) {
+    stop("path should be a single character string")
+  }
+  
+  # max_year is the maximum data year allowed 
+  # print warning if there are more recent data which have been submitted 'early'
+  
+  if (length(max_year) != 1 |
+      !isTRUE(all.equal(max_year, as.integer(max_year)))) {
+    stop("max_year must be a single (integer valued) year")
+  }
+
+
+  # sort out extraction date
+    
   if (length(extraction) > 1) {
     stop("extraction must be a single date")
   }
   extraction <- as.POSIXlt(extraction)
   
-
-  if (!is.character(path) | length(path) > 1) {
-    stop("path should be a single character string")
+  extraction_year <- as.numeric(format(extraction, "%Y"))
+  extraction_month <- as.numeric(format(extraction, "%m"))
+  
+  if (extraction_year < max_year) {
+    stop("extraction predates some monitoring data")
   }
   
-
-  # max_year is the maximum data year allowed 
-  # print warning if there are more recent data which have been submitted 'early'
-  
-  if (length(max_year) != 1 |
-      !isTRUE(all.equal(max_year, as.integer(max_year))) |
-      max_year <= 2000) {
-    stop("max_year must be a single year in this millenium")
+  extraction_text <- format(extraction, "%d %B %Y")
+  if (substring(extraction_text, 1, 1) == "0") { 
+    extraction_text <- substring(extraction_text, 2)
   }
   
   
-  # set up control structure 
-  # should probably be put in ctsm_create_timeSeries
+  # set up control (info) structure 
+  # some of this should probably go in ctsm_create_timeSeries
     
-  control <- modifyList(ctsm_control(), control)
+  info <- list(
+    compartment = compartment, 
+    purpose = purpose, 
+    extraction = extraction_text, 
+    max_year = max_year 
+  )
   
+  control <- modifyList(ctsm_control(purpose), control)
   
+  if (any(names(control) %in% names(info))) {
+    warning("possible conflict between function arguments and control")
+  }
+  
+  info <- append(info, control)
+  
+
+  # construct recent_years in which there must be some monitoring data
+  
+  info$recent_years <- seq(max_year - control$reporting_window + 1, max_year)
+  
+
+    
   # read in station dictionary, contaminant and biological effects data and QA data
   
   station_dictionary <- ctsm_read_stations(stations, path, purpose)
@@ -55,7 +86,7 @@ ctsm_read_data <- function(
   QA <- ctsm_read_QA(QA, path, purpose)
   
 
-  # check no data after maxYear
+  # check no data after max_year
   
   if (any(data$year > max_year)) { 
     warning("data submitted after max_year", call. = FALSE)
@@ -66,42 +97,16 @@ ctsm_read_data <- function(
   }
   
     
-  # sort out extraction date
-
-  extraction_year <- as.numeric(format(extraction, "%Y"))
-  extraction_month <- as.numeric(format(extraction, "%m"))
-  
-  if (extraction_year < max_year) {
-    stop("extraction predates some monitoring data")
-  }
-
-  extraction_text <- format(extraction, "%d %B %Y")
-  if (substring(extraction_text, 1, 1) == "0") { 
-    extraction_text <- substring(extraction_text, 2)
-  }
-  
-  
-  # construct recent.years in which there must be some monitoring data
-  
-  recent_years <- seq(max_year - control$reporting_window + 1, max_year)
-  
   list(
     call = match.call(), 
-    info = list(
-      compartment = compartment, 
-      purpose = purpose, 
-      extraction = extraction_text, 
-      maxYear = max_year, 
-      recentYears = recent_years, 
-      reportingWindow = control$reporting_window
-    ),
+    info = info,
     data = data, 
     stations = station_dictionary, 
     QA = QA)
 }
 
 
-ctsm_control <- function() {
+ctsm_control <- function(purpose) {
   
   # import functions
   # sets up default values that control the assessment
@@ -110,7 +115,13 @@ ctsm_control <- function() {
   # series with no data in the most recent_window are excluded 
   
   list(
-    reporting_window = 6L
+    reporting_window = 6L, 
+    region_ID = switch(
+      purpose, 
+      OSPAR = c("OSPAR_region", "OSPAR_subregion"),
+      HELCOM = c("HELCOM_subbasin", "HELCOM_l3", "HELCOM_l4"),
+      NULL
+    )
   )
 }
 
@@ -396,7 +407,7 @@ ctsm_create_timeSeries <- function(
   rm(ctsm.obj)
  
 
-  is.recent <- function(year) year %in% info$recentYears
+  is.recent <- function(year) year %in% info$recent_years
 
 
   # lots of data cleansing - first ensure oddity directory exists and back up
@@ -466,8 +477,8 @@ ctsm_create_timeSeries <- function(
   # recent years reduces size of data and removes legacy species not in info files
   
   cat(
-    "   Dropping stations with no data between", min(info$recentYears), "and", 
-    max(info$recentYears), "\n"
+    "   Dropping stations with no data between", min(info$recent_years), "and", 
+    max(info$recent_years), "\n"
   )
 
   if ("species" %in% names(data)) {
@@ -1165,7 +1176,7 @@ ctsm_create_timeSeries <- function(
   # drop groups of data at stations with no data in recent years
 
   cat("   Dropping groups of compounds / stations with no data between", 
-      min(info$recentYears), "and", max(info$recentYears), "\n")
+      min(info$recent_years), "and", max(info$recent_years), "\n")
   id.names <- intersect(c("station", "filtered", "species", "group"), names(data))
   id <- do.call("paste", data[id.names])
   data <- subset(data, id %in% id[is.recent(year) & !is.na(concentration)])
@@ -3593,7 +3604,7 @@ ctsm_TBT_convert <- function(
 }  
 
 
-ctsm_TBT_remove_early_data <- function(ctsm_obj, recent_year = min(ctsm_obj$info$recentYears)) {
+ctsm_TBT_remove_early_data <- function(ctsm_obj, recent_year = min(ctsm_obj$info$recent_years)) {
   
   tin <- c("TBTIN", "TPTIN", "DBTIN", "DPTIN", "MBTIN", "MPTIN")
   cation <- c("TBSN+", "TPSN+", "DBSN+", "DPSN+", "MBSN+", "MPSN+")
