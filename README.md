@@ -1,5 +1,5 @@
 # HARSAT
-Harmonized Regional Seas Assessment Tool
+Harmonized Regional Seas Assessment Tool v1.1
 
 
 Requirements:
