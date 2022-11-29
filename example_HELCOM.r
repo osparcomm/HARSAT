@@ -14,6 +14,8 @@
 # The functions and reference tables folders are assumed to be in the current
 # R project folder
 
+# Test comment
+
 rm(list = objects())
 
 function_path <- file.path("functions")
