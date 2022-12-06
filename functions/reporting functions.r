@@ -440,6 +440,7 @@ ctsm.summary.table <- function(
   assessments, determinandGroups, path = ".", export = TRUE,  
   include_all = FALSE, collapse_AC = TRUE) {
 
+  # reporting functions
   # get summary files
   
   # path is for output
@@ -693,37 +694,26 @@ ctsm.summary.table <- function(
       )
     }
     
+
+    # rename some variables
     
-    if (purpose %in% c("OSPAR", "AMAP")) {
-      
-      summary <- rename(
-        summary, 
-        region = OSPAR_region,
-        subregion = OSPAR_subregion,
-        station_code = code,
-        station_name = station,
-        station_long_name = stationName,
-      )
-  
-      if ("AMAP_group" %in% names(summary))
-        summary <- rename(summary, mammal_group = AMAP_group)
-      
-    }
-
-    if (purpose %in% c("HELCOM")) {
-      
-      summary <- rename(
-        summary, 
-        subbasin = HELCOM_subbasin,
-        L3 = HELCOM_L3,
-        L4 = HELCOM_L4,
-        station_code = code,
-        station_name = station,
-        station_long_name = stationName,
-      )
-
+    summary <- rename(
+      summary, 
+      station_code = code,
+      station_name = station,
+      station_long_name = stationName,
+    )
+    
+    if ("AMAP_group" %in% names(summary)) {
+      summary <- rename(summary, mammal_group = AMAP_group)
     }
     
+    if (!identical(assessment$info$region_id, assessment$info$region_names)) {
+      pos <- match(assessment$info$region_id, names(summary))
+      names(summary)[pos] <- assessment$info$region_names
+    }
+    
+
     outfile <- file.path(path, paste0(tolower(x), "_summary.csv"))
      
     readr::write_excel_csv(summary, outfile, na = "")
