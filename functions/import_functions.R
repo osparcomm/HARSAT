@@ -1,7 +1,7 @@
 # main import and data processing functions ----
 
 
-# read in data ---- 
+# read in data  ---- 
 
 ctsm_read_data <- function(
   compartment = c("sediment", "biota", "water"), 
@@ -14,6 +14,9 @@ ctsm_read_data <- function(
   max_year, 
   control = list()) {
 
+  # import functions
+  # reads in data from an ICES extraction
+  
   # validate arguments
   
   compartment <- match.arg(compartment)
@@ -62,7 +65,9 @@ ctsm_read_data <- function(
     max_year = max_year 
   )
   
-  control <- modifyList(ctsm_control(purpose), control)
+  control_default <- ctsm_control_default(purpose)
+  
+  control <- ctsm_control_modify(control_default, control)
   
   if (any(names(control) %in% names(info))) {
     warning("possible conflict between function arguments and control")
@@ -106,13 +111,16 @@ ctsm_read_data <- function(
 }
 
 
-ctsm_control <- function(purpose) {
+ctsm_control_default <- function(purpose) {
   
   # import functions
   # sets up default values that control the assessment
   
   # reporting_window is set to 6 to match the MSFD reporting cycle
-  # series with no data in the most recent_window are excluded 
+  # series with no data in the most recent_window are excluded
+  
+  # region_id are the names or the relevant regions in the ICES extraction
+  # region_names are the names that will be used for reporting 
   
   # all_in_region is a logical that determines whether all data (and stations)
   # must be in a region
@@ -124,13 +132,42 @@ ctsm_control <- function(purpose) {
     NULL
   )
   
+  region_names <- region_id
+  
   all_in_region <- !is.null(region_id)
     
   list(
     reporting_window = 6L, 
     region_id = region_id,
+    region_names = region_names,
     all_in_region = all_in_region
   )
+}
+
+
+ctsm_control_modify <- function(control_default, control) {
+
+  # import functions
+  # updates default control structure with user specification and does basic 
+  # error checking
+  
+  # initialise region_names if region_id has been modified (and region_names is
+  # not specified)
+  
+  if ("region_id" %in% names(control) & !("region_names" %in% names(control))) {
+    control <- append(control, list(region_names = control$region_id))
+  }
+  
+  control <- modifyList(control_default, control, keep.null = TRUE)
+
+  if (length(control$region_id) != length(control$region_names)) {
+    stop(
+      "error in control argument: length of region_id and region_names must be ",
+      "identical"
+    )
+  }
+
+  control
 }
 
 
