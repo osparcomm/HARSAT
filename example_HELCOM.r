@@ -20,15 +20,15 @@ rm(list = objects())
 
 function_path <- file.path("functions")
 
-source(file.path(function_path, "import functions.R"))
-source(file.path(function_path, "import check functions.R"))
-source(file.path(function_path, "assessment functions.R"))
-source(file.path(function_path, "ctsm lmm.R"))
-source(file.path(function_path, "proportional odds functions.R"))
-source(file.path(function_path, "imposex functions.R"))
-source(file.path(function_path, "imposex clm.R"))
-source(file.path(function_path, "reporting functions.R"))
-source(file.path(function_path, "support functions.R"))
+source(file.path(function_path, "import_functions.R"))
+source(file.path(function_path, "import_check_functions.R"))
+source(file.path(function_path, "assessment_functions.R"))
+source(file.path(function_path, "ctsm_lmm.R"))
+source(file.path(function_path, "proportional_odds_functions.R"))
+source(file.path(function_path, "imposex_functions.R"))
+source(file.path(function_path, "imposex_clm.R"))
+source(file.path(function_path, "reporting_functions.R"))
+source(file.path(function_path, "support_functions.R"))
 
 
 # source reference tables and associated information functions
@@ -43,7 +43,7 @@ info_AC_infile <- list(
 )
 info_AC_type <- "HELCOM"
 
-source(file.path(function_path, "information functions.R"))
+source(file.path(function_path, "information_functions.R"))
 
 
 ## determinands ----
