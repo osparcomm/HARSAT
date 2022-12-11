@@ -12,10 +12,10 @@
 ctsm.lmm.fit <- function(
   data, dfSmooth, varComp.start, fixed_bound = 5, random_bound = 3, controlLmmFit = NULL, ...) {
 
-  require(lme4)
-  require(mgcv)
-  require(numDeriv)
-  require(optimx)
+  library(lme4)
+  library(mgcv)
+  library(numDeriv)
+  library(optimx)
 
   # get total number of years
 
@@ -304,7 +304,7 @@ ctsm.lmm.dcalc <- function(x, qflag, mean, sd, log = FALSE) {
 
 negTwiceLogLik <- function(data, mu, varComp) {
 
-  require(mvtnorm)
+  library(mvtnorm)
 
   sdSample <- if ("sdSample" %in% names(varComp)) varComp["sdSample"] else 0
   sdYear <- varComp["sdYear"]

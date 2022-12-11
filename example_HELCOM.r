@@ -327,8 +327,8 @@ sediment_assessment <- ctsm.assessment.setup(
   recent.trend = 20
 )
 
-require("parallel")
-require("pbapply")
+library("parallel")
+library("pbapply")
 
 wk.cores <- detectCores()
 wk.cluster <- makeCluster(wk.cores - 1)
@@ -398,8 +398,8 @@ source("example_HELCOM_imposex_preparation.R")
 # can sometimes be useful to split up the assessment because of size limitations
 # not really needed here, but done to illustrate
 
-require("parallel")
-require("pbapply")
+library("parallel")
+library("pbapply")
 
 wk.cores <- detectCores()
 wk.cluster <- makeCluster(wk.cores - 1)
@@ -567,8 +567,8 @@ water_assessment <- ctsm.assessment.setup(
 )
 
 
-require(parallel)
-require(pbapply)
+library(parallel)
+library(pbapply)
 
 wk.cores <- detectCores()
 wk.cluster <- makeCluster(wk.cores - 1)

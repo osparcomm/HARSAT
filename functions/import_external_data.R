@@ -5,9 +5,9 @@ add_non_ICES_data <- function(
   ICES_data, AMAP_data, AMAP_stations, 
   keep = c("all", "AMAP"), path = ".") {
 
-  require("dplyr")
-  require("readxl")
-  require("tidyr")
+  library("dplyr")
+  library("readxl")
+  library("tidyr")
   
   keep <- match.arg(keep)
   

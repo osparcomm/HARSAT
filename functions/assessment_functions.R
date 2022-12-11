@@ -31,8 +31,8 @@ ctsm.assessment <- function(
 
   # assess each time series
   
-  require("pbapply")
-  require("dplyr")
+  library("pbapply")
+  library("dplyr")
   
   info <- ctsm.ob$info
 

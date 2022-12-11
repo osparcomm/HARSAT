@@ -1232,7 +1232,7 @@ convert.units.engine <- function(conc, from, to, determinand) {
 convert.basis <- function(
   conc, from, to, drywt, drywt.qflag, lipidwt = NA, lipidwt.qflag = NA, exclude) {
 
-  require(dplyr)
+  library(dplyr)
   
 
   # converts between wet, dry and lipid basis of measurement
@@ -1543,8 +1543,8 @@ rm(info.path, info.file)
 
 get_RECO <- function(code, path = "information") {
   
-  require(tidyverse)
-  require(lubridate)
+  library(tidyverse)
+  library(lubridate)
   
   # check code argument and convert to upper case
   

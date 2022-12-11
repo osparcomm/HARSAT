@@ -11,7 +11,7 @@ imposex.VDS.p.calc <- function(theta, cumulate = FALSE) {
 
 imposex.clm.fit <- function(data, model, theta, model.control = list(), hessian = FALSE) {
 
-  require(mgcv)
+  library(mgcv)
   
   out <- list(model = model, model.control = model.control)
   

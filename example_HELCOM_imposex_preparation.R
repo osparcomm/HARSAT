@@ -1,8 +1,8 @@
 # get imposex data 
 
-require(dplyr)
-require(tibble)
-require(tidyr)
+library(dplyr)
+library(tibble)
+library(tidyr)
 
 wk_timeSeries <- biota_timeSeries
 
@@ -92,8 +92,8 @@ with(wk_data, table(regionID, VDS))
 wk_split <- split(wk_data, wk_data$regionID)
 
 
-require("parallel")
-require("pbapply")
+library("parallel")
+library("pbapply")
 
 wk.cores <- detectCores()
 wk.cluster <- makeCluster(wk.cores - 1)

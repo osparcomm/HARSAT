@@ -117,7 +117,7 @@ ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
 
 ctsm.VDS.cl <- function(fit, nsim = 1000) {
 
-  require(MASS)
+  library(MASS)
 
   nCuts <- fit$K
   cutsID <- as.character(0:(nCuts-1))
