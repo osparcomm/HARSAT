@@ -105,8 +105,8 @@ biota_assessment <- ctsm.assessment.setup(
 )
 
 
-require("parallel")
-require("pbapply")
+library("parallel")
+library("pbapply")
 
 wk.cores <- detectCores()
 wk.cluster <- makeCluster(wk.cores - 1)

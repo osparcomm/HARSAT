@@ -387,7 +387,7 @@ ctsm_create_timeSeries <- function(
 
   # load packages
   
-  require(tidyverse)
+  library(tidyverse)
 
   
   # check arguments

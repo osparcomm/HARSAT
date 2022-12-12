@@ -465,8 +465,8 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
 
 plot.setup <- function(newPage) {
 
-  require("lattice")
-  require("grid")
+  library("lattice")
+  library("grid")
 
   if (newPage) grid.newpage()
 
@@ -1474,8 +1474,8 @@ plot.ratio.pred <- function(
 
 plot.ratio <- function(data, info, ...) {
   
-  require("lattice")
-  require("grid")
+  library("lattice")
+  library("grid")
   
   # get working data 
   # sediment - use non-normalised concentrations

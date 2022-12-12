@@ -445,7 +445,7 @@ ctsm.summary.table <- function(
   
   # path is for output
 
-  require(dplyr)
+  library(dplyr)
 
   out <- sapply(names(assessments), simplify = FALSE, FUN = function(x) {
   

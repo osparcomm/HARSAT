@@ -20,7 +20,7 @@
 
 ctsm.uncrt.workup <- function(clean_data) {
 
-  require(dplyr)
+  library(dplyr)
   
   # turn 'clean' data into uncertainty data
   
@@ -252,7 +252,7 @@ ctsm.uncrt.estimate <- function(data) {
 
 ctsm.uncrt.plot.estimates <- function(uncrt_obj, old_estimates, group_id) {
 
-  require(lattice)
+  library(lattice)
 
   id <- with(uncrt_obj$data, group %in% group_id)  
   data <- uncrt_obj$data[id, ]
@@ -301,7 +301,7 @@ ctsm.uncrt.plot.estimates <- function(uncrt_obj, old_estimates, group_id) {
 
 ctsm.uncrt.plot.data <- function(uncrt_obj, det_id) {
   
-  require(lattice)
+  library(lattice)
 
   id <- with(uncrt_obj$data, determinand %in% det_id)  
   data <- uncrt_obj$data[id, ]
