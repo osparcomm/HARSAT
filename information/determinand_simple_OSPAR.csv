@@ -1,4 +1,4 @@
-determinand,common.name,pargroup,biota.group,sediment.group,water.group,biota_assess,sediment_assess,water_assess,biota.unit,sediment.unit,water.unit,biota.auxiliary,sediment.auxiliary,water.auxiliary,distribution,good.status
+determinand,common.name,pargroup,biota.group,sediment.group,water.group,biota_assess,sediment_assess,water_assess,biota.unit,sediment.unit,water.unit,biota_auxiliary,sediment_auxiliary,water_auxiliary,distribution,good.status
 AG,Silver,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
 AL,Aluminium,I-MET,Metals,Auxiliary,Metals,FALSE,FALSE,FALSE,ug/kg,%,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
 AS,Arsenic,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low

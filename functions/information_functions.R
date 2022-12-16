@@ -11,7 +11,7 @@ info.species <- read.csv(
 )
 
 
-# Uncertainty estiamtes ----
+# Uncertainty estimates ----
 
 info.uncertainty <- read.csv(
   info.file(info_uncertainty_file_id), 
@@ -24,7 +24,26 @@ info.uncertainty <- read.csv(
 
 info.determinand <- read.csv(
   info.file(info_determinand_infile),
-  na.strings = ""
+  na.strings = "", 
+  colClasses = c(
+    determinand = "character",
+    common.name = "character",
+    pargroup = "character", 
+    biota.group = "character",
+    sediment.group = "character",
+    water.group = "character",
+    biota_assess = "logical",
+    sediment_assess = "logical",
+    water_assess = "logical",
+    biota.unit = "character",
+    sediment.unit = "character", 
+    water.unit = "character",       
+    biota_auxiliary = "character", 
+    sediment_auxiliary = "character", 
+    water_auxiliary = "character", 
+    distribution = "character", 
+    good.status = "character"
+  )
 )
 
 info.determinand <- dplyr::mutate(
@@ -38,16 +57,53 @@ info.determinand <- dplyr::mutate(
 
 info.determinand <- tibble::column_to_rownames(info.determinand, "determinand")
 
-# check all auxiliary variables are recognised as determinands in their own right
 
-lapply(c("biota", "sediment"), function(i) {
 
-  auxiliary <- paste0(i, ".auxiliary")
-  auxiliary <- info.determinand[[auxiliary]]
+# extractor functions
+
+ctsm_get_determinands <- function(compartment = c("biota", "sediment", "water")) {
+  
+  # information_functions.R
+  # gets determinands to be assessed from determinand reference table
+  
+  compartment <- match.arg(compartment)
+  
+  assess_id <- paste0(compartment, "_assess")
+  ok <- info.determinand[[assess_id]]
+  
+  row.names(info.determinand)[ok]
+}  
+
+
+ctsm_get_auxiliary <- function(
+  determinands, 
+  compartment = c("biota", "sediment", "water")) {
+  
+  # information_functions.R
+  # gets required auxiliary variables for determinands
+  
+  # in case determinands is a factor
+  determinands <- as.character(determinands)
+  
+  determinands <- unique(determinands)
+  
+  auxiliary_id <- paste0(compartment , "_auxiliary")
+  auxiliary <- info.determinand[determinands, auxiliary_id]
   auxiliary <- strsplit(auxiliary, ", ")
   auxiliary <- unlist(auxiliary)
-  auxiliary <- unique(na.omit(auxiliary))
   
+  unique(c(na.omit(auxiliary)))
+}
+
+
+# check all auxiliary variables in info.determinand are recognised as 
+# determinands in their own right
+
+lapply(c("biota", "sediment", "water"), function(compartment) {
+  
+  determinands <- row.names(info.determinand)
+  auxiliary <- ctsm_get_auxiliary(determinands, compartment)
+
   ok <- auxiliary %in% row.names(info.determinand)
   if(!all(ok)) {
     stop(
@@ -57,21 +113,6 @@ lapply(c("biota", "sediment"), function(i) {
   }
 })
 
-
-# extractor function
-
-ctsm_get_determinands <- function(
-  info, 
-  compartment = c("biota", "sediment", "water")) {
-  
-  # information_functions.R
-  # gets determinands to be assessed from determinand reference table
-  
-  compartment <- match.arg(compartment)
-  assess_var <- paste0(compartment, "_assess")
-  ok <- info[[assess_var]]
-  row.names(info)[ok]
-}  
 
 
 # Toxic EQuivalents for WHO_DFP (health)

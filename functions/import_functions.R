@@ -381,7 +381,7 @@ ctsm_read_QA <- function(QA, path, purpose) {
 
 ctsm_create_timeSeries <- function(
   ctsm.obj, 
-  determinands = ctsm_get_determinands(info.determinand, ctsm.obj$info$compartment), 
+  determinands = ctsm_get_determinands(ctsm.obj$info$compartment), 
   determinands.control = NULL, 
   oddity.path = "oddities", 
   return_early = FALSE, 
@@ -757,7 +757,7 @@ ctsm_create_timeSeries <- function(
   # drop any remaining unwanted determinands (from sum and perhaps bespoke functions);
   # could make this more elegant!
   
-  id <- c(determinands, ctsm.get.auxiliary(determinands, info$compartment))
+  id <- c(determinands, ctsm_get_auxiliary(determinands, info$compartment))
   
   data <- filter(data, determinand %in% id)
 
@@ -2208,18 +2208,6 @@ ctsm.imposex.check.femalepop <- function(data) {
 }
 
 
-ctsm.get.auxiliary <- function(determinands, compartment) {
-
-  # gets all the required auxiliary variables for determinands
-    
-  determinands <- as.character(unique(determinands))
-  auxiliary <- 
-    info.determinand[determinands, paste(compartment , "auxiliary", sep = ".")]
-  auxiliary <- strsplit(as.character(auxiliary), ", ")
-  unique(c(na.omit(unlist(auxiliary))))
-}
-
-
 ctsm_check_determinands <- function(compartment, data, determinands, control = NULL) {
 
   # checks all determinands are recognised in info files
@@ -2281,7 +2269,7 @@ ctsm_check_determinands <- function(compartment, data, determinands, control = N
   determinands <- intersect(determinands, id)
 
   
-  auxiliary <- ctsm.get.auxiliary(determinands, compartment)
+  auxiliary <- ctsm_get_auxiliary(determinands, compartment)
   
   if (!is.null(control)) {
     ok <- names(control) %in% c(determinands, auxiliary, get_control_dets(control, .names = FALSE))

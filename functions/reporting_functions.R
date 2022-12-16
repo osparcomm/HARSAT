@@ -1,9 +1,17 @@
 # web construction ----
 
-ctsm.web.initialise <- function(
-  assessmentObject, determinands, classColour = NULL, determinandGroups
-) {
+ctsm_web_initialise <- function(
+  assessmentObject, 
+  determinands = ctsm_get_determinands(assessmentObject$info$compartment), 
+  classColour = NULL, 
+  determinandGroups) {
+
+  # reporting_functions.R
+
   
+  determinands <- force(determinands)
+  
+    
   # check assessment criteria have an appropriate class colour
   
   AC <- assessmentObject$info$AC
@@ -87,7 +95,7 @@ ctsm.web.initialise <- function(
       detGroup <- detGroup[, drop = TRUE]
   })
   
-  assessmentObject <- ctsm.web.setup(assessmentObject)
+  assessmentObject <- ctsm_web_setup(assessmentObject)
   
   list(
     assessment = assessmentObject, 
@@ -97,7 +105,7 @@ ctsm.web.initialise <- function(
 }
 
 
-ctsm.web.setup <- function(assessmentObject) {
+ctsm_web_setup <- function(assessmentObject) {
   
   # extract timeSeries and stations and get more useful names
   

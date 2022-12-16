@@ -78,11 +78,11 @@ biota_timeSeries <- ctsm_create_timeSeries(
   )
 )
 
-# identical (apart from call) to either 
+# identical (apart from call) to: 
 # 
 # ctsm_create_timeSeries(
 #   biota_data,
-#   determinands = ctsm_get_determinands(info.determinand, "biota"),
+#   determinands = ctsm_get_determinands("biota"),
 #   determinands.control = list(
 #     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
 #     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
@@ -96,7 +96,6 @@ biota_timeSeries <- ctsm_create_timeSeries(
 #     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
 #   )
 # )
-
 
 
 # Assessment ----
@@ -110,10 +109,7 @@ biota_assessment <- ctsm.assessment.setup(
 )
 
 
-biota_assessment$assessment <- ctsm.assessment(
-  biota_assessment, 
-  determinandID = unlist(determinands$Biota)
-)
+biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 
 
 # check convergence - no errors this time
@@ -180,9 +176,8 @@ webGroups = list(
   )
 )
 
-biota_web <- ctsm.web.initialise(
+biota_web <- ctsm_web_initialise(
   biota_assessment,
-  determinands = unlist(determinands$Biota), 
   classColour = list(
     below = c(
       "BAC" = "blue", 
