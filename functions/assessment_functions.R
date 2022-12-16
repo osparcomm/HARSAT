@@ -213,7 +213,7 @@ ctsm.assessment <- function(
 # Annual indices ----
 
 get.index <- function(compartment, determinand, data) {
-  group <- ctsm_get_info("determinand", determinand, "group", compartment)
+  group <- ctsm_get_info("determinand", determinand, "group", compartment, sep = "_")
   function_id <- paste("get.index", compartment, group, sep = ".")
   do.call(function_id, list(data = data, determinand = determinand)) 
 }
@@ -284,7 +284,7 @@ get.index.biota.Effects <- function(data, determinand) {
   
   distribution <- ctsm_get_info("determinand", determinand, "distribution")
   
-  good_status <- ctsm_get_info("determinand", determinand, "good.status")
+  good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
   
   qflag_trap <- FALSE
@@ -384,7 +384,7 @@ ctsm.anyyear.lmm <- function(data, annualIndex, AC, recent.years, determinand, m
   # sort out assumed distribution (lognormal or normal) and whether high or low indicates good status
   
   distribution <- ctsm_get_info("determinand", determinand, "distribution")
-  good.status <- ctsm_get_info("determinand", determinand, "good.status")
+  good.status <- ctsm_get_info("determinand", determinand, "good_status")
   
 
   data$response <- switch( 
@@ -1147,7 +1147,7 @@ ctsm_assess_survival <- function(
   
   # establish other info
   
-  good_status <- ctsm_get_info("determinand", determinand, "good.status")
+  good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
 
   # type of fit depends on number of years:
@@ -1660,7 +1660,7 @@ ctsm_assess_beta <- function(
   
   # establish other info
   
-  good_status <- ctsm_get_info("determinand", determinand, "good.status")
+  good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
   
   # type of fit depends on number of years:
@@ -2049,7 +2049,7 @@ ctsm_assess_negativebinomial <- function(
   
   # establish other info
   
-  good_status <- ctsm_get_info("determinand", determinand, "good.status")
+  good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
   
   # type of fit depends on number of years:

@@ -65,10 +65,13 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
   #out$station <- if (html) convert.html.characters(txt) else txt
   out$station <- txt
   
-  out$determinand <- paste("Determinand:", ctsm_get_info("determinand", info$determinand, "common.name"))
+  out$determinand <- paste(
+    "Determinand:", 
+    ctsm_get_info("determinand", info$determinand, "common_name")
+  )
 
 
-  unitID <- as.character(ctsm_get_info("determinand", info$determinand, "unit", info$compartment))
+  unitID <- ctsm_get_info("determinand", info$determinand, "unit", info$compartment, sep = "_")
 
   groupID = unique(info$group)
   if (length(groupID) > 1)
@@ -444,7 +447,7 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
         TRUE                                    ~ "concentration"
       )
       ylabel <- paste(
-        ctsm_get_info("determinand", info$determinand, "common.name"), 
+        ctsm_get_info("determinand", info$determinand, "common_name"), 
         extra
       )
       grid.text(
@@ -809,7 +812,9 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
           value = paste(info$determinand, "non-normalised"),
           LNMEA = {
             family <- as.character(ctsm_get_info("species", info$species, "family"))
-            unit <- ctsm_get_info("determinand", type.id, "unit", info$compartment)
+            unit <- ctsm_get_info(
+              "determinand", type.id, "unit", info$compartment, sep = "_"
+            )
             paste(
               "Mean ", 
               switch(
@@ -824,8 +829,13 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
             )
           },
           {
-            unit <- ctsm_get_info("determinand", type.id, "unit", info$compartment)
-            paste(ctsm_get_info("determinand", type.id, "common.name"), " (", unit, ")", sep = "")
+            unit <- ctsm_get_info(
+              "determinand", type.id, "unit", info$compartment, sep = "_"
+            )
+            paste0(
+              ctsm_get_info("determinand", type.id, "common_name"), 
+              " (", unit, ")"
+            )
           }
         )
         grid.text(ylabel, 0, unit(1, "npc") + unit(1, "char"), just = c("left", "bottom"), 

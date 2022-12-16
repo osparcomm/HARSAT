@@ -85,7 +85,9 @@ ctsm_web_initialise <- function(
   
   assessmentObject$timeSeries <- within(
     assessmentObject$timeSeries, {
-      detGroup <- ctsm_get_info("determinand", determinand, "group", compartment)
+      detGroup <- ctsm_get_info(
+        "determinand", determinand, "group", compartment, sep = "_"
+      )
       if (!all(detGroup %in% determinandGroups$levels)) 
         stop('some determinand groups present in data, but not in groups argument')
       detGroup <- factor(
@@ -308,7 +310,7 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
     # when indicated by high concentrations, positive ACdiff is good
     # to make colour calculation 'simple' change sign on ACdiff when goodStatus == high
     
-    goodStatus <- ctsm_get_info("determinand", timeSeries$determinand, "good.status")
+    goodStatus <- ctsm_get_info("determinand", timeSeries$determinand, "good_status")
     
     wk <- out[ACdiff]
     wk[] <- lapply(wk, "*", ifelse(goodStatus == "low", 1, -1))
@@ -582,7 +584,9 @@ ctsm.summary.table <- function(
     
     wk <- setdiff(names(overview), station.var)
     wk.det <- sapply(strsplit(wk, " "), "[[", 1)
-    wk.group <- ctsm_get_info("determinand", wk.det, "group", assessment$info$compartment)
+    wk.group <- ctsm_get_info(
+      "determinand", wk.det, "group", assessment$info$compartment, sep = "_"
+    )
     wk.group <- factor(
       wk.group, 
       levels = c(
@@ -751,10 +755,12 @@ ctsm_OHAT_legends <- function(
     legends <- legends[determinands, , drop = FALSE]   
 
     compartment <- assessment$info$compartment
-    group <- ctsm_get_info("determinand", determinands, "group", compartment)
+    group <- ctsm_get_info(
+      "determinand", determinands, "group", compartment, sep = "_"
+    )
     web_group <- factor(group, levels = determinandGroups$levels, labels = determinandGroups$labels)[, drop = TRUE]
     
-    goodStatus <- ctsm_get_info("determinand", determinands, "good.status")
+    goodStatus <- ctsm_get_info("determinand", determinands, "good_status")
     goodStatus <- as.character(goodStatus)
 
     legendName <- apply(legends, 1, function(i) paste(colnames(legends)[i], collapse = " "))

@@ -115,7 +115,9 @@ ctsm.uncrt.workup <- function(clean_data) {
   # restrict to 'log-normally' distributed responses
   
   ok <- with(data, {
-    dist <- ctsm_get_info("determinand", determinand, "distribution", na_action = "output_ok") 
+    dist <- ctsm_get_info(
+      "determinand", determinand, "distribution", na_action = "output_ok"
+    ) 
     dist %in% "lognormal" | determinand %in% c("CORG", "LOIGN")
   })
   

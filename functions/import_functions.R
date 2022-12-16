@@ -538,7 +538,9 @@ ctsm_create_timeSeries <- function(
   # add variables that are going to be useful throughout
   # pargroup in ICES extraction, but can also be got from info.determinand
   
-  data$group <- ctsm_get_info("determinand", data$determinand, "group", info$compartment)
+  data$group <- ctsm_get_info(
+    "determinand", data$determinand, "group", info$compartment, sep = "_"
+  )
 
   if (info$compartment == "biota") {
     data$family <- ctsm_get_info("species", data$species, "family")
@@ -774,7 +776,9 @@ ctsm_create_timeSeries <- function(
   # determinand file in the information folder, required to get correct unit details
   
   data <- within(data, {
-    new.unit <- ctsm_get_info("determinand", determinand, "unit", info$compartment)
+    new.unit <- ctsm_get_info(
+      "determinand", determinand, "unit", info$compartment, sep = "_"
+    )
     concentration <- value
   })
   
@@ -1474,7 +1478,9 @@ ctsm_import_value <- function(data, station.dictionary, compartment, purpose, pr
       sex = factor(sex),
       
       metoa = as.character(metoa),
-      .group = ctsm_get_info("determinand", .data$determinand, "group", "biota"),
+      .group = ctsm_get_info(
+        "determinand", .data$determinand, "group", "biota", sep = "_"
+      ),
       metoa = if_else(.group %in% "Metabolites", .data$metoa, NA_character_),
       .group = NULL,
       metoa = factor(metoa)
@@ -1545,7 +1551,9 @@ changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
   }
   
   
-  group <- ctsm_get_info("determinand", timeSeries$determinand, "group", compartment)
+  group <- ctsm_get_info(
+    "determinand", timeSeries$determinand, "group", compartment, sep = "_"
+  )
   
   id <- timeSeries$determinand %in% "EROD"
   if (any(id))
@@ -2100,7 +2108,8 @@ ctsm.link.QA.digestion <- function(data, compartment) {
       na_action = "input_ok"
   )
   
-  data$group = ctsm_get_info("determinand", data$determinand, "group", compartment)
+  data$group = ctsm_get_info(
+    "determinand", data$determinand, "group", compartment, sep = "_")
 
   data$organic = !(data$group == "Metals" | data$determinand %in% c("AL", "LI"))
 
@@ -2800,7 +2809,9 @@ ctsm_normalise_sediment <- function(data, QA, station_dictionary, control) {
       switch(
         control$method,
         simple = {
-          unit <- ctsm_get_info("determinand", normaliser, "unit", "sediment")
+          unit <- ctsm_get_info(
+            "determinand", normaliser, "unit", "sediment", sep = "_"
+          )
           message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
         },
         pivot = message("   Normalising ", group, " to ", normaliser, " using pivot values")
@@ -3137,7 +3148,9 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
       switch(
         control$method,
         simple = {
-          unit <- ctsm_get_info("determinand", normaliser, "unit", "sediment")
+          unit <- ctsm_get_info(
+            "determinand", normaliser, "unit", "sediment", sep = "_"
+          )
           message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
         },
         pivot = message("   Normalising ", group, " to ", normaliser, " using pivot values"),

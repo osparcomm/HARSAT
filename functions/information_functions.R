@@ -24,7 +24,7 @@ ctsm_get_info <- function(
   # construct input variables and check that all input elements are recognised in 
   # information files
   
-  info_file <- get(paste("info", info_type, sep = sep))
+  info_file <- get(paste("info", info_type, sep = "."))
   input <- as.character(input)
   
   # check whether input is a combination of values - sometimes used when e.g. there are 
@@ -125,31 +125,31 @@ info.determinand <- read.csv(
   na.strings = "", 
   colClasses = c(
     determinand = "character",
-    common.name = "character",
+    common_name = "character",
     pargroup = "character", 
-    biota.group = "character",
-    sediment.group = "character",
-    water.group = "character",
+    biota_group = "character",
+    sediment_group = "character",
+    water_group = "character",
     biota_assess = "logical",
     sediment_assess = "logical",
     water_assess = "logical",
-    biota.unit = "character",
-    sediment.unit = "character", 
-    water.unit = "character",       
+    biota_unit = "character",
+    sediment_unit = "character", 
+    water_unit = "character",       
     biota_auxiliary = "character", 
     sediment_auxiliary = "character", 
     water_auxiliary = "character", 
     distribution = "character", 
-    good.status = "character"
+    good_status = "character"
   )
 )
 
 info.determinand <- dplyr::mutate(
   info.determinand, 
-  common.name = ifelse(
-    is.na(.data$common.name), 
+  common_name = ifelse(
+    is.na(.data$common_name), 
     .data$determinand, 
-    .data$common.name
+    .data$common_name
   )
 )
 
@@ -185,8 +185,18 @@ ctsm_get_auxiliary <- function(
   
   determinands <- unique(determinands)
   
-  auxiliary_id <- paste0(compartment , "_auxiliary")
-  auxiliary <- info.determinand[determinands, auxiliary_id]
+  # auxiliary_id <- paste0(compartment , "_auxiliary")
+  # auxiliary <- info.determinand[determinands, auxiliary_id]
+  
+  auxiliary <- ctsm_get_info(
+    "determinand", 
+    determinands, 
+    "auxiliary", 
+    compartment, 
+    na_action = "output_ok", 
+    sep = "_"
+  )
+  
   auxiliary <- strsplit(auxiliary, ", ")
   auxiliary <- unlist(auxiliary)
   
@@ -282,7 +292,9 @@ get.AC <- function(compartment, determinand, info, AC) {
                 
   # split by determinand groupings
   
-  group <- ctsm_get_info("determinand", data$determinand, "group", compartment)
+  group <- ctsm_get_info(
+    "determinand", data$determinand, "group", compartment, sep = "_"
+  )
   
   data <- split(data, group, drop = TRUE)
 
