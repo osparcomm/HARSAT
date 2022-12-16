@@ -805,7 +805,7 @@ sediment_data$QA %>%
   filter(
     data_type == "CS", 
     determinand %in% c(
-      unlist(determinands$Sediment), 
+      ctsm_get_determinands("sediment"), 
       "BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154", "HBCDA", "HBCDB", "HBCDG"
     ),
     grepl("~", metcx, fixed = TRUE) 

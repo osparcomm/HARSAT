@@ -7,7 +7,10 @@ library(tidyr)
 wk_timeSeries <- biota_timeSeries
 
 wk_data <- wk_timeSeries$data %>% 
-  filter(determinand %in% determinands$Biota$Imposex) %>% 
+  filter(
+    ctsm_get_info("determinand", determinand, "group", "biota", sep = "_") %in% 
+      "Imposex"
+  ) %>% 
   select(c("seriesID", "station", "year", "species", "determinand", "concentration", 
            "noinp", "%FEMALEPOP"))
 
