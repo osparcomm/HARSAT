@@ -1,0 +1,7 @@
+determinand,common_name,pargroup,biota_group,sediment_group,water_group,biota_assess,sediment_assess,water_assess,biota_unit,sediment_unit,water_unit,biota_auxiliary,sediment_auxiliary,water_auxiliary,distribution,good_status
+HG,Mercury,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,low
+LNMEA,mean length,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,
+DRYWT%,dry weight,B-BIO,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,%,%,,,,,,
+EXLIP%,extractable lipid,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,
+LIPIDWT%,lipid weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,
+FATWT%,fat weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,

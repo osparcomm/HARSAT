@@ -407,7 +407,7 @@ wk.cluster <- makeCluster(wk.cores - 1)
 
 clusterExport(
   wk.cluster, 
-  c("biota_assessment", "determinands", "negTwiceLogLik", "convert.basis", 
+  c("biota_assessment", "negTwiceLogLik", "convert.basis", 
     "assess_imposex", "imposex.assess.index", "imposex_class", "imposex.family", 
     "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", "imposex_assess_clm", 
     "imposex.clm.fit", "imposex.clm.X", "imposex.clm.loglik.calc", 
@@ -428,9 +428,12 @@ clusterEvalQ(wk.cluster, {
 })  
 
 
+wk_determinands <- ctsm_get_determinands("biota")
+wk_group <- info.determinand[wk_determinands, "biota_group"]
+
 biota_Metals <- ctsm.assessment(
   biota_assessment, 
-  determinandID = determinands$Biota$Metals, 
+  determinandID = wk_determinands[wk_group == "Metals"], 
   clusterID = wk.cluster
 )
 
@@ -442,29 +445,23 @@ wk_organics <- c(
 
 biota_Organics <- ctsm.assessment(
   biota_assessment, 
-  determinandID = unlist(determinands$Biota[wk_organics]), 
+  determinandID = wk_determinands[wk_group %in% wk_organics], 
   clusterID = wk.cluster
 )
 
 
 biota_Metabolites <- ctsm.assessment(
   biota_assessment, 
-  determinandID = determinands$Biota$Metabolites, 
+  determinandID = wk_determinands[wk_group %in% "Metabolites"], 
   clusterID = wk.cluster
 )
 
 
 biota_Imposex <- ctsm.assessment(
   biota_assessment, 
-  determinandID = determinands$Biota$Imposex,
+  determinandID = wk_determinands[wk_group %in% "Imposex"],
   clusterID = wk.cluster
 )
-
-biota_Imposex <- ctsm.assessment(
-  biota_assessment, 
-  determinandID = determinands$Biota$Imposex
-)
-
 
 stopCluster(wk.cluster)
 
@@ -528,7 +525,7 @@ biota_assessment$assessment <- local({
 biota_assessment$timeSeries <- biota_assessment$timeSeries %>% 
   rownames_to_column(".rownames") %>% 
   mutate(
-    .matrix = get.info("matrix", matrix, "name"), 
+    .matrix = ctsm_get_info("matrix", matrix, "name"), 
     .matrix = str_to_sentence(.matrix),
     level6name = case_when(
       level6element %in% "matrix" ~ .matrix,
@@ -656,9 +653,8 @@ webGroups = list(
 biota_web <- biota_assessment
 biota_web$info$AC <- c("BAC", "EAC", "EQS", "MPC")
 
-biota_web <- ctsm.web.initialise(
+biota_web <- ctsm_web_initialise(
   biota_web,
-  determinands = unlist(determinands$Biota), 
   classColour = list(
     below = c(
       "BAC" = "green", 
@@ -679,9 +675,8 @@ biota_web <- ctsm.web.initialise(
 # saveRDS(biota_web, file.path("RData", "biota web.rds"))
 
 
-sediment_web <- ctsm.web.initialise(
+sediment_web <- ctsm_web_initialise(
   sediment_assessment,
-  determinands = unlist(determinands$Sediment), 
   classColour = list(
     below = c("EQS" = "green"), 
     above = c("EQS" = "red"), 
@@ -693,9 +688,8 @@ sediment_web <- ctsm.web.initialise(
 # saveRDS(sediment_web, file.path("RData", "sediment web.rds"))
 
 
-water_web <- ctsm.web.initialise(
+water_web <- ctsm_web_initialise(
   water_assessment, 
-  determinands = unlist(determinands$Water), 
   classColour = list(
     below = c("EQS" = "green"), 
     above = c("EQS" = "red"), 
