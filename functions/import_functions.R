@@ -380,17 +380,28 @@ ctsm_read_QA <- function(QA, path, purpose) {
 
 
 ctsm_create_timeSeries <- function(
-  ctsm.obj, determinands, determinands.control = NULL, oddity.path = "oddities", 
-  return_early = FALSE, print_code_warnings = FALSE, 
+  ctsm.obj, 
+  determinands = ctsm_get_determinands(info.determinand, ctsm.obj$info$compartment), 
+  determinands.control = NULL, 
+  oddity.path = "oddities", 
+  return_early = FALSE, 
+  print_code_warnings = FALSE, 
   output = c("time_series", "uncertainties"), 
-  normalise = FALSE, normalise.control = list()) {
+  normalise = FALSE, 
+  normalise.control = list()) {
 
-  # load packages
+  # import_functions.R
+  # cleans data and turns into time series structures ready for assessment
   
   library(tidyverse)
 
   
-  # check arguments
+  # arguments
+  
+  # determinands: character string of determinands to be assessed; default is to 
+  #   take values from determinand reference table
+  
+  determinands <- force(determinands)
   
   # output: 
   # time_series is default

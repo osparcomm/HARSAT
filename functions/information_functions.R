@@ -1,4 +1,4 @@
-# Species and determinand information and uncertainty estimates ----
+# Species information ----
 
 info.path <- sub("functions", "information", function_path)
 info.file <- function(file.name) file.path(info.path, file.name)
@@ -11,6 +11,7 @@ info.species <- read.csv(
 )
 
 
+# Uncertainty estiamtes ----
 
 info.uncertainty <- read.csv(
   info.file(info_uncertainty_file_id), 
@@ -19,13 +20,12 @@ info.uncertainty <- read.csv(
 )
 
 
+# Determinand information and functions ----
+
 info.determinand <- read.csv(
-  info.file("determinand.csv"), 
-  row.names = "determinand", 
+  info.file(info_determinand_infile),
   na.strings = ""
 )
-
-info.determinand <- tibble::rownames_to_column(info.determinand, "determinand")
 
 info.determinand <- dplyr::mutate(
   info.determinand, 
@@ -57,6 +57,24 @@ lapply(c("biota", "sediment"), function(i) {
   }
 })
 
+
+# extractor function
+
+ctsm_get_determinands <- function(
+  info, 
+  compartment = c("biota", "sediment", "water")) {
+  
+  # information_functions.R
+  # gets determinands to be assessed from determinand reference table
+  
+  compartment <- match.arg(compartment)
+  assess_var <- paste0(compartment, "_assess")
+  ok <- info[[assess_var]]
+  row.names(info)[ok]
+}  
+
+
+# Toxic EQuivalents for WHO_DFP (health)
 
 info_TEQ <- c(
   "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, "CB126" = 0.1, 
