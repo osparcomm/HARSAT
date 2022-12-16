@@ -1,3 +1,101 @@
+# Information extractor function ----
+
+ctsm_get_info <- function(
+  info_type, 
+  input, 
+  output, 
+  compartment = NULL, 
+  na_action = c("fail", "input_ok", "output_ok", "ok"), 
+  sep = ".") {
+  
+  # information_functions.R
+  # gets data from standard reference tables 
+  
+  # na_action: 
+  #   fail doesn't allow any missing values
+  #   input.ok allows missing values in input, but all non-missing values must be 
+  #     recognised, and must have output
+  #   output.ok requires all input values to be present, but allows missing values in 
+  #     output (for e.g. dryweight by species)
+  #   ok allows missing values everywhere
+  
+  na_action <- match.arg(na_action)
+  
+  # construct input variables and check that all input elements are recognised in 
+  # information files
+  
+  info_file <- get(paste("info", info_type, sep = sep))
+  input <- as.character(input)
+  
+  # check whether input is a combination of values - sometimes used when e.g. there are 
+  # two methods used in the extraction of a chemical 
+  
+  split_input <- any(grepl("~", na.omit(input)))
+  if (split_input) {
+    input2 <- strsplit(input, "~", fixed = TRUE)
+  }
+  
+  
+  # check for failure due to missing values
+  
+  wk <- unique(if(split_input) unlist(input2) else input)
+  ok <- switch(
+    na_action, 
+    fail = wk %in% rownames(info_file),
+    input_ok = wk %in% c(rownames(info_file), NA),
+    output_ok = wk %in% rownames(info_file),
+    TRUE
+  )
+  
+  if (any(!ok)) {
+    stop('Not found in ', info_type, ' information file: ', 
+         paste(wk[!ok], collapse = ", "))
+  }
+  
+  
+  # construct output variables and check that all information is present 
+  
+  if (!is.null(compartment)) {
+    output <- paste(compartment, output, sep = sep)
+  }
+  
+  if (!(output %in% names(info_file))) { 
+    stop('Incorrect specification of output variable in function ctsm_get_info')
+  }
+  
+  
+  # check that if the input has multiple values (i.e. has had to be split) each element
+  # gives the same output - then simplify input to just one of the relevant values
+  
+  if (split_input) {
+    ok <- sapply(input2, function(i) length(unique(info_file[i, output])) == 1)
+    if (any(!ok)) {
+      stop('Incompatible data found in ', info_type, ' information file: ', 
+           paste(input[!ok], collapse = ", "))
+    }
+    input <- sapply(input2, "[", 1)
+  }
+  
+  out <- info_file[input, output]
+  
+  ok <- switch(
+    na_action,
+    fail = !is.na(out),
+    input_ok = is.na(input) | (!is.na(input) & !is.na(out)),
+    TRUE
+  )
+  
+  if (any(!ok)) { 
+    stop ('Missing values for following in ', info_type, ' information file: ', 
+          paste(unique(input[!ok]), collapse = ", "))
+  }
+
+  out
+}  
+
+
+
+
 # Species information ----
 
 info.path <- sub("functions", "information", function_path)
@@ -127,79 +225,6 @@ info_TEQ <- c(
 
 
 
-# Information extractor function ----
-
-get.info <- function(info.type, input, output, compartment, 
-                     na.action = c("fail", "input.ok", "output.ok", "ok")) {
-  # na.action: 
-  #   fail doesn't allow any missing values
-  #   input.ok allows missing values in input, but all non-missing values must be 
-  #     recognised, and must have output
-  #   output.ok requires all input values to be present, but allows missing values in 
-  #     output (for e.g. dryweight by species)
-  #   ok allows missing values everywhere
-
-  na.action <- match.arg(na.action)
-
-  # construct input variables and check that all input elements are recognised in 
-  # information files
-  
-  info.file <- get(paste("info", info.type, sep = "."))
-  input <- as.character(input)
-
-  # check whether input is a combination of values - sometimes used when e.g. there are 
-  # two methods used in the extraction of a chemical 
-  
-  splitInput <- any(grepl("~", na.omit(input)))
-  if (splitInput) input2 <- strsplit(input, "~", fixed = TRUE)
-
-  
-  # check for failure due to missing values
-  
-  wk <- unique(if(splitInput) unlist(input2) else input)
-  ok <- switch(na.action, 
-    fail = wk %in% rownames(info.file),
-    input.ok = wk %in% c(rownames(info.file), NA),
-    output.ok = wk %in% rownames(info.file),
-    TRUE
-  )
-  if (any(!ok)) 
-    stop('Not found in ', info.type, ' information file: ', 
-         paste(wk[!ok], collapse = ", "))
-
-
-  # construct output variables and check that all information is present 
-
-  if (!missing(compartment)) output <- paste(compartment, output, sep = ".")
-  if (!(output %in% names(info.file))) 
-    stop('Incorrect specification of output variable in function get.info')
-
-  
-  # check that if the input has multiple values (i.e. has had to be split) each element
-  # gives the same output - then simplify input to just one of the relevant values
-  
-  if (splitInput)
-  {
-    ok <- sapply(input2, function(i) length(unique(info.file[i, output])) == 1)
-    if (any(!ok)) 
-      stop('Incompatible data found in ', info.type, ' information file: ', 
-           paste(input[!ok], collapse = ", "))
-    input <- sapply(input2, "[", 1)
-  }
-
-  out <- info.file[input, output]
- 
-
-  ok <- switch(na.action,
-    fail = !is.na(out),
-    input.ok = is.na(input) | (!is.na(input) & !is.na(out)),
-    TRUE)
-  if (any(!ok)) { 
-    stop ('Missing values for following in ', info.type, ' information file: ', 
-          paste(unique(input[!ok]), collapse = ", "))}
-    
-  out
-}  
 
 
 # Assessment criteria ----
@@ -257,7 +282,7 @@ get.AC <- function(compartment, determinand, info, AC) {
                 
   # split by determinand groupings
   
-  group <- get.info("determinand", data$determinand, "group", compartment)
+  group <- ctsm_get_info("determinand", data$determinand, "group", compartment)
   
   data <- split(data, group, drop = TRUE)
 
@@ -283,8 +308,8 @@ get.AC.biota.contaminant <- function(data, AC, export_cf = FALSE) {
     rownames_to_column("rownames") %>% 
     mutate_if(is.factor, as.character) %>%
     mutate(
-      family = get.info("species", species, "family"),
-      sub.family = get.info("species", species, "sub.family")
+      family = ctsm_get_info("species", species, "family"),
+      sub.family = ctsm_get_info("species", species, "sub.family")
     ) %>% 
     mutate_at(c("family", "sub.family"), as.character)
   
@@ -345,8 +370,8 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        family = get.info("species", .data$species, "family"),
-        sub.family = get.info("species", .data$species, "sub.family")
+        family = ctsm_get_info("species", .data$species, "family"),
+        sub.family = ctsm_get_info("species", .data$species, "sub.family")
       )
     
     
@@ -455,8 +480,8 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        family = get.info("species", .data$species, "family"),
-        sub.family = get.info("species", .data$species, "sub.family")
+        family = ctsm_get_info("species", .data$species, "family"),
+        sub.family = ctsm_get_info("species", .data$species, "sub.family")
       )
     
     # BACs in fish only apply to high lipid tissue
@@ -508,7 +533,7 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        family = get.info("species", .data$species, "family"),
+        family = ctsm_get_info("species", .data$species, "family"),
         species = as.character(species)
       )
     
@@ -598,7 +623,7 @@ if (info_AC_type == "OSPAR") {
     
     out <- out %>%
       rownames_to_column() %>%
-      mutate(family = get.info("species", .data$species, "family"))
+      mutate(family = ctsm_get_info("species", .data$species, "family"))
     
     
     # fish liver - multiply by 5
@@ -634,7 +659,7 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        family = get.info("species", .data$species, "family"),
+        family = ctsm_get_info("species", .data$species, "family"),
         species = as.character(species)
       )
     
@@ -678,7 +703,7 @@ if (info_AC_type == "OSPAR") {
     
     out <- out %>%
       rownames_to_column() %>%
-      mutate(family = get.info("species", .data$species, "family"))
+      mutate(family = ctsm_get_info("species", .data$species, "family"))
     
     
     # add in HQS of 0.02 ww for fish liver
@@ -736,14 +761,14 @@ if (info_AC_type == "OSPAR") {
       }
       
       if ("SFG" %in% data$determinand) {
-        id <- get.info("species", species, "sub.family") %in% "Mussel" &
+        id <- ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
           determinand %in% "SFG"
         if ("BAC" %in% AC) out$BAC[id] <- 25
         if ("EAC" %in% AC) out$EAC[id] <- 15
       }
       
       if ("SURVT" %in% data$determinand) {
-        id <- get.info("species", species, "sub.family") %in% "Mussel" &
+        id <- ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
           determinand %in% "SURVT"
         if ("BAC" %in% AC) out$BAC[id] <- 10
         if ("EAC" %in% AC) out$EAC[id] <- 5
@@ -763,7 +788,7 @@ if (info_AC_type == "OSPAR") {
       
       if ("MNC" %in% data$determinand) {
         
-        if (any(get.info("species", species, "sub.family") %in% "Mussel" &
+        if (any(ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
                 determinand %in% "MNC"))
           stop("AC not coded for MNC in mussels")
         
@@ -1381,7 +1406,7 @@ get_basis_OSPAR <- function(compartment, group, matrix, determinand, species, li
       out <- mutate(
         out,
         across(everything(), as.character),
-        family = get.info("species", .data$species, "family")
+        family = ctsm_get_info("species", .data$species, "family")
       )
            
       # get typical lipid content by species and matrix 
@@ -1473,7 +1498,7 @@ get_basis_HELCOM <- function(compartment, group, matrix, determinand, species) {
       out <- mutate(
         out,
         across(everything(), as.character),
-        family = get.info("species", .data$species, "family")
+        family = ctsm_get_info("species", .data$species, "family")
       )
  
       # define new basis

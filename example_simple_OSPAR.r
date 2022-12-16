@@ -124,7 +124,7 @@ ctsm_check_convergence(biota_assessment$assessment)
 biota_assessment$timeSeries <- biota_assessment$timeSeries %>% 
   rownames_to_column(".rownames") %>% 
   mutate(
-    .matrix = get.info("matrix", matrix, "name") %>% 
+    .matrix = ctsm_get_info("matrix", matrix, "name") %>% 
       str_to_sentence() %>% 
       recode(
         "Erythrocytes (red blood cells in vertebrates)" = "Red blood cells",

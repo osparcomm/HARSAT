@@ -538,14 +538,14 @@ ctsm_create_timeSeries <- function(
   # add variables that are going to be useful throughout
   # pargroup in ICES extraction, but can also be got from info.determinand
   
-  data$group <- get.info("determinand", data$determinand, "group", info$compartment)
+  data$group <- ctsm_get_info("determinand", data$determinand, "group", info$compartment)
 
   if (info$compartment == "biota") {
-    data$family <- get.info("species", data$species, "family")
+    data$family <- ctsm_get_info("species", data$species, "family")
   }
   
   if (!"pargroup" %in% names(data)) {
-    data$pargroup <- get.info("determinand", data$determinand, "pargroup")
+    data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
   }
   
 
@@ -774,7 +774,7 @@ ctsm_create_timeSeries <- function(
   # determinand file in the information folder, required to get correct unit details
   
   data <- within(data, {
-    new.unit <- get.info("determinand", determinand, "unit", info$compartment)
+    new.unit <- ctsm_get_info("determinand", determinand, "unit", info$compartment)
     concentration <- value
   })
   
@@ -1474,7 +1474,7 @@ ctsm_import_value <- function(data, station.dictionary, compartment, purpose, pr
       sex = factor(sex),
       
       metoa = as.character(metoa),
-      .group = get.info("determinand", .data$determinand, "group", "biota"),
+      .group = ctsm_get_info("determinand", .data$determinand, "group", "biota"),
       metoa = if_else(.group %in% "Metabolites", .data$metoa, NA_character_),
       .group = NULL,
       metoa = factor(metoa)
@@ -1545,7 +1545,7 @@ changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
   }
   
   
-  group <- get.info("determinand", timeSeries$determinand, "group", compartment)
+  group <- ctsm_get_info("determinand", timeSeries$determinand, "group", compartment)
   
   id <- timeSeries$determinand %in% "EROD"
   if (any(id))
@@ -2093,14 +2093,14 @@ ctsm.link.QA.digestion <- function(data, compartment) {
 
   # get digestion method based on metcx
 
-  data$digestion <- get.info(
+  data$digestion <- ctsm_get_info(
       "methodExtraction",
       data$metcx, 
       "digestion", 
-      na.action = "input.ok"
+      na_action = "input_ok"
   )
   
-  data$group = get.info("determinand", data$determinand, "group", compartment)
+  data$group = ctsm_get_info("determinand", data$determinand, "group", compartment)
 
   data$organic = !(data$group == "Metals" | data$determinand %in% c("AL", "LI"))
 
@@ -2800,7 +2800,7 @@ ctsm_normalise_sediment <- function(data, QA, station_dictionary, control) {
       switch(
         control$method,
         simple = {
-          unit <- get.info("determinand", normaliser, "unit", "sediment")
+          unit <- ctsm_get_info("determinand", normaliser, "unit", "sediment")
           message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
         },
         pivot = message("   Normalising ", group, " to ", normaliser, " using pivot values")
@@ -3137,7 +3137,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
       switch(
         control$method,
         simple = {
-          unit <- get.info("determinand", normaliser, "unit", "sediment")
+          unit <- ctsm_get_info("determinand", normaliser, "unit", "sediment")
           message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
         },
         pivot = message("   Normalising ", group, " to ", normaliser, " using pivot values"),
@@ -3510,11 +3510,11 @@ ctsm.estimate.uncertainty <- function(data, response_id, compartment, QA) {
   
   # get two components of variance
   
-  data$sd_constant <- get.info(
-    "uncertainty", data$determinand, "sd_constant", compartment, na.action = "output.ok")
+  data$sd_constant <- ctsm_get_info(
+    "uncertainty", data$determinand, "sd_constant", compartment, na_action = "output_ok")
   
-  data$sd_variable = get.info(
-    "uncertainty", data$determinand, "sd_variable", compartment, na.action = "output.ok")
+  data$sd_variable = ctsm_get_info(
+    "uncertainty", data$determinand, "sd_variable", compartment, na_action = "output_ok")
   
   
   # adjust sd_constant to correct basis (
