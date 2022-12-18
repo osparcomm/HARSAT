@@ -497,12 +497,14 @@ ctsm_create_timeSeries <- function(
     max(info$recent_years), "\n"
   )
 
+  # recognised_species was replaced by species in line 507 -> species reference table
+  
   if ("species" %in% names(data)) {
     data <- within(data, {
       species <- as.character(species)
       species <- ifelse(
         species %in% row.names(info.species), 
-        as.character(info.species[species, "recognised.species"]), 
+        as.character(info.species[species, "reference_species"]), 
         species
       )
       species <- factor(species)
