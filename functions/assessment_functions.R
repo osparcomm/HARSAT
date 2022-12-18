@@ -173,7 +173,7 @@ ctsm.assessment <- function(
       # trap for any lognormal or normal distributed data that have missing 
       #   uncertainties
 
-      distribution <- get.info("determinand", determinand, "distribution")
+      distribution <- ctsm_get_info("determinand", determinand, "distribution")
 
       if (determinand %in% "SFG" && any(is.na(x$uncertainty))) {      
         cat("  warning: ad-hoc fix to estimate missing uncertainties\n")
@@ -213,7 +213,7 @@ ctsm.assessment <- function(
 # Annual indices ----
 
 get.index <- function(compartment, determinand, data) {
-  group <- get.info("determinand", determinand, "group", compartment)
+  group <- ctsm_get_info("determinand", determinand, "group", compartment, sep = "_")
   function_id <- paste("get.index", compartment, group, sep = ".")
   do.call(function_id, list(data = data, determinand = determinand)) 
 }
@@ -226,7 +226,7 @@ get.index.default <- function(data, determinand) {
   # median (log) concentrations with flag to denote if less thans used in their 
   # construction
   
-  distribution <- get.info("determinand", determinand, "distribution")
+  distribution <- ctsm_get_info("determinand", determinand, "distribution")
   
   data$response <- switch(
     distribution, 
@@ -282,9 +282,9 @@ get.index.biota.Effects <- function(data, determinand) {
   # have put in a trap for qflags for anything that is not lognormally distributed
   # or that has good.status = high
   
-  distribution <- get.info("determinand", determinand, "distribution")
+  distribution <- ctsm_get_info("determinand", determinand, "distribution")
   
-  good_status <- get.info("determinand", determinand, "good.status")
+  good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
   
   qflag_trap <- FALSE
@@ -383,8 +383,8 @@ ctsm.anyyear.lmm <- function(data, annualIndex, AC, recent.years, determinand, m
   
   # sort out assumed distribution (lognormal or normal) and whether high or low indicates good status
   
-  distribution <- get.info("determinand", determinand, "distribution")
-  good.status <- get.info("determinand", determinand, "good.status")
+  distribution <- ctsm_get_info("determinand", determinand, "distribution")
+  good.status <- ctsm_get_info("determinand", determinand, "good_status")
   
 
   data$response <- switch( 
@@ -1147,7 +1147,7 @@ ctsm_assess_survival <- function(
   
   # establish other info
   
-  good_status <- get.info("determinand", determinand, "good.status")
+  good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
 
   # type of fit depends on number of years:
@@ -1660,7 +1660,7 @@ ctsm_assess_beta <- function(
   
   # establish other info
   
-  good_status <- get.info("determinand", determinand, "good.status")
+  good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
   
   # type of fit depends on number of years:
@@ -2049,7 +2049,7 @@ ctsm_assess_negativebinomial <- function(
   
   # establish other info
   
-  good_status <- get.info("determinand", determinand, "good.status")
+  good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
   
   # type of fit depends on number of years:

@@ -1,23 +1,3 @@
-# functions for estimating uncertainties - edit history ----
-
-# 2019-02-25  initial document
-# 2019-11-05  update to include qflag = D and Q
-
-# 2_61
-# ctsm.unct.estimate - radical rewrite - simplify estimation in terms of 
-#   median relative_u / 100 and limit_detection / 3
-
-# 2_62
-# ctsm.uncrt.plot.estimates - update column names in 'old' uncertainty object
-
-# 2_64
-# ctsm.uncrt.estimate - change options to remove summarise information
-
-# 2_68 (HELCOM 2022)
-# ctsm.uncrt.workup - add in LOIGN; further streamlining encouraged!
-
-# functions ----
-
 ctsm.uncrt.workup <- function(clean_data) {
 
   library(dplyr)
@@ -135,7 +115,9 @@ ctsm.uncrt.workup <- function(clean_data) {
   # restrict to 'log-normally' distributed responses
   
   ok <- with(data, {
-    dist <- get.info("determinand", determinand, "distribution", na.action = "output.ok") 
+    dist <- ctsm_get_info(
+      "determinand", determinand, "distribution", na_action = "output_ok"
+    ) 
     dist %in% "lognormal" | determinand %in% c("CORG", "LOIGN")
   })
   

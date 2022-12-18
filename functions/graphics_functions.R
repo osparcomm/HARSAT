@@ -21,7 +21,7 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
   
   if (length(matrixID) == 0) stop('no valid matrix information')
   
-  matrixNames <- get.info("matrix", matrixID, "name")
+  matrixNames <- ctsm_get_info("matrix", matrixID, "name")
   
   # ad-hoc fix to make names consistent with markdown
   
@@ -32,7 +32,7 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
 
   txt <- switch(compartment,
     Biota = {
-      txt <- paste0(txt, " (", get.info("species", info$species, "common.name"), " ")
+      txt <- paste0(txt, " (", ctsm_get_info("species", info$species, "common.name"), " ")
       if (length(matrixID) == 1) 
         paste0(txt, matrixNames, ")") 
       else {
@@ -65,10 +65,13 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
   #out$station <- if (html) convert.html.characters(txt) else txt
   out$station <- txt
   
-  out$determinand <- paste("Determinand:", get.info("determinand", info$determinand, "common.name"))
+  out$determinand <- paste(
+    "Determinand:", 
+    ctsm_get_info("determinand", info$determinand, "common_name")
+  )
 
 
-  unitID <- as.character(get.info("determinand", info$determinand, "unit", info$compartment))
+  unitID <- ctsm_get_info("determinand", info$determinand, "unit", info$compartment, sep = "_")
 
   groupID = unique(info$group)
   if (length(groupID) > 1)
@@ -243,7 +246,7 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
 
   # make data types compatible - i.e. raw data or assessment indices
  
-  distribution <- get.info("determinand", info$determinand, "distribution")
+  distribution <- ctsm_get_info("determinand", info$determinand, "distribution")
   
   if (info$determinand %in% c("MNC")) {
     warning("remember to fix distribution changes")
@@ -444,7 +447,7 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
         TRUE                                    ~ "concentration"
       )
       ylabel <- paste(
-        get.info("determinand", info$determinand, "common.name"), 
+        ctsm_get_info("determinand", info$determinand, "common_name"), 
         extra
       )
       grid.text(
@@ -637,7 +640,7 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
   #   water = not specified yet
   # otherwise must contain four relevant variables
   
-  distribution <- get.info("determinand", info$determinand, "distribution")
+  distribution <- ctsm_get_info("determinand", info$determinand, "distribution")
   
   if (info$determinand %in% "MNC") {
     warning("remember to fix distribution changes")
@@ -808,8 +811,10 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
           ),
           value = paste(info$determinand, "non-normalised"),
           LNMEA = {
-            family <- as.character(get.info("species", info$species, "family"))
-            unit <- get.info("determinand", type.id, "unit", info$compartment)
+            family <- as.character(ctsm_get_info("species", info$species, "family"))
+            unit <- ctsm_get_info(
+              "determinand", type.id, "unit", info$compartment, sep = "_"
+            )
             paste(
               "Mean ", 
               switch(
@@ -824,8 +829,13 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
             )
           },
           {
-            unit <- get.info("determinand", type.id, "unit", info$compartment)
-            paste(get.info("determinand", type.id, "common.name"), " (", unit, ")", sep = "")
+            unit <- ctsm_get_info(
+              "determinand", type.id, "unit", info$compartment, sep = "_"
+            )
+            paste0(
+              ctsm_get_info("determinand", type.id, "common_name"), 
+              " (", unit, ")"
+            )
           }
         )
         grid.text(ylabel, 0, unit(1, "npc") + unit(1, "char"), just = c("left", "bottom"), 
@@ -909,7 +919,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   is.pred <- sapply(assessment, function(i) !is.null(i) && !is.null(i$pred))
   is.AC <- sapply(assessment, function(i) !is.null(i) && !all(is.na(i$AC)))
   
-  series_distribution <- get.info("determinand", info$determinand, "distribution")
+  series_distribution <- ctsm_get_info("determinand", info$determinand, "distribution")
   
   if (any(info$determinand %in% "MNC")) {
     warning("remember to fix distribution changes")
@@ -1141,7 +1151,7 @@ plot.multidata <- function(data, info,  ...) {
 
   data <- subset(data, !is.na(concentration))
 
-  series_distribution <- get.info("determinand", data$determinand, "distribution")
+  series_distribution <- ctsm_get_info("determinand", data$determinand, "distribution")
   
   if (any(data$determinand %in% "MNC")) {
     warning("remember to fix distribution changes")

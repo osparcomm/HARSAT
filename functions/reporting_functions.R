@@ -1,9 +1,17 @@
 # web construction ----
 
-ctsm.web.initialise <- function(
-  assessmentObject, determinands, classColour = NULL, determinandGroups
-) {
+ctsm_web_initialise <- function(
+  assessmentObject, 
+  determinands = ctsm_get_determinands(assessmentObject$info$compartment), 
+  classColour = NULL, 
+  determinandGroups) {
+
+  # reporting_functions.R
+
   
+  determinands <- force(determinands)
+  
+    
   # check assessment criteria have an appropriate class colour
   
   AC <- assessmentObject$info$AC
@@ -26,7 +34,7 @@ ctsm.web.initialise <- function(
     switch(
       compartment, 
       biota = {
-        level2name <- get.info("species", species, "family")[drop = TRUE]
+        level2name <- ctsm_get_info("species", species, "family")[drop = TRUE]
         levels(level2name) <- list(
           "Fish" = "Fish", 
           "Shellfish" = c("Bivalvia", "Gastropoda"), 
@@ -34,7 +42,7 @@ ctsm.web.initialise <- function(
           "Bird" = "Bird",
           "Mammal" = "Mammal")
         level2element <- "Family"
-        level3name <- get.info("species", species, "common.name")
+        level3name <- ctsm_get_info("species", species, "common.name")
         level3element <- "Species"
       }, 
       sediment = {                                                       
@@ -77,7 +85,9 @@ ctsm.web.initialise <- function(
   
   assessmentObject$timeSeries <- within(
     assessmentObject$timeSeries, {
-      detGroup <- get.info("determinand", determinand, "group", compartment)
+      detGroup <- ctsm_get_info(
+        "determinand", determinand, "group", compartment, sep = "_"
+      )
       if (!all(detGroup %in% determinandGroups$levels)) 
         stop('some determinand groups present in data, but not in groups argument')
       detGroup <- factor(
@@ -87,7 +97,7 @@ ctsm.web.initialise <- function(
       detGroup <- detGroup[, drop = TRUE]
   })
   
-  assessmentObject <- ctsm.web.setup(assessmentObject)
+  assessmentObject <- ctsm_web_setup(assessmentObject)
   
   list(
     assessment = assessmentObject, 
@@ -97,7 +107,7 @@ ctsm.web.initialise <- function(
 }
 
 
-ctsm.web.setup <- function(assessmentObject) {
+ctsm_web_setup <- function(assessmentObject) {
   
   # extract timeSeries and stations and get more useful names
   
@@ -300,7 +310,7 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
     # when indicated by high concentrations, positive ACdiff is good
     # to make colour calculation 'simple' change sign on ACdiff when goodStatus == high
     
-    goodStatus <- get.info("determinand", timeSeries$determinand, "good.status")
+    goodStatus <- ctsm_get_info("determinand", timeSeries$determinand, "good_status")
     
     wk <- out[ACdiff]
     wk[] <- lapply(wk, "*", ifelse(goodStatus == "low", 1, -1))
@@ -574,7 +584,9 @@ ctsm.summary.table <- function(
     
     wk <- setdiff(names(overview), station.var)
     wk.det <- sapply(strsplit(wk, " "), "[[", 1)
-    wk.group <- get.info("determinand", wk.det, "group", assessment$info$compartment)
+    wk.group <- ctsm_get_info(
+      "determinand", wk.det, "group", assessment$info$compartment, sep = "_"
+    )
     wk.group <- factor(
       wk.group, 
       levels = c(
@@ -743,10 +755,12 @@ ctsm_OHAT_legends <- function(
     legends <- legends[determinands, , drop = FALSE]   
 
     compartment <- assessment$info$compartment
-    group <- get.info("determinand", determinands, "group", compartment)
+    group <- ctsm_get_info(
+      "determinand", determinands, "group", compartment, sep = "_"
+    )
     web_group <- factor(group, levels = determinandGroups$levels, labels = determinandGroups$labels)[, drop = TRUE]
     
-    goodStatus <- get.info("determinand", determinands, "good.status")
+    goodStatus <- ctsm_get_info("determinand", determinands, "good_status")
     goodStatus <- as.character(goodStatus)
 
     legendName <- apply(legends, 1, function(i) paste(colnames(legends)[i], collapse = " "))

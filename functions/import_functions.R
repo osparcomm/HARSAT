@@ -380,17 +380,28 @@ ctsm_read_QA <- function(QA, path, purpose) {
 
 
 ctsm_create_timeSeries <- function(
-  ctsm.obj, determinands, determinands.control = NULL, oddity.path = "oddities", 
-  return_early = FALSE, print_code_warnings = FALSE, 
+  ctsm.obj, 
+  determinands = ctsm_get_determinands(ctsm.obj$info$compartment), 
+  determinands.control = NULL, 
+  oddity.path = "oddities", 
+  return_early = FALSE, 
+  print_code_warnings = FALSE, 
   output = c("time_series", "uncertainties"), 
-  normalise = FALSE, normalise.control = list()) {
+  normalise = FALSE, 
+  normalise.control = list()) {
 
-  # load packages
+  # import_functions.R
+  # cleans data and turns into time series structures ready for assessment
   
   library(tidyverse)
 
   
-  # check arguments
+  # arguments
+  
+  # determinands: character string of determinands to be assessed; default is to 
+  #   take values from determinand reference table
+  
+  determinands <- force(determinands)
   
   # output: 
   # time_series is default
@@ -527,14 +538,16 @@ ctsm_create_timeSeries <- function(
   # add variables that are going to be useful throughout
   # pargroup in ICES extraction, but can also be got from info.determinand
   
-  data$group <- get.info("determinand", data$determinand, "group", info$compartment)
+  data$group <- ctsm_get_info(
+    "determinand", data$determinand, "group", info$compartment, sep = "_"
+  )
 
   if (info$compartment == "biota") {
-    data$family <- get.info("species", data$species, "family")
+    data$family <- ctsm_get_info("species", data$species, "family")
   }
   
   if (!"pargroup" %in% names(data)) {
-    data$pargroup <- get.info("determinand", data$determinand, "pargroup")
+    data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
   }
   
 
@@ -746,7 +759,7 @@ ctsm_create_timeSeries <- function(
   # drop any remaining unwanted determinands (from sum and perhaps bespoke functions);
   # could make this more elegant!
   
-  id <- c(determinands, ctsm.get.auxiliary(determinands, info$compartment))
+  id <- c(determinands, ctsm_get_auxiliary(determinands, info$compartment))
   
   data <- filter(data, determinand %in% id)
 
@@ -763,7 +776,9 @@ ctsm_create_timeSeries <- function(
   # determinand file in the information folder, required to get correct unit details
   
   data <- within(data, {
-    new.unit <- get.info("determinand", determinand, "unit", info$compartment)
+    new.unit <- ctsm_get_info(
+      "determinand", determinand, "unit", info$compartment, sep = "_"
+    )
     concentration <- value
   })
   
@@ -1463,7 +1478,9 @@ ctsm_import_value <- function(data, station.dictionary, compartment, purpose, pr
       sex = factor(sex),
       
       metoa = as.character(metoa),
-      .group = get.info("determinand", .data$determinand, "group", "biota"),
+      .group = ctsm_get_info(
+        "determinand", .data$determinand, "group", "biota", sep = "_"
+      ),
       metoa = if_else(.group %in% "Metabolites", .data$metoa, NA_character_),
       .group = NULL,
       metoa = factor(metoa)
@@ -1534,7 +1551,9 @@ changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
   }
   
   
-  group <- get.info("determinand", timeSeries$determinand, "group", compartment)
+  group <- ctsm_get_info(
+    "determinand", timeSeries$determinand, "group", compartment, sep = "_"
+  )
   
   id <- timeSeries$determinand %in% "EROD"
   if (any(id))
@@ -2082,14 +2101,15 @@ ctsm.link.QA.digestion <- function(data, compartment) {
 
   # get digestion method based on metcx
 
-  data$digestion <- get.info(
+  data$digestion <- ctsm_get_info(
       "methodExtraction",
       data$metcx, 
       "digestion", 
-      na.action = "input.ok"
+      na_action = "input_ok"
   )
   
-  data$group = get.info("determinand", data$determinand, "group", compartment)
+  data$group = ctsm_get_info(
+    "determinand", data$determinand, "group", compartment, sep = "_")
 
   data$organic = !(data$group == "Metals" | data$determinand %in% c("AL", "LI"))
 
@@ -2197,18 +2217,6 @@ ctsm.imposex.check.femalepop <- function(data) {
 }
 
 
-ctsm.get.auxiliary <- function(determinands, compartment) {
-
-  # gets all the required auxiliary variables for determinands
-    
-  determinands <- as.character(unique(determinands))
-  auxiliary <- 
-    info.determinand[determinands, paste(compartment , "auxiliary", sep = ".")]
-  auxiliary <- strsplit(as.character(auxiliary), ", ")
-  unique(c(na.omit(unlist(auxiliary))))
-}
-
-
 ctsm_check_determinands <- function(compartment, data, determinands, control = NULL) {
 
   # checks all determinands are recognised in info files
@@ -2270,7 +2278,7 @@ ctsm_check_determinands <- function(compartment, data, determinands, control = N
   determinands <- intersect(determinands, id)
 
   
-  auxiliary <- ctsm.get.auxiliary(determinands, compartment)
+  auxiliary <- ctsm_get_auxiliary(determinands, compartment)
   
   if (!is.null(control)) {
     ok <- names(control) %in% c(determinands, auxiliary, get_control_dets(control, .names = FALSE))
@@ -2801,7 +2809,9 @@ ctsm_normalise_sediment <- function(data, QA, station_dictionary, control) {
       switch(
         control$method,
         simple = {
-          unit <- get.info("determinand", normaliser, "unit", "sediment")
+          unit <- ctsm_get_info(
+            "determinand", normaliser, "unit", "sediment", sep = "_"
+          )
           message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
         },
         pivot = message("   Normalising ", group, " to ", normaliser, " using pivot values")
@@ -3138,7 +3148,9 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
       switch(
         control$method,
         simple = {
-          unit <- get.info("determinand", normaliser, "unit", "sediment")
+          unit <- ctsm_get_info(
+            "determinand", normaliser, "unit", "sediment", sep = "_"
+          )
           message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
         },
         pivot = message("   Normalising ", group, " to ", normaliser, " using pivot values"),
@@ -3511,11 +3523,11 @@ ctsm.estimate.uncertainty <- function(data, response_id, compartment, QA) {
   
   # get two components of variance
   
-  data$sd_constant <- get.info(
-    "uncertainty", data$determinand, "sd_constant", compartment, na.action = "output.ok")
+  data$sd_constant <- ctsm_get_info(
+    "uncertainty", data$determinand, "sd_constant", compartment, na_action = "output_ok")
   
-  data$sd_variable = get.info(
-    "uncertainty", data$determinand, "sd_variable", compartment, na.action = "output.ok")
+  data$sd_variable = ctsm_get_info(
+    "uncertainty", data$determinand, "sd_variable", compartment, na_action = "output_ok")
   
   
   # adjust sd_constant to correct basis (

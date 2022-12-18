@@ -36,43 +36,48 @@ source(file.path(function_path, "support_functions.R"))
 info_species_file_id <- "species_2020.csv"
 info_uncertainty_file_id <- "uncertainty_2020.csv"
 
+info_AC_type <- "HELCOM"
+
 info_AC_infile <- list(
   biota = "assessment criteria biota HELCOM.csv",
   sediment = "assessment criteria sediment HELCOM.csv",
   water = "assessment criteria water.csv"
 )
-info_AC_type <- "HELCOM"
+
+info_determinand_infile <- "determinand_HELCOM.csv"
 
 source(file.path(function_path, "information_functions.R"))
 
 
 ## determinands ----
 
-determinands <- list(
-  Biota = list(
-    Metals = c("CD", "PB", "HG"),
-    PAH_parent = c("FLU", "BAP"), 
-    Metabolites = "PYR1OH",
-    PBDEs = "SBDE6",
-    Organobromines = "HBCD", 
-    Organofluorines = "PFOS",
-    Chlorobiphenyls = "SCB6",
-    Dioxins = "TEQDFP",
-    Imposex = c("IMPS", "INTS", "VDS")
-  ),  
-  Sediment = list(
-    Metals = c("CD", "CU", "PB"),
-    Organotins = "TBSN+",
-    PAH_parent = c("ANT", "FLU"),
-    PBDEs = "SBDE6",
-    Organobromines = "HBCD" 
-  ),
-  Water = list(
-    Metals = c("CD", "PB"), 
-    Organotins = "TBSN+",
-    Organofluorines = "PFOS"
-  )
-)
+# determinands <- list(
+#   Biota = list(
+#     Metals = c("CD", "PB", "HG"),
+#     PAH_parent = c("FLU", "BAP"), 
+#     Metabolites = "PYR1OH",
+#     PBDEs = "SBDE6",
+#     Organobromines = "HBCD", 
+#     Organofluorines = "PFOS",
+#     Chlorobiphenyls = "SCB6",
+#     Dioxins = "TEQDFP",
+#     Imposex = c("IMPS", "INTS", "VDS")
+#   ),  
+#   Sediment = list(
+#     Metals = c("CD", "CU", "PB"),
+#     Organotins = "TBSN+",
+#     PAH_parent = c("ANT", "FLU"),
+#     PBDEs = "SBDE6",
+#     Organobromines = "HBCD" 
+#   ),
+#   Water = list(
+#     Metals = c("CD", "PB"), 
+#     Organotins = "TBSN+",
+#     Organofluorines = "PFOS"
+#   )
+# )
+
+
 
 
 # Read data and make adjustments ----
@@ -194,7 +199,6 @@ info_TEQ["CDFO"] <- 0.0003
 
 biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
-  determinands = unlist(determinands$Biota),
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
     SBDE6 = list(
@@ -259,7 +263,7 @@ biota_timeSeries$data <- mutate(
 # ad-hoc change to bring in LOIGN
 
 wk_id <- c(
-  unlist(determinands$Sediment), 
+  ctsm_get_determinands("sediment"), 
   "BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154", 
   "HBCDA", "HBCDB", "HBCDG"
 )
@@ -267,8 +271,8 @@ names(wk_id) <- NULL
 
 wk_id <- setdiff(wk_id, c("CD", "PB"))
 
-info.determinand[wk_id, "sediment.auxiliary"] <- 
-  paste0(info.determinand[wk_id, "sediment.auxiliary"], ", LOIGN") 
+info.determinand[wk_id, "sediment_auxiliary"] <- 
+  paste0(info.determinand[wk_id, "sediment_auxiliary"], ", LOIGN") 
 
 info.uncertainty["LOIGN", c("sediment.sd_constant", "sediment.sd_variable")] <-
   c(0, 0.1)
@@ -282,7 +286,6 @@ info.uncertainty["SBDE6", c("sediment.sd_constant", "sediment.sd_variable")] <-
 
 sediment_timeSeries <- ctsm_create_timeSeries(
   sediment_data,
-  determinands = unlist(determinands$Sediment),
   determinands.control = list(
     SBDE6 = list(
       det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
@@ -305,7 +308,6 @@ sediment_timeSeries <- ctsm_create_timeSeries(
 
 water_timeSeries <- ctsm_create_timeSeries(
   water_data,
-  determinands = unlist(determinands$Water), 
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
   )
@@ -335,7 +337,7 @@ wk.cluster <- makeCluster(wk.cores - 1)
 
 clusterExport(
   wk.cluster, 
-  c("sediment_assessment", "determinands", "negTwiceLogLik",
+  c("sediment_assessment", "negTwiceLogLik",
     unique(c(
       objects(pattern = "ctsm*"), 
       objects(pattern = "get*"), 
@@ -352,7 +354,6 @@ clusterEvalQ(wk.cluster, {
 
 sediment_assessment$assessment <- ctsm.assessment(
   sediment_assessment, 
-  determinandID = unlist(determinands$Sediment), 
   clusterID = wk.cluster
 )
 
@@ -406,7 +407,7 @@ wk.cluster <- makeCluster(wk.cores - 1)
 
 clusterExport(
   wk.cluster, 
-  c("biota_assessment", "determinands", "negTwiceLogLik", "convert.basis", 
+  c("biota_assessment", "negTwiceLogLik", "convert.basis", 
     "assess_imposex", "imposex.assess.index", "imposex_class", "imposex.family", 
     "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", "imposex_assess_clm", 
     "imposex.clm.fit", "imposex.clm.X", "imposex.clm.loglik.calc", 
@@ -427,9 +428,12 @@ clusterEvalQ(wk.cluster, {
 })  
 
 
+wk_determinands <- ctsm_get_determinands("biota")
+wk_group <- info.determinand[wk_determinands, "biota_group"]
+
 biota_Metals <- ctsm.assessment(
   biota_assessment, 
-  determinandID = determinands$Biota$Metals, 
+  determinandID = wk_determinands[wk_group == "Metals"], 
   clusterID = wk.cluster
 )
 
@@ -441,29 +445,23 @@ wk_organics <- c(
 
 biota_Organics <- ctsm.assessment(
   biota_assessment, 
-  determinandID = unlist(determinands$Biota[wk_organics]), 
+  determinandID = wk_determinands[wk_group %in% wk_organics], 
   clusterID = wk.cluster
 )
 
 
 biota_Metabolites <- ctsm.assessment(
   biota_assessment, 
-  determinandID = determinands$Biota$Metabolites, 
+  determinandID = wk_determinands[wk_group %in% "Metabolites"], 
   clusterID = wk.cluster
 )
 
 
 biota_Imposex <- ctsm.assessment(
   biota_assessment, 
-  determinandID = determinands$Biota$Imposex,
+  determinandID = wk_determinands[wk_group %in% "Imposex"],
   clusterID = wk.cluster
 )
-
-biota_Imposex <- ctsm.assessment(
-  biota_assessment, 
-  determinandID = determinands$Biota$Imposex
-)
-
 
 stopCluster(wk.cluster)
 
@@ -527,7 +525,7 @@ biota_assessment$assessment <- local({
 biota_assessment$timeSeries <- biota_assessment$timeSeries %>% 
   rownames_to_column(".rownames") %>% 
   mutate(
-    .matrix = get.info("matrix", matrix, "name"), 
+    .matrix = ctsm_get_info("matrix", matrix, "name"), 
     .matrix = str_to_sentence(.matrix),
     level6name = case_when(
       level6element %in% "matrix" ~ .matrix,
@@ -575,7 +573,7 @@ wk.cluster <- makeCluster(wk.cores - 1)
 
 clusterExport(
   wk.cluster, 
-  c("water_assessment", "determinands", "negTwiceLogLik",
+  c("water_assessment", "negTwiceLogLik",
     unique(c(
       objects(pattern = "ctsm*"), 
       objects(pattern = "get*"), 
@@ -591,7 +589,6 @@ clusterEvalQ(wk.cluster, {
 
 water_assessment$assessment <- ctsm.assessment(
   water_assessment, 
-  determinandID = unlist(determinands$Water), 
   clusterID = wk.cluster
 )
 
@@ -656,9 +653,8 @@ webGroups = list(
 biota_web <- biota_assessment
 biota_web$info$AC <- c("BAC", "EAC", "EQS", "MPC")
 
-biota_web <- ctsm.web.initialise(
+biota_web <- ctsm_web_initialise(
   biota_web,
-  determinands = unlist(determinands$Biota), 
   classColour = list(
     below = c(
       "BAC" = "green", 
@@ -679,9 +675,8 @@ biota_web <- ctsm.web.initialise(
 # saveRDS(biota_web, file.path("RData", "biota web.rds"))
 
 
-sediment_web <- ctsm.web.initialise(
+sediment_web <- ctsm_web_initialise(
   sediment_assessment,
-  determinands = unlist(determinands$Sediment), 
   classColour = list(
     below = c("EQS" = "green"), 
     above = c("EQS" = "red"), 
@@ -693,9 +688,8 @@ sediment_web <- ctsm.web.initialise(
 # saveRDS(sediment_web, file.path("RData", "sediment web.rds"))
 
 
-water_web <- ctsm.web.initialise(
+water_web <- ctsm_web_initialise(
   water_assessment, 
-  determinands = unlist(determinands$Water), 
   classColour = list(
     below = c("EQS" = "green"), 
     above = c("EQS" = "red"), 

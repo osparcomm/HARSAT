@@ -1,30 +1,3 @@
-# 15/06/2016 in all functions, need to test if isTRUE(any(id)) - can sometimes fall over otherwise
-# 01/11/2016 add in information for SURVT, NRR, LP, %DNATAIL, MNC, CMT-QC-NR, MNC-QC-NR
-# 03/11/2016 update matrix info for ACHE: GI (shellfish), MU or BR
-# 16/11/2016 noinp = 0 is a warning (rather than error) apart for imposex
-# 18/01/2016 add water functions
-# 22/11/2017 water matrix - allow BF and AF from legacy data
-# 04/12/2017 water - add in unit checks for TBSN+
-# 06/12/2017 biota matrix - allow MU&EP for contaminants and auxiliary variables
-# 10/02/2017 POP renamed as PFC, furans absorbed within dioxins
-# 26/02/2019 organo-metals - change checks on organometal units
-# 17/10/2019 add in checks for birds and mammals
-# 24/10/2019 add in checks for AGMEA 
-# 24/10/2019 ctsm.check.sex.biota - test for acceptable values for all determiands
-# 24/10/2019 ctsm.check.value.biota - use is.wholenumber rather than round to check for integers
-# 06/11/2019 ctsm.check.sex.biota - make EROD checks stringent for LIMIC as well as LIS9
-# 27/11/2019 matrix - LNMEA for birds should be ES (egg shell) or WO
-# 23/01/2020 matrix - allow BL and ER (red blood cells) for birds
-
-# 2_60
-# ctsm.check.matrix.biota - MNC should be ER; %FEMALEPOP should be POP
-
-# 2_61 (OSPAR 2020)
-# ctsm.check.basis.biota - LIPIDWT% can be on D and W - assume W if missing
-# throughout - update group names and use pargroup to simplify
-
-# 2_68 (HELCOM 2022)
-# add in LOIGN
 
 
 ctsm.check0 <- function(data, type, compartment, message, fileName) {
@@ -385,7 +358,7 @@ ctsm.check.species.biota <- function(data) {
   # only assess species for which info.species$assess is TRUE
   
   data <- within(data, {
-    ok <- get.info("species", species, "assess")
+    ok <- ctsm_get_info("species", species, "assess")
     action <- ifelse(ok, "none", "delete")
   })
 

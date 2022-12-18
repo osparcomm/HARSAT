@@ -29,12 +29,15 @@ source(file.path(function_path, "support_functions.R"))
 info_species_file_id <- "species_2020.csv"
 info_uncertainty_file_id <- "uncertainty_2020.csv"
 
+info_AC_type <- "OSPAR"
+
 info_AC_infile <- list(
   biota = "assessment criteria biota.csv",
   sediment = "assessment criteria sediment.csv",
   water = "assessment criteria water.csv"
 )
-info_AC_type <- "OSPAR"
+
+info_determinand_infile <- "determinand_external_data.csv"
 
 source(file.path(function_path, "information_functions.R"))
 
@@ -85,7 +88,6 @@ rmarkdown::render(
 
 biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
-  determinands = "HG",
   determinands.control = list(
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   )
@@ -131,7 +133,6 @@ clusterEvalQ(wk.cluster, {
 
 biota_assessment$assessment <- ctsm.assessment(
   biota_assessment, 
-  determinandID = "HG",  
   clusterID = wk.cluster
 )
 
@@ -157,7 +158,7 @@ biota_assessment$assessment[wk_check] <-
 biota_assessment$timeSeries <- biota_assessment$timeSeries %>% 
   rownames_to_column(".rownames") %>% 
   mutate(
-    .matrix = get.info("matrix", matrix, "name") %>% 
+    .matrix = ctsm_get_info("matrix", matrix, "name") %>% 
       str_to_sentence() %>% 
       recode(
         "Erythrocytes (red blood cells in vertebrates)" = "Red blood cells",
@@ -212,9 +213,8 @@ webGroups = list(
 biota_web <- biota_assessment
 biota_web$info$AC <- c("BAC", "EQS.OSPAR")
 
-biota_web <- ctsm.web.initialise(
+biota_web <- ctsm_web_initialise(
   biota_web,
-  determinands = "HG", 
   classColour = list(
     below = c(
       "BAC" = "blue", 

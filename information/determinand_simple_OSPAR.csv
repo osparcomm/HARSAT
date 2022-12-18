@@ -3,7 +3,7 @@ AG,Silver,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, 
 AL,Aluminium,I-MET,Metals,Auxiliary,Metals,FALSE,FALSE,FALSE,ug/kg,%,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
 AS,Arsenic,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
 BA,Barium,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
-CD,Cadmium,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
+CD,Cadmium,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
 CO,Cobalt,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
 CR,Chromium,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
 CU,Copper,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,lognormal,low
@@ -83,7 +83,7 @@ CB137,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,u
 CB138,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 CB138+163,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 CB149,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
-CB153,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
+CB153,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 CB156,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 CB156+172,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 CB157,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
@@ -119,10 +119,10 @@ BD190,,O-BR,PBDEs,PBDEs,PBDEs,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT
 BD209,,O-BR,PBDEs,PBDEs,PBDEs,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 PBB153+BD154,,O-BR,PBDEs,PBDEs,PBDEs,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 SBDE6,"Sum of BDE 28, 47, 99, 100, 153, 154",O-BR,PBDEs,PBDEs,PBDEs,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
-HBCD,,O-BR,Organobromines,Organobromines,Organobromines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
-HBCDA,alpha-HBCD,O-BR,Organobromines,Organobromines,Organobromines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
+HBCD,,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
+HBCDA,alpha-HBCD,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 HBCDB,beta-HBCD,O-BR,Organobromines,Organobromines,Organobromines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
-HBCDG,gamma-HBCD,O-BR,Organobromines,Organobromines,Organobromines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
+HBCDG,gamma-HBCD,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 TBBPA,Tetrabromobiphenol-A,O-BR,Organobromines,Organobromines,Organobromines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 MPSN+,Monophenyl tin cation,O-MET,Organotins,Organotins,Organotins,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
 TPSN+,Triphenyl tin cation,O-MET,Organotins,Organotins,Organotins,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,lognormal,low
@@ -221,7 +221,7 @@ SFG,Scope for growth,B-TOX,Effects,,,FALSE,FALSE,FALSE,j/h/g,,,"LNMEA, LIPIDWT%,
 BAP3OH,3-hydroxy benzo(a)pyrene,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ng/ml,,,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,low
 NAP2OH,2-hydroxy naphthalene,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ng/ml,,,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,low
 PA1OH,1-hydroxy phenanthrene,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ng/ml,,,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,low
-PYR1OH,1-hydroxy pyrene,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ng/ml,,,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,low
+PYR1OH,1-hydroxy pyrene,B-MBA,Metabolites,,,TRUE,FALSE,FALSE,ng/ml,,,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,low
 PYR1OHEQ,1-hydroxy pyrene equivalent,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ug/ml,,,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,low
 ACHE,,B-MBA,Effects,,,FALSE,FALSE,FALSE,nmol/min/mg protein,,,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,high
 ALAD,,B-MBA,Effects,,,FALSE,FALSE,FALSE,ng/min/mg protein,,,"LNMEA, LIPIDWT%, DRYWT%",,,lognormal,high

@@ -28,27 +28,17 @@ source(file.path(function_path, "support_functions.R"))
 info_species_file_id <- "species_2020.csv"
 info_uncertainty_file_id <- "uncertainty_2020.csv"
 
+info_AC_type <- "OSPAR"
+
 info_AC_infile <- list(
   biota = "assessment criteria biota.csv",
   sediment = "assessment criteria sediment.csv",
   water = "assessment criteria water.csv"
 )
 
-info_AC_type <- "OSPAR"
+info_determinand_infile <- "determinand_simple_OSPAR.csv"
 
 source(file.path(function_path, "information_functions.R"))
-
-
-# list of determinands to be assesses  
-
-determinands <- list(
-  Biota = list(
-    Metals = "CD", 
-    Chlorobiphenyls = "CB153", 
-    Metabolites = "PYR1OH", 
-    Organobromines = c("HBCD","HBCDA", "HBCDG")
-  )
-)
 
 
 # Read data from ICES extraction ----
@@ -81,12 +71,31 @@ biota_data$data$AMAP_group <- rep("Not applicable", nrow(biota_data$data))
 
 biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
-  determinands = unlist(determinands$Biota),
+  determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"), 
   determinands.control = list(
     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   )
 )
+
+# identical (apart from call) to: 
+# 
+# ctsm_create_timeSeries(
+#   biota_data,
+#   determinands = ctsm_get_determinands("biota"),
+#   determinands.control = list(
+#     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
+#     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+#   )
+# )
+# 
+# ctsm_create_timeSeries(
+#   biota_data,
+#   determinands.control = list(
+#     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
+#     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+#   )
+# )
 
 
 # Assessment ----
@@ -100,10 +109,7 @@ biota_assessment <- ctsm.assessment.setup(
 )
 
 
-biota_assessment$assessment <- ctsm.assessment(
-  biota_assessment, 
-  determinandID = unlist(determinands$Biota)
-)
+biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 
 
 # check convergence - no errors this time
@@ -118,7 +124,7 @@ ctsm_check_convergence(biota_assessment$assessment)
 biota_assessment$timeSeries <- biota_assessment$timeSeries %>% 
   rownames_to_column(".rownames") %>% 
   mutate(
-    .matrix = get.info("matrix", matrix, "name") %>% 
+    .matrix = ctsm_get_info("matrix", matrix, "name") %>% 
       str_to_sentence() %>% 
       recode(
         "Erythrocytes (red blood cells in vertebrates)" = "Red blood cells",
@@ -170,9 +176,8 @@ webGroups = list(
   )
 )
 
-biota_web <- ctsm.web.initialise(
+biota_web <- ctsm_web_initialise(
   biota_assessment,
-  determinands = unlist(determinands$Biota), 
   classColour = list(
     below = c(
       "BAC" = "blue", 
