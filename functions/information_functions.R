@@ -103,7 +103,7 @@ info.file <- function(file.name) file.path(info.path, file.name)
 
 info.species <- read.csv(
     info.file(info_species_file_id), 
-    row.names = "species", 
+    row.names = "submitted_species", 
     na.strings = "", 
     check.names = FALSE
 )
