@@ -1,4 +1,4 @@
-reference_species,submitted_species,common.name,family,sub.family,assess,MU.DRYWT%,LI.DRYWT%,SB.DRYWT%,TM.DRYWT%,EH.DRYWT%,HA.DRYWT%,FE.DRYWT%,BL.DRYWT%,MU.LIPIDWT%,LI.LIPIDWT%,SB.LIPIDWT%,TM.LIPIDWT%,EH.LIPIDWT%,HA.LIPIDWT%,FE.LIPIDWT%,BL.LIPIDWT%
+reference_species,submitted_species,common_name,family,sub.family,assess,MU.DRYWT%,LI.DRYWT%,SB.DRYWT%,TM.DRYWT%,EH.DRYWT%,HA.DRYWT%,FE.DRYWT%,BL.DRYWT%,MU.LIPIDWT%,LI.LIPIDWT%,SB.LIPIDWT%,TM.LIPIDWT%,EH.LIPIDWT%,HA.LIPIDWT%,FE.LIPIDWT%,BL.LIPIDWT%
 Abramis brama,Abramis brama,Common bream,Fish,Fish,TRUE,,,,,,,,,,,,,,,,
 Anguilla anguilla,Anguilla anguilla,European eel,Fish,Fish,TRUE,,,,,,,,,,,,,,,,
 Brosme brosme,Brosme brosme,Cusk,Fish,Fish,TRUE,,,,,,,,,,,,,,,,

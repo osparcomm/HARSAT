@@ -42,7 +42,7 @@ ctsm_web_initialise <- function(
           "Bird" = "Bird",
           "Mammal" = "Mammal")
         level2element <- "Family"
-        level3name <- ctsm_get_info("species", species, "common.name")
+        level3name <- ctsm_get_info("species", species, "common_name")
         level3element <- "Species"
       }, 
       sediment = {                                                       
