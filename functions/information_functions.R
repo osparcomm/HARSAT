@@ -321,7 +321,7 @@ get.AC.biota.contaminant <- function(data, AC, export_cf = FALSE) {
     mutate_if(is.factor, as.character) %>%
     mutate(
       species_group = ctsm_get_info("species", species, "species_group"),
-      sub.family = ctsm_get_info("species", species, "sub.family")
+      sub.family = ctsm_get_info("species", species, "species_subgroup")
     ) %>% 
     mutate_at(c("species_group", "sub.family"), as.character)
   
@@ -383,7 +383,7 @@ if (info_AC_type == "OSPAR") {
       rownames_to_column() %>%
       mutate(
         species_group = ctsm_get_info("species", .data$species, "species_group"),
-        sub.family = ctsm_get_info("species", .data$species, "sub.family")
+        sub.family = ctsm_get_info("species", .data$species, "species_subgroup")
       )
     
     
@@ -493,7 +493,7 @@ if (info_AC_type == "OSPAR") {
       rownames_to_column() %>%
       mutate(
         species_group = ctsm_get_info("species", .data$species, "species_group"),
-        sub.family = ctsm_get_info("species", .data$species, "sub.family")
+        sub.family = ctsm_get_info("species", .data$species, "species_subgroup")
       )
     
     # BACs in fish only apply to high lipid tissue
