@@ -586,8 +586,8 @@ if (info_AC_type == "OSPAR") {
       
       out[id, ] <- mutate(
         out[id, ],
-        .lipid_mu = info.species[.data$species, "MU.LIPIDWT%"],
-        .dry_mu = info.species[.data$species, "MU.DRYWT%"],
+        .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
+        .dry_mu = info.species[.data$species, "MU_DRYWT%"],
         HQS = convert.basis(61, "W", "L", .dry_mu, "", .lipid_mu, ""),
         HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
         .lipid_mu = NULL,
@@ -604,8 +604,8 @@ if (info_AC_type == "OSPAR") {
       
       out[id, ] <- mutate(
         out[id, ],
-        .lipid_mu = info.species[.data$species, "MU.LIPIDWT%"],
-        .dry_mu = info.species[.data$species, "MU.DRYWT%"],
+        .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
+        .dry_mu = info.species[.data$species, "MU_DRYWT%"],
         HQS = convert.basis(10, "W", "L", .dry_mu, "", .lipid_mu, ""),
         HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
         .lipid_mu = NULL,
@@ -684,8 +684,8 @@ if (info_AC_type == "OSPAR") {
       
       out[id, ] <- mutate(
         out[id, ],
-        .lipid_mu = info.species[.data$species, "MU.LIPIDWT%"],
-        .dry_mu = info.species[.data$species, "MU.DRYWT%"],
+        .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
+        .dry_mu = info.species[.data$species, "MU_DRYWT%"],
         HQS = convert.basis(0.0085, "W", "L", .dry_mu, "", .lipid_mu, ""),
         HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
         .lipid_mu = NULL,
