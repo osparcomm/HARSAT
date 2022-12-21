@@ -320,10 +320,10 @@ get.AC.biota.contaminant <- function(data, AC, export_cf = FALSE) {
     rownames_to_column("rownames") %>% 
     mutate_if(is.factor, as.character) %>%
     mutate(
-      family = ctsm_get_info("species", species, "family"),
+      species_group = ctsm_get_info("species", species, "species_group"),
       sub.family = ctsm_get_info("species", species, "sub.family")
     ) %>% 
-    mutate_at(c("family", "sub.family"), as.character)
+    mutate_at(c("species_group", "sub.family"), as.character)
   
   lipid_info <- info.species %>% 
     rownames_to_column("species") %>% 
@@ -382,7 +382,7 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        family = ctsm_get_info("species", .data$species, "family"),
+        species_group = ctsm_get_info("species", .data$species, "species_group"),
         sub.family = ctsm_get_info("species", .data$species, "sub.family")
       )
     
@@ -405,40 +405,40 @@ if (info_AC_type == "OSPAR") {
         out[id, ],
         
         BAC = case_when(
-          .data$family %in% "Fish"                            ~ NA_real_,
+          .data$species_group %in% "Fish"                            ~ NA_real_,
           .data$sub.family %in% "Oyster"                      ~ NA_real_,
-          .data$family %in% "Mammal" & .data$matrix %in% "LI" ~
+          .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
             convert.basis(16000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Mammal" & .data$matrix %in% "HA" ~
+          .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
             convert.basis(6100, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Bird" & .data$matrix %in% "EH"   ~
+          .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
             convert.basis(110, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Bird" & .data$matrix %in% "LI"   ~
+          .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
             convert.basis(1400, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Bird" & .data$matrix %in% "FE"   ~
+          .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
             convert.basis(1580, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Bird" & .data$matrix %in% "BL"   ~
+          .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
             convert.basis(200, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
           TRUE                                                ~ .data$BAC
         ),
         
         EQS.OSPAR = case_when(
-          .data$family %in% "Mammal" & .data$matrix %in% "LI" ~
+          .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
             convert.basis(64000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Mammal" & .data$matrix %in% "HA" ~
+          .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
             convert.basis(24400, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Bird" & .data$matrix %in% "EH"   ~
+          .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
             convert.basis(470, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Bird" & .data$matrix %in% "LI"   ~
+          .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
             convert.basis(7300, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Bird" & .data$matrix %in% "FE"   ~
+          .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
             convert.basis(7920, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          .data$family %in% "Bird" & .data$matrix %in% "BL"   ~
+          .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
             convert.basis(1000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
           TRUE                                                ~ .data$EQS.OSPAR
         ),
         
-        HQS = if_else(.data$family %in% "Fish" & .data$matrix %in% "LI", NA_real_, .data$HQS)
+        HQS = if_else(.data$species_group %in% "Fish" & .data$matrix %in% "LI", NA_real_, .data$HQS)
       )
     }
     
@@ -451,19 +451,19 @@ if (info_AC_type == "OSPAR") {
       out,
       
       HQS = if_else(
-        .data$determinand %in% "CD" & .data$family %in% "Fish" & .data$matrix %in% "MU",
+        .data$determinand %in% "CD" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
         50,
         .data$HQS
       ),
       
       HQS = if_else(
-        .data$determinand %in% "PB" & .data$family %in% "Fish" & .data$matrix %in% "MU",
+        .data$determinand %in% "PB" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
         300,
         .data$HQS
       ),
       
       BAC = if_else(
-        .data$determinand %in% c("CD", "PB") & .data$family %in% "Fish" &
+        .data$determinand %in% c("CD", "PB") & .data$species_group %in% "Fish" &
           (is.na(.data$lipid_wt) | .data$lipid_wt < lipid_high),
         NA_real_,
         .data$BAC
@@ -492,7 +492,7 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        family = ctsm_get_info("species", .data$species, "family"),
+        species_group = ctsm_get_info("species", .data$species, "species_group"),
         sub.family = ctsm_get_info("species", .data$species, "sub.family")
       )
     
@@ -503,13 +503,13 @@ if (info_AC_type == "OSPAR") {
       out,
       
       BAC = if_else(
-        .data$family %in% "Fish" & (is.na(.data$lipid_wt) | .data$lipid_wt < lipid_high),
+        .data$species_group %in% "Fish" & (is.na(.data$lipid_wt) | .data$lipid_wt < lipid_high),
         NA_real_,
         .data$BAC
       ),
       
       HQS = if_else(
-        .data$family %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "SCB6",
+        .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "SCB6",
         convert.basis(200, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
         .data$HQS
       ),
@@ -545,7 +545,7 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        family = ctsm_get_info("species", .data$species, "family"),
+        species_group = ctsm_get_info("species", .data$species, "species_group"),
         species = as.character(species)
       )
     
@@ -557,7 +557,7 @@ if (info_AC_type == "OSPAR") {
       out,
       
       BAC = if_else(
-        .data$family %in% "Fish" & (is.na(.data$lipid_wt) | .data$lipid_wt < lipid_high),
+        .data$species_group %in% "Fish" & (is.na(.data$lipid_wt) | .data$lipid_wt < lipid_high),
         NA_real_,
         .data$BAC
       ),
@@ -580,7 +580,7 @@ if (info_AC_type == "OSPAR") {
     
     # HCHG HQS in liver converted from muscle using muscle lipid content
     
-    id <- out$determinand %in% "HCHG" & out$family %in% "Fish" & out$matrix %in% "LI"
+    id <- out$determinand %in% "HCHG" & out$species_group %in% "Fish" & out$matrix %in% "LI"
     
     if (any(id)) {
       
@@ -598,7 +598,7 @@ if (info_AC_type == "OSPAR") {
     
     # HCB HQS in liver converted from muscle using muscle lipid content
     
-    id <- out$determinand %in% "HCB" & out$family %in% "Fish" & out$matrix %in% "LI"
+    id <- out$determinand %in% "HCB" & out$species_group %in% "Fish" & out$matrix %in% "LI"
     
     if (any(id)) {
       
@@ -635,14 +635,14 @@ if (info_AC_type == "OSPAR") {
     
     out <- out %>%
       rownames_to_column() %>%
-      mutate(family = ctsm_get_info("species", .data$species, "family"))
+      mutate(species_group = ctsm_get_info("species", .data$species, "species_group"))
     
     
     # fish liver - multiply by 5
     
     out <- mutate(
       out,
-      .id <- .data$family %in% "Fish" & .data$matrix %in% "LI" &
+      .id <- .data$species_group %in% "Fish" & .data$matrix %in% "LI" &
         .data$determinand %in% "PFOS",
       EQS.OSPAR = .data$EQS.OSPAR * if_else(.id, 5, 1),
       HQS = .data$HQS * if_else(.id, 5, 1),
@@ -671,14 +671,14 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        family = ctsm_get_info("species", .data$species, "family"),
+        species_group = ctsm_get_info("species", .data$species, "species_group"),
         species = as.character(species)
       )
     
     
     # HQS in liver converted from muscle using muscle lipid content
     
-    id <- out$determinand %in% "SBDE6" & out$family %in% "Fish" & out$matrix %in% "LI"
+    id <- out$determinand %in% "SBDE6" & out$species_group %in% "Fish" & out$matrix %in% "LI"
     
     if (any(id)) {
       
@@ -715,7 +715,7 @@ if (info_AC_type == "OSPAR") {
     
     out <- out %>%
       rownames_to_column() %>%
-      mutate(family = ctsm_get_info("species", .data$species, "family"))
+      mutate(species_group = ctsm_get_info("species", .data$species, "species_group"))
     
     
     # add in HQS of 0.02 ww for fish liver
@@ -723,7 +723,7 @@ if (info_AC_type == "OSPAR") {
     out <- mutate(
       out,
       HQS = if_else(
-        .data$family %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
+        .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
         convert.basis(0.02, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
         .data$HQS
       )
@@ -1418,7 +1418,7 @@ get_basis_OSPAR <- function(compartment, group, matrix, determinand, species, li
       out <- mutate(
         out,
         across(everything(), as.character),
-        family = ctsm_get_info("species", .data$species, "family")
+        species_group = ctsm_get_info("species", .data$species, "species_group")
       )
            
       # get typical lipid content by species and matrix 
@@ -1456,16 +1456,16 @@ get_basis_OSPAR <- function(compartment, group, matrix, determinand, species, li
         .lw = .data$group %in% lw_group & !(.data$determinand %in% c("MCCP", "SCCP")),
         new.basis = case_when(
           .data$group %in% c("Imposex", "Effects", "Metabolites")       ~ NA_character_,
-          .data$family %in% c("Bivalvia", "Gastropoda")                 ~ "D",
-          .data$family %in% c("Fish", "Crustacea") & 
+          .data$species_group %in% c("Bivalvia", "Gastropoda")                 ~ "D",
+          .data$species_group %in% c("Fish", "Crustacea") & 
             .lw &
             .data$lipid_wt >= lipid_high                                ~ "L",
-          .data$family %in% c("Fish", "Crustacea")                      ~ "W",
-          .data$family %in% "Mammal" &
+          .data$species_group %in% c("Fish", "Crustacea")                      ~ "W",
+          .data$species_group %in% "Mammal" &
             .data$matrix %in% "HA"                                      ~ "D",
-          .data$family %in% "Mammal" &
+          .data$species_group %in% "Mammal" &
             .data$group %in% "Metals"                                   ~ "W",
-          .data$family %in% "Mammal"                                    ~ "L",
+          .data$species_group %in% "Mammal"                                    ~ "L",
           .data$species %in% c("Alle alle", "Rissa tridactyla")         ~ "D",
           .data$matrix %in% "EH" &
             .data$group %in% "Metals" & 
@@ -1482,7 +1482,7 @@ get_basis_OSPAR <- function(compartment, group, matrix, determinand, species, li
             .data$species %in% c(
               "Larus argentatus", "Somateria mollissima"
             )                                                           ~ "W",
-          .data$family %in% "Bird"                                      ~ "W"
+          .data$species_group %in% "Bird"                                      ~ "W"
         )
       )
       
@@ -1510,7 +1510,7 @@ get_basis_HELCOM <- function(compartment, group, matrix, determinand, species) {
       out <- mutate(
         out,
         across(everything(), as.character),
-        family = ctsm_get_info("species", .data$species, "family")
+        species_group = ctsm_get_info("species", .data$species, "species_group")
       )
  
       # define new basis
@@ -1519,10 +1519,10 @@ get_basis_HELCOM <- function(compartment, group, matrix, determinand, species) {
         out, 
         new.basis = case_when(
           .data$group %in% c("Imposex", "Metabolites")       ~ NA_character_,
-          .data$family %in% "Bivalvia"                       ~ "W",
-          .data$family %in% "Fish" & 
+          .data$species_group %in% "Bivalvia"                       ~ "W",
+          .data$species_group %in% "Fish" & 
             .data$group %in% c("Metals", "Organofluorines")  ~ "W",
-          .data$family %in% "Fish"                           ~ "L"
+          .data$species_group %in% "Fish"                           ~ "L"
         )
       ) 
 

@@ -34,7 +34,7 @@ ctsm_web_initialise <- function(
     switch(
       compartment, 
       biota = {
-        level2name <- ctsm_get_info("species", species, "family")[drop = TRUE]
+        level2name <- ctsm_get_info("species", species, "species_group")[drop = TRUE]
         levels(level2name) <- list(
           "Fish" = "Fish", 
           "Shellfish" = c("Bivalvia", "Gastropoda"), 

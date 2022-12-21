@@ -545,7 +545,7 @@ ctsm_create_timeSeries <- function(
   )
 
   if (info$compartment == "biota") {
-    data$family <- ctsm_get_info("species", data$species, "family")
+    data$family <- ctsm_get_info("species", data$species, "species_group")
   }
   
   if (!"pargroup" %in% names(data)) {
