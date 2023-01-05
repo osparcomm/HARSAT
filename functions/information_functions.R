@@ -329,13 +329,13 @@ get.AC.biota.contaminant <- function(data, AC, export_cf = FALSE) {
     rownames_to_column("species") %>% 
     select(.data$species, contains("LIPIDWT%")) %>% 
     gather(key = "matrix", value = "lipid_wt", contains("LIPIDWT%"), na.rm = TRUE) %>% 
-    separate(matrix, c("matrix", NA), sep = "\\.") 
+    separate(matrix, c("matrix", NA), sep = "_") 
   
   drywt_info <- info.species %>% 
     rownames_to_column("species") %>% 
     select(.data$species, contains("DRYWT%")) %>% 
     gather(key = "matrix", value = "dry_wt", contains("DRYWT%"), na.rm = TRUE) %>% 
-    separate(matrix, c("matrix", NA), sep = "\\.") 
+    separate(matrix, c("matrix", NA), sep = "_") 
   
   data <- left_join(data, lipid_info, by = c("species", "matrix"))
   data <- left_join(data, drywt_info, by = c("species", "matrix"))
