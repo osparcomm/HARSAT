@@ -190,13 +190,6 @@ biota_assessment$timeSeries <- biota_assessment$timeSeries %>%
   column_to_rownames(".rownames")
 
 
-# only retain time series with assessments
-
-biota_assessment <- local({
-  ok <- sapply(biota_assessment$assessment, function(i) !is.null(i$summary))
-  ctsm.subset.assessment(biota_assessment, ok)
-})
-
 # saveRDS(biota_assessment, file.path("RData", "biota assessment.rds"))
 
 
@@ -233,7 +226,7 @@ biota_web <- ctsm_web_initialise(
 
 # write table 
 
-ctsm.summary.table(
+ctsm_summary_table(
   assessments = list(Biota = biota_web),
   determinandGroups = webGroups,
   path = file.path("output", "example_external_data")

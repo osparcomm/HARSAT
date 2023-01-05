@@ -2,16 +2,12 @@
 
 ctsm_web_initialise <- function(
   assessmentObject, 
-  determinands = ctsm_get_determinands(assessmentObject$info$compartment), 
   classColour = NULL, 
   determinandGroups) {
 
   # reporting_functions.R
 
-  
-  determinands <- force(determinands)
-  
-    
+
   # check assessment criteria have an appropriate class colour
   
   AC <- assessmentObject$info$AC
@@ -70,19 +66,9 @@ ctsm_web_initialise <- function(
     ))
   
   
-  # setup up assessment object for web manipulations - essentially, subset by 
-  # determinand lists (leaving out any unused assessments or stations) and
-  # create unique filename
-  # haven't quite got ctsm.subset.assessment working right yet - ideally would 
-  # put in ctsm.web.setup, but scoping falls over
-  
+
   # create detGroup variable in each timeSeries structure
-  
-  assessmentObject <- ctsm.subset.assessment(
-    assessmentObject, 
-    determinand %in% determinands
-  )
-  
+
   assessmentObject$timeSeries <- within(
     assessmentObject$timeSeries, {
       detGroup <- ctsm_get_info(
@@ -101,7 +87,7 @@ ctsm_web_initialise <- function(
   
   list(
     assessment = assessmentObject, 
-    determinands = determinands, 
+    # determinands = determinands, 
     classColour = classColour
   )
 }
@@ -205,16 +191,38 @@ ctsm.projection <- function(latitude, longitude) {
 
 # support functions ----
 
-ctsm.subset.assessment <- function(ctsm.assessment.ob, subset) {
-  timeSeries <- ctsm.assessment.ob$timeSeries
-  timeSeries <- timeSeries[eval(substitute(subset), timeSeries, parent.frame()), ]
-  ctsm.assessment.ob$timeSeries <- droplevels(timeSeries)
-  within(ctsm.assessment.ob, 
-  {
-    assessment <- assessment[rownames(timeSeries)]
-    data <- droplevels(data[data$seriesID %in% rownames(timeSeries), ])
-    stations <- droplevels(stations[row.names(stations) %in% timeSeries$station, ])
-  })
+ctsm_subset_assessment <- function(assessment_obj, subset) {
+  
+  # reporting_functions.R
+  # subsets an assessment object by filtering on the timeSeries component
+  
+  timeSeries <- assessment_obj$timeSeries
+  
+  ok <- eval(substitute(subset), timeSeries, parent.frame())
+  timeSeries <- timeSeries[ok, ]
+  
+  assessment_obj$timeSeries <- timeSeries
+
+  
+  # update other components to be consistent
+  
+  id <- row.names(timeSeries)
+  
+  assessment_obj$assessment <- assessment_obj$assessment[id]
+  
+  ok <- assessment_obj$data$seriesID %in% id
+  assessment_obj$data <- assessment_obj$data[ok, ]
+  
+  ok <- row.names(assessment_obj$stations) %in% timeSeries$station 
+  assessment_obj$stations <- assessment_obj$stations[ok, ]
+  
+  
+  # drop redundant factor levels
+  
+  id <- c("timeSeries", "data", "stations")
+  assessment_obj[id] <- lapply(assessment_obj[id], droplevels)
+  
+  assessment_obj
 }  
 
 
@@ -446,7 +454,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 
 # summary table ----
 
-ctsm.summary.table <- function(
+ctsm_summary_table <- function(
   assessments, determinandGroups, path = ".", export = TRUE,  
   include_all = FALSE, collapse_AC = TRUE) {
 

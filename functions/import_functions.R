@@ -1000,13 +1000,7 @@ ctsm_create_timeSeries <- function(
     
     out  = c(
       out, 
-      ctsm_import_value(
-        data, 
-        station.dictionary, 
-        info$compartment, 
-        info$purpose, 
-        print_code_warnings
-      )
+      ctsm_import_value(data, station.dictionary, info, print_code_warnings) 
     )
     out$QA <- QA
     return(out)
@@ -1210,9 +1204,10 @@ ctsm_create_timeSeries <- function(
 
   cat("   Dropping groups of compounds / stations with no data between", 
       min(info$recent_years), "and", max(info$recent_years), "\n")
-  id.names <- intersect(c("station", "filtered", "species", "group"), names(data))
-  id <- do.call("paste", data[id.names])
-  data <- subset(data, id %in% id[is.recent(year) & !is.na(concentration)])
+  id_names <- intersect(c("station", "filtered", "species", "group"), names(data))
+  id <- do.call("paste", data[id_names])
+  ok <- id %in% id[is.recent(data$year) & !is.na(data$concentration)]
+  data <- data[ok, ]
   
 
   # check no replicates (typically across matrices)
@@ -1237,13 +1232,7 @@ ctsm_create_timeSeries <- function(
  
   out  = c(
     out, 
-    ctsm_import_value(
-      data, 
-      station.dictionary, 
-      info$compartment, 
-      info$purpose, 
-      print_code_warnings
-    )
+    ctsm_import_value(data, station.dictionary, info, print_code_warnings)
   )
   
   out$QA <- QA
@@ -1414,7 +1403,10 @@ ctsm.check2 <- function(data, action, message, fileName, merge.stations = TRUE) 
 }
 
 
-ctsm_import_value <- function(data, station.dictionary, compartment, purpose, print_code_warnings) {
+ctsm_import_value <- function(data, station_dictionary, info, print_code_warnings) {
+  
+  # import_functions.R
+  # identifies timeseries in the data and creates timeSeries metadata object
   
   # order data and select variables of interest
 
@@ -1455,14 +1447,14 @@ ctsm_import_value <- function(data, station.dictionary, compartment, purpose, pr
   # get seriesID and timeSeries structure 
   
   id <- c("station", "determinand")
-  if (compartment == "biota")
+  if (info$compartment == "biota")
     id <- switch(
-      purpose, 
+      info$purpose, 
       AMAP = c(id, "species", "matrix", "AMAP_group"), 
       OSPAR = c(id, "species", "matrix", "sex", "metoa", "AMAP_group"),
       c(id, "species", "matrix", "sex", "metoa")
     )
-  if (compartment == "water" & purpose %in% "HELCOM")
+  if (info$compartment == "water" & info$purpose %in% "HELCOM")
     id <- c(id, "filtered")
   timeSeries <- data[id]
   
@@ -1471,7 +1463,7 @@ ctsm_import_value <- function(data, station.dictionary, compartment, purpose, pr
   # with a view to then 
   # identifying each time series
 
-  if (compartment == "biota") {
+  if (info$compartment == "biota") {
     timeSeries <- mutate(
       timeSeries,
 
@@ -1519,17 +1511,31 @@ ctsm_import_value <- function(data, station.dictionary, compartment, purpose, pr
   
   # change timeSeries output columns to fit the levels of the xml requirements
   
-  timeSeries <- changeToLevelsForXML(timeSeries, compartment, purpose)
+  timeSeries <- changeToLevelsForXML(timeSeries, info$compartment, info$purpose)
 
+
+  # remove any series that don't have data in recent years
+  
+  is_recent_data <- (data$year %in% info$recent_years) & !is.na(data$concentration)
+  
+  id <- data$seriesID[is_recent_data]
+  id <- unique(id)
+  
+  data <- data[data$seriesID %in% id, ]
+  data <- droplevels(data)
+  
+  ok <- row.names(timeSeries) %in% id
+  timeSeries <- timeSeries[ok, ]
+  timeSeries <- droplevels(timeSeries)
   
   # remove unused stations from the station dictionary
 
-  ok <- row.names(station.dictionary) %in% as.character(timeSeries$station) 
+  ok <- row.names(station_dictionary) %in% as.character(timeSeries$station) 
   
-  station.dictionary <- droplevels(station.dictionary[ok, ])
+  station_dictionary <- droplevels(station_dictionary[ok, ])
   
   
-  list(data = data, stations = station.dictionary, timeSeries = timeSeries)
+  list(data = data, stations = station_dictionary, timeSeries = timeSeries)
 }
 
 
