@@ -157,14 +157,6 @@ biota_assessment$timeSeries <- biota_assessment$timeSeries %>%
 
 
 
-# only retain time series with assessments
-
-biota_assessment <- local({
-  ok <- sapply(biota_assessment$assessment, function(i) !is.null(i$summary))
-  ctsm.subset.assessment(biota_assessment, ok)
-})
-
-
 # Summary files ----
 
 # web objects: these are a legacy from a Flash app for displaying results
@@ -200,7 +192,7 @@ biota_web <- ctsm_web_initialise(
 # write summary table 
 # can adjust file location with the path argument
 
-ctsm.summary.table(
+ctsm_summary_table(
   assessments = list(Biota = biota_web), 
   determinandGroups = webGroups,
   path = file.path("output", "example_simple_OSPAR")

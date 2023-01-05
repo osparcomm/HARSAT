@@ -365,15 +365,6 @@ stopCluster(wk.cluster)
 ctsm_check_convergence(sediment_assessment$assessment)
 
 
-### tidy up ----
-
-# only retain time series with assessments
-
-sediment_assessment <- local({
-  ok <- sapply(sediment_assessment$assessment, function(i) !is.null(i$summary))
-  ctsm.subset.assessment(sediment_assessment, ok)
-})
-
 # saveRDS(sediment_assessment, file.path("RData", "sediment assessment.rds"))
 
 
@@ -543,14 +534,6 @@ biota_assessment$timeSeries <- biota_assessment$timeSeries %>%
   column_to_rownames(".rownames")
 
 
-
-# only retain time series with assessments
-
-biota_assessment <- local({
-  ok <- sapply(biota_assessment$assessment, function(i) !is.null(i$summary))
-  ctsm.subset.assessment(biota_assessment, ok)
-})
-
 # saveRDS(biota_assessment, file.path("RData", "biota assessment.rds"))
 
 
@@ -613,16 +596,6 @@ water_assessment$assessment[wk_id] <-
 
 ctsm_check_convergence(water_assessment$assessment)
 
-
-
-### tidy up ----
-
-# only retain time series with assessments
-
-water_assessment <- local({
-  ok <- sapply(water_assessment$assessment, function(i) !is.null(i$summary))
-  ctsm.subset.assessment(water_assessment, ok)
-})
 
 # saveRDS(water_assessment, file.path("RData", "water assessment.rds"))
 
@@ -703,7 +676,7 @@ water_web <- ctsm_web_initialise(
 
 ## write tables ----
 
-ctsm.summary.table(
+ctsm_summary_table(
   assessments = list(
     Biota = biota_web, 
     Sediment = sediment_web, 
