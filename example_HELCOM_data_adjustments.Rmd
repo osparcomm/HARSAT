@@ -604,7 +604,7 @@ wk <- sediment_data$data %>%
 
 wk <- wk %>% 
   filter(determinand %in% c("AL", "CORG", "LOIGN")) %>% 
-  mutate(value = convert.units(value, unit, "%"))
+  mutate(value = convert_units(value, unit, "%"))
 
 lattice::xyplot(
   value ~ year | country, 
@@ -673,7 +673,7 @@ wk <- sediment_data$data %>%
 
 wk <- wk %>% 
   filter(determinand %in% "CORG") %>% 
-  mutate(value = convert.units(value, unit, "%"))
+  mutate(value = convert_units(value, unit, "%"))
 
 
 lattice::xyplot(
@@ -882,7 +882,7 @@ Missing uncertainties for all determinands other than LOIGN are imputed using th
 wk <- sediment_data$data %>% 
   filter(determinand %in% "LOIGN") %>% 
   mutate(
-    value = convert.units(value, unit, "%"),
+    value = convert_units(value, unit, "%"),
     uncertainty = case_when(
       methodUncertainty == "U2" ~ 100 * (uncertainty / 2) / value, 
       methodUncertainty == "SD" ~ 100 * uncertainty / value, 
@@ -1205,7 +1205,7 @@ biota_data$data <- mutate(
 
 wk_data <- biota_data$data %>% 
   filter(.id & determinand == "CB153") %>% 
-  mutate(concentration = convert.units(value, unit, "ug/kg"))
+  mutate(concentration = convert_units(value, unit, "ug/kg"))
 
 stopifnot(
   wk_data$matrix == "MU",
@@ -1237,7 +1237,7 @@ biota_data$data <- filter(
 
 wk_data <- biota_data$data %>% 
   filter(.id & determinand == "CB153") %>% 
-  mutate(concentration = convert.units(value, unit, "ug/kg"))
+  mutate(concentration = convert_units(value, unit, "ug/kg"))
 
 biota_data$data$'.id' <- NULL
 
