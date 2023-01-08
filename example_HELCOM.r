@@ -119,12 +119,11 @@ sediment_data <- ctsm_read_data(
 water_data <- ctsm_read_data(
   compartment = "water", 
   purpose = "HELCOM",                               
-  contaminants = "water_data.txt", 
-  stations = "station_dictionary.txt", 
-  QA = "quality_assurance.txt",
-  path = file.path("data", "example_HELCOM"), 
+  contaminants = file.path("data", "example_HELCOM_new_format", "water_data.txt"), 
+  stations = file.path("data", "example_HELCOM", "station_dictionary.txt"), 
   extraction = "2022/10/06",
-  max_year = 2021L
+  max_year = 2021L, 
+  data_format = "new"
 )  
 
 # saveRDS(water_data, file.path("RData", "water data.rds"))
@@ -310,7 +309,8 @@ water_timeSeries <- ctsm_create_timeSeries(
   water_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
-  )
+  ),
+  data_format = "new"
 )
 
 # saveRDS(water_timeSeries, file.path("RData", "water timeSeries.rds"))
@@ -604,7 +604,7 @@ ctsm_check_convergence(water_assessment$assessment)
 
 ## web objects ----
 
-webGroups = list(
+webGroups <- list(
   levels = c(
     "Metals", "Organotins", 
     "PAH_parent", "Metabolites", 
