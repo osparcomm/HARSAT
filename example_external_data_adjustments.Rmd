@@ -234,7 +234,7 @@ wk_data <- biota_data$data %>%
       methodUncertainty == "U2" ~ 100 * uncertainty / (2 * value),
       TRUE                      ~ uncertainty
     ),
-    value = convert.units(value, from = unit, to = "ug/kg")
+    value = convert_units(value, from = unit, to = "ug/kg")
   )
 
 lattice::xyplot(
@@ -266,7 +266,7 @@ wk_data <- biota_data$data %>%
   filter(.id) %>% 
   mutate(
     relative_uncertainty = 100 * uncertainty / (2 * value),
-    value = convert.units(value, from = unit, to = "ug/kg")
+    value = convert_units(value, from = unit, to = "ug/kg")
   )
 
 lattice::xyplot(
@@ -522,7 +522,7 @@ biota_data$data <- mutate(
 wk_data <- biota_data$data %>% 
   mutate(.matrix = if_else(determinand %in% c("HG", "AS"), "MU", "LI")) %>% 
   filter(.id & matrix == .matrix) %>%
-  mutate(value = convert.units(value, unit, "ug/kg"))
+  mutate(value = convert_units(value, unit, "ug/kg"))
 
 wk_dry <- biota_data$data %>% 
   filter(.station & determinand %in% "DRYWT%") %>% 
@@ -617,7 +617,7 @@ biota_data$data <- mutate(
 
 wk_data <- biota_data$data %>% 
   filter(.id) %>% 
-  mutate(value = convert.units(value, unit, "ug/kg"))
+  mutate(value = convert_units(value, unit, "ug/kg"))
 
 if (!all(wk_data$basis %in% "W"))
   warning("need to convert basis")
@@ -652,7 +652,7 @@ biota_data$data <- mutate(
 
 wk_data <- biota_data$data %>% 
   filter(.id) %>% 
-  mutate(value = convert.units(value, unit, "ug/kg"))
+  mutate(value = convert_units(value, unit, "ug/kg"))
 
 lattice::xyplot(
   value ~ year | station_name, data = wk_data,

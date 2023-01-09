@@ -791,10 +791,9 @@ ctsm_create_timeSeries <- function(
   # can't change bases here because need to merge with auxiliary variables
 
   id <- c("concentration", "uncertainty", "limit_detection", "limit_quantification")
-  data[id] <- lapply(data[id], function(i) 
-    wk.convert.units(conc = i, from = data$unit, to = data$new.unit, 
-                     determinand = data$determinand))
-  
+
+  data[id] <- lapply(data[id], convert_units, from = data$unit, to = data$new.unit) 
+
 
   # merge auxiliary data with determinand data
   # weights and sediment normalisers are merged by sampleID and matrix
@@ -2523,20 +2522,17 @@ determinand.link.sum <- function(data, keep, drop, ...) {
     # have to pass in compartment
     
     if (n_distinct(x$unit) > 1) {
-      
-      wk <- table(x$unit)
-      target.unit <- names(wk)[which.max(wk)]
 
-      x <- x %>% 
-        mutate(
-          across(
-            c("value", "uncertainty", "limit_detection", "limit_quantification"),
-            convert.units, 
-            from = .data$unit, 
-            to = target.unit
-          ),
-          unit = target.unit
-        )
+      # get modal value of unit
+      
+      unit_values <- unique(x$unit)
+      target_unit <- unit_values[which.max(tabulate(match(x$unit, unit_values)))]
+           
+      id <- c("value", "uncertainty", "limit_detection", "limit_quantification")
+      
+      x[id] <- lapply(x[id], convert_units, from = x$unit, to = target_unit)
+
+      x$unit <- target_unit
     }      
     
     
@@ -2656,8 +2652,8 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
     # convert to ug/kg and then to TEQ
     
     id <- c("value", "uncertainty", "limit_detection", "limit_quantification")
-    x[id] <- lapply(
-      x[id], wk.convert.units, from = x$unit, to = "ug/kg", determinand = x$determinand)
+    
+    x[id] <- lapply(x[id], convert_units, from = x$unit, to = "ug/kg")
     
     TEQ <- info_TEQ[as.character(x$determinand)]
     
