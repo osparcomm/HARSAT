@@ -9,13 +9,18 @@ ctsm_read_data <- function(
   contaminants, 
   stations, 
   QA, 
-  path = "", 
+  path = ".", 
   extraction, 
   max_year, 
-  control = list()) {
+  control = list(), 
+  data_format = c("old", "new")) {
 
-  # import functions
+  # import_functions.R
   # reads in data from an ICES extraction
+  
+  
+  data_format <- match.arg(data_format)
+  
   
   # validate arguments
   
@@ -86,9 +91,12 @@ ctsm_read_data <- function(
   
   stations <- ctsm_read_stations(stations, path, info$purpose, info$region_id)
   
-  data <- ctsm_read_contaminants(contaminants, path, info$purpose, info$region_id)
+  data <- ctsm_read_contaminants(
+    contaminants, path, info$purpose, info$region_id, data_format
+  )
   
-  QA <- ctsm_read_QA(QA, path, purpose)
+  if (data_format == "old") 
+    QA <- ctsm_read_QA(QA, path, purpose)
   
 
   # check no data after max_year
@@ -102,12 +110,16 @@ ctsm_read_data <- function(
   }
   
     
-  list(
+  out <- list(
     call = match.call(), 
     info = info,
     data = data, 
-    stations = stations, 
-    QA = QA)
+    stations = stations
+  )
+  
+  if (data_format == "old") out$QA <- QA
+  
+  out
 }
 
 
@@ -225,7 +237,7 @@ ctsm_read_stations <- function(infile, path, purpose, region_id) {
 }
 
 
-ctsm_read_contaminants <- function(infile, path, purpose, region_id) {
+ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format) {
   
   # import functions
   # read in contaminant (and biological effects) data
@@ -239,15 +251,20 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id) {
     na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
   )
   
-  
-  # create more useful names
-  # for biota, tblsampleid is the species, tblbioid gives the subsample (individual) 
-  # which with matrix gives the unique sample id
-  # for sediment, tblsampleid and matrix give the unique sample id
-  # to streamline, could make sample = tblbioid (biota) or tblsampleid (sediment)
-  
-  # convert names to lower case, apart from the regional names
-  
+
+  # check regional identifiers are in the extraction 
+
+  if (data_format == "new" & purpose == "HELCOM") {
+
+    data <- dplyr::rename(
+      data,
+      HELCOM_subbasin = helcom_subbasin,
+      HELCOM_L3 = helcom_l3,
+      HELCOM_L4 = helcom_l4,
+    )
+
+  }
+    
   pos <- names(data) %in% region_id
   if (sum(pos) != length(region_id)) {
     stop("not all regional identifiers are in the data extraction")
@@ -256,11 +273,25 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id) {
   names(data)[!pos] <- tolower(names(data)[!pos])     # just in case!
 
   
-  # deal with inconsistent extractions
-  # can be rationalised when extraction is formalised
-  # AMAP is identical to OSPAR so that the example with external data will run
+  # create more useful names
+  # for biota, tblsampleid is the species, tblbioid gives the subsample (individual) 
+  # which with matrix gives the unique sample id
+  # for sediment, tblsampleid and matrix give the unique sample id
+  # to streamline, could make sample = tblbioid (biota) or tblsampleid (sediment)
+
   
-  if (purpose %in% c("OSPAR", "AMAP")) {
+  if (data_format == "new") {
+    
+    data <- dplyr::rename(
+      data,
+      submitted.station = statn, 
+      sd_name = sd_code_name,
+      sd_code = sd_code_match,
+      station_name = sd_name_final,
+      station_code = sd_code_final
+    )
+    
+  } else if (purpose %in% c("OSPAR", "AMAP")) {
     
     data <- dplyr::rename(
       data,
@@ -286,10 +317,10 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id) {
   } 
   
   
-  # variables common across purpose and compartment
-  
+  # variables common across purpose and compartments
+
   data <- dplyr::rename(
-    data, 
+    data,
     year = myear, 
     determinand = param, 
     matrix = matrx, 
@@ -388,13 +419,17 @@ ctsm_create_timeSeries <- function(
   print_code_warnings = FALSE, 
   output = c("time_series", "uncertainties"), 
   normalise = FALSE, 
-  normalise.control = list()) {
+  normalise.control = list(), 
+  data_format = c("old", "new")) {
 
   # import_functions.R
   # cleans data and turns into time series structures ready for assessment
   
   library(tidyverse)
 
+  
+  data_format = match.arg(data_format)
+  
   
   # arguments
   
@@ -429,7 +464,8 @@ ctsm_create_timeSeries <- function(
   info <- ctsm.obj$info
   station.dictionary <- ctsm.obj$stations
   data <- ctsm.obj$data
-  QA <- ctsm.obj$QA
+  
+  if (data_format == "old") QA <- ctsm.obj$QA
   
   rm(ctsm.obj)
  
@@ -474,11 +510,19 @@ ctsm_create_timeSeries <- function(
 
   # clean QA data - creates unique qaID to link data and QA files 
 
-  wk <- ctsm_clean_QA(info$purpose, QA, data, info$compartment)
+  if (data_format == "old") {
+  
+    wk <- ctsm_clean_QA(info$purpose, QA, data, info$compartment)
+    
+    data <- wk$data
+    QA <- wk$QA
 
-  data <- wk$data
-  QA <- wk$QA
-
+  } else {
+    
+    data$qaID = rep(0, nrow(data))
+    
+  }
+    
 
   cat("\nFurther cleaning of data\n")
   
@@ -574,7 +618,7 @@ ctsm_create_timeSeries <- function(
   # get method of analysis and check all data have a valid method of analysis, 
   # value and number in pool
   
-  data$metoa <- QA[as.character(data$qaID), "metoa"]
+  if (data_format == "old") data$metoa <- QA[as.character(data$qaID), "metoa"]
 
   for (varID in c("metoa", "value", "noinp")) data <- ctsm.check0(data, varID, info$compartment)
 
@@ -1001,7 +1045,9 @@ ctsm_create_timeSeries <- function(
       out, 
       ctsm_import_value(data, station.dictionary, info, print_code_warnings) 
     )
-    out$QA <- QA
+    
+    if (data_format == "old") out$QA <- QA
+    
     return(out)
 
   }
@@ -1123,23 +1169,31 @@ ctsm_create_timeSeries <- function(
   if (return_early) {
     out  = c(
       out, 
-      ctsm.import.value(data, station.dictionary, info$compartment, info$purpose, print_code_warnings))
-    out$QA <- QA
+      ctsm.import.value(
+        data, 
+        station.dictionary, 
+        info$compartment, 
+        info$purpose, 
+        print_code_warnings)
+    )
+    
+    if (data_format == "old") out$QA <- QA
+    
     return(out)
   }
 
 
   # estimate missing uncertainties
 
-  data$uncertainty <- ctsm.estimate.uncertainty(data, "concentration", info$compartment, QA)
+  data$uncertainty <- ctsm.estimate.uncertainty(data, "concentration", info$compartment)
 
   if (info$compartment == "sediment") {
-    data$AL.uncertainty <- ctsm.estimate.uncertainty(data, "AL", info$compartment, QA)
-    data$LI.uncertainty <- ctsm.estimate.uncertainty(data, "LI", info$compartment, QA)
-    data$CORG.uncertainty <- ctsm.estimate.uncertainty(data, "CORG", info$compartment, QA)
+    data$AL.uncertainty <- ctsm.estimate.uncertainty(data, "AL", info$compartment)
+    data$LI.uncertainty <- ctsm.estimate.uncertainty(data, "LI", info$compartment)
+    data$CORG.uncertainty <- ctsm.estimate.uncertainty(data, "CORG", info$compartment)
     
     if ("LOIGN" %in% names(data)) {
-      data$LOIGN.uncertainty <- ctsm.estimate.uncertainty(data, "LOIGN", info$compartment, QA)
+      data$LOIGN.uncertainty <- ctsm.estimate.uncertainty(data, "LOIGN", info$compartment)
     }    
   }
 
@@ -1234,7 +1288,8 @@ ctsm_create_timeSeries <- function(
     ctsm_import_value(data, station.dictionary, info, print_code_warnings)
   )
   
-  out$QA <- QA
+  if (data_format == "old") out$QA <- QA
+  
   out
 }
 
@@ -1896,7 +1951,7 @@ ctsm.clean.contaminants <- function(purpose, ...) {
     "station", "year", "date", "time", "latitude", "longitude", "depth", "species", 
     "filtered", "sampleID", "sample", "sub.sample", 
     "replicate", "upload", "noinp", "sex", 
-    "determinand", "pargroup", "matrix", "basis", "unit", "value", 
+    "determinand", "pargroup", "matrix", "basis", "metoa", "unit", "value", 
     "qflag", "limit_detection", "limit_quantification", "uncertainty", 
     "methodUncertainty", "alabo", "qalink", "AMAP_group"
   )
@@ -3486,7 +3541,7 @@ ctsm_normalise_calculate <- function(Cm, Nm, Nss, var_Cm, var_Nm, Cx, Nx, var_Cx
 
 
 
-ctsm.estimate.uncertainty <- function(data, response_id, compartment, QA) {
+ctsm.estimate.uncertainty <- function(data, response_id, compartment) {
 
   # estimating missing uncertainties
   
@@ -3572,10 +3627,6 @@ ctsm.estimate.uncertainty <- function(data, response_id, compartment, QA) {
     TRUE                ~ NA_real_
   )
   
-  
-  # get inflation factor from QA 
-  
-  # data$inflation <- QA[as.character(data$qaID), "inflation"]      
   
   data <- dplyr::mutate(
     data, 

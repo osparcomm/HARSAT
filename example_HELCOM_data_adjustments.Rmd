@@ -75,12 +75,11 @@ Here is a summary of the matrix and filtration data. Data with matrix SPM are de
 ```{r water_matrix1}
 water_data$data <- mutate(
   water_data$data,
-  matrix = matrx_std,
-  metpt = metpt_std
+  filtered = if_else(grepl("NF", metpt), "No", "Yes")
 )
 
 water_data$data %>% 
-  with(table(matrix, filtered)) %>% 
+  with(table(matrix, filtered, useNA = "ifany")) %>% 
   print(zero.print = ".")
 
 water_data$data <- filter(
