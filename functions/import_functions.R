@@ -245,13 +245,98 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   infile <- file.path(path, infile)
   cat("\nReading contaminant and biological effects data from '", infile, "'\n", 
       sep = "")
-  
-  data <- read.table(
-    infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
-    na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
-  )
-  
 
+  if (data_format == "old") {  
+
+    data <- read.table(
+      infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
+      na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
+    )
+    
+  } else {
+
+    # specify type of each column
+    # station codes and tblsampleid are converted to characters
+    #   to make it easier to combine with external data - this could be revisited
+    # could maybe filter out unwanted variables at this stage to save space 
+    #   e.g. don't need Ospar variables for a Helcom assessment
+    
+    data <- read.table(
+      infile, 
+      strip.white = TRUE, 
+      sep = "\t", 
+      header = TRUE, 
+      quote = "\"" , 
+      na.strings = c("", "NULL"), 
+      fileEncoding = "UTF-8-BOM", 
+      comment.char = "",
+      colClasses = c(
+        "country" = "character",
+        "mprog" = "character", 
+        "helcom_subbasin" = "character",     
+        "helcom_l3" = "character",
+        "helcom_l4" = "character",
+        "ices_ecoregion" = "character",
+        "ospar_region" = "character", 
+        "ospar_subregion" = "character", 
+        "is_amap_monitoring" = "logical",
+        "is_helcom_monitoring" = "logical", 
+        "is_medpol_monitoring" = "logical", 
+        "is_ospar_monitoring" = "logical",  
+        "is_amap_area" = "logical", 
+        "is_helcom_area" = "logical",
+        "is_ospar_area"= "logical",
+        "rlabo" = "character",
+        "slabo" = "character",
+        "alabo" = "character",               
+        "statn" = "character",
+        "sd_code_match" = "character",
+        "sd_code_name" = "character", 
+        "sd_code_replaced" = "character", 
+        "sd_name_replaced" = "character", 
+        "sd_code_final" = "character",
+        "sd_name_final" = "character", 
+        "myear" = "integer",
+        "date" = "Date",                
+        "latitude" = "numeric",
+        "longitude" = "numeric",
+        "dephu" = "numeric",               
+        "dephl" = "numeric",
+        "purpm" = "character",
+        "finfl" = "character",               
+        "param" = "character",
+        "pargroup" = "character",
+        "matrx" = "character",              
+        "basis" = "character",
+        "value" = "numeric",
+        "munit" = "character",              
+        "detli" = "numeric",
+        "lmqnt" = "numeric",
+        "uncrt" = "numeric",              
+        "metcu" = "character",
+        "qflag" = "character",
+        "vflag" = "character",              
+        "metoa" = "character",
+        "metcx" = "character",
+        "metpt" = "character",
+        "metst" = "character",
+        "metps" = "character",
+        "metfp" = "character",               
+        "smtyp" = "character",
+        "smpno" = "character",
+        "subno" = "character",              
+        "dcflgs" = "character",
+        "tblAnalysisid" = "integer",
+        "tblparamid" = "integer",          
+        "tblsampleid" = "character",
+        "tblspotid" = "integer",
+        "tbluploadid" = "integer"         
+      )
+    )
+    
+  }
+    
+    
   # check regional identifiers are in the extraction 
 
   if (data_format == "new" & purpose == "HELCOM") {
@@ -359,17 +444,21 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     unit = tolower(.data$unit)
   )
   
+  
+  if (data_format == "old") {
 
-  id <- c(
-    region_id, "qflag", "sample", "sub.sample", "sd_code", "station_code", 
-    "sd_name", "station_name"
-  )
+    id <- c(
+      region_id, "qflag", "sample", "sub.sample", "sd_code", "station_code", 
+      "sd_name", "station_name"
+    )
+    
+    data <- dplyr::mutate(
+      data, 
+      dplyr::across(any_of(id), as.character)
+    )
   
-  data <- dplyr::mutate(
-    data, 
-    dplyr::across(any_of(id), as.character)
-  )
-  
+  }
+      
   data
 }
 
@@ -419,18 +508,14 @@ ctsm_create_timeSeries <- function(
   print_code_warnings = FALSE, 
   output = c("time_series", "uncertainties"), 
   normalise = FALSE, 
-  normalise.control = list(), 
-  data_format = c("old", "new")) {
+  normalise.control = list()) {
 
   # import_functions.R
   # cleans data and turns into time series structures ready for assessment
   
   library(tidyverse)
 
-  
-  data_format = match.arg(data_format)
-  
-  
+
   # arguments
   
   # determinands: character string of determinands to be assessed; default is to 
@@ -457,6 +542,15 @@ ctsm_create_timeSeries <- function(
   }
   
 
+  # identify data format (old or new) - temporary requirement during development
+  
+  if (is.null(ctsm.obj$call$data_format)) {
+    data_format <- "old"
+  } else {
+    data_format <- ctsm.obj$call$data_format
+  }
+  
+  
   # get key data structures, and initialise output
 
   out <- list(call = match.call(), call.data = ctsm.obj$call, info = ctsm.obj$info)
@@ -507,7 +601,7 @@ ctsm_create_timeSeries <- function(
   determinands <- wk$determinands
   determinands.control <- wk$control
 
-
+  
   # clean QA data - creates unique qaID to link data and QA files 
 
   if (data_format == "old") {
@@ -522,7 +616,7 @@ ctsm_create_timeSeries <- function(
     data$qaID = rep(0, nrow(data))
     
   }
-    
+
 
   cat("\nFurther cleaning of data\n")
   
@@ -615,12 +709,24 @@ ctsm_create_timeSeries <- function(
   for (varID in c("basis", "matrix", "unit")) data <- ctsm.check0(data, varID, info$compartment)
 
 
-  # get method of analysis and check all data have a valid method of analysis, 
-  # value and number in pool
+  # get method of analysis and method of chemical extraction
   
-  if (data_format == "old") data$metoa <- QA[as.character(data$qaID), "metoa"]
+  if (data_format == "old") {
+    id <- c("metoa", "metcx") 
+    data[id] <- QA[as.character(data$qaID), id]
+  }
+
+  
+  # check all data have a valid method of analysis, value and number in pool
 
   for (varID in c("metoa", "value", "noinp")) data <- ctsm.check0(data, varID, info$compartment)
+
+
+  # get digestion method for metals in sediments and check that these are valid
+  
+  if (info$compartment == "sediment") {
+    data$digestion <- ctsm_get_digestion(data)
+  }
 
 
   # check no replicate measurements (some are genuine replicates, mostly from
@@ -897,16 +1003,24 @@ ctsm_create_timeSeries <- function(
   
   for (i in names(auxData)) {
 
-    if (i %in% c("DRYWT%", "LIPIDWT%", "AL", "LI", "CORG", "LOIGN")) {
+    if (i %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN")) {
       mergeID <- c("sampleID", "matrix")
       newID <- c(
         "concentration", "qflag", "basis", "limit_detection", "limit_quantification", 
-        "uncertainty", "qaID")
+        "uncertainty", "qaID"
+      )
+      newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
+    } else if (i %in% c("AL", "LI")) {
+      mergeID <- c("sampleID", "matrix")
+      newID <- c(
+        "concentration", "qflag", "basis", "limit_detection", "limit_quantification", 
+        "uncertainty", "qaID", "digestion"
+      )
       newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
     } else if (i %in% c("C13D", "N15D")) {
-        mergeID <- "sampleID"
-        newID <- c("concentration", "matrix", "basis")
-        newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
+      mergeID <- "sampleID"
+      newID <- c("concentration", "matrix", "basis")
+      newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
     } else {
       mergeID <- "sampleID"
       newID <- "concentration"
@@ -1235,11 +1349,11 @@ ctsm_create_timeSeries <- function(
       biota = 
         ctsm_normalise_biota(data, QA, station.dictionary, normalise.control),
       sediment = 
-        ctsm_normalise_sediment(data, QA, station.dictionary, normalise.control),
+        ctsm_normalise_sediment(data, station.dictionary, normalise.control),
       water = stop("there is no default normalisation function for water")
     )
   } else if (is.function(normalise)) {
-    data <- normalise(data, QA, station.dictionary, normalise.control)
+    data <- normalise(data, station.dictionary, normalise.control)
   }
     
 
@@ -1282,14 +1396,13 @@ ctsm_create_timeSeries <- function(
     
   }
     
- 
   out  = c(
     out, 
     ctsm_import_value(data, station.dictionary, info, print_code_warnings)
   )
   
   if (data_format == "old") out$QA <- QA
-  
+ 
   out
 }
 
@@ -1951,8 +2064,8 @@ ctsm.clean.contaminants <- function(purpose, ...) {
     "station", "year", "date", "time", "latitude", "longitude", "depth", "species", 
     "filtered", "sampleID", "sample", "sub.sample", 
     "replicate", "upload", "noinp", "sex", 
-    "determinand", "pargroup", "matrix", "basis", "metoa", "unit", "value", 
-    "qflag", "limit_detection", "limit_quantification", "uncertainty", 
+    "determinand", "pargroup", "matrix", "basis", "metoa", "metcx", "unit", 
+    "value", "qflag", "limit_detection", "limit_quantification", "uncertainty", 
     "methodUncertainty", "alabo", "qalink", "AMAP_group"
   )
   
@@ -2141,9 +2254,9 @@ ctsm_link_QA_OSPAR <- function(QA, data, compartment) {
 
   # get digestion method based on metcx - only needed for sediment
 
-  if (compartment == "sediment") {
-    QA <- ctsm.link.QA.digestion(QA, compartment)
-  }
+  # if (compartment == "sediment") {
+  #   QA <- ctsm.link.QA.digestion(QA, compartment)
+  # }
 
 
   # tidy up
@@ -2159,22 +2272,26 @@ ctsm_link_QA_HELCOM <- ctsm_link_QA_OSPAR
 
 
 
-ctsm.link.QA.digestion <- function(data, compartment) {
+ctsm_get_digestion <- function(data) {
 
-  # get digestion method based on metcx
+  # import_functions.R
+  # get digestion method for metals based on metcx
+  
+  data$digestion <- rep(NA_character_)
 
-  data$digestion <- ctsm_get_info(
-      "methodExtraction",
-      data$metcx, 
-      "digestion", 
-      na_action = "input_ok"
+
+  # only apply ctsm_get_info on metals data to avoid all the potential issues
+  # associated with organics submissions
+  
+  is_metal <- data$pargroup %in% "I-MET"  
+  
+  data[is_metal, "digestion"] <- ctsm_get_info(
+    "methodExtraction",
+    data[is_metal, "metcx"], 
+    "digestion", 
+    na_action = "input_ok"
   )
   
-  data$group = ctsm_get_info(
-    "determinand", data$determinand, "group", compartment, sep = "_")
-
-  data$organic = !(data$group == "Metals" | data$determinand %in% c("AL", "LI"))
-
 
   # trap mercury digestion wth metcx of NON  
   
@@ -2184,10 +2301,8 @@ ctsm.link.QA.digestion <- function(data, compartment) {
     data[id, "digestion"] <- "Tot"
   }
   
-  # digestion method 'not needed' for non-metals (AL group is auxiliary)
-  
-  id <- data$organic & is.na(data$digestion)
-  data[id, "digestion"] <- "nn"
+
+  # convert Pe digestion to Ps due to lack of pivot values
   
   id <- data$digestion %in% "Pe"
   if (any(id)) {
@@ -2199,29 +2314,14 @@ ctsm.link.QA.digestion <- function(data, compartment) {
   # check for missing values, organics analysed by a digestion method, and CORG
   # analysed by a digestion method other than HCL
 
-  ok <- ifelse(
-    data$organic,
-    data$digestion %in% "nn" | 
-      (data$determinand %in% "CORG" & data$metcx %in% "HCL"), 
-    !is.na(data$digestion)
-  )
-  
+  not_ok <- is_metal & is.na(data$digestion) 
+
   ctsm.check(
-    data, !ok, action = "warning", 
-    message = "Missing or implausible digestion methods", 
+    data, not_ok, action = "warning", 
+    message = "Missing digestion methods", 
     fileName = "digestion_errors", merge.stations = FALSE)
 
-  not_ok <- data$organic & !(data$digestion %in% "nn") 
-  if (any(not_ok)) {
-    cat("   Converting organics with some sort of digestion based on submitted METCX", 
-        "to 'not needed' for pivot calculation \n")
-    data[not_ok, "digestion"] <- "nn"
-  }
-
-  data$group <- NULL
-  data$organic <- NULL
-
-  data  
+  data$digestion  
 }
 
 
@@ -2776,7 +2876,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
 }  
 
   
-ctsm_normalise_sediment <- function(data, QA, station_dictionary, control) {
+ctsm_normalise_sediment <- function(data, station_dictionary, control) {
   
   # normalises sediment concentrations
   
@@ -2918,8 +3018,8 @@ ctsm_normalise_sediment <- function(data, QA, station_dictionary, control) {
         #   same sample matrix combination
         # might both be missing if QA does not contain the metcx code 
         
-        Cdigestion <- QA[as.character(data$qaID), "digestion"]
-        Ndigestion <- QA[as.character(getNdata("qaID")), "digestion"]
+        Cdigestion <- data$digestion
+        Ndigestion <- getNdata("digestion")
         
         if ("PNL" %in% Cdigestion) {
           warning(
@@ -3093,7 +3193,7 @@ ctsm_normalise_sediment <- function(data, QA, station_dictionary, control) {
 }
 
 
-ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control) {
+ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
   
   # normalises sediment concentrations
   
@@ -3145,7 +3245,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
   
   # make ad-hoc change to deal with LOIGN
   # must undo at the end of the code
-  
+
   data <- mutate(
     data, 
     .tmp = CORG,
@@ -3163,7 +3263,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
 
   
   # split into metals (CD, PB), copper and organics and then normalise each 
-  # with AL, CORG (LOIGN) and CORG (LOIGN) respectively
+  # with AL, CORG (LOIGN) and CORG (LOIGN) respectively#
   
   groupID <- case_when(
     data$determinand %in% c("CD", "PB") ~ "metals",
@@ -3184,7 +3284,10 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
       # check normalisation method fully specified by control
       
       if (! control$method %in% c("none", "simple", "pivot", "hybrid")) {
-        stop("uncoded normalisation method specified: current methods are none, simple, pivot, hybrid")
+        stop(
+          "uncoded normalisation method specified: ", 
+          "current methods are none, simple, pivot, hybrid"
+        )
       }
       
       
@@ -3258,8 +3361,8 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
         #   same sample matrix combination
         # might both be missing if QA does not contain the metcx code 
         
-        Cdigestion <- QA[as.character(data$qaID), "digestion"]
-        Ndigestion <- QA[as.character(getNdata("qaID")), "digestion"]
+        Cdigestion <- data$digestion
+        Ndigestion <- getNdata("digestion")
         
 
         notOK <- !is.na(data[[normaliser]]) & is.na(Ndigestion)
@@ -3338,7 +3441,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
         # get digestion for contaminant 
         # not needed for normaliser (CORG)
 
-        Cdigestion <- QA[as.character(data$qaID), "digestion"]
+        Cdigestion <- data$digestion
 
 
         # check that all pivot values are there (provided digestion information present)
@@ -3409,7 +3512,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, QA, station_dictionary, control
 }
 
 
-ctsm_normalise_biota_HELCOM <- function(data, QA, station_dictionary, control) {
+ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, control) {
   
   # normalises biota concentrations on a lipid weight basis to 5% lipid
   

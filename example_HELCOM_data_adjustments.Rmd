@@ -245,6 +245,20 @@ water_data$data <- mutate(
 
 ### Sediment
 
+```{r sed_setup, include = FALSE}
+
+# default
+
+wk_data_format <- "old"
+
+# overwrite if specified in call
+
+if (!is.null(sediment_data$call$data_format)) {
+  wk_data_format <- sediment_data$call$data_format 
+}
+```
+
+
 #### Data summary
 
 Here is a summary of the submissions for each country, first by determinand and then by year. The grain size fraction data have been omitted for simplicity.  
@@ -740,6 +754,8 @@ wk_data <- mutate(
   Value = NULL
 )
 
+if (wk_data_format == "new") wk_data$indicator <- NULL
+
 sediment_data$data <- bind_rows(sediment_data$data, wk_data)
 
 ```
@@ -776,12 +792,18 @@ wk_CORG <- by(wk_CORG, wk_CORG$station_name, function(x) {
 
 wk_CORG <- do.call(rbind, wk_CORG)
 
+
+  
 wk_id <- c(
-  "indicator", "ges_matrix", "pargroup", "determinand", "basis", "unit",
+  "pargroup", "determinand", "basis", "unit",
   "value", "qflag", "limit_detection", "limit_quantification", "uncertainty", 
   "methodUncertainty", "alabo", "metoa", "smtyp", "qalink"
 )
-  
+
+if (wk_data_format == "old") {
+  wk_id <- append(wk_id, c("indicator", "ges_matrix"), after = 0)
+}
+                  
 wk_data[, wk_id] <- wk_CORG[wk_data$station_name, wk_id] 
 
 wk_data$replicate <- 1:nrow(wk_data) + max(sediment_data$data$replicate)
@@ -797,12 +819,13 @@ rm(wk_data, wk_CORG)
 
 #### Multiple METCX
 
-There are a few instances of multiple METCX for sediment in the QA file. These are unusual. If they are single methods, new METCX codes should be set up. Unfortunately, the R code can't currently deal with them, so we have to modify them sensibly. Here are the methods and the determinands they are used for (relevant to the HELCOM assessment)
+`r if (wk_data_format == "new") "This section is only actioned for the old data format - the issue has been resolved for the new format. "` There are a few instances of multiple METCX for sediment in the QA file. These are unusual. If they are single methods, new METCX codes should be set up. Unfortunately, the R code can't currently deal with them, so we have to modify them sensibly. Here are the methods and the determinands they are used for (relevant to the HELCOM assessment)
 
-```{r sed_metcx1}
+```{r sed_metcx1, eval = wk_data_format == "old"}
+
 sediment_data$QA %>% 
   filter(
-    data_type == "CS", 
+    data_type == "CS",
     determinand %in% c(
       ctsm_get_determinands("sediment"), 
       "BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154", "HBCDA", "HBCDB", "HBCDG"
@@ -824,7 +847,8 @@ Fortunately, most of these are for organics, for which METCX isn't used. So repl
 HNO-CM~LMF-A-L is more problematic, because it is for metals and is a combination of a strong and a total digestion method, which doesn't make sense. Fortunately, it doesn't matter because the only time series with metals data analysed by this method finished in 2014 (see below). So we can replace this code by HNO-CM without it having any impact on the assessment.
 
 
-```{r sed_metcx2}
+```{r sed_metcx2, eval = wk_data_format == "old"}
+
 sediment_data$QA <- mutate(
   sediment_data$QA, 
   metcx = recode(
@@ -866,6 +890,7 @@ sediment_data$QA <- mutate(
   sediment_data$QA, 
   metcx = recode(metcx, "HNO-CM~LMF-A-L" = "HNO-CM")
 )
+
 
 ```
 

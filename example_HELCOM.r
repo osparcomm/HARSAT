@@ -79,7 +79,6 @@ source(file.path(function_path, "information_functions.R"))
 
 
 
-
 # Read data and make adjustments ----
 
 ## biota ----
@@ -101,15 +100,25 @@ biota_data <- ctsm_read_data(
 ## sediment ----
 
 sediment_data <- ctsm_read_data(
-  compartment = "sediment", 
-  purpose = "HELCOM",                               
-  contaminants = "sediment_data.txt", 
-  stations = "station_dictionary.txt", 
-  QA = "quality_assurance.txt",
-  path = file.path("data", "example_HELCOM"), 
+  compartment = "sediment",
+  purpose = "HELCOM",
+  contaminants = file.path("data", "example_HELCOM_new_format", "sediment_data.txt"),
+  stations = file.path("data", "example_HELCOM", "station_dictionary.txt"),
   extraction = "2022/10/06",
-  max_year = 2021L
-)  
+  max_year = 2021L,
+  data_format = "new"
+)
+
+# sediment_data <- ctsm_read_data(
+#   compartment = "sediment",
+#   purpose = "HELCOM",
+#   contaminants = file.path("data", "example_HELCOM", "sediment_data.txt"),
+#   stations = file.path("data", "example_HELCOM", "station_dictionary.txt"),
+#   QA = file.path("data", "example_HELCOM", "quality_assurance.txt"),
+#   extraction = "2022/10/06",
+#   max_year = 2021L,
+#   data_format = "old"
+# )
 
 # saveRDS(sediment_data, file = file.path("RData", "sediment data.rds"))
 
@@ -139,7 +148,6 @@ rmarkdown::render(
   output_dir = file.path("output", "example_HELCOM") 
 )
 
-# saveRDS(biota_data, file = file.path("RData", "biota data adjusted.rds"))
 # saveRDS(sediment_data, file = file.path("RData", "sediment data adjusted.rds"))
 # saveRDS(water_data, file = file.path("RData", "water data adjusted.rds"))
 
@@ -309,8 +317,7 @@ water_timeSeries <- ctsm_create_timeSeries(
   water_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
-  ),
-  data_format = "new"
+  )
 )
 
 # saveRDS(water_timeSeries, file.path("RData", "water timeSeries.rds"))
