@@ -1407,7 +1407,7 @@ get_basis_OSPAR <- function(compartment, group, matrix, determinand, species, li
         rownames_to_column("species") %>% 
         select(.data$species, contains("LIPIDWT%")) %>% 
         gather(key = "matrix", value = "lipid_wt", contains("LIPIDWT%"), na.rm = TRUE) %>% 
-        separate(matrix, c("matrix", NA), sep = "\\.") 
+        separate(matrix, c("matrix", NA), sep = "_") 
       
       out <- left_join(out, lipid_info, by = c("species", "matrix"))
            
@@ -1563,8 +1563,10 @@ info.regions <- sapply(
 # Method of extraction and pivot values ----
 
 info.methodExtraction <- read.csv(
-  info.file("method of extraction.csv"), row.names = "METCX", as.is = "description", 
-  na.strings = "")
+  info.file("method of extraction.csv"), 
+  row.names = "METCX",  
+  na.strings = ""
+)
 
 info.pivotValues <- read.csv(info.file("pivot values.csv"), na.strings = "")
 
