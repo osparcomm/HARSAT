@@ -48,6 +48,12 @@ info_determinand_infile <- "determinand_HELCOM.csv"
 
 source(file.path(function_path, "information_functions.R"))
 
+# check if species values are within pre-defined range
+# constants
+min_value = 0L # min value for species values range check
+max_value = 100L # max value for species values range check
+species <- read.csv(file.path("information",info_species_file_id),header=TRUE,colClasses="character")
+values_range_check_species(species, min_value, max_value)
 
 ## determinands ----
 
