@@ -1,3 +1,47 @@
+# function to check if species numerical values are within pre-defined range 
+
+values_range_check_species <- function(species_data, min_value, max_value) {
+  library(tidyverse)
+  
+  # select subset of columns
+  numerical_columns <- select(species_data, ends_with("WT."))
+  
+  # convert to numerical type
+  numerical_columns <- transform(numerical_columns, 
+                                 MU_DRYWT.   = as.numeric(MU_DRYWT.), 
+                                 LI_DRYWT.   = as.numeric(LI_DRYWT.),
+                                 SB_DRYWT.   = as.numeric(SB_DRYWT.), 
+                                 TM_DRYWT.   = as.numeric(TM_DRYWT.), 
+                                 EH_DRYWT.   = as.numeric(EH_DRYWT.), 
+                                 HA_DRYWT.   = as.numeric(HA_DRYWT.), 
+                                 FE_DRYWT.   = as.numeric(FE_DRYWT.), 
+                                 BL_DRYWT.   = as.numeric(BL_DRYWT.), 
+                                 MU_LIPIDWT. = as.numeric(MU_LIPIDWT.),
+                                 LI_LIPIDWT. = as.numeric(LI_LIPIDWT.),
+                                 SB_LIPIDWT. = as.numeric(SB_LIPIDWT.), 
+                                 TM_LIPIDWT. = as.numeric(TM_LIPIDWT.), 
+                                 EH_LIPIDWT. = as.numeric(EH_LIPIDWT.), 
+                                 HA_LIPIDWT. = as.numeric(HA_LIPIDWT.), 
+                                 FE_LIPIDWT. = as.numeric(FE_LIPIDWT.), 
+                                 BL_LIPIDWT. = as.numeric(BL_LIPIDWT.)
+  )
+  
+  # check the condition if values in pre-defined range
+  condition <- (numerical_columns >= min_value) & (numerical_columns <= max_value)
+  
+  # convert NA to TRUE to only have boolean values
+  condition[is.na(condition)] <- TRUE
+  
+  # check if all values are TRUE
+  check <- all(condition == TRUE)
+  
+  if(!check)
+    print("Warning: not all values in species reference table are within range [min_value, max_value] !!!")
+  else
+    print("OK, all values in species reference table are within range [min_value, max_value]")
+}
+
+
 # Information extractor function ----
 
 ctsm_get_info <- function(
