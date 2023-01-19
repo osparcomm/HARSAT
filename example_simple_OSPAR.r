@@ -66,6 +66,13 @@ biota_data <- ctsm_read_data(
 )  
 
 
+# Prepare data for next stage ----
+
+# gets correct variable and streamlines some of the data files
+
+biota_data <- ctsm_tidy_data(biota_data)
+
+
 # Construct timeseries ----
 
 # identifies groups of data that form a coherent timeseries

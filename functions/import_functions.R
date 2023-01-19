@@ -498,12 +498,420 @@ ctsm_read_QA <- function(QA, path, purpose) {
 }
 
 
+ctsm_tidy_data <- function(ctsm_obj, oddity_path = "oddities") {
+  
+  # import_functions.R
+  # reduces the size of the ICES extraction by removing redundant variables 
+
+  # any ad-hoc changes will usually be made between read_data and simplify_data
+  
+  # output is in the correct format for create_timeSeries
+  
+  library(tidyverse)
+  
+  
+  info <- ctsm_obj$info
+  data <- ctsm_obj$data
+  stations <- ctsm_obj$stations
+  
+  
+  # set up oddity directory and back up any previous oddity files
+  
+  oddity.dir <- ctsm.initialise.oddities(oddity_path)
+  
+  
+  # tidy station dictionary and contaminant data
+  
+  stations <- ctsm_tidy_stations(stations, info)
+
+  data <- ctsm_tidy_contaminants(data, info)
+
+  if (is.null(ctsm_obj$call$data_format)) {
+    data_format <- "old"
+  } else {
+    data_format <- ctsm_obj$call$data_format
+  }
+  
+  if (data_format == "old") {
+    
+    QA <- ctsm_obj$QA
+    
+    wk <- ctsm_tidy_QA(QA, data, info)
+    
+    data <- wk$data
+    QA <- wk$QA
+    
+    id <- c("metoa", "metcx") 
+    data[id] <- QA[as.character(data$qaID), id]
+
+  } else {
+    
+    data$qaID = rep(0, nrow(data))
+
+  }
+
+  
+  ctsm_obj$stations <- stations
+  ctsm_obj$data <- data
+  
+  if (data_format == "old") ctsm_obj$QA <- NULL
+  
+  ctsm_obj
+}
+
+
+ctsm_tidy_stations <- function(stations, info) {
+  
+  cat("\nCleaning station dictionary\n")
+  
+  # purpose-specific changes
+  
+  stations <- do.call(
+    paste("ctsm_tidy_stations", info$purpose, sep = "_"),
+    list(stations = stations, info = info)
+  )
+  
+  
+  # ensure country is consistent
+  
+  stations <- mutate(stations, country = str_to_title(.data$country))
+  
+  
+  # replace backward slash with forward slash in station (long) name
+  
+  stations <- mutate(stations, name = gsub("\\", "/", .data$name, fixed = TRUE))
+  
+  
+  # remove stations that have been replaced
+  
+  stations <- filter(stations, is.na(.data$replacedBy))
+  
+  
+  # check whether any remaining duplicated stations 
+  # if present, select most recent of these
+  # crude method to sort by station, startYear and endYear (since NAs are sorted last)
+  # and then reverse the ordering of the whole data frame so it works with ctsm.check
+  
+  stations <- unite(
+    stations, 
+    "station_id", 
+    .data$country, 
+    .data$station,
+    remove = FALSE
+  )
+  
+  stations <- arrange(stations, .data$station_id, .data$startYear, .data$endYear)
+  stations <- arrange(stations, desc(row_number()))
+  
+  stations <- ctsm.check(
+    stations, 
+    station_id, 
+    action = "delete.dups",
+    message = "Duplicate stations - first one selected",
+    fileName = "duplicate stations", 
+    merge.stations = FALSE
+  )
+  
+  stations$station_id <- NULL
+  
+  
+  # select useful columns
+  
+  col_id <- c(
+    info$region_id, "country", "station", "code", "name", 
+    "latitude", "longitude", "MSTAT", "WLTYP"
+  )
+  stations <- stations[col_id]
+  
+  
+  # order data
+  
+  col_id <- c(info$region_id, "country", "station")
+  
+  stations <- arrange(stations, across(all_of(col_id))) 
+  
+  stations
+}
+
+
+ctsm_tidy_stations_OSPAR <- function(stations, info) {
+  
+  # restrict to OSPAR stations used for temporal monitoring 
+  # also includes grouped stations: Assessment Grouping for OSPAR MIME
+  
+  stations <- filter(
+    stations, 
+    grepl("OSPAR", .data$programGovernance) & grepl("T", .data$PURPM)
+  )
+  
+  # and stations that are used for contaminants or biological effects
+  
+  stations <- filter(
+    stations, 
+    switch(
+      info$compartment, 
+      biota = grepl("CF|EF", .data$dataType), 
+      sediment = grepl("CS", .data$dataType), 
+      water = grepl("CW", .data$dataType)
+    )
+  )
+  
+  
+  # delete stations outside the OSPAR region
+  
+  ctsm.check(
+    stations, 
+    is.na(OSPAR_region) | is.na(OSPAR_subregion), 
+    action = "delete", 
+    message = "Stations outside OSPAR region", 
+    fileName = "stations outside area", 
+    merge.stations = FALSE
+  )
+  
+  
+  # check all regions are within the appropriate OSPAR_region 
+  # can sometimes go wrong due to local shape file errors
+  
+  if (all(c("OSPAR_region", "OSPAR_subregion") %in% info$region_id)) {
+    
+    ok <- local({
+      id1 <- stations$OSPAR_region
+      id2 <- info.regions[["OSPAR"]][stations$OSPAR_subregion, "OSPAR_region"]
+      !is.na(id2) & id1 == id2
+    })
+    
+    ctsm.check(
+      stations, !ok, action = "warning", 
+      message = "OSPAR subregion in wrong OSPAR region", 
+      fileName = "Region information incorrect", merge.stations = FALSE
+    )
+    
+  }    
+  
+  
+  stations
+}
+
+
+ctsm_tidy_stations_HELCOM <- function(stations, info) {
+  
+  # restrict to stations that have a HELCOM region
+  
+  stations <- drop_na(stations, .data$HELCOM_subbasin)
+  
+  
+  stations
+}
+
+
+ctsm_tidy_stations_AMAP <- function(stations, info) {
+  
+  # restrict to AMAP stations used for temporal monitoring 
+  # also includes grouped stations: Assessment Grouping for OSPAR MIME
+  
+  stations <- dplyr::filter(
+    stations,
+    grepl("AMAP", .data$programGovernance) & grepl("T", .data$PURPM)
+  )
+  
+  # and stations that are used for contaminants or biological effects
+  
+  stations <- dplyr::filter(
+    stations,
+    switch(
+      info$compartment,
+      biota = grepl("CF|EF", .data$dataType),
+      sediment = grepl("CS", .data$dataType),
+      water = grepl("CW", .data$dataType)
+    )
+  )
+  
+  # assume missing OSPAR region information corresponds to AMAP stations in 'region 0'
+  
+  # add in regional information for East AMAP area
+  
+  stations <- dplyr::mutate_at(stations, c("OSPAR_region", "OSPAR_subregion"), as.character)
+  
+  stations <- within(stations, {
+    OSPAR_region[is.na(OSPAR_region)] <- "0"
+    OSPAR_subregion[OSPAR_region %in% "0"] <- "East AMAP area"
+  })
+  
+  
+  stations
+}
+
+
+ctsm_tidy_contaminants <- function(data, info) {
+  
+  cat("\nCleaning contaminant and biological effects data\n")
+  
+  # check whether submitted station has matched to station correctly for 
+  # those countries where extraction is by station
+  
+  if (info$purpose %in% c("OSPAR", "AMAP")) {
+    
+    # Denmark, France, Ireland, Norway, Spain (2005 onwards), Sweden, UK
+    # need to update this list
+    
+    odd <- 
+      data$country %in% c(
+        "Denmark", "France", "Ireland", "Norway", "Sweden", "United Kingdom"
+      ) | 
+      (data$country %in% "Spain" & data$year > 2005)
+    
+    # have to use sd_name because station_name also incorporates 
+    # replacements and groupings
+    
+    odd <- odd & !is.na(data$submitted.station) & is.na(data$sd_name)
+    
+  } else if (info$purpose %in% "HELCOM") {
+    
+    odd <- data$country %in% c("Denmark", "Sweden") 
+    
+    odd <- odd & !is.na(data$submitted.station) & is.na(data$station_name)
+    
+  }    
+  
+  ctsm.check(
+    data, 
+    odd, 
+    action = "warning", 
+    message = "Submitted.station not recognised by dictionary", 
+    fileName = "submitted station not recognised", 
+    merge.stations = FALSE
+  )
+  
+  
+  # drop data with no stations  
+  
+  cat("   Dropping data with no stations\n")  
+  
+  ok <- !is.na(data$station_name)
+  data <- droplevels(data[ok, ])
+  
+  
+  # create sampleID from sample or sub.sample (depending on the compartment)
+  # delete sample and sub.sample variables
+  
+  data <- mutate(
+    data,
+    sampleID = switch(
+      info$compartment, 
+      sediment = factor(.data$sample, labels = ""), 
+      biota = factor(.data$sub.sample, labels = ""), 
+      water = factor(.data$sample, labels = "")
+    ),
+    sampleID = as.character(.data$sampleID), 
+    sample = NULL,
+    sub.sample = NULL
+  )
+  
+  
+  # retain useful variables
+  
+  var_id <- c(
+    "country", "station_name", "station_code", "latitude", "longitude", 
+    "year", "date", "time", "depth", 
+    "species", "sex", "noinp", "AMAP_group", "sampleID", "replicate", 
+    "determinand", "pargroup", "matrix", "basis", "filtered", "metoa", "metcx", "metpt",
+    "unit", "value", "qflag", "limit_detection", "limit_quantification", 
+    "uncertainty", "methodUncertainty", "alabo", "qalink"
+  )
+  
+  data <- data[intersect(var_id, names(data))]
+  
+  
+  data
+}
+
+
+
+ctsm_tidy_QA <- function(QA, data, info) {
+  
+  # filter QA by data_type 
+  
+  id <- switch(info$compartment, biota = "CF", sediment = "CS", water = "CW")
+  
+  QA <- dplyr::filter(QA, .data$data_type %in% id)
+  
+  
+  # retain useful variables  
+  
+  QA <- QA[c("alabo", "year", "determinand", "metcx", "metoa", "qalink")]
+  
+  
+  # relabel organotins (which have been relabelled in adjustment file)
+  
+  QA <- ctsm_TBT_convert(QA, action = "relabel")
+  
+  
+  # drop crm data with no useful information
+  
+  QA <- dplyr::filter(QA, !(is.na(.data$metcx) & is.na(.data$metoa)))
+  
+  
+  # retain unique information
+  
+  QA <- unique(QA)
+  
+  
+  # qalink and determinand should be unique combinations 
+  
+  QA <- dplyr::arrange(QA, dplyr::across(c("qalink", "determinand", "metcx", "metoa")))
+  
+  QA <- ctsm.check(
+    QA, 
+    paste(qalink, determinand), 
+    action = "delete.dups",
+    message = "Conflicting QA information - first one selected",
+    fileName = "conflicting QA", 
+    merge.stations = FALSE
+  )
+  
+  ctsm_link_QA(QA, data, info$compartment)
+}
+
+
+ctsm_link_QA <- function(QA, data, compartment) {
+  
+  # create unique qaID to link data and QA files 
+  # should be able to use qalink and determinand, but alabo and year give
+  # useful extra information
+  
+  var_id <- c("determinand", "qalink", "alabo", "year")
+  
+  data <- tidyr::unite(data, "qaID", dplyr::all_of(var_id), remove = FALSE)
+  
+  QA <- tidyr::unite(QA, "qaID", dplyr::all_of(var_id), remove = FALSE)
+  
+  
+  # restrict QA to those values found in data
+  
+  QA <- dplyr::filter(QA, .data$qaID %in% data$qaID)
+  
+  
+  # get digestion method based on metcx - only needed for sediment
+  
+  # if (compartment == "sediment") {
+  #   QA <- ctsm.link.QA.digestion(QA, compartment)
+  # }
+  
+  
+  # tidy up
+  
+  QA <- tibble::column_to_rownames(QA, "qaID")
+  
+  list(QA = QA, data = data)
+}
+
+
 
 ctsm_create_timeSeries <- function(
   ctsm.obj, 
   determinands = ctsm_get_determinands(ctsm.obj$info$compartment), 
   determinands.control = NULL, 
-  oddity.path = "oddities", 
+  oddity_path = "oddities", 
   return_early = FALSE, 
   print_code_warnings = FALSE, 
   output = c("time_series", "uncertainties"), 
@@ -542,15 +950,6 @@ ctsm_create_timeSeries <- function(
   }
   
 
-  # identify data format (old or new) - temporary requirement during development
-  
-  if (is.null(ctsm.obj$call$data_format)) {
-    data_format <- "old"
-  } else {
-    data_format <- ctsm.obj$call$data_format
-  }
-  
-  
   # get key data structures, and initialise output
 
   out <- list(call = match.call(), call.data = ctsm.obj$call, info = ctsm.obj$info)
@@ -558,8 +957,6 @@ ctsm_create_timeSeries <- function(
   info <- ctsm.obj$info
   station.dictionary <- ctsm.obj$stations
   data <- ctsm.obj$data
-  
-  if (data_format == "old") QA <- ctsm.obj$QA
   
   rm(ctsm.obj)
  
@@ -570,21 +967,16 @@ ctsm_create_timeSeries <- function(
   # lots of data cleansing - first ensure oddity directory exists and back up
   # any previous oddity files
 
-  oddity.dir <- ctsm.initialise.oddities(oddity.path)
+  oddity.dir <- ctsm.initialise.oddities(oddity_path)
 
 
-  # clean station dictionary, and provide rownames that will link to stationID 
-  # in the data file
+  # create station identifier in station dictionary and data
 
-  station.dictionary <- ctsm.clean.stations(
-    info$purpose, station.dictionary, info$compartment)
-
-
-  # clean data - get rid of data with no station, construct stationID 
-  # and sampleID, and retain variables that are going to be used 
-
-  data <- ctsm.clean.contaminants(info$purpose, data, info$compartment)
-
+  wk <- ctsm_create_stationID(station.dictionary, data, info)
+  
+  station.dictionary <- wk$stations  
+  data <- wk$data
+  
 
   # retains determinands of interest, including auxiliary determinands and those
   # required by determinands.control$variables 
@@ -602,23 +994,7 @@ ctsm_create_timeSeries <- function(
   determinands.control <- wk$control
 
   
-  # clean QA data - creates unique qaID to link data and QA files 
-
-  if (data_format == "old") {
-  
-    wk <- ctsm_clean_QA(info$purpose, QA, data, info$compartment)
-    
-    data <- wk$data
-    QA <- wk$QA
-
-  } else {
-    
-    data$qaID = rep(0, nrow(data))
-    
-  }
-
-
-  cat("\nFurther cleaning of data\n")
+  cat("\nCleaning data\n")
   
   id <- c("station", "date", "filtered", "species", "sampleID", "matrix", "determinand")
   id <- intersect(id, names(data))
@@ -633,8 +1009,8 @@ ctsm_create_timeSeries <- function(
   data <- ctsm.check(
     data, !ok, action = "delete", message = "Stations not in station dictionary", 
     fileName = "unidentified stations", merge.stations = FALSE)
-  if (!all(ok)) 
-    stop("Error in extraction: stations not in station dictionary", call. = FALSE)
+  # if (!all(ok)) 
+  #   stop("Error in extraction: stations not in station dictionary", call. = FALSE)
 
 
   # drop stations (sediment) or station / species combinations (biota) with no
@@ -709,19 +1085,13 @@ ctsm_create_timeSeries <- function(
   for (varID in c("basis", "matrix", "unit")) data <- ctsm.check0(data, varID, info$compartment)
 
 
-  # get method of analysis and method of chemical extraction
-  
-  if (data_format == "old") {
-    id <- c("metoa", "metcx") 
-    data[id] <- QA[as.character(data$qaID), id]
+  # check all data have a valid method of analysis, value and number in pool
+
+  for (varID in c("metoa", "value", "noinp")) {
+    data <- ctsm.check0(data, varID, info$compartment)
   }
 
   
-  # check all data have a valid method of analysis, value and number in pool
-
-  for (varID in c("metoa", "value", "noinp")) data <- ctsm.check0(data, varID, info$compartment)
-
-
   # get digestion method for metals in sediments and check that these are valid
   
   if (info$compartment == "sediment") {
@@ -1291,8 +1661,6 @@ ctsm_create_timeSeries <- function(
         print_code_warnings)
     )
     
-    if (data_format == "old") out$QA <- QA
-    
     return(out)
   }
 
@@ -1396,13 +1764,11 @@ ctsm_create_timeSeries <- function(
     
   }
     
-  out  = c(
+  out <- c(
     out, 
     ctsm_import_value(data, station.dictionary, info, print_code_warnings)
   )
   
-  if (data_format == "old") out$QA <- QA
- 
   out
 }
 
@@ -1771,240 +2137,18 @@ changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
 }
 
 
-
-
-
-ctsm.clean.stations <- function(purpose, ...) {
-  cat("\nCleaning station dictionary\n")
-  do.call(paste("ctsm.clean.stations", purpose, sep = "."), list(...))
-}
-
-
-ctsm.clean.stations.OSPAR <- function(stations, compartment) {
-
-  # restrict to OSPAR stations used for temporal monitoring 
-  # also includes grouped stations: Assessment Grouping for OSPAR MIME
-
-  stations <- filter(
-    stations, 
-    grepl("OSPAR", .data$programGovernance) & grepl("T", .data$PURPM)
-  )
-
-  # and stations that are used for contaminants or biological effects
+ctsm_create_stationID <- function(stations, data, info) {
   
-  stations <- filter(
-    stations, 
-    switch(
-      compartment, 
-      biota = grepl("CF|EF", .data$dataType), 
-      sediment = grepl("CS", .data$dataType), 
-      water = grepl("CW", .data$dataType)
-    )
-  )
+  # ensure no backward slashes in station dictionary
   
-
-  # ensure country is consistent
-  
-  stations <- mutate(stations, country = str_to_title(.data$country))
-  
-    
-  # ensure no backward slashes in station and replace them in name
-  
-  not_ok <- grepl("\\", stations$station, fixed = TRUE)
-  if (any(not_ok))
-    stop("backward slashes present in station variable")
-  
-  stations <- mutate(stations, name = gsub("\\", "/", .data$name, fixed = TRUE))
-
-  
-  # create station ID and remove stations that have been replaced
-  
-  stations <- stations %>% 
-    unite(stationID, .data$country, .data$station, remove = FALSE) %>% 
-    filter(is.na(.data$replacedBy))
-  
-  
-  # check whether any remaining duplicated stations 
-  # if present, select most recent of these
-  # crude method to sort by station, startYear and endYear (since NAs are sorted last)
-  # and then reverse the ordering of the whole data frame so it works with ctsm.check
-  
-  stations <- stations %>% 
-    arrange(.data$stationID, .data$startYear, .data$endYear) %>% 
-    arrange(desc(row_number()))
-  
-  stations <- ctsm.check(
-    stations, stationID, action = "delete.dups",
-    message = "Duplicate stations - first one selected",
-    fileName = "duplicate stations", merge.stations = FALSE)
-  
-  
-  # identify stations outside the OSPAR region; only a warning because need to
-  # retain this information until we have deleted the data that are associated with these stations; 
-  # should probably do this in a single function call later on, but low priority
-
-  ctsm.check(
-    stations, is.na(OSPAR_region) | is.na(OSPAR_subregion), action = "warning", 
-    message = "Stations outside OSPAR region", 
-    fileName = "stations outside area", merge.stations = FALSE)
+  not_ok <- grepl("\\", stations$station, fixed = TRUE) |
+    grepl("\\", stations$name, fixed = TRUE)
+  if (any(not_ok)) {
+    stop("backward slashes present in station dictionary")
+  }
     
 
-  # check all regions are within the appropriate OSPARregion - can sometimes go wrong due to 
-  # local shape file errors
-  
-  ok <- local({
-    id1 <- stations$OSPAR_region
-    id2 <- info.regions[["OSPAR"]][stations$OSPAR_subregion, "OSPAR_region"]
-    (is.na(id1) & is.na(id2)) | id1 == id2
-  })
-  
-  ctsm.check(
-    stations, !ok, action = "warning", 
-    message = "OSPAR subregion in wrong OSPAR region", 
-    fileName = "Region information incorrect", merge.stations = FALSE)
-  
-
-  # tidy up output
-  
-  stations <- arrange(
-    stations, 
-    .data$OSPAR_region, 
-    .data$OSPAR_subregion, 
-    .data$country, 
-    .data$station
-  )  
-    
-  stations <- column_to_rownames(stations, "stationID")
-
-  col_id <- c(
-    "OSPAR_region", "OSPAR_subregion", "country", "station", "code", "name", 
-    "latitude", "longitude", "offshore", "MSTAT", "WLTYP"
-  )
-  stations <- stations[col_id]
-
-  stations
-}
-
-ctsm.clean.stations.AMAP <- function(stations, compartment) {
-  
-  # restrict to AMAP stations used for temporal monitoring 
-  # also includes grouped stations: Assessment Grouping for OSPAR MIME
-  
-  stations <- dplyr::filter(
-    stations, 
-    grepl("AMAP", .data$programGovernance) & grepl("T", .data$PURPM)
-  )
-  
-  # and stations that are used for contaminants or biological effects
-  
-  stations <- dplyr::filter(
-    stations, 
-    switch(
-      compartment, 
-      biota = grepl("CF", .data$dataType) | grepl("EF", .data$dataType), 
-      sediment = grepl("CS", .data$dataType), 
-      water = grepl("CW", .data$dataType)
-    )
-  )  
-  
-  # assume missing OSPAR region information corresponds to AMAP stations in 'region 0'
-  
-  # add in regional information for East AMAP area
-  
-  stations <- dplyr::mutate_at(stations, c("OSPARregion", "region"), as.character)
-  
-  stations <- within(stations, {
-    OSPARregion[is.na(OSPARregion)] <- "0"
-    region[OSPARregion %in% "0"] <- "East AMAP area"
-  })
-  
-  stations <- dplyr::mutate_at(stations, c("OSPARregion", "region"), as.factor)
-  
-  
-  # create station ID and remove stations that have been replaced
-  
-  stations <- stations %>% 
-    unite(stationID, .data$country, .data$station, remove = FALSE) %>% 
-    filter(is.na(.data$replacedBy))
-  
-  
-  # check whether any remaining duplicated stations 
-  # if present, select most recent of these
-  # crude method to sort by station, startYear and endYear (since NAs are sorted last)
-  # and then reverse the ordering of the whole data frame so it works with ctsm.check
-  
-  stations <- stations %>% 
-    arrange(.data$stationID, .data$startYear, .data$endYear) %>% 
-    arrange(desc(row_number()))
-
-  stations <- ctsm.check(
-    stations, stationID, action = "delete.dups", 
-    message = "Duplicate stations - first one selected", 
-    fileName = "duplicate stations", merge.stations = FALSE)
-  
-  
-  # identify stations outside the AMAP region; only a warning because need to
-  # retain this information until we have deleted the data that are associated with these stations; 
-  # should probably do this in a single function call later on, but low priority
-  
-  ctsm.check(
-    stations, !(OSPARregion %in% c("0", "1")) | is.na(region), action = "warning", 
-    message = "Stations outside AMAP region", 
-    fileName = "stations outside area", merge.stations = FALSE)
-  
-  
-  # check all regions (within the OSPAR area) are within the appropriate OSPARregion
-  # (can sometimes go wrong due to local shape file errors)
-  
-  ok <- local({
-    id1 <- as.character(stations$OSPARregion)
-    region <- as.character(stations$region)
-    id2 <- info.regions[["OSPAR"]][region, "OSPARregion"]
-    id1 == "0" | (is.na(id1) & is.na(id2)) | id1 == id2 
-  })
-  
-  ctsm.check(
-    stations, !ok, action = "warning", 
-    message = "Region in wrong OSPAR region", 
-    fileName = "Region information incorrect", merge.stations = FALSE)
-  
-  
-  # tidy up output
-  
-  stations <- stations %>% 
-    droplevels() %>% 
-    arrange(.data$OSPARregion, .data$region, .data$country, .data$station) %>% 
-    column_to_rownames("stationID")
-  
-  col_id <- c(
-    "OSPARregion", "region", "country", "station", "code", "name", "latitude", "longitude", 
-    "offshore", "MSTAT", "WLTYP", "ICES_ecoregion"
-  )
-  stations <- stations[col_id]
-  
-  stations
-}
-
-ctsm.clean.stations.HELCOM <- function(stations, compartment) {
-  
-  # restrict to stations that have a HELCOM region
-  
-  stations <- drop_na(stations, .data$HELCOM_subbasin)
-  
-  
-  # ensure country is consistent
-  
-  stations <- mutate(stations, country = str_to_title(.data$country))
-  
-
-  # ensure no backward slashes in station and replace them in name
-  
-  not_ok <- grepl("\\", stations$station, fixed = TRUE)
-  if (any(not_ok))
-    stop("backward slashes present in station variable")
-  
-  
-  # create station ID and remove stations that have been replaced
+  # create station ID in station dictionary and ensure no duplicates
   
   stations <- unite(
     stations, 
@@ -2014,261 +2158,39 @@ ctsm.clean.stations.HELCOM <- function(stations, compartment) {
     remove = FALSE
   ) 
   
-  stations <- filter(stations, is.na(.data$replacedBy))
+  if (any(duplicated(stations$stationID))) {
+    stop("duplicated stations found in station dictionary")
+  }
+
   
-
-  # check whether any remaining duplicated stations 
-  # if present, select most recent of these
-  # crude method to sort by station, startYear and endYear (since NAs are sorted last)
-  # and then reverse the ordering of the whole data frame so it works with ctsm.check
-
-  stations <- stations %>% 
-    arrange(.data$stationID, .data$startYear, .data$endYear) %>% 
-    arrange(desc(row_number()))
+  # create corresponding stationID in the data file (variable station)
   
-  stations <- ctsm.check(
-    stations, stationID, action = "delete.dups",
-    message = "Duplicate stations - first one selected",
-    fileName = "duplicate stations", merge.stations = FALSE)
-
-
-  # tidy up output
-
-  stations <- arrange(
-    stations,
-    .data$HELCOM_subbasin, 
-    .data$HELCOM_L3, 
-    .data$HELCOM_L4, 
+  data <- unite(
+    data, 
+    "station", 
     .data$country, 
-    .data$station
+    .data$station_name, 
+    remove = FALSE
   ) 
+  
+  
+  # tidy up station dictionary
+  
+  col_id <- c(info$region_id, "country", "station")
+  
+  stations <- arrange(stations, across(all_of(col_id))) 
+  
+  
+  # create rownames with stationID
   
   stations <- column_to_rownames(stations, "stationID")
   
-  col_id <- c(
-    "HELCOM_subbasin", "HELCOM_L3", "HELCOM_L4", 
-    "country", "station", "code", "name", "latitude", "longitude",
-    "MSTAT", "WLTYP"
-  )
-  stations <- stations[col_id]
   
-  stations  
-}
-
-
-ctsm.clean.contaminants <- function(purpose, ...) {
-  cat("\nCleaning contaminant and biological effects data\n")
-  data <- do.call(paste("ctsm.clean.contaminants", purpose, sep = "."), list(...))
-  
-  id <- c(
-    "station", "year", "date", "time", "latitude", "longitude", "depth", "species", 
-    "filtered", "sampleID", "sample", "sub.sample", 
-    "replicate", "upload", "noinp", "sex", 
-    "determinand", "pargroup", "matrix", "basis", "metoa", "metcx", "unit", 
-    "value", "qflag", "limit_detection", "limit_quantification", "uncertainty", 
-    "methodUncertainty", "alabo", "qalink", "AMAP_group"
-  )
-  
-  data[intersect(id, names(data))]
-}
-
-ctsm.clean.contaminants.OSPAR <- function(data, compartment, ...) {
-
-  # check whether submitted station has matched to station correctly
-  # for Denmark, France, Ireland, Norway, Spain (2005 onwards), Sweden, UK
-   
-  # have to use sd_name because there is then the grouped station amalgamation
-
-  odd <- with(data, {
-    country %in% c("Denmark", "France", "Ireland", "Norway", "Sweden", "United Kingdom") | 
-      (country %in% "Spain" & year > 2005)
-  })
-  
-  odd <- odd & with(data, !is.na(submitted.station) & is.na(sd_name))
-  
-  ctsm.check(
-    data, odd, action = "warning", 
-    message = "Submitted.station not recognised by dictionary", 
-    fileName = "submitted station not recognised", merge.stations = FALSE)
-  
-
-  # drop data with no stations  
-
-  cat("   Dropping data with no stations\n")  
-
-  ok <- with(data, !is.na(station_name))
-  data <- droplevels(data[ok, ])
-  
- 
-  # create new station that is a combination of country and station - corresponds 
-  # to the row.names of the station dictionary - and unique sampleID 
-
-  data <- data %>% 
-    unite(station, .data$country, .data$station_name, remove = FALSE) %>%
-    mutate(
-      station = factor(station),
-      sampleID = switch(
-        compartment, 
-        sediment = factor(sample, labels = ""), 
-        biota = factor(sub.sample, labels = ""), 
-        water = factor(sample, labels = "")
-      )
-    )
-  
-  # drop sample and sub.sample as replicate gives emough information 
-  
-  data <- data[setdiff(names(data), c("sample", "sub.sample"))]
-  
-  data
-}
-
-ctsm.clean.contaminants.AMAP <- ctsm.clean.contaminants.OSPAR
-
-ctsm.clean.contaminants.HELCOM <- function(data, compartment, ...) {
-  
-  # check whether submitted station has matched to station correctly for Denmark and Sweden
-      
-  # (differs from OSPAR because extraction doesn't yet have grouped station amalgamation)
-  
-  odd <- data$country %in% c("Denmark", "Sweden") 
-
-  odd <- odd & with(data, !is.na(submitted.station) & is.na(station_name))
-  
-  ctsm.check(
-    data, odd, action = "warning", 
-    message = "Submitted.station not recognised by dictionary", 
-    fileName = "submitted station not in dictionary", merge.stations = FALSE)
-  
-  
-  # drop data with no stations  
-  
-  cat("   Dropping data with no stations\n")  
-  
-  ok <- with(data, !is.na(station_name))
-  data <- droplevels(data[ok, ])
-  
-  
-  # create new station that is a combination of country and station - corresponds 
-  # to the row.names of the station dictionary - and unique sampleID 
-  
-  data <- data %>% 
-    unite(station, .data$country, .data$station_name, remove = FALSE) %>%
-    mutate(
-      station = factor(station),
-      sampleID = switch(
-        compartment, 
-        sediment = factor(sample, labels = ""), 
-        biota = factor(sub.sample, labels = ""), 
-        water = factor(sample, labels = "")
-      )
-    )
-  
-  # drop sample and sub.sample as replicate gives emough information 
-  
-  data <- data[setdiff(names(data), c("sample", "sub.sample"))]
-  
-  data
+  list(stations = stations, data = data)
 }
 
 
 
-
-
-
-ctsm_clean_QA <- function(purpose, ...) {
-  cat("\nCleaning QA data\n")
-  do.call(paste("ctsm_clean_QA", purpose, sep = "_"), list(...))
-}
-
-ctsm_clean_QA_OSPAR <- function(QA, data, compartment) {
-  
-  # filter QA by data_type 
-  
-  id <- switch(compartment, biota = "CF", sediment = "CS", water = "CW")
-  
-  QA <- dplyr::filter(QA, .data$data_type %in% id)
-
-  
-  # retain useful variables  
-
-  QA <- QA[c("alabo", "year", "determinand", "metcx", "metoa", "qalink")]
-  
-  
-  # relabel organotins (which have been relabelled in adjustment file)
-  
-  QA <- ctsm_TBT_convert(QA, action = "relabel")
-  
-
-  # drop crm data with no useful information
-  
-  QA <- dplyr::filter(QA, !(is.na(.data$metcx) & is.na(.data$metoa)))
-  
-
-  # retain unique information
-
-  QA <- unique(QA)
-
-
-  # qalink and determinand should be unique combinations 
-  
-  QA <- dplyr::arrange(QA, dplyr::across(c("qalink", "determinand", "metcx", "metoa")))
-  
-  QA <- ctsm.check(
-    QA, 
-    paste(qalink, determinand), 
-    action = "delete.dups",
-    message = "Conflicting QA information - first one selected",
-    fileName = "conflicting QA", 
-    merge.stations = FALSE
-  )
-  
-  ctsm_link_QA_OSPAR(QA, data, compartment)
-}
-
-ctsm_clean_QA_HELCOM <- ctsm_clean_QA_OSPAR
-
-ctsm_clean_QA_AMAP <- ctsm_clean_QA_OSPAR
-
-
-
-ctsm_link_QA <- function(purpose, ...)
-  do.call(paste("ctsm_link_QA", purpose, sep = "."), list(...))
-
-ctsm_link_QA_OSPAR <- function(QA, data, compartment) {
-  
-  # create unique qaID to link data and QA files 
-  # should be able to use qalink and determinand, but alabo and year give
-  # useful extra information
-
-  var_id <- c("determinand", "qalink", "alabo", "year")
-  
-  data <- tidyr::unite(data, "qaID", dplyr::all_of(var_id), remove = FALSE)
-  
-  QA <- tidyr::unite(QA, "qaID", dplyr::all_of(var_id), remove = FALSE)
-  
-  
-  # restrict QA to those values found in data
-  
-  QA <- dplyr::filter(QA, .data$qaID %in% data$qaID)
-  
-
-  # get digestion method based on metcx - only needed for sediment
-
-  # if (compartment == "sediment") {
-  #   QA <- ctsm.link.QA.digestion(QA, compartment)
-  # }
-
-
-  # tidy up
-  
-  QA <- tibble::column_to_rownames(QA, "qaID")
-
-  list(QA = QA, data = data)
-}
-
-ctsm_link_QA_AMAP <- ctsm_link_QA_OSPAR
-
-ctsm_link_QA_HELCOM <- ctsm_link_QA_OSPAR
 
 
 
