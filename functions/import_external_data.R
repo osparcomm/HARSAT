@@ -144,7 +144,7 @@ add_non_ICES_data <- function(
   # check all required columns are present
   
   required <- c(
-    "code", "OSPARregion", "region", "country", "programGovernance", "station", "latitude", 
+    "code", "OSPAR_region", "OSPAR_subregion", "country", "programGovernance", "station", "latitude", 
     "longitude") 
   
   ok <- required %in% id
@@ -155,7 +155,7 @@ add_non_ICES_data <- function(
 
   col_types <- rep("skip", length(id))
   col_types[
-    id %in% c("code", "OSPARregion", "region", "country", "programGovernance", "station")] <- "text"
+    id %in% c("code", "OSPAR_region", "OSPAR_subregion", "country", "programGovernance", "station")] <- "text"
   col_types[id %in% c("latitude", "longitude")] <- "numeric"
 
   AMAP_stations <- readxl::read_excel(file_id, col_types = col_types, na = "")
@@ -180,7 +180,7 @@ add_non_ICES_data <- function(
 
   region_id <- c(
     "Barents Sea", "Greenland-Scotland ridge", "Norwegian Sea", "East of Iceland", "West of Iceland")
-  wk <- with(AMAP_stations, ifelse(OSPARregion %in% 1, region %in% region_id, TRUE))
+  wk <- with(AMAP_stations, ifelse(OSPAR_region %in% 1, OSPAR_subregion %in% region_id, TRUE))
   if (!all(wk))
     stop("region in OSPARregion 1 must be one of", paste(region_id, collapse = ", "))
 

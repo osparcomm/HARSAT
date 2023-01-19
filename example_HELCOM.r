@@ -158,6 +158,16 @@ rmarkdown::render(
 # saveRDS(water_data, file = file.path("RData", "water data adjusted.rds"))
 
 
+# Prepare data for next stage ----
+
+# gets correct variable and streamlines some of the data files
+
+biota_data <- ctsm_tidy_data(biota_data)
+sediment_data <- ctsm_tidy_data(sediment_data)
+water_data <- ctsm_tidy_data(water_data)
+
+
+
 # Construct timeseries ----
 
 ## biota ----
@@ -194,8 +204,19 @@ biota_data$data <- bind_rows(biota_data$data, wk)
 
 # ad-hoc change to merge methods of analysis for Poland for PYR10H
 
-biota_data$QA <- mutate(
-  biota_data$QA, 
+# biota_data$QA <- mutate(
+#   biota_data$QA, 
+#   metoa = if_else(
+#     alabo %in% "IMWP" & 
+#       determinand %in% "PYR1OH" &
+#       year %in% 2020:2021,
+#     "HPLC-FD", 
+#     metoa
+#   )
+# )  
+
+biota_data$data <- mutate(
+  biota_data$data, 
   metoa = if_else(
     alabo %in% "IMWP" & 
       determinand %in% "PYR1OH" &
@@ -204,6 +225,8 @@ biota_data$QA <- mutate(
     metoa
   )
 )  
+
+
   
 # ad_hoc change to info_TEQ to make it appropriate for human health QS
 

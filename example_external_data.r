@@ -48,6 +48,7 @@ max_value = 100L # max value for species values range check
 species <- read.csv(file.path("information",info_species_file_id),header=TRUE,colClasses="character")
 values_range_check_species(species, min_value, max_value)
 
+
 # Read data from ICES extraction ----
 
 # mercury data with supporting variables, station dictionary, and 
@@ -88,6 +89,14 @@ rmarkdown::render(
 )
 
 # saveRDS(biota_data, file.path("RData", "biota data adjusted.rds"))
+
+
+# Prepare data for next stage ----
+
+# gets correct variable and streamlines some of the data files
+
+biota_data <- ctsm_tidy_data(biota_data)
+
 
 
 # Construct timeseries ----
