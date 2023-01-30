@@ -29,7 +29,10 @@ source(file.path(function_path, "support_functions.R"))
 info_species_file_id <- "species_2020.csv"
 info_uncertainty_file_id <- "uncertainty_2020.csv"
 
-info_AC_type <- "OSPAR"
+info_AC_type <- "EXTERNAL"
+if(tolower(info_AC_type) != tolower("OSPAR") && tolower(info_AC_type) != tolower("HELCOM") && tolower(info_AC_type) != tolower("EXTERNAL")){
+  stop("info_AC_type can only be OSPAR, HELCOM, or EXTERNAL")
+}
 
 info_AC_infile <- list(
   biota = "assessment criteria biota.csv",
