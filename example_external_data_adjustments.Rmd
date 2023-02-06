@@ -230,8 +230,8 @@ wk_data <- biota_data$data %>%
   filter(.id) %>% 
   mutate(
     relative_uncertainty = case_when(
-      methodUncertainty == "SD" ~ 100 * uncertainty / value,
-      methodUncertainty == "U2" ~ 100 * uncertainty / (2 * value),
+      unit_uncertainty == "SD" ~ 100 * uncertainty / value,
+      unit_uncertainty == "U2" ~ 100 * uncertainty / (2 * value),
       TRUE                      ~ uncertainty
     ),
     value = convert_units(value, from = unit, to = "ug/kg")
@@ -252,12 +252,12 @@ The suspicion is that the method of uncertainty has been incorrectly reported as
 ```{r Ireland_uncrt_2}
 
 wk_data %>%  
-  with(table(methodUncertainty, year, useNA = "ifany")) %>% 
+  with(table(unit_uncertainty, year, useNA = "ifany")) %>% 
   print(zero.print = ".")
 
 biota_data$data <- mutate(
   biota_data$data, 
-  methodUncertainty = if_else(.id, "U2", methodUncertainty)
+  unit_uncertainty = if_else(.id, "U2", unit_uncertainty)
 )
 
 # check
@@ -309,7 +309,7 @@ wk_data <- filter(
 if (any(wk_data$determinand %in% "HG" & wk_data$basis %in% "D" & wk_data$year != 2016))
   stop("something has changed - investigate")
 
-if (!all(na.omit(wk_data$methodUncertainty) %in% "U2"))
+if (!all(na.omit(wk_data$unit_uncertainty) %in% "U2"))
   stop("something has changed - investigate")
 
 wk_data %>% 

@@ -880,44 +880,44 @@ if (info_AC_type == "OSPAR") {
     
     with(data, {
       
-      stopifnot("metoa" %in% names(data))
+      stopifnot("method_analysis" %in% names(data))
       
       if ("BAC" %in% AC) {
         id <- species %in% "Limanda limanda"
-        out$BAC[id & determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 16
-        out$BAC[id & determinand %in% "PA1OH" & metoa %in% "HPLC-FD"] <- 3.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 0.15
+        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
+        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
+        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 0.15
         
         id <- species %in% "Gadus morhua"
-        out$BAC[id & determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 21
-        out$BAC[id & determinand %in% "PA1OH" & metoa %in% "HPLC-FD"] <- 2.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 1.1
+        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 21
+        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 2.7
+        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.1
         
         id <- species %in% "Platichthys flesus"
-        out$BAC[id & determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 16
-        out$BAC[id & determinand %in% "PA1OH" & metoa %in% "HPLC-FD"] <- 3.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 1.3
+        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
+        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
+        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.3
         
         id <- species %in% "Melanogrammus aeglefinus"
-        out$BAC[id & determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 13
-        out$BAC[id & determinand %in% "PA1OH" & metoa %in% "HPLC-FD"] <- 0.8
-        out$BAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 1.9
+        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 13
+        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 0.8
+        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.9
       }
       
       if ("EAC" %in% AC) {
         id <- species %in% "Limanda limanda"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 22
+        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 22
         
         id <- species %in% "Gadus morhua"
-        out$EAC[id & determinand %in% "PYR1OH" & metoa %in% "GC-MS"] <- 483
-        out$EAC[id & determinand %in% "PA1OH" & metoa %in% "GC-MS"] <- 528
-        out$EAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 35
+        out$EAC[id & determinand %in% "PYR1OH" & method_analysis %in% "GC-MS"] <- 483
+        out$EAC[id & determinand %in% "PA1OH" & method_analysis %in% "GC-MS"] <- 528
+        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
         
         id <- species %in% "Platichthys flesus"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 29
+        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 29
         
         id <- species %in% "Melanogrammus aeglefinus"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 35
+        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
       }
       
       out
@@ -1039,10 +1039,10 @@ if (info_AC_type == "HELCOM") {
     
     with(data, {
       
-      stopifnot("metoa" %in% names(data))
+      stopifnot("method_analysis" %in% names(data))
       
       if ("EAC" %in% AC) {
-        out$EAC[determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 483
+        out$EAC[determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 483
       }
       
       out
@@ -1548,44 +1548,44 @@ if (info_AC_type == "EXTERNAL") {
     
     with(data, {
       
-      stopifnot("metoa" %in% names(data))
+      stopifnot("method_analysis" %in% names(data))
       
       if ("BAC" %in% AC) {
         id <- species %in% "Limanda limanda"
-        out$BAC[id & determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 16
-        out$BAC[id & determinand %in% "PA1OH" & metoa %in% "HPLC-FD"] <- 3.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 0.15
+        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
+        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
+        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 0.15
         
         id <- species %in% "Gadus morhua"
-        out$BAC[id & determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 21
-        out$BAC[id & determinand %in% "PA1OH" & metoa %in% "HPLC-FD"] <- 2.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 1.1
+        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 21
+        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 2.7
+        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.1
         
         id <- species %in% "Platichthys flesus"
-        out$BAC[id & determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 16
-        out$BAC[id & determinand %in% "PA1OH" & metoa %in% "HPLC-FD"] <- 3.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 1.3
+        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
+        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
+        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.3
         
         id <- species %in% "Melanogrammus aeglefinus"
-        out$BAC[id & determinand %in% "PYR1OH" & metoa %in% "HPLC-FD"] <- 13
-        out$BAC[id & determinand %in% "PA1OH" & metoa %in% "HPLC-FD"] <- 0.8
-        out$BAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 1.9
+        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 13
+        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 0.8
+        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.9
       }
       
       if ("EAC" %in% AC) {
         id <- species %in% "Limanda limanda"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 22
+        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 22
         
         id <- species %in% "Gadus morhua"
-        out$EAC[id & determinand %in% "PYR1OH" & metoa %in% "GC-MS"] <- 483
-        out$EAC[id & determinand %in% "PA1OH" & metoa %in% "GC-MS"] <- 528
-        out$EAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 35
+        out$EAC[id & determinand %in% "PYR1OH" & method_analysis %in% "GC-MS"] <- 483
+        out$EAC[id & determinand %in% "PA1OH" & method_analysis %in% "GC-MS"] <- 528
+        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
         
         id <- species %in% "Platichthys flesus"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 29
+        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 29
         
         id <- species %in% "Melanogrammus aeglefinus"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & metoa %in% "FLM-SS"] <- 35
+        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
       }
       
       out

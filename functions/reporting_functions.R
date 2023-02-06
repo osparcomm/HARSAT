@@ -504,7 +504,7 @@ ctsm_summary_table <- function(
       "country", "CMA", 
       "code", "station", "stationName", "latitude", "longitude", "MSTAT", "WLTYP", 
       "determinand", "detGroup", "species", "filtered",
-      "submedia", "matrix", "basis", "unit", "sex", "metoa", "AMAP_group", "shape", "colour"
+      "submedia", "matrix", "basis", "unit", "sex", "method_analysis", "AMAP_group", "shape", "colour"
     ) 
   
     summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
@@ -524,7 +524,7 @@ ctsm_summary_table <- function(
       assessment$info$region_id, 
       "country", "CMA", 
       "station", "stationName", "latitude", "longitude", "determinand", "detGroup", 
-      "species", "matrix", "sex", "metoa", "AMAP_group", "filtered", "shape", "colour", 
+      "species", "matrix", "sex", "method_analysis", "AMAP_group", "filtered", "shape", "colour", 
       "nyfit", "nypos"
     )
   
@@ -542,8 +542,8 @@ ctsm_summary_table <- function(
     if ("sex" %in% names(overview))
       overview <- within(overview, determinand2 <- paste_overview(determinand2, sex))
     
-    if ("metoa" %in% names(overview))
-      overview <- within(overview, determinand2 <- paste_overview(determinand2, metoa))
+    if ("method_analysis" %in% names(overview))
+      overview <- within(overview, determinand2 <- paste_overview(determinand2, method_analysis))
     
     if ("AMAP_group" %in% names(overview))
       overview <- within(overview, determinand2 <- paste_overview(determinand2, AMAP_group))

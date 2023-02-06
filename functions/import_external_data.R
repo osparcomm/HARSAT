@@ -29,7 +29,7 @@ add_non_ICES_data <- function(
   
   required <- c(
     "country", "station_code", "station_name", "species", "sex", "determinand", "matrix", "basis", 
-    "unit", "uncertainty", "methodUncertainty", "qflag", "sub.sample", "year", "value", 
+    "unit", "uncertainty", "unit_uncertainty", "qflag", "sub.sample", "year", "value", 
     "limit_detection", "limit_quantification", "AMAP_group") 
  
   ok <- required %in% id
@@ -41,7 +41,7 @@ add_non_ICES_data <- function(
   col_types <- rep("skip", length(id))
   col_types[id %in% c(
     "country", "station_code", "station_name", "species", "sex", "determinand", "matrix", "basis", 
-    "unit", "methodUncertainty", "qflag", "sub.sample", "AMAP_group")] <- "text"
+    "unit", "unit_uncertainty", "qflag", "sub.sample", "AMAP_group")] <- "text"
   col_types[id %in% c(
     "year", "value", "uncertainty", "limit_detection", "limit_quantification")] <- "numeric"
 
@@ -87,7 +87,7 @@ add_non_ICES_data <- function(
     stop("following variables have missing values: ", paste(var_id[!ok], collapse = ", "))
   
   stopifnot(
-    with(AMAP_data, ifelse(!is.na(uncertainty), !is.na(methodUncertainty), TRUE))
+    with(AMAP_data, ifelse(!is.na(uncertainty), !is.na(unit_uncertainty), TRUE))
   )
   
 

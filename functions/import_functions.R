@@ -373,7 +373,10 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
       sd_name = sd_code_name,
       sd_code = sd_code_match,
       station_name = sd_name_final,
-      station_code = sd_code_final
+      station_code = sd_code_final,
+      method_analysis = metoa,
+      method_extraction = metcx,
+      method_pretreatment = metpt
     )
     
   } else if (purpose %in% c("OSPAR", "AMAP")) {
@@ -397,8 +400,9 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
       sd_code = sd_stationcode,
       station_name = sd_replacedby_stationname,
       station_code = sd_replacedby_stationcode,
+      method_analysis = metoa
     )
-    
+
   } 
   
   
@@ -412,7 +416,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     unit = munit, 
     qalink = tblanalysisid,
     uncertainty = uncrt,
-    methodUncertainty = metcu, 
+    unit_uncertainty = metcu, 
     replicate = tblparamid, 
     sample = tblsampleid, 
     limit_detection = detli,
@@ -489,7 +493,9 @@ ctsm_read_QA <- function(QA, path, purpose) {
     unit = munit,
     data_type = dtype,
     determinand = param,
-    qalink = tblanalysisid
+    qalink = tblanalysisid, 
+    method_analysis = metoa,
+    method_extraction = metcx
   )
 
   crm <- dplyr::mutate(crm, determinand = toupper(.data$determinand))
@@ -541,7 +547,7 @@ ctsm_tidy_data <- function(ctsm_obj, oddity_path = "oddities") {
     data <- wk$data
     QA <- wk$QA
     
-    id <- c("metoa", "metcx") 
+    id <- c("method_analysis", "method_extraction") 
     data[id] <- QA[as.character(data$qaID), id]
 
   } else {
@@ -814,9 +820,10 @@ ctsm_tidy_contaminants <- function(data, info) {
     "country", "station_name", "station_code", "latitude", "longitude", 
     "year", "date", "time", "depth", 
     "species", "sex", "noinp", "AMAP_group", "sampleID", "replicate", 
-    "determinand", "pargroup", "matrix", "basis", "filtered", "metoa", "metcx", "metpt",
+    "determinand", "pargroup", "matrix", "basis", "filtered", 
+    "method_analysis", "method_extraction", "method_pretreatment",
     "unit", "value", "qflag", "limit_detection", "limit_quantification", 
-    "uncertainty", "methodUncertainty", "alabo", "qalink"
+    "uncertainty", "unit_uncertainty", "alabo", "qalink"
   )
   
   data <- data[intersect(var_id, names(data))]
@@ -838,7 +845,7 @@ ctsm_tidy_QA <- function(QA, data, info) {
   
   # retain useful variables  
   
-  QA <- QA[c("alabo", "year", "determinand", "metcx", "metoa", "qalink")]
+  QA <- QA[c("alabo", "year", "determinand", "method_extraction", "method_analysis", "qalink")]
   
   
   # relabel organotins (which have been relabelled in adjustment file)
@@ -848,7 +855,7 @@ ctsm_tidy_QA <- function(QA, data, info) {
   
   # drop crm data with no useful information
   
-  QA <- dplyr::filter(QA, !(is.na(.data$metcx) & is.na(.data$metoa)))
+  QA <- dplyr::filter(QA, !(is.na(.data$method_extraction) & is.na(.data$method_analysis)))
   
   
   # retain unique information
@@ -858,7 +865,7 @@ ctsm_tidy_QA <- function(QA, data, info) {
   
   # qalink and determinand should be unique combinations 
   
-  QA <- dplyr::arrange(QA, dplyr::across(c("qalink", "determinand", "metcx", "metoa")))
+  QA <- dplyr::arrange(QA, dplyr::across(c("qalink", "determinand", "method_extraction", "method_analysis")))
   
   QA <- ctsm.check(
     QA, 
@@ -891,7 +898,7 @@ ctsm_link_QA <- function(QA, data, compartment) {
   QA <- dplyr::filter(QA, .data$qaID %in% data$qaID)
   
   
-  # get digestion method based on metcx - only needed for sediment
+  # get digestion method based on method_extraction - only needed for sediment
   
   # if (compartment == "sediment") {
   #   QA <- ctsm.link.QA.digestion(QA, compartment)
@@ -1087,7 +1094,7 @@ ctsm_create_timeSeries <- function(
 
   # check all data have a valid method of analysis, value and number in pool
 
-  for (varID in c("metoa", "value", "noinp")) {
+  for (varID in c("method_analysis", "value", "noinp")) {
     data <- ctsm.check0(data, varID, info$compartment)
   }
 
@@ -1226,14 +1233,14 @@ ctsm_create_timeSeries <- function(
   data <- mutate(
     data, 
     uncertainty_sd = case_when(
-      methodUncertainty %in% "U2" ~ uncertainty / 2, 
-      methodUncertainty %in% "%" ~ value * uncertainty / 100, 
+      unit_uncertainty %in% "U2" ~ uncertainty / 2, 
+      unit_uncertainty %in% "%" ~ value * uncertainty / 100, 
       TRUE ~ uncertainty
     ),
     uncertainty_rel = 100 * (uncertainty_sd / value)
   )                 
 
-  wk_id <- match("methodUncertainty", names(data))
+  wk_id <- match("unit_uncertainty", names(data))
   wk_n <- ncol(data)
   data <- data[c(
     names(data)[1:wk_id], 
@@ -1255,7 +1262,7 @@ ctsm_create_timeSeries <- function(
     
   data <- within(data, {
     uncertainty <- uncertainty_sd
-    rm(methodUncertainty, uncertainty_sd, uncertainty_rel)
+    rm(unit_uncertainty, uncertainty_sd, uncertainty_rel)
   })
   
 
@@ -1959,7 +1966,7 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   out.names = c(
     "station", "latitude", "longitude", "filtered", "species", "sex", "depth",
     "year", "date", "time", "sample", "sub.sample", "sampleID", 
-    "matrix", "AMAP_group", "group", "determinand", "basis", "unit", "value", "metoa", "noinp", 
+    "matrix", "AMAP_group", "group", "determinand", "basis", "unit", "value", "method_analysis", "noinp", 
     "concOriginal", "qflagOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "qflag",  
     "qaID", "limit_detection", "limit_quantification", "uncertainty",  
@@ -1984,15 +1991,15 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
     id <- switch(
       info$purpose, 
       AMAP = c(id, "species", "matrix", "AMAP_group"), 
-      OSPAR = c(id, "species", "matrix", "sex", "metoa", "AMAP_group"),
-      c(id, "species", "matrix", "sex", "metoa")
+      OSPAR = c(id, "species", "matrix", "sex", "method_analysis", "AMAP_group"),
+      c(id, "species", "matrix", "sex", "method_analysis")
     )
   if (info$compartment == "water" & info$purpose %in% "HELCOM")
     id <- c(id, "filtered")
   timeSeries <- data[id]
   
   
-  # simplify relevant elements of matrix, sex and metoa for level6 and level7, 
+  # simplify relevant elements of matrix, sex and method_analysis for level6 and level7, 
   # with a view to then 
   # identifying each time series
 
@@ -2004,13 +2011,13 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
       sex = if_else(.data$determinand %in% "EROD", .data$sex, NA_character_),
       sex = factor(sex),
       
-      metoa = as.character(metoa),
+      method_analysis = as.character(method_analysis),
       .group = ctsm_get_info(
         "determinand", .data$determinand, "group", "biota", sep = "_"
       ),
-      metoa = if_else(.group %in% "Metabolites", .data$metoa, NA_character_),
+      method_analysis = if_else(.group %in% "Metabolites", .data$method_analysis, NA_character_),
       .group = NULL,
-      metoa = factor(metoa)
+      method_analysis = factor(method_analysis)
     )
  }
     
@@ -2115,8 +2122,8 @@ changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
   id <- group %in% "Metabolites"
   if (any(id))
     timeSeries[id, ] <- within(timeSeries[id, ], {
-      level6element <- "METOA"
-      level6name <- as.character(metoa)
+      level6element <- "method_analysis"
+      level6name <- as.character(method_analysis)
     })
   
   id <- !group %in% c("Effects", "Imposex", "Metabolites")
@@ -2197,7 +2204,7 @@ ctsm_create_stationID <- function(stations, data, info) {
 ctsm_get_digestion <- function(data) {
 
   # import_functions.R
-  # get digestion method for metals based on metcx
+  # get digestion method for metals based on method_extraction
   
   data$digestion <- rep(NA_character_)
 
@@ -2209,17 +2216,17 @@ ctsm_get_digestion <- function(data) {
   
   data[is_metal, "digestion"] <- ctsm_get_info(
     "methodExtraction",
-    data[is_metal, "metcx"], 
+    data[is_metal, "method_extraction"], 
     "digestion", 
     na_action = "input_ok"
   )
   
 
-  # trap mercury digestion wth metcx of NON  
+  # trap mercury digestion wth method_extraction of NON  
   
-  id <- data$metoa %in% "AAS-CV" & data$metcx %in% "NON"
+  id <- data$method_analysis %in% "AAS-CV" & data$method_extraction %in% "NON"
   if (any(id)) {
-    message("   Warning: Ad-hoc way of dealing with mercury digestion that has metcx of NON")
+    message("   Warning: Ad-hoc way of dealing with mercury digestion that has method_extraction of NON")
     data[id, "digestion"] <- "Tot"
   }
   
@@ -2614,7 +2621,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
     
     
     # make output row have all the information from the largest determinand (ad-hoc) 
-    # ensures a sensible qaID, metoa, etc.
+    # ensures a sensible qaID, method_analysis, etc.
     
     out <- x[which.max(x$value), ]
     
@@ -2738,7 +2745,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
     
     
     # make output row have all the information from the largest determinand (ad-hoc) 
-    # ensures a sensible qaID, metoa, etc.
+    # ensures a sensible qaID, method_analysis, etc.
     
     out <- x[which.max(x$value), ]
     
@@ -2938,7 +2945,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
         # get digestion for both contaminant and normaliser (nn indicates not required)
         # if missing digestion for normaliser, assume the strongest method for the 
         #   same sample matrix combination
-        # might both be missing if QA does not contain the metcx code 
+        # might both be missing if QA does not contain the method_extraction code 
         
         Cdigestion <- data$digestion
         Ndigestion <- getNdata("digestion")
@@ -3281,7 +3288,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
         # get digestion for both contaminant and normaliser (nn indicates not required)
         # if missing digestion for normaliser, assume the strongest method for the 
         #   same sample matrix combination
-        # might both be missing if QA does not contain the metcx code 
+        # might both be missing if QA does not contain the method_extraction code 
         
         Cdigestion <- data$digestion
         Ndigestion <- getNdata("digestion")
@@ -3684,8 +3691,8 @@ ctsm_TBT_convert <- function(
     stop("shouldn't relabel cation determinands")
   
   if ("convert" %in% action & "uncertainty" %in% convert_var & 
-      ! "methodUncertainty" %in% names(data))
-    stop("methodUncertainty not provided to allow conversion of uncertainty")
+      ! "unit_uncertainty" %in% names(data))
+    stop("unit_uncertainty not provided to allow conversion of uncertainty")
   
   
   id <- data$determinand %in% switch(
@@ -3708,7 +3715,7 @@ ctsm_TBT_convert <- function(
   
   if ("convert" %in% action) {
     if ("uncertainty" %in% convert_var) 
-      with(data[id, ], stopifnot(is.na(methodUncertainty) | methodUncertainty %in% "U2"))
+      with(data[id, ], stopifnot(is.na(unit_uncertainty) | unit_uncertainty %in% "U2"))
     
     tin_id <- with(data[id, ], substring(determinand, 1, 2))
     conversion <- dplyr::recode(

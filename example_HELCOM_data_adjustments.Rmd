@@ -75,7 +75,7 @@ Here is a summary of the matrix and filtration data. Data with matrix SPM are de
 ```{r water_matrix1}
 water_data$data <- mutate(
   water_data$data,
-  filtered = if_else(grepl("NF", metpt), "No", "Yes")
+  filtered = if_else(grepl("NF", method_pretreatment), "No", "Yes")
 )
 
 water_data$data %>% 
@@ -228,7 +228,7 @@ water_data$data %>%
   filter(.id) %>% 
   select(
     country, year, determinand, value, qflag, limit_detection, 
-    limit_quantification, uncertainty, methodUncertainty
+    limit_quantification, uncertainty, unit_uncertainty
   ) %>% 
   as.data.frame() %>% 
   DT::datatable(options = DT_options, rownames = FALSE)
@@ -743,11 +743,11 @@ wk_data <- mutate(
   value = Value,
   unit = "%", 
   qflag = NA_character_,
-  metoa = NA_character_,
+  method_analysis = NA_character_,
   limit_detection = NA_real_,
   limit_quantification = NA_real_, 
   uncertainty = NA_real_, 
-  methodUncertainty = NA_character_, 
+  unit_uncertainty = NA_character_, 
   alabo = "NSLS", 
   qalink = 0,
   replicate = 1:nrow(wk_data) + max(sediment_data$data$replicate), 
@@ -797,7 +797,7 @@ wk_CORG <- do.call(rbind, wk_CORG)
 wk_id <- c(
   "pargroup", "determinand", "basis", "unit",
   "value", "qflag", "limit_detection", "limit_quantification", "uncertainty", 
-  "methodUncertainty", "alabo", "metoa", "smtyp", "qalink"
+  "unit_uncertainty", "alabo", "method_analysis", "smtyp", "qalink"
 )
 
 if (wk_data_format == "old") {
@@ -817,9 +817,9 @@ rm(wk_data, wk_CORG)
 <br>
 
 
-#### Multiple METCX
+#### Multiple method_extraction
 
-`r if (wk_data_format == "new") "This section is only actioned for the old data format - the issue has been resolved for the new format. "` There are a few instances of multiple METCX for sediment in the QA file. These are unusual. If they are single methods, new METCX codes should be set up. Unfortunately, the R code can't currently deal with them, so we have to modify them sensibly. Here are the methods and the determinands they are used for (relevant to the HELCOM assessment)
+`r if (wk_data_format == "new") "This section is only actioned for the old data format - the issue has been resolved for the new format. "` There are a few instances of multiple method_extraction for sediment in the QA file. These are unusual. If they are single methods, new method_extraction codes should be set up. Unfortunately, the R code can't currently deal with them, so we have to modify them sensibly. Here are the methods and the determinands they are used for (relevant to the HELCOM assessment)
 
 ```{r sed_metcx1, eval = wk_data_format == "old"}
 
@@ -830,11 +830,11 @@ sediment_data$QA %>%
       ctsm_get_determinands("sediment"), 
       "BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154", "HBCDA", "HBCDB", "HBCDG"
     ),
-    grepl("~", metcx, fixed = TRUE) 
+    grepl("~", method_extraction, fixed = TRUE) 
   ) %>% 
-  distinct(metcx, determinand, alabo) %>% 
-  arrange(metcx, alabo) %>% 
-  select(metcx, alabo, determinand) %>% 
+  distinct(method_extraction, determinand, alabo) %>% 
+  arrange(method_extraction, alabo) %>% 
+  select(method_extraction, alabo, determinand) %>% 
   as.data.frame() %>% 
   DT::datatable(options = DT_options, rownames = FALSE)
 
@@ -842,7 +842,7 @@ sediment_data$QA %>%
 
 <br>
 
-Fortunately, most of these are for organics, for which METCX isn't used. So replace e.g. ACH~PLE by ACE etc. 
+Fortunately, most of these are for organics, for which method_extraction isn't used. So replace e.g. ACH~PLE by ACE etc. 
 
 HNO-CM~LMF-A-L is more problematic, because it is for metals and is a combination of a strong and a total digestion method, which doesn't make sense. Fortunately, it doesn't matter because the only time series with metals data analysed by this method finished in 2014 (see below). So we can replace this code by HNO-CM without it having any impact on the assessment.
 
@@ -851,8 +851,8 @@ HNO-CM~LMF-A-L is more problematic, because it is for metals and is a combinatio
 
 sediment_data$QA <- mutate(
   sediment_data$QA, 
-  metcx = recode(
-    metcx, 
+  method_extraction = recode(
+    method_extraction, 
     "ACH~PLE" = "ACH", 
     "ACE~PLE~TOL" = "ACE",
     "DCM~METH" = "DCM",
@@ -866,7 +866,7 @@ wk_id <- sediment_data$QA %>%
   filter(
     data_type == "CS", 
     determinand %in% c("CD", "HG", "CU"),
-    metcx == "HNO-CM~LMF-A-L" 
+    method_extraction == "HNO-CM~LMF-A-L" 
   ) %>% 
   distinct(alabo, year) %>%
   unite(.id) %>% 
@@ -888,7 +888,7 @@ sediment_data$data %>%
 
 sediment_data$QA <- mutate(
   sediment_data$QA, 
-  metcx = recode(metcx, "HNO-CM~LMF-A-L" = "HNO-CM")
+  method_extraction = recode(method_extraction, "HNO-CM~LMF-A-L" = "HNO-CM")
 )
 
 
@@ -908,8 +908,8 @@ wk <- sediment_data$data %>%
   mutate(
     value = convert_units(value, unit, "%"),
     uncertainty = case_when(
-      methodUncertainty == "U2" ~ 100 * (uncertainty / 2) / value, 
-      methodUncertainty == "SD" ~ 100 * uncertainty / value, 
+      unit_uncertainty == "U2" ~ 100 * (uncertainty / 2) / value, 
+      unit_uncertainty == "SD" ~ 100 * uncertainty / value, 
       TRUE                      ~ uncertainty
     ), 
     uncertainty = if_else(uncertainty >= 100, NA_real_, uncertainty)
@@ -1062,7 +1062,7 @@ wk <- biota_data$data %>%
   
 wk %>% 
   select(year, station_name, sub.sample, determinand, matrix, 
-         replicate, value, uncertainty, methodUncertainty) %>% 
+         replicate, value, uncertainty, unit_uncertainty) %>% 
   arrange(year, sub.sample, determinand, replicate) %>%
   as.data.frame() %>% 
   DT::datatable(options = DT_options, rownames = FALSE)
@@ -1071,7 +1071,7 @@ wk_rep <- wk$replicate
 
 wk_keep <- wk %>% 
   filter(
-    methodUncertainty == "%" |
+    unit_uncertainty == "%" |
       100 * uncertainty / value > 5  
   ) %>% 
   pull(replicate)
@@ -1470,12 +1470,12 @@ Here is a summary of the data by method of analysis (which is important for appl
 ```{r bio_eff3}
 get_relevant_biota() %>% 
   filter(determinand %in% "PYR1OH") %>% 
-  with(table(metoa, year)) %>% 
+  with(table(method_analysis, year)) %>% 
   print(zero.print = ".")
 
 biota_data$data <- filter(
   biota_data$data, 
-  !(determinand %in% "PYR1OH" & metoa %in% "GRS") 
+  !(determinand %in% "PYR1OH" & method_analysis %in% "GRS") 
 )
 
 ```
@@ -1487,7 +1487,7 @@ And here is what is left by species and country. Conventionally, separate time s
 ```{r bio_eff4}
 get_relevant_biota() %>% 
   filter(determinand %in% "PYR1OH") %>% 
-  with(table(metoa, year, country)) %>% 
+  with(table(method_analysis, year, country)) %>% 
   print(zero.print = ".")
 
 ```
