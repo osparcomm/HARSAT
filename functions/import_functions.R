@@ -407,6 +407,8 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   data <- dplyr::rename(
     data,
     year = myear, 
+    sample_latitude = latitude,
+    sample_longitude = longitude,
     determinand = param, 
     matrix = matrx, 
     unit = munit, 
@@ -543,12 +545,11 @@ ctsm_tidy_data <- function(ctsm_obj, oddity_path = "oddities") {
     
     id <- c("metoa", "metcx") 
     data[id] <- QA[as.character(data$qaID), id]
-
-  } else {
     
-    data$qaID = rep(0, nrow(data))
+    data$qaID <- NULL
+    data$qalink <- NULL
 
-  }
+  } 
 
   
   ctsm_obj$stations <- stations
@@ -811,7 +812,7 @@ ctsm_tidy_contaminants <- function(data, info) {
   # retain useful variables
   
   var_id <- c(
-    "country", "station_name", "station_code", "latitude", "longitude", 
+    "country", "station_name", "station_code", "sample_latitude", "sample_longitude", 
     "year", "date", "time", "depth", 
     "species", "sex", "noinp", "AMAP_group", "sampleID", "replicate", 
     "determinand", "pargroup", "matrix", "basis", "filtered", "metoa", "metcx", "metpt",
@@ -1377,14 +1378,14 @@ ctsm_create_timeSeries <- function(
       mergeID <- c("sampleID", "matrix")
       newID <- c(
         "concentration", "qflag", "basis", "limit_detection", "limit_quantification", 
-        "uncertainty", "qaID"
+        "uncertainty"
       )
       newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
     } else if (i %in% c("AL", "LI")) {
       mergeID <- c("sampleID", "matrix")
       newID <- c(
         "concentration", "qflag", "basis", "limit_detection", "limit_quantification", 
-        "uncertainty", "qaID", "digestion"
+        "uncertainty", "digestion"
       )
       newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
     } else if (i %in% c("C13D", "N15D")) {
@@ -1957,15 +1958,17 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   )
 
   out.names = c(
-    "station", "latitude", "longitude", "filtered", "species", "sex", "depth",
+    "station", "sample_latitude", "sample_longitude", "filtered", 
+    "species", "sex", "depth",
     "year", "date", "time", "sample", "sub.sample", "sampleID", 
-    "matrix", "AMAP_group", "group", "determinand", "basis", "unit", "value", "metoa", "noinp", 
+    "matrix", "AMAP_group", "group", "determinand", "basis", "unit", "value", 
+    "metoa", "noinp", 
     "concOriginal", "qflagOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "qflag",  
-    "qaID", "limit_detection", "limit_quantification", "uncertainty",  
+    "limit_detection", "limit_quantification", "uncertainty",  
     paste(
-      rep(auxiliary, each = 6), 
-      c("", ".qflag", ".qaID", ".limit_detection", ".limit_quantification", ".uncertainty"), 
+      rep(auxiliary, each = 5), 
+      c("", ".qflag", ".limit_detection", ".limit_quantification", ".uncertainty"), 
       sep = ""
     ),
     "C13D.basis", "C13D.matrix", "N15D.basis", "N15D.matrix")
@@ -2738,7 +2741,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
     
     
     # make output row have all the information from the largest determinand (ad-hoc) 
-    # ensures a sensible qaID, metoa, etc.
+    # ensures a sensible metoa, etc.
     
     out <- x[which.max(x$value), ]
     
@@ -3590,7 +3593,7 @@ ctsm.estimate.uncertainty <- function(data, response_id, compartment) {
   if (response_id != "concentration") {
     data <- mutate(data, determinand = rep(response_id, nrow(data)))
 
-    var1 <- c("uncertainty", "qflag", "limit_detection", "limit_quantification", "qaID")  
+    var1 <- c("uncertainty", "qflag", "limit_detection", "limit_quantification")  
     var2  <- paste(response_id, var1, sep = ".")
     
     data[c("concentration", var1)] <- data[c(response_id, var2)]
