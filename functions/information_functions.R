@@ -156,11 +156,11 @@ info.species <- read.csv(
 
 # Uncertainty estimates ----
 
-info.uncertainty <- read.csv(
-  info.file(info_uncertainty_file_id), 
-  row.names = "determinand", 
-  na.strings = ""
-)
+# info.uncertainty <- read.csv(
+#   info.file(info_uncertainty_file_id), 
+#   row.names = "determinand", 
+#   na.strings = ""
+# )
 
 
 # Determinand information and functions ----
@@ -184,6 +184,12 @@ info.determinand <- read.csv(
     biota_auxiliary = "character", 
     sediment_auxiliary = "character", 
     water_auxiliary = "character", 
+    biota_sd_constant = "numeric",
+    biota_sd_variable = "numeric",
+    sediment_sd_constant = "numeric",
+    sediment_sd_variable = "numeric",
+    water_sd_constant = "numeric",
+    water_sd_variable = "numeric",
     distribution = "character", 
     good_status = "character"
   )

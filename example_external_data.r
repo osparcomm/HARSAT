@@ -27,7 +27,6 @@ source(file.path(function_path, "support_functions.R"))
 # source reference tables and associated information functions
 
 info_species_file_id <- "species_2020.csv"
-info_uncertainty_file_id <- "uncertainty_2020.csv"
 
 info_AC_type <- "EXTERNAL"
 if(tolower(info_AC_type) != tolower("OSPAR") && tolower(info_AC_type) != tolower("HELCOM") && tolower(info_AC_type) != tolower("EXTERNAL")){
@@ -249,4 +248,6 @@ ctsm_summary_table(
   determinandGroups = webGroups,
   path = file.path("output", "example_external_data")
 )
+
+
 
