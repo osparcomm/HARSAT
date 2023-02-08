@@ -3610,11 +3610,23 @@ ctsm.estimate.uncertainty <- function(data, response_id, compartment) {
   
   # get two components of variance
   
-  data$sd_constant <- ctsm_get_info(
-    "uncertainty", data$determinand, "sd_constant", compartment, na_action = "output_ok")
+  data$sd_constant = ctsm_get_info(
+    "determinand", 
+    data$determinand, 
+    "sd_constant", 
+    compartment, 
+    na_action = "output_ok", 
+    sep = "_"
+  )
   
   data$sd_variable = ctsm_get_info(
-    "uncertainty", data$determinand, "sd_variable", compartment, na_action = "output_ok")
+    "determinand", 
+    data$determinand, 
+    "sd_variable", 
+    compartment, 
+    na_action = "output_ok", 
+    sep = "_"
+  )
   
   
   # adjust sd_constant to correct basis (

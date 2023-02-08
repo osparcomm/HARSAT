@@ -34,7 +34,6 @@ source(file.path(function_path, "support_functions.R"))
 # source reference tables and associated information functions
 
 info_species_file_id <- "species_2020.csv"
-info_uncertainty_file_id <- "uncertainty_2020.csv"
 
 info_AC_type <- "HELCOM"
 
@@ -310,13 +309,13 @@ wk_id <- setdiff(wk_id, c("CD", "PB"))
 info.determinand[wk_id, "sediment_auxiliary"] <- 
   paste0(info.determinand[wk_id, "sediment_auxiliary"], ", LOIGN") 
 
-info.uncertainty["LOIGN", c("sediment.sd_constant", "sediment.sd_variable")] <-
+info.determinand["LOIGN", c("sediment_sd_constant", "sediment_sd_variable")] <-
   c(0, 0.1)
 
 
 # and uncertainty for SBDE6 (estimated from OSPAR data)
 
-info.uncertainty["SBDE6", c("sediment.sd_constant", "sediment.sd_variable")] <-
+info.determinand["SBDE6", c("sediment_sd_constant", "sediment_sd_variable")] <-
   c(0.0433, 0.1727)
 
 

@@ -26,7 +26,6 @@ source(file.path(function_path, "support_functions.R"))
 # source reference tables and associated information functions
 
 info_species_file_id <- "species_2020.csv"
-info_uncertainty_file_id <- "uncertainty_2020.csv"
 
 info_AC_type <- "OSPAR"
 
