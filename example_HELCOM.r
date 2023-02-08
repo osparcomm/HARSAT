@@ -148,7 +148,7 @@ water_data <- ctsm_read_data(
 # correct known errors in the data
 
 rmarkdown::render(
-  "example_HElCOM_data_adjustments.Rmd", 
+  "example_HELCOM_data_adjustments.Rmd", 
   output_file = "HELCOM_adjustments.html",
   output_dir = file.path("output", "example_HELCOM") 
 )
@@ -216,17 +216,16 @@ biota_data$data <- bind_rows(biota_data$data, wk)
 
 biota_data$data <- mutate(
   biota_data$data, 
-  metoa = if_else(
+  method_analysis = if_else(
     alabo %in% "IMWP" & 
       determinand %in% "PYR1OH" &
       year %in% 2020:2021,
     "HPLC-FD", 
-    metoa
+    method_analysis
   )
 )  
 
 
-  
 # ad_hoc change to info_TEQ to make it appropriate for human health QS
 
 info_TEQ["CDFO"] <- 0.0003
@@ -274,19 +273,19 @@ biota_timeSeries$data <- mutate(
 
 biota_timeSeries$data <- mutate(
   biota_timeSeries$data, 
-  metoa = if_else(
+  method_analysis = if_else(
     grepl("Poland", station) &  
       determinand %in% "PYR1OH" &
       year %in% 2020,
     "HPLC-ESI-MS-MS", 
-    metoa
+    method_analysis
   ), 
-  metoa = if_else(
+  method_analysis = if_else(
     grepl("Poland", station) &  
       determinand %in% "PYR1OH" &
       year %in% 2021,
     "GC-MS-MS", 
-    metoa
+    method_analysis
   ), 
 )  
 

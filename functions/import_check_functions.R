@@ -658,7 +658,7 @@ ctsm.check.unit.water <- function(data) {
 }             
 
 
-ctsm.check.metoa.sediment <- function(data) {
+ctsm.check.method_analysis.sediment <- function(data) {
 
   data <- within(data, {
     ok <- TRUE
@@ -668,7 +668,7 @@ ctsm.check.metoa.sediment <- function(data) {
   data
 }  
 
-ctsm.check.metoa.water <- function(data) {
+ctsm.check.method_analysis.water <- function(data) {
   
   data <- within(data, {
     ok <- TRUE
@@ -678,7 +678,7 @@ ctsm.check.metoa.water <- function(data) {
   data
 }  
 
-ctsm.check.metoa.biota <- function(data) {
+ctsm.check.method_analysis.biota <- function(data) {
 
   id <- data$group != "Metabolites"
   if (any(id))
@@ -690,13 +690,13 @@ ctsm.check.metoa.biota <- function(data) {
   id <- data$group %in% "Metabolites"
   if (any(id))
     data[id,] <- within(data[id,], {    
-      # ok <- metoa %in% c("FLM-SS", "HPLC-FD", "GC-MS", "GC-MS-MS", "GC-MS-SIM")
-      ok <- !is.na(metoa)
+      # ok <- method_analysis %in% c("FLM-SS", "HPLC-FD", "GC-MS", "GC-MS-MS", "GC-MS-SIM")
+      ok <- !is.na(method_analysis)
       action <- ifelse(ok, "none", "error")
       
-      if (any(metoa %in% c("GC-MS-MS", "GC-MS-SIM"))) {
-        cat ("   Bile metabolite metoa GC-MS-MS and GC-MS-SIM changed to GC-MS\n")
-        new[metoa %in% c("GC-MS-MS", "GC-MS-SIM")] <- "GC-MS"
+      if (any(method_analysis %in% c("GC-MS-MS", "GC-MS-SIM"))) {
+        cat ("   Bile metabolite method_analysis GC-MS-MS and GC-MS-SIM changed to GC-MS\n")
+        new[method_analysis %in% c("GC-MS-MS", "GC-MS-SIM")] <- "GC-MS"
       }
     })
   
