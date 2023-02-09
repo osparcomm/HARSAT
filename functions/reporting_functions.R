@@ -102,9 +102,8 @@ ctsm_web_setup <- function(assessmentObject) {
   timeSeries <- within(timeSeries, stationID <- as.character(stationID))
   
   stations <- assessmentObject$stations
-  stations <- swap.names(stations, "name", "stationName")
-  
-  
+
+
   # convert station factors to characters for output 
   
   stations <- tibble::rownames_to_column(stations, ".rownames")
@@ -502,7 +501,8 @@ ctsm_summary_table <- function(
       "series", 
       assessment$info$region_id,  
       "country", "CMA", 
-      "code", "station", "stationName", "latitude", "longitude", "MSTAT", "WLTYP", 
+      "station_code", "station_name", "station_longname", 
+      "station_latitude", "station_longitude", "station_type", "waterbody_type", 
       "determinand", "detGroup", "species", "filtered",
       "submedia", "matrix", "basis", "unit", "sex", "method_analysis", "AMAP_group", "shape", "colour"
     ) 
@@ -510,104 +510,14 @@ ctsm_summary_table <- function(
     summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
 
     sortID <- intersect(
-      c(assessment$info$region_id, "country", "CMA", "station", 
+      c(assessment$info$region_id, "country", "CMA", "station_name", 
         "species", "detGroup", "determinand", "matrix"), 
       names(summary)
     )
     summary <- summary[do.call(order, summary[sortID]), ]
     
-      
-    
-    # now streamline to get colour coded fit
-    
-    wk <- c(
-      assessment$info$region_id, 
-      "country", "CMA", 
-      "station", "stationName", "latitude", "longitude", "determinand", "detGroup", 
-      "species", "matrix", "sex", "method_analysis", "AMAP_group", "filtered", "shape", "colour", 
-      "nyfit", "nypos"
-    )
-  
-    overview <- summary[wk[wk %in% names(summary)]]
 
-    overview <- within(overview, determinand2 <- as.character(determinand))
-    
-    # ad hoc fix for biota - need to generalise
-
-    paste_overview <- function(det2, var) ifelse(is.na(var), det2, paste(det2, var))
-    
-    if ("matrix" %in% names(overview))
-      overview <- within(overview, determinand2 <- paste_overview(determinand2, matrix))
-
-    if ("sex" %in% names(overview))
-      overview <- within(overview, determinand2 <- paste_overview(determinand2, sex))
-    
-    if ("method_analysis" %in% names(overview))
-      overview <- within(overview, determinand2 <- paste_overview(determinand2, method_analysis))
-    
-    if ("AMAP_group" %in% names(overview))
-      overview <- within(overview, determinand2 <- paste_overview(determinand2, AMAP_group))
-    
-    overview <- within(overview, {
-      shape[shape %in% "downward_triangle"] <- "down"
-      shape[shape %in% "upward_triangle"] <- "up"
-      shape[shape %in% c("large_filled_circle", "small_filled_circle", "small_open_circle")] <- 
-        "flat"
-      summary <- paste(nyfit, colour, shape)
-    })
-
-    overview <- within(overview, id <- as.character(station))
-    
-    if ("country" %in% names(overview)) overview <- within(overview, id <- paste(country, id))
-    
-    if ("species" %in% names(overview)) overview <- within(overview, id <- paste(id, species))
-    
-    if ("filtered" %in% names(overview)) overview <- within(overview, id <- paste(id, filtered))
-    
-    
-    station.var <- c(
-      assessment$info$region_id, 
-      "country", "CMA", 
-      "station", "stationName", "latitude", "longitude", "species", "filtered"
-    )
-    station.var <- station.var[station.var %in% names(summary)]
-    
-    overview <- overview[c(station.var, "determinand2", "summary", "id")] 
-
-    overview <- reshape(overview, direction = "wide", v.names = "summary", 
-              timevar = "determinand2", idvar = "id")
-
-    overview <- overview[-match("id", names(overview))]
-
-    names(overview) <- gsub("summary.", "", names(overview), fixed = TRUE)
-    
-    
-    # order both rows and columns
-
-    sortID <- intersect(
-      c(assessment$info$region_id, "CMA", "station"), 
-      names(overview)
-    )
-    overview <- overview[do.call(order, overview[sortID]), ]
-    
-    wk <- setdiff(names(overview), station.var)
-    wk.det <- sapply(strsplit(wk, " "), "[[", 1)
-    wk.group <- ctsm_get_info(
-      "determinand", wk.det, "group", assessment$info$compartment, sep = "_"
-    )
-    wk.group <- factor(
-      wk.group, 
-      levels = c(
-        "Metals", "Organotins", "PAH_parent", "PAH_alkylated", "PAH_metabolites", 
-        "PBDEs", "Organobromines", "Organofluorines", "Chlorobiphenyls", 
-        "Dioxins", "Organochlorines", "Imposex", "Effects"
-      )
-    )  
-    wk.group <- droplevels(wk.group)
-    
-    overview <- overview[c(station.var, wk[order(wk.group, wk.det)])]
-
-    if (!export) return(list(summary = summary, overview = overview))
+    # rename variables
     
     summary <- rename(
       summary, 
@@ -716,14 +626,7 @@ ctsm_summary_table <- function(
     
 
     # rename some variables
-    
-    summary <- rename(
-      summary, 
-      station_code = code,
-      station_name = station,
-      station_long_name = stationName,
-    )
-    
+
     if ("AMAP_group" %in% names(summary)) {
       summary <- rename(summary, mammal_group = AMAP_group)
     }
@@ -734,9 +637,12 @@ ctsm_summary_table <- function(
     }
     
 
-    outfile <- file.path(path, paste0(tolower(x), "_summary.csv"))
-     
-    readr::write_excel_csv(summary, outfile, na = "")
+    if (export) {
+      outfile <- file.path(path, paste0(tolower(x), "_summary.csv"))
+      readr::write_excel_csv(summary, outfile, na = "")
+    }
+    
+    summary
   })  
   
   if (export) invisible() else out

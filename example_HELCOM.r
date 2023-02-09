@@ -203,17 +203,6 @@ biota_data$data <- bind_rows(biota_data$data, wk)
 
 # ad-hoc change to merge methods of analysis for Poland for PYR10H
 
-# biota_data$QA <- mutate(
-#   biota_data$QA, 
-#   metoa = if_else(
-#     alabo %in% "IMWP" & 
-#       determinand %in% "PYR1OH" &
-#       year %in% 2020:2021,
-#     "HPLC-FD", 
-#     metoa
-#   )
-# )  
-
 biota_data$data <- mutate(
   biota_data$data, 
   method_analysis = if_else(

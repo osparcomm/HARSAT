@@ -162,6 +162,17 @@ add_non_ICES_data <- function(
   AMAP_stations <- as.data.frame(AMAP_stations)
 
 
+  # rename variables to be compatible with new names
+  
+  AMAP_stations <- rename(
+    AMAP_stations,
+    station_code = code,
+    station_name = station,
+    station_latitude = latitude,
+    station_longitude = longitude
+  )
+  
+
   # data checks
   
   if (any(is.na(AMAP_stations)))
@@ -187,7 +198,7 @@ add_non_ICES_data <- function(
   
   # check for no conflicts in station dictionary
   
-  id <- c("country", "station")
+  id <- c("country", "station_name")
   if (any(my_paste(AMAP_stations[id]) %in% my_paste(ICES_data$stations[id])))
     stop("AMAP station replicates a station in the ICES station dictionary", call. = FALSE)
   
@@ -195,7 +206,11 @@ add_non_ICES_data <- function(
   # check for consistency between data and stations
 
   id <- sort(unique(AMAP_data$station_code))
-  ok <- id %in% c(AMAP_stations$code, as.character(ICES_data$stations$code))
+  ok <- id %in% c(
+    AMAP_stations$station_code, 
+    as.character(ICES_data$stations$station_code)
+  )
+  
   if (!all(ok))
     stop(
       "The following stations are in the data file but not the station file or the ICES station ", 
@@ -205,13 +220,16 @@ add_non_ICES_data <- function(
     )
   
   stopifnot(
-    AMAP_data$station_name %in% c(AMAP_stations$station, as.character(ICES_data$stations$station))
+    AMAP_data$station_name %in% c(
+      AMAP_stations$station_name, 
+      as.character(ICES_data$stations$station_name)
+    )
   )
     
   wk <- unique(AMAP_data[c("country", "station_code", "station_name")])
   ok <- my_paste(wk) %in% 
-    c(my_paste(AMAP_stations[c("country", "code", "station")]), 
-      my_paste(ICES_data$stations[c("country", "code", "station")]))
+    c(my_paste(AMAP_stations[c("country", "station_code", "station_name")]), 
+      my_paste(ICES_data$stations[c("country", "station_code", "station_name")]))
 
   if (!all(ok)) {
     cat("Error: the following combinations in the data are not in ICES or AMAP station files:\n")
@@ -228,7 +246,7 @@ add_non_ICES_data <- function(
     dataType = "CF"
   )
     
-
+  
   # construct QA file
     
   AMAP_QA <- data.frame(qalink = 0)

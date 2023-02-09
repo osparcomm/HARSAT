@@ -2325,7 +2325,7 @@ get_RECO <- function(code, path = "information") {
 
 # get station code from station name
   
-get_station_code <- function(name, country, stations) {
+get_station_code <- function(station_name, country, stations) {
   
   # gets the station code corresponding to the station name and country from the 
   # station dictionary
@@ -2333,18 +2333,18 @@ get_station_code <- function(name, country, stations) {
   # only works for one country at a time
   
   stopifnot(length(country) == 1)
-  n <- length(name)
+  n <- length(station_name)
   
-  out <- data.frame(station = name, country = country) 
+  out <- data.frame(station_name = station_name, country = country) 
   out <- mutate(out, across(.fns = as.character))
     
   
-  stations <- stations[c("station", "country", "code")]
+  stations <- stations[c("station_name", "country", "station_code")]
   stations <- mutate(stations, across(.fns = as.character)) 
   
-  out <- left_join(out, stations, by = c("station", "country"))
+  out <- left_join(out, stations, by = c("station_name", "country"))
   
   stopifnot(!is.na(out), n == nrow(out))
   
-  out$code
+  out$station_code
 }
