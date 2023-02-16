@@ -1975,161 +1975,227 @@ convert.basis <- function(
 }
 
 
-get_basis <- function(purpose, ...) {
-  do.call(paste("get_basis", purpose, sep = "_"), list(...))
-}
+# four get_basis functions defined here
+
+# default is very simplistic, but works in all cases for sediment and water
+# most_common was used by AMAP in their mercury assessment and takes the most 
+#   common basis reported in each station, species (biota), matrix and  
+#   determinand_group combination
+# biota_OSPAR is the current (2023) OSPAR biota configuration
+# biota_HELCOM is the current (2023) HELCOM biota configuration
 
 
-get_basis_OSPAR <- function(compartment, group, matrix, determinand, species, lipid_high = 3.0) {
+get_basis_default <- function(data, compartment = c("biota", "sediment", "water")) {
   
-  switch(
-    compartment, 
-    sediment = if (missing(group)) "D" else rep("D", length(group)),
-    water = if (missing(group)) "W" else rep("W", length(group)),
-    biota = { 
-           
-      # combine input variables and get species family
-           
-      out <- data.frame(species, matrix, determinand, group)
-           
-      out <- mutate(
-        out,
-        across(everything(), as.character),
-        species_group = ctsm_get_info("species", .data$species, "species_group")
-      )
-           
-      # get typical lipid content by species and matrix 
-           
-      lipid_info <- info.species %>% 
-        rownames_to_column("species") %>% 
-        select(.data$species, contains("LIPIDWT%")) %>% 
-        gather(key = "matrix", value = "lipid_wt", contains("LIPIDWT%"), na.rm = TRUE) %>% 
-        separate(matrix, c("matrix", NA), sep = "_") 
-      
-      out <- left_join(out, lipid_info, by = c("species", "matrix"))
-           
-      # default basis W
-      # bivalves and gastropods - D
-      # fish and crustacea:
-      #   organobromines and organochlorines (except chlorinated paraffins) L
-      # mammals (based on data submissions): 
-      #   hair D 
-      #   metals W
-      #   organics L (note organofluorines submitted on L, with no associated
-      #     lw, so can't convert)
-      # birds: 
-      #   Alle alle (BL, FE) D
-      #   Rissa tridactyla (ER) D
-      #   remaining data (other than EH) (BL, FE, LI, MU) W
-      #   EH metals W (apart from Larus argentatus D)
-      #   EH organofluorines W
-      #   EH organics L (Cepphus grylle, Haematopus ostralegus, Sterna hirundo)
-      #               W (Larus argentatus, Somateria mollissima)
-
-      lw_group <- c("PBDEs", "Organobromines", "Chlorobiphenyls", "Dioxins", "Organochlorines")
-
-      out <- mutate(
-        out,
-        .lw = .data$group %in% lw_group & !(.data$determinand %in% c("MCCP", "SCCP")),
-        new.basis = case_when(
-          .data$group %in% c("Imposex", "Effects", "Metabolites")       ~ NA_character_,
-          .data$species_group %in% c("Bivalvia", "Gastropoda")                 ~ "D",
-          .data$species_group %in% c("Fish", "Crustacea") & 
-            .lw &
-            .data$lipid_wt >= lipid_high                                ~ "L",
-          .data$species_group %in% c("Fish", "Crustacea")                      ~ "W",
-          .data$species_group %in% "Mammal" &
-            .data$matrix %in% "HA"                                      ~ "D",
-          .data$species_group %in% "Mammal" &
-            .data$group %in% "Metals"                                   ~ "W",
-          .data$species_group %in% "Mammal"                                    ~ "L",
-          .data$species %in% c("Alle alle", "Rissa tridactyla")         ~ "D",
-          .data$matrix %in% "EH" &
-            .data$group %in% "Metals" & 
-            .data$species %in% "Larus argentatus"                       ~ "D",
-          .data$matrix %in% "EH" &
-            .data$group %in% "Metals"                                   ~ "W",
-          .data$matrix %in% "EH" &
-            .data$group %in% "Organofluorines"                          ~ "W",
-          .data$matrix %in% "EH" & 
-            .data$species %in% c(
-              "Cepphus grylle", "Haematopus ostralegus", "Sterna hirundo"
-            )                                                           ~ "L",
-          .data$matrix %in% "EH" & 
-            .data$species %in% c(
-              "Larus argentatus", "Somateria mollissima"
-            )                                                           ~ "W",
-          .data$species_group %in% "Bird"                                      ~ "W"
-        )
-      )
-      
-      out$new.basis
-    }
-  )
-}
-
-
-get_basis_CSEMP <- get_basis_OSPAR
-
-
-get_basis_HELCOM <- function(compartment, group, matrix, determinand, species) {
+  # gets default target basis - information_functions.r
   
-  switch(
+  # biota: W
+  # sediment: D
+  # water: W
+  
+  # only supply a basis if the original measurement has one (to avoid trying 
+  # to give e.g. imposex data a basis
+  
+  compartment = match.arg(compartment)
+  
+  basis_id <- switch(
     compartment, 
-    sediment = if (missing(group)) "D" else rep("D", length(group)),
-    water = if (missing(group)) "W" else rep("W", length(group)),
-    biota = { 
-           
-      # combine input variables and get species family
-           
-      out <- data.frame(species, matrix, determinand, group)
-      
-      out <- mutate(
-        out,
-        across(everything(), as.character),
-        species_group = ctsm_get_info("species", .data$species, "species_group")
-      )
- 
-      # define new basis
-      
-      out <- mutate(
-        out, 
-        new.basis = case_when(
-          .data$group %in% c("Imposex", "Metabolites")       ~ NA_character_,
-          .data$species_group %in% "Bivalvia"                       ~ "W",
-          .data$species_group %in% "Fish" & 
-            .data$group %in% c("Metals", "Organofluorines")  ~ "W",
-          .data$species_group %in% "Fish"                           ~ "L"
-        )
-      ) 
-
-      out$new.basis
-    }
+    biota = "W", 
+    sediment = "D",
+    water = "W"
   )
+  
+  new_basis <- dplyr::if_else(is.na(data$basis), NA_character_, basis_id)
+  
+  new_basis  
 }
 
-get_basis_AMAP <- function(data, compartment) {
 
-  # chooses basis which is most reported (regardless of when or whether 
-  # auxiliary variables are also present to enable conversion)
+get_basis_most_common <- function(data, compartment = c("biota", "sediment", "water")) {
+
+  # gets target basis defined as the most commonly reported basis 
+  # information_function.r
+  
+  # the basis most reported within a particular station, species, matrix and 
+  # determinand group (regardless of whether auxiliary variables are present to 
+  # enable conversion)
+  
+  # get grouping identifier
+  
+  var_id <- c("station", "species", "matrix", "group")
+  var_id <- intersect(var_id, names(data))
+  
+  data$.id <- do.call("paste", c(data[var_id], sep = "_"))
+  
+  
+  # provide index to ensure output is in same order as original
+  
+  data$.order <- 1:nrow(data)
+  
+  
+  # get modal basis within each group
+  
+  out <- by(data, data$.id, function(x) {
     
-  if (compartment != "biota")
-    stop("not coded")
-  
-  id <- do.call(paste, data[c("station", "species", "matrix", "group")])
-  
-  out <- by(data, id, function(x) {
-    out <- with(x, table(basis))
-    x$new.basis <- names(out)[which.max(out)]
-    x
+    # deal with e.g. biological effects which don't have a basis
+    
+    if (unique(x$group) %in% c("Metabolites", "Imposex", "Effects")) {
+      x$new_basis <- rep(NA_character_, nrow(x))
+      x <- x[c(".order", "new_basis")]
+      return(x)
+    }
+    
+    # check that have full basis information
+    
+    if (any(is.na(x$basis))) {
+      stop("missing basis information for the following: ", unique(x$.id))
+    }
+    
+    wk <- table(x$basis)
+    x$new_basis = names(wk)[which.max(wk)]
+    x[c(".order", "new_basis")]
   })
   
   out <- do.call(rbind, out)
   
-  out <- within(out, new.basis <- factor(new.basis))
   
-  out
+  # return to the original ordering
+  
+  out <- out[order(out$.order), ]
+  
+  out$new_basis
 }
+
+
+
+get_basis_biota_OSPAR <- function(data, compartment = "biota") {
+  
+  # 2023 OSPAR biota target basis - information_functions.r
+  
+  # note hard-wiring of lipid_high which should be passed as a control variable
+  
+  
+  match.arg(compartment)
+  
+  
+  # define cut-off for using lipid as a basis 
+  
+  lipid_high <- 3.0
+  
+
+  # combine input variables and get species family
+  
+  out <- data[c("species", "matrix", "determinand", "group")]
+  
+  out <- mutate(
+    out,
+    across(everything(), as.character),
+    species_group = ctsm_get_info("species", .data$species, "species_group")
+  )
+  
+
+  # get typical lipid content by species and matrix 
+  
+  lipid_info <- info.species %>% 
+    rownames_to_column("species") %>% 
+    select(.data$species, contains("LIPIDWT%")) %>% 
+    gather(key = "matrix", value = "lipid_wt", contains("LIPIDWT%"), na.rm = TRUE) %>% 
+    separate(matrix, c("matrix", NA), sep = "_") 
+  
+  out <- left_join(out, lipid_info, by = c("species", "matrix"))
+  
+  # default basis W
+  # bivalves and gastropods - D
+  # fish and crustacea:
+  #   organobromines and organochlorines (except chlorinated paraffins) L
+  # mammals (based on data submissions): 
+  #   hair D 
+  #   metals W
+  #   organics L (note organofluorines submitted on L, with no associated
+  #     lw, so can't convert)
+  # birds: 
+  #   Alle alle (BL, FE) D
+  #   Rissa tridactyla (ER) D
+  #   remaining data (other than EH) (BL, FE, LI, MU) W
+  #   EH metals W (apart from Larus argentatus D)
+  #   EH organofluorines W
+  #   EH organics L (Cepphus grylle, Haematopus ostralegus, Sterna hirundo)
+  #               W (Larus argentatus, Somateria mollissima)
+  
+  lw_group <- c("PBDEs", "Organobromines", "Chlorobiphenyls", "Dioxins", "Organochlorines")
+  
+  out <- mutate(
+    out,
+    .lw = .data$group %in% lw_group & !(.data$determinand %in% c("MCCP", "SCCP")),
+    new_basis = case_when(
+      .data$group %in% c("Imposex", "Effects", "Metabolites")            ~ NA_character_,
+      .data$species_group %in% c("Bivalvia", "Gastropoda")               ~ "D",
+      .data$species_group %in% c("Fish", "Crustacea") & 
+        .lw &
+        .data$lipid_wt >= lipid_high                                     ~ "L",
+      .data$species_group %in% c("Fish", "Crustacea")                    ~ "W",
+      .data$species_group %in% "Mammal" & .data$matrix %in% "HA"         ~ "D",
+      .data$species_group %in% "Mammal" & .data$group %in% "Metals"      ~ "W",
+      .data$species_group %in% "Mammal"                                  ~ "L",
+      .data$species %in% c("Alle alle", "Rissa tridactyla")              ~ "D",
+      .data$matrix %in% "EH" & .data$group %in% "Metals" & 
+        .data$species %in% "Larus argentatus"                            ~ "D",
+      .data$matrix %in% "EH" & .data$group %in% "Metals"                 ~ "W",
+      .data$matrix %in% "EH" & .data$group %in% "Organofluorines"        ~ "W",
+      .data$matrix %in% "EH" & 
+        .data$species %in% c(
+          "Cepphus grylle", "Haematopus ostralegus", "Sterna hirundo"
+        )                                                                ~ "L",
+      .data$matrix %in% "EH" & 
+        .data$species %in% c("Larus argentatus", "Somateria mollissima") ~ "W",
+      .data$species_group %in% "Bird"                                    ~ "W"
+    )
+  )
+  
+  out$new_basis
+}
+
+
+get_basis_biota_HELCOM <- function(data, compartment = "biota") {
+  
+  # 2023 HELCOM target basis - information_functions.r
+  
+  # note that the lipid basis for organics in fish is a 'trick' and needs
+  # to be resolved in conjuction with the lipid normalisation routine
+  
+  
+  match.arg(compartment)
+  
+  
+  # combine input variables and get species family
+  
+  out <- data[c("species", "matrix", "determinand", "group")]
+  
+  out <- mutate(
+    out,
+    across(everything(), as.character),
+    species_group = ctsm_get_info("species", .data$species, "species_group")
+  )
+  
+  
+  # define new basis
+      
+  out <- mutate(
+    out, 
+    new_basis = case_when(
+      .data$group %in% c("Imposex", "Metabolites")       ~ NA_character_,
+      .data$species_group %in% "Bivalvia"                ~ "W",
+      .data$species_group %in% "Fish" & 
+        .data$group %in% c("Metals", "Organofluorines")  ~ "W",
+      .data$species_group %in% "Fish"                    ~ "L"
+    )
+  ) 
+  
+  out$new_basis
+}
+
+
+# Matrix ----
 
 
 info.matrix <- read.csv(info.file("matrix.csv"), row.names = "matrix", stringsAsFactors = FALSE)
