@@ -203,19 +203,21 @@ ctsm_read_stations <- function(infile, path, purpose, region_id) {
 
   stations <- dplyr::rename(
     stations, 
-    code = Code,
+    station_code = Code,
     country_ISO = Country,
     country = Country_CNTRY,
-    station = Name,
-    name = LongName,
-    latitude = Latitude,
-    longitude = Longitude,
+    station_name = Name,
+    station_longname = LongName,
+    station_latitude = Latitude,
+    station_longitude = Longitude,
     startYear = ActiveFromDate,
     endYear = ActiveUntilDate,
     parent_code = AsmtMimeParent,
     replacedBy = ReplacedBy,
     programGovernance = ProgramGovernance,
-    dataType = DataType
+    dataType = DataType,
+    station_type = MSTAT,
+    waterbody_type = WLTYP
   )
 
   if (purpose %in% c("OSPAR", "AMAP")) {
@@ -226,7 +228,7 @@ ctsm_read_stations <- function(infile, path, purpose, region_id) {
   # code and parent code could be kept as integers, but safer to leave as 
   # characters until have decided how we are going to merge with non-ICES data
 
-  id <- c(region_id, "code", "parent_code")
+  id <- c(region_id, "station_code", "parent_code")
   
   stations <- dplyr::mutate(
     stations, 
@@ -586,7 +588,10 @@ ctsm_tidy_stations <- function(stations, info) {
   
   # replace backward slash with forward slash in station (long) name
   
-  stations <- mutate(stations, name = gsub("\\", "/", .data$name, fixed = TRUE))
+  stations <- mutate(
+    stations, 
+    station_longname = gsub("\\", "/", .data$station_longname, fixed = TRUE)
+  )
   
   
   # remove stations that have been replaced
@@ -603,7 +608,7 @@ ctsm_tidy_stations <- function(stations, info) {
     stations, 
     "station_id", 
     .data$country, 
-    .data$station,
+    .data$station_name,
     remove = FALSE
   )
   
@@ -625,15 +630,15 @@ ctsm_tidy_stations <- function(stations, info) {
   # select useful columns
   
   col_id <- c(
-    info$region_id, "country", "station", "code", "name", 
-    "latitude", "longitude", "MSTAT", "WLTYP"
+    info$region_id, "country", "station_name", "station_code", "station_longname", 
+    "station_latitude", "station_longitude", "station_type", "waterbody_type"
   )
   stations <- stations[col_id]
   
   
   # order data
   
-  col_id <- c(info$region_id, "country", "station")
+  col_id <- c(info$region_id, "country", "station_name")
   
   stations <- arrange(stations, across(all_of(col_id))) 
   
@@ -2152,8 +2157,8 @@ ctsm_create_stationID <- function(stations, data, info) {
   
   # ensure no backward slashes in station dictionary
   
-  not_ok <- grepl("\\", stations$station, fixed = TRUE) |
-    grepl("\\", stations$name, fixed = TRUE)
+  not_ok <- grepl("\\", stations$station_name, fixed = TRUE) |
+    grepl("\\", stations$station_longname, fixed = TRUE)
   if (any(not_ok)) {
     stop("backward slashes present in station dictionary")
   }
@@ -2165,7 +2170,7 @@ ctsm_create_stationID <- function(stations, data, info) {
     stations, 
     stationID, 
     .data$country, 
-    .data$station, 
+    .data$station_name, 
     remove = FALSE
   ) 
   
@@ -2187,7 +2192,7 @@ ctsm_create_stationID <- function(stations, data, info) {
   
   # tidy up station dictionary
   
-  col_id <- c(info$region_id, "country", "station")
+  col_id <- c(info$region_id, "country", "station_name")
   
   stations <- arrange(stations, across(all_of(col_id))) 
   

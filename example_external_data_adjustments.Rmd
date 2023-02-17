@@ -156,9 +156,9 @@ if (!identical(wk_stations, "Inch Lough"))
 biota_data$stations %>% 
   filter(
     country == "Ireland", 
-    station %in% wk_stations
+    station_name %in% wk_stations
   ) %>% 
-  select(station, dataType, startYear, endYear, PURPM)
+  select(station_name, dataType, startYear, endYear, PURPM)
 
 ```      
 
@@ -175,8 +175,8 @@ wk_data <- wk_data %>%
   distinct() %>% 
   mutate(
     station_name = submitted.station,
-  station_code = get_station_code(station_name, "Ireland", biota_data$stations)
-)
+    station_code = get_station_code(station_name, "Ireland", biota_data$stations)
+  )
 
 biota_data$data <- left_join(
   biota_data$data,
@@ -200,7 +200,7 @@ biota_data$data <- biota_data$data %>%
 
 biota_data$stations <- biota_data$stations %>%
   mutate(
-    .id = code %in% wk_data$station_code,
+    .id = station_code %in% wk_data$station_code,
     .T = str_split(PURPM, "~") %>% sapply(function(x) "T" %in% x),
     .EF = str_split(dataType, "~") %>% sapply(function(x) "EF" %in% x),
     PURPM = if_else(.id & !.T, paste0(PURPM, "~T"), PURPM),
@@ -414,12 +414,12 @@ wk <- biota_data$stations %>%
   filter(
     country %in% "Sweden",
     grepl("CF", dataType),
-    station %in% c("E/W FLADEN", "Nidingen") |
-      grepl("llbacka", station) | 
-      (grepl("V", station) & grepl("arna", station))
+    station_name %in% c("E/W FLADEN", "Nidingen") |
+      grepl("llbacka", station_name) | 
+      (grepl("V", station_name) & grepl("arna", station_name))
   ) %>%
-  select(code, station) %>%
-  column_to_rownames("code")
+  select(station_code, station_name) %>%
+  column_to_rownames("station_code")
 
 wk
 
@@ -440,11 +440,11 @@ biota_data$data <- mutate(
   .id = country %in% "Sweden" & submitted.station %in% "B-R07",
   
   .change = .id & speciestype %in% "Fish",
-  station_name = if_else(.change, wk["6141", "station"], station_name),
+  station_name = if_else(.change, wk["6141", "station_name"], station_name),
   station_code = if_else(.change, "6141", station_code),
   
   .change = .id & speciestype %in% "Bivalve",
-  station_name = if_else(.change, wk["5747", "station"], station_name),
+  station_name = if_else(.change, wk["5747", "station_name"], station_name),
   station_code = if_else(.change, "5747", station_code),
   
   .id = NULL,
@@ -787,8 +787,8 @@ with(wk_data, table(station_name)) %>%
 ```{r Faroes_3}
 
 wk_station <- biota_data$stations %>% 
-  filter(code == "902") %>% 
-  pull(station)
+  filter(station_code == "902") %>% 
+  pull(station_name)
 ```
 
 For assessment purposes these data are all taken to come from a single station covering the waters around Faroes: specifically `r wk_station`. Here is a summary of the number of measurements by year.
@@ -832,8 +832,8 @@ with(wk_data, table(submitted.station, station_name, useNA = "ifany")) %>%
   print(zero.print = ".")
 
 wk_station <- biota_data$stations %>% 
-  filter(code == "916") %>% 
-  pull(station)
+  filter(station_code == "916") %>% 
+  pull(station_name)
 ```
 
 Somehow everything seems to have matched up, apart for data submitted with station Skuvoy, which needs to be changed to `r wk_station`.
