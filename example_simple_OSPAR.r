@@ -87,7 +87,8 @@ biota_timeSeries <- ctsm_create_timeSeries(
   determinands.control = list(
     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  )
+  ), 
+  get_basis = get_basis_biota_OSPAR
 )
 
 # identical (apart from call) to: 

@@ -239,6 +239,7 @@ biota_timeSeries <- ctsm_create_timeSeries(
     INTS = list(det = "INTSI", action = "bespoke"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   ),
+  get_basis = get_basis_biota_HELCOM,
   normalise = ctsm_normalise_biota_HELCOM,
   normalise.control = list(
     lipid = list(method = "simple", value = 5), 

@@ -928,6 +928,7 @@ ctsm_create_timeSeries <- function(
   return_early = FALSE, 
   print_code_warnings = FALSE, 
   output = c("time_series", "uncertainties"), 
+  get_basis = get_basis_default,
   normalise = FALSE, 
   normalise.control = list()) {
 
@@ -1554,30 +1555,10 @@ ctsm_create_timeSeries <- function(
   # convert data to basis of assessment
   
 
-  if (info$purpose %in% c("HELCOM", "OSPAR")) {
-    
-    cat("   Converting data to appropriate basis for statistical analysis", fill = TRUE)
+  cat("   Converting data to appropriate basis for statistical analysis", fill = TRUE)
 
-    data <- mutate(
-      data, 
-      new.basis = get_basis(
-        info$purpose, info$compartment, .data$group, .data$matrix, .data$determinand,
-        species = switch(info$compartment, biota = .data$species, NA)
-      ),
-      new.basis = factor(new.basis)
-    )
-  }
-  
+  data$new.basis <- get_basis(data, info$compartment)
 
-  if (info$purpose %in% "AMAP") {
-    
-    cat(
-      "   Converting data to common basis (within station, species, matrix and determinand group)", 
-      fill = TRUE)
-    
-    data <- get_basis(info$purpose, data, info$compartment)
-  }
-    
 
   # don't convert water because already assumed to be on a wet weight basis
   # no DRYWT% data and convert.basis falls over

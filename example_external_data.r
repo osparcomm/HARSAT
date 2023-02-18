@@ -107,7 +107,8 @@ biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
   determinands.control = list(
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  )
+  ),
+  get_basis = get_basis_biota_OSPAR
 )
 
 # saveRDS(biota_timeSeries, file.path("RData", "biota timeSeries.rds"))
