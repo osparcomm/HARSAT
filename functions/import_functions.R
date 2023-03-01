@@ -937,7 +937,7 @@ ctsm_create_timeSeries <- function(
   
   library(tidyverse)
 
-
+  
   # arguments
   
   # determinands: character string of determinands to be assessed; default is to 
@@ -945,6 +945,19 @@ ctsm_create_timeSeries <- function(
   
   determinands <- force(determinands)
   
+  if (!is.character(determinands)) {
+    stop("determinands must be a character string")
+  }
+  
+  if (length(determinands) == 0L) {
+    stop(
+      "No determinands have been been selected for assessment:\n", 
+      "  please update the determinand reference table or supply the\n",
+      "  determinands directly via the determinands argument."
+    )
+  }
+
+    
   # output: 
   # time_series is default
   # uncertainties provides data for estimating missing uncertainties - converts all 
@@ -1338,28 +1351,21 @@ ctsm_create_timeSeries <- function(
       "merging of auxiliary variables in ctsm.create.timeseries; mergeID hard-wired",
       call. = FALSE)
   
-  auxData <- droplevels(data[data$group == "Auxiliary", ])
+  auxData <- data[data$group == "Auxiliary", ]
   
+  data <- data[data$group != "Auxiliary", ]
+  
+  
+  # ensure all auxiliary variables are present
 
-  # ad-hoc fix to ensure 'key' auxiliary variables are present
-  
-  auxData <- within(auxData, {
-    levels(determinand) <- switch(
-      info$compartment,
-      biota = unique(c(levels(determinand), "DRYWT%", "LIPIDWT%", "LNMEA")), 
-      sediment = unique(c(levels(determinand), "DRYWT%")),
-      levels(determinand)
-    )
-    
-    if (info$purpose %in% "AMAP")
-      levels(determinand) <- unique(c(levels(determinand), "AGMEA", "C13D", "N15D"))
-  })
+  auxData$determinand <- factor(
+    auxData$determinand, 
+    levels = ctsm_get_auxiliary(data$determinand, info$compartment)
+  )
   
   auxData <- split(auxData, auxData$determinand)
   
-  data <- data[data$group != "Auxiliary", ]
 
-  
   # catch for LNMEA measured in WO and ES for birds - probably shouldn't happen because the 
   # sampleID will differ?  need to check
   
