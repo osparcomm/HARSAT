@@ -220,6 +220,14 @@ ctsm_get_determinands <- function(compartment = c("biota", "sediment", "water"))
   assess_id <- paste0(compartment, "_assess")
   ok <- info.determinand[[assess_id]]
   
+  if (!any(ok)) {
+    stop(
+      "No determinands have been been selected for assessment:\n", 
+      "  please update the determinand reference table or supply the\n",
+      "  determinands directly via the determinands argument."
+    )
+  }
+  
   row.names(info.determinand)[ok]
 }  
 
