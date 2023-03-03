@@ -11,12 +11,14 @@ wk_data <- wk_timeSeries$data %>%
     ctsm_get_info("determinand", determinand, "group", "biota", sep = "_") %in% 
       "Imposex"
   ) %>% 
-  select(c("seriesID", "station", "year", "species", "determinand", "concentration", 
-           "noinp", "%FEMALEPOP"))
+  select(c("seriesID", "station_code", "year", "species", "determinand", 
+           "concentration", "noinp", "%FEMALEPOP"))
 
-wk_id <- c("country", "HELCOM_subbasin")
-wk_data[wk_id] <- 
-  wk_timeSeries$stations[as.character(wk_data$station), ][wk_id]
+wk_data <- left_join(
+  wk_data, 
+  wk_timeSeries$stations[c("station_code", "country", "HELCOM_subbasin")],
+  by = "station_code"
+)
 
 rm(wk_timeSeries)
 
@@ -27,7 +29,7 @@ stopifnot(round(wk_data$noinp) == wk_data$noinp)
 
 wk_data <- wk_data %>%
   mutate(noinp = as.integer(noinp)) %>%
-  group_by(station, determinand, species, year) %>% 
+  group_by(station_code, determinand, species, year) %>% 
   filter(all(noinp == 1L)) %>% 
   ungroup() %>% 
   droplevels() %>% 
@@ -82,7 +84,7 @@ with(wk_data, table(regionID, VDS, species))
 # redefine indexID and regionID so don't have to worry about multiple species
 
 wk_data <- wk_data %>% 
-  unite("indexID", station, year, species, sep = " ", remove = FALSE) %>% 
+  unite("indexID", station_code, year, species, sep = " ", remove = FALSE) %>% 
   unite("regionID", regionID, species, sep = " ", remove = FALSE) %>% 
   mutate(indexID = factor(indexID)) %>% 
   as.data.frame()
@@ -131,7 +133,10 @@ clusterExport(wk.cluster, "biota.VDS.estimates")
 biota.VDS.cl <- parLapply(wk.cluster, biota.VDS.estimates, ctsm.VDS.cl)
 biota.VDS.cl <- do.call(rbind, biota.VDS.cl)
 
-row.names(biota.VDS.cl) <- do.call(paste, biota.VDS.cl[c("station", "year", "species")])
+row.names(biota.VDS.cl) <- do.call(
+  paste, 
+  biota.VDS.cl[c("station_code", "year", "species")]
+)
 summary(biota.VDS.cl)
 
 # saveRDS(

@@ -93,43 +93,27 @@ ctsm_web_initialise <- function(
 }
 
 
-ctsm_web_setup <- function(assessmentObject) {
+ctsm_web_setup <- function(assessment_obj) {
   
-  # extract timeSeries and stations and get more useful names
-  
-  timeSeries <- assessmentObject$timeSeries
-  timeSeries <- swap.names(timeSeries, "station", "stationID")
-  timeSeries <- within(timeSeries, stationID <- as.character(stationID))
-  
-  stations <- assessmentObject$stations
+  # merge timeSeries with stations
 
+  timeSeries <- assessment_obj$timeSeries
+  
+  timeSeries <- rownames_to_column(timeSeries, ".series")
+  
+  timeSeries <- left_join(
+    timeSeries, 
+    assessment_obj$stations,
+    by = "station_code"
+  )
 
-  # convert station factors to characters for output 
+  timeSeries <- column_to_rownames(timeSeries, ".series")
   
-  stations <- tibble::rownames_to_column(stations, ".rownames")
-  stations <- dplyr::mutate(stations, dplyr::across(where(is.factor), as.character))
-  stations <- tibble::column_to_rownames(stations, ".rownames")
+  assessment_obj$timeSeries <- timeSeries
   
-  
-  # check lower case stationIDs are unique (for unique filenames)
-  
-  wk <- tolower(row.names(stations))
-  if (any(duplicated(wk))) {
-    stop(
-      "stationID not unique when converted to lower case ", 
-      "- might cause difficulties with filenames"
-    )
-  }
-  
-
-  # merge timeSeries and stations  
-  
-  timeSeries <- cbind(timeSeries, stations[timeSeries$stationID, ])
-
-  assessmentObject$timeSeries <- timeSeries
-  assessmentObject
+  assessment_obj
 }
-
+  
 
 
 # mapping functions ----

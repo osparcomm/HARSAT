@@ -154,7 +154,10 @@ ctsm.VDS.cl <- function(fit, nsim = 1000) {
   namesID <- strsplit(row.names(cl), " ", fixed = TRUE)
   cl$species <- sapply(namesID, function(x) paste(tail(x, n_tail), collapse = " "))
   cl$year <- as.numeric(sapply(namesID, function(x) x[length(x) - n_tail]))
-  cl$station <- sapply(namesID, function(x) paste(head(x, length(x) - n_tail - 1), collapse = " "))
+  cl$station_code <- sapply(
+    namesID, 
+    function(x) paste(head(x, length(x) - n_tail - 1), collapse = " ")
+  )
 
   cl
 }

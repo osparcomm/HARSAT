@@ -139,8 +139,9 @@ imposex.family <- list(
 
 
 
-assess_imposex <- function(data, annualIndex, AC, recent.years, determinand, species, 
-                           station, thetaID, max.year, recent.trend = 20) {
+assess_imposex <- function(
+    data, annualIndex, AC, recent.years, determinand, species, 
+    station_code, thetaID, max.year, recent.trend = 20) {
   
   # main assessment routine for imposex data (imposex functions)
   
