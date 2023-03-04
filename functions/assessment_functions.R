@@ -47,7 +47,8 @@ ctsm.assessment <- function(
   data <- droplevels(subset(ctsm.ob$data, seriesID %in% row.names(timeSeries)))
 
   stations <- ctsm.ob$stations
-  stations <- stations[row.names(stations) %in% timeSeries$station, ]
+  stations <- column_to_rownames(stations, "station_code")
+  stations <- stations[timeSeries$station_code, ]
   
   data <- split(data, data$seriesID)
   
@@ -56,8 +57,12 @@ ctsm.assessment <- function(
     # get info about the time series
     
     seriesID <- as.character(x$seriesID[1])
-    seriesInfo <- sapply(timeSeries[seriesID,], function(i) if (is.numeric(i)) i else as.character(i), 
-                         USE.NAMES = TRUE, simplify = FALSE)
+    seriesInfo <- sapply(
+      timeSeries[seriesID,], 
+      function(i) if (is.numeric(i)) i else as.character(i), 
+      USE.NAMES = TRUE, 
+      simplify = FALSE
+    )
     seriesInfo <- seriesInfo[vapply(seriesInfo, function(x) !is.na(x), NA)]
     
     print(paste("assessing series:", paste(names(seriesInfo), seriesInfo, collapse = "; ")))
@@ -67,8 +72,9 @@ ctsm.assessment <- function(
     
     if (all(is.na(x$concentration))) return()
     
-    if ("country" %in% names(stations))
-      seriesInfo$country <- as.character(stations[seriesInfo$station, "country"])
+    if ("country" %in% names(stations)) {
+      seriesInfo$country <- stations[seriesInfo$station_code, "country"]
+    }
 
 
     # construct annual index
@@ -115,12 +121,12 @@ ctsm.assessment <- function(
     if (determinand %in% c("VDS", "IMPS", "INTS")) {
       
       species <- seriesInfo$species
-      station <- seriesInfo$station
+      station_code <- seriesInfo$station_code
 
       thetaID <- switch(
         info$purpose, 
-        CSEMP = as.character(stations[station, "CMA"]),
-        OSPAR = paste(seriesInfo$country, stations[station, "OSPAR_subregion"]),
+        CSEMP = stations[station_code, "CMA"],
+        OSPAR = paste(seriesInfo$country, stations[station_code, "OSPAR_subregion"]),
         HELCOM = seriesInfo$country
       )
 
@@ -137,7 +143,7 @@ ctsm.assessment <- function(
 
         out$annualIndex[c("lower", "upper")] <- NA
         
-        clID <- paste(station, names(indiID)[indiID], species)
+        clID <- paste(station_code, names(indiID)[indiID], species)
         out$annualIndex[indiID, c("lower", "upper")] <- 
           biota.VDS.cl[clID, c("lower", "upper")]
         
@@ -161,7 +167,7 @@ ctsm.assessment <- function(
         recent.years = info$recent_years,
         determinand = determinand, 
         species = species,
-        station = station,
+        station_code = station_code,
         thetaID = thetaID, 
         max.year = info$max_year, 
         recent.trend = info$recent.trend)

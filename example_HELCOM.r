@@ -175,8 +175,14 @@ water_data <- ctsm_tidy_data(water_data)
 # only need to do this for years up to and including 2013 when there are 
 # no MU&EP measurements, so no risk of mixing up MU and MU&EP data.
 
-biota_data$data <- mutate(
+biota_data$data <- left_join(
   biota_data$data, 
+  biota_data$stations[c("station_code", "country")],
+  by = "station_code"
+)
+  
+biota_data$data <- mutate(
+  biota_data$data,
   .id = country == "Finland" & 
     species == "Perca fluviatilis" &  
     year <= 2013 & 
@@ -218,6 +224,8 @@ biota_data$data <- mutate(
 # ad_hoc change to info_TEQ to make it appropriate for human health QS
 
 info_TEQ["CDFO"] <- 0.0003
+
+biota_data$data$country <- NULL
 
 
 biota_timeSeries <- ctsm_create_timeSeries(
@@ -261,23 +269,32 @@ biota_timeSeries$data <- mutate(
 
 # resolve Polish metoa changes
 
+biota_timeSeries$data <- left_join(
+  biota_timeSeries$data, 
+  biota_data$stations[c("station_code", "country")],
+  by = "station_code"
+)
+
+
 biota_timeSeries$data <- mutate(
   biota_timeSeries$data, 
   method_analysis = if_else(
-    grepl("Poland", station) &  
+    country == "Poland" &  
       determinand %in% "PYR1OH" &
       year %in% 2020,
     "HPLC-ESI-MS-MS", 
     method_analysis
   ), 
   method_analysis = if_else(
-    grepl("Poland", station) &  
+    country == "Poland" &  
       determinand %in% "PYR1OH" &
       year %in% 2021,
     "GC-MS-MS", 
     method_analysis
   ), 
 )  
+
+biota_timeSeries$data$country <- NULL
 
 # saveRDS(biota_timeSeries, file.path("RData", "biota timeSeries.rds"))
 
@@ -499,12 +516,12 @@ wk_group <- c("Metals", "Organics", "Metabolites")
 
 # two time series need to be refitted
 
-# Germany_OMSH PB Perca fluviatilis MU" - fixed bounds
+# "2109 PB Perca fluviatilis MU" - fixed bounds
 (wk_id <- wk_check$Metals[1])
 biota_Metals[wk_id] <- 
   ctsm.assessment(biota_assessment, seriesID = wk_id, fixed_bound = 20)
 
-# "Germany_FOE-B01 PYR1OH Limanda limanda BI HPLC-FD" - standard errors
+# "2299 PYR1OH Limanda limanda BI HPLC-FD" - standard errors
 (wk_id <- wk_check$Metabolites[1])
 biota_Metabolites[wk_id] <- 
   ctsm.assessment(biota_assessment, seriesID = wk_id, hess.d = 0.0001, hess.r = 8)
@@ -608,12 +625,12 @@ stopCluster(wk.cluster)
 
 # refit a couple of time series
 
-# "Poland_CZP CD Yes" - fixed effects on bounds
+# "5190 CD Yes" - fixed effects on bounds
 (wk_id <- wk_check[1])
 water_assessment$assessment[wk_id] <- 
   ctsm.assessment(water_assessment, seriesID = wk_id, fixed_bound = 20)
 
-# "Poland_HZP CD Yes" - fixed effects on bounds
+# "5192 CD Yes" - fixed effects on bounds
 (wk_id <- wk_check[2])
 water_assessment$assessment[wk_id] <- 
   ctsm.assessment(water_assessment, seriesID = wk_id, fixed_bound = 20)
@@ -703,8 +720,8 @@ water_web <- ctsm_web_initialise(
 ctsm_summary_table(
   assessments = list(
     Biota = biota_web, 
-    Sediment = sediment_web, 
-    Water = water_web
+    Sediment = sediment_web 
+    # Water = water_web
   ),
   determinandGroups = webGroups,
   path = file.path("output", "example_HELCOM")

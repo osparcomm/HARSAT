@@ -823,7 +823,7 @@ ctsm_tidy_contaminants <- function(data, info) {
   # retain useful variables
   
   var_id <- c(
-    "country", "station_name", "station_code", "sample_latitude", "sample_longitude", 
+    "station_code", "sample_latitude", "sample_longitude", 
     "year", "date", "time", "depth", 
     "species", "sex", "noinp", "AMAP_group", "sampleID", "replicate", 
     "determinand", "pargroup", "matrix", "basis", "filtered", 
@@ -982,7 +982,7 @@ ctsm_create_timeSeries <- function(
   out <- list(call = match.call(), call.data = ctsm.obj$call, info = ctsm.obj$info)
   
   info <- ctsm.obj$info
-  station.dictionary <- ctsm.obj$stations
+  station_dictionary <- ctsm.obj$stations
   data <- ctsm.obj$data
   
   rm(ctsm.obj)
@@ -997,14 +997,13 @@ ctsm_create_timeSeries <- function(
   oddity.dir <- ctsm.initialise.oddities(oddity_path)
 
 
-  # create station identifier in station dictionary and data
-
-  wk <- ctsm_create_stationID(station.dictionary, data, info)
+  # checks station dictionary:
+  # - no backward slashes in station_name or station_longname
+  # - no duplicated or missing station_code 
   
-  station.dictionary <- wk$stations  
-  data <- wk$data
+  ctsm_check_stations(station_dictionary)
   
-
+  
   # retains determinands of interest, including auxiliary determinands and those
   # required by determinands.control$variables 
   # checks all determinands of interest are recognised by info.determinand
@@ -1023,22 +1022,24 @@ ctsm_create_timeSeries <- function(
   
   cat("\nCleaning data\n")
   
-  id <- c("station", "date", "filtered", "species", "sampleID", "matrix", "determinand")
+  id <- c("station_code", "date", "filtered", "species", "sampleID", "matrix", "determinand")
   id <- intersect(id, names(data))
   ord <- do.call("order", data[id])
   data <- data[ord, ]
   
 
-  # check all stations are in station dictionary - abort if not - means there
-  # has been an error in extraction
+  # check all stations are in station dictionary 
 
-  ok <- data$station %in% rownames(station.dictionary)
+  ok <- data$station_code %in% station_dictionary$station_code
   data <- ctsm.check(
-    data, !ok, action = "delete", message = "Stations not in station dictionary", 
-    fileName = "unidentified stations", merge.stations = FALSE)
-  # if (!all(ok)) 
-  #   stop("Error in extraction: stations not in station dictionary", call. = FALSE)
-
+    data, 
+    !ok, 
+    action = "delete", 
+    message = "Stations in data not found in station dictionary", 
+    fileName = "unidentified stations", 
+    merge.stations = FALSE
+  )
+  
 
   # drop stations (sediment) or station / species combinations (biota) with no
   # data in the relatively recent period 
@@ -1062,8 +1063,9 @@ ctsm_create_timeSeries <- function(
       species <- factor(species)
     })
   }
+
   
-  id.names <- intersect(c("station", "species"), names(data))
+  id.names <- intersect(c("station_code", "species"), names(data))
   id <- do.call("paste", data[id.names])
   ok <- id %in% id[is.recent(data$year)]
   data <- droplevels(data[ok, ])
@@ -1071,10 +1073,20 @@ ctsm_create_timeSeries <- function(
 
   # drop data corresponding to stations outside the region (mainly OSPAR or HELCOM requirement)
   
-  id <- is.na(station.dictionary[as.character(data$station), "region"])
-  if (any(id)) {
-    cat("   Dropping stations with no associated region in station dictionary\n")
-    data <- droplevels(subset(data, !id))
+  if (info$all_in_region) {
+    
+    data <- left_join(
+      data, 
+      station_dictionary[c("station_code", info$region_id)],
+      by = "station_code"
+    )
+    
+    if (any(is.na(data[info$region.id]))) {
+      cat("   Dropping stations with missing region information in station dictionary\n")
+      data <- drop_na(data, all_of(info$region_id))
+    }
+    
+    data <- data[setdiff(names(data), info$region_id)]
   }
 
 
@@ -1547,7 +1559,7 @@ ctsm_create_timeSeries <- function(
     
     out  = c(
       out, 
-      ctsm_import_value(data, station.dictionary, info, print_code_warnings) 
+      ctsm_import_value(data, station_dictionary, info, print_code_warnings) 
     )
     
     if (data_format == "old") out$QA <- QA
@@ -1655,7 +1667,7 @@ ctsm_create_timeSeries <- function(
       out, 
       ctsm.import.value(
         data, 
-        station.dictionary, 
+        station_dictionary, 
         info$compartment, 
         info$purpose, 
         print_code_warnings)
@@ -1715,13 +1727,13 @@ ctsm_create_timeSeries <- function(
     data <- switch(
       info$compartment,
       biota = 
-        ctsm_normalise_biota(data, QA, station.dictionary, normalise.control),
+        ctsm_normalise_biota(data, QA, station_dictionary, normalise.control),
       sediment = 
-        ctsm_normalise_sediment(data, station.dictionary, normalise.control),
+        ctsm_normalise_sediment(data, station_dictionary, normalise.control),
       water = stop("there is no default normalisation function for water")
     )
   } else if (is.function(normalise)) {
-    data <- normalise(data, station.dictionary, normalise.control)
+    data <- normalise(data, station_dictionary, normalise.control)
   }
     
 
@@ -1739,7 +1751,7 @@ ctsm_create_timeSeries <- function(
 
   cat("   Dropping groups of compounds / stations with no data between", 
       min(info$recent_years), "and", max(info$recent_years), "\n")
-  id_names <- intersect(c("station", "filtered", "species", "group"), names(data))
+  id_names <- intersect(c("station_code", "filtered", "species", "group"), names(data))
   id <- do.call("paste", data[id_names])
   ok <- id %in% id[is.recent(data$year) & !is.na(data$concentration)]
   data <- data[ok, ]
@@ -1766,7 +1778,7 @@ ctsm_create_timeSeries <- function(
     
   out <- c(
     out, 
-    ctsm_import_value(data, station.dictionary, info, print_code_warnings)
+    ctsm_import_value(data, station_dictionary, info, print_code_warnings)
   )
   
   out
@@ -1788,7 +1800,7 @@ ctsm.check <- function(
   
   action <- match.arg(action)
 
-  # evaluate logical identifying odditie:
+  # evaluate logical identifying oddities:
   # if action = remove duplicates, then find all the duplicated values in id
   # else evaluate id to obtain logical of oddities
 
@@ -1817,11 +1829,9 @@ ctsm.check <- function(
   # merge with station dictionary if required - gets dictionary from top environment
 
   if (merge.stations) {
-    station.dictionary <- evalq(station.dictionary, sys.frame(1))
-    oddities.stations <- station.dictionary[as.character(oddities$station), ]
-    names(oddities.stations) <- paste("SD", names(oddities.stations), sep = ".")
-    oddities <- oddities[setdiff(names(oddities), "station")]        
-    oddities <- cbind(oddities.stations, oddities)
+    station_dictionary <- evalq(station_dictionary, sys.frame(1))
+    oddities <- left_join(oddities, station_dictionary, by = "station_code")
+    oddities <- relocate(oddities, all_of(names(station_dictionary)))
   }
 
   
@@ -1897,11 +1907,9 @@ ctsm.check2 <- function(data, action, message, fileName, merge.stations = TRUE) 
   # merge with station dictionary if required - gets dictionary from top environment
   
   if (merge.stations) {
-    station.dictionary <- evalq(station.dictionary, sys.frame(1))
-    oddities.stations <- station.dictionary[as.character(oddities$station), ]
-    names(oddities.stations) <- paste("SD", names(oddities.stations), sep = ".")
-    oddities <- oddities[setdiff(names(oddities), "station")]        
-    oddities <- cbind(oddities.stations, oddities)
+    station_dictionary <- evalq(station_dictionary, sys.frame(1))
+    oddities <- left_join(oddities, station_dictionary, by = "station_code")
+    oddities <- relocate(oddities, all_of(names(station_dictionary)))
   }
   
   
@@ -1944,7 +1952,9 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   # order data and select variables of interest
 
   order.names = c(
-    "station", "species", "filtered", "year", "sex", "sample", "sub.sample", "group", "determinand")
+    "station_code", "species", "filtered", "year", "sex", "sample", "sub.sample", 
+    "group", "determinand"
+  )
   order.names <- intersect(order.names, names(data))
   data <- data[do.call(order, data[order.names]), ]
   
@@ -1957,12 +1967,11 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   )
 
   out.names = c(
-    "station", "sample_latitude", "sample_longitude", "filtered", 
+    "station_code", "sample_latitude", "sample_longitude", "filtered", 
     "species", "sex", "depth",
     "year", "date", "time", "sample", "sub.sample", "sampleID", 
-
-    "matrix", "AMAP_group", "group", "determinand", "basis", "unit", "value", "method_analysis", "noinp", 
-
+    "matrix", "AMAP_group", "group", "determinand", "basis", "unit", "value", 
+    "method_analysis", "noinp", 
     "concOriginal", "qflagOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "qflag",  
     "limit_detection", "limit_quantification", "uncertainty",  
@@ -1982,7 +1991,7 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   
   # get seriesID and timeSeries structure 
   
-  id <- c("station", "determinand")
+  id <- c("station_code", "determinand")
   if (info$compartment == "biota")
     id <- switch(
       info$purpose, 
@@ -2064,11 +2073,15 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   timeSeries <- timeSeries[ok, ]
   timeSeries <- droplevels(timeSeries)
   
-  # remove unused stations from the station dictionary
 
-  ok <- row.names(station_dictionary) %in% as.character(timeSeries$station) 
+  # remove unused stations and rownames from the station dictionary
+
+  ok <- station_dictionary$station_code %in% timeSeries$station_code 
   
-  station_dictionary <- droplevels(station_dictionary[ok, ])
+  station_dictionary <- station_dictionary[ok, ]
+  
+  row.names(station_dictionary) <- NULL
+  
   
   
   list(data = data, stations = station_dictionary, timeSeries = timeSeries)
@@ -2140,56 +2153,36 @@ changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
 }
 
 
-ctsm_create_stationID <- function(stations, data, info) {
-  
+ctsm_check_stations <- function(stations) {
+
+  # import_functions.R
+    
   # ensure no backward slashes in station dictionary
   
-  not_ok <- grepl("\\", stations$station_name, fixed = TRUE) |
-    grepl("\\", stations$station_longname, fixed = TRUE)
-  if (any(not_ok)) {
-    stop("backward slashes present in station dictionary")
-  }
-    
-
-  # create station ID in station dictionary and ensure no duplicates
+  not_ok1 <- grepl("\\", stations$station_name, fixed = TRUE) 
+  not_ok2 <- grepl("\\", stations$station_longname, fixed = TRUE)
   
-  stations <- unite(
-    stations, 
-    stationID, 
-    .data$country, 
-    .data$station_name, 
-    remove = FALSE
-  ) 
+  not_ok1 <- any(not_ok1)
+  not_ok2 <- any(not_ok2)
   
-  if (any(duplicated(stations$stationID))) {
-    stop("duplicated stations found in station dictionary")
+  if (not_ok1 | not_ok2) {
+    var_id <- c("station_name", "station_longname")
+    var_id <- var_id[c(not_ok1, not_ok2)]
+    stop(
+      "backward slashes not allowed in station dictionary variables: ", 
+      toString(var_id)
+    )
   }
 
   
-  # create corresponding stationID in the data file (variable station)
+  # ensure no duplicated station codes
   
-  data <- unite(
-    data, 
-    "station", 
-    .data$country, 
-    .data$station_name, 
-    remove = FALSE
-  ) 
-  
-  
-  # tidy up station dictionary
-  
-  col_id <- c(info$region_id, "country", "station_name")
-  
-  stations <- arrange(stations, across(all_of(col_id))) 
-  
-  
-  # create rownames with stationID
-  
-  stations <- column_to_rownames(stations, "stationID")
-  
-  
-  list(stations = stations, data = data)
+  if (any(duplicated(stations$station_code))) {
+    stop("duplicated values of station_code not allowed in station dictionary")
+  }
+
+
+  invisible()  
 }
 
 
@@ -2460,7 +2453,7 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
   # for imposex, indices and stages aren't linked by sampleID, but by visit
   # will assume, for simplicity, that only one visit per year
   
-  visitID <- with(data, paste(station, year))
+  visitID <- with(data, paste(station_code, year))
   
   
   # find visits when both indivuduals and stages reported and check consistent
@@ -2840,8 +2833,8 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
   
   if (!is.null(control$exclude)) {
     exclude_id <- eval(control$exclude, station_dictionary, parent.frame())
-    exclude_id <- row.names(station_dictionary)[exclude_id]
-    exclude_id <- as.character(data$station) %in% exclude_id
+    exclude_id <- station_dictionary[exclude_id, "station_code"]
+    exclude_id <- data$station_code %in% exclude_id
   } else {
     exclude_id <- FALSE
   }
@@ -3042,8 +3035,8 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
           
           station_id <- station_dictionary$country %in% "France" & 
             station_dictionary$OSPAR_region %in% "2"
-          station_id <- row.names(station_dictionary)[station_id]
-          id <- as.character(data$station) %in% station_id
+          station_id <- station_dictionary[station_id, "station_code"]
+          id <- data$station_code %in% station_id
           
           if (any(id)) {
             message(
@@ -3158,8 +3151,8 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
   
   if (!is.null(control$exclude)) {
     exclude_id <- eval(control$exclude, station_dictionary, parent.frame())
-    exclude_id <- row.names(station_dictionary)[exclude_id]
-    exclude_id <- as.character(data$station) %in% exclude_id
+    exclude_id <- station_dictionary[exclude_id, "station_code"]
+    exclude_id <- data$station_code %in% exclude_id
   } else {
     exclude_id <- FALSE
   }
@@ -3476,8 +3469,8 @@ ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, control) {
   
   if (!is.null(control$exclude)) {
     exclude_id <- eval(control$exclude, station_dictionary, parent.frame())
-    exclude_id <- row.names(station_dictionary)[exclude_id]
-    exclude_id <- as.character(data$station) %in% exclude_id
+    exclude_id <- station_dictionary[exclude_id, "station_code"]
+    exclude_id <- data$station_code %in% exclude_id
   } else {
     exclude_id <- FALSE
   }
@@ -3760,13 +3753,13 @@ ctsm_TBT_remove_early_data <- function(ctsm_obj, recent_year = min(ctsm_obj$info
   
   # drop data with no stations
   
-  ok <- with(tin_data, !is.na(station_name))
+  ok <- with(tin_data, !is.na(station_code))
   tin_data <- tin_data[ok, ]
   
   # drop time series with no data in recent years - avoids sorting out old data that won't get used
   
-  wk <- with(tin_data, tapply(year, station_name[, drop = TRUE], max))
-  ok <- with(tin_data, station_name %in% names(wk)[wk >= recent_year])
+  wk <- with(tin_data, tapply(year, station_code, max))
+  ok <- with(tin_data, station_code %in% names(wk)[wk >= recent_year])
   tin_data <- tin_data[ok, ]
   
   ctsm_obj$data <- rbind(data[["FALSE"]], tin_data)
