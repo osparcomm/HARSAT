@@ -191,9 +191,8 @@ ctsm_read_stations <- function(infile, path, purpose, region_id) {
   infile <- file.path(path, infile)
   cat("Reading station dictionary from '", infile, "'\n", sep = "")
 
-  stations <- read.table(
-    infile, strip.white = TRUE, sep = "\t",  header = TRUE, quote = "\"", 
-    na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
+  stations <- read.csv(
+    infile, na.strings = c("", "NULL")
   )
   
   
@@ -250,10 +249,16 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
 
   if (data_format == "old") {  
 
-    data <- read.table(
-      infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
-      na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
+    data <- read.csv(
+      infile, na.strings = c("", "NULL")
     )
+      
+    #data <- read.table(
+    #  infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
+    #  na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""  
+    #)
+    
+    
     
   } else {
 
@@ -481,9 +486,8 @@ ctsm_read_QA <- function(QA, path, purpose) {
   infile <- file.path(path, QA)
   cat("\nReading QA data from '", infile, "'\n", sep = "")
   
-  crm <- read.table(
-    infile, strip.white = TRUE, header = TRUE, quote = "\"" , sep = "\t",
-    na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""
+  crm <- read.csv(
+    infile, na.strings = c("", "NULL")
   )
 
   names(crm) <- tolower(names(crm))
@@ -2152,6 +2156,7 @@ ctsm_create_stationID <- function(stations, data, info) {
     
 
   # create station ID in station dictionary and ensure no duplicates
+  
   
   stations <- unite(
     stations, 
