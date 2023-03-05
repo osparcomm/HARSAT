@@ -79,7 +79,7 @@ biota_data <- ctsm_tidy_data(biota_data)
 
 # need a quick hack because some variables aren't present in simplified data
 
-biota_data$data$AMAP_group <- rep("Not applicable", nrow(biota_data$data))
+biota_data$data$subseries <- rep(NA_character_, nrow(biota_data$data))
 
 biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
@@ -150,7 +150,7 @@ biota_assessment$timeSeries <- biota_assessment$timeSeries %>%
     ),
     level7name = case_when(
       level7element %in% "matrix" ~ .matrix,
-      level7element %in% "AMAP_group" ~ gsub("_", " ", level7name),
+      level7element %in% "subseries" ~ gsub("_", " ", level7name),
       TRUE ~ level7name
     ),
     .matrix = NULL,
@@ -163,7 +163,7 @@ biota_assessment$timeSeries <- biota_assessment$timeSeries %>%
     level7element = recode(
       level7element, 
       matrix = "Tissue", 
-      AMAP_group = "Mammal group"
+      subseries = "Mammal group"
     )
   ) %>% 
   column_to_rownames(".rownames")

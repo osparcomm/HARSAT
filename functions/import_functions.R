@@ -825,7 +825,7 @@ ctsm_tidy_contaminants <- function(data, info) {
   var_id <- c(
     "station_code", "sample_latitude", "sample_longitude", 
     "year", "date", "time", "depth", 
-    "species", "sex", "noinp", "AMAP_group", "sampleID", "replicate", 
+    "species", "sex", "noinp", "subseries", "sampleID", "replicate", 
     "determinand", "pargroup", "matrix", "basis", "filtered", 
     "method_analysis", "method_extraction", "method_pretreatment",
     "unit", "value", "qflag", "limit_detection", "limit_quantification", 
@@ -1137,6 +1137,7 @@ ctsm_create_timeSeries <- function(
     data$digestion <- ctsm_get_digestion(data)
   }
 
+  
 
   # check no replicate measurements (some are genuine replicates, mostly from
   # early years) but will just delete these for simplicity (taking the average
@@ -1168,7 +1169,7 @@ ctsm_create_timeSeries <- function(
     abs & rel
   }
     
-
+  
   # check detection limits associated with data are positive 
 
   if (print_code_warnings)
@@ -1322,8 +1323,51 @@ ctsm_create_timeSeries <- function(
   
   id <- c(determinands, ctsm_get_auxiliary(determinands, info$compartment))
   
-  data <- filter(data, determinand %in% id)
+  data <- filter(data, .data$determinand %in% id)
 
+
+  # subseries 
+  # - if timeseries have subseries classifications for some but not all 
+  #   records, then delete the latter; this avoids the situation where e.g. 
+  #   there is a subgroup for medium sized fish and the remaining samples are 
+  #   the small and large fish
+  # - replace remaining missing values (timeseries with no subseries
+  #   classifications with Not_applicable so that series can be formed
+  
+  # NB need to work on this in phase 2 of the subseries update
+  
+  if ("subseries" %in% names(data)) {
+    
+    # identify series with subgroups
+
+    data <- unite(
+      data, 
+      ".series", 
+      any_of(c("station_code", "species", "determinand", "matrix")), 
+      remove = FALSE
+    )
+    
+    has_subgroup <- tapply(
+      data$subseries, 
+      data$.series, 
+      function(x) any(!is.na(x))
+    )
+    
+    has_subgroup <- names(has_subgroup)[has_subgroup]
+    
+    # remove extra data in these series that do not have a subgroup 
+    
+    not_ok <- data$.series %in% has_subgroup & is.na(data$subseries)
+    
+    data <- data[!not_ok, ]
+    
+    # replace remaining missing values with Not_applicable
+    
+    data <- mutate(data, subseries = replace_na(subseries, "Not_applicable"))
+    
+  }
+  
+  
   # set rownames to NULL(ie. back to auto numeric)
   
   rownames(data) <- NULL
@@ -1970,7 +2014,7 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
     "station_code", "sample_latitude", "sample_longitude", "filtered", 
     "species", "sex", "depth",
     "year", "date", "time", "sample", "sub.sample", "sampleID", 
-    "matrix", "AMAP_group", "group", "determinand", "basis", "unit", "value", 
+    "matrix", "subseries", "group", "determinand", "basis", "unit", "value", 
     "method_analysis", "noinp", 
     "concOriginal", "qflagOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "qflag",  
@@ -1995,8 +2039,8 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   if (info$compartment == "biota")
     id <- switch(
       info$purpose, 
-      AMAP = c(id, "species", "matrix", "AMAP_group"), 
-      OSPAR = c(id, "species", "matrix", "sex", "method_analysis", "AMAP_group"),
+      AMAP = c(id, "species", "matrix", "subseries"), 
+      OSPAR = c(id, "species", "matrix", "sex", "method_analysis", "subseries"),
       c(id, "species", "matrix", "sex", "method_analysis")
     )
   if (info$compartment == "water" & info$purpose %in% "HELCOM")
@@ -2101,8 +2145,8 @@ changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
     timeSeries <- within(timeSeries, {
       level6element <- "matrix"
       level6name <- as.character(matrix)
-      level7element <- "AMAP_group"
-      level7name <- as.character(AMAP_group)
+      level7element <- "subseries"
+      level7name <- as.character(subseries)
     })
     return(timeSeries)
   }
@@ -2145,8 +2189,8 @@ changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
   id <- !group %in% c("Effects", "Imposex", "Metabolites")
   if (any(id) & purpose %in% "OSPAR") 
     timeSeries[id, ] <- within(timeSeries[id, ], {
-      level7element <- "AMAP_group"
-      level7name <- as.character(AMAP_group)
+      level7element <- "subseries"
+      level7name <- as.character(subseries)
     })
 
   timeSeries

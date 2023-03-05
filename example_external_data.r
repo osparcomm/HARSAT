@@ -189,7 +189,7 @@ biota_assessment$timeSeries <- biota_assessment$timeSeries %>%
     ),
     level7name = case_when(
       level7element %in% "matrix" ~ .matrix,
-      level7element %in% "AMAP_group" ~ gsub("_", " ", level7name),
+      level7element %in% "subseries" ~ gsub("_", " ", level7name),
       TRUE ~ level7name
     ),
     .matrix = NULL,
@@ -202,7 +202,7 @@ biota_assessment$timeSeries <- biota_assessment$timeSeries %>%
     level7element = recode(
       level7element, 
       matrix = "Tissue", 
-      AMAP_group = "Mammal group"
+      subseries = "Mammal group"
     )
   ) %>% 
   column_to_rownames(".rownames")

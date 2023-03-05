@@ -732,7 +732,7 @@ Add a column to allow the creation of different mammal groups based on age (size
 
 ```{r AMAP_3}
 
-biota_data$data$AMAP_group <- "Not_applicable"
+biota_data$data$subseries <- rep(NA_character_, nrow(biota_data$data))
 
 ```
 
@@ -1036,17 +1036,17 @@ biota_data$data <-
   left_join(biota_data$data, wk_length, by = "sub.sample") %>% 
   mutate(
     .id = station_code %in% "902" & species %in% "Globicephala melas",
-    AMAP_group = case_when(
+    subseries = case_when(
       .id & sex %in% "F" & .length >= 375 ~ "Adult",
       .id & sex %in% "M" & .length >= 495 ~ "Adult",
       .id & sex %in% "M" & .length >= 320 ~ "Juvenile_male",
-      .id                                 ~ NA_character_,
-      TRUE                                ~ AMAP_group
+      .id                                 ~ "Undefined",
+      TRUE                                ~ subseries
     ),
     .id = NULL,
     .length = NULL
   ) %>% 
-  drop_na(AMAP_group)
+  filter(!(subseries %in% "Undefined"))
 
 ```
 

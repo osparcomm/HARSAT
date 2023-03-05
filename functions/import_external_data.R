@@ -112,21 +112,31 @@ add_non_ICES_data <- function(
     stop("sub.sample must start with a character")
 
   
-  # ensure consistency of AMAP_group within sub.samples
+  # relabel AMAP_group as subseries
+  # need to do this in data file but worried about git conflicts at this point
+
+  AMAP_data <- rename(AMAP_data, subseries = AMAP_group)
   
-  wk <- with(AMAP_data, tapply(AMAP_group, sub.sample, function(x) length(unique(x))))
+  
+  # ensure consistency of subseries within sub.samples
+  
+  wk <- with(
+    AMAP_data, 
+    tapply(subseries, sub.sample, function(x) length(unique(x)))
+  )
+  
   if (!all(wk %in% 1L))
-    stop("multiple AMAP_groups in the same sub.sample are not allowed")
+    stop("multiple subseries in the same sub.sample are not allowed")
   
   
-  # some timeseries have AMAP_group classifications for some but not all records
+  # some timeseries have subseries classifications for some but not all records
   # classify the latter as "undefined"
   
   AMAP_data <- group_by(AMAP_data, station_code, species, determinand, matrix)
   
   AMAP_data <- mutate(
     AMAP_data, 
-    AMAP_group = if (all(is.na(AMAP_group))) AMAP_group else replace_na(AMAP_group, "undefined")
+    subseries = if (all(is.na(subseries))) subseries else replace_na(subseries, "undefined")
   )
   
   AMAP_data <- ungroup(AMAP_data)
