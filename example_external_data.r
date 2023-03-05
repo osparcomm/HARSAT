@@ -162,7 +162,7 @@ stopCluster(wk.cluster)
 (wk_check <- ctsm_check_convergence(biota_assessment$assessment))
 
 # this time series has missing standard errors   
-# "Ireland_Lee K Estuary HG Mytilus edulis SB Not_applicable"                       
+# "3371 HG Mytilus edulis SB Not_applicable"                       
 
 # refit with different numerical differencing arguments
 biota_assessment$assessment[wk_check] <- 

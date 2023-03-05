@@ -59,8 +59,8 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
 
   out <- list(media = txt)
 
-  txt <- paste("Station: ", info$station, sep = "")
-  if (!is.na(info$stationName)) txt <- paste(txt, " (", info$stationName, ")", sep = "")
+  txt <- paste("Station: ", info$station_name, sep = "")
+  if (!is.na(info$station_longname)) txt <- paste(txt, " (", info$station_longname, ")", sep = "")
 
   #out$station <- if (html) convert.html.characters(txt) else txt
   out$station <- txt
