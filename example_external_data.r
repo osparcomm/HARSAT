@@ -28,7 +28,7 @@ source(file.path(function_path, "support_functions.R"))
 
 info_species_file_id <- "species_2020.csv"
 
-info_AC_type <- "OSPAR"
+info_AC_type <- "EXTERNAL"
 if(tolower(info_AC_type) != tolower("OSPAR") && tolower(info_AC_type) != tolower("HELCOM") && tolower(info_AC_type) != tolower("EXTERNAL")){
   stop("info_AC_type can only be OSPAR, HELCOM, or EXTERNAL")
 }
@@ -59,8 +59,8 @@ values_range_check_species(species, min_value, max_value)
 biota_data <- ctsm_read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
-  contaminants = "mercury_data.csv", 
-  stations = "station_dictionary.csv", 
+  contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 
+  stations = "AMAP_external_new_stations_only.csv", 
   QA = "quality_assurance.csv",
   path = file.path("data", "example_external_data"), 
   extraction = "2022/01/11",
