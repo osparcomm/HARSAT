@@ -488,7 +488,7 @@ ctsm_summary_table <- function(
       "station_code", "station_name", "station_longname", 
       "station_latitude", "station_longitude", "station_type", "waterbody_type", 
       "determinand", "detGroup", "species", "filtered",
-      "submedia", "matrix", "basis", "unit", "sex", "method_analysis", "AMAP_group", "shape", "colour"
+      "submedia", "matrix", "basis", "unit", "sex", "method_analysis", "subseries", "shape", "colour"
     ) 
   
     summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
@@ -611,8 +611,8 @@ ctsm_summary_table <- function(
 
     # rename some variables
 
-    if ("AMAP_group" %in% names(summary)) {
-      summary <- rename(summary, mammal_group = AMAP_group)
+    if ("subseries" %in% names(summary)) {
+      summary <- rename(summary, mammal_group = subseries)
     }
     
     if (!identical(assessment$info$region_id, assessment$info$region_names)) {
