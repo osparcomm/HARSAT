@@ -593,6 +593,7 @@ ctsm_tidy_stations <- function(stations, info) {
   
   # replace backward slash with forward slash in station (long) name
   
+  if(info_AC_type != "EXTERNAL") {
   stations <- mutate(
     stations, 
     station_longname = gsub("\\", "/", .data$station_longname, fixed = TRUE)
@@ -603,6 +604,7 @@ ctsm_tidy_stations <- function(stations, info) {
   
   stations <- filter(stations, is.na(.data$replacedBy))
   
+  }
   
   # check whether any remaining duplicated stations 
   # if present, select most recent of these
@@ -617,7 +619,10 @@ ctsm_tidy_stations <- function(stations, info) {
     remove = FALSE
   )
   
-  stations <- arrange(stations, .data$station_id, .data$startYear, .data$endYear)
+  if(info_AC_type != "EXTERNAL") {
+    stations <- arrange(stations, .data$station_id, .data$startYear, .data$endYear)
+  }
+  
   stations <- arrange(stations, desc(row_number()))
   
   stations <- ctsm.check(
@@ -656,23 +661,26 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
   # restrict to OSPAR stations used for temporal monitoring 
   # also includes grouped stations: Assessment Grouping for OSPAR MIME
   
-  stations <- filter(
-    stations, 
-    grepl("OSPAR", .data$programGovernance) & grepl("T", .data$PURPM)
-  )
-  
-  # and stations that are used for contaminants or biological effects
-  
-  stations <- filter(
-    stations, 
-    switch(
-      info$compartment, 
-      biota = grepl("CF|EF", .data$dataType), 
-      sediment = grepl("CS", .data$dataType), 
-      water = grepl("CW", .data$dataType)
+  if(info_AC_type != "EXTERNAL") {
+    
+    stations <- filter(
+      stations, 
+      grepl("OSPAR", .data$programGovernance) & grepl("T", .data$PURPM)
     )
-  )
   
+  
+    # and stations that are used for contaminants or biological effects
+  
+    stations <- filter(
+      stations, 
+      switch(
+        info$compartment, 
+        biota = grepl("CF|EF", .data$dataType), 
+        sediment = grepl("CS", .data$dataType), 
+        water = grepl("CW", .data$dataType)
+      )
+    )
+  }
   
   # delete stations outside the OSPAR region
   
