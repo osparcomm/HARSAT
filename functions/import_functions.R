@@ -195,33 +195,36 @@ ctsm_read_stations <- function(infile, path, purpose, region_id) {
     infile, na.strings = c("", "NULL")
   )
   
-  
+  print(info_AC_type)
   # rename columns to suit!
   
   names(stations) <- gsub("Station_", "", names(stations), fixed = TRUE)
 
-  stations <- dplyr::rename(
-    stations, 
-    station_code = Code,
-    country_ISO = Country,
-    country = Country_CNTRY,
-    station_name = Name,
-    station_longname = LongName,
-    station_latitude = Latitude,
-    station_longitude = Longitude,
-    startYear = ActiveFromDate,
-    endYear = ActiveUntilDate,
-    parent_code = AsmtMimeParent,
-    replacedBy = ReplacedBy,
-    programGovernance = ProgramGovernance,
-    dataType = DataType,
-    station_type = MSTAT,
-    waterbody_type = WLTYP
-  )
+  if(info_AC_type != "EXTERNAL") {
+    stations <- dplyr::rename(
+      stations, 
+      station_code = Code,
+      country_ISO = Country,
+      country = Country_CNTRY,
+      station_name = Name,
+      station_longname = LongName,
+      station_latitude = Latitude,
+      station_longitude = Longitude,
+      startYear = ActiveFromDate,
+      endYear = ActiveUntilDate,
+      parent_code = AsmtMimeParent,
+      replacedBy = ReplacedBy,
+      programGovernance = ProgramGovernance,
+      dataType = DataType,
+      station_type = MSTAT,
+      waterbody_type = WLTYP
+    )
 
-  if (purpose %in% c("OSPAR", "AMAP")) {
-    stations <- dplyr::rename(stations, offshore = OSPAR_shore)
-  }  
+    if (purpose %in% c("OSPAR", "AMAP")) {
+      stations <- dplyr::rename(stations, offshore = OSPAR_shore)
+    }  
+  
+  }
 
   # turn following variables into a character
   # code and parent code could be kept as integers, but safer to leave as 
@@ -356,7 +359,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     )
 
   }
-    
+  
   pos <- names(data) %in% region_id
   if (sum(pos) != length(region_id)) {
     stop("not all regional identifiers are in the data extraction")
@@ -386,7 +389,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
       method_pretreatment = metpt
     )
     
-  } else if (purpose %in% c("OSPAR", "AMAP")) {
+  } else if (info_AC_type != "EXTERNAL" && purpose %in% c("OSPAR", "AMAP")) {
     
     data <- dplyr::rename(
       data,
@@ -414,24 +417,25 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   
   
   # variables common across purpose and compartments
-
-  data <- dplyr::rename(
-    data,
-    year = myear, 
-    sample_latitude = latitude,
-    sample_longitude = longitude,
-    determinand = param, 
-    matrix = matrx, 
-    unit = munit, 
-    qalink = tblanalysisid,
-    uncertainty = uncrt,
-    unit_uncertainty = metcu, 
-    replicate = tblparamid, 
-    sample = tblsampleid, 
-    limit_detection = detli,
-    limit_quantification = lmqnt,
-    upload = tbluploadid
-  )
+  if(info_AC_type != "EXTERNAL") {
+    data <- dplyr::rename(
+      data,
+      year = myear, 
+      sample_latitude = latitude,
+      sample_longitude = longitude,
+      determinand = param, 
+      matrix = matrx, 
+      unit = munit, 
+      qalink = tblanalysisid,
+      uncertainty = uncrt,
+      unit_uncertainty = metcu, 
+      replicate = tblparamid, 
+      sample = tblsampleid, 
+      limit_detection = detli,
+      limit_quantification = lmqnt,
+      upload = tbluploadid
+    )
+  }
   
 
   # compartment specific variables
