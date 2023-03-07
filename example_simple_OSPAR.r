@@ -56,9 +56,9 @@ values_range_check_species(species, min_value, max_value)
 biota_data <- ctsm_read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
-  contaminants = "test_data.txt", 
-  stations = "station_dictionary.txt", 
-  QA = "quality_assurance.txt",
+  contaminants = "test_data.csv", 
+  stations = "station_dictionary.csv", 
+  QA = "quality_assurance.csv",
   path = file.path("data", "example_simple_OSPAR"), 
   extraction = "2022/01/11",
   max_year = 2020L

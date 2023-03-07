@@ -271,15 +271,9 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     # could maybe filter out unwanted variables at this stage to save space 
     #   e.g. don't need Ospar variables for a Helcom assessment
     
-    data <- read.table(
+    data <- read.csv(
       infile, 
-      strip.white = TRUE, 
-      sep = "\t", 
-      header = TRUE, 
-      quote = "\"" , 
       na.strings = c("", "NULL"), 
-      fileEncoding = "UTF-8-BOM", 
-      comment.char = "",
       colClasses = c(
         "country" = "character",
         "mprog" = "character", 
@@ -346,6 +340,9 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     
   }
     
+  
+  
+  
     
   # check regional identifiers are in the extraction 
 
