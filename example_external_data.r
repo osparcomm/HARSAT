@@ -84,11 +84,13 @@ biota_data <- ctsm_read_data(
 
 # the report of the adjustments can be sent anywhere
 
-rmarkdown::render(
-  "example_external_data_adjustments.Rmd", 
-  output_file = "mercury_adjustments.html",
-  output_dir = file.path("output", "example_external_data") 
-)
+if(info_AC_type != "EXTERNAL") {
+  rmarkdown::render(
+    "example_external_data_adjustments.Rmd", 
+    output_file = "mercury_adjustments.html",
+    output_dir = file.path("output", "example_external_data") 
+  )
+}
 
 # saveRDS(biota_data, file.path("RData", "biota data adjusted.rds"))
 
