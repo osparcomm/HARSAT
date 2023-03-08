@@ -192,7 +192,7 @@ ctsm_read_stations <- function(infile, path, purpose, region_id) {
   cat("Reading station dictionary from '", infile, "'\n", sep = "")
 
   stations <- read.csv(
-    infile, na.strings = c("", "NULL")
+    infile, na.strings = c("", "NULL"), strip.white = TRUE
   )
   
   print(info_AC_type)
@@ -253,7 +253,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   if (data_format == "old") {  
 
     data <- read.csv(
-      infile, na.strings = c("", "NULL")
+      infile, na.strings = c("", "NULL"), strip.white = TRUE,
     )
       
     #data <- read.table(
@@ -488,7 +488,7 @@ ctsm_read_QA <- function(QA, path, purpose) {
   cat("\nReading QA data from '", infile, "'\n", sep = "")
   
   crm <- read.csv(
-    infile, na.strings = c("", "NULL")
+    infile, na.strings = c("", "NULL"), strip.white = TRUE
   )
 
   names(crm) <- tolower(names(crm))
