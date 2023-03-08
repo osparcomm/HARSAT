@@ -109,6 +109,13 @@ ctsm_read_data <- function(
     warning("no data in max_year - possible error in function call", call. = FALSE)
   }
   
+  # adding required variables 'replicate' and 'pargroup'
+  data$replicate <- seq(from = 1, to = nrow(data), by = 1)
+  
+  if (!"pargroup" %in% names(data)) {
+    data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
+  }
+  
     
   out <- list(
     call = match.call(), 
