@@ -110,7 +110,10 @@ ctsm_read_data <- function(
   }
   
   # adding required variables 'replicate' and 'pargroup'
-  data$replicate <- seq(from = 1, to = nrow(data), by = 1)
+  
+  if (!"replicate" %in% names(data)) {
+    data$replicate <- seq(from = 1, to = nrow(data), by = 1)
+  }
   
   if (!"pargroup" %in% names(data)) {
     data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
