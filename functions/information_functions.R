@@ -72,8 +72,8 @@ ctsm_get_info <- function(
   info_file <- get(paste("info", info_type, sep = "."))
   input <- as.character(input)
   
-  # check whether input is a combination of values - sometimes used when e.g. there are 
-  # two methods used in the extraction of a chemical 
+  # check whether input is a combination of values - sometimes used when e.g. 
+  # there are two methods used in the extraction of a chemical 
   
   split_input <- any(grepl("~", na.omit(input)))
   if (split_input) {
@@ -81,23 +81,23 @@ ctsm_get_info <- function(
   }
   
   
-  # check for failure due to missing values
+  # check for failure due to missing values in data or in reference table 
   
-  wk <- unique(if(split_input) unlist(input2) else input)
-  ok <- switch(
-    na_action, 
-    fail = wk %in% rownames(info_file),
-    input_ok = wk %in% c(rownames(info_file), NA),
-    output_ok = wk %in% rownames(info_file),
-    TRUE
-  )
+  wk <- if(split_input) unlist(input2) else input
+
+  if (na_action %in% c("fail", "output_ok") && any(is.na(wk))) {
+    stop(
+      "Missing input values to ctsm_get_info with na.action set to ", 
+      na_action
+    )
+  } 
   
-  if (any(!ok)) {
-    stop('Not found in ', info_type, ' information file: ', 
-         paste(wk[!ok], collapse = ", "))
+  if (na_action != "ok") {
+    ctsm_check_reference_table(na.omit(wk), info_type)
   }
   
-  
+
+
   # construct output variables and check that all information is present 
   
   if (!is.null(compartment)) {
@@ -139,6 +139,31 @@ ctsm_get_info <- function(
 }  
 
 
+ctsm_check_reference_table <- function(x, info_type) {
+
+  # information_functions.R
+  # checks whether x is in the info_type reference table
+  
+  id <- unique(x)
+  
+  ref_table <- get(paste("info", info_type, sep = "."))
+  
+  ok <- id %in% row.names(ref_table)
+  
+  if (!all(ok)) {
+    id <- id[!ok]
+    id <- sort(id)
+    stop(
+      'The following values are present in the data but not in the ', 
+      info_type, 
+      ' reference table. ',
+      "Please add these to the reference table or edit your data to continue.\n",
+      paste(id, collapse = ", ")
+    )
+  }
+  
+  invisible()
+}
 
 
 # Species information ----

@@ -109,7 +109,8 @@ ctsm_read_data <- function(
     warning("no data in max_year - possible error in function call", call. = FALSE)
   }
   
-  # adding required variables 'replicate' and 'pargroup'
+  
+  # add required variables 'replicate' and 'pargroup' (not present in external data)
   
   if (!"replicate" %in% names(data)) {
     data$replicate <- seq(from = 1, to = nrow(data), by = 1)
@@ -2406,14 +2407,10 @@ ctsm_check_determinands <- function(compartment, data, determinands, control = N
   # note all auxiliaries are guaranteed to be info.determinands
   
   id <- c(determinands, get_control_dets(control))
-  
-  id <- unique(id)
-  
-  ok <- id %in% row.names(info.determinand)
-  if (!all(ok)) 
-    stop('Not found in determinand information file: ', paste(id[!ok], collapse = ", "))
- 
 
+  ctsm_check_reference_table(id, "determinand")  
+  
+    
   # simplify determinands and determinand.control so they only contain values that are
   # required
   
