@@ -650,18 +650,12 @@ ctsm_tidy_stations <- function(stations, info) {
   
   # select useful columns
   
-  if(info_AC_type != "EXTERNAL") {
-    col_id <- c(
-      info$region_id, "country", "station_name", "station_code", "station_longname", 
-      "station_latitude", "station_longitude", "station_type", "waterbody_type"
-    )
-  } 
-  else {
-    col_id <- c(
-      info$region_id, "country", "station_name", "station_code", 
-      "station_latitude", "station_longitude"
-    )
-  }
+  
+  col_id <- c(
+    info$region_id, "country", "station_name", "station_code", "station_longname", 
+    "station_latitude", "station_longitude", "station_type", "waterbody_type"
+  )
+  
   
   print(col_id)
   print(colnames(stations))
