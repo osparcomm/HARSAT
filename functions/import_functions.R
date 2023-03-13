@@ -833,29 +833,24 @@ ctsm_tidy_contaminants <- function(data, info) {
   data <- droplevels(data[ok, ])
   
   
-  # create sampleID from sample or sub.sample (depending on the compartment)
-  # delete sample and sub.sample variables
+  # ICES biota data: sample is the species identifier (within a haul say) and 
+  # sub.sample is what we usually think of as the sample 
+  # swap over and delete sub.sample
+
+  if (info$compartment == "biota" && "sub.sample" %in% names(data)) {
+    data$sample <- data$sub.sample
+    data$sub.sample <- NULL
+  }
   
-  data <- mutate(
-    data,
-    sampleID = switch(
-      info$compartment, 
-      sediment = factor(.data$sample, labels = ""), 
-      biota = factor(.data$sub.sample, labels = ""), 
-      water = factor(.data$sample, labels = "")
-    ),
-    sampleID = as.character(.data$sampleID), 
-    sample = NULL,
-    sub.sample = NULL
-  )
+  data$sample <- as.character(data$sample)
   
-  
+
   # retain useful variables
   
   var_id <- c(
     "station_code", "sample_latitude", "sample_longitude", 
     "year", "date", "time", "depth", 
-    "species", "sex", "noinp", "subseries", "sampleID", "replicate", 
+    "species", "sex", "noinp", "subseries", "sample", "replicate", 
     "determinand", "pargroup", "matrix", "basis", "filtered", 
     "method_analysis", "method_extraction", "method_pretreatment",
     "unit", "value", "qflag", "limit_detection", "limit_quantification", 
@@ -1052,7 +1047,7 @@ ctsm_create_timeSeries <- function(
   
   cat("\nCleaning data\n")
   
-  id <- c("station_code", "date", "filtered", "species", "sampleID", "matrix", "determinand")
+  id <- c("station_code", "date", "filtered", "species", "sample", "matrix", "determinand")
   id <- intersect(id, names(data))
   ord <- do.call("order", data[id])
   data <- data[ord, ]
@@ -1138,7 +1133,7 @@ ctsm_create_timeSeries <- function(
 
   # drop samples which only have auxiliary data
   
-  ok <- with(data, sampleID %in% sampleID[group != "Auxiliary"])
+  ok <- with(data, sample %in% sample[group != "Auxiliary"])
   if (any(!ok)) {
     cat("   Dropping samples with only auxiliary variables\n")
     data <- data[ok, ]
@@ -1180,7 +1175,7 @@ ctsm_create_timeSeries <- function(
   # necessarily the correct ones
   
   data <- ctsm.check(
-    data, paste(sampleID, determinand, matrix), action = "delete.dups", 
+    data, paste(sample, determinand, matrix), action = "delete.dups", 
     message = "Replicate measurements, only first retained", 
     fileName = "replicate measurements")
 
@@ -1429,8 +1424,8 @@ ctsm_create_timeSeries <- function(
 
 
   # merge auxiliary data with determinand data
-  # weights and sediment normalisers are merged by sampleID and matrix
-  # others just by sampleID (for now)
+  # weights and sediment normalisers are merged by sample and matrix
+  # others just by sample (for now)
 
   if (print_code_warnings)
     warning(
@@ -1453,14 +1448,14 @@ ctsm_create_timeSeries <- function(
   
 
   # catch for LNMEA measured in WO and ES for birds - probably shouldn't happen because the 
-  # sampleID will differ?  need to check
+  # sample will differ?  need to check
   
   if ("LNMEA" %in% names(auxData)) {
     if (print_code_warnings)
       warning("need to resolve merging of LNMEA with contaminant data", call. = FALSE)
     
-    if (anyDuplicated(auxData[["LNMEA"]][["sampleID"]]))
-      stop("sampleID with LNMEA measurements in more than one matrix", call. = FALSE)
+    if (anyDuplicated(auxData[["LNMEA"]][["sample"]]))
+      stop("sample with LNMEA measurements in more than one matrix", call. = FALSE)
   }
   
   # and similarly check that C13D and N15D are only measured once in each sub.sample
@@ -1469,36 +1464,36 @@ ctsm_create_timeSeries <- function(
     if (print_code_warnings)
       warning("need to resolve merging of C13D and N15D with contaminant data", call. = FALSE)
     
-    if (anyDuplicated(auxData[["C13D"]][["sampleID"]]))
-      stop("sampleID with C13D measurements in more than one matrix", call. = FALSE)
+    if (anyDuplicated(auxData[["C13D"]][["sample"]]))
+      stop("sample with C13D measurements in more than one matrix", call. = FALSE)
   
-    if (anyDuplicated(auxData[["N15D"]][["sampleID"]]))
-      stop("sampleID with N15D measurements in more than one matrix", call. = FALSE)
+    if (anyDuplicated(auxData[["N15D"]][["sample"]]))
+      stop("sample with N15D measurements in more than one matrix", call. = FALSE)
   }
   
   
   for (i in names(auxData)) {
 
     if (i %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN")) {
-      mergeID <- c("sampleID", "matrix")
+      mergeID <- c("sample", "matrix")
       newID <- c(
         "concentration", "qflag", "basis", "limit_detection", "limit_quantification", 
         "uncertainty"
       )
       newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
     } else if (i %in% c("AL", "LI")) {
-      mergeID <- c("sampleID", "matrix")
+      mergeID <- c("sample", "matrix")
       newID <- c(
         "concentration", "qflag", "basis", "limit_detection", "limit_quantification", 
         "uncertainty", "digestion"
       )
       newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
     } else if (i %in% c("C13D", "N15D")) {
-      mergeID <- "sampleID"
+      mergeID <- "sample"
       newID <- c("concentration", "matrix", "basis")
       newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
     } else {
-      mergeID <- "sampleID"
+      mergeID <- "sample"
       newID <- "concentration"
       newNames <- c(mergeID, i)
     }
@@ -1837,14 +1832,14 @@ ctsm_create_timeSeries <- function(
   if (info$compartment == "biota") {
 
     data <- ctsm.check(
-      data, paste(sampleID, determinand, matrix), action = "delete.dups", 
+      data, paste(sample, determinand, matrix), action = "delete.dups", 
       message = "Measurements still replicated, only first retained", 
       fileName = "replicate measurements extra")
 
   } else {
     
     data <- ctsm.check(
-      data, paste(sampleID, determinand), action = "delete.dups", 
+      data, paste(sample, determinand), action = "delete.dups", 
       message = "Measurements replicated across matrices, only first retained", 
       fileName = "replicate measurements extra")
     
@@ -2043,7 +2038,7 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   out.names = c(
     "station_code", "sample_latitude", "sample_longitude", "filtered", 
     "species", "sex", "depth",
-    "year", "date", "time", "sample", "sub.sample", "sampleID", 
+    "year", "date", "time", "sample", "sub.sample", "sample", 
     "matrix", "subseries", "group", "determinand", "basis", "unit", "value", 
     "method_analysis", "noinp", 
     "concOriginal", "qflagOriginal", "uncrtOriginal", 
@@ -2460,7 +2455,7 @@ determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...
   # matrix and, if so, delete drop - note that ctsm.check doesn't do the
   # deleting because it isn't necessarily the first instance that is retained
   
-  ID <- with(data, paste(sampleID, matrix))
+  ID <- with(data, paste(sample, matrix))
   
   dropID <- data$determinand %in% drop 
   keepID <- data$determinand %in% keep
@@ -2520,7 +2515,7 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
 
   detID <- c(keep, drop)
   
-  # for imposex, indices and stages aren't linked by sampleID, but by visit
+  # for imposex, indices and stages aren't linked by sample, but by visit
   # will assume, for simplicity, that only one visit per year
   
   visitID <- with(data, paste(station_code, year))
@@ -2630,7 +2625,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
   # if keep already exists, then don't need to do anything
   # don't delete drop data because might want to assess them individually
   
-  ID <- with(data, paste(sampleID, matrix))
+  ID <- with(data, paste(sample, matrix))
   
   dropID <- data$determinand %in% drop 
   keepID <- data$determinand %in% keep
@@ -2649,7 +2644,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
   
   data <- split(data, with(data, determinand %in% drop & sum_ID))
   
-  ID <- with(data[["TRUE"]], paste(sampleID, matrix))
+  ID <- with(data[["TRUE"]], paste(sample, matrix))
 
   summed_data <- by(data[["TRUE"]], ID, function(x) {
     
@@ -2751,7 +2746,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
   # if keep already exists, then don't need to do anything
   # don't delete drop data because might want to assess them individually
   
-  ID <- with(data, paste(sampleID, matrix))
+  ID <- with(data, paste(sample, matrix))
   
   dropID <- data$determinand %in% drop 
   keepID <- data$determinand %in% keep
@@ -2769,7 +2764,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
   
   data <- split(data, with(data, determinand %in% drop))
   
-  ID <- with(data[["TRUE"]], paste(sampleID, matrix))
+  ID <- with(data[["TRUE"]], paste(sample, matrix))
   
   summed_data <- by(data[["TRUE"]], ID, function(x) {
     
@@ -3035,7 +3030,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
           
           # get strongest digestion for same sample matrix combination
           
-          linkID <- with(data, paste(sampleID, matrix))
+          linkID <- with(data, paste(sample, matrix))
           
           replacement <- tapply(Cdigestion, linkID, function(x) {
             if (all(is.na(x))) return(NA)
@@ -3371,7 +3366,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
           
           # get strongest digestion for same sample matrix combination
           
-          linkID <- with(data, paste(sampleID, matrix))
+          linkID <- with(data, paste(sample, matrix))
           
           replacement <- tapply(Cdigestion, linkID, function(x) {
             if (all(is.na(x))) return(NA)

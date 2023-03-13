@@ -38,7 +38,7 @@ ctsm.uncrt.workup <- function(clean_data) {
   )
   
   id <- intersect(
-    c("country", "alabo", "year", "sampleID", "group", "determinand", 
+    c("country", "alabo", "year", "sample", "group", "determinand", 
       "concentration", "uncertainty", 
       "qflag", "limit_detection", "limit_quantification", 
       paste0("AL", id_aux), 
@@ -54,7 +54,7 @@ ctsm.uncrt.workup <- function(clean_data) {
   
   if (compartment == "sediment") {
     
-    id <- c("country", "alabo", "year", "group", "sampleID", "determinand")
+    id <- c("country", "alabo", "year", "group", "sample", "determinand")
 
     out_names <- c(
       "concentration", "uncertainty", "qflag", "limit_detection", 

@@ -1161,10 +1161,10 @@ plot.multidata <- function(data, info,  ...) {
   useLogs <- series_distribution %in% "lognormal"
   
   data <- within(data, concentration[useLogs] <- log(concentration[useLogs]))
-  data <- data[c("year", "sampleID", "seriesID", "qflag", "concentration")]
+  data <- data[c("year", "sample", "seriesID", "qflag", "concentration")]
 
 
-  data <- reshape(data, direction = "wide", idvar = c("sampleID", "year"), timevar = "seriesID")
+  data <- reshape(data, direction = "wide", idvar = c("sample", "year"), timevar = "seriesID")
 
   # add in extra rows for recent years to ensure there is a sensible range of years and to cover 
   # situation where a determinand has only a single value and a range can't be calculated - could be done
@@ -1589,12 +1589,12 @@ plot.ratio <- function(data, info, ...) {
   
   # widen data 
   
-  data <- data[c("year", "sampleID", "determinand", "qflag", "concentration")]
+  data <- data[c("year", "sample", "determinand", "qflag", "concentration")]
   
   data <- reshape(
     data, 
     direction = "wide", 
-    idvar = c("sampleID", "year"), 
+    idvar = c("sample", "year"), 
     timevar = "determinand"
   )
 
