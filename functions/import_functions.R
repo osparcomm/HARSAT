@@ -264,7 +264,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   if (data_format == "old") {  
 
     data <- read.csv(
-      infile, na.strings = c("", "NULL"), strip.white = TRUE,
+      infile, na.strings = c("", "NULL"), strip.white = TRUE
     )
       
     #data <- read.table(
@@ -650,10 +650,16 @@ ctsm_tidy_stations <- function(stations, info) {
   
   # select useful columns
   
+  
   col_id <- c(
     info$region_id, "country", "station_name", "station_code", "station_longname", 
     "station_latitude", "station_longitude", "station_type", "waterbody_type"
   )
+  
+  
+  print(col_id)
+  print(colnames(stations))
+  #print(stations["waterbody_type"])
   stations <- stations[col_id]
   
   
