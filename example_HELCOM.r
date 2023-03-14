@@ -111,7 +111,7 @@ sediment_data <- ctsm_read_data(
   stations = file.path("data", "example_HELCOM", "station_dictionary.csv"),
   extraction = "2022/10/06",
   max_year = 2021L,
-  data_format = "new"
+  data_format = "ICES_new"
 )
 
 # sediment_data <- ctsm_read_data(
@@ -137,7 +137,7 @@ water_data <- ctsm_read_data(
   stations = file.path("data", "example_HELCOM", "station_dictionary.csv"), 
   extraction = "2022/10/06",
   max_year = 2021L, 
-  data_format = "new"
+  data_format = "ICES_new"
 )  
 
 # saveRDS(water_data, file.path("RData", "water data.rds"))

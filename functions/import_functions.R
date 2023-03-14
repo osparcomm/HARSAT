@@ -13,7 +13,7 @@ ctsm_read_data <- function(
   extraction, 
   max_year, 
   control = list(), 
-  data_format = c("old", "new")) {
+  data_format = c("ICES_old", "ICES_new", "external")) {
 
   # import_functions.R
   # reads in data from an ICES extraction
@@ -66,7 +66,8 @@ ctsm_read_data <- function(
   info <- list(
     compartment = compartment, 
     purpose = purpose, 
-    extraction = extraction_text, 
+    extraction = extraction_text,
+    data_format = data_format,
     max_year = max_year 
   )
   
@@ -89,13 +90,15 @@ ctsm_read_data <- function(
     
   # read in station dictionary, contaminant and biological effects data and QA data
   
-  stations <- ctsm_read_stations(stations, path, info$purpose, info$region_id)
-  
-  data <- ctsm_read_contaminants(
-    contaminants, path, info$purpose, info$region_id, data_format
+  stations <- ctsm_read_stations(
+    stations, path, purpose, info$region_id, data_format
   )
   
-  if (data_format == "old") 
+  data <- ctsm_read_contaminants(
+    contaminants, path, purpose, info$region_id, data_format
+  )
+  
+  if (data_format == "ICES_old") 
     QA <- ctsm_read_QA(QA, path, purpose)
   
 
@@ -112,11 +115,8 @@ ctsm_read_data <- function(
   
   # add required variables 'replicate' and 'pargroup' (not present in external data)
   
-  if (!"replicate" %in% names(data)) {
+  if (data_format == "external") {
     data$replicate <- seq(from = 1, to = nrow(data), by = 1)
-  }
-  
-  if (!"pargroup" %in% names(data)) {
     data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
   }
   
@@ -128,7 +128,7 @@ ctsm_read_data <- function(
     stations = stations
   )
   
-  if (data_format == "old") out$QA <- QA
+  if (data_format == "ICES_old") out$QA <- QA
   
   out
 }
@@ -194,7 +194,7 @@ ctsm_control_modify <- function(control_default, control) {
 }
 
 
-ctsm_read_stations <- function(infile, path, purpose, region_id) {
+ctsm_read_stations <- function(infile, path, purpose, region_id, data_format) {
 
   # import functions
   # read in station dictionary
@@ -206,12 +206,12 @@ ctsm_read_stations <- function(infile, path, purpose, region_id) {
     infile, na.strings = c("", "NULL"), strip.white = TRUE
   )
   
-  print(info_AC_type)
+
   # rename columns to suit!
   
   names(stations) <- gsub("Station_", "", names(stations), fixed = TRUE)
 
-  if(info_AC_type != "EXTERNAL") {
+  if (data_format %in% c("ICES_old", "ICES_new")) {
     stations <- dplyr::rename(
       stations, 
       station_code = Code,
@@ -261,7 +261,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   cat("\nReading contaminant and biological effects data from '", infile, "'\n", 
       sep = "")
 
-  if (data_format == "old") {  
+  if (data_format %in% c("ICES_old", "external")) {  
 
     data <- read.csv(
       infile, na.strings = c("", "NULL"), strip.white = TRUE
@@ -271,8 +271,6 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     #  infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
     #  na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""  
     #)
-    
-    
     
   } else {
 
@@ -357,7 +355,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     
   # check regional identifiers are in the extraction 
 
-  if (data_format == "new" & purpose == "HELCOM") {
+  if (data_format == "ICES_new" & purpose == "HELCOM") {
 
     data <- dplyr::rename(
       data,
@@ -383,7 +381,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   # to streamline, could make sample = tblbioid (biota) or tblsampleid (sediment)
 
   
-  if (data_format == "new") {
+  if (data_format == "ICES_new") {
     
     data <- dplyr::rename(
       data,
@@ -397,7 +395,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
       method_pretreatment = metpt
     )
     
-  } else if (info_AC_type != "EXTERNAL" && purpose %in% c("OSPAR", "AMAP")) {
+  } else if (data_format == "ICES_old" && purpose %in% c("OSPAR", "AMAP")) {
     
     data <- dplyr::rename(
       data,
@@ -409,7 +407,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
       station_code = sd_asmt_stationcode,
     )
     
-  } else if (purpose %in% "HELCOM") {
+  } else if (data_format == "ICES_old" && purpose %in% "HELCOM") {
     
     data <- dplyr::rename(
       data,
@@ -425,7 +423,8 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   
   
   # variables common across purpose and compartments
-  if(info_AC_type != "EXTERNAL") {
+  
+  if(data_format %in% c("ICES_old", "ICES_new")) {
     data <- dplyr::rename(
       data,
       year = myear, 
@@ -470,7 +469,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   )
   
   
-  if (data_format == "old") {
+  if (data_format %in% "ICES_old") {
 
     id <- c(
       region_id, "qflag", "sample", "sub.sample", "sd_code", "station_code", 
@@ -552,13 +551,7 @@ ctsm_tidy_data <- function(ctsm_obj, oddity_path = "oddities") {
 
   data <- ctsm_tidy_contaminants(data, info)
 
-  if (is.null(ctsm_obj$call$data_format)) {
-    data_format <- "old"
-  } else {
-    data_format <- ctsm_obj$call$data_format
-  }
-  
-  if (data_format == "old") {
+  if (info$data_format == "ICES_old") {
     
     QA <- ctsm_obj$QA
     
@@ -579,7 +572,7 @@ ctsm_tidy_data <- function(ctsm_obj, oddity_path = "oddities") {
   ctsm_obj$stations <- stations
   ctsm_obj$data <- data
   
-  if (data_format == "old") ctsm_obj$QA <- NULL
+  if (info$data_format %in% "ICES_old") ctsm_obj$QA <- NULL
   
   ctsm_obj
 }
@@ -589,12 +582,14 @@ ctsm_tidy_stations <- function(stations, info) {
   
   cat("\nCleaning station dictionary\n")
   
-  # purpose-specific changes
+  # purpose-specific changes for ICES data
   
-  stations <- do.call(
-    paste("ctsm_tidy_stations", info$purpose, sep = "_"),
-    list(stations = stations, info = info)
-  )
+  if (info$data_format %in% c("ICES_old", "ICES_new")) {
+    stations <- do.call(
+      paste("ctsm_tidy_stations", info$purpose, sep = "_"),
+      list(stations = stations, info = info)
+    )
+  }
   
   
   # ensure country is consistent
@@ -602,51 +597,50 @@ ctsm_tidy_stations <- function(stations, info) {
   stations <- mutate(stations, country = str_to_title(.data$country))
   
   
-  # replace backward slash with forward slash in station (long) name
-  
-  if(info_AC_type != "EXTERNAL") {
-  stations <- mutate(
-    stations, 
-    station_longname = gsub("\\", "/", .data$station_longname, fixed = TRUE)
-  )
-  
-  
-  # remove stations that have been replaced
-  
-  stations <- filter(stations, is.na(.data$replacedBy))
-  
-  }
-  
-  # check whether any remaining duplicated stations 
-  # if present, select most recent of these
-  # crude method to sort by station, startYear and endYear (since NAs are sorted last)
-  # and then reverse the ordering of the whole data frame so it works with ctsm.check
-  
-  stations <- unite(
-    stations, 
-    "station_id", 
-    .data$country, 
-    .data$station_name,
-    remove = FALSE
-  )
-  
-  if(info_AC_type != "EXTERNAL") {
+
+  if (info$data_format %in% c("ICES_old","ICES_new")) {
+
+    # replace backward slash with forward slash in station (long) name
+
+    stations <- mutate(
+      stations, 
+      station_longname = gsub("\\", "/", .data$station_longname, fixed = TRUE)
+    )
+    
+    
+    # remove stations that have been replaced
+    
+    stations <- filter(stations, is.na(.data$replacedBy))
+    
+
+    # check whether any remaining duplicated stations 
+    # if present, select most recent of these
+    # crude method to sort by station, startYear and endYear (since NAs are sorted last)
+    # and then reverse the ordering of the whole data frame so it works with ctsm.check
+    
+    stations <- unite(
+      stations, 
+      "station_id", 
+      .data$country, 
+      .data$station_name,
+      remove = FALSE
+    )
+    
     stations <- arrange(stations, .data$station_id, .data$startYear, .data$endYear)
-  }
-  
-  stations <- arrange(stations, desc(row_number()))
-  
-  stations <- ctsm.check(
-    stations, 
-    station_id, 
-    action = "delete.dups",
-    message = "Duplicate stations - first one selected",
-    fileName = "duplicate stations", 
-    merge.stations = FALSE
-  )
-  
-  stations$station_id <- NULL
-  
+
+    stations <- arrange(stations, desc(row_number()))
+    
+    stations <- ctsm.check(
+      stations, 
+      station_id, 
+      action = "delete.dups",
+      message = "Duplicate stations - first one selected",
+      fileName = "duplicate stations", 
+      merge.stations = FALSE
+    )
+    
+    stations$station_id <- NULL
+  }    
   
   # select useful columns
   
@@ -787,44 +781,46 @@ ctsm_tidy_stations_AMAP <- function(stations, info) {
 ctsm_tidy_contaminants <- function(data, info) {
   
   cat("\nCleaning contaminant and biological effects data\n")
-  
-  # check whether submitted station has matched to station correctly for 
-  # those countries where extraction is by station
-  
-  if (info$purpose %in% c("OSPAR", "AMAP")) {
+
+  if (info$data_format %in% c("ICES_old", "ICES_new")) {
     
-    # Denmark, France, Ireland, Norway, Spain (2005 onwards), Sweden, UK
-    # need to update this list
+    # check whether submitted station has matched to station correctly for 
+    # those countries where extraction is by station
     
-    odd <- 
-      data$country %in% c(
-        "Denmark", "France", "Ireland", "Norway", "Sweden", "United Kingdom"
-      ) | 
-      (data$country %in% "Spain" & data$year > 2005)
+    if (info$purpose %in% c("OSPAR", "AMAP")) {
+      
+      # Denmark, France, Ireland, Norway, Spain (2005 onwards), Sweden, UK
+      # need to update this list
+      
+      odd <- 
+        data$country %in% c(
+          "Denmark", "France", "Ireland", "Norway", "Sweden", "United Kingdom"
+        ) | 
+        (data$country %in% "Spain" & data$year > 2005)
+      
+      # have to use sd_name because station_name also incorporates 
+      # replacements and groupings
+      
+      odd <- odd & !is.na(data$submitted.station) & is.na(data$sd_name)
+      
+    } else if (info$purpose %in% "HELCOM") {
+      
+      odd <- data$country %in% c("Denmark", "Sweden") 
+      
+      odd <- odd & !is.na(data$submitted.station) & is.na(data$station_name)
+      
+    }    
     
-    # have to use sd_name because station_name also incorporates 
-    # replacements and groupings
-    
-    odd <- odd & !is.na(data$submitted.station) & is.na(data$sd_name)
-    
-  } else if (info$purpose %in% "HELCOM") {
-    
-    odd <- data$country %in% c("Denmark", "Sweden") 
-    
-    odd <- odd & !is.na(data$submitted.station) & is.na(data$station_name)
-    
+    ctsm.check(
+      data, 
+      odd, 
+      action = "warning", 
+      message = "Submitted.station not recognised by dictionary", 
+      fileName = "submitted station not recognised", 
+      merge.stations = FALSE
+    )
   }    
-  
-  ctsm.check(
-    data, 
-    odd, 
-    action = "warning", 
-    message = "Submitted.station not recognised by dictionary", 
-    fileName = "submitted station not recognised", 
-    merge.stations = FALSE
-  )
-  
-  
+    
   # drop data with no stations  
   
   cat("   Dropping data with no stations\n")  
@@ -837,7 +833,7 @@ ctsm_tidy_contaminants <- function(data, info) {
   # sub.sample is what we usually think of as the sample 
   # swap over and delete sub.sample
 
-  if (info$compartment == "biota" && "sub.sample" %in% names(data)) {
+  if (info$data_format %in% c("ICES_old", "ICES_new") && info$compartment == "biota") {
     data$sample <- data$sub.sample
     data$sub.sample <- NULL
   }
