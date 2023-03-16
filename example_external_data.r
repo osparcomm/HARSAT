@@ -61,10 +61,12 @@ biota_data <- ctsm_read_data(
   purpose = "OSPAR",                               
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 
   stations = "AMAP_external_new_stations_only.csv", 
-  QA = "quality_assurance.csv",
   path = file.path("data", "example_external_data"), 
   extraction = "2022/01/11",
-  max_year = 2020L)  
+  max_year = 2020L, 
+  data_format = "external", 
+  control = list(region_id = "AMAP_region")
+)  
 
 # saveRDS(biota_data, file.path("RData", "biota data.rds"))
 
@@ -97,7 +99,7 @@ if(info_AC_type != "EXTERNAL") {
 
 # Prepare data for next stage ----
 
-# gets correct variable and streamlines some of the data files
+# gets correct variables and streamlines some of the data files
 
 biota_data <- ctsm_tidy_data(biota_data)
 
@@ -122,53 +124,59 @@ biota_timeSeries <- ctsm_create_timeSeries(
 
 biota_assessment <- ctsm.assessment.setup(
   biota_timeSeries, 
-  AC = c("BAC", "EQS.OSPAR", "HQS"), 
   recent.trend = 20
 )
 
 
-library("parallel")
-library("pbapply")
-
-wk.cores <- detectCores()
-wk.cluster <- makeCluster(wk.cores - 1)
-
-clusterExport(
-  wk.cluster, 
-  c("biota_assessment", "negTwiceLogLik", "convert.basis", 
-    unique(
-      c(objects(pattern = "ctsm*"), 
-        objects(pattern = "get*"), 
-        objects(pattern = "info*")
-      )
-    )
-  )
-)
-
-clusterEvalQ(wk.cluster, {
-  library("lme4")
-  library("tidyverse")
-})  
+biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 
 
-biota_assessment$assessment <- ctsm.assessment(
-  biota_assessment, 
-  clusterID = wk.cluster
-)
+# use the code below if it takes a long time to run
 
-stopCluster(wk.cluster)
+# library("parallel")
+# library("pbapply")
+# 
+# wk.cores <- detectCores()
+# wk.cluster <- makeCluster(wk.cores - 1)
+# 
+# clusterExport(
+#   wk.cluster, 
+#   c("biota_assessment", "negTwiceLogLik", "convert.basis", 
+#     unique(
+#       c(objects(pattern = "ctsm*"), 
+#         objects(pattern = "get*"), 
+#         objects(pattern = "info*")
+#       )
+#     )
+#   )
+# )
+# 
+# clusterEvalQ(wk.cluster, {
+#   library("lme4")
+#   library("tidyverse")
+# })  
+# 
+# 
+# biota_assessment$assessment <- ctsm.assessment(
+#   biota_assessment, 
+#   clusterID = wk.cluster
+# )
+# 
+# stopCluster(wk.cluster)
+
 
 
 ## check convergence ----
 
 (wk_check <- ctsm_check_convergence(biota_assessment$assessment))
 
+
 # this time series has missing standard errors   
 # "3371 HG Mytilus edulis SB Not_applicable"                       
 
 # refit with different numerical differencing arguments
-biota_assessment$assessment[wk_check] <- 
-  ctsm.assessment(biota_assessment, seriesID = wk_check, hess.d = 0.01, hess.r = 8)
+# biota_assessment$assessment[wk_check] <- 
+#   ctsm.assessment(biota_assessment, seriesID = wk_check, hess.d = 0.01, hess.r = 8)
 
 
 ## tidy up ----
@@ -224,7 +232,7 @@ webGroups = list(
 # only use environmental AC (not the health quality standard)
 
 biota_web <- biota_assessment
-biota_web$info$AC <- c("BAC", "EQS.OSPAR")
+# biota_web$info$AC <- c("BAC", "EQS.OSPAR")
 
 biota_web <- ctsm_web_initialise(
   biota_web,

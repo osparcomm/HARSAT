@@ -90,13 +90,9 @@ ctsm_read_data <- function(
     
   # read in station dictionary, contaminant and biological effects data and QA data
   
-  stations <- ctsm_read_stations(
-    stations, path, purpose, info$region_id, data_format
-  )
+  stations <- ctsm_read_stations(stations, path, info)
   
-  data <- ctsm_read_contaminants(
-    contaminants, path, purpose, info$region_id, data_format
-  )
+  data <- ctsm_read_contaminants(contaminants, path, info)
   
   if (data_format == "ICES_old") 
     QA <- ctsm_read_QA(QA, path, purpose)
@@ -112,15 +108,7 @@ ctsm_read_data <- function(
     warning("no data in max_year - possible error in function call", call. = FALSE)
   }
   
-  
-  # add required variables 'replicate' and 'pargroup' (not present in external data)
-  
-  if (data_format == "external") {
-    data$replicate <- seq(from = 1, to = nrow(data), by = 1)
-    data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
-  }
-  
-    
+
   out <- list(
     call = match.call(), 
     info = info,
@@ -194,7 +182,7 @@ ctsm_control_modify <- function(control_default, control) {
 }
 
 
-ctsm_read_stations <- function(infile, path, purpose, region_id, data_format) {
+ctsm_read_stations <- function(infile, path, info) {
 
   # import functions
   # read in station dictionary
@@ -202,16 +190,17 @@ ctsm_read_stations <- function(infile, path, purpose, region_id, data_format) {
   infile <- file.path(path, infile)
   cat("Reading station dictionary from '", infile, "'\n", sep = "")
 
-  stations <- read.csv(
-    infile, na.strings = c("", "NULL"), strip.white = TRUE
-  )
   
-
-  # rename columns to suit!
-  
-  names(stations) <- gsub("Station_", "", names(stations), fixed = TRUE)
-
-  if (data_format %in% c("ICES_old", "ICES_new")) {
+  if (info$data_format %in% c("ICES_old", "ICES_new")) {
+    
+    stations <- read.csv(
+      infile, na.strings = c("", "NULL"), strip.white = TRUE
+    )
+    
+    # rename columns to suit!
+    
+    names(stations) <- gsub("Station_", "", names(stations), fixed = TRUE)
+    
     stations <- dplyr::rename(
       stations, 
       station_code = Code,
@@ -230,29 +219,80 @@ ctsm_read_stations <- function(infile, path, purpose, region_id, data_format) {
       station_type = MSTAT,
       waterbody_type = WLTYP
     )
-
-    if (purpose %in% c("OSPAR", "AMAP")) {
+    
+    if (info$purpose %in% c("OSPAR", "AMAP")) {
       stations <- dplyr::rename(stations, offshore = OSPAR_shore)
     }  
   
-  }
-
-  # turn following variables into a character
-  # code and parent code could be kept as integers, but safer to leave as 
-  # characters until have decided how we are going to merge with non-ICES data
-
-  id <- c(region_id, "station_code", "parent_code")
+    # turn following variables into a character
+    # code and parent code could be kept as integers, but safer to leave as 
+    # characters until have decided how we are going to merge with non-ICES data
+    
+    id <- c(info$region_id, "station_code", "parent_code")
   
-  stations <- dplyr::mutate(
-    stations, 
-    dplyr::across(any_of(id), as.character)
-  )
+    stations <- dplyr::mutate(
+      stations, 
+      dplyr::across(any_of(id), as.character)
+    )
+
+  }    
+        
+  
+  if (info$data_format == "external") {  
+    
+    required <- c(
+      country = "character",
+      station_name = "character",
+      station_code = "character",
+      station_longname = "character",
+      station_latitude = "numeric", 
+      station_longitude = "numeric",
+      station_type = "character",
+      waterbody_type = "character"
+    )
+    
+    if (!is.null(info$region_id)) {
+      extra <- rep("character", length(info$region_id))
+      names(extra) <- info$region_id
+      required <- c(required, extra)
+    }
+    
+    
+    # check required variables are present in data
+    
+    stations <- read.csv(infile, strip.white = TRUE, nrows = 1)
+    
+    ok <- names(required) %in% names(stations)
+    
+    if (!all(ok)) {
+      id <- names(required)[!ok]
+      id <- sort(id)
+      stop(
+        "The following variables are not in the stations file. ", 
+        "Please update the stations file to continue. ",
+        "Note that the variable names are case sensitive.\n",
+        "Variables: ", paste(id, collapse = ", ")
+      )
+    }
+    
+    
+    # read data
+    
+    stations <- read.csv(
+      infile, 
+      na.strings = c("", "NULL"),
+      strip.white = TRUE,
+      colClasses = required
+    )
+    
+  }  
+  
   
   stations
 }
 
 
-ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format) {
+ctsm_read_contaminants <- function(infile, path, info) {
   
   # import functions
   # read in contaminant (and biological effects) data
@@ -261,7 +301,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   cat("\nReading contaminant and biological effects data from '", infile, "'\n", 
       sep = "")
 
-  if (data_format %in% c("ICES_old", "external")) {  
+  if (info$data_format == "ICES_old") {  
 
     data <- read.csv(
       infile, na.strings = c("", "NULL"), strip.white = TRUE
@@ -272,90 +312,147 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     #  na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""  
     #)
     
-  } else {
+  } 
+  
+  if (info$data_format == "ICES_new") {
 
-    # specify type of each column
-    # station codes and tblsampleid are converted to characters
-    #   to make it easier to combine with external data - this could be revisited
-    # could maybe filter out unwanted variables at this stage to save space 
-    #   e.g. don't need Ospar variables for a Helcom assessment
-    
-    data <- read.csv(
-      infile, 
-      na.strings = c("", "NULL"), 
-      colClasses = c(
-        "country" = "character",
-        "mprog" = "character", 
-        "helcom_subbasin" = "character",     
-        "helcom_l3" = "character",
-        "helcom_l4" = "character",
-        "ices_ecoregion" = "character",
-        "ospar_region" = "character", 
-        "ospar_subregion" = "character", 
-        "is_amap_monitoring" = "logical",
-        "is_helcom_monitoring" = "logical", 
-        "is_medpol_monitoring" = "logical", 
-        "is_ospar_monitoring" = "logical",  
-        "is_amap_area" = "logical", 
-        "is_helcom_area" = "logical",
-        "is_ospar_area"= "logical",
-        "rlabo" = "character",
-        "slabo" = "character",
-        "alabo" = "character",               
-        "statn" = "character",
-        "sd_code_match" = "character",
-        "sd_code_name" = "character", 
-        "sd_code_replaced" = "character", 
-        "sd_name_replaced" = "character", 
-        "sd_code_final" = "character",
-        "sd_name_final" = "character", 
-        "myear" = "integer",
-        "date" = "Date",                
-        "latitude" = "numeric",
-        "longitude" = "numeric",
-        "dephu" = "numeric",               
-        "dephl" = "numeric",
-        "purpm" = "character",
-        "finfl" = "character",               
-        "param" = "character",
-        "pargroup" = "character",
-        "matrx" = "character",              
-        "basis" = "character",
-        "value" = "numeric",
-        "munit" = "character",              
-        "detli" = "numeric",
-        "lmqnt" = "numeric",
-        "uncrt" = "numeric",              
-        "metcu" = "character",
-        "qflag" = "character",
-        "vflag" = "character",              
-        "metoa" = "character",
-        "metcx" = "character",
-        "metpt" = "character",
-        "metst" = "character",
-        "metps" = "character",
-        "metfp" = "character",               
-        "smtyp" = "character",
-        "smpno" = "character",
-        "subno" = "character",              
-        "dcflgs" = "character",
-        "tblAnalysisid" = "integer",
-        "tblparamid" = "integer",          
-        "tblsampleid" = "character",
-        "tblspotid" = "integer",
-        "tbluploadid" = "integer"         
-      )
+    required <- c(
+      "country" = "character",
+      "mprog" = "character", 
+      "helcom_subbasin" = "character",     
+      "helcom_l3" = "character",
+      "helcom_l4" = "character",
+      "ices_ecoregion" = "character",
+      "ospar_region" = "character", 
+      "ospar_subregion" = "character", 
+      "is_amap_monitoring" = "logical",
+      "is_helcom_monitoring" = "logical", 
+      "is_medpol_monitoring" = "logical", 
+      "is_ospar_monitoring" = "logical",  
+      "is_amap_area" = "logical", 
+      "is_helcom_area" = "logical",
+      "is_ospar_area"= "logical",
+      "rlabo" = "character",
+      "slabo" = "character",
+      "alabo" = "character",               
+      "statn" = "character",
+      "sd_code_match" = "character",
+      "sd_code_name" = "character", 
+      "sd_code_replaced" = "character", 
+      "sd_name_replaced" = "character", 
+      "sd_code_final" = "character",
+      "sd_name_final" = "character", 
+      "myear" = "integer",
+      "date" = "Date",                
+      "latitude" = "numeric",
+      "longitude" = "numeric",
+      "dephu" = "numeric",               
+      "dephl" = "numeric",
+      "purpm" = "character",
+      "finfl" = "character",               
+      "param" = "character",
+      "pargroup" = "character",
+      "matrx" = "character",              
+      "basis" = "character",
+      "value" = "numeric",
+      "munit" = "character",              
+      "detli" = "numeric",
+      "lmqnt" = "numeric",
+      "uncrt" = "numeric",              
+      "metcu" = "character",
+      "qflag" = "character",
+      "vflag" = "character",              
+      "metoa" = "character",
+      "metcx" = "character",
+      "metpt" = "character",
+      "metst" = "character",
+      "metps" = "character",
+      "metfp" = "character",               
+      "smtyp" = "character",
+      "smpno" = "character",
+      "subno" = "character",              
+      "dcflgs" = "character",
+      "tblAnalysisid" = "integer",
+      "tblparamid" = "integer",          
+      "tblsampleid" = "character",
+      "tblspotid" = "integer",
+      "tbluploadid" = "integer"         
     )
     
+  } else if (info$data_format == "external") {
+
+    required <- c(
+      "country" = "character",
+      "station_code" = "character",
+      "station_name"= "character",
+      "sample_latitude" = "numeric", 
+      "sample_longitude" = "numeric", 
+      "year" = "integer", 
+      "date" = "Date",
+      "depth" = "numeric",
+      "subseries" = "character",
+      "sample" = "character",
+      "determinand" = "character",
+      "matrix" = "character",
+      "basis" = "character",
+      "unit" = "character",
+      "value" = "numeric",
+      "qflag" = "character",
+      "limit_detection" = "numeric",
+      "limit_quantification" = "numeric", 
+      "uncertainty" = "numeric", 
+      "unit_uncertainty" = "character",
+      "method_pretreatment" = "character",
+      "method_analysis" = "character",
+      "method_extraction" = "character"
+    )
+
+    if (info$compartment == "biota") {
+      required = c(
+        required, 
+        "species" = "character",
+        "sex" = "character",
+        "noinp" = "integer"
+      )
+    }    
+
   }
+  
+
+  if (info$data_format %in% c("ICES_new", "external")) {  
+
+    # check required variables are present in data
     
+    data <- read.csv(infile, strip.white = TRUE, nrows = 1)
   
-  
-  
+    ok <- names(required) %in% names(data)
     
+    if (!all(ok)) {
+      id <- names(required)[!ok]
+      id <- sort(id)
+      stop(
+        "The following variables are not in the data file. ", 
+        "Please update the data file to continue. ",
+        "Note that the variable names are case sensitive.\n",
+        "Variables: ", paste(id, collapse = ", ")
+      )
+    }
+    
+    
+    # read data
+        
+    data <- read.csv(
+      infile, 
+      na.strings = c("", "NULL"),
+      strip.white = TRUE,
+      colClasses = required
+    )
+  }  
+  
+  
   # check regional identifiers are in the extraction 
 
-  if (data_format == "ICES_new" & purpose == "HELCOM") {
+  if (info$data_format == "ICES_new" & info$purpose == "HELCOM") {
 
     data <- dplyr::rename(
       data,
@@ -365,14 +462,21 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
     )
 
   }
+
+  if (info$data_format %in% c("ICES_new", "ICES_old")) {
+    
+    pos <- names(data) %in% info$region_id
+    if (sum(pos) != length(info$region_id)) {
+      stop("not all regional identifiers are in the data extraction")
+    }
   
-  pos <- names(data) %in% region_id
-  if (sum(pos) != length(region_id)) {
-    stop("not all regional identifiers are in the data extraction")
+    names(data)[!pos] <- tolower(names(data)[!pos])     # just in case!
+    
+  } else if (info$data_format == "external") {
+    
+    names(data) <- tolower(names(data))  
   }
   
-  names(data)[!pos] <- tolower(names(data)[!pos])     # just in case!
-
   
   # create more useful names
   # for biota, tblsampleid is the species, tblbioid gives the subsample (individual) 
@@ -381,7 +485,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   # to streamline, could make sample = tblbioid (biota) or tblsampleid (sediment)
 
   
-  if (data_format == "ICES_new") {
+  if (info$data_format == "ICES_new") {
     
     data <- dplyr::rename(
       data,
@@ -395,7 +499,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
       method_pretreatment = metpt
     )
     
-  } else if (data_format == "ICES_old" && purpose %in% c("OSPAR", "AMAP")) {
+  } else if (info$data_format == "ICES_old" && info$purpose %in% c("OSPAR", "AMAP")) {
     
     data <- dplyr::rename(
       data,
@@ -407,7 +511,7 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
       station_code = sd_asmt_stationcode,
     )
     
-  } else if (data_format == "ICES_old" && purpose %in% "HELCOM") {
+  } else if (info$data_format == "ICES_old" && info$purpose %in% "HELCOM") {
     
     data <- dplyr::rename(
       data,
@@ -424,7 +528,8 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   
   # variables common across purpose and compartments
   
-  if(data_format %in% c("ICES_old", "ICES_new")) {
+  if(info$data_format %in% c("ICES_old", "ICES_new")) {
+
     data <- dplyr::rename(
       data,
       year = myear, 
@@ -442,23 +547,24 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
       limit_quantification = lmqnt,
       upload = tbluploadid
     )
+    
+    # compartment specific variables
+    
+    var_id <- c("tblbioid", "sexco", "dephu")
+    replacement <- c("sub.sample", "sex", "depth")
+    
+    pos <- match(var_id, names(data), nomatch = 0)
+    
+    if (any(pos > 0)) {
+      ok <- pos > 0
+      pos <- pos[ok]
+      replacement <- replacement[ok]
+      names(data)[pos] <- replacement
+    }
+    
   }
   
 
-  # compartment specific variables
-    
-  var_id <- c("tblbioid", "sexco", "dephu")
-  replacement <- c("sub.sample", "sex", "depth")
-  
-  pos <- match(var_id, names(data), nomatch = 0)
-  
-  if (any(pos > 0)) {
-    ok <- pos > 0
-    pos <- pos[ok]
-    replacement <- replacement[ok]
-    names(data)[pos] <- replacement
-  }
-  
   
   # ensure further consistency
   
@@ -469,10 +575,10 @@ ctsm_read_contaminants <- function(infile, path, purpose, region_id, data_format
   )
   
   
-  if (data_format %in% "ICES_old") {
+  if (info$data_format %in% "ICES_old") {
 
     id <- c(
-      region_id, "qflag", "sample", "sub.sample", "sd_code", "station_code", 
+      info$region_id, "qflag", "sample", "sub.sample", "sd_code", "station_code", 
       "sd_name", "station_name"
     )
     
@@ -597,17 +703,16 @@ ctsm_tidy_stations <- function(stations, info) {
   stations <- mutate(stations, country = str_to_title(.data$country))
   
   
+ # replace backward slash with forward slash in station (long) name
 
-  if (info$data_format %in% c("ICES_old","ICES_new")) {
-
-    # replace backward slash with forward slash in station (long) name
-
-    stations <- mutate(
-      stations, 
-      station_longname = gsub("\\", "/", .data$station_longname, fixed = TRUE)
-    )
+  stations <- mutate(
+    stations, 
+    station_longname = gsub("\\", "/", .data$station_longname, fixed = TRUE)
+  )
     
-    
+
+  if (info$data_format %in% c("ICES_old", "ICES_new")) {
+      
     # remove stations that have been replaced
     
     stations <- filter(stations, is.na(.data$replacedBy))
@@ -651,9 +756,6 @@ ctsm_tidy_stations <- function(stations, info) {
   )
   
   
-  print(col_id)
-  print(colnames(stations))
-  #print(stations["waterbody_type"])
   stations <- stations[col_id]
   
   
@@ -820,7 +922,16 @@ ctsm_tidy_contaminants <- function(data, info) {
       merge.stations = FALSE
     )
   }    
-    
+
+  
+  # add required variables 'replicate' and 'pargroup' (not present in external data)
+  
+  if (info$data_format == "external") {
+    data$replicate <- seq(from = 1, to = nrow(data), by = 1)
+    data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
+  }
+  
+      
   # drop data with no stations  
   
   cat("   Dropping data with no stations\n")  
