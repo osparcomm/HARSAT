@@ -94,6 +94,81 @@ ctsm_read_data <- function(
   
   data <- ctsm_read_contaminants(contaminants, path, info)
   
+  # add missing NA variables
+  if (data_format == "external") {
+    if (!"sample_latitude" %in% names(data)) {
+      data$sample_latitude <- NA
+    }
+  
+    if (!"sample_longitude" %in% names(data)) {
+      data$sample_longitude <- NA
+    }
+  
+    if (!"date" %in% names(data)) {
+      data$date <- NA
+    }
+  
+    if (!"depth" %in% names(data)) {
+      data$depth <- NA
+    }
+  
+    if (!"sex" %in% names(data)) {
+      data$sex <- NA
+    }
+  
+    if (!"noinp" %in% names(data)) {
+      data$noinp <- NA
+    }
+  
+    if (!"AMAP_group" %in% names(data)) {
+      data$AMAP_group <- NA
+    }
+  
+    if (!"basis" %in% names(data)) {
+      data$basis <- NA
+    }
+  
+    if (!"qflag" %in% names(data)) {
+      data$qflag <- NA
+    }
+  
+    if (!"limit_detection" %in% names(data)) {
+      data$limit_detection <- NA
+    }
+  
+    if (!"limit_quantification" %in% names(data)) {
+      data$limit_quantification <- NA
+    }
+  
+    if (!"uncertainty" %in% names(data)) {
+      data$uncertainty <- NA
+    }
+  
+    if (!"unit_uncertainty" %in% names(data)) {
+      data$unit_uncertainty <- NA
+    }
+  
+    if (!"method_pretreatment" %in% names(data)) {
+      data$method_pretreatment <- NA
+    }
+  
+    if (!"method_analysis" %in% names(data)) {
+      data$method_analysis <- NA
+    }
+  
+    if (!"method_extraction" %in% names(data)) {
+      data$method_extraction <- NA
+    }
+    
+    # subseries not in our table?
+    
+    if (!"subseries" %in% names(data)) {
+      data$subseries <- "Not_applicable"
+    }
+  }
+  
+  
+  
   if (data_format == "ICES_old") 
     QA <- ctsm_read_QA(QA, path, purpose)
   
@@ -380,7 +455,8 @@ ctsm_read_contaminants <- function(infile, path, info) {
     )
     
   } else if (info$data_format == "external") {
-
+    
+    
     required <- c(
       "country" = "character",
       "station_code" = "character",
@@ -424,6 +500,76 @@ ctsm_read_contaminants <- function(infile, path, info) {
     # check required variables are present in data
     
     data <- read.csv(infile, strip.white = TRUE, nrows = 1)
+    
+    if (!"sample_latitude" %in% names(data)) {
+      data$sample_latitude <- NA
+    }
+    
+    if (!"sample_longitude" %in% names(data)) {
+      data$sample_longitude <- NA
+    }
+    
+    if (!"date" %in% names(data)) {
+      data$date <- NA
+    }
+    
+    if (!"depth" %in% names(data)) {
+      data$depth <- NA
+    }
+    
+    if (!"sex" %in% names(data)) {
+      data$sex <- NA
+    }
+    
+    if (!"noinp" %in% names(data)) {
+      data$noinp <- NA
+    }
+    
+    if (!"AMAP_group" %in% names(data)) {
+      data$AMAP_group <- NA
+    }
+    
+    if (!"basis" %in% names(data)) {
+      data$basis <- NA
+    }
+    
+    if (!"qflag" %in% names(data)) {
+      data$qflag <- NA
+    }
+    
+    if (!"limit_detection" %in% names(data)) {
+      data$limit_detection <- NA
+    }
+    
+    if (!"limit_quantification" %in% names(data)) {
+      data$limit_quantification <- NA
+    }
+    
+    if (!"uncertainty" %in% names(data)) {
+      data$uncertainty <- NA
+    }
+    
+    if (!"unit_uncertainty" %in% names(data)) {
+      data$unit_uncertainty <- NA
+    }
+    
+    if (!"method_pretreatment" %in% names(data)) {
+      data$method_pretreatment <- NA
+    }
+    
+    if (!"method_analysis" %in% names(data)) {
+      data$method_analysis <- NA
+    }
+    
+    if (!"method_extraction" %in% names(data)) {
+      data$method_extraction <- NA
+    }
+    
+    # subseries not in our table!
+    
+    if (!"subseries" %in% names(data)) {
+      data$subseries <- "Not_applicable"
+    }
   
     ok <- names(required) %in% names(data)
     
