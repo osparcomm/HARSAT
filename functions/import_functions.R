@@ -94,81 +94,6 @@ ctsm_read_data <- function(
   
   data <- ctsm_read_contaminants(contaminants, path, info)
   
-  # add missing NA variables
-  if (data_format == "external") {
-    if (!"sample_latitude" %in% names(data)) {
-      data$sample_latitude <- NA
-    }
-  
-    if (!"sample_longitude" %in% names(data)) {
-      data$sample_longitude <- NA
-    }
-  
-    if (!"date" %in% names(data)) {
-      data$date <- NA
-    }
-  
-    if (!"depth" %in% names(data)) {
-      data$depth <- NA
-    }
-  
-    if (!"sex" %in% names(data)) {
-      data$sex <- NA
-    }
-  
-    if (!"noinp" %in% names(data)) {
-      data$noinp <- NA
-    }
-  
-    if (!"AMAP_group" %in% names(data)) {
-      data$AMAP_group <- NA
-    }
-  
-    if (!"basis" %in% names(data)) {
-      data$basis <- NA
-    }
-  
-    if (!"qflag" %in% names(data)) {
-      data$qflag <- NA
-    }
-  
-    if (!"limit_detection" %in% names(data)) {
-      data$limit_detection <- NA
-    }
-  
-    if (!"limit_quantification" %in% names(data)) {
-      data$limit_quantification <- NA
-    }
-  
-    if (!"uncertainty" %in% names(data)) {
-      data$uncertainty <- NA
-    }
-  
-    if (!"unit_uncertainty" %in% names(data)) {
-      data$unit_uncertainty <- NA
-    }
-  
-    if (!"method_pretreatment" %in% names(data)) {
-      data$method_pretreatment <- NA
-    }
-  
-    if (!"method_analysis" %in% names(data)) {
-      data$method_analysis <- NA
-    }
-  
-    if (!"method_extraction" %in% names(data)) {
-      data$method_extraction <- NA
-    }
-    
-    # subseries not in our table?
-    
-    if (!"subseries" %in% names(data)) {
-      data$subseries <- "Not_applicable"
-    }
-  }
-  
-  
-  
   if (data_format == "ICES_old") 
     QA <- ctsm_read_QA(QA, path, purpose)
   
@@ -315,7 +240,7 @@ ctsm_read_stations <- function(infile, path, info) {
   
   if (info$data_format == "external") {  
     
-    required <- c(
+    var_id <- c(
       country = "character",
       station_name = "character",
       station_code = "character",
@@ -329,7 +254,15 @@ ctsm_read_stations <- function(infile, path, info) {
     if (!is.null(info$region_id)) {
       extra <- rep("character", length(info$region_id))
       names(extra) <- info$region_id
-      required <- c(required, extra)
+      var_id <- c(var_id, extra)
+    }
+    
+    required <- c(
+      "country", "station_name", "station_code", "station_latitude", "station_longitude")
+    )
+    
+    if (!is.null(info$region_id)) {
+      required <- c(required, info$region_id)
     }
     
     
@@ -337,10 +270,10 @@ ctsm_read_stations <- function(infile, path, info) {
     
     stations <- read.csv(infile, strip.white = TRUE, nrows = 1)
     
-    ok <- names(required) %in% names(stations)
-    
+    ok <- required %in% names(stations)
+ 
     if (!all(ok)) {
-      id <- names(required)[!ok]
+      id <- required[!ok]
       id <- sort(id)
       stop(
         "The following variables are not in the stations file. ", 
@@ -352,14 +285,32 @@ ctsm_read_stations <- function(infile, path, info) {
     
     
     # read data
-    
+ 
+    ok <- names(var_id) %in% names(stations)
+    var_id <- var_id[ok]
+
     stations <- read.csv(
       infile, 
       na.strings = c("", "NULL"),
       strip.white = TRUE,
-      colClasses = required
+      colClasses = var_id
     )
+
     
+    # add missing NA variables
+
+    if (!"station_longname" %in% names(stations))) {
+      data$station_longname <- NA_character_
+    }
+  
+    if (!"station_type" %in% names(stations))) {
+      data$station_type <- NA_character_
+    }
+
+    if (!"waterbody_type" %in% names(stations))) {
+      data$waterbody_type <- NA_character_
+    }
+
   }  
   
   
@@ -391,7 +342,7 @@ ctsm_read_contaminants <- function(infile, path, info) {
   
   if (info$data_format == "ICES_new") {
 
-    required <- c(
+    var_id <- c(
       "country" = "character",
       "mprog" = "character", 
       "helcom_subbasin" = "character",     
@@ -454,10 +405,11 @@ ctsm_read_contaminants <- function(infile, path, info) {
       "tbluploadid" = "integer"         
     )
     
+    required <- names(var_id)
+    
   } else if (info$data_format == "external") {
     
-    
-    required <- c(
+    var_id <- c(
       "country" = "character",
       "station_code" = "character",
       "station_name"= "character",
@@ -484,14 +436,26 @@ ctsm_read_contaminants <- function(infile, path, info) {
     )
 
     if (info$compartment == "biota") {
-      required = c(
-        required, 
+      var_id <- c(
+        var_id, 
         "species" = "character",
         "sex" = "character",
         "noinp" = "integer"
       )
     }    
 
+    required <- c(
+      "country", "station_code", "station_name", "year", "sample", "determinand", 
+      "matrix", "unit", "value"
+    )
+
+    if (info$compartment %in% c("biota", "sediment")) {
+      required <- c(required, basis)
+    }
+    
+    if (info$compartment == "biota") {
+      required <- c(required, "species")
+    }
   }
   
 
@@ -501,80 +465,10 @@ ctsm_read_contaminants <- function(infile, path, info) {
     
     data <- read.csv(infile, strip.white = TRUE, nrows = 1)
     
-    if (!"sample_latitude" %in% names(data)) {
-      data$sample_latitude <- NA
-    }
-    
-    if (!"sample_longitude" %in% names(data)) {
-      data$sample_longitude <- NA
-    }
-    
-    if (!"date" %in% names(data)) {
-      data$date <- NA
-    }
-    
-    if (!"depth" %in% names(data)) {
-      data$depth <- NA
-    }
-    
-    if (!"sex" %in% names(data)) {
-      data$sex <- NA
-    }
-    
-    if (!"noinp" %in% names(data)) {
-      data$noinp <- NA
-    }
-    
-    if (!"AMAP_group" %in% names(data)) {
-      data$AMAP_group <- NA
-    }
-    
-    if (!"basis" %in% names(data)) {
-      data$basis <- NA
-    }
-    
-    if (!"qflag" %in% names(data)) {
-      data$qflag <- NA
-    }
-    
-    if (!"limit_detection" %in% names(data)) {
-      data$limit_detection <- NA
-    }
-    
-    if (!"limit_quantification" %in% names(data)) {
-      data$limit_quantification <- NA
-    }
-    
-    if (!"uncertainty" %in% names(data)) {
-      data$uncertainty <- NA
-    }
-    
-    if (!"unit_uncertainty" %in% names(data)) {
-      data$unit_uncertainty <- NA
-    }
-    
-    if (!"method_pretreatment" %in% names(data)) {
-      data$method_pretreatment <- NA
-    }
-    
-    if (!"method_analysis" %in% names(data)) {
-      data$method_analysis <- NA
-    }
-    
-    if (!"method_extraction" %in% names(data)) {
-      data$method_extraction <- NA
-    }
-    
-    # subseries not in our table!
-    
-    if (!"subseries" %in% names(data)) {
-      data$subseries <- "Not_applicable"
-    }
-  
-    ok <- names(required) %in% names(data)
+    ok <- required %in% names(data)
     
     if (!all(ok)) {
-      id <- names(required)[!ok]
+      id <- required[!ok]
       id <- sort(id)
       stop(
         "The following variables are not in the data file. ", 
@@ -583,17 +477,91 @@ ctsm_read_contaminants <- function(infile, path, info) {
         "Variables: ", paste(id, collapse = ", ")
       )
     }
-    
+ 
     
     # read data
-        
+
+    ok <- names(var_id) %in% names(data)
+    var_id <- var_id[ok]
+
     data <- read.csv(
       infile, 
       na.strings = c("", "NULL"),
       strip.white = TRUE,
-      colClasses = required
+      colClasses = var_id
     )
+  
   }  
+  
+  
+  # add missing NA variables (for external data)
+  
+  if (data_format == "external") {
+  
+    if (!"sample_latitude" %in% names(data)) {
+      data$sample_latitude <- NA_real_
+    }
+  
+    if (!"sample_longitude" %in% names(data)) {
+      data$sample_longitude <- NA_real_
+    }
+  
+    if (!"date" %in% names(data)) {
+      data$date <- as.Date(NA)
+    }
+  
+    if (!"depth" %in% names(data)) {
+      data$depth <- NA_real_
+    }
+  
+    if (info$compartment == "biota" && !"sex" %in% names(data)) {
+      data$sex <- NA_character_
+    }
+  
+    if (info$compartment == "biota" && !"noinp" %in% names(data)) {
+      data$noinp <- NA_integer_
+    }
+  
+    if (!"subseries" %in% names(data)) {
+      data$subseries <- NA_character_
+    }
+    
+    if (info$compartment == "water" && !"basis" %in% names(data)) {
+      data$basis <- NA_character_
+    }
+  
+    if (!"qflag" %in% names(data)) {
+      data$qflag <- NA_character_
+    }
+  
+    if (!"limit_detection" %in% names(data)) {
+      data$limit_detection <- NA_real_
+    }
+  
+    if (!"limit_quantification" %in% names(data)) {
+      data$limit_quantification <- NA_real_
+    }
+  
+    if (!"uncertainty" %in% names(data)) {
+      data$uncertainty <- NA_real_
+    }
+  
+    if (!"unit_uncertainty" %in% names(data)) {
+      data$unit_uncertainty <- NA_character_
+    }
+  
+    if (!"method_pretreatment" %in% names(data)) {
+      data$method_pretreatment <- NA_character_
+    }
+  
+    if (!"method_analysis" %in% names(data)) {
+      data$method_analysis <- NA_character_
+    }
+  
+    if (!"method_extraction" %in% names(data)) {
+      data$method_extraction <- NA_character_
+    }
+  } 
   
   
   # check regional identifiers are in the extraction 
