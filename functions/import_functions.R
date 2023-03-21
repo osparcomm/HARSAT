@@ -240,7 +240,7 @@ ctsm_read_stations <- function(infile, path, info) {
   
   if (info$data_format == "external") {  
     
-    required <- c(
+    var_id<- c(
       country = "character",
       station_name = "character",
       station_code = "character",
@@ -254,18 +254,23 @@ ctsm_read_stations <- function(infile, path, info) {
     if (!is.null(info$region_id)) {
       extra <- rep("character", length(info$region_id))
       names(extra) <- info$region_id
-      required <- c(required, extra)
+      var_id <- c(var_id, extra)
     }
+    
+    required <- c(
+      "country", "station_name", "station_code", "station_latitude", 
+      "station_longitude", info$region_id
+    )
     
     
     # check required variables are present in data
     
     stations <- read.csv(infile, strip.white = TRUE, nrows = 1)
     
-    ok <- names(required) %in% names(stations)
+    ok <- required %in% names(stations)
     
     if (!all(ok)) {
-      id <- names(required)[!ok]
+      id <- required[!ok]
       id <- sort(id)
       stop(
         "The following variables are not in the stations file. ", 
@@ -278,13 +283,29 @@ ctsm_read_stations <- function(infile, path, info) {
     
     # read data
     
+    ok <- names(var_id) %in% names(stations)
+    
     stations <- read.csv(
       infile, 
       na.strings = c("", "NULL"),
       strip.white = TRUE,
-      colClasses = required
+      colClasses = var_id[ok]
     )
+
     
+    # create missing (non-required) variables 
+    
+    id <- c("station_longname", "station_type", "waterbody_type")
+
+    for (i in id) {
+      if (is.null(stations[[i]])) stations[[i]] <- NA_character_
+    }
+    
+    
+    if (!all(names(var_id) %in% names(stations))) {
+      stop("coding error - seek help from HARSAT team")
+    }
+
   }  
   
   
@@ -316,7 +337,7 @@ ctsm_read_contaminants <- function(infile, path, info) {
   
   if (info$data_format == "ICES_new") {
 
-    required <- c(
+    var_id <- c(
       "country" = "character",
       "mprog" = "character", 
       "helcom_subbasin" = "character",     
@@ -379,9 +400,11 @@ ctsm_read_contaminants <- function(infile, path, info) {
       "tbluploadid" = "integer"         
     )
     
+    required <- names(var_id)
+    
   } else if (info$data_format == "external") {
 
-    required <- c(
+    var_id <- c(
       "country" = "character",
       "station_code" = "character",
       "station_name"= "character",
@@ -408,13 +431,26 @@ ctsm_read_contaminants <- function(infile, path, info) {
     )
 
     if (info$compartment == "biota") {
-      required = c(
-        required, 
+      var_id = c(
+        var_id, 
         "species" = "character",
         "sex" = "character",
         "noinp" = "integer"
       )
     }    
+
+    required <- c(
+      "country", "station_code", "station_name", "year", "sample", "determinand",
+      "matrix", "unit", "value"
+    )
+
+    if (info$compartment %in% c("biota", "sediment")) {
+      required <- c(required, "basis")
+    }
+
+    if (info$compartment %in% c("biota")) {
+      required <- c(required, "species")
+    }
 
   }
   
@@ -425,10 +461,10 @@ ctsm_read_contaminants <- function(infile, path, info) {
     
     data <- read.csv(infile, strip.white = TRUE, nrows = 1)
   
-    ok <- names(required) %in% names(data)
+    ok <- required %in% names(data)
     
     if (!all(ok)) {
-      id <- names(required)[!ok]
+      id <- required[!ok]
       id <- sort(id)
       stop(
         "The following variables are not in the data file. ", 
@@ -440,13 +476,56 @@ ctsm_read_contaminants <- function(infile, path, info) {
     
     
     # read data
-        
+    
+    ok <- names(var_id) %in% names(data)
+
     data <- read.csv(
       infile, 
       na.strings = c("", "NULL"),
       strip.white = TRUE,
-      colClasses = required
+      colClasses = var_id[ok]
     )
+    
+    
+    # create missing (non-required) variables 
+    
+    # numeric (non-integer) variables
+      
+    id <- c(
+      "sample_latitude", "sample_longitude", "depth", "limit_detection",
+      "limit_quantification", "uncertainty"
+    )
+
+    for (i in id) {
+      if (is.null(data[[i]])) data[[i]] <- NA_real_
+    }
+    
+    
+    # character variables
+    
+    id <- c(
+      "subseries", "basis", "basis", "qflag", "unit_uncertainty", 
+      "method_pretreatment", "method_analysis", "method_extraction"
+    )
+    
+    for (i in id) {
+      if (is.null(data[[i]])) data[[i]] <- NA_character_
+    }
+    
+    
+    # other variables
+    
+    if (is.null(data$date)) data$date <- as.Date(NA)
+    
+    if (info$compartment == "biota") {
+      if (is.null(data$sex)) data$sex <- NA_character_
+      if (is.null(data$noinp)) data$noinp <- NA_integer_
+    }
+    
+    if (!all(names(var_id) %in% names(data))) {
+      stop("coding error - seek help from HARSAT team")
+    }
+      
   }  
   
   
