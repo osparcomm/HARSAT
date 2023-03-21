@@ -59,7 +59,7 @@ values_range_check_species(species, min_value, max_value)
 biota_data <- ctsm_read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
-  contaminants = "AMAP_external_data_new_data_only_GRL_AllSpecies.csv", 
+  contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 
   stations = "AMAP_external_new_stations_only.csv", 
   path = file.path("data", "example_external_data"), 
   extraction = "2022/01/11",
