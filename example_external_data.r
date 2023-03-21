@@ -209,11 +209,7 @@ biota_assessment$timeSeries <- biota_assessment$timeSeries %>%
       sex = "Sex", 
       "METOA" = "Chemical analysis"
     ),
-    level7element = recode(
-      level7element, 
-      matrix = "Tissue", 
-      subseries = "Mammal group"
-    )
+    level7element = recode(level7element, matrix = "Tissue")
   ) %>% 
   column_to_rownames(".rownames")
 
