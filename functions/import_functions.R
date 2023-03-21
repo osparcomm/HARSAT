@@ -486,9 +486,13 @@ ctsm_read_contaminants <- function(infile, path, info) {
       colClasses = var_id[ok]
     )
     
-    
-    # create missing (non-required) variables 
-    
+  }
+  
+
+  # create missing (non-required) variables 
+  
+  if (info$data_format %in% "external") {
+  
     # numeric (non-integer) variables
       
     id <- c(
@@ -526,9 +530,14 @@ ctsm_read_contaminants <- function(infile, path, info) {
       stop("coding error - seek help from HARSAT team")
     }
       
+  } else if (info$data_format %in% c("ICES_new", "ICES_old")) {
+    
+    data$subseries <- NA_character_
+    
   }  
   
-  
+
+
   # check regional identifiers are in the extraction 
 
   if (info$data_format == "ICES_new" & info$purpose == "HELCOM") {
@@ -1367,104 +1376,106 @@ ctsm_create_timeSeries <- function(
 
 
   # ensure qflag, limit of detection and limit of quantification are consistent
-  
-  # define function for testing equality - also need a relative component to cope with some tiny
-  # value submitted with units g/g
-  
-  my_near <- function(x, y) {
-    abs <- near(x, y) 
-    rel <- case_when(
-      x > 0 ~ abs((x - y) / y) < 1e-5,
-      TRUE ~ TRUE
-    )
-    abs & rel
-  }
-    
-  
-  # check detection limits associated with data are positive 
 
-  if (print_code_warnings)
-    warning('Need to make checking of detection limits determinand specific', call. = FALSE)
+  data <- ctsm_check_censoring(data, print_code_warnings)
   
-  data <- ctsm.check(
-    data, limit_detection <= 0, action = "make.NA", 
-    message = "Non-positive detection limits", 
-    fileName = "non positive det limits", missingID = "limit_detection")
-  
-  data <- ctsm.check(
-    data, limit_quantification <= 0, action = "make.NA", 
-    message = "Non-positive quantification limits", 
-    fileName = "non positive quant limits", missingID = "limit_quantification")
-  
-  
-  # limit_quantification must be greater than limit_detection - otherwise set both to missing
-
-  data <- ctsm.check(
-    data,  limit_quantification <= limit_detection, action = "make.NA", 
-    message = "Limit of quantification less than limit of detection", 
-    fileName = "limits inconsistent", 
-    missingID = c("limit_detection", "limit_quantification"))
-  
-  
-  # check for valid values of qflag
-  # qflag cannot contain a > (although possible for some biological effects - need to revisit)
-  # also check for other unrecognised characters
-
-  if (print_code_warnings)
-    warning(
-      "Need to make qflag determinand specific when biological effects are introduced", 
-      call. = FALSE)
-
-  data <- within(data, {
-    levels(qflag) <- c(levels(qflag), "")
-    qflag[is.na(qflag)] <- ""
-    qflag <- recode(qflag, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
-  })
-  
-  data <- ctsm.check(
-    data, ! qflag %in% c("", "D", "Q", "<"), action = "delete", 
-    message = "Unrecognised qflag values", fileName = "qflags unrecognised")
-  
-  
-  # if qflag = D, then value must equal detection_limit
-  # if qflag = Q, then value must equal limit_quantification
-  
-  id <- with(data, {
-    out1 <- qflag == "D" & (is.na(limit_detection) | !my_near(value, limit_detection))
-    out2 <- qflag == "Q" & (is.na(limit_quantification) | !my_near(value, limit_quantification))
-    out1 | out2
-  })
-  
-  ctsm.check(
-    data, id, action = "warning",
-    message = "Qflag D and Q inconsistent with respective limits",
-    fileName = "qflags and limits inconsistent")
-  
-  
-  # resolve these inconsistencies
-  
-  data <- within(data, {
-    qflag <- case_when(
-      qflag %in% "" ~ "",
-      !is.na(limit_detection) & my_near(value, limit_detection) ~ "D",
-      !is.na(limit_quantification) & my_near(value, limit_quantification) ~ "Q",
-      TRUE ~ "<"
-    )
-    qflag <- factor(qflag, levels = c("", "D", "Q", "<"))  
-  })    
-
-  
-  # check limit_detection is less than (or equal to) concentration
-  # NB would need to be revised if limits are submitted in different units to concentrations
-  
-  data <- ctsm.check(
-    data, 
-    id = qflag %in% c("", "<") & limit_detection > value, 
-    action = "make.NA", 
-    message = "Detection limit higher than data", 
-    fileName = "detection limit high", 
-    missingID = c("limit_detection", "limit_quantification")
-  )
+  # # define function for testing equality - also need a relative component to cope with some tiny
+  # # value submitted with units g/g
+  # 
+  # my_near <- function(x, y) {
+  #   abs <- near(x, y) 
+  #   rel <- case_when(
+  #     x > 0 ~ abs((x - y) / y) < 1e-5,
+  #     TRUE ~ TRUE
+  #   )
+  #   abs & rel
+  # }
+  #   
+  # 
+  # # check detection limits associated with data are positive 
+  # 
+  # if (print_code_warnings)
+  #   warning('Need to make checking of detection limits determinand specific', call. = FALSE)
+  # 
+  # data <- ctsm.check(
+  #   data, limit_detection <= 0, action = "make.NA", 
+  #   message = "Non-positive detection limits", 
+  #   fileName = "non positive det limits", missingID = "limit_detection")
+  # 
+  # data <- ctsm.check(
+  #   data, limit_quantification <= 0, action = "make.NA", 
+  #   message = "Non-positive quantification limits", 
+  #   fileName = "non positive quant limits", missingID = "limit_quantification")
+  # 
+  # 
+  # # limit_quantification must be greater than limit_detection - otherwise set both to missing
+  # 
+  # data <- ctsm.check(
+  #   data,  limit_quantification <= limit_detection, action = "make.NA", 
+  #   message = "Limit of quantification less than limit of detection", 
+  #   fileName = "limits inconsistent", 
+  #   missingID = c("limit_detection", "limit_quantification"))
+  # 
+  # 
+  # # check for valid values of qflag
+  # # qflag cannot contain a > (although possible for some biological effects - need to revisit)
+  # # also check for other unrecognised characters
+  # 
+  # if (print_code_warnings)
+  #   warning(
+  #     "Need to make qflag determinand specific when biological effects are introduced", 
+  #     call. = FALSE)
+  # 
+  # data <- within(data, {
+  #   levels(qflag) <- c(levels(qflag), "")
+  #   qflag[is.na(qflag)] <- ""
+  #   qflag <- recode(qflag, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
+  # })
+  # 
+  # data <- ctsm.check(
+  #   data, ! qflag %in% c("", "D", "Q", "<"), action = "delete", 
+  #   message = "Unrecognised qflag values", fileName = "qflags unrecognised")
+  # 
+  # 
+  # # if qflag = D, then value must equal detection_limit
+  # # if qflag = Q, then value must equal limit_quantification
+  # 
+  # id <- with(data, {
+  #   out1 <- qflag == "D" & (is.na(limit_detection) | !my_near(value, limit_detection))
+  #   out2 <- qflag == "Q" & (is.na(limit_quantification) | !my_near(value, limit_quantification))
+  #   out1 | out2
+  # })
+  # 
+  # ctsm.check(
+  #   data, id, action = "warning",
+  #   message = "Qflag D and Q inconsistent with respective limits",
+  #   fileName = "qflags and limits inconsistent")
+  # 
+  # 
+  # # resolve these inconsistencies
+  # 
+  # data <- within(data, {
+  #   qflag <- case_when(
+  #     qflag %in% "" ~ "",
+  #     !is.na(limit_detection) & my_near(value, limit_detection) ~ "D",
+  #     !is.na(limit_quantification) & my_near(value, limit_quantification) ~ "Q",
+  #     TRUE ~ "<"
+  #   )
+  #   qflag <- factor(qflag, levels = c("", "D", "Q", "<"))  
+  # })    
+  # 
+  # 
+  # # check limit_detection is less than (or equal to) concentration
+  # # NB would need to be revised if limits are submitted in different units to concentrations
+  # 
+  # data <- ctsm.check(
+  #   data, 
+  #   id = qflag %in% c("", "<") & limit_detection > value, 
+  #   action = "make.NA", 
+  #   message = "Detection limit higher than data", 
+  #   fileName = "detection limit high", 
+  #   missingID = c("limit_detection", "limit_quantification")
+  # )
   
 
   # convert uncertainty into standard deviations, and remove any associated variables
@@ -3045,6 +3056,142 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
   
   data
 }  
+
+
+ctsm_check_censoring <- function(data, print_code_warnings) {
+  
+  # import_functions.R
+  # checks that qflag, limit_detection and limit_quantification are consistent
+  # and makes sensible adjustments to qflag
+  
+  # define function for testing equality - also need a relative component to cope with some tiny
+  # value submitted with units g/g
+  
+  my_near <- function(x, y) {
+    abs <- near(x, y) 
+    rel <- case_when(
+      x > 0   ~ abs((x - y) / y) < 1e-5,
+      TRUE    ~ TRUE
+    )
+    abs & rel
+  }
+  
+  
+  # check detection limits associated with data are positive 
+  
+  if (print_code_warnings) {
+    warning(
+      'Need to make checking of detection limits determinand specific', 
+      call. = FALSE
+    )
+  }  
+  
+  data <- ctsm.check(
+    data, 
+    limit_detection <= 0, 
+    action = "make.NA", 
+    message = "Non-positive detection limits", 
+    fileName = "non positive det limits", 
+    missingID = "limit_detection"
+  )
+  
+  data <- ctsm.check(
+    data, 
+    limit_quantification <= 0, 
+    action = "make.NA", 
+    message = "Non-positive quantification limits", 
+    fileName = "non positive quant limits", 
+    missingID = "limit_quantification"
+  )
+
+
+  # limit_quantification must be greater than limit_detection - 
+  # otherwise set both to missing
+  
+  data <- ctsm.check(
+    data,  
+    limit_quantification <= limit_detection, 
+    action = "make.NA", 
+    message = "Limit of quantification less than limit of detection", 
+    fileName = "limits inconsistent", 
+    missingID = c("limit_detection", "limit_quantification")
+  )
+
+
+  # check for valid values of qflag
+  # qflag cannot contain a > (although possible for some biological effects - 
+  # need to revisit)
+  # also check for other unrecognised characters
+  
+  if (print_code_warnings) {
+    warning(
+      "Need to make qflag determinand specific when biological effects are introduced", 
+      call. = FALSE
+    )
+  }
+
+  data <- within(data, {
+    levels(qflag) <- c(levels(qflag), "")
+    qflag[is.na(qflag)] <- ""
+    qflag <- recode(qflag, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
+  })
+
+  data <- ctsm.check(
+    data, 
+    !qflag %in% c("", "D", "Q", "<"), 
+    action = "delete", 
+    message = "Unrecognised qflag values", 
+    fileName = "qflags unrecognised"
+  )
+
+
+  # if qflag = D, then value must equal detection_limit
+  # if qflag = Q, then value must equal limit_quantification
+  
+  id <- with(data, {
+    out1 <- qflag == "D" & 
+      (is.na(limit_detection) | !my_near(value, limit_detection))
+    out2 <- qflag == "Q" & 
+      (is.na(limit_quantification) | !my_near(value, limit_quantification))
+    out1 | out2
+  })
+
+  ctsm.check(
+    data, 
+    id, 
+    action = "warning",
+    message = "Qflag D and Q inconsistent with respective limits",
+    fileName = "qflags and limits inconsistent"
+  )
+
+
+  # resolve these inconsistencies
+  
+  data <- within(data, {
+    qflag <- case_when(
+      qflag %in% "" ~ "",
+      !is.na(limit_detection) & my_near(value, limit_detection) ~ "D",
+      !is.na(limit_quantification) & my_near(value, limit_quantification) ~ "Q",
+      TRUE ~ "<"
+    )
+    qflag <- factor(qflag, levels = c("", "D", "Q", "<"))  
+  })    
+
+
+  # check limit_detection is less than (or equal to) concentration
+  # NB would need to be revised if limits are submitted in different units to concentrations
+  
+  data <- ctsm.check(
+    data, 
+    id = qflag %in% c("", "<") & limit_detection > value, 
+    action = "make.NA", 
+    message = "Detection limit higher than data", 
+    fileName = "detection limit high", 
+    missingID = c("limit_detection", "limit_quantification")
+  )
+
+  data
+}
 
   
 ctsm_normalise_sediment <- function(data, station_dictionary, control) {
