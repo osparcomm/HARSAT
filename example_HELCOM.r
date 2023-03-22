@@ -54,34 +54,6 @@ max_value = 100L # max value for species values range check
 species <- read.csv(file.path("information",info_species_file_id),header=TRUE,colClasses="character")
 values_range_check_species(species, min_value, max_value)
 
-## determinands ----
-
-# determinands <- list(
-#   Biota = list(
-#     Metals = c("CD", "PB", "HG"),
-#     PAH_parent = c("FLU", "BAP"), 
-#     Metabolites = "PYR1OH",
-#     PBDEs = "SBDE6",
-#     Organobromines = "HBCD", 
-#     Organofluorines = "PFOS",
-#     Chlorobiphenyls = "SCB6",
-#     Dioxins = "TEQDFP",
-#     Imposex = c("IMPS", "INTS", "VDS")
-#   ),  
-#   Sediment = list(
-#     Metals = c("CD", "CU", "PB"),
-#     Organotins = "TBSN+",
-#     PAH_parent = c("ANT", "FLU"),
-#     PBDEs = "SBDE6",
-#     Organobromines = "HBCD" 
-#   ),
-#   Water = list(
-#     Metals = c("CD", "PB"), 
-#     Organotins = "TBSN+",
-#     Organofluorines = "PFOS"
-#   )
-# )
-
 
 
 # Read data and make adjustments ----
@@ -300,30 +272,6 @@ biota_timeSeries$data$country <- NULL
 
 
 ## sediment ----
-
-# ad-hoc change to bring in LOIGN
-
-wk_id <- c(
-  ctsm_get_determinands("sediment"), 
-  "BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154", 
-  "HBCDA", "HBCDB", "HBCDG"
-)
-names(wk_id) <- NULL
-
-wk_id <- setdiff(wk_id, c("CD", "PB"))
-
-info.determinand[wk_id, "sediment_auxiliary"] <- 
-  paste0(info.determinand[wk_id, "sediment_auxiliary"], ", LOIGN") 
-
-info.determinand["LOIGN", c("sediment_sd_constant", "sediment_sd_variable")] <-
-  c(0, 0.1)
-
-
-# and uncertainty for SBDE6 (estimated from OSPAR data)
-
-info.determinand["SBDE6", c("sediment_sd_constant", "sediment_sd_variable")] <-
-  c(0.0433, 0.1727)
-
 
 sediment_timeSeries <- ctsm_create_timeSeries(
   sediment_data,
