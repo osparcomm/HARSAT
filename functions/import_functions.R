@@ -1945,21 +1945,24 @@ ctsm_create_timeSeries <- function(
 
   # estimate missing uncertainties
 
-  data$uncertainty <- ctsm.estimate.uncertainty(data, "concentration", info$compartment)
+  data$uncertainty <- ctsm_estimate_uncertainty(data, "concentration", info$compartment)
 
   if (info$compartment == "sediment") {
-    data$AL.uncertainty <- ctsm.estimate.uncertainty(data, "AL", info$compartment)
-    data$LI.uncertainty <- ctsm.estimate.uncertainty(data, "LI", info$compartment)
-    data$CORG.uncertainty <- ctsm.estimate.uncertainty(data, "CORG", info$compartment)
     
-    if ("LOIGN" %in% names(data)) {
-      data$LOIGN.uncertainty <- ctsm.estimate.uncertainty(data, "LOIGN", info$compartment)
-    }    
+    for (norm_id in c("AL", "LI", "CORG", "LOIGN")) {
+      
+      if (norm_id %in% names(data)) {
+        norm_uncrt <- paste0(norm_id, ".uncertainty")
+        data[[norm_uncrt]] <- ctsm_estimate_uncertainty(data, norm_id, "sediment")
+      }    
+    }
+    
   }
 
-  if (info$compartment == "biota") {
+  
+  # restrict shellfish data to 'sensible' months - must make this region specific
 
-    # restrict shellfish data to 'sensible' months - must make this region specific
+  if (info$compartment == "biota") {
 
     nok <- with(data, {
       month <- substring(months(as.Date(date)), 1, 3)
@@ -3962,11 +3965,13 @@ ctsm_normalise_calculate <- function(Cm, Nm, Nss, var_Cm, var_Nm, Cx, Nx, var_Cx
 
 
 
-ctsm.estimate.uncertainty <- function(data, response_id, compartment) {
+ctsm_estimate_uncertainty <- function(data, response_id, compartment) {
 
+  # import_functions.R
+  
   # estimating missing uncertainties
   
-  # only return uncertainty so can modify data object at will
+  # only returns uncertainty so can modify data object at will
   
   # check response_id is valid (could be "concentration" or an auxiliary variable)
   # check compartment is valid and not a variable in data
@@ -3997,8 +4002,9 @@ ctsm.estimate.uncertainty <- function(data, response_id, compartment) {
 
   missing_id <- is.na(data$uncertainty)
   
-  if (!any(missing_id)) 
-    return(uncertainty)
+  if (!any(missing_id)) { 
+    return(data$uncertainty)
+  }
 
   
   # get two components of variance
