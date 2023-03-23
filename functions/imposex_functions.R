@@ -2,11 +2,11 @@
 
 get.index.biota.Imposex <- function(data, determinand) {
 
-  data$nfemale <- round(data$noinp * data[["%FEMALEPOP"]] / 100)
+  data$nfemale <- round(data$n_individual * data[["%FEMALEPOP"]] / 100)
   if (any(is.na(data$nfemale)))
   {
     warning("missing FEMALEPOP - inferring 50%", immediate. = TRUE)
-    data <- within(data, nfemale <- ceiling(noinp / 2))
+    data <- within(data, nfemale <- ceiling(n_individual / 2))
   }
   
   out <- by(data, data$year, function(x) with(x, 
@@ -179,7 +179,7 @@ assess_imposex <- function(
 
   # all individual data, a mixture, or just indices
   
-  indiID <- with(data, tapply(noinp, year, function(x) all(x == 1)))
+  indiID <- with(data, tapply(n_individual, year, function(x) all(x == 1)))
   
   
   # if a mixture and the most recent three years of data are based on individuals
@@ -212,7 +212,7 @@ assess_imposex <- function(
 
   # all individual data, a mixture, or just indices
   
-  indiID <- with(data, tapply(noinp, year, function(x) all(x == 1)))
+  indiID <- with(data, tapply(n_individual, year, function(x) all(x == 1)))
   
   # NB the following assumes that only a single imposex measure is assessed
   # for each station / species combination - need to make this bullet proof

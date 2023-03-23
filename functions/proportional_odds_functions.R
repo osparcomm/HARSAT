@@ -169,7 +169,7 @@ ctsm.VDS.cl <- function(fit, nsim = 1000) {
 # ctsm.VDS.check <- function(ctsmOb) {
 #   
 #   data <- droplevels(subset(ctsmOb$data, determinand %in% determinands$Biota$imposex))
-#   data <- data[c("seriesID", "station", "year", "species", "determinand", "concentration", "noinp", 
+#   data <- data[c("seriesID", "station", "year", "species", "determinand", "concentration", "n_individual", 
 #                  "%FEMALEPOP")]
 #   
 #   data[c("country", "region")] <- 
@@ -178,21 +178,21 @@ ctsm.VDS.cl <- function(fit, nsim = 1000) {
 #   
 #   data <- within(data, {
 #     indexID <- factor(paste(station, determinand, species, year))
-#     stopifnot(round(noinp) == noinp)
-#     noinp <- as.integer(noinp)
+#     stopifnot(round(n_individual) == n_individual)
+#     n_individual <- as.integer(n_individual)
 #   })
 #   
 #   
 #     # identify points with both individual and pooled data
 #   
-#   mixedData <- with(data, tapply(noinp, indexID, function(x) any(x == 1) & any(x > 1)))
+#   mixedData <- with(data, tapply(n_individual, indexID, function(x) any(x == 1) & any(x > 1)))
 #   mixedData <- names(mixedData)[mixedData]
 #   data <- droplevels(subset(data, indexID %in% mixedData))
 #   
 #   
 #   # calculate VDSI based on individuals
 #   
-#   splitID <- factor(data$noinp == 1, levels = c(FALSE, TRUE), labels = c("index", "stage"))
+#   splitID <- factor(data$n_individual == 1, levels = c(FALSE, TRUE), labels = c("index", "stage"))
 #   data <- split(data, splitID)
 #   
 #   stage <- with(data$stage, aggregate(concentration, by = list(indexID = indexID), function(x) 
@@ -203,13 +203,13 @@ ctsm.VDS.cl <- function(fit, nsim = 1000) {
 #   
 #   names(data)[match("concentration", names(data))] <- "Index"
 #   
-#   data <- data[c("country", "station", "year", "species", "determinand", "noinp", "%FEMALEPOP", 
+#   data <- data[c("country", "station", "year", "species", "determinand", "n_individual", "%FEMALEPOP", 
 #                  "Index", "SIndex", "SN", "SSum")]
 #   names(data)[match("%FEMALEPOP", names(data))] <- "fprop"
 #   
 #   data <- within(data, {
 #     okValue <- abs(Index - SIndex) <= 0.01  
-#     okN <- round(noinp * fprop / 100) == SN
+#     okN <- round(n_individual * fprop / 100) == SN
 #   })
 #   
 #   return(data)

@@ -435,7 +435,7 @@ ctsm_read_contaminants <- function(infile, path, info) {
         var_id, 
         "species" = "character",
         "sex" = "character",
-        "noinp" = "integer"
+        "n_individual" = "integer"
       )
     }    
 
@@ -523,7 +523,7 @@ ctsm_read_contaminants <- function(infile, path, info) {
     
     if (info$compartment == "biota") {
       if (is.null(data$sex)) data$sex <- NA_character_
-      if (is.null(data$noinp)) data$noinp <- NA_integer_
+      if (is.null(data$n_individual)) data$n_individual <- NA_integer_
     }
     
     if (!all(names(var_id) %in% names(data))) {
@@ -638,8 +638,8 @@ ctsm_read_contaminants <- function(infile, path, info) {
     
     # compartment specific variables
     
-    var_id <- c("tblbioid", "sexco", "dephu")
-    replacement <- c("sub.sample", "sex", "depth")
+    var_id <- c("tblbioid", "sexco", "dephu", "noinp")
+    replacement <- c("sub.sample", "sex", "depth", "n_individual")
     
     pos <- match(var_id, names(data), nomatch = 0)
     
@@ -1045,7 +1045,7 @@ ctsm_tidy_contaminants <- function(data, info) {
   var_id <- c(
     "station_code", "sample_latitude", "sample_longitude", 
     "year", "date", "time", "depth", 
-    "species", "sex", "noinp", "subseries", "sample", "replicate", 
+    "species", "sex", "n_individual", "subseries", "sample", "replicate", 
     "determinand", "pargroup", "matrix", "basis", "filtered", 
     "method_analysis", "method_extraction", "method_pretreatment",
     "unit", "value", "qflag", "limit_detection", "limit_quantification", 
@@ -1344,9 +1344,10 @@ ctsm_create_timeSeries <- function(
   for (varID in c("basis", "matrix", "unit")) data <- ctsm.check0(data, varID, info$compartment)
 
 
-  # check all data have a valid method of analysis, value and number in pool
+  # check data have a valid method of analysis, value and 
+  # number of individuals (in each pool)
 
-  for (varID in c("method_analysis", "value", "noinp")) {
+  for (varID in c("method_analysis", "value", "n_individual")) {
     data <- ctsm.check0(data, varID, info$compartment)
   }
 
@@ -2240,7 +2241,7 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
     "species", "sex", "depth",
     "year", "date", "time", "sample", "sub.sample", "sample", 
     "matrix", "subseries", "group", "determinand", "basis", "unit", "value", 
-    "method_analysis", "noinp", 
+    "method_analysis", "n_individual", 
     "concOriginal", "qflagOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "qflag",  
     "limit_detection", "limit_quantification", "uncertainty",  
