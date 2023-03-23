@@ -841,27 +841,27 @@ ctsm.check.value.water <- function(data) {
 }             
 
 
-ctsm.check.noinp.biota <- function(data) {
+ctsm.check.n_individual.biota <- function(data) {
 
   id <- data$group != "Imposex"
   if (any(id))
     data[id,] <- within(data[id,], {
-      ok <- is.na(noinp) | noinp > 0
+      ok <- is.na(n_individual) | n_individual > 0
       action <- ifelse(ok, "none", "warning")
     })
   
   id <- data$determinand %in% c("VDS", "IMPS", "INTS")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- !is.na(noinp) & noinp == 1
-      action <- ifelse(ok, "none", ifelse(is.na(noinp), "warning", "error"))
-      new[is.na(noinp)] <- 1
+      ok <- !is.na(n_individual) & n_individual == 1
+      action <- ifelse(ok, "none", ifelse(is.na(n_individual), "warning", "error"))
+      new[is.na(n_individual)] <- 1
     })
     
   id <- data$determinand %in% c("VDSI", "PCI", "INTSI")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- !is.na(noinp) & noinp >= 1
+      ok <- !is.na(n_individual) & n_individual >= 1
       action <- ifelse(ok, "none", "error")
     })
   

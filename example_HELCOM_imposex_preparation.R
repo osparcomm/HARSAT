@@ -12,7 +12,7 @@ wk_data <- wk_timeSeries$data %>%
       "Imposex"
   ) %>% 
   select(c("seriesID", "station_code", "year", "species", "determinand", 
-           "concentration", "noinp", "%FEMALEPOP"))
+           "concentration", "n_individual", "%FEMALEPOP"))
 
 wk_data <- left_join(
   wk_data, 
@@ -25,15 +25,15 @@ rm(wk_timeSeries)
 
 # see where we have individual data 
 
-stopifnot(round(wk_data$noinp) == wk_data$noinp)
+stopifnot(round(wk_data$n_individual) == wk_data$n_individual)
 
 wk_data <- wk_data %>%
-  mutate(noinp = as.integer(noinp)) %>%
+  mutate(n_individual = as.integer(n_individual)) %>%
   group_by(station_code, determinand, species, year) %>% 
-  filter(all(noinp == 1L)) %>% 
+  filter(all(n_individual == 1L)) %>% 
   ungroup() %>% 
   droplevels() %>% 
-  select(-noinp)
+  select(-n_individual)
   
 
 

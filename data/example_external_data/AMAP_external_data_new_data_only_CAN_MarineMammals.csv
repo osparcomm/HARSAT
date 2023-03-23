@@ -1,4 +1,4 @@
-﻿country,station_code,station_name,year,species,sex,determinand,matrix,basis,value,unit,qflag,limit_detection,limit_quantification,uncertainty,unit_uncertainty,sample,subseries,sample_latitude,sample_longitude,date,depth,method_pretreatment,method_analysis,method_extraction,noinp
+﻿country,station_code,station_name,year,species,sex,determinand,matrix,basis,value,unit,qflag,limit_detection,limit_quantification,uncertainty,unit_uncertainty,sample,subseries,sample_latitude,sample_longitude,date,depth,method_pretreatment,method_analysis,method_extraction,n_individual
 Canada,A3,Southern Hudson Bay,2006,Ursus maritimus,F,HG,LI,D,34.42,ug/g,,,,,,A10001,adult_female,,,,,,,,
 Canada,A3,Southern Hudson Bay,2006,Ursus maritimus,M,HG,LI,D,49.1,ug/g,,,,,,A10002,adult_male,,,,,,,,
 Canada,A3,Southern Hudson Bay,2007,Ursus maritimus,M,HG,LI,D,15.97,ug/g,,,,,,A10003,adult_male,,,,,,,,

@@ -1691,7 +1691,7 @@ biota_data$data %>%
     determinand %in% "VDSI", 
     station_name == "DMU D2" 
   ) %>%
-  select(year, date, station_name, species, sub.sample, replicate, noinp, value) %>% 
+  select(year, date, station_name, species, sub.sample, replicate, n_individual, value) %>% 
   arrange(year)
   
 biota_data$data <- filter(

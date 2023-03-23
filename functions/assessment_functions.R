@@ -84,7 +84,7 @@ ctsm.assessment <- function(
     var_id <- c("year", "concentration")
     
     var_id <- if (determinand %in% c("VDS", "IMPS", "INTS")) {
-      append(var_id, c("noinp", "%FEMALEPOP"))
+      append(var_id, c("n_individual", "%FEMALEPOP"))
     } else {
       append(var_id, c("qflag", "uncertainty"))
     }
@@ -132,12 +132,11 @@ ctsm.assessment <- function(
 
       thetaID <- paste(thetaID, species)
       
-      
 
       # if any individual data, need to augment annual indices with confidence 
       # intervals
       
-      indiID <- with(x, tapply(noinp, year, function(y) all(y == 1)))
+      indiID <- with(x, tapply(n_individual, year, function(y) all(y == 1)))
       
       if (any(indiID) & thetaID %in% names(biota.VDS.estimates)) {
 
