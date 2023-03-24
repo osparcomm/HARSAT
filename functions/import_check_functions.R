@@ -846,22 +846,22 @@ ctsm.check.n_individual.biota <- function(data) {
   id <- data$group != "Imposex"
   if (any(id))
     data[id,] <- within(data[id,], {
-      ok <- is.na(n_individual) | n_individual > 0
+      ok <- is.na(n_individual) | n_individual > 0L
       action <- ifelse(ok, "none", "warning")
     })
   
   id <- data$determinand %in% c("VDS", "IMPS", "INTS")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- !is.na(n_individual) & n_individual == 1
+      ok <- !is.na(n_individual) & n_individual == 1L
       action <- ifelse(ok, "none", ifelse(is.na(n_individual), "warning", "error"))
-      new[is.na(n_individual)] <- 1
+      new[is.na(n_individual)] <- 1L
     })
     
   id <- data$determinand %in% c("VDSI", "PCI", "INTSI")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- !is.na(n_individual) & n_individual >= 1
+      ok <- !is.na(n_individual) & n_individual >= 1L
       action <- ifelse(ok, "none", "error")
     })
   
