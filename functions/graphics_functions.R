@@ -1,3 +1,142 @@
+ctsm_plot_assessment <- function(
+    ctsm_web_obj, 
+    subset = NULL, 
+    output_dir = ".",
+    file_type = c("data", "index"),
+    file_format = c("png", "pdf")) {
+  
+  # graphics_functions.R
+  
+  # plots a series of assessment plots with the raw data or the annual indices
+  # or both
+  
+  
+  library("lattice")
+  library("grid")
+  
+  file_format = match.arg(file_format)
+  
+  if (!all(file_type %in% c("data", "index"))) {
+    stop(
+      "argument file_type is invalid: ", 
+      "must be 'data' or 'index' or both of them"
+    )
+  }
+  
+  
+  # set up time series information
+  
+  timeSeries <- ctsm_web_obj$assessment$timeSeries 
+  
+  if (!is.null(substitute(subset))) {
+    ok <- eval(substitute(subset), timeSeries, parent.frame())
+    timeSeries <- timeSeries[ok, ]
+  }
+  
+  series <- row.names(timeSeries)
+  
+  
+  lapply(series, function(id) {
+    
+    data <- filter(ctsm_web_obj$assessment$data, seriesID == id)
+    
+    assessment <- ctsm_web_obj$assessment$assessment[[id]]
+
+    
+    # get relevant series info
+        
+    info <- c(
+      ctsm_web_obj$assessment$info,
+      ctsm_web_obj$assessment$timeSeries[id, ]
+    )
+    
+    info$distribution <- ctsm_get_info(
+      "determinand", 
+      info$determinand, 
+      "distribution"
+    )
+    
+    info$group <- ctsm_get_info(
+      "determinand", 
+      info$determinand,
+      "group",
+      info$compartment, 
+      sep = "_"
+    )
+    
+    if (info$compartment == "sediment") {
+      info$matrix <- unique(data$matrix)
+    }  
+    
+    if (info$compartment == "water") {
+      info$matrix <- "WT"
+    }
+    
+    
+    # get file name from id, and add country and station name 
+    # for easier identification
+    
+    output_id <- gsub(
+      info$station_code, 
+      paste(info$station_code, info$country, info$station_name), 
+      id
+    )
+    
+    
+    # get rid of any slashes that might have crept in 
+    
+    output_id <- gsub(" / ", " ", output_id, fixed = TRUE)
+    output_id <- gsub("/", " ", output_id, fixed = TRUE)
+    
+    output_id <- gsub(" \ ", " ", output_id, fixed = TRUE)
+    output_id <- gsub("\\", " ", output_id, fixed = TRUE)
+    
+    
+    # plot assessment with index
+    
+    if ("index" %in% file_type) {
+      
+      output_file <- paste0(output_id, " index.", file_format)
+      output_file <- file.path(output_dir, output_file)
+      
+      switch(
+        file_format, 
+        png = png(output_file, width = 680, height = 480), 
+        pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
+      )
+      
+      plot.data(data, assessment, info, type = "assessment", xykey.cex = 1.4) 
+      dev.off()
+      
+    }    
+    
+    
+    # plot assessment with data
+    
+    if ("data" %in% file_type) {
+      
+      output_file <- paste0(output_id, " data.", file_format)
+      output_file <- file.path(output_dir, output_file)
+      
+      switch(
+        file_format, 
+        png = png(output_file, width = 680, height = 480), 
+        pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
+      )
+      
+      plot.data(data, assessment, info, type = "data", xykey.cex = 1.4)
+      dev.off()
+      
+    }  
+    
+  })
+  
+  invisible() 
+}  
+
+
+
+
 ctsm.format <- function(x, y = x, nsig = 3) {
 
   # get arguments to format y to nsig significant figures
@@ -32,7 +171,7 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
 
   txt <- switch(compartment,
     Biota = {
-      txt <- paste0(txt, " (", ctsm_get_info("species", info$species, "common.name"), " ")
+      txt <- paste0(txt, " (", ctsm_get_info("species", info$species, "common_name"), " ")
       if (length(matrixID) == 1) 
         paste0(txt, matrixNames, ")") 
       else {
@@ -233,7 +372,7 @@ plot.AC <- function(AC, ylim, useLogs = TRUE) {
 
 
 plot.data <- function(data, assessment, info, type = c("data", "assessment"), 
-                      xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = TRUE, ...) {
+                      xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = FALSE, ...) {
 
   type <- match.arg(type) 
 

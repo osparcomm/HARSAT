@@ -23,6 +23,8 @@ source(file.path(function_path, "assessment_functions.R"))
 source(file.path(function_path, "ctsm_lmm.R"))
 source(file.path(function_path, "reporting_functions.R"))
 source(file.path(function_path, "support_functions.R"))
+source(file.path(function_path, "graphics_functions.R"))
+
 
 # source reference tables and associated information functions
 
@@ -254,6 +256,34 @@ ctsm_summary_table(
   assessments = list(Biota = biota_web),
   determinandGroups = webGroups,
   path = file.path("output", "example_external_data")
+)
+
+
+# Graphics output ----
+
+# plots assessment with either data (file_type = "data") or annual index 
+# (file_type = "index") or both (default)
+
+# output can be png or pdf
+
+# can subset assessment based on timeSeries structure - commonly by 
+# determinand, matrix or species
+# if subset is NULL (default), all timeseries are plotted (can take some time)
+
+ctsm_plot_assessment(
+  biota_web,
+  subset = species %in% "Phoca hispida",
+  output_dir = file.path("output", "graphics"), 
+  file_type = "data",
+  file_format = "png"
+)
+
+ctsm_plot_assessment(
+  biota_web,
+  subset = matrix %in% "LI",
+  output_dir = file.path("output", "graphics"), 
+  file_type = "index",
+  file_format = "pdf"
 )
 
 
