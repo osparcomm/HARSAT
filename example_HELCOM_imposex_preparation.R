@@ -25,10 +25,9 @@ rm(wk_timeSeries)
 
 # see where we have individual data 
 
-stopifnot(round(wk_data$n_individual) == wk_data$n_individual)
+stopifnot(is.integer(wk_data$n_individual))
 
 wk_data <- wk_data %>%
-  mutate(n_individual = as.integer(n_individual)) %>%
   group_by(station_code, determinand, species, year) %>% 
   filter(all(n_individual == 1L)) %>% 
   ungroup() %>% 

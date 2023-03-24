@@ -179,7 +179,7 @@ assess_imposex <- function(
 
   # all individual data, a mixture, or just indices
   
-  indiID <- with(data, tapply(n_individual, year, function(x) all(x == 1)))
+  indiID <- with(data, tapply(n_individual, year, function(x) all(x == 1L)))
   
   
   # if a mixture and the most recent three years of data are based on individuals
@@ -212,7 +212,7 @@ assess_imposex <- function(
 
   # all individual data, a mixture, or just indices
   
-  indiID <- with(data, tapply(n_individual, year, function(x) all(x == 1)))
+  indiID <- with(data, tapply(n_individual, year, function(x) all(x == 1L)))
   
   # NB the following assumes that only a single imposex measure is assessed
   # for each station / species combination - need to make this bullet proof
