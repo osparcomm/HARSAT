@@ -86,7 +86,7 @@ ctsm.assessment <- function(
     var_id <- if (determinand %in% c("VDS", "IMPS", "INTS")) {
       append(var_id, c("n_individual", "%FEMALEPOP"))
     } else {
-      append(var_id, c("qflag", "uncertainty"))
+      append(var_id, c("censoring", "uncertainty"))
     }
     
     if (determinand %in% "MNC") {
@@ -241,17 +241,17 @@ get.index.default <- function(data, determinand) {
   
   index <- tapply(data$response, data$year, median, na.rm = TRUE)
   
-  qflag <- by(data, data$year, function(x) {
+  censoring <- by(data, data$year, function(x) {
     x <- x[order(x$concentration),]
     n <- nrow(x)
     n0 <- ceiling(n / 2)
-    any(x$qflag[n0:n] %in% c("<", "D", "Q"))
+    any(x$censoring[n0:n] %in% c("<", "D", "Q"))
   })
-  qflag <- sapply(qflag, function(i) i)	
+  censoring <- sapply(censoring, function(i) i)	
   
-  data <- data.frame(year = as.numeric(names(index)), index, qflag, row.names = NULL)
+  data <- data.frame(year = as.numeric(names(index)), index, censoring, row.names = NULL)
   
-  data <- within(data, qflag <- factor(ifelse(qflag, "<", "")))
+  data <- within(data, censoring <- factor(ifelse(censoring, "<", "")))
   
   data
 }
@@ -284,7 +284,7 @@ get.index.biota.Effects <- function(data, determinand) {
   # median value apart from MNC and %DNATAIL where we get a weighted average
   # based on the number of cells
 
-  # have put in a trap for qflags for anything that is not lognormally distributed
+  # have put in a trap for censoring values for anything that is not lognormally distributed
   # or that has good.status = high
   
   distribution <- ctsm_get_info("determinand", determinand, "distribution")
@@ -292,18 +292,18 @@ get.index.biota.Effects <- function(data, determinand) {
   good_status <- ctsm_get_info("determinand", determinand, "good_status")
   
   
-  qflag_trap <- FALSE
+  censoring_trap <- FALSE
   
-  if (any(data$qflag != "") && good_status == "high") {
-    qflag_trap <- TRUE
+  if (any(data$censoring != "") && good_status == "high") {
+    censoring_trap <- TRUE
   } 
   
-  if (any(data$qflag != "") && !distribution %in% c("normal", "lognormal")) {
-    qflag_trap <- TRUE
+  if (any(data$censoring != "") && !distribution %in% c("normal", "lognormal")) {
+    censoring_trap <- TRUE
   } 
   
-  if (qflag_trap) {
-    stop("surprising qflags: need to investigate")
+  if (censoring_trap) {
+    stop("surprising censorings: need to investigate")
   }
   
   
@@ -336,9 +336,9 @@ get.index.biota.Effects <- function(data, determinand) {
 
   out <- do.call("rbind", out)
   
-  out$qflag <- factor(rep("", nrow(out)), levels = c("", "<"))
+  out$censoring <- factor(rep("", nrow(out)), levels = c("", "<"))
   
-  out <- out[c("year", "index", "qflag", "nCell")]
+  out <- out[c("year", "index", "censoring", "nCell")]
     
   out$row.names <- NULL
   
@@ -506,7 +506,7 @@ ctsm.anyyear.lmm <- function(data, annualIndex, AC, recent.years, determinand, m
   # nyearPos >= 5 linear or smooth
   # nYearPos >= 7, 10, 15 try smooths on 2, 3, 4 df
   
-  nYearPos <- with(data, sum(tapply(qflag, year, function(x) any(x == ""))))
+  nYearPos <- with(data, sum(tapply(censoring, year, function(x) any(x == ""))))
   
 
   # initialise output
@@ -830,12 +830,12 @@ ctsm.test.below <- function(year, index, value, min.year, below = TRUE) {
 
 ctsm.remove.early.lessThans <- function(data) {
 
-  check <- with(data, length(unique(year)) > 2 & any(qflag %in% c("<", "D", "Q")))
+  check <- with(data, length(unique(year)) > 2 & any(censoring %in% c("<", "D", "Q")))
   if (!check) return(data)
 
   # identify years with at least one real
   
-  wk <- with(data, tapply(qflag, year, function(x) any(x == "")))
+  wk <- with(data, tapply(censoring, year, function(x) any(x == "")))
 
   # if 5 or more years with reals, then exclude all completely less than years at the start of the time series
   

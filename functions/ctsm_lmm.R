@@ -28,7 +28,7 @@ ctsm.lmm.fit <- function(
 
   # create explanatory variable that is constant once there are no more 'real observations'
 
-  maxYearPos <- with(data, max(year[qflag %in% ""]))
+  maxYearPos <- with(data, max(year[censoring %in% ""]))
   data <- within(data, yearwk <- pmin(year, maxYearPos))
   
 
@@ -54,7 +54,7 @@ ctsm.lmm.fit <- function(
   
   
   # get good starting values by doing the fit in lmer (if there are multiple samples in some years)  
-  #   or lm (otherwise) but ignoring sdAnalytic and qflag
+  #   or lm (otherwise) but ignoring sdAnalytic and censoring
   # when variation in data less than smallest sdAnalytic (e.g. when all less-thans, but only some 
   #   recorded as such) can get pathological behaviour - so add in some 'random' noise to induce a  
   #   small amount of analytical uncertainty - NB don't want to make it truly random for 
@@ -211,7 +211,7 @@ ctsm.lmm.fit <- function(
   # and that sdYear is dominant variance component so
   # number of parameters used in correction term is pFixed + 1
   
-  out$nYearPos <- with(data, sum(tapply(qflag, year, function(x) any(x == ""))))
+  out$nYearPos <- with(data, sum(tapply(censoring, year, function(x) any(x == ""))))
   out$dfResid <- with(out, nYearPos - pFixed)
 
   out <- within(out, {
@@ -296,8 +296,8 @@ ctsm.lmm.hess <- function(ctsm.ob, hess.d = 0.001, hess.r = 6, ...) {
 
 # utility function for likelihood calculation
 
-ctsm.lmm.dcalc <- function(x, qflag, mean, sd, log = FALSE) {
-  out <- ifelse(qflag == "", dnorm(x, mean, sd), pnorm(x, mean, sd)) 
+ctsm.lmm.dcalc <- function(x, censoring, mean, sd, log = FALSE) {
+  out <- ifelse(censoring == "", dnorm(x, mean, sd), pnorm(x, mean, sd)) 
   if (log) sum(log(out)) else prod(out)
 }
 
@@ -326,9 +326,9 @@ negTwiceLogLik <- function(data, mu, varComp) {
 
       # univariate, or effectively independent observations, so can use standard functions
       
-      with(data, ctsm.lmm.dcalc(response, qflag, mu, sdTotal, log = TRUE))
+      with(data, ctsm.lmm.dcalc(response, censoring, mu, sdTotal, log = TRUE))
 
-    } else if (all(data$qflag %in% "")) {
+    } else if (all(data$censoring %in% "")) {
 
       # can use dmvnorm with impunity
         
@@ -347,7 +347,7 @@ negTwiceLogLik <- function(data, mu, varComp) {
        
       out <- try(integrate(function(z) {
         dYear <- dnorm(z, zmu, sdYear)
-        dIndep <- sapply(z, function(x) ctsm.lmm.dcalc(data$response, data$qflag, x, data$sdIndep))
+        dIndep <- sapply(z, function(x) ctsm.lmm.dcalc(data$response, data$censoring, x, data$sdIndep))
         dYear * dIndep
       }, zmu - 10 * sdYear, zmu + 10 * sdYear)$value)
       if (class(out) %in% "try-error")

@@ -398,7 +398,7 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
   data <- switch(type, 
     data = 
     {
-      out <- subset(data, select = c(year, concentration, qflag))
+      out <- subset(data, select = c(year, concentration, censoring))
       if (useLogs) out <- within(out, concentration <- log(concentration))
       out
     },
@@ -406,7 +406,7 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
     {
       out <- assessment$annualIndex
       names(out)[2] <- "concentration"
-      if (info$determinand %in% c("VDS", "IMPS", "INTS")) out$qflag <- rep("", nrow(out))
+      if (info$determinand %in% c("VDS", "IMPS", "INTS")) out$censoring <- rep("", nrow(out))
       out
     }
   )    
@@ -520,7 +520,7 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
                                          xykey.cex = xykey.cex, useLogs = useLogs, ...), 
     panel = function(x, y)
     {
-      plot.panel(x, y, data$qflag, type, AC = assessment$AC, 
+      plot.panel(x, y, data$censoring, type, AC = assessment$AC, 
                  pred = if (is.pred) assessment$pred else NULL, ylim, useLogs = useLogs,
                  indiCL = assessment$annualIndex)
 
@@ -692,7 +692,7 @@ label.units <- function(
 
 
 plot.panel <- function(
-  x, y, qflag, type, AC = NA, pred = NULL, ylim, layout.row, useLogs = TRUE, 
+  x, y, censoring, type, AC = NA, pred = NULL, ylim, layout.row, useLogs = TRUE, 
   indiCL) {
 
   # type
@@ -733,30 +733,30 @@ plot.panel <- function(
     multi_assessment = 16
   )
   
-  wk.cex.qflag = if (wk.pch == "+") wk.cex * 0.8 else wk.cex
+  wk.cex.censoring = if (wk.pch == "+") wk.cex * 0.8 else wk.cex
   
-  # recognise following symbols for qflag: ">" and "?" can arise in ratio plots
+  # recognise following symbols for censoring: ">" and "?" can arise in ratio plots
 
-  qflag <- as.character(qflag)
+  censoring <- as.character(censoring)
   
-  is_qflag <- qflag %in% c("<", "D", "Q", ">", "?")
+  is_censoring <- censoring %in% c("<", "D", "Q", ">", "?")
 
-  qflag[is_qflag] <- tolower(qflag[is_qflag])
+  censoring[is_censoring] <- tolower(censoring[is_censoring])
   
-  if (any(is_qflag)) {
+  if (any(is_censoring)) {
     lpoints(
-      x[is_qflag], 
-      y[is_qflag], 
-      pch = qflag[is_qflag], 
-      cex = wk.cex.qflag, 
+      x[is_censoring], 
+      y[is_censoring], 
+      pch = censoring[is_censoring], 
+      cex = wk.cex.censoring, 
       col = "black"
     )
   }
     
-  if (any(!is_qflag)) {
+  if (any(!is_censoring)) {
     lpoints(
-      x[!is_qflag], 
-      y[!is_qflag], 
+      x[!is_censoring], 
+      y[!is_censoring], 
       pch = wk.pch, 
       cex = wk.cex, 
       col = "black"
@@ -791,11 +791,11 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
 
   data <- within(data, {
     if (useLogs) concentration <- log(concentration)
-    concentration.qflag <- qflag
+    concentration.censoring <- censoring
 
     if (exists("concOriginal")) {
       if (useLogs) value <- log(concOriginal)
-      value.qflag <- qflagOriginal
+      value.censoring <- censoringOriginal
     }
   })
 
@@ -815,19 +815,19 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
     auxiliary <- auxiliary_id
   }
     
-  auxiliary.qflag <- paste(auxiliary, "qflag", sep = ".")
+  auxiliary.censoring <- paste(auxiliary, "censoring", sep = ".")
   
-  # not all auxiliary variables have qflags, so create dummy columns
+  # not all auxiliary variables have censorings, so create dummy columns
   
-  ok <- auxiliary.qflag %in% names(data)
+  ok <- auxiliary.censoring %in% names(data)
   if (!all(ok))
-    data[auxiliary.qflag[!ok]] <- lapply(data[auxiliary[!ok]], function(x) ifelse(is.na(x), NA, ""))
+    data[auxiliary.censoring[!ok]] <- lapply(data[auxiliary[!ok]], function(x) ifelse(is.na(x), NA, ""))
     
-  data <- data[c("year", auxiliary, auxiliary.qflag)]
+  data <- data[c("year", auxiliary, auxiliary.censoring)]
 
 
   data <- reshape(
-    data, varying = list(auxiliary, auxiliary.qflag), v.names = c("value", "qflag"), direction = "long", 
+    data, varying = list(auxiliary, auxiliary.censoring), v.names = c("value", "censoring"), direction = "long", 
     timevar = "type", times = auxiliary)
   
   data <- within(data, type <- ordered(type, levels = auxiliary))
@@ -927,9 +927,9 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
           grid.text("data not-normalised", 0.5, 0.5, gp = gpar(cex = xykey.cex))
         else {
           if (any(duplicated(x))) x <- jitter(x, amount = 0.1)
-          qflag <- tolower(as.character(qflag[subscripts]))
-          qflag <- ifelse(qflag %in% "", "+", qflag)
-          lpoints(x, y, pch = qflag, cex = 2.5, col = "black")
+          censoring <- tolower(as.character(censoring[subscripts]))
+          censoring <- ifelse(censoring %in% "", "+", censoring)
+          lpoints(x, y, pch = censoring, cex = 2.5, col = "black")
         }
 
         pushViewport(viewport(clip = "off"))
@@ -1078,7 +1078,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
       names(out)[2] <- "concentration"
       out
     }
-    else data.frame(year = info$max.year, concentration = 0, qflag = factor("", levels = c("", "<")))
+    else data.frame(year = info$max.year, concentration = 0, censoring = factor("", levels = c("", "<")))
   })  
     
 
@@ -1205,7 +1205,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
       panel = function(x, y) {
         if (is.data[i]) {
           plot.panel(
-            x, y, data[[i]]$qflag, 
+            x, y, data[[i]]$censoring, 
             type = "multi_assessment",
             layout.row = layout.row, 
             AC = assessment[[i]]$AC, 
@@ -1300,7 +1300,7 @@ plot.multidata <- function(data, info,  ...) {
   useLogs <- series_distribution %in% "lognormal"
   
   data <- within(data, concentration[useLogs] <- log(concentration[useLogs]))
-  data <- data[c("year", "sample", "seriesID", "qflag", "concentration")]
+  data <- data[c("year", "sample", "seriesID", "censoring", "concentration")]
 
 
   data <- reshape(data, direction = "wide", idvar = c("sample", "year"), timevar = "seriesID")
@@ -1352,8 +1352,8 @@ plot.multidata <- function(data, info,  ...) {
     par.settings = list(
       layout.heights = list(bottom.padding = 0, axis.bottom = 0, axis.xlab.padding = 0, xlab = 0)),
     panel = function(x, y, i, j) {
-      qflag <- if (i > 1) data[paste("qflag", colID[i], sep = ".")] else rep("", length(x))
-      lpoints(x, y, col = "black", pch = ifelse(qflag == "", "+", "<"), cex = 1.1)
+      censoring <- if (i > 1) data[paste("censoring", colID[i], sep = ".")] else rep("", length(x))
+      lpoints(x, y, col = "black", pch = ifelse(censoring == "", "+", "<"), cex = 1.1)
     }  
   )
 
@@ -1513,15 +1513,15 @@ plot.ratio.data <- function(data, numerator, denominator, type = c("logistic", "
   
   id <- c(
     "year", 
-    paste(c("concentration", "qflag"), numerator, sep = "."),
-    paste(c("concentration", "qflag"), denominator, sep = ".")
+    paste(c("concentration", "censoring"), numerator, sep = "."),
+    paste(c("concentration", "censoring"), denominator, sep = ".")
   )
 
   
   # calculate ratios
     
   data <- data[id]
-  names(data) <- c("year", "n_conc", "n_qflag", "d_conc", "d_qflag")
+  names(data) <- c("year", "n_conc", "n_censoring", "d_conc", "d_censoring")
   
   data <- dplyr::mutate(
     data, 
@@ -1530,16 +1530,16 @@ plot.ratio.data <- function(data, numerator, denominator, type = c("logistic", "
       logistic = .data$n_conc / (.data$n_conc + .data$d_conc),
       log = .data$n_conc / .data$d_conc
     ), 
-    qflag = dplyr::case_when(
-      .data$n_qflag %in% "" & .data$d_qflag %in% ""               ~ "+",
-      .data$n_qflag %in% "" & .data$d_qflag %in% c("<", "D", "Q") ~ ">",
-      .data$n_qflag %in% c("<", "D", "Q") & .data$d_qflag %in% "" ~ "<",
-      !is.na(.data$n_qflag) & !is.na(.data$d_qflag)               ~ "?",
+    censoring = dplyr::case_when(
+      .data$n_censoring %in% "" & .data$d_censoring %in% ""               ~ "+",
+      .data$n_censoring %in% "" & .data$d_censoring %in% c("<", "D", "Q") ~ ">",
+      .data$n_censoring %in% c("<", "D", "Q") & .data$d_censoring %in% "" ~ "<",
+      !is.na(.data$n_censoring) & !is.na(.data$d_censoring)               ~ "?",
       TRUE                                                        ~ NA_character_
     )
   )
   
-  data <- data[c("year", "ratio", "qflag")]
+  data <- data[c("year", "ratio", "censoring")]
   
   data
 }
@@ -1548,7 +1548,7 @@ plot.ratio.data <- function(data, numerator, denominator, type = c("logistic", "
 plot.ratio.pred <- function(
   data, 
   type = c("logistic", "log"), 
-  control = list(nyear = 5, prop_qflag = 0.1)
+  control = list(nyear = 5, prop_censoring = 0.1)
 ) {
 
   type <- match.arg(type)
@@ -1559,9 +1559,9 @@ plot.ratio.pred <- function(
   
   nyear <- length(unique(data$year))
   
-  prop_qflag <- sum(!data$qflag %in% "+") / length(data$qflag) 
+  prop_censoring <- sum(!data$censoring %in% "+") / length(data$censoring) 
   
-  if (nyear < control$nyear || prop_qflag >= control$prop_qflag ) {
+  if (nyear < control$nyear || prop_censoring >= control$prop_censoring ) {
     return(NULL)
   }
   
@@ -1634,7 +1634,7 @@ plot.ratio <- function(data, info, ...) {
 
   if (info$compartment == "sediment") {
     data$concentration <- data$concOriginal
-    data$qflag <- data$qflagOriginal
+    data$censoring <- data$censoringOriginal
   }
   
   # set up ratios
@@ -1728,7 +1728,7 @@ plot.ratio <- function(data, info, ...) {
   
   # widen data 
   
-  data <- data[c("year", "sample", "determinand", "qflag", "concentration")]
+  data <- data[c("year", "sample", "determinand", "censoring", "concentration")]
   
   data <- reshape(
     data, 
@@ -1741,7 +1741,7 @@ plot.ratio <- function(data, info, ...) {
   # add in dummy columns to deal with variables that are not reported
   
   if (length(missing_det) > 0) {
-    new_id <- paste("qflag", missing_det, sep = ".")
+    new_id <- paste("censoring", missing_det, sep = ".")
     data[new_id] <- rep(NA_character_, nrow(data))
     
     new_id <- paste("concentration", missing_det, sep = ".")
@@ -1902,7 +1902,7 @@ plot.ratio <- function(data, info, ...) {
       panel = function(x, y) {
         if (is_data[i]) {
           plot.panel(
-            x, y, data[[i]]$qflag,
+            x, y, data[[i]]$censoring,
             type = "ratio",
             AC = ref_lines[[i]],
             pred = pred[[i]],

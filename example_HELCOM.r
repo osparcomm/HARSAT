@@ -668,8 +668,8 @@ water_web <- ctsm_web_initialise(
 ctsm_summary_table(
   assessments = list(
     Biota = biota_web, 
-    Sediment = sediment_web 
-    # Water = water_web
+    Sediment = sediment_web, 
+    Water = water_web
   ),
   determinandGroups = webGroups,
   path = file.path("output", "example_HELCOM")

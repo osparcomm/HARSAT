@@ -420,7 +420,7 @@ ctsm_read_contaminants <- function(infile, path, info) {
       "basis" = "character",
       "unit" = "character",
       "value" = "numeric",
-      "qflag" = "character",
+      "censoring" = "character",
       "limit_detection" = "numeric",
       "limit_quantification" = "numeric", 
       "uncertainty" = "numeric", 
@@ -508,7 +508,7 @@ ctsm_read_contaminants <- function(infile, path, info) {
     # character variables
     
     id <- c(
-      "subseries", "basis", "basis", "qflag", "unit_uncertainty", 
+      "subseries", "basis", "basis", "censoring", "unit_uncertainty", 
       "method_pretreatment", "method_analysis", "method_extraction"
     )
     
@@ -625,7 +625,8 @@ ctsm_read_contaminants <- function(infile, path, info) {
       sample_longitude = longitude,
       determinand = param, 
       matrix = matrx, 
-      unit = munit, 
+      unit = munit,
+      censoring = qflag,
       qalink = tblanalysisid,
       uncertainty = uncrt,
       unit_uncertainty = metcu, 
@@ -666,7 +667,7 @@ ctsm_read_contaminants <- function(infile, path, info) {
   if (info$data_format %in% "ICES_old") {
 
     id <- c(
-      info$region_id, "qflag", "sample", "sub.sample", "sd_code", "station_code", 
+      info$region_id, "censoring", "sample", "sub.sample", "sd_code", "station_code", 
       "sd_name", "station_name"
     )
     
@@ -1048,7 +1049,7 @@ ctsm_tidy_contaminants <- function(data, info) {
     "species", "sex", "n_individual", "subseries", "sample", "replicate", 
     "determinand", "pargroup", "matrix", "basis", "filtered", 
     "method_analysis", "method_extraction", "method_pretreatment",
-    "unit", "value", "qflag", "limit_detection", "limit_quantification", 
+    "unit", "value", "censoring", "limit_detection", "limit_quantification", 
     "uncertainty", "unit_uncertainty", "alabo", "qalink"
   )
   
@@ -1376,107 +1377,9 @@ ctsm_create_timeSeries <- function(
     fileName = "replicate measurements")
 
 
-  # ensure qflag, limit of detection and limit of quantification are consistent
+  # ensure censoring, limit of detection and limit of quantification are consistent
 
   data <- ctsm_check_censoring(data, print_code_warnings)
-  
-  # # define function for testing equality - also need a relative component to cope with some tiny
-  # # value submitted with units g/g
-  # 
-  # my_near <- function(x, y) {
-  #   abs <- near(x, y) 
-  #   rel <- case_when(
-  #     x > 0 ~ abs((x - y) / y) < 1e-5,
-  #     TRUE ~ TRUE
-  #   )
-  #   abs & rel
-  # }
-  #   
-  # 
-  # # check detection limits associated with data are positive 
-  # 
-  # if (print_code_warnings)
-  #   warning('Need to make checking of detection limits determinand specific', call. = FALSE)
-  # 
-  # data <- ctsm.check(
-  #   data, limit_detection <= 0, action = "make.NA", 
-  #   message = "Non-positive detection limits", 
-  #   fileName = "non positive det limits", missingID = "limit_detection")
-  # 
-  # data <- ctsm.check(
-  #   data, limit_quantification <= 0, action = "make.NA", 
-  #   message = "Non-positive quantification limits", 
-  #   fileName = "non positive quant limits", missingID = "limit_quantification")
-  # 
-  # 
-  # # limit_quantification must be greater than limit_detection - otherwise set both to missing
-  # 
-  # data <- ctsm.check(
-  #   data,  limit_quantification <= limit_detection, action = "make.NA", 
-  #   message = "Limit of quantification less than limit of detection", 
-  #   fileName = "limits inconsistent", 
-  #   missingID = c("limit_detection", "limit_quantification"))
-  # 
-  # 
-  # # check for valid values of qflag
-  # # qflag cannot contain a > (although possible for some biological effects - need to revisit)
-  # # also check for other unrecognised characters
-  # 
-  # if (print_code_warnings)
-  #   warning(
-  #     "Need to make qflag determinand specific when biological effects are introduced", 
-  #     call. = FALSE)
-  # 
-  # data <- within(data, {
-  #   levels(qflag) <- c(levels(qflag), "")
-  #   qflag[is.na(qflag)] <- ""
-  #   qflag <- recode(qflag, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
-  # })
-  # 
-  # data <- ctsm.check(
-  #   data, ! qflag %in% c("", "D", "Q", "<"), action = "delete", 
-  #   message = "Unrecognised qflag values", fileName = "qflags unrecognised")
-  # 
-  # 
-  # # if qflag = D, then value must equal detection_limit
-  # # if qflag = Q, then value must equal limit_quantification
-  # 
-  # id <- with(data, {
-  #   out1 <- qflag == "D" & (is.na(limit_detection) | !my_near(value, limit_detection))
-  #   out2 <- qflag == "Q" & (is.na(limit_quantification) | !my_near(value, limit_quantification))
-  #   out1 | out2
-  # })
-  # 
-  # ctsm.check(
-  #   data, id, action = "warning",
-  #   message = "Qflag D and Q inconsistent with respective limits",
-  #   fileName = "qflags and limits inconsistent")
-  # 
-  # 
-  # # resolve these inconsistencies
-  # 
-  # data <- within(data, {
-  #   qflag <- case_when(
-  #     qflag %in% "" ~ "",
-  #     !is.na(limit_detection) & my_near(value, limit_detection) ~ "D",
-  #     !is.na(limit_quantification) & my_near(value, limit_quantification) ~ "Q",
-  #     TRUE ~ "<"
-  #   )
-  #   qflag <- factor(qflag, levels = c("", "D", "Q", "<"))  
-  # })    
-  # 
-  # 
-  # # check limit_detection is less than (or equal to) concentration
-  # # NB would need to be revised if limits are submitted in different units to concentrations
-  # 
-  # data <- ctsm.check(
-  #   data, 
-  #   id = qflag %in% c("", "<") & limit_detection > value, 
-  #   action = "make.NA", 
-  #   message = "Detection limit higher than data", 
-  #   fileName = "detection limit high", 
-  #   missingID = c("limit_detection", "limit_quantification")
-  # )
   
 
   # convert uncertainty into standard deviations, and remove any associated variables
@@ -1599,7 +1502,7 @@ ctsm_create_timeSeries <- function(
 
   data <- data[setdiff(names(data), c("qalink", "alabo"))]
 
-  
+
   # create new.unit and concentration columns comprising the details from the
   # determinand file in the information folder, required to get correct unit details
   
@@ -1675,14 +1578,14 @@ ctsm_create_timeSeries <- function(
     if (i %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN")) {
       mergeID <- c("sample", "matrix")
       newID <- c(
-        "concentration", "qflag", "basis", "limit_detection", "limit_quantification", 
+        "concentration", "censoring", "basis", "limit_detection", "limit_quantification", 
         "uncertainty"
       )
       newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
     } else if (i %in% c("AL", "LI")) {
       mergeID <- c("sample", "matrix")
       newID <- c(
-        "concentration", "qflag", "basis", "limit_detection", "limit_quantification", 
+        "concentration", "censoring", "basis", "limit_detection", "limit_quantification", 
         "uncertainty", "digestion"
       )
       newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
@@ -1725,9 +1628,9 @@ ctsm_create_timeSeries <- function(
       from = data[["LIPIDWT%.basis"]], 
       to = rep("W", nrow(data)),
       drywt = data[["DRYWT%"]], 
-      drywt.qflag = data[["DRYWT%.qflag"]], 
+      drywt.censoring = data[["DRYWT%.censoring"]], 
       lipidwt = NA, 
-      lipidwt.qflag = NA
+      lipidwt.censoring = NA
     )
   }
 
@@ -1755,9 +1658,9 @@ ctsm_create_timeSeries <- function(
         from = data$basis, 
         to = data$new.basis,
         drywt = data[["DRYWT%"]], 
-        drywt.qflag = data[["DRYWT%.qflag"]], 
+        drywt.censoring = data[["DRYWT%.censoring"]], 
         lipidwt = switch(info$compartment, biota = data[["LIPIDWT%"]], NA), 
-        lipidwt.qflag = switch(info$compartment, biota = data[["LIPIDWT%.qflag"]], NA), 
+        lipidwt.censoring = switch(info$compartment, biota = data[["LIPIDWT%.censoring"]], NA), 
         exclude = data$group %in% c("Imposex", "Metabolites", "Effects")
       )
       
@@ -1776,7 +1679,7 @@ ctsm_create_timeSeries <- function(
           from = data$AL.basis,
           to = data$new.basis,
           drywt = data[["DRYWT%"]], 
-          drywt.qflag = data[["DRYWT%.qflag"]]
+          drywt.censoring = data[["DRYWT%.censoring"]]
         )
         
         id <- paste0("LI", wk_suffix)
@@ -1786,7 +1689,7 @@ ctsm_create_timeSeries <- function(
           from = data$AL.basis,
           to = data$new.basis,
           drywt = data[["DRYWT%"]], 
-          drywt.qflag = data[["DRYWT%.qflag"]]
+          drywt.censoring = data[["DRYWT%.censoring"]]
         )
         
         id <- paste0("CORG", wk_suffix)
@@ -1796,7 +1699,7 @@ ctsm_create_timeSeries <- function(
           from = data$CORG.basis,
           to = data$new.basis,
           drywt = data[["DRYWT%"]], 
-          drywt.qflag = data[["DRYWT%.qflag"]]
+          drywt.censoring = data[["DRYWT%.censoring"]]
         )
         
         if ("LOIGN" %in% names(data)) {
@@ -1808,7 +1711,7 @@ ctsm_create_timeSeries <- function(
             from = data$LOIGN.basis,
             to = data$new.basis,
             drywt = data[["DRYWT%"]], 
-            drywt.qflag = data[["DRYWT%.qflag"]]
+            drywt.censoring = data[["DRYWT%.censoring"]]
           )
         }        
       }
@@ -1857,9 +1760,9 @@ ctsm_create_timeSeries <- function(
       from = data$basis, 
       to = data$new.basis,
       drywt = data[["DRYWT%"]], 
-      drywt.qflag = data[["DRYWT%.qflag"]], 
+      drywt.censoring = data[["DRYWT%.censoring"]], 
       lipidwt = switch(info$compartment, biota = data[["LIPIDWT%"]], NA), 
-      lipidwt.qflag = switch(info$compartment, biota = data[["LIPIDWT%.qflag"]], NA), 
+      lipidwt.censoring = switch(info$compartment, biota = data[["LIPIDWT%.censoring"]], NA), 
       exclude = data$group %in% c("Imposex", "Metabolites", "Effects")
     )
     
@@ -1883,7 +1786,7 @@ ctsm_create_timeSeries <- function(
       from = data$AL.basis,
       to = data$new.basis,
       drywt = data[["DRYWT%"]], 
-      drywt.qflag = data[["DRYWT%.qflag"]]
+      drywt.censoring = data[["DRYWT%.censoring"]]
     )
     
     id <- paste0("LI", wk_suffix)
@@ -1893,7 +1796,7 @@ ctsm_create_timeSeries <- function(
       from = data$AL.basis,
       to = data$new.basis,
       drywt = data[["DRYWT%"]], 
-      drywt.qflag = data[["DRYWT%.qflag"]]
+      drywt.censoring = data[["DRYWT%.censoring"]]
     )
     
     id <- paste0("CORG", wk_suffix)
@@ -1903,7 +1806,7 @@ ctsm_create_timeSeries <- function(
       from = data$CORG.basis,
       to = data$new.basis,
       drywt = data[["DRYWT%"]], 
-      drywt.qflag = data[["DRYWT%.qflag"]]
+      drywt.censoring = data[["DRYWT%.censoring"]]
     )
     
     if ("LOIGN" %in% names(data)) {
@@ -1915,7 +1818,7 @@ ctsm_create_timeSeries <- function(
         from = data$LOIGN.basis,
         to = data$new.basis,
         drywt = data[["DRYWT%"]], 
-        drywt.qflag = data[["DRYWT%.qflag"]]
+        drywt.censoring = data[["DRYWT%.censoring"]]
       )
     }        
   }
@@ -2008,12 +1911,12 @@ ctsm_create_timeSeries <- function(
     
 
   # remove concentrations where cv of uncertainty > 100%
-  # tidy up missing data for uncertainties and qflag
+  # tidy up missing data for uncertainties and censoring
   
   data <- within(data, {
     concentration[uncertainty > concentration] <- NA
     uncertainty[is.na(concentration)] <- NA
-    qflag[is.na(concentration)] <- NA
+    censoring[is.na(concentration)] <- NA
   })
     
 
@@ -2242,12 +2145,12 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
     "year", "date", "time", "sample", "sub.sample", "sample", 
     "matrix", "subseries", "group", "determinand", "basis", "unit", "value", 
     "method_analysis", "n_individual", 
-    "concOriginal", "qflagOriginal", "uncrtOriginal", 
-    "concentration", "new.basis", "new.unit", "qflag",  
+    "concOriginal", "censoringOriginal", "uncrtOriginal", 
+    "concentration", "new.basis", "new.unit", "censoring",  
     "limit_detection", "limit_quantification", "uncertainty",  
     paste(
       rep(auxiliary, each = 5), 
-      c("", ".qflag", ".limit_detection", ".limit_quantification", ".uncertainty"), 
+      c("", ".censoring", ".limit_detection", ".limit_quantification", ".uncertainty"), 
       sep = ""
     ),
     "C13D.basis", "C13D.matrix", "N15D.basis", "N15D.matrix")
@@ -2889,12 +2792,12 @@ determinand.link.sum <- function(data, keep, drop, ...) {
     out$limit_detection <- sum(x$limit_detection)
     out$limit_quantification <- sum(x$limit_quantification)
     
-    if ("" %in% x$qflag)
-      out$qflag <- ""
-    else if (n_distinct(x$qflag) == 1) 
-      out$qflag <- unique(x$qflag) 
+    if ("" %in% x$censoring)
+      out$censoring <- ""
+    else if (n_distinct(x$censoring) == 1) 
+      out$censoring <- unique(x$censoring) 
     else 
-      out$qflag <- "<"
+      out$censoring <- "<"
 
     if (all(is.na(x$uncertainty))) 
       out$uncertainty <- NA
@@ -3020,13 +2923,13 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
     out$limit_detection <- sum(x$limit_detection)
     out$limit_quantification <- sum(x$limit_quantification)
     
-    if ("" %in% x$qflag)
-      out$qflag <- ""
-    else if (n_distinct(x$qflag) == 1) 
-      out$qflag <- unique(x$qflag) 
+    if ("" %in% x$censoring)
+      out$censoring <- ""
+    else if (n_distinct(x$censoring) == 1) 
+      out$censoring <- unique(x$censoring) 
     else 
-      out$qflag <- "<"
-    out$qflag <- if(all(x$qflag %in% "<")) "<" else ""
+      out$censoring <- "<"
+    out$censoring <- if(all(x$censoring %in% "<")) "<" else ""
     
     if (all(is.na(x$uncertainty))) 
       out$uncertainty <- NA
@@ -3065,8 +2968,8 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
 ctsm_check_censoring <- function(data, print_code_warnings) {
   
   # import_functions.R
-  # checks that qflag, limit_detection and limit_quantification are consistent
-  # and makes sensible adjustments to qflag
+  # checks that censoring, limit_detection and limit_quantification are consistent
+  # and makes sensible adjustments to censoring
   
   # define function for testing equality - also need a relative component to cope with some tiny
   # value submitted with units g/g
@@ -3122,40 +3025,40 @@ ctsm_check_censoring <- function(data, print_code_warnings) {
   )
 
 
-  # check for valid values of qflag
-  # qflag cannot contain a > (although possible for some biological effects - 
+  # check for valid values of censoring
+  # censoring cannot contain a > (although possible for some biological effects - 
   # need to revisit)
   # also check for other unrecognised characters
   
   if (print_code_warnings) {
     warning(
-      "Need to make qflag determinand specific when biological effects are introduced", 
+      "Need to make censoring determinand specific when biological effects are introduced", 
       call. = FALSE
     )
   }
 
   data <- within(data, {
-    levels(qflag) <- c(levels(qflag), "")
-    qflag[is.na(qflag)] <- ""
-    qflag <- recode(qflag, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
+    levels(censoring) <- c(levels(censoring), "")
+    censoring[is.na(censoring)] <- ""
+    censoring <- recode(censoring, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
   })
 
   data <- ctsm.check(
     data, 
-    !qflag %in% c("", "D", "Q", "<"), 
+    !censoring %in% c("", "D", "Q", "<"), 
     action = "delete", 
-    message = "Unrecognised qflag values", 
-    fileName = "qflags unrecognised"
+    message = "Unrecognised censoring values", 
+    fileName = "censoring codes unrecognised"
   )
 
 
-  # if qflag = D, then value must equal detection_limit
-  # if qflag = Q, then value must equal limit_quantification
+  # if censoring = D, then value must equal detection_limit
+  # if censoring = Q, then value must equal limit_quantification
   
   id <- with(data, {
-    out1 <- qflag == "D" & 
+    out1 <- censoring == "D" & 
       (is.na(limit_detection) | !my_near(value, limit_detection))
-    out2 <- qflag == "Q" & 
+    out2 <- censoring == "Q" & 
       (is.na(limit_quantification) | !my_near(value, limit_quantification))
     out1 | out2
   })
@@ -3164,21 +3067,21 @@ ctsm_check_censoring <- function(data, print_code_warnings) {
     data, 
     id, 
     action = "warning",
-    message = "Qflag D and Q inconsistent with respective limits",
-    fileName = "qflags and limits inconsistent"
+    message = "censoring codes D and Q inconsistent with respective limits",
+    fileName = "censoring codes and limits inconsistent"
   )
 
 
   # resolve these inconsistencies
   
   data <- within(data, {
-    qflag <- case_when(
-      qflag %in% "" ~ "",
+    censoring <- case_when(
+      censoring %in% "" ~ "",
       !is.na(limit_detection) & my_near(value, limit_detection) ~ "D",
       !is.na(limit_quantification) & my_near(value, limit_quantification) ~ "Q",
       TRUE ~ "<"
     )
-    qflag <- factor(qflag, levels = c("", "D", "Q", "<"))  
+    censoring <- factor(censoring, levels = c("", "D", "Q", "<"))  
   })    
 
 
@@ -3187,7 +3090,7 @@ ctsm_check_censoring <- function(data, print_code_warnings) {
   
   data <- ctsm.check(
     data, 
-    id = qflag %in% c("", "<") & limit_detection > value, 
+    id = censoring %in% c("", "<") & limit_detection > value, 
     action = "make.NA", 
     message = "Detection limit higher than data", 
     fileName = "detection limit high", 
@@ -3213,13 +3116,14 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
   control <- modifyList(ctsm_normalise_default, control)
   
   
-  # save non-normalised concentrations and qflags for plotting purposes later on
+  # save non-normalised concentrations and censoring codes for plotting purposes 
+  # later on
   # also save uncertainties just in case
   
   data <- mutate(
     data, 
     concOriginal = .data$concentration,     
-    qflagOriginal = .data$qflag,
+    censoringOriginal = .data$censoring,
     uncrtOriginal = .data$uncertainty
   )
   
@@ -3493,7 +3397,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
       # if so, normalised concentration should be a greater than, but
       # haven't coded this yet
       
-      notOK <- getNdata("qflag") %in% c("<", "D", "Q")
+      notOK <- getNdata("censoring") %in% c("<", "D", "Q")
       if (any(notOK)) {
         message('   Removing sediment data where normaliser is a less than')
         concentration[notOK] <- NA
@@ -3531,13 +3435,14 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
   control <- modifyList(ctsm_normalise_default, control)
   
   
-  # save non-normalised concentrations and qflags for plotting purposes later on
+  # save non-normalised concentrations and censoring codes for plotting purposes 
+  # later on
   # also save uncertainties just in case
   
   data <- mutate(
     data, 
     concOriginal = .data$concentration,     
-    qflagOriginal = .data$qflag,
+    censoringOriginal = .data$censoring,
     uncrtOriginal = .data$uncertainty
   )
   
@@ -3571,15 +3476,15 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
   data <- mutate(
     data, 
     .tmp = CORG,
-    .tmp.qflag = CORG.qflag,
+    .tmp.censoring = CORG.censoring,
     .tmp.uncertainty = CORG.uncertainty,
     CORG = if_else(is.na(.tmp), 0.35 * LOIGN, CORG),
-    CORG.qflag = if_else(
+    CORG.censoring = if_else(
       is.na(.tmp), 
-      as.character(LOIGN.qflag), 
-      as.character(CORG.qflag)
+      as.character(LOIGN.censoring), 
+      as.character(CORG.censoring)
     ),
-    CORG.qflag = factor(CORG.qflag),
+    CORG.censoring = factor(CORG.censoring),
     CORG.uncertainty = if_else(is.na(.tmp), 0.35 * LOIGN.uncertainty, CORG.uncertainty)
   )
 
@@ -3801,7 +3706,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
       # if so, normalised concentration should be a greater than, but
       # haven't coded this yet
       
-      notOK <- getNdata("qflag") %in% c("<", "D", "Q")
+      notOK <- getNdata("censoring") %in% c("<", "D", "Q")
       if (any(notOK)) {
         message('   Removing sediment data where normaliser is a less than')
         concentration[notOK] <- NA
@@ -3819,10 +3724,10 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
   data <- mutate(
     data, 
     CORG = .tmp,
-    CORG.qflag = .tmp.qflag,
+    CORG.censoring = .tmp.censoring,
     CORG.uncertainty = .tmp.uncertainty,
     .tmp = NULL,
-    .tmp.qflag = NULL,
+    .tmp.censoring = NULL,
     .tmp.uncertainty = NULL
   )
 
@@ -3849,13 +3754,14 @@ ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, control) {
   control <- modifyList(ctsm_normalise_default, control)
   
   
-  # save non-normalised concentrations and qflags for plotting purposes later on
+  # save non-normalised concentrations and censoring codes for plotting purposes 
+  # later on
   # also save uncertainties just in case
   
   data <- mutate(
     data, 
     concOriginal = .data$concentration,     
-    qflagOriginal = .data$qflag,
+    censoringOriginal = .data$censoring,
     uncrtOriginal = .data$uncertainty
   )
   
@@ -3992,7 +3898,7 @@ ctsm_estimate_uncertainty <- function(data, response_id, compartment) {
   if (response_id != "concentration") {
     data <- mutate(data, determinand = rep(response_id, nrow(data)))
 
-    var1 <- c("uncertainty", "qflag", "limit_detection", "limit_quantification")  
+    var1 <- c("uncertainty", "censoring", "limit_detection", "limit_quantification")  
     var2  <- paste(response_id, var1, sep = ".")
     
     data[c("concentration", var1)] <- data[c(response_id, var2)]
@@ -4039,27 +3945,27 @@ ctsm_estimate_uncertainty <- function(data, response_id, compartment) {
       rep("W", length(data$sd_constant)), 
       data$new.basis, 
       data[["DRYWT%"]], 
-      data[["DRYWT%.qflag"]], 
+      data[["DRYWT%.censoring"]], 
       data[["LIPIDWT%"]], 
-      data[["LIPIDWT%.qflag"]], 
+      data[["LIPIDWT%.censoring"]], 
       exclude = data$group %in% c("Imposex", "Effects", "Metabolites")
     )
   }
 
   
-  # adjust sd_constant to use limit and qflag information where possible 
-  # however qflag < is difficult to work with as it is inconsistent with both lod and loq so
+  # adjust sd_constant to use limit and censoring information where possible 
+  # however censoring < is difficult to work with as it is inconsistent with both lod and loq so
   #   take lower of concentration / 3 and sd_constant
-  # qflag = "" is also difficult to work with because we can't trust the lod and loq 
+  # censoring = "" is also difficult to work with because we can't trust the lod and loq 
   #   option - again take lower of many options
   
   data$sd_constant <- case_when(
-    data$qflag %in% "D" ~ data$limit_detection / 3,
-    data$qflag %in% "Q" ~ data$limit_quantification / 10,
-    data$qflag %in% "<" ~ pmin(data$sd_constant, 
+    data$censoring %in% "D" ~ data$limit_detection / 3,
+    data$censoring %in% "Q" ~ data$limit_quantification / 10,
+    data$censoring %in% "<" ~ pmin(data$sd_constant, 
                                data$concentration / 3, 
                                na.rm = TRUE),
-    data$qflag %in% ""  ~ pmin(data$sd_constant, 
+    data$censoring %in% ""  ~ pmin(data$sd_constant, 
                                data$limit_detection / 3, 
                                data$limit_quantification / 10, 
                                data$concentration / 3, 
