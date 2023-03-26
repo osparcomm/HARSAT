@@ -1,5 +1,5 @@
 ctsm_plot_assessment <- function(
-    ctsm_web_obj, 
+    ctsm_asmt_obj, 
     subset = NULL, 
     output_dir = ".",
     file_type = c("data", "index"),
@@ -24,10 +24,24 @@ ctsm_plot_assessment <- function(
   }
   
   
-  # set up time series information
+  # set up time series information:
+  # - merge with station information
+  # - subset if necessary
   
-  timeSeries <- ctsm_web_obj$assessment$timeSeries 
+  timeSeries <- ctsm_asmt_obj$timeSeries 
   
+  
+  timeSeries <- rownames_to_column(timeSeries, ".series")
+  
+  timeSeries <- left_join(
+    timeSeries, 
+    ctsm_asmt_obj$stations, 
+    by = "station_code"
+  )
+  
+  timeSeries <- column_to_rownames(timeSeries, ".series")
+  
+
   if (!is.null(substitute(subset))) {
     ok <- eval(substitute(subset), timeSeries, parent.frame())
     timeSeries <- timeSeries[ok, ]
@@ -36,18 +50,20 @@ ctsm_plot_assessment <- function(
   series <- row.names(timeSeries)
   
   
+  # plot each timeSeries
+  
   lapply(series, function(id) {
     
-    data <- filter(ctsm_web_obj$assessment$data, seriesID == id)
+    data <- filter(ctsm_asmt_obj$data, seriesID == id)
     
-    assessment <- ctsm_web_obj$assessment$assessment[[id]]
+    assessment <- ctsm_asmt_obj$assessment[[id]]
 
     
     # get relevant series info
         
     info <- c(
-      ctsm_web_obj$assessment$info,
-      ctsm_web_obj$assessment$timeSeries[id, ]
+      ctsm_asmt_obj$info,
+      timeSeries[id, ]
     )
     
     info$distribution <- ctsm_get_info(

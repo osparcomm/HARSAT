@@ -266,12 +266,13 @@ ctsm_summary_table(
 
 # output can be png or pdf
 
-# can subset assessment based on timeSeries structure - commonly by 
-# determinand, matrix or species
+# can subset assessment based on variables in either timeSeries or stations 
+# components of object: commonly by determinand, matrix, species, station_code 
+# or station_name
 # if subset is NULL (default), all timeseries are plotted (can take some time)
 
 ctsm_plot_assessment(
-  biota_web,
+  biota_assessment,
   subset = species %in% "Phoca hispida",
   output_dir = file.path("output", "graphics"), 
   file_type = "data",
@@ -279,12 +280,19 @@ ctsm_plot_assessment(
 )
 
 ctsm_plot_assessment(
-  biota_web,
+  biota_assessment,
   subset = matrix %in% "LI",
   output_dir = file.path("output", "graphics"), 
   file_type = "index",
   file_format = "pdf"
 )
 
+ctsm_plot_assessment(
+  biota_assessment,
+  subset = station_code %in% "A1",
+  output_dir = file.path("output", "graphics"), 
+  file_type = "data",
+  file_format = "pdf"
+)
 
 
