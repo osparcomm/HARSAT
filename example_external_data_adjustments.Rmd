@@ -732,7 +732,7 @@ Add a column to allow the creation of different mammal groups based on age (size
 
 ```{r AMAP_3}
 
-biota_data$data$subseries <- rep(NA_character_, nrow(biota_data$data))
+# biota_data$data$subseries <- rep(NA_character_, nrow(biota_data$data))
 
 ```
 
