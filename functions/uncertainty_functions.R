@@ -34,13 +34,13 @@ ctsm.uncrt.workup <- function(clean_data) {
   #   (CORG and AL) information
 
   id_aux <- c(
-    "", ".uncertainty", ".qflag", ".limit_detection", ".limit_quantification"
+    "", ".uncertainty", ".censoring", ".limit_detection", ".limit_quantification"
   )
   
   id <- intersect(
     c("country", "alabo", "year", "sample", "group", "determinand", 
       "concentration", "uncertainty", 
-      "qflag", "limit_detection", "limit_quantification", 
+      "censoring", "limit_detection", "limit_quantification", 
       paste0("AL", id_aux), 
       paste0("LI", id_aux),
       paste0("CORG", id_aux), 
@@ -57,7 +57,7 @@ ctsm.uncrt.workup <- function(clean_data) {
     id <- c("country", "alabo", "year", "group", "sample", "determinand")
 
     out_names <- c(
-      "concentration", "uncertainty", "qflag", "limit_detection", 
+      "concentration", "uncertainty", "censoring", "limit_detection", 
       "limit_quantification"
     )
     
@@ -158,11 +158,11 @@ ctsm.uncrt.estimate <- function(data) {
     summarise(n_values = n())
 
   
-  # remove duplicate combinations of concentration and uncertainty (and associated qflag variables)
+  # remove duplicate combinations of concentration and uncertainty (and associated censoring variables)
   # big problems when there are lots of less thans
   
   id <- c(
-    "determinand", "concentration", "uncertainty", "qflag", 
+    "determinand", "concentration", "uncertainty", "censoring", 
     "limit_detection", "limit_quantification", "alabo"
   )
   
@@ -189,7 +189,7 @@ ctsm.uncrt.estimate <- function(data) {
   # median relative_u for values above the detection level by alabo
   
   out_relative <- data %>% 
-    filter(.data$qflag == "") %>% 
+    filter(.data$censoring == "") %>% 
     group_by(.data$determinand, .data$alabo) %>% 
     summarise(sd_variable = median(.data$relative_u) / 100) 
   
@@ -203,11 +203,11 @@ ctsm.uncrt.estimate <- function(data) {
   
   
   # constant error
-  # median limit_detection for values with qflag == D, Q or "" by alabo
+  # median limit_detection for values with censoring == D, Q or "" by alabo
   # don't use "<" because we can't trust any of the limit values
   
   out_constant <- data %>% 
-    filter(.data$qflag %in% c("D", "Q", "")) %>% 
+    filter(.data$censoring %in% c("D", "Q", "")) %>% 
     drop_na(.data$limit_detection) %>% 
     group_by(.data$determinand, .data$alabo) %>% 
     summarise(sd_constant = median(.data$limit_detection) / 3) 
@@ -258,7 +258,7 @@ ctsm.uncrt.plot.estimates <- function(uncrt_obj, old_estimates, group_id) {
     as.table = TRUE,
     panel = function(x, y, subscripts) {
       data <- data[subscripts, ]
-      lod <- with(data, limit_detection[qflag %in% c("D", "Q", "")])
+      lod <- with(data, limit_detection[censoring %in% c("D", "Q", "")])
       lod <- na.omit(lod)
       panel.rug(x = log10(lod), lwd = 2, col = "red")
 
@@ -295,7 +295,7 @@ ctsm.uncrt.plot.data <- function(uncrt_obj, det_id) {
     as.table = TRUE, aspect = 0.7,
     panel = function(x, y, subscripts, ...) {
       data <- data[subscripts, ]
-      lod <- with(data, limit_detection[qflag %in% c("D", "Q", "")])
+      lod <- with(data, limit_detection[censoring %in% c("D", "Q", "")])
       lod <- na.omit(lod)
       panel.rug(x = log10(lod), lwd = 2)
       panel.superpose(x, y, subscripts, ..., panel.groups = "panel.xyplot")

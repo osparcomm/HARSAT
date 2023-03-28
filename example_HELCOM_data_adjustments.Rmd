@@ -227,7 +227,7 @@ if (sum(water_data$data$.id) != 23) {
 water_data$data %>% 
   filter(.id) %>% 
   select(
-    country, year, determinand, value, qflag, limit_detection, 
+    country, year, determinand, value, censoring, limit_detection, 
     limit_quantification, uncertainty, unit_uncertainty
   ) %>% 
   as.data.frame() %>% 
@@ -742,7 +742,7 @@ wk_data <- mutate(
   determinand = "CORG", 
   value = Value,
   unit = "%", 
-  qflag = NA_character_,
+  censoring = NA_character_,
   method_analysis = NA_character_,
   limit_detection = NA_real_,
   limit_quantification = NA_real_, 
@@ -796,7 +796,7 @@ wk_CORG <- do.call(rbind, wk_CORG)
   
 wk_id <- c(
   "pargroup", "determinand", "basis", "unit",
-  "value", "qflag", "limit_detection", "limit_quantification", "uncertainty", 
+  "value", "censoring", "limit_detection", "limit_quantification", "uncertainty", 
   "unit_uncertainty", "alabo", "method_analysis", "smtyp", "qalink"
 )
 
@@ -933,7 +933,7 @@ The relative standard deviations is estimated using the same procedures as used 
 ```{r sed_uncrt2}
 out_relative <- wk %>% 
   filter(
-    is.na(.data$qflag), 
+    is.na(.data$censoring), 
     !is.na(alabo)
   ) %>% 
   group_by(.data$determinand, .data$alabo, .data$country) %>% 
@@ -1279,23 +1279,23 @@ xyplot(
 <br>
 
 
-#### Strange qflags
+#### Strange censoring values
 
-The following data from relevant stations (with data in the last six years) have qflag = ">", which is unusual. The German data appear to be well above the limits of detection, so the ">" has been removed. The Swedish data appear to be values below the limit of detection and have been replaced with qflag = "D".
+The following data from relevant stations (with data in the last six years) have censoring = ">", which is unusual. The German data appear to be well above the limits of detection, so the ">" has been removed. The Swedish data appear to be values below the limit of detection and have been replaced with censoring = "D".
 
-```{r bio_qflag1}
+```{r bio_censoring1}
 get_relevant_biota() %>%
-  filter(grepl(">", qflag)) %>% 
-  select(country, year, determinand, value, qflag, limit_detection, limit_quantification) %>% 
+  filter(grepl(">", censoring)) %>% 
+  select(country, year, determinand, value, censoring, limit_detection, limit_quantification) %>% 
   arrange(country, year, determinand) %>% 
   as.data.frame() %>% 
   DT::datatable(options = DT_options, rownames = FALSE)
 
 biota_data$data <- mutate(
   biota_data$data, 
-  .id = grepl(">", qflag), 
-  qflag = if_else(.id & country == "Germany", NA_character_, qflag),
-  qflag = if_else(.id & country == "Sweden", "D", qflag),
+  .id = grepl(">", censoring), 
+  censoring = if_else(.id & country == "Germany", NA_character_, censoring),
+  censoring = if_else(.id & country == "Sweden", "D", censoring),
   .id = NULL    
 )
 ```

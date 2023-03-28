@@ -1936,7 +1936,7 @@ convert_units_workup <- function(units) {
 # Basis and matrix information and basis conversion ----
 
 convert.basis <- function(
-  conc, from, to, drywt, drywt.qflag, lipidwt = NA, lipidwt.qflag = NA, exclude) {
+  conc, from, to, drywt, drywt.censoring, lipidwt = NA, lipidwt.censoring = NA, exclude) {
 
   library(dplyr)
   
@@ -1944,7 +1944,7 @@ convert.basis <- function(
   # converts between wet, dry and lipid basis of measurement
 
   data <- data.frame(
-    conc, from, to, drywt, drywt.qflag, lipidwt, lipidwt.qflag, 
+    conc, from, to, drywt, drywt.censoring, lipidwt, lipidwt.censoring, 
     stringsAsFactors = FALSE
   )
   
@@ -1967,7 +1967,7 @@ convert.basis <- function(
   # ensure columns of data are of correct type
 
   data <- mutate_at(data, c("drywt", "lipidwt"), as.numeric)
-  data <- mutate_at(data, c("drywt.qflag", "lipidwt.qflag"), as.character)
+  data <- mutate_at(data, c("drywt.censoring", "lipidwt.censoring"), as.character)
   
   data$conc[!ok] <- with(data[!ok, ], {
 
@@ -1977,10 +1977,10 @@ convert.basis <- function(
       from == "L" ~ lipidwt
     )
     
-    from_qflag <- case_when(
+    from_censoring <- case_when(
       from == "W" ~ "", 
-      from == "D" ~ drywt.qflag, 
-      from == "L" ~ lipidwt.qflag
+      from == "D" ~ drywt.censoring, 
+      from == "L" ~ lipidwt.censoring
     )
 
     to_value <- case_when(
@@ -1989,16 +1989,16 @@ convert.basis <- function(
       to == "L" ~ lipidwt
     )
     
-    to_qflag <- case_when(
+    to_censoring <- case_when(
       to == "W" ~ "", 
-      to == "D" ~ drywt.qflag,
-      to == "L" ~ lipidwt.qflag
+      to == "D" ~ drywt.censoring,
+      to == "L" ~ lipidwt.censoring
     )
 
-    qflag_ok <- from_qflag %in% "" & to_qflag %in% ""
+    censoring_ok <- from_censoring %in% "" & to_censoring %in% ""
     
     conc <- case_when(
-      ! qflag_ok ~ NA_real_,
+      ! censoring_ok ~ NA_real_,
       TRUE ~ conc * from_value / to_value
     )
     conc

@@ -1,4 +1,4 @@
-﻿country,station_code,station_name,year,species,sex,determinand,matrix,basis,value,unit,qflag,limit_detection,limit_quantification,uncertainty,unit_uncertainty,sample,subseries,source
+﻿country,station_code,station_name,year,species,sex,determinand,matrix,basis,value,unit,censoring,limit_detection,limit_quantification,uncertainty,unit_uncertainty,sample,subseries,source
 Canada,A6,Western Hudson Bay,2006,Rangifer tarandus,I,HG,KI,D,1.43,ug/g,,,,,,A12594,,Gamberg
 Canada,A6,Western Hudson Bay,2006,Rangifer tarandus,I,HG,KI,D,1.5,ug/g,,,,,,A12595,,Gamberg
 Canada,A6,Western Hudson Bay,2006,Rangifer tarandus,M,HG,KI,D,1.57,ug/g,,,,,,A12596,,Gamberg

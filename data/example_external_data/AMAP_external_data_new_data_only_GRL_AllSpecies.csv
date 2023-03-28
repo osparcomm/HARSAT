@@ -1,4 +1,4 @@
-﻿country,station_code,station_name,year,species,sex,determinand,matrix,basis,value,unit,qflag,limit_detection,limit_quantification,uncertainty,unit_uncertainty,sample,subseries,source
+﻿country,station_code,station_name,year,species,sex,determinand,matrix,basis,value,unit,censoring,limit_detection,limit_quantification,uncertainty,unit_uncertainty,sample,subseries,source
 Greenland,A90,Ittoqqortoormiit AMAP,1983,Ursus maritimus,M,HG,LI,W,4.41,mg/kg,,,,25,%,A20001,juvenile,Riget
 Greenland,A90,Ittoqqortoormiit AMAP,1983,Ursus maritimus,M,AGMEA,WO,,2,y,,,,,,A20001,juvenile,Riget
 Greenland,A90,Ittoqqortoormiit AMAP,1983,Ursus maritimus,M,N15D,MU,D,19.75,ppt,,,,,,A20001,juvenile,Riget
