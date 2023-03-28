@@ -29,8 +29,8 @@ add_non_ICES_data <- function(
   
   required <- c(
     "country", "station_code", "station_name", "species", "sex", "determinand", "matrix", "basis", 
-    "unit", "uncertainty", "unit_uncertainty", "qflag", "sub.sample", "year", "value", 
-    "limit_detection", "limit_quantification", "AMAP_group") 
+    "unit", "uncertainty", "unit_uncertainty", "censoring", "sub.sample", "year", "value", 
+    "limit_detection", "limit_quantification", "subseries") 
  
   ok <- required %in% id
   
@@ -41,7 +41,7 @@ add_non_ICES_data <- function(
   col_types <- rep("skip", length(id))
   col_types[id %in% c(
     "country", "station_code", "station_name", "species", "sex", "determinand", "matrix", "basis", 
-    "unit", "unit_uncertainty", "qflag", "sub.sample", "AMAP_group")] <- "text"
+    "unit", "unit_uncertainty", "censoring", "sub.sample", "subseries")] <- "text"
   col_types[id %in% c(
     "year", "value", "uncertainty", "limit_detection", "limit_quantification")] <- "numeric"
 
@@ -111,12 +111,6 @@ add_non_ICES_data <- function(
   if (!all(wk %in% toupper(letters)))
     stop("sub.sample must start with a character")
 
-  
-  # relabel AMAP_group as subseries
-  # need to do this in data file but worried about git conflicts at this point
-
-  AMAP_data <- rename(AMAP_data, subseries = AMAP_group)
-  
   
   # ensure consistency of subseries within sub.samples
   
