@@ -609,12 +609,8 @@ ctsm_summary_table <- function(
     }
     
 
-    # rename some variables
+    # rename region variables if required
 
-    if ("subseries" %in% names(summary)) {
-      summary <- rename(summary, mammal_group = subseries)
-    }
-    
     if (!identical(assessment$info$region_id, assessment$info$region_names)) {
       pos <- match(assessment$info$region_id, names(summary))
       names(summary)[pos] <- assessment$info$region_names

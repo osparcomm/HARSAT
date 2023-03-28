@@ -1452,47 +1452,45 @@ ctsm_create_timeSeries <- function(
   data <- filter(data, .data$determinand %in% id)
 
 
-  # subseries 
-  # - if timeseries have subseries classifications for some but not all 
+  # remove 'extra' data from time series which have a subseries classification 
+  # for some but not all records
+
+  data <- ctsm_check_subseries(data)
+    
   #   records, then delete the latter; this avoids the situation where e.g. 
   #   there is a subgroup for medium sized fish and the remaining samples are 
   #   the small and large fish
   # - replace remaining missing values (timeseries with no subseries
   #   classifications with Not_applicable so that series can be formed
   
-  # NB need to work on this in phase 2 of the subseries update
-  
-  if ("subseries" %in% names(data)) {
-    
-    # identify series with subgroups
+  # identify series with subgroups
 
-    data <- unite(
-      data, 
-      ".series", 
-      any_of(c("station_code", "species", "determinand", "matrix")), 
-      remove = FALSE
-    )
-    
-    has_subgroup <- tapply(
-      data$subseries, 
-      data$.series, 
-      function(x) any(!is.na(x))
-    )
-    
-    has_subgroup <- names(has_subgroup)[has_subgroup]
-    
-    # remove extra data in these series that do not have a subgroup 
-    
-    not_ok <- data$.series %in% has_subgroup & is.na(data$subseries)
-    
-    data <- data[!not_ok, ]
-    
-    # replace remaining missing values with Not_applicable
-    
-    data <- mutate(data, subseries = replace_na(subseries, "Not_applicable"))
-    
-  }
+  # data <- unite(
+  #   data, 
+  #   ".series", 
+  #   any_of(c("station_code", "species", "determinand", "matrix")), 
+  #   remove = FALSE
+  # )
+  #   
+  # has_subgroup <- tapply(
+  #   data$subseries, 
+  #   data$.series, 
+  #   function(x) any(!is.na(x))
+  # )
+  #   
+  # has_subgroup <- names(has_subgroup)[has_subgroup]
+  #   
+  # # remove extra data in these series that do not have a subgroup 
+  # 
+  # not_ok <- data$.series %in% has_subgroup & is.na(data$subseries)
+  # 
+  # data <- data[!not_ok, ]
+  # 
+  # # replace remaining missing values with Not_applicable
+  # 
+  # data <- mutate(data, subseries = replace_na(subseries, "Not_applicable"))
   
+
   
   # set rownames to NULL(ie. back to auto numeric)
   
@@ -2142,7 +2140,7 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   out.names = c(
     "station_code", "sample_latitude", "sample_longitude", "filtered", 
     "species", "sex", "depth",
-    "year", "date", "time", "sample", "sub.sample", "sample", 
+    "year", "date", "time", "sample",   
     "matrix", "subseries", "group", "determinand", "basis", "unit", "value", 
     "method_analysis", "n_individual", 
     "concOriginal", "censoringOriginal", "uncrtOriginal", 
@@ -2203,12 +2201,23 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   # create seriesID column in data, filled with the concatenated values of timeSeries and 
   # reorder variables
 
-  assign("wk.timeSeries", timeSeries, pos = 1)
+  # assign("wk.timeSeries", timeSeries, pos = 1)
     
-  data$seriesID <- factor(do.call("pasteOmitNA", timeSeries))
+  # data$seriesID <- factor(do.call("pasteOmitNA", timeSeries))
 
-  data <- data[c("seriesID", setdiff(names(data), "seriesID"))]
+  # data <- data[c("seriesID", setdiff(names(data), "seriesID"))]
   
+  timeSeries <- unite(
+    timeSeries, 
+    "seriesID", 
+    all_of(names(timeSeries)), 
+    sep = " ", 
+    remove = FALSE, 
+    na.rm = TRUE
+  )
+ 
+  data <- cbind(seriesID = timeSeries$seriesID, data)
+
   
   # pick up new.basis and new.unit for each timeSeries 
   
@@ -2220,11 +2229,11 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
 
   # timeSeries is now the unique rows of timeSeries
   
-  timeSeries <- droplevels(unique(timeSeries))
+  timeSeries <- droplevels(distinct(timeSeries))
   
-  id <- setdiff(names(timeSeries), c("basis", "unit"))
-
-  rownames(timeSeries) <- do.call("pasteOmitNA", timeSeries[id])
+  # id <- setdiff(names(timeSeries), c("basis", "unit"))
+  
+  timeSeries <- column_to_rownames(timeSeries, "seriesID")
 
   
   # change timeSeries output columns to fit the levels of the xml requirements
@@ -3099,6 +3108,61 @@ ctsm_check_censoring <- function(data, print_code_warnings) {
 
   data
 }
+
+
+ctsm_check_subseries <- function(data) {
+
+  # import_functions.R
+  
+  # if a time series has a subseries classification for some, but not all, 
+  # records, delete the records that have no classification
+
+  # avoids the situation where e.g. there is a subgroup for medium sized fish 
+  # and the remaining samples are the small and large fish
+  
+  # note that this should probably be done other after 'grouping' variables
+  # have been identified (e.g. sex for EROD) - future enhancement
+
+  data <- unite(
+    data, 
+    ".series", 
+    any_of(c("station_code", "species", "determinand", "matrix")), 
+    remove = FALSE
+  )
+  
+  has_subgroup <- tapply(
+    data$subseries, 
+    data$.series, 
+    function(x) any(!is.na(x))
+  )
+  
+  has_subgroup <- names(has_subgroup)[has_subgroup]
+  
+  # remove extra data in these series that do not have a subgroup 
+  
+  not_ok <- data$.series %in% has_subgroup & is.na(data$subseries)
+  
+  message_txt <- paste0(
+    "Some times series only have partial subseries classifications\n", 
+    "            unclassified records are deleted"
+  )
+  
+  data <- ctsm.check(
+    data, 
+    not_ok, 
+    action = "delete", 
+    message = message_txt,  
+    fileName = "subseries unclassified data", 
+    merge.stations = TRUE
+  )
+  
+  # replace remaining missing values with Not_applicable
+  
+  # data <- mutate(data, subseries = replace_na(subseries, "Not_applicable"))
+
+  data
+}
+
 
   
 ctsm_normalise_sediment <- function(data, station_dictionary, control) {
