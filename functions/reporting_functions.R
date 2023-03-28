@@ -209,19 +209,30 @@ ctsm_subset_assessment <- function(assessment_obj, subset) {
 }  
 
 
-ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE) {
+ctsm_summary_overview <- function(assessmentObject, classColour, fullSummary = FALSE) {
+  
+  # reporting_functions.R
+  
   # gets shape and colour for each time series
   
   assessment <- assessmentObject$assessment
   info <- assessmentObject$info
   timeSeries <- assessmentObject$timeSeries
   
-  # first get list of assessment summaries - some are null, so need to be careful
-  # also summary structures differ between detGroups, so need to be doubly careful
+  # first get list of assessment summaries 
+  # summary structures differ between detGroups, so need to be careful
   
-  summaryList <- sapply(row.names(timeSeries), simplify = FALSE, USE.NAMES = TRUE, 
-                        FUN = function(i) assessment[[i]]$summary)
+  # order assessment so that it is compatible with timeSeries - 
+  # need to resolve this
   
+  assessment <- assessment[row.names(timeSeries)]
+  
+  summaryList <- sapply(assessment, "[[", "summary", simplify = FALSE)
+  
+  if (any(is.null(summaryList)) | (length(summaryList) != nrow(timeSeries))) {
+    stop("coding error - contact HARSAT development team")
+  }
+    
   
   # get combined summary names across detGroups
   
@@ -245,11 +256,21 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
   }))
   
   
-  # get shape of plotting symbols
+  # get shape and colour of plotting symbols
+
+  out <- ctsm_symbology_OSPAR(out, info, timeSeries, classColour)
+
+  if (fullSummary) out else out[c("shape", "colour")]
+}
+
+
+ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha = 0.05) {
   
-  out$shape <- with(out, {
+  # reporting_functions.R
+  
+  summary$shape <- with(summary, {
     
-    shape <- character(nrow(out))
+    shape <- character(nrow(summary))
     
     # trend symbols: a trend is estimated if pltrend is present - default shape is a large filled circle
     
@@ -262,7 +283,7 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
     
     # isImposex <- timeSeries$detGroup %in% "Imposex"
     
-    isTrend <- !is.na(prtrend) & prtrend < 0.05
+    isTrend <- !is.na(prtrend) & prtrend < alpha
     upTrend <- isTrend & rtrend > 0
     downTrend <- isTrend & rtrend < 0
     
@@ -281,9 +302,8 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
     
     shape
   })
-  
-  
-  
+
+
   # colour based on 
   # - upper confidence limit (nyfit > 2 or, for VDS, individual measurements) 
   # - meanly (nyfit <= 2)
@@ -303,10 +323,10 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
     
     goodStatus <- ctsm_get_info("determinand", timeSeries$determinand, "good_status")
     
-    wk <- out[ACdiff]
+    wk <- summary[ACdiff]
     wk[] <- lapply(wk, "*", ifelse(goodStatus == "low", 1, -1))
     
-    out$colour <- apply(wk, 1, function(x) {
+    summary$colour <- apply(wk, 1, function(x) {
       
       if (all(is.na(x))) return(classColour$none)
       
@@ -319,11 +339,11 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
     
     # need to adjust for null summaries
     
-    out <- within(out, colour[is.na(shape)] <- NA)
+    summary <- within(summary, colour[is.na(shape)] <- NA)
     
   } else {
     
-    out$colour <- classColour$none
+    summary$colour <- classColour$none
     
   }
   
@@ -336,7 +356,7 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
     
     ACbelow <- paste(info$AC, "below", sep = "")
     
-    wk <- out[ACbelow]
+    wk <- summary[ACbelow]
     wk[] <- lapply(wk, function(x) {
       
       ok <- !is.na(x) & goodStatus == "high"
@@ -356,15 +376,14 @@ ctsm.web.overview <- function(assessmentObject, classColour, fullSummary = FALSE
       else classColour$above[AC[length(x)]]
     })  
     
-    id <- with(out, nyfit <= 2 & nyall > 2 & !is.na(wk))
-    out$colour[id] <- wk[id]
-    out$shape[id] <- "small_filled_circle"
+    id <- with(summary, nyfit <= 2 & nyall > 2 & !is.na(wk))
+    summary$colour[id] <- wk[id]
+    summary$shape[id] <- "small_filled_circle"
     
   }
   
-  if (fullSummary) out else out[c("shape", "colour")]
+  summary
 }
-
 
 
 ctsm.web.AC <- function(assessment_ob, classification) {
@@ -454,8 +473,8 @@ ctsm_summary_table <- function(
     classColour <- assessments[[x]]$classColour
     purpose <- assessment$info$purpose
     compartment <- assessment$info$compartment
-
-    summary <- ctsm.web.overview(assessment, classColour, fullSummary = TRUE)
+    
+    summary <- ctsm_summary_overview(assessment, classColour, fullSummary = TRUE)
 
     summary <- cbind(assessment$timeSeries, summary)
     
