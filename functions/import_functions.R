@@ -71,7 +71,7 @@ ctsm_read_data <- function(
     max_year = max_year 
   )
   
-  control_default <- ctsm_control_default(purpose)
+  control_default <- ctsm_control_default(purpose, compartment)
   
   control <- ctsm_control_modify(control_default, control)
   
@@ -122,7 +122,7 @@ ctsm_read_data <- function(
 }
 
 
-ctsm_control_default <- function(purpose) {
+ctsm_control_default <- function(purpose, compartment) {
   
   # import functions
   # sets up default values that control the assessment
@@ -136,6 +136,10 @@ ctsm_control_default <- function(purpose) {
   # all_in_region is a logical that determines whether all data (and stations)
   # must be in a region
 
+  # bivalve_spawning_season is a character vector of months when contaminant
+  # data for bivalves and gastropds will be deleted because they are in the 
+  # spawning season
+  
   region_id <- switch(
     purpose, 
     OSPAR = c("OSPAR_region", "OSPAR_subregion"),
@@ -147,11 +151,23 @@ ctsm_control_default <- function(purpose) {
   
   all_in_region <- !is.null(region_id)
     
+  bivalve_spawning_season <- switch(
+    compartment, 
+    biota = switch(
+      purpose, 
+      OSPAR = c("April", "May", "June", "July"),
+      HELCOM = c("April", "May", "June", "July"),
+      NULL
+    ), 
+    NULL
+  )
+  
   list(
     reporting_window = 6L, 
     region_id = region_id,
     region_names = region_names,
-    all_in_region = all_in_region
+    all_in_region = all_in_region, 
+    bivalve_spawning_season = bivalve_spawning_season
   )
 }
 
@@ -177,7 +193,19 @@ ctsm_control_modify <- function(control_default, control) {
       "identical"
     )
   }
-
+  
+  if (!is.null(control$bivalve_spawning_season)) {
+    months <- c(
+      "January", "February", "March", "April", "May", "June", "July", "August",
+      "September", "October", "November", "December"
+    )
+    if (!all(control$bivalve_spawning_season %in% months)) {
+      stop(
+        "error in control argument: invalid months in bivalve_spawning_season"
+      )
+    }
+  }
+  
   control
 }
 
@@ -1039,8 +1067,8 @@ ctsm_tidy_contaminants <- function(data, info) {
   }
   
   data$sample <- as.character(data$sample)
-  
 
+  
   # retain useful variables
   
   var_id <- c(
@@ -1457,39 +1485,6 @@ ctsm_create_timeSeries <- function(
 
   data <- ctsm_check_subseries(data)
     
-  #   records, then delete the latter; this avoids the situation where e.g. 
-  #   there is a subgroup for medium sized fish and the remaining samples are 
-  #   the small and large fish
-  # - replace remaining missing values (timeseries with no subseries
-  #   classifications with Not_applicable so that series can be formed
-  
-  # identify series with subgroups
-
-  # data <- unite(
-  #   data, 
-  #   ".series", 
-  #   any_of(c("station_code", "species", "determinand", "matrix")), 
-  #   remove = FALSE
-  # )
-  #   
-  # has_subgroup <- tapply(
-  #   data$subseries, 
-  #   data$.series, 
-  #   function(x) any(!is.na(x))
-  # )
-  #   
-  # has_subgroup <- names(has_subgroup)[has_subgroup]
-  #   
-  # # remove extra data in these series that do not have a subgroup 
-  # 
-  # not_ok <- data$.series %in% has_subgroup & is.na(data$subseries)
-  # 
-  # data <- data[!not_ok, ]
-  # 
-  # # replace remaining missing values with Not_applicable
-  # 
-  # data <- mutate(data, subseries = replace_na(subseries, "Not_applicable"))
-  
 
   
   # set rownames to NULL(ie. back to auto numeric)
@@ -1862,31 +1857,37 @@ ctsm_create_timeSeries <- function(
   }
 
   
-  # restrict shellfish data to 'sensible' months - must make this region specific
+  # filter contaminant data to remove bivalve and gastropod records in the 
+  # spawning season when they are elevated / more variable
+  
+  # this is placed here for convenience at present
+  # it should be in tidy_contaminants, where other purpose specific filtering 
+  # operations will be done (when code for matching new ICES data with stations
+  # is available) 
+  # however, first need to make pargroup information available for all 
+  # determinands that might be downloaded, not just those that are of interest
 
-  if (info$compartment == "biota") {
+  if (info$compartment == "biota" && !is.null(info$bivalve_spawning_season)) {
 
-    nok <- with(data, {
-      month <- substring(months(as.Date(date)), 1, 3)
-      contaminants <- ! group %in% c("Effects", "Imposex", "Metabolites")
-      contaminants & 
-        family %in% c("Bivalvia", "Gastropoda") & 
-        month %in% switch(
-          info$purpose, 
-          AMAP = c("Apr", "May", "Jun", "Jul"),
-          OSPAR = c("Apr", "May", "Jun", "Jul"),
-          HELCOM = c("Apr", "May", "Jun", "Jul"))
-    })
-
-    if (any(nok)) {
-      txt <- switch(
-        info$purpose, 
-        AMAP = "April through July",
-        OSPAR = "April through July", 
-        HELCOM = "April through July")
-      cat("   Dropping shellfish data from", txt, "(spawning season)\n")
-      data <- data[!nok, ]
+    data <- mutate(
+      data, 
+      .month = months(as.Date(.data$date)),
+      .not_ok = family %in% c("Bivalvia", "Gastropoda") & 
+        (is.na(.month) | .month %in% info$bivalve_spawning_season) & 
+        !group %in% c("Effects", "Imposex", "Metabolites") 
+    )
+    
+    if (any(data$.not_ok)) {
+      cat(
+        "   Dropping bivalve and gastropod contaminant data collected during the\n", 
+        "   spawning season, which is taken to be the following months:\n   ",
+        paste(info$bivalve_spawning_season, collapse = ", "), 
+        ".\n"
+      )
+      data <- filter(data, !.not_ok)
     }
+    
+    data[c(".month", ".not_ok")] <- NULL
   }
 
 
