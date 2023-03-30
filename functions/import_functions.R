@@ -2163,50 +2163,58 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
   # get seriesID and timeSeries structure 
   
   id <- c("station_code", "determinand")
-  if (info$compartment == "biota")
-    id <- switch(
-      info$purpose, 
-      AMAP = c(id, "species", "matrix", "subseries"), 
-      OSPAR = c(id, "species", "matrix", "sex", "method_analysis", "subseries"),
-      c(id, "species", "matrix", "sex", "method_analysis")
-    )
-  if (info$compartment == "water" & info$purpose %in% "HELCOM")
-    id <- c(id, "filtered")
+  
+  if (info$compartment %in% c("biota")) {
+    id <- c(id, "species", "matrix", "subseries", "sex", "method_analysis")
+  }
+
+  if (info$compartment %in% "sediment") {
+    id <- c(id, "matrix", "subseries")
+  }
+  
+  if (info$compartment %in% "water") {
+    id <- c(id, "filtered", "subseries") 
+  }
+  
+  # if (info$compartment == "biota")
+  #   id <- switch(
+  #     info$purpose, 
+  #     AMAP = c(id, "species", "matrix", "subseries"), 
+  #     OSPAR = c(id, "species", "matrix", "sex", "method_analysis", "subseries"),
+  #     c(id, "species", "matrix", "sex", "method_analysis")
+  #   )
+  # if (info$compartment == "water" & info$purpose %in% "HELCOM")
+  #   id <- c(id, "filtered")
+   
   timeSeries <- data[id]
   
+
+  # only retaine sex and method_analysis information in timeSeries where 
+  # necessary to distinguish different series
   
-  # simplify relevant elements of matrix, sex and method_analysis for level6 and level7, 
-  # with a view to then 
-  # identifying each time series
+  # currently hard-wired for EROD and Metabolites in biota: issue raised as 
+  # future enhancement 
 
   if (info$compartment == "biota") {
     timeSeries <- mutate(
       timeSeries,
-
-      sex = as.character(.data$sex),
       sex = if_else(.data$determinand %in% "EROD", .data$sex, NA_character_),
-      sex = factor(sex),
-      
-      method_analysis = as.character(method_analysis),
       .group = ctsm_get_info(
         "determinand", .data$determinand, "group", "biota", sep = "_"
       ),
-      method_analysis = if_else(.group %in% "Metabolites", .data$method_analysis, NA_character_),
+      method_analysis = if_else(
+        .group %in% "Metabolites", 
+        .data$method_analysis, 
+        NA_character_
+      ),
       .group = NULL,
-      method_analysis = factor(method_analysis)
     )
- }
+  }
     
  
   # create seriesID column in data, filled with the concatenated values of timeSeries and 
   # reorder variables
 
-  # assign("wk.timeSeries", timeSeries, pos = 1)
-    
-  # data$seriesID <- factor(do.call("pasteOmitNA", timeSeries))
-
-  # data <- data[c("seriesID", setdiff(names(data), "seriesID"))]
-  
   timeSeries <- unite(
     timeSeries, 
     "seriesID", 
@@ -2237,8 +2245,9 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
 
   
   # change timeSeries output columns to fit the levels of the xml requirements
+  # this is a legacy requirement and an issue has been raised to fix this
   
-  timeSeries <- changeToLevelsForXML(timeSeries, info$compartment, info$purpose)
+  timeSeries <- changeToLevelsForXML(timeSeries, info)
 
 
   # remove any series that don't have data in recent years
@@ -2270,67 +2279,42 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
 }
 
 
-changeToLevelsForXML <- function(timeSeries, compartment, purpose) {
+changeToLevelsForXML <- function(timeSeries, info) {
   
-  # set up columns for populating
+  # inport_functions.R
+  
+  # legacy code for populating Flash application 
+  # issue raised to deprecate code
+  
+  id <- c("level6element", "level6name", "level7element", "level7name")
+  timeSeries[id] <- NA_character_
     
-  timeSeries[c("level6element", "level6name", "level7element", "level7name")] <- NA
-    
-  if (compartment %in% c("sediment", "water"))
-    return(timeSeries)
-
-  if (purpose %in% "AMAP") {
-    timeSeries <- within(timeSeries, {
-      level6element <- "matrix"
-      level6name <- as.character(matrix)
-      level7element <- "subseries"
-      level7name <- as.character(subseries)
-    })
+  if (info$compartment %in% c("sediment", "water")) {
     return(timeSeries)
   }
-  
-  
+
   group <- ctsm_get_info(
-    "determinand", timeSeries$determinand, "group", compartment, sep = "_"
+    "determinand", 
+    timeSeries$determinand, 
+    "group", 
+    info$compartment, 
+    sep = "_"
   )
   
   id <- timeSeries$determinand %in% "EROD"
   if (any(id))
     timeSeries[id, ] <- within(timeSeries[id, ], {
       level6element <- "sex"
-      level6name <- as.character(sex)
-      level7element <- "matrix"
-      level7name <- as.character(matrix)
+      level6name <- sex
     })
 
-  id <- timeSeries$determinand %in% "ACHE"
-  if (any(id))
-    timeSeries[id, ] <- within(timeSeries[id, ], {
-      level6element <- "matrix"
-      level6name <- as.character(matrix)
-    })
-  
   id <- group %in% "Metabolites"
   if (any(id))
     timeSeries[id, ] <- within(timeSeries[id, ], {
       level6element <- "method_analysis"
-      level6name <- as.character(method_analysis)
+      level6name <- method_analysis
     })
   
-  id <- !group %in% c("Effects", "Imposex", "Metabolites")
-  if (any(id))
-    timeSeries[id, ] <- within(timeSeries[id, ], {
-      level6element <- "matrix"
-      level6name <- as.character(matrix)
-    })
-
-  id <- !group %in% c("Effects", "Imposex", "Metabolites")
-  if (any(id) & purpose %in% "OSPAR") 
-    timeSeries[id, ] <- within(timeSeries[id, ], {
-      level7element <- "subseries"
-      level7name <- as.character(subseries)
-    })
-
   timeSeries
 }
 

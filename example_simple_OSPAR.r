@@ -126,42 +126,6 @@ biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 ctsm_check_convergence(biota_assessment$assessment)
 
 
-# tidy up 
-
-# make timeSeries factor levels more interpretable
-
-biota_assessment$timeSeries <- biota_assessment$timeSeries %>% 
-  rownames_to_column(".rownames") %>% 
-  mutate(
-    .matrix = ctsm_get_info("matrix", matrix, "name") %>% 
-      str_to_sentence() %>% 
-      recode(
-        "Erythrocytes (red blood cells in vertebrates)" = "Red blood cells",
-        "Egg homogenate of yolk and albumin" = "Egg yolk & albumin"
-      ), 
-    level6name = case_when(
-      level6element %in% "matrix" ~ .matrix,
-      level6element %in% "sex" ~ recode(level6name, "F" = "Female", "M" = "Male"),
-      TRUE ~ level6name
-    ),
-    level7name = case_when(
-      level7element %in% "matrix" ~ .matrix,
-      level7element %in% "subseries" ~ gsub("_", " ", level7name),
-      TRUE ~ level7name
-    ),
-    .matrix = NULL,
-    level6element = recode(
-      level6element, 
-      matrix = "Tissue", 
-      sex = "Sex", 
-      "METOA" = "Chemical analysis"
-    ),
-    level7element = recode(level7element, matrix = "Tissue")
-  ) %>% 
-  column_to_rownames(".rownames")
-
-
-
 # Summary files ----
 
 # web objects: these are a legacy from a Flash app for displaying results

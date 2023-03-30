@@ -498,31 +498,6 @@ biota_assessment$assessment <- local({
 })
 
 
-### tidy up ----
-
-# make timeSeries factor levels more interpretable
-
-biota_assessment$timeSeries <- biota_assessment$timeSeries %>% 
-  rownames_to_column(".rownames") %>% 
-  mutate(
-    .matrix = ctsm_get_info("matrix", matrix, "name"), 
-    .matrix = str_to_sentence(.matrix),
-    level6name = case_when(
-      level6element %in% "matrix" ~ .matrix,
-      level6element %in% "sex" ~ recode(level6name, "F" = "Female", "M" = "Male"),
-      TRUE ~ level6name
-    ),
-    .matrix = NULL,
-    level6element = recode(
-      level6element, 
-      matrix = "Tissue", 
-      sex = "Sex", 
-      "METOA" = "Chemical analysis"
-    )
-  ) %>% 
-  column_to_rownames(".rownames")
-
-
 # saveRDS(biota_assessment, file.path("RData", "biota assessment.rds"))
 
 
