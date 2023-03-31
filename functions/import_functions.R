@@ -1727,7 +1727,7 @@ ctsm_create_timeSeries <- function(
     
     out  = c(
       out, 
-      ctsm_import_value(data, station_dictionary, info, print_code_warnings) 
+      ctsm_import_value(data, station_dictionary, info) 
     )
     
     if (data_format == "old") out$QA <- QA
@@ -1949,7 +1949,7 @@ ctsm_create_timeSeries <- function(
     
   out <- c(
     out, 
-    ctsm_import_value(data, station_dictionary, info, print_code_warnings)
+    ctsm_import_value(data, station_dictionary, info)
   )
   
   out
@@ -2115,29 +2115,26 @@ ctsm.check2 <- function(data, action, message, fileName, merge.stations = TRUE) 
 }
 
 
-ctsm_import_value <- function(data, station_dictionary, info, print_code_warnings) {
+ctsm_import_value <- function(data, station_dictionary, info) {
   
   # import_functions.R
+  
   # identifies timeseries in the data and creates timeSeries metadata object
-  
-  # order data and select variables of interest
 
-  order.names = c(
-    "station_code", "species", "filtered", "year", "sex", "sample", "sub.sample", 
-    "group", "determinand"
-  )
-  order.names <- intersect(order.names, names(data))
-  data <- data[do.call(order, data[order.names]), ]
-  
-  if (print_code_warnings)
-    warning("auxiliary variables hard-wired in ctsm.import.value: need to resolve", call. = FALSE)
-  
-  auxiliary <- c(
-    "AL", "LI", "CORG", "LOIGN", "LNMEA", "AGMEA", "DRYWT%", "LIPIDWT%", 
-    "%FEMALEPOP", "CMT-QC-NR", "MNC-QC-NR", "C13D", "N15D"
-  )
 
-  out.names = c(
+  # order data 
+
+  id = c(
+    "station_code", "species", "filtered", "year", "sex", "sample", "group", 
+    "determinand"
+  )
+  
+  data <- arrange(data, across(any_of(id)))
+
+
+  # select variables of interest
+
+  id <- c(
     "station_code", "sample_latitude", "sample_longitude", "filtered", 
     "species", "sex", "depth",
     "year", "date", "time", "sample",   
@@ -2145,18 +2142,20 @@ ctsm_import_value <- function(data, station_dictionary, info, print_code_warning
     "method_analysis", "n_individual", 
     "concOriginal", "censoringOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "censoring",  
-    "limit_detection", "limit_quantification", "uncertainty",  
-    paste(
-      rep(auxiliary, each = 5), 
-      c("", ".censoring", ".limit_detection", ".limit_quantification", ".uncertainty"), 
-      sep = ""
-    ),
-    "C13D.basis", "C13D.matrix", "N15D.basis", "N15D.matrix")
-
-  out.names <- intersect(out.names, names(data))
-  data <- data[out.names]
+    "limit_detection", "limit_quantification", "uncertainty"
+  )
   
-  row.names(data) <- NULL
+  auxiliary <- ctsm_get_auxiliary(data$determinand, info$compartment)
+  auxiliary_id <- paste0(
+    rep(auxiliary, each = 5), 
+    c("", ".censoring", ".limit_detection", ".limit_quantification", ".uncertainty") 
+  )
+    
+  id <- c(id, auxiliary_id)
+
+  data <- dplyr::select(data, any_of(id))
+
+  row.names(data) <- NULL  
   data <- droplevels(data)
   
   
