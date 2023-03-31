@@ -3805,7 +3805,9 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
 
 ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, control) {
   
-  # normalises biota concentrations on a lipid weight basis to 5% lipid
+  # normalises fish concentrations in contaminants other than metals or 
+  # organofluorines to 5% lipid
+  # these concentrations are expressed on a wet weight basis
   
   # method supplied by control
   
@@ -3853,9 +3855,15 @@ ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, control) {
   }
   
   
-  # split into contaminants on a lipid weight basis and others
+  # split into contaminants that are to be normalised to 5% lipid and 
+  # others
   
-  groupID <- if_else(data$new.basis %in% "L", "lipid", "other")
+  groupID <- if_else(
+    data$family %in% "Fish" & 
+      !(data$group  %in% c("Metals", "Organofluorines", "Metabolites")), 
+    "lipid", 
+    "other"
+  )
   
   groupID <- factor(groupID)
   
@@ -3887,8 +3895,14 @@ ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, control) {
       
       message("   Normalising ", group, " to ", control$value, "%")
 
-      data$concentration <- data$concentration * control$value / 100
-      data$uncertainty <- data$uncertainty * control$value / 100
+      conversion <- if_else(
+        data[["LIPIDWT%.censoring"]] %in% "", 
+        control$value / data[["LIPIDWT%"]],
+        NA_real_
+      )
+      
+      data$concentration <- data$concentration * conversion
+      data$uncertainty <- data$uncertainty * conversion
       
       data
     })
