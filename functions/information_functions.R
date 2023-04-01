@@ -2199,32 +2199,13 @@ get_basis_biota_HELCOM <- function(data, compartment = "biota") {
   
   match.arg(compartment)
   
-  
-  # combine input variables and get species family
-  
-  out <- data[c("species", "matrix", "determinand", "group")]
-  
-  out <- mutate(
-    out,
-    across(everything(), as.character),
-    species_group = ctsm_get_info("species", .data$species, "species_group")
+  new_basis = if_else(
+    data$group %in% c("Imposex", "Metabolites"), 
+    NA_character_,
+    "W"
   )
   
-  
-  # define new basis
-      
-  out <- mutate(
-    out, 
-    new_basis = case_when(
-      .data$group %in% c("Imposex", "Metabolites")       ~ NA_character_,
-      .data$species_group %in% "Bivalvia"                ~ "W",
-      .data$species_group %in% "Fish" & 
-        .data$group %in% c("Metals", "Organofluorines")  ~ "W",
-      .data$species_group %in% "Fish"                    ~ "L"
-    )
-  ) 
-  
-  out$new_basis
+  new_basis
 }
 
 
