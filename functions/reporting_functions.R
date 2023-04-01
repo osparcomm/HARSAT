@@ -1,16 +1,15 @@
 # web construction ----
 
 ctsm_web_initialise <- function(
-  assessmentObject, 
+  assessment_obj, 
   classColour = NULL, 
   determinandGroups) {
 
   # reporting_functions.R
 
-
   # check assessment criteria have an appropriate class colour
   
-  AC <- assessmentObject$info$AC
+  AC <- assessment_obj$info$AC
   if (!is.null(AC)) 
     stopifnot(
       AC %in% names(classColour$below), 
@@ -19,101 +18,49 @@ ctsm_web_initialise <- function(
     )
   
   
-  # create submedia (levelTwo) and levelSix and levelSeven variables 
-  # (should be done externally) and 'species' (levelThree) for sediment
-  
-  compartment <- assessmentObject$info$compartment
-  purpose <- assessmentObject$info$purpose
-  
-  assessmentObject$timeSeries <- within(
-    assessmentObject$timeSeries, 
-    switch(
-      compartment, 
-      biota = {
-        level2name <- ctsm_get_info("species", species, "species_group")[drop = TRUE]
-        levels(level2name) <- list(
-          "Fish" = "Fish", 
-          "Shellfish" = c("Bivalvia", "Gastropoda"), 
-          "Crustacea" = "Crustacea", 
-          "Bird" = "Bird",
-          "Mammal" = "Mammal")
-        level2element <- "Family"
-        level3name <- ctsm_get_info("species", species, "common_name")
-        level3element <- "Species"
-      }, 
-      sediment = {                                                       
-        # null values 
-        level2name <- "Sediment"   
-        level2element <- as.character(NA)
-        level3name <- "Sediment"   
-        level3element <- as.character(NA)
-      }, 
-      water = {                                                       
-        # null values 
-        switch(
-          purpose, 
-          HELCOM = {
-            level2name <- ifelse(filtered, "filtered", "unfiltered")
-            level2element <- "Filtration"
-          }, {
-            level2name <- "Water"
-            level3element <- "Water"
-          }
-        )
-        level3name <- "Water"   
-        level3element <- as.character(NA)
-      }
-    ))
-  
-  
-
   # create detGroup variable in each timeSeries structure
 
-  assessmentObject$timeSeries <- within(
-    assessmentObject$timeSeries, {
-      detGroup <- ctsm_get_info(
-        "determinand", determinand, "group", compartment, sep = "_"
-      )
-      if (!all(detGroup %in% determinandGroups$levels)) 
-        stop('some determinand groups present in data, but not in groups argument')
-      detGroup <- factor(
-        detGroup, 
-        levels = determinandGroups$levels, labels = determinandGroups$labels, 
-        ordered = TRUE)
-      detGroup <- detGroup[, drop = TRUE]
-  })
-  
-  assessmentObject <- ctsm_web_setup(assessmentObject)
-  
-  list(
-    assessment = assessmentObject, 
-    # determinands = determinands, 
-    classColour = classColour
-  )
-}
-
-
-ctsm_web_setup <- function(assessment_obj) {
-  
-  # merge timeSeries with stations
-
   timeSeries <- assessment_obj$timeSeries
-  
+
   timeSeries <- rownames_to_column(timeSeries, ".series")
+  
+  timeSeries$detGroup <- ctsm_get_info(
+    "determinand", 
+    timeSeries$determinand, 
+    "group", 
+    assessment_obj$info$compartment, sep = "_"
+  )
+      
+  if (!all(timeSeries$detGroup %in% determinandGroups$levels)) {
+    stop('some determinand groups present in data, but not in groups argument')
+  }
+  
+  timeSeries$detGroup <- factor(
+    timeSeries$detGroup, 
+    levels = determinandGroups$levels, 
+    labels = determinandGroups$labels, 
+    ordered = TRUE
+  )
+      
+  timeSeries$detGroup <-   timeSeries$detGroup[, drop = TRUE]
+  
+
+  # merge stations with timeSeries
   
   timeSeries <- left_join(
     timeSeries, 
     assessment_obj$stations,
     by = "station_code"
   )
-
+  
   timeSeries <- column_to_rownames(timeSeries, ".series")
   
   assessment_obj$timeSeries <- timeSeries
   
+  assessment_obj$classColour <- classColour
+
   assessment_obj
 }
-  
 
 
 # mapping functions ----
@@ -209,15 +156,12 @@ ctsm_subset_assessment <- function(assessment_obj, subset) {
 }  
 
 
-ctsm_summary_overview <- function(assessmentObject, classColour, fullSummary = FALSE) {
+ctsm_summary_overview <- function(
+    assessment, timeSeries, info, classColour, fullSummary = FALSE) {
   
   # reporting_functions.R
   
   # gets shape and colour for each time series
-  
-  assessment <- assessmentObject$assessment
-  info <- assessmentObject$info
-  timeSeries <- assessmentObject$timeSeries
   
   # first get list of assessment summaries 
   # summary structures differ between detGroups, so need to be careful
@@ -468,15 +412,17 @@ ctsm_summary_table <- function(
   library(dplyr)
 
   out <- sapply(names(assessments), simplify = FALSE, FUN = function(x) {
-  
-    assessment <- assessments[[x]]$assessment
-    classColour <- assessments[[x]]$classColour
-    purpose <- assessment$info$purpose
-    compartment <- assessment$info$compartment
-    
-    summary <- ctsm_summary_overview(assessment, classColour, fullSummary = TRUE)
 
-    summary <- cbind(assessment$timeSeries, summary)
+    assessment <- assessments[[x]]$assessment
+    timeSeries <- assessments[[x]]$timeSeries
+    info <- assessments[[x]]$info
+    classColour <- assessments[[x]]$classColour
+
+    summary <- ctsm_summary_overview(
+      assessment, timeSeries, info, classColour, fullSummary = TRUE
+    )
+
+    summary <- cbind(timeSeries, summary)
     
     summary$series <- row.names(summary)
     
@@ -488,10 +434,7 @@ ctsm_summary_table <- function(
     
     if (!include_all) {
       notok <- match(
-        c("stationID", 
-          "level6element", "level6name", "level7element", "level7name", 
-          "level2element", "level2name", "level3element", "level3name", 
-          "fileName", "offshore"), 
+        c("level6element", "level6name", "level7element", "level7name", "offshore"),
         names(summary)
       )
       notok <- na.omit(notok)
@@ -502,7 +445,7 @@ ctsm_summary_table <- function(
   
     wk <- c(
       "series", 
-      assessment$info$region_id,  
+      info$region_id,  
       "country", "CMA", 
       "station_code", "station_name", "station_longname", 
       "station_latitude", "station_longitude", "station_type", "waterbody_type", 
@@ -513,7 +456,7 @@ ctsm_summary_table <- function(
     summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
 
     sortID <- intersect(
-      c(assessment$info$region_id, "country", "CMA", "station_name", 
+      c(info$region_id, "country", "CMA", "station_name", 
         "species", "detGroup", "determinand", "matrix"), 
       names(summary)
     )
@@ -554,7 +497,7 @@ ctsm_summary_table <- function(
     
     if (collapse_AC) {
 
-      AC <- assessment$info$AC
+      AC <- info$AC
       
       # set up basic type and value variables for each AC
       # BAC_type is what we want to keep
@@ -630,9 +573,9 @@ ctsm_summary_table <- function(
 
     # rename region variables if required
 
-    if (!identical(assessment$info$region_id, assessment$info$region_names)) {
-      pos <- match(assessment$info$region_id, names(summary))
-      names(summary)[pos] <- assessment$info$region_names
+    if (!identical(info$region_id, info$region_names)) {
+      pos <- match(info$region_id, names(summary))
+      names(summary)[pos] <- info$region_names
     }
     
 
