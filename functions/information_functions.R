@@ -2026,8 +2026,8 @@ get_basis_default <- function(data, compartment = c("biota", "sediment", "water"
   # sediment: D
   # water: W
   
-  # only supply a basis if the original measurement has one (to avoid trying 
-  # to give e.g. imposex data a basis
+  # the exceptions are biological effects measurements where it is assumed the 
+  # data are submitted on the correct basis (or where basis isn't relevant)
   
   compartment = match.arg(compartment)
   
@@ -2038,7 +2038,11 @@ get_basis_default <- function(data, compartment = c("biota", "sediment", "water"
     water = "W"
   )
   
-  new_basis <- dplyr::if_else(is.na(data$basis), NA_character_, basis_id)
+  new_basis <- dplyr::if_else(
+    data$group %in% c("Imposex", "Metabolites", "Effects"), 
+    NA_character_, 
+    basis_id
+  )
   
   new_basis  
 }
