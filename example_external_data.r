@@ -184,41 +184,10 @@ biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 
 # Summary files ----
 
-webGroups = list(
-  levels = "Metals", 
-  labels = "Metals"
-)
-
-
-# only use environmental AC (not the health quality standard)
-
-biota_web <- biota_assessment
-# biota_web$info$AC <- c("BAC", "EQS.OSPAR")
-
-biota_web <- ctsm_web_initialise(
-  biota_web,
-  classColour = list(
-    below = c(
-      "BAC" = "blue", 
-      "EQS.OSPAR" = "green"
-    ),
-    above = c(
-      "BAC" = "orange", 
-      "EQS.OSPAR" = "red"
-    ), 
-    none = "black"
-  ),
-  determinandGroups = webGroups)
-
-# saveRDS(biota_web, file.path("RData", "biota web.rds"))
-
-
-# write table 
-
 ctsm_summary_table(
-  assessments = list(Biota = biota_web),
-  determinandGroups = webGroups,
-  path = file.path("output", "example_external_data")
+  biota_assessment,
+  determinandGroups = list(levels = "Metals", labels = "Metals"),
+  output_dir = file.path("output", "example_external_data")
 )
 
 
