@@ -2193,25 +2193,6 @@ get_basis_biota_OSPAR <- function(data, compartment = "biota") {
 }
 
 
-get_basis_biota_HELCOM <- function(data, compartment = "biota") {
-  
-  # 2023 HELCOM target basis - information_functions.r
-  
-  # note that the lipid basis for organics in fish is a 'trick' and needs
-  # to be resolved in conjuction with the lipid normalisation routine
-  
-  
-  match.arg(compartment)
-  
-  new_basis = if_else(
-    data$group %in% c("Imposex", "Metabolites"), 
-    NA_character_,
-    "W"
-  )
-  
-  new_basis
-}
-
 
 # Matrix ----
 
