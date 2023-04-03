@@ -1932,21 +1932,21 @@ ctsm_create_timeSeries <- function(
   # check no replicates (typically across matrices)
   # frustratingly have made ctsm.check too clever to generalise this
 
-  if (info$compartment == "biota") {
-
-    data <- ctsm.check(
-      data, paste(sample, determinand, matrix), action = "delete.dups", 
-      message = "Measurements still replicated, only first retained", 
-      fileName = "replicate measurements extra")
-
-  } else {
-    
-    data <- ctsm.check(
-      data, paste(sample, determinand), action = "delete.dups", 
-      message = "Measurements replicated across matrices, only first retained", 
-      fileName = "replicate measurements extra")
-    
-  }
+  # if (info$compartment == "biota") {
+  # 
+  #   data <- ctsm.check(
+  #     data, paste(sample, determinand, matrix), action = "delete.dups", 
+  #     message = "Measurements still replicated, only first retained", 
+  #     fileName = "replicate measurements extra")
+  # 
+  # } else {
+  #   
+  #   data <- ctsm.check(
+  #     data, paste(sample, determinand), action = "delete.dups", 
+  #     message = "Measurements replicated across matrices, only first retained", 
+  #     fileName = "replicate measurements extra")
+  #   
+  # }
     
   out <- c(
     out, 
@@ -2189,7 +2189,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   timeSeries <- data[id]
   
 
-  # only retaine sex and method_analysis information in timeSeries where 
+  # only retain sex and method_analysis information in timeSeries where 
   # necessary to distinguish different series
   
   # currently hard-wired for EROD and Metabolites in biota: issue raised as 
@@ -2249,6 +2249,17 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   
   timeSeries <- changeToLevelsForXML(timeSeries, info)
 
+  
+  # check no replicate measurements within time series
+  
+  data <- ctsm.check(
+    data, 
+    paste(seriesID, sample), 
+    action = "delete.dups",
+    message = "Measurements still replicated, only first retained",
+    fileName = "replicate measurements extra"
+  )
+  
 
   # remove any series that don't have data in recent years
   
