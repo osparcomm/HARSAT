@@ -2026,8 +2026,8 @@ get_basis_default <- function(data, compartment = c("biota", "sediment", "water"
   # sediment: D
   # water: W
   
-  # only supply a basis if the original measurement has one (to avoid trying 
-  # to give e.g. imposex data a basis
+  # the exceptions are biological effects measurements where it is assumed the 
+  # data are submitted on the correct basis (or where basis isn't relevant)
   
   compartment = match.arg(compartment)
   
@@ -2038,7 +2038,11 @@ get_basis_default <- function(data, compartment = c("biota", "sediment", "water"
     water = "W"
   )
   
-  new_basis <- dplyr::if_else(is.na(data$basis), NA_character_, basis_id)
+  new_basis <- dplyr::if_else(
+    data$group %in% c("Imposex", "Metabolites", "Effects"), 
+    NA_character_, 
+    basis_id
+  )
   
   new_basis  
 }
@@ -2188,25 +2192,6 @@ get_basis_biota_OSPAR <- function(data, compartment = "biota") {
   out$new_basis
 }
 
-
-get_basis_biota_HELCOM <- function(data, compartment = "biota") {
-  
-  # 2023 HELCOM target basis - information_functions.r
-  
-  # note that the lipid basis for organics in fish is a 'trick' and needs
-  # to be resolved in conjuction with the lipid normalisation routine
-  
-  
-  match.arg(compartment)
-  
-  new_basis = if_else(
-    data$group %in% c("Imposex", "Metabolites"), 
-    NA_character_,
-    "W"
-  )
-  
-  new_basis
-}
 
 
 # Matrix ----
