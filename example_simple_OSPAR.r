@@ -128,43 +128,34 @@ ctsm_check_convergence(biota_assessment$assessment)
 
 # Summary files ----
 
-# web objects: these are a legacy from a Flash app for displaying results
-
-webGroups = list(
+webGroups <- list(
   levels = c("Metals", "Metabolites", "Organobromines", "Chlorobiphenyls"),  
   labels = c(
     "Metals", "PAH metabolites", "Organobromines",  "Polychlorinated biphenyls"
   )
 )
 
-biota_web <- ctsm_web_initialise(
-  biota_assessment,
-  classColour = list(
-    below = c(
-      "BAC" = "blue", 
-      "EAC" = "green", 
-      "EQS.OSPAR" = "green",
-      "HQS" = "green"
-    ),
-    above = c(
-      "BAC" = "orange", 
-      "EAC" = "red", 
-      "EQS.OSPAR" = "red",
-      "HQS" = "red"
-    ), 
-    none = "black"
+classColour <- list(
+  below = c(
+    "BAC" = "blue", 
+    "EAC" = "green", 
+    "EQS.OSPAR" = "green",
+    "HQS" = "green"
   ),
-  determinandGroups = webGroups
+  above = c(
+    "BAC" = "orange", 
+    "EAC" = "red", 
+    "EQS.OSPAR" = "red",
+    "HQS" = "red"
+  ), 
+  none = "black"
 )
 
-
-# write summary table 
-# can adjust file location with the path argument
-
 ctsm_summary_table(
-  assessments = list(Biota = biota_web), 
+  biota_assessment, 
   determinandGroups = webGroups,
-  path = file.path("output", "example_simple_OSPAR")
+  classColour = classColour,
+  output_dir = file.path("output", "example_simple_OSPAR")
 )
 
 

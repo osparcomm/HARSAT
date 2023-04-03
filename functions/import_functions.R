@@ -2247,7 +2247,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   # change timeSeries output columns to fit the levels of the xml requirements
   # this is a legacy requirement and an issue has been raised to fix this
   
-  timeSeries <- changeToLevelsForXML(timeSeries, info)
+  # timeSeries <- changeToLevelsForXML(timeSeries, info)
 
   
   # check no replicate measurements within time series
@@ -2290,44 +2290,6 @@ ctsm_import_value <- function(data, station_dictionary, info) {
 }
 
 
-changeToLevelsForXML <- function(timeSeries, info) {
-  
-  # inport_functions.R
-  
-  # legacy code for populating Flash application 
-  # issue raised to deprecate code
-  
-  id <- c("level6element", "level6name", "level7element", "level7name")
-  timeSeries[id] <- NA_character_
-    
-  if (info$compartment %in% c("sediment", "water")) {
-    return(timeSeries)
-  }
-
-  group <- ctsm_get_info(
-    "determinand", 
-    timeSeries$determinand, 
-    "group", 
-    info$compartment, 
-    sep = "_"
-  )
-  
-  id <- timeSeries$determinand %in% "EROD"
-  if (any(id))
-    timeSeries[id, ] <- within(timeSeries[id, ], {
-      level6element <- "sex"
-      level6name <- sex
-    })
-
-  id <- group %in% "Metabolites"
-  if (any(id))
-    timeSeries[id, ] <- within(timeSeries[id, ], {
-      level6element <- "method_analysis"
-      level6name <- method_analysis
-    })
-  
-  timeSeries
-}
 
 
 ctsm_check_stations <- function(stations) {

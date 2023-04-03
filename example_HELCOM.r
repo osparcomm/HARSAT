@@ -586,66 +586,36 @@ webGroups <- list(
   )
 )
 
-biota_web <- biota_assessment
-biota_web$info$AC <- c("BAC", "EAC", "EQS", "MPC")
-
-biota_web <- ctsm_web_initialise(
-  biota_web,
+ctsm_summary_table(
+  biota_assessment,
+  determinandGroups = webGroups,
   classColour = list(
-    below = c(
-      "BAC" = "green", 
-      "EAC" = "green", 
-      "EQS" = "green", 
-      "MPC" = "green"
-    ),
-    above = c(
-      "BAC" = "red", 
-      "EAC" = "red", 
-      "EQS" = "red", 
-      "MPC" = "red"
-    ), 
+    below = c("BAC" = "green", "EAC" = "green", "EQS" = "green", "MPC" = "green"),
+    above = c("BAC" = "red", "EAC" = "red", "EQS" = "red", "MPC" = "red"),
     none = "black"
   ),
-  determinandGroups = webGroups)
-
-# saveRDS(biota_web, file.path("RData", "biota web.rds"))
-
-
-sediment_web <- ctsm_web_initialise(
-  sediment_assessment,
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
-  ),
-  determinandGroups = webGroups
+  output_dir = file.path("output", "example_HELCOM")
 )
-
-# saveRDS(sediment_web, file.path("RData", "sediment web.rds"))
-
-
-water_web <- ctsm_web_initialise(
-  water_assessment, 
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
-  ),
-  determinandGroups = webGroups
-)
-
-# saveRDS(water_web, file.path("RData", "water web.rds"))
-
-
-## write tables ----
 
 ctsm_summary_table(
-  assessments = list(
-    Biota = biota_web, 
-    Sediment = sediment_web, 
-    Water = water_web
-  ),
+  sediment_assessment,
   determinandGroups = webGroups,
-  path = file.path("output", "example_HELCOM")
+  classColour = list(
+    below = c("EQS" = "green"), 
+    above = c("EQS" = "red"), 
+    none = "black"
+  ),
+  output_dir = file.path("output", "example_HELCOM")
+)
+
+ctsm_summary_table(
+  water_assessment,
+  determinandGroups = webGroups,
+  classColour = list(
+    below = c("EQS" = "green"), 
+    above = c("EQS" = "red"), 
+    none = "black"
+  ),
+  output_dir = file.path("output", "example_HELCOM")
 )
 

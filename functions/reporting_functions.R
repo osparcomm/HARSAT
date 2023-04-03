@@ -1,68 +1,3 @@
-# web construction ----
-
-ctsm_web_initialise <- function(
-  assessment_obj, 
-  classColour = NULL, 
-  determinandGroups) {
-
-  # reporting_functions.R
-
-  # check assessment criteria have an appropriate class colour
-  
-  AC <- assessment_obj$info$AC
-  if (!is.null(AC)) 
-    stopifnot(
-      AC %in% names(classColour$below), 
-      AC %in% names(classColour$above),
-      "none" %in% names(classColour)
-    )
-  
-  
-  # create detGroup variable in each timeSeries structure
-
-  timeSeries <- assessment_obj$timeSeries
-
-  timeSeries <- rownames_to_column(timeSeries, ".series")
-  
-  timeSeries$detGroup <- ctsm_get_info(
-    "determinand", 
-    timeSeries$determinand, 
-    "group", 
-    assessment_obj$info$compartment, sep = "_"
-  )
-      
-  if (!all(timeSeries$detGroup %in% determinandGroups$levels)) {
-    stop('some determinand groups present in data, but not in groups argument')
-  }
-  
-  timeSeries$detGroup <- factor(
-    timeSeries$detGroup, 
-    levels = determinandGroups$levels, 
-    labels = determinandGroups$labels, 
-    ordered = TRUE
-  )
-      
-  timeSeries$detGroup <-   timeSeries$detGroup[, drop = TRUE]
-  
-
-  # merge stations with timeSeries
-  
-  timeSeries <- left_join(
-    timeSeries, 
-    assessment_obj$stations,
-    by = "station_code"
-  )
-  
-  timeSeries <- column_to_rownames(timeSeries, ".series")
-  
-  assessment_obj$timeSeries <- timeSeries
-  
-  assessment_obj$classColour <- classColour
-
-  assessment_obj
-}
-
-
 # mapping functions ----
 
 ctsm.Mercator <- function(x) atanh(sin(x * pi / 180))
@@ -401,193 +336,252 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 # summary table ----
 
 ctsm_summary_table <- function(
-  assessments, determinandGroups, path = ".", export = TRUE,  
-  include_all = FALSE, collapse_AC = TRUE) {
+  assessment_obj, determinandGroups, classColour = NULL, output_dir = NULL, 
+  output_file = NULL, export = TRUE, collapse_AC = TRUE) {
 
-  # reporting functions
+  # reporting_functions.R
   # get summary files
   
-  # path is for output
-
   library(dplyr)
-
-  out <- sapply(names(assessments), simplify = FALSE, FUN = function(x) {
-
-    assessment <- assessments[[x]]$assessment
-    timeSeries <- assessments[[x]]$timeSeries
-    info <- assessments[[x]]$info
-    classColour <- assessments[[x]]$classColour
-
-    summary <- ctsm_summary_overview(
-      assessment, timeSeries, info, classColour, fullSummary = TRUE
-    )
-
-    summary <- cbind(timeSeries, summary)
-    
-    summary$series <- row.names(summary)
-    
-
-    # double check no legacy data and exclude those columns that aren't useful
-
-    if (any(is.na(summary$shape))) 
-      stop('some legacy data have crept through')
-    
-    if (!include_all) {
-      notok <- match(
-        c("level6element", "level6name", "level7element", "level7name", "offshore"),
-        names(summary)
-      )
-      notok <- na.omit(notok)
-      if (length(notok)) summary <- summary[, -notok]
-    }
-      
-    # reorder to get most useful output
   
-    wk <- c(
-      "series", 
-      info$region_id,  
-      "country", "CMA", 
-      "station_code", "station_name", "station_longname", 
-      "station_latitude", "station_longitude", "station_type", "waterbody_type", 
-      "determinand", "detGroup", "species", "filtered",
-      "submedia", "matrix", "basis", "unit", "sex", "method_analysis", "subseries", "shape", "colour"
-    ) 
+  # error checking
   
-    summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
+  if (export && !is.null(output_file)) {
+    n_filename <- nchar(output_file)
+    ext_filename <- substring(output_file, n_filename - 3, n_filename)
+    if (ext_filename != ".csv") {
+      stop("output_file must has a .csv extension")
+    } 
+  }
+  
+    
+  assessment <- assessment_obj$assessment
+  timeSeries <- assessment_obj$timeSeries
+  info <- assessment_obj$info
 
-    sortID <- intersect(
-      c(info$region_id, "country", "CMA", "station_name", 
-        "species", "detGroup", "determinand", "matrix"), 
-      names(summary)
+
+  # check assessment criteria have an appropriate class colour
+    
+  AC <- info$AC
+  if (!is.null(AC)) { 
+    stopifnot(
+      !is.null(classColour),
+      AC %in% names(classColour$below), 
+      AC %in% names(classColour$above),
+      "none" %in% names(classColour)
     )
-    summary <- summary[do.call(order, summary[sortID]), ]
+  }
+
+  
+  # resolve determinand group naming
+  
+  timeSeries <- rownames_to_column(timeSeries, ".series")
+  
+  timeSeries$detGroup <- ctsm_get_info(
+    "determinand", 
+    timeSeries$determinand, 
+    "group", 
+    info$compartment, 
+    sep = "_"
+  )
+  
+  if (!all(timeSeries$detGroup %in% determinandGroups$levels)) {
+    stop('some determinand groups present in data, but not in groups argument')
+  }
+  
+  timeSeries$detGroup <- factor(
+    timeSeries$detGroup, 
+    levels = determinandGroups$levels, 
+    labels = determinandGroups$labels, 
+    ordered = TRUE
+  )
+  
+  timeSeries$detGroup <-   timeSeries$detGroup[, drop = TRUE]
+  
+  
+  # merge stations with timeSeries
+  
+  timeSeries <- left_join(
+    timeSeries, 
+    assessment_obj$stations,
+    by = "station_code"
+  )
+  
+  timeSeries <- column_to_rownames(timeSeries, ".series")
+  
+
+  # get summary from assessment 
+  
+  summary <- ctsm_summary_overview(
+    assessment, timeSeries, info, classColour, fullSummary = TRUE
+  )
+  
+  summary <- cbind(timeSeries, summary)
+    
+  summary$series <- row.names(summary)
     
 
-    # rename variables
+  # double check no legacy data 
+  
+  if (any(is.na(summary$shape))) {
+    stop('some legacy data have crept through')
+  }
     
-    summary <- rename(
-      summary, 
-      determinand_group = detGroup, 
-      n_year_all = nyall,
-      n_year_fit = nyfit,
-      n_year_positive = nypos,
-      first_year_all = firstYearAll,
-      first_year_fit = firstYearFit,
-      last_year = lastyear,
-      p_linear_trend = pltrend,
-      linear_trend = ltrend,
-      p_recent_trend = prtrend,
-      recent_trend = rtrend,
-      detectable_trend = dtrend,
-      mean_last_year = meanLY,
-      climit_last_year = clLY
-    )
-    
-    if ("class" %in% names(summary))
-      summary <- rename(summary, imposex_class = class)
-    
-    names(summary) <- gsub("diff$", "_diff", names(summary))
-    names(summary) <- gsub("achieved$", "_achieved", names(summary))
-    names(summary) <- gsub("below$", "_below", names(summary))
-    
-    
-    # put all BAC type results together and all EAC type results together
-    # this is developmental and, if there are alternative BAC types (AMAP NRC), 
-    # they will have to be edited externally for now
-    
-    if (collapse_AC) {
 
-      AC <- info$AC
-      
-      # set up basic type and value variables for each AC
-      # BAC_type is what we want to keep
-      # EAC_type needs to be collapsed across the remaining EAC related variables
-      
-      id <- paste0(AC, "_type")
-      summary[id] <- lapply(AC, function(x) {
-        ifelse(!is.na(summary[[x]]), x, NA_character_)
-      })
-      
-      id <- match(AC, names(summary))
-      names(summary)[id] <- paste0(AC, "_value")
-      
-      
-      EAC_id <- setdiff(AC, "BAC")
-      
-      if (length(EAC_id) >= 1) {
+  # reorder variables to get most useful output
+  
+  wk <- c(
+    "series", 
+    info$region_id,  
+    "country", "CMA", 
+    "station_code", "station_name", "station_longname", 
+    "station_latitude", "station_longitude", "station_type", "waterbody_type", 
+    "determinand", "detGroup", "species", "filtered",
+    "submedia", "matrix", "basis", "unit", "sex", "method_analysis", "subseries", 
+    "shape", "colour"
+  ) 
+  
+  summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
 
-        collapse <- function(x, type = c("real", "character")) {
-          type = match.arg(type)
-          if (all(is.na(x))) {
-            return(switch(type, real = NA_real_, character = NA_character_))
-          }
-          x <- x[!is.na(x)]
-          if (length(x) > 1) stop("multiple EAC values not allowed")
-          x
+  sortID <- intersect(
+    c(info$region_id, "country", "CMA", "station_name", 
+      "species", "detGroup", "determinand", "matrix"), 
+    names(summary)
+  )
+  summary <- summary[do.call(order, summary[sortID]), ]
+  
+  
+  # rename variables
+  
+  summary <- rename(
+    summary, 
+    determinand_group = detGroup, 
+    n_year_all = nyall,
+    n_year_fit = nyfit,
+    n_year_positive = nypos,
+    first_year_all = firstYearAll,
+    first_year_fit = firstYearFit,
+    last_year = lastyear,
+    p_linear_trend = pltrend,
+    linear_trend = ltrend,
+    p_recent_trend = prtrend,
+    recent_trend = rtrend,
+    detectable_trend = dtrend,
+    mean_last_year = meanLY,
+    climit_last_year = clLY
+  )
+  
+  if ("class" %in% names(summary)) {
+    summary <- rename(summary, imposex_class = class)
+  }
+  
+  names(summary) <- gsub("diff$", "_diff", names(summary))
+  names(summary) <- gsub("achieved$", "_achieved", names(summary))
+  names(summary) <- gsub("below$", "_below", names(summary))
+  
+  
+  # put all BAC type results together and all EAC type results together
+  # this is developmental and, if there are alternative BAC types (AMAP NRC), 
+  # they will have to be edited externally for now
+  
+  if (collapse_AC) {
+    
+    AC <- info$AC
+    
+    # set up basic type and value variables for each AC
+    # BAC_type is what we want to keep
+    # EAC_type needs to be collapsed across the remaining EAC related variables
+    
+    id <- paste0(AC, "_type")
+    summary[id] <- lapply(AC, function(x) {
+      ifelse(!is.na(summary[[x]]), x, NA_character_)
+    })
+    
+    id <- match(AC, names(summary))
+    names(summary)[id] <- paste0(AC, "_value")
+    
+    
+    EAC_id <- setdiff(AC, "BAC")
+    
+    if (length(EAC_id) >= 1) {
+      
+      collapse <- function(x, type = c("real", "character")) {
+        type = match.arg(type)
+        if (all(is.na(x))) {
+          return(switch(type, real = NA_real_, character = NA_character_))
         }
-        
-        id <- paste0(EAC_id, "_type")
-        summary["EAC_type"] <- apply(summary[id], 1, collapse, type = "character")
-
-        id <- paste0(EAC_id, "_value")
-        summary["EAC_value"] <- apply(summary[id], 1, collapse)
-        
-        id <- paste0(EAC_id, "_diff")
-        summary["EAC_diff"] <- apply(summary[id], 1, collapse)
-        
-        id <- paste0(EAC_id, "_achieved")
-        summary["EAC_achieved"] <- apply(summary[id], 1, collapse)
-        
-        id <- paste0(EAC_id, "_below")
-        summary["EAC_below"] <- apply(summary[id], 1, collapse, type = "character")
+        x <- x[!is.na(x)]
+        if (length(x) > 1) stop("multiple EAC values not allowed")
+        x
       }
       
-      # remove unwanted columns
-
-      id <- setdiff(EAC_id, "EAC")
-      id <- paste(
-        rep(id, each = 5), 
-        c("type", "value", "diff", "achieved", "below"), 
-        sep = "_"
-      )
+      id <- paste0(EAC_id, "_type")
+      summary["EAC_type"] <- apply(summary[id], 1, collapse, type = "character")
       
-      id <- setdiff(names(summary), id)
+      id <- paste0(EAC_id, "_value")
+      summary["EAC_value"] <- apply(summary[id], 1, collapse)
       
-      summary <- summary[id]
+      id <- paste0(EAC_id, "_diff")
+      summary["EAC_diff"] <- apply(summary[id], 1, collapse)
       
-      # reorder so that BAC_type and EAC type are first in their class
+      id <- paste0(EAC_id, "_achieved")
+      summary["EAC_achieved"] <- apply(summary[id], 1, collapse)
       
-      id <- paste(
-        rep(c("BAC", "EAC"), each = 5), 
-        c("type", "value", "diff", "achieved", "below"), 
-        sep = "_"
-      )
-      
-      summary <- dplyr::relocate(
-        summary, 
-        tidyselect::any_of(id), 
-        .after = climit_last_year
-      )
+      id <- paste0(EAC_id, "_below")
+      summary["EAC_below"] <- apply(summary[id], 1, collapse, type = "character")
     }
     
-
-    # rename region variables if required
-
-    if (!identical(info$region_id, info$region_names)) {
-      pos <- match(info$region_id, names(summary))
-      names(summary)[pos] <- info$region_names
-    }
+    # remove unwanted columns
+    
+    id <- setdiff(EAC_id, "EAC")
+    id <- paste(
+      rep(id, each = 5), 
+      c("type", "value", "diff", "achieved", "below"), 
+      sep = "_"
+    )
+    
+    id <- setdiff(names(summary), id)
+    
+    summary <- summary[id]
+    
+    # reorder so that BAC_type and EAC type are first in their class
+    
+    id <- paste(
+      rep(c("BAC", "EAC"), each = 5), 
+      c("type", "value", "diff", "achieved", "below"), 
+      sep = "_"
+    )
+    
+    summary <- dplyr::relocate(
+      summary, 
+      tidyselect::any_of(id), 
+      .after = climit_last_year
+    )
+  }
     
 
-    if (export) {
-      outfile <- file.path(path, paste0(tolower(x), "_summary.csv"))
-      readr::write_excel_csv(summary, outfile, na = "")
-    }
-    
-    summary
-  })  
+  # rename region variables if required
   
-  if (export) invisible() else out
+  if (!identical(info$region_id, info$region_names)) {
+    pos <- match(info$region_id, names(summary))
+    names(summary)[pos] <- info$region_names
+  }
+  
+
+  # write summary to output_file
+    
+  if (export) {
+    if (is.null(output_file)) {
+      output_file <- paste0(info$compartment, "_summary.csv")
+    } 
+    if (!is.null(output_dir)) {
+      output_file <- file.path(output_dir, output_file)
+    }
+    readr::write_excel_csv(summary, output_file, na = "")
+  }
+    
+  
+  if (export) invisible() else summary
 }
 
 
