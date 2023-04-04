@@ -1518,86 +1518,89 @@ ctsm_create_timeSeries <- function(
 
 
   # merge auxiliary data with determinand data
-  # weights and sediment normalisers are merged by sample and matrix
-  # others just by sample (for now)
 
-  if (print_code_warnings)
-    warning(
-      "merging of auxiliary variables in ctsm.create.timeseries; mergeID hard-wired",
-      call. = FALSE)
+  data <- ctsm_merge_auxiliary(data, info)
   
-  auxData <- data[data$group == "Auxiliary", ]
-  
-  data <- data[data$group != "Auxiliary", ]
-  
-  
-  # ensure all auxiliary variables are present
-
-  auxData$determinand <- factor(
-    auxData$determinand, 
-    levels = ctsm_get_auxiliary(data$determinand, info$compartment)
-  )
-  
-  auxData <- split(auxData, auxData$determinand)
-  
-
-  # catch for LNMEA measured in WO and ES for birds - probably shouldn't happen because the 
-  # sample will differ?  need to check
-  
-  if ("LNMEA" %in% names(auxData)) {
-    if (print_code_warnings)
-      warning("need to resolve merging of LNMEA with contaminant data", call. = FALSE)
-    
-    if (anyDuplicated(auxData[["LNMEA"]][["sample"]]))
-      stop("sample with LNMEA measurements in more than one matrix", call. = FALSE)
-  }
-  
-  # and similarly check that C13D and N15D are only measured once in each sub.sample
-  
-  if (any(c("C13D", "N15D") %in% names(auxData))) {
-    if (print_code_warnings)
-      warning("need to resolve merging of C13D and N15D with contaminant data", call. = FALSE)
-    
-    if (anyDuplicated(auxData[["C13D"]][["sample"]]))
-      stop("sample with C13D measurements in more than one matrix", call. = FALSE)
-  
-    if (anyDuplicated(auxData[["N15D"]][["sample"]]))
-      stop("sample with N15D measurements in more than one matrix", call. = FALSE)
-  }
-  
-  
-  for (i in names(auxData)) {
-
-    if (i %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN")) {
-      mergeID <- c("sample", "matrix")
-      newID <- c(
-        "concentration", "censoring", "basis", "limit_detection", "limit_quantification", 
-        "uncertainty"
-      )
-      newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
-    } else if (i %in% c("AL", "LI")) {
-      mergeID <- c("sample", "matrix")
-      newID <- c(
-        "concentration", "censoring", "basis", "limit_detection", "limit_quantification", 
-        "uncertainty", "digestion"
-      )
-      newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
-    } else if (i %in% c("C13D", "N15D")) {
-      mergeID <- "sample"
-      newID <- c("concentration", "matrix", "basis")
-      newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
-    } else {
-      mergeID <- "sample"
-      newID <- "concentration"
-      newNames <- c(mergeID, i)
-    }
-    
-    wk <- auxData[[i]][c(mergeID, newID)]
-    names(wk) <- newNames
-    data <- merge(data, wk, all.x = TRUE)
-  }
-  
-  data <- droplevels(data)
+  # # weights and sediment normalisers are merged by sample and matrix
+  # # others just by sample (for now)
+  # 
+  # if (print_code_warnings)
+  #   warning(
+  #     "merging of auxiliary variables in ctsm.create.timeseries; mergeID hard-wired",
+  #     call. = FALSE)
+  # 
+  # auxData <- data[data$group == "Auxiliary", ]
+  # 
+  # data <- data[data$group != "Auxiliary", ]
+  # 
+  # 
+  # # ensure all auxiliary variables are present
+  # 
+  # auxData$determinand <- factor(
+  #   auxData$determinand, 
+  #   levels = ctsm_get_auxiliary(data$determinand, info$compartment)
+  # )
+  # 
+  # auxData <- split(auxData, auxData$determinand)
+  # 
+  # 
+  # # catch for LNMEA measured in WO and ES for birds - probably shouldn't happen because the 
+  # # sample will differ?  need to check
+  # 
+  # if ("LNMEA" %in% names(auxData)) {
+  #   if (print_code_warnings)
+  #     warning("need to resolve merging of LNMEA with contaminant data", call. = FALSE)
+  #   
+  #   if (anyDuplicated(auxData[["LNMEA"]][["sample"]]))
+  #     stop("sample with LNMEA measurements in more than one matrix", call. = FALSE)
+  # }
+  # 
+  # # and similarly check that C13D and N15D are only measured once in each sub.sample
+  # 
+  # if (any(c("C13D", "N15D") %in% names(auxData))) {
+  #   if (print_code_warnings)
+  #     warning("need to resolve merging of C13D and N15D with contaminant data", call. = FALSE)
+  #   
+  #   if (anyDuplicated(auxData[["C13D"]][["sample"]]))
+  #     stop("sample with C13D measurements in more than one matrix", call. = FALSE)
+  # 
+  #   if (anyDuplicated(auxData[["N15D"]][["sample"]]))
+  #     stop("sample with N15D measurements in more than one matrix", call. = FALSE)
+  # }
+  # 
+  # 
+  # for (i in names(auxData)) {
+  # 
+  #   if (i %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN")) {
+  #     mergeID <- c("sample", "matrix")
+  #     newID <- c(
+  #       "concentration", "censoring", "basis", "limit_detection", "limit_quantification", 
+  #       "uncertainty"
+  #     )
+  #     newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
+  #   } else if (i %in% c("AL", "LI")) {
+  #     mergeID <- c("sample", "matrix")
+  #     newID <- c(
+  #       "concentration", "censoring", "basis", "limit_detection", "limit_quantification", 
+  #       "uncertainty", "digestion"
+  #     )
+  #     newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
+  #   } else if (i %in% c("C13D", "N15D")) {
+  #     mergeID <- "sample"
+  #     newID <- c("concentration", "matrix", "basis")
+  #     newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
+  #   } else {
+  #     mergeID <- "sample"
+  #     newID <- "concentration"
+  #     newNames <- c(mergeID, i)
+  #   }
+  #   
+  #   wk <- auxData[[i]][c(mergeID, newID)]
+  #   names(wk) <- newNames
+  #   data <- merge(data, wk, all.x = TRUE)
+  # }
+  # 
+  # data <- droplevels(data)
 
 
   # impute %femalepop when missing and sex = 1 - write out remaining
@@ -2025,9 +2028,6 @@ ctsm.check <- function(
   
   write.csv(oddities, file.path(oddity.dir, oddity.file), row.names = FALSE, na = "")
   
-  #write.xlsx(oddities, oddity.file, sheetName, append = TRUE, showNA = FALSE, 
-  #           row.names = FALSE)
-
   if (action == "warning") return()
   
   data <- switch(
@@ -2176,16 +2176,6 @@ ctsm_import_value <- function(data, station_dictionary, info) {
     id <- c(id, "filtered", "subseries") 
   }
   
-  # if (info$compartment == "biota")
-  #   id <- switch(
-  #     info$purpose, 
-  #     AMAP = c(id, "species", "matrix", "subseries"), 
-  #     OSPAR = c(id, "species", "matrix", "sex", "method_analysis", "subseries"),
-  #     c(id, "species", "matrix", "sex", "method_analysis")
-  #   )
-  # if (info$compartment == "water" & info$purpose %in% "HELCOM")
-  #   id <- c(id, "filtered")
-   
   timeSeries <- data[id]
   
 
@@ -3118,6 +3108,111 @@ ctsm_check_subseries <- function(data) {
   # data <- mutate(data, subseries = replace_na(subseries, "Not_applicable"))
 
   data
+}
+
+
+ctsm_merge_auxiliary <- function(data, info) {
+
+  # import_functions.R
+  # merge auxiliary variables with data
+
+  # identify auxiliary variables and split data set accordingly
+    
+  auxiliary_var <- ctsm_get_auxiliary(data$determinand, info$compartment)
+
+  id <- data$determinand %in% auxiliary_var
+    
+  auxiliary <- data[id, ]
+  data <- data[!id, ]
+  
+  
+  # ensure all auxiliary variables are present in output, by creating a 
+  # factor with levels given by auxiliary_var, and then splitting by this factor
+  
+  auxiliary$determinand <- factor(
+    auxiliary$determinand, 
+    levels = auxiliary_var
+  )
+  
+  auxiliary <- split(auxiliary, auxiliary$determinand)
+  
+  
+  # catch for LNMEA measured in WO and ES for birds - probably shouldn't happen because the 
+  # sample will differ?  need to check
+  
+  
+
+  for (aux_id in names(auxiliary)) {
+
+    auxiliary_data <- auxiliary[[aux_id]]
+    
+    # standard merging variables, new variables and their names
+    
+    merge_id <- "sample"
+    new_id <- "concentration"
+    new_names <- aux_id
+    
+    # additional variables for some auxiliaries
+    # need to make this more flexible - issue raised
+    
+    if (aux_id %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN", "AL", "LI")) {
+      
+      merge_id <- c(merge_id, "matrix")
+      
+      extra_id <- c(
+        "censoring", "basis", "limit_detection", "limit_quantification", 
+        "uncertainty"
+      )
+      
+      if (aux_id %in% c("AL", "LI")) {
+        extra_id <- c(extra_id, "digestion")
+      }
+      
+      extra_names <- paste(aux_id, extra_id, sep = ".")
+      
+      new_id <- c(new_id, extra_id)
+      new_names <- c(new_names, extra_names)
+    } 
+    
+    auxiliary_data <- auxiliary_data[c(merge_id, new_id)]
+    names(auxiliary_data) <- c(merge_id, new_names)
+    
+    
+    # check for no replicate measurements when merging (merge should be many to one)
+    
+    dup_check <- do.call("paste", auxiliary_data[merge_id]) 
+    
+    if (any(duplicated(dup_check))) {
+
+      message_txt <- paste0(
+        "Cannot merge data with ", aux_id, " measurements due to\n",
+        "            ambiguous matches; this might be because there are\n", 
+        "            ", aux_id, " measurements for the same sample in more\n",
+        "            than one matrix"
+      )
+      
+      auxiliary_data <- ctsm.check(
+        auxiliary_data, 
+        dup_check %in% dup_check[duplicated(dup_check)], 
+        action = "warning",
+        message = message_txt,
+        fileName = "replicated_auxiliary_measurements"
+      )
+      
+      stop(
+        "To proceed, edit the data to remove any ambiguous matches.\n", 
+        "  Otherwise, contact the HARSAT development team to resolve the issue."
+      )
+      
+    }
+    
+    
+    # finally merge data
+    
+    data <- merge(data, auxiliary_data, all.x = TRUE)
+  }
+  
+  data <- droplevels(data)
 }
 
 
