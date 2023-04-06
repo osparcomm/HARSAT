@@ -155,7 +155,8 @@ ctsm_summary_table(
   biota_assessment, 
   determinandGroups = webGroups,
   classColour = classColour,
-  output_dir = file.path("output", "example_simple_OSPAR")
+  collapse_AC = list(EAC = c("EAC", "EQS.OSPAR")),
+  output_dir = file.path("output", "example_simple_OSPAR"), 
 )
 
 

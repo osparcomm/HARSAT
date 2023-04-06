@@ -594,6 +594,7 @@ ctsm_summary_table(
     above = c("BAC" = "red", "EAC" = "red", "EQS" = "red", "MPC" = "red"),
     none = "black"
   ),
+  collapse_AC = list(EAC = c("EAC", "EQS", "MPC")),
   output_dir = file.path("output", "example_HELCOM")
 )
 
@@ -605,6 +606,7 @@ ctsm_summary_table(
     above = c("EQS" = "red"), 
     none = "black"
   ),
+  collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
 )
 
@@ -616,6 +618,7 @@ ctsm_summary_table(
     above = c("EQS" = "red"), 
     none = "black"
   ),
+  collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
 )
 

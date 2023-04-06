@@ -109,15 +109,25 @@ biota_data <- ctsm_tidy_data(biota_data)
 
 # Construct timeseries ----
 
-biota_timeSeries <- ctsm_create_timeSeries(
-  biota_data,
-  determinands.control = list(
-    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  ),
-  get_basis = get_basis_biota_OSPAR
-)
+if (info_AC_type == "EXTERNAL") {
+  biota_timeSeries <- ctsm_create_timeSeries(
+    biota_data,
+    get_basis = get_basis_biota_OSPAR
+  )
+}
 
-# saveRDS(biota_timeSeries, file.path("RData", "biota timeSeries.rds"))
+# only need the liipid weight control structure if lipidwt% has been reported in 
+# multiple ways - typically an ICES extraction issue
+
+if(info_AC_type != "EXTERNAL") {
+  biota_timeSeries <- ctsm_create_timeSeries(
+    biota_data,
+    determinands.control = list(
+      "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+    ),
+    get_basis = get_basis_biota_OSPAR
+  )
+}  
 
 
 # Assessment ----
@@ -186,7 +196,6 @@ biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 
 ctsm_summary_table(
   biota_assessment,
-  determinandGroups = list(levels = "Metals", labels = "Metals"),
   output_dir = file.path("output", "example_external_data")
 )
 

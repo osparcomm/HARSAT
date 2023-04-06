@@ -336,34 +336,38 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 # summary table ----
 
 ctsm_summary_table <- function(
-  assessment_obj, determinandGroups, classColour = NULL, output_dir = NULL, 
-  output_file = NULL, export = TRUE, collapse_AC = TRUE) {
+  assessment_obj, determinandGroups = NULL, classColour = NULL, output_dir = NULL, 
+  output_file = NULL, export = TRUE, collapse_AC = NULL) {
 
   # reporting_functions.R
-  # get summary files
+  # create summary file and add symbology 
   
   library(dplyr)
   
-  # error checking
+  assessment <- assessment_obj$assessment
+  timeSeries <- assessment_obj$timeSeries
+  info <- assessment_obj$info
+  
+  
+  ## error checking
+  
+  # output file name must be a .csv file
   
   if (export && !is.null(output_file)) {
     n_filename <- nchar(output_file)
     ext_filename <- substring(output_file, n_filename - 3, n_filename)
     if (ext_filename != ".csv") {
-      stop("output_file must has a .csv extension")
+      stop("output_file must has a .csv extension", call. = FALSE)
     } 
   }
   
     
-  assessment <- assessment_obj$assessment
-  timeSeries <- assessment_obj$timeSeries
-  info <- assessment_obj$info
-
-
-  # check assessment criteria have an appropriate class colour
+  # assessment criteria must have an appropriate class colour
     
-  AC <- info$AC
-  if (!is.null(AC)) { 
+  is_AC <- !is.null(info$AC)
+  
+  if (is_AC) {
+    AC <- info$AC
     stopifnot(
       !is.null(classColour),
       AC %in% names(classColour$below), 
@@ -372,8 +376,75 @@ ctsm_summary_table <- function(
     )
   }
 
+
+  # assessment criteria in collapse_AC must be present in the data
+  # can turn some of these errors into warnings by creating extra variables 
+  # later on - have raised an issue 
   
-  # resolve determinand group naming
+  if (!is.null(collapse_AC)) {
+    
+    if (is.null(names(collapse_AC))) {
+      stop(
+        "collapse_AC must be a names list of valid assessment criterion", 
+        call. = FALSE
+      )
+    }
+    
+    if (is_AC) {
+
+      id <- unlist(collapse_AC)
+      if (any(duplicated(id))) {
+        stop(
+          "cannot specify the same assessment criterion more than once in ", 
+          "collapse_AC", 
+          call. = FALSE
+        )
+      }
+      
+      ok <- id %in% AC
+      if (!all(ok)) {
+        id <- id[!ok]
+        stop(
+          "these assessment criteria are specified in collapse_AC but were not ",
+          "used in the\n", 
+          "in the assessment: ",
+          paste(id, collapse = ", "), 
+          call. = FALSE
+        )
+      }
+      
+      other_AC <- !AC %in% unlist(collapse_AC)
+      if (any(other_AC)) {
+        id <- AC[other_AC]
+        if (any(id %in% names(collapse_AC))) {
+          stop(
+            "cannot use the name of another assessment criterion in the names of \n", 
+            "collapse_AC",
+            .call = FALSE
+          )
+        }
+      }
+      
+      
+    } else {
+
+      stop(
+        "collapse_AC specified, but no assessment criteria were used in the assessment", 
+        call. = FALSE
+      )
+      
+    }
+
+  }
+      
+
+  ## augment timeSeries structure
+
+  # get determinand group
+  # NB detGroup is currently a character if determinandGroups is null and a 
+  # factor otherwise - the use of the factor assists with ordering, but probably
+  # not needed here as this is primarily an OHAT requirement - have raised
+  # an issue to tidy this up
   
   timeSeries <- rownames_to_column(timeSeries, ".series")
   
@@ -384,20 +455,23 @@ ctsm_summary_table <- function(
     info$compartment, 
     sep = "_"
   )
-  
-  if (!all(timeSeries$detGroup %in% determinandGroups$levels)) {
-    stop('some determinand groups present in data, but not in groups argument')
-  }
-  
-  timeSeries$detGroup <- factor(
-    timeSeries$detGroup, 
-    levels = determinandGroups$levels, 
-    labels = determinandGroups$labels, 
-    ordered = TRUE
-  )
-  
-  timeSeries$detGroup <-   timeSeries$detGroup[, drop = TRUE]
-  
+
+  if (!is.null(determinandGroups)) {
+    
+    if (!all(timeSeries$detGroup %in% determinandGroups$levels)) {
+      stop('some determinand groups present in data, but not in groups argument')
+    }
+    
+    timeSeries$detGroup <- factor(
+      timeSeries$detGroup, 
+      levels = determinandGroups$levels, 
+      labels = determinandGroups$labels, 
+      ordered = TRUE
+    )
+
+    timeSeries$detGroup <-   timeSeries$detGroup[, drop = TRUE]
+  }  
+    
   
   # merge stations with timeSeries
   
@@ -410,7 +484,7 @@ ctsm_summary_table <- function(
   timeSeries <- column_to_rownames(timeSeries, ".series")
   
 
-  # get summary from assessment 
+  ## get summary from assessment 
   
   summary <- ctsm_summary_overview(
     assessment, timeSeries, info, classColour, fullSummary = TRUE
@@ -428,7 +502,9 @@ ctsm_summary_table <- function(
   }
     
 
-  # reorder variables to get most useful output
+  ## tidy up output
+  
+  # reorder variables 
   
   wk <- c(
     "series", 
@@ -480,18 +556,28 @@ ctsm_summary_table <- function(
   names(summary) <- gsub("below$", "_below", names(summary))
   
   
-  # put all BAC type results together and all EAC type results together
-  # this is developmental and, if there are alternative BAC types (AMAP NRC), 
-  # they will have to be edited externally for now
+  ## simplify (collapse) AC output if required
   
-  if (collapse_AC) {
+  if (is_AC && !is.null(collapse_AC)) {
+
+    # augment collapse_AC with unspecified AC
     
-    AC <- info$AC
+    other_AC <- !AC %in% unlist(collapse_AC)
+
+    if (any(other_AC)) {
+      other_AC <- AC[other_AC]
+      
+      extra <- as.list(other_AC)
+      names(extra) <- other_AC
+      
+      collapse_AC <- c(collapse_AC, extra)
+      
+      collapse_AC <- collapse_AC[sort(names(collapse_AC))]
+    }
     
-    # set up basic type and value variables for each AC
-    # BAC_type is what we want to keep
-    # EAC_type needs to be collapsed across the remaining EAC related variables
-    
+
+    # set up type and value variables for each AC
+
     id <- paste0(AC, "_type")
     summary[id] <- lapply(AC, function(x) {
       ifelse(!is.na(summary[[x]]), x, NA_character_)
@@ -500,66 +586,67 @@ ctsm_summary_table <- function(
     id <- match(AC, names(summary))
     names(summary)[id] <- paste0(AC, "_value")
     
-    
-    EAC_id <- setdiff(AC, "BAC")
-    
-    if (length(EAC_id) >= 1) {
+
+    var_id <- c("type", "value", "diff", "achieved", "below") 
+
+        
+    for (group_id in names(collapse_AC)) {
       
-      collapse <- function(x, type = c("real", "character")) {
-        type = match.arg(type)
-        if (all(is.na(x))) {
-          return(switch(type, real = NA_real_, character = NA_character_))
-        }
-        x <- x[!is.na(x)]
-        if (length(x) > 1) stop("multiple EAC values not allowed")
-        x
+      AC_id <- collapse_AC[[group_id]]
+      
+      # if only one AC and it has a different name, then rename
+      
+      if (length(AC_id) == 1 && group_id != AC_id) {
+        pos <- match(paste(AC_id, var_id, sep = "_"), names(summary))
+        names(summary)[pos] <- paste(group_id, var_id, sep = "_")
       }
       
-      id <- paste0(EAC_id, "_type")
-      summary["EAC_type"] <- apply(summary[id], 1, collapse, type = "character")
+      if (length(AC_id) > 1) {
       
-      id <- paste0(EAC_id, "_value")
-      summary["EAC_value"] <- apply(summary[id], 1, collapse)
+        in_id <- paste0(AC_id, "_type")
+        out_id <- paste0(group_id, "_type")
+        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "character")
+        
+        in_id <- paste0(AC_id, "_value")
+        out_id <- paste0(group_id, "_value")
+        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
+        
+        in_id <- paste0(AC_id, "_diff")
+        out_id <- paste0(group_id, "_diff")
+        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
+        
+        in_id <- paste0(AC_id, "_achieved")
+        out_id <- paste0(group_id, "_achieved")
+        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
+        
+        in_id <- paste0(AC_id, "_below")
+        out_id <- paste0(group_id, "_below")
+        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "character")
+      }
       
-      id <- paste0(EAC_id, "_diff")
-      summary["EAC_diff"] <- apply(summary[id], 1, collapse)
+      # remove unwanted columns
       
-      id <- paste0(EAC_id, "_achieved")
-      summary["EAC_achieved"] <- apply(summary[id], 1, collapse)
-      
-      id <- paste0(EAC_id, "_below")
-      summary["EAC_below"] <- apply(summary[id], 1, collapse, type = "character")
-    }
+      id <- setdiff(AC_id, group_id)
+      id <- paste(rep(id, each = 5), var_id, sep = "_")
     
-    # remove unwanted columns
+      id <- setdiff(names(summary), id)
     
-    id <- setdiff(EAC_id, "EAC")
-    id <- paste(
-      rep(id, each = 5), 
-      c("type", "value", "diff", "achieved", "below"), 
-      sep = "_"
-    )
+      summary <- summary[id]
+    }    
     
-    id <- setdiff(names(summary), id)
+    # reorder column names 
     
-    summary <- summary[id]
-    
-    # reorder so that BAC_type and EAC type are first in their class
-    
-    id <- paste(
-      rep(c("BAC", "EAC"), each = 5), 
-      c("type", "value", "diff", "achieved", "below"), 
-      sep = "_"
-    )
+    id <- paste(rep(names(collapse_AC), each = 5), var_id, sep = "_")
     
     summary <- dplyr::relocate(
       summary, 
-      tidyselect::any_of(id), 
+      tidyselect::all_of(id), 
       .after = climit_last_year
     )
-  }
     
-
+  }
+  
+  
   # rename region variables if required
   
   if (!identical(info$region_id, info$region_names)) {
@@ -583,6 +670,24 @@ ctsm_summary_table <- function(
   
   if (export) invisible() else summary
 }
+
+
+ctsm_collapse_AC <- function(x, type = c("real", "character")) {
+  type = match.arg(type)
+  if (all(is.na(x))) {
+    out <- switch(
+      type, 
+      real = NA_real_, 
+      character = NA_character_
+    )
+    return(out)
+  }
+  x <- x[!is.na(x)]
+  if (length(x) > 1) stop("multiple values not allowed")
+  x
+}
+
+
 
 
 # OHAT ----
