@@ -11,34 +11,32 @@ ctsm_read_data <- function(
   QA, 
   path = ".", 
   extraction, 
-  max_year, 
+  max_year = NULL, 
   control = list(), 
   data_format = c("ICES_old", "ICES_new", "external")) {
 
   # import_functions.R
-  # reads in data from an ICES extraction
-  
-  
-  data_format <- match.arg(data_format)
+  # reads in data from an ICES extraction or from an external data file
   
   
   # validate arguments
   
   compartment <- match.arg(compartment)
   purpose <- match.arg(purpose)
-  
-  if (!is.character(path) | length(path) > 1) {
-    stop("path should be a single character string")
-  }
-  
-  # max_year is the maximum data year allowed 
-  # print warning if there are more recent data which have been submitted 'early'
-  
-  if (length(max_year) != 1 |
-      !isTRUE(all.equal(max_year, as.integer(max_year)))) {
-    stop("max_year must be a single (integer valued) year")
-  }
+  data_format <- match.arg(data_format)
 
+  if (!is.null(max_year)) {
+    if (length(max_year) != 1) {
+      stop("max_year must be a single integer valued year")
+    } 
+    if (!is.integer(max_year)) {
+      if (!isTRUE(all.equal(max_year, as.integer(max_year)))) {
+        stop("max_year must be an integer valued year")
+      }
+      max_year <- as.integer(max_year)
+    }
+  }    
+    
 
   # sort out extraction date
     
@@ -50,7 +48,7 @@ ctsm_read_data <- function(
   extraction_year <- as.numeric(format(extraction, "%Y"))
   extraction_month <- as.numeric(format(extraction, "%m"))
   
-  if (extraction_year < max_year) {
+  if (!is.null(max_year) && extraction_year < max_year) {
     stop("extraction predates some monitoring data")
   }
   
@@ -67,8 +65,8 @@ ctsm_read_data <- function(
     compartment = compartment, 
     purpose = purpose, 
     extraction = extraction_text,
-    data_format = data_format,
-    max_year = max_year 
+    data_format = data_format, 
+    max_year = max_year
   )
   
   control_default <- ctsm_control_default(purpose, compartment)
@@ -82,12 +80,6 @@ ctsm_read_data <- function(
   info <- append(info, control)
   
 
-  # construct recent_years in which there must be some monitoring data
-  
-  info$recent_years <- seq(max_year - control$reporting_window + 1, max_year)
-  
-
-    
   # read in station dictionary, contaminant and biological effects data and QA data
   
   stations <- ctsm_read_stations(stations, path, info)
@@ -98,17 +90,25 @@ ctsm_read_data <- function(
     QA <- ctsm_read_QA(QA, path, purpose)
   
 
-  # check no data after max_year
+  # populate max_year if not set in function call
   
-  if (any(data$year > max_year)) { 
-    warning("data submitted after max_year", call. = FALSE)
+  if (is.null(info$max_year)) {
+    info$max_year <- max(data$year)
+    cat(
+      "\nArgument max_year taken to be the maximum year in the data:", 
+      info$max_year
+    )
   }
-  
-  if (!any(data$year == max_year)) { 
-    warning("no data in max_year - possible error in function call", call. = FALSE)
-  }
-  
 
+
+  # construct recent_years in which there must be some monitoring data
+  
+  info$recent_years <- seq(
+    info$max_year - info$reporting_window + 1, 
+    info$max_year
+  )
+  
+    
   out <- list(
     call = match.call(), 
     info = info,
@@ -1001,6 +1001,42 @@ ctsm_tidy_contaminants <- function(data, info) {
   
   cat("\nCleaning contaminant and biological effects data\n")
 
+  
+  # check for compatibility between data, max_year, and reporting_window
+  
+  if (any(data$year > info$max_year)) { 
+
+    message_txt <- paste0(
+      "years greater than ", info$max_year, " will be excluded; to change this use", 
+      "\n   the max_year argument of ctsm_read_data"
+    )
+
+    not_ok <- data$year > info$max_year
+      
+    data <- ctsm.check(
+      data, 
+      not_ok, 
+      action = "delete", 
+      message = message_txt, 
+      fileName = "data_too_recent", 
+      merge.stations = FALSE
+    )
+    
+  }
+  
+  if (!any(data$year %in% info$recent_years)) {
+    
+    stop(
+      "no data in the period ", min(info$recent_years), " to ", 
+      max(info$recent_years), " inclusive; nothing to assess!\n",
+      "Consider changing the max_year argument or the reporting_window control\n", 
+      "option in ctsm_read_data.",
+      call. = FALSE
+    )
+    
+  }
+  
+
   if (info$data_format %in% c("ICES_old", "ICES_new")) {
     
     # check whether submitted station has matched to station correctly for 
@@ -1521,87 +1557,6 @@ ctsm_create_timeSeries <- function(
 
   data <- ctsm_merge_auxiliary(data, info)
   
-  # # weights and sediment normalisers are merged by sample and matrix
-  # # others just by sample (for now)
-  # 
-  # if (print_code_warnings)
-  #   warning(
-  #     "merging of auxiliary variables in ctsm.create.timeseries; mergeID hard-wired",
-  #     call. = FALSE)
-  # 
-  # auxData <- data[data$group == "Auxiliary", ]
-  # 
-  # data <- data[data$group != "Auxiliary", ]
-  # 
-  # 
-  # # ensure all auxiliary variables are present
-  # 
-  # auxData$determinand <- factor(
-  #   auxData$determinand, 
-  #   levels = ctsm_get_auxiliary(data$determinand, info$compartment)
-  # )
-  # 
-  # auxData <- split(auxData, auxData$determinand)
-  # 
-  # 
-  # # catch for LNMEA measured in WO and ES for birds - probably shouldn't happen because the 
-  # # sample will differ?  need to check
-  # 
-  # if ("LNMEA" %in% names(auxData)) {
-  #   if (print_code_warnings)
-  #     warning("need to resolve merging of LNMEA with contaminant data", call. = FALSE)
-  #   
-  #   if (anyDuplicated(auxData[["LNMEA"]][["sample"]]))
-  #     stop("sample with LNMEA measurements in more than one matrix", call. = FALSE)
-  # }
-  # 
-  # # and similarly check that C13D and N15D are only measured once in each sub.sample
-  # 
-  # if (any(c("C13D", "N15D") %in% names(auxData))) {
-  #   if (print_code_warnings)
-  #     warning("need to resolve merging of C13D and N15D with contaminant data", call. = FALSE)
-  #   
-  #   if (anyDuplicated(auxData[["C13D"]][["sample"]]))
-  #     stop("sample with C13D measurements in more than one matrix", call. = FALSE)
-  # 
-  #   if (anyDuplicated(auxData[["N15D"]][["sample"]]))
-  #     stop("sample with N15D measurements in more than one matrix", call. = FALSE)
-  # }
-  # 
-  # 
-  # for (i in names(auxData)) {
-  # 
-  #   if (i %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN")) {
-  #     mergeID <- c("sample", "matrix")
-  #     newID <- c(
-  #       "concentration", "censoring", "basis", "limit_detection", "limit_quantification", 
-  #       "uncertainty"
-  #     )
-  #     newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
-  #   } else if (i %in% c("AL", "LI")) {
-  #     mergeID <- c("sample", "matrix")
-  #     newID <- c(
-  #       "concentration", "censoring", "basis", "limit_detection", "limit_quantification", 
-  #       "uncertainty", "digestion"
-  #     )
-  #     newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
-  #   } else if (i %in% c("C13D", "N15D")) {
-  #     mergeID <- "sample"
-  #     newID <- c("concentration", "matrix", "basis")
-  #     newNames <- c(mergeID, i, paste(i, newID[-1], sep = "."))
-  #   } else {
-  #     mergeID <- "sample"
-  #     newID <- "concentration"
-  #     newNames <- c(mergeID, i)
-  #   }
-  #   
-  #   wk <- auxData[[i]][c(mergeID, newID)]
-  #   names(wk) <- newNames
-  #   data <- merge(data, wk, all.x = TRUE)
-  # }
-  # 
-  # data <- droplevels(data)
-
 
   # impute %femalepop when missing and sex = 1 - write out remaining
   # missing values for correction
@@ -1932,25 +1887,8 @@ ctsm_create_timeSeries <- function(
   data <- data[ok, ]
   
 
-  # check no replicates (typically across matrices)
-  # frustratingly have made ctsm.check too clever to generalise this
-
-  # if (info$compartment == "biota") {
-  # 
-  #   data <- ctsm.check(
-  #     data, paste(sample, determinand, matrix), action = "delete.dups", 
-  #     message = "Measurements still replicated, only first retained", 
-  #     fileName = "replicate measurements extra")
-  # 
-  # } else {
-  #   
-  #   data <- ctsm.check(
-  #     data, paste(sample, determinand), action = "delete.dups", 
-  #     message = "Measurements replicated across matrices, only first retained", 
-  #     fileName = "replicate measurements extra")
-  #   
-  # }
-    
+  # create seriesID and timeSeries object
+  
   out <- c(
     out, 
     ctsm_import_value(data, station_dictionary, info)
@@ -2023,8 +1961,15 @@ ctsm.check <- function(
   
   oddity.dir <- evalq(oddity.dir, sys.frame(1))
   oddity.file <- paste0(fileName, ".csv")
-  message("   Warning: ", message, 
-      switch(action, delete = ": deleted data in '", ": see '"), oddity.file)
+  message(
+    "   Warning: ", message, 
+    switch(
+      action, 
+      delete = ": deleted data in '", 
+      ": see '"
+    ), 
+    oddity.file, "'"
+  )
   
   write.csv(oddities, file.path(oddity.dir, oddity.file), row.names = FALSE, na = "")
   
