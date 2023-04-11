@@ -27,11 +27,11 @@ ctsm.assessment.setup <- function(ctsm.ob, AC = NULL, recent.trend = 20) {
 
 
 ctsm.assessment <- function(
-  ctsm.ob, determinandID, seriesID, get.assessment.criteria = get.AC, clusterID = NULL, ...) {
+  ctsm.ob, determinandID, seriesID, get.assessment.criteria = get.AC, 
+  parallel = FALSE, ...) {
 
   # assess each time series
   
-  library("pbapply")
   library("dplyr")
   
   info <- ctsm.ob$info
@@ -45,14 +45,45 @@ ctsm.assessment <- function(
     timeSeries <- droplevels(timeSeries[seriesID, ])
   
   data <- droplevels(subset(ctsm.ob$data, seriesID %in% row.names(timeSeries)))
-
+  
   stations <- ctsm.ob$stations
-  stations <- column_to_rownames(stations, "station_code")
+  stations <- tibble::column_to_rownames(stations, "station_code")
   stations <- stations[timeSeries$station_code, ]
   
-  data <- split(data, data$seriesID)
   
-  assessment <- pblapply(data, ..., cl = clusterID, FUN = function(x, ...) {
+  
+  # set up parallel processing information 
+  
+  if (parallel) {
+
+    cat("Setting up clusters: be patient, it can take a while!")
+        
+    n_cores <- parallel::detectCores()
+    cluster_id <- parallel::makeCluster(n_cores - 1)
+    on.exit(parallel::stopCluster(cluster_id))
+
+    is_imposex <- "Imposex" %in% data$group
+    export_objects <- ctsm_parallel_objects(is_imposex)
+    parallel::clusterExport(cluster_id, export_objects)
+
+    parallel::clusterEvalQ(
+      cluster_id, 
+      {
+        library("lme4")
+        library("tidyverse")
+      }
+    )  
+
+  } else {
+    cluster_id <- NULL
+  }
+
+
+  # split data into each series
+  
+  data <- split(data, data$seriesID)
+
+  assessment <- pbapply::pblapply(data, ..., cl = cluster_id, FUN = function(x, ...) {
   
     # get info about the time series
     
@@ -65,7 +96,11 @@ ctsm.assessment <- function(
     )
     seriesInfo <- seriesInfo[vapply(seriesInfo, function(x) !is.na(x), NA)]
     
-    print(paste("assessing series:", paste(names(seriesInfo), seriesInfo, collapse = "; ")))
+    cat(
+      "\nassessing series: ", 
+      paste(names(seriesInfo), seriesInfo, collapse = "; "), 
+      "\n"
+    )
     
     
     # return if no data to assess
@@ -104,7 +139,8 @@ ctsm.assessment <- function(
     annualIndex <- get.index(info$compartment, determinand, x)
     
 
-    # get assessment concentrations - need to extract some key variables first, could streamline in future
+    # get assessment concentrations - need to extract some key variables first 
+    # could streamline in future
     
     if ("AC" %in% names(info))
       AC <- unlist(get.AC(info$compartment, determinand, seriesInfo, info$AC))
@@ -213,6 +249,32 @@ ctsm.assessment <- function(
   assessment
 }
 
+
+ctsm_parallel_objects <- function(imposex = FALSE) {
+  
+  # assessment_functions.R
+  # objects required for clusterExport
+  
+  out <- c(
+    "negTwiceLogLik", "convert.basis",
+    objects(".GlobalEnv", pattern = "^get*"),
+    objects(".GlobalEnv", pattern = "^ctsm*"),
+    objects(".GlobalEnv", pattern = "^info*")
+  )
+  
+  if (imposex) {
+    out <- c(
+      out, 
+      "assess_imposex", "imposex.assess.index", "imposex_class", 
+      "imposex.family", "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", 
+      "imposex_assess_clm", "imposex.clm.fit", "imposex.clm.X", 
+      "imposex.clm.X.change", "imposex.clm.loglik.calc", "imposex.VDS.p.calc", 
+      "imposex.clm.predict", "imposex.clm.cl", "imposex.clm.contrast"
+    )
+  }
+  
+  out
+}
 
 
 # Annual indices ----

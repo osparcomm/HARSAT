@@ -117,7 +117,6 @@ biota_assessment <- ctsm.assessment.setup(
   recent.trend = 20
 )
 
-
 biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 
 

@@ -139,41 +139,12 @@ biota_assessment <- ctsm.assessment.setup(
   recent.trend = 20
 )
 
-
 biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 
 
 # use the code below if it takes a long time to run
 
-# library("parallel")
-# library("pbapply")
-# 
-# wk.cores <- detectCores()
-# wk.cluster <- makeCluster(wk.cores - 1)
-# 
-# clusterExport(
-#   wk.cluster, 
-#   c("biota_assessment", "negTwiceLogLik", "convert.basis", 
-#     unique(
-#       c(objects(pattern = "ctsm*"), 
-#         objects(pattern = "get*"), 
-#         objects(pattern = "info*")
-#       )
-#     )
-#   )
-# )
-# 
-# clusterEvalQ(wk.cluster, {
-#   library("lme4")
-#   library("tidyverse")
-# })  
-# 
-# biota_assessment$assessment <- ctsm.assessment(
-#   biota_assessment, 
-#   clusterID = wk.cluster
-# )
-# 
-# stopCluster(wk.cluster)
+# biota_assessment$assessment <- ctsm.assessment(biota_assessment, parallel = TRUE)
 
 
 
