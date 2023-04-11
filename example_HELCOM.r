@@ -86,17 +86,6 @@ sediment_data <- ctsm_read_data(
   data_format = "ICES_new"
 )
 
-# sediment_data <- ctsm_read_data(
-#   compartment = "sediment",
-#   purpose = "HELCOM",
-#   contaminants = file.path("data", "example_HELCOM", "sediment_data.txt"),
-#   stations = file.path("data", "example_HELCOM", "station_dictionary.txt"),
-#   QA = file.path("data", "example_HELCOM", "quality_assurance.txt"),
-#   extraction = "2022/10/06",
-#   max_year = 2021L,
-#   data_format = "old"
-# )
-
 # saveRDS(sediment_data, file = file.path("RData", "sediment data.rds"))
 
 
@@ -317,35 +306,10 @@ sediment_assessment <- ctsm.assessment.setup(
   recent.trend = 20
 )
 
-library("parallel")
-library("pbapply")
-
-wk.cores <- detectCores()
-wk.cluster <- makeCluster(wk.cores - 1)
-
-clusterExport(
-  wk.cluster, 
-  c("sediment_assessment", "negTwiceLogLik",
-    unique(c(
-      objects(pattern = "ctsm*"), 
-      objects(pattern = "get*"), 
-      objects(pattern = "info*")
-    ))
-  )
-)
-
-clusterEvalQ(wk.cluster, {
-  library("lme4")
-  library("tidyverse")
-})  
-
-
 sediment_assessment$assessment <- ctsm.assessment(
   sediment_assessment, 
-  clusterID = wk.cluster
+  parallel = TRUE
 )
-
-stopCluster(wk.cluster)
 
 
 ### check convergence ----
@@ -378,42 +342,13 @@ source("example_HELCOM_imposex_preparation.R")
 # can sometimes be useful to split up the assessment because of size limitations
 # not really needed here, but done to illustrate
 
-library("parallel")
-library("pbapply")
-
-wk.cores <- detectCores()
-wk.cluster <- makeCluster(wk.cores - 1)
-
-clusterExport(
-  wk.cluster, 
-  c("biota_assessment", "negTwiceLogLik", "convert.basis", 
-    "assess_imposex", "imposex.assess.index", "imposex_class", "imposex.family", 
-    "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", "imposex_assess_clm", 
-    "imposex.clm.fit", "imposex.clm.X", "imposex.clm.loglik.calc", 
-    "imposex.VDS.p.calc", "imposex.clm.predict", "imposex.clm.cl",
-    "imposex.clm.contrast", 
-    unique(
-      c(objects(pattern = "ctsm*"), 
-        objects(pattern = "get*"), 
-        objects(pattern = "info*")
-      )
-    )
-  )
-)
-
-clusterEvalQ(wk.cluster, {
-  library("lme4")
-  library("tidyverse")
-})  
-
-
 wk_determinands <- ctsm_get_determinands("biota")
 wk_group <- info.determinand[wk_determinands, "biota_group"]
 
 biota_Metals <- ctsm.assessment(
   biota_assessment, 
   determinandID = wk_determinands[wk_group == "Metals"], 
-  clusterID = wk.cluster
+  parallel = TRUE
 )
 
 
@@ -425,25 +360,21 @@ wk_organics <- c(
 biota_Organics <- ctsm.assessment(
   biota_assessment, 
   determinandID = wk_determinands[wk_group %in% wk_organics], 
-  clusterID = wk.cluster
+  parallel = TRUE
 )
 
 
 biota_Metabolites <- ctsm.assessment(
   biota_assessment, 
-  determinandID = wk_determinands[wk_group %in% "Metabolites"], 
-  clusterID = wk.cluster
+  determinandID = wk_determinands[wk_group %in% "Metabolites"]
 )
 
 
 biota_Imposex <- ctsm.assessment(
   biota_assessment, 
   determinandID = wk_determinands[wk_group %in% "Imposex"],
-  clusterID = wk.cluster
+  parallel = TRUE
 )
-
-stopCluster(wk.cluster)
-
 
 
 
@@ -510,35 +441,7 @@ water_assessment <- ctsm.assessment.setup(
   recent.trend = 20
 )
 
-
-library(parallel)
-library(pbapply)
-
-wk.cores <- detectCores()
-wk.cluster <- makeCluster(wk.cores - 1)
-
-clusterExport(
-  wk.cluster, 
-  c("water_assessment", "negTwiceLogLik",
-    unique(c(
-      objects(pattern = "ctsm*"), 
-      objects(pattern = "get*"), 
-      objects(pattern = "info*")
-    ))
-  )
-)
-
-clusterEvalQ(wk.cluster, {
-  library(lme4)
-  library(tidyverse)
-})  
-
-water_assessment$assessment <- ctsm.assessment(
-  water_assessment, 
-  clusterID = wk.cluster
-)
-
-stopCluster(wk.cluster)
+water_assessment$assessment <- ctsm.assessment(water_assessment, parallel = TRUE)
 
 
 ### check convergence ----
