@@ -366,8 +366,8 @@ biota_data$data <- mutate(
   .id = .id & 
     determinand %in% "HG" & 
     basis %in% "D",
-  value = convert.basis(value, basis, "W", wk_dw, "", exclude = !.id),
-  uncertainty = convert.basis(uncertainty, basis, "W", wk_dw, "", exclude = !.id),
+  value = ctsm_convert_basis(value, basis, "W", wk_dw, exclude = !.id),
+  uncertainty = ctsm_convert_basis(uncertainty, basis, "W", wk_dw, exclude = !.id),
   limit_detection = if_else(.id, NA_real_, limit_detection),
   limit_quantification = if_else(.id, NA_real_, limit_quantification), 
   basis = if_else(.id, "W", basis),
@@ -541,11 +541,7 @@ wk_n <- nrow(wk_data)
 
 wk_data <- mutate(
   wk_data,
-  value = convert.basis(
-    value, basis, rep("W", wk_n),
-    dry_weight, rep("", wk_n),
-    lipid_weight, rep("", wk_n)
-  )
+  value = ctsm_convert_basis(value, basis, "W", dry_weight, lipid_weight)
 )
 
 lattice::xyplot(

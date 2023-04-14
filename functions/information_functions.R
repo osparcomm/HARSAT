@@ -430,7 +430,13 @@ get.AC.biota.contaminant <- function(data, AC, export_cf = FALSE) {
   
   out <- sapply(AC, simplify = FALSE, FUN = function(i) {
     basis_AC <- paste("basis", i, sep = ".")
-    convert.basis(data[[i]], from = data[[basis_AC]], to = data$basis, data$dry_wt, "", data$lipid_wt, "")
+    ctsm_convert_basis(
+      data[[i]], 
+      from = data[[basis_AC]], 
+      to = data$basis, 
+      drywt = data$dry_wt, 
+      lipidwt = data$lipid_wt
+    )
   })
   
   out <- data.frame(out)
@@ -484,42 +490,42 @@ if (info_AC_type == "OSPAR") {
     id <- out$determinand %in% "HG"
     
     if (any(id)) {
-      
+  
       out[id, ] <- mutate(
         out[id, ],
         
         BAC = case_when(
           .data$species_group %in% "Fish"                            ~ NA_real_,
-          .data$sub.family %in% "Oyster"                      ~ NA_real_,
+          .data$sub.family %in% "Oyster"                             ~ NA_real_,
           .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-            convert.basis(16000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(16000, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-            convert.basis(6100, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(6100, "D", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-            convert.basis(110, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(110, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-            convert.basis(1400, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(1400, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-            convert.basis(1580, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(1580, "D", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-            convert.basis(200, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          TRUE                                                ~ .data$BAC
+            ctsm_convert_basis(200, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
+          TRUE                                                       ~ .data$BAC
         ),
         
         EQS.OSPAR = case_when(
           .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-            convert.basis(64000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(64000, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-            convert.basis(24400, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(24400, "D", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-            convert.basis(470, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(470, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-            convert.basis(7300, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(7300, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-            convert.basis(7920, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(7920, "D", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-            convert.basis(1000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
-          TRUE                                                ~ .data$EQS.OSPAR
+            ctsm_convert_basis(1000, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
+          TRUE                                                       ~ .data$EQS.OSPAR
         ),
         
         HQS = if_else(.data$species_group %in% "Fish" & .data$matrix %in% "LI", NA_real_, .data$HQS)
@@ -594,14 +600,14 @@ if (info_AC_type == "OSPAR") {
       
       HQS = if_else(
         .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "SCB6",
-        convert.basis(200, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(200, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$HQS
       ),
       
       EAC = if_else(
         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
           .data$matrix %in% "EH" & .data$determinand %in% "SCB7",
-        convert.basis(6.7, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(6.7, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$EAC
       )
     )
@@ -649,14 +655,14 @@ if (info_AC_type == "OSPAR") {
       EAC = if_else(
         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
           .data$matrix %in% "EH" & .data$determinand %in% "HCB",
-        convert.basis(2.0, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(2.0, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$EAC
       ),
       
       EAC = if_else(
         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
           .data$matrix %in% "EH" & .data$determinand %in% "HCH",
-        convert.basis(2.0, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(2.0, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$EAC
       )
     )
@@ -672,8 +678,8 @@ if (info_AC_type == "OSPAR") {
         out[id, ],
         .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
         .dry_mu = info.species[.data$species, "MU_DRYWT%"],
-        HQS = convert.basis(61, "W", "L", .dry_mu, "", .lipid_mu, ""),
-        HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        HQS = ctsm_convert_basis(61, "W", "L", .dry_mu, .lipid_mu),
+        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$dry_wt, .data$lipid_wt),
         .lipid_mu = NULL,
         .dry_mu = NULL
       )
@@ -690,8 +696,8 @@ if (info_AC_type == "OSPAR") {
         out[id, ],
         .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
         .dry_mu = info.species[.data$species, "MU_DRYWT%"],
-        HQS = convert.basis(10, "W", "L", .dry_mu, "", .lipid_mu, ""),
-        HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        HQS = ctsm_convert_basis(10, "W", "L", .dry_mu, .lipid_mu),
+        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$dry_wt, .data$lipid_wt),
         .lipid_mu = NULL,
         .dry_mu = NULL
       )
@@ -770,8 +776,8 @@ if (info_AC_type == "OSPAR") {
         out[id, ],
         .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
         .dry_mu = info.species[.data$species, "MU_DRYWT%"],
-        HQS = convert.basis(0.0085, "W", "L", .dry_mu, "", .lipid_mu, ""),
-        HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        HQS = ctsm_convert_basis(0.0085, "W", "L", .dry_mu, .lipid_mu),
+        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$dry_wt, .data$lipid_wt),
         .lipid_mu = NULL,
         .dry_mu = NULL
       )
@@ -808,7 +814,7 @@ if (info_AC_type == "OSPAR") {
       out,
       HQS = if_else(
         .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
-        convert.basis(0.02, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(0.02, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$HQS
       )
     )
@@ -1160,33 +1166,33 @@ if (info_AC_type == "EXTERNAL") {
           .data$species_group %in% "Fish"                            ~ NA_real_,
           .data$sub.family %in% "Oyster"                      ~ NA_real_,
           .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-            convert.basis(16000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(16000, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-            convert.basis(6100, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(6100, "D", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-            convert.basis(110, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(110, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-            convert.basis(1400, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(1400, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-            convert.basis(1580, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(1580, "D", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-            convert.basis(200, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(200, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           TRUE                                                ~ .data$BAC
         ),
         
         EQS.OSPAR = case_when(
           .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-            convert.basis(64000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(64000, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-            convert.basis(24400, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(24400, "D", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-            convert.basis(470, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(470, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-            convert.basis(7300, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(7300, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-            convert.basis(7920, "D", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(7920, "D", .data$basis, .data$dry_wt, .data$lipid_wt),
           .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-            convert.basis(1000, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+            ctsm_convert_basis(1000, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
           TRUE                                                ~ .data$EQS.OSPAR
         ),
         
@@ -1262,14 +1268,14 @@ if (info_AC_type == "EXTERNAL") {
       
       HQS = if_else(
         .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "SCB6",
-        convert.basis(200, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(200, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$HQS
       ),
       
       EAC = if_else(
         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
           .data$matrix %in% "EH" & .data$determinand %in% "SCB7",
-        convert.basis(6.7, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(6.7, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$EAC
       )
     )
@@ -1317,14 +1323,14 @@ if (info_AC_type == "EXTERNAL") {
       EAC = if_else(
         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
           .data$matrix %in% "EH" & .data$determinand %in% "HCB",
-        convert.basis(2.0, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(2.0, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$EAC
       ),
       
       EAC = if_else(
         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
           .data$matrix %in% "EH" & .data$determinand %in% "HCH",
-        convert.basis(2.0, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(2.0, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$EAC
       )
     )
@@ -1340,8 +1346,8 @@ if (info_AC_type == "EXTERNAL") {
         out[id, ],
         .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
         .dry_mu = info.species[.data$species, "MU_DRYWT%"],
-        HQS = convert.basis(61, "W", "L", .dry_mu, "", .lipid_mu, ""),
-        HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        HQS = ctsm_convert_basis(61, "W", "L", .dry_mu, "", .lipid_mu, ""),
+        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$dry_wt, .data$lipid_wt),
         .lipid_mu = NULL,
         .dry_mu = NULL
       )
@@ -1358,8 +1364,8 @@ if (info_AC_type == "EXTERNAL") {
         out[id, ],
         .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
         .dry_mu = info.species[.data$species, "MU_DRYWT%"],
-        HQS = convert.basis(10, "W", "L", .dry_mu, "", .lipid_mu, ""),
-        HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        HQS = ctsm_convert_basis(10, "W", "L", .dry_mu, "", .lipid_mu, ""),
+        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$dry_wt, .data$lipid_wt),
         .lipid_mu = NULL,
         .dry_mu = NULL
       )
@@ -1438,8 +1444,8 @@ if (info_AC_type == "EXTERNAL") {
         out[id, ],
         .lipid_mu = info.species[.data$species, "MU_LIPIDWT%"],
         .dry_mu = info.species[.data$species, "MU_DRYWT%"],
-        HQS = convert.basis(0.0085, "W", "L", .dry_mu, "", .lipid_mu, ""),
-        HQS = convert.basis(.data$HQS, "L", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        HQS = ctsm_convert_basis(0.0085, "W", "L", .dry_mu, "", .lipid_mu, ""),
+        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$dry_wt, .data$lipid_wt),
         .lipid_mu = NULL,
         .dry_mu = NULL
       )
@@ -1476,7 +1482,7 @@ if (info_AC_type == "EXTERNAL") {
       out,
       HQS = if_else(
         .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
-        convert.basis(0.02, "W", .data$basis, .data$dry_wt, "", .data$lipid_wt, ""),
+        ctsm_convert_basis(0.02, "W", .data$basis, .data$dry_wt, .data$lipid_wt),
         .data$HQS
       )
     )
@@ -1935,77 +1941,230 @@ convert_units_workup <- function(units) {
 
 # Basis and matrix information and basis conversion ----
 
-convert.basis <- function(
-  conc, from, to, drywt, drywt.censoring, lipidwt = NA, lipidwt.censoring = NA, exclude) {
+ctsm_convert_basis <- function(
+  conc, from, to, 
+  drywt = NA_real_, 
+  lipidwt = NA_real_, 
+  drywt_censoring = ifelse(is.na(drywt), NA_character_, ""), 
+  lipidwt_censoring = ifelse(is.na(lipidwt), NA_character_, ""), 
+  exclude = FALSE, 
+  print_warning = TRUE) {
 
-  library(dplyr)
+  # source: information_functions.R
+  # dependencies: dplyr
   
+  # converts concentrations between wet, dry and lipid bases
 
-  # converts between wet, dry and lipid basis of measurement
+  # from ~ current basis
+  # to ~ target basis
 
+  # drywt and lipidwt assumed to be percentages taking values in [0, 100]
+
+  # lipidwt assumed to be on a wet weight basis - could generalise (issue raised)
+  
+  # exclude is a logical identifying records that do not need to be converted -
+  # useful when the data contain biological effects measurements
+  
+  # print_warning gives the number of records lost during conversion
+  
+  
+  # set up working data frame
+  
   data <- data.frame(
-    conc, from, to, drywt, drywt.censoring, lipidwt, lipidwt.censoring, 
-    stringsAsFactors = FALSE
-  )
-  
-  if (missing(exclude))
-    exclude <- rep(FALSE, length(data$conc))
-
-  stopifnot(
-    data$from[!exclude] %in% c("W", "D", "L", NA), 
-    data$to[!exclude] %in% c("W", "D", "L")
+    conc, from, to, drywt, drywt_censoring, lipidwt, lipidwt_censoring, exclude 
   )
 
-
-  # check to see if any conversions needed
-
-  ok <- exclude | (is.na(data$from) | as.character(data$from) == as.character(data$to))
-  if (all(ok)) return (data$conc)
-
-
-  # do conversion on subset of data that needs it
-  # ensure columns of data are of correct type
-
-  data <- mutate_at(data, c("drywt", "lipidwt"), as.numeric)
-  data <- mutate_at(data, c("drywt.censoring", "lipidwt.censoring"), as.character)
   
-  data$conc[!ok] <- with(data[!ok, ], {
+  # ensure variables are stored as characters (rather than factors)
+  
+  var_id <- c("from", "to", "drywt_censoring", "lipidwt_censoring")
+  data <- dplyr::mutate(data, dplyr::across(all_of(var_id), as.character))
 
-    from_value <- case_when(
-      from == "W" ~ 100, 
-      from == "D" ~ drywt, 
-      from == "L" ~ lipidwt
+  
+  # check arguments have admissible values
+  
+  ctsm_check_convert_basis(data)
+  
+
+  # only need to convert records which are 
+  # a) not excluded
+  # b) concentration is not missing
+  # c) from and to differ
+  
+  data$exclude <- data$exclude | 
+    is.na(data$conc) |
+    (!is.na(data$from) & !is.na(data$to) & data$from == data$to)
+  
+  if (all(data$exclude)) {
+    return(data$conc)
+  }
+
+
+  # set up extra variables to do the conversion
+
+  data <- dplyr::mutate(
+    data, 
+    from_value = dplyr::case_when(
+      .data$from %in% "W" ~ 100, 
+      .data$from %in% "D" ~ drywt, 
+      .data$from %in% "L" ~ lipidwt,
+      TRUE                ~ NA_real_
+    ),
+    from_censoring = dplyr::case_when(
+      .data$from %in% "W" ~ "", 
+      .data$from %in% "D" ~ drywt_censoring, 
+      .data$from %in% "L" ~ lipidwt_censoring,
+      TRUE                ~ NA_character_ 
+    ),
+    to_value = dplyr::case_when(
+      .data$to %in% "W" ~ 100, 
+      .data$to %in% "D" ~ drywt, 
+      .data$to %in% "L" ~ lipidwt,
+      TRUE              ~ NA_real_
+    ),
+    to_censoring = dplyr::case_when(
+      .data$to %in% "W" ~ "", 
+      .data$to %in% "D" ~ drywt_censoring, 
+      .data$to %in% "L" ~ lipidwt_censoring,
+      TRUE              ~ NA_character_ 
     )
+  )
+  
+  
+  # conversion not possible if missing or censored dry or lipid data or because 
+  # the to_value is 0%
+  
+  data <- dplyr::mutate(
+    data, 
+    convert = !.data$exclude,
+    convert_ok = .data$convert & 
+      !is.na(.data$to_value) & !is.na(.data$from_value) & 
+      data$from_censoring %in% "" & .data$to_censoring %in% "" &
+      .data$to_value > 0
+  )  
+  
+  if (sum(data$convert_ok) < sum(data$convert) && print_warning) {
+    message(
+      "   Losing ", sum(data$convert) - sum(data$convert_ok), " out of ", 
+      nrow(data), " records in basis conversion due to missing, censored\n",
+      "   or zero drywt or lipidwt values."
+    )
+  }
     
-    from_censoring <- case_when(
-      from == "W" ~ "", 
-      from == "D" ~ drywt.censoring, 
-      from == "L" ~ lipidwt.censoring
-    )
+  
+  # finally convert
+  
+  conc = dplyr::case_when(
+    !data$convert    ~ data$conc,
+    !data$convert_ok ~ NA_real_,
+    TRUE             ~ data$conc * data$from_value / data$to_value
+  )
 
-    to_value <- case_when(
-      to == "W" ~ 100, 
-      to == "D" ~ drywt,
-      to == "L" ~ lipidwt
-    )
-    
-    to_censoring <- case_when(
-      to == "W" ~ "", 
-      to == "D" ~ drywt.censoring,
-      to == "L" ~ lipidwt.censoring
-    )
-
-    censoring_ok <- from_censoring %in% "" & to_censoring %in% ""
-    
-    conc <- case_when(
-      ! censoring_ok ~ NA_real_,
-      TRUE ~ conc * from_value / to_value
-    )
-    conc
-  })
-
-  data$conc
+  conc
 }
+
+
+ctsm_check_convert_basis <- function(data) {
+
+  # source: information_functions.R
+  # dependencies: dplyr
+
+  # check inputs to ctsm_convert_basis are valid
+  
+  if (any(is.na(data$exclude))) {
+    stop("Missing values not allowed in 'exclude'")
+  }
+  
+
+  # only need to consider values in records which are 
+  # a) not excluded
+  # b) concentration is not missing
+  # c) from and to differ
+
+  data$exclude <- data$exclude | 
+    is.na(data$conc) |
+    (!is.na(data$from) & !is.na(data$to) & data$from == data$to)
+
+  if (all(data$exclude)) {
+    return(invisible())
+  }
+  
+  data <- data[!data$exclude, ]
+  
+  
+  # from and to 
+
+  not_ok <- c(any(is.na(data$from)), any(is.na(data$to)))
+  
+  if (any(not_ok)) {
+    txt <- c('from', 'to')[not_ok]
+    txt <- paste(txt, collapse = ", and ")
+    warning(
+      "Missing basis values in ", txt,  
+      "; associated concentrations will be set to missing.\n", 
+      "The exclude argument can prevent basis conversion (and ", 
+      "suppress this warning);\n",
+      "this would be appropriate for biological effects or auxiliary variables.", 
+      call. = FALSE, immediate. = TRUE
+    )
+  }
+  
+  if (!all(data$from %in% c("W", "D", "L", NA_character_))) {
+    stop("Unexpected basis values in 'from': must be 'W', 'D', 'L' or NA")
+  }  
+
+  if (!all(data$to %in% c("W", "D", "L", NA_character_))) {
+    stop("Unexpected basis values in 'to': must be 'W', 'D', 'L' or NA")
+  }  
+  
+
+  # drywt and lipidwt
+  
+  if (!all(is.na(data$drywt) | dplyr::between(data$drywt, 0, 100))) {
+    stop("Some drywt values are less than 0% or greater than 100%")
+  }
+
+  if (!all(is.na(data$lipidwt) | dplyr::between(data$lipidwt, 0, 100))) {
+    stop("Some lipidwt values are less than 0% or greater than 100%")
+  }
+  
+
+  # validate drywt_censoring and lipidwt_censoring
+
+  if (any(!is.na(data$drywt) & is.na(data$drywt_censoring))) {
+    warning(
+      "Missing drywt_censoring values when drywt is present;\n",  
+      "this might result in data getting lost during basis conversion.",
+      call. = FALSE
+    )
+  }
+    
+  if (any(!is.na(data$lipidwt) & is.na(data$lipidwt_censoring))) {
+    warning(
+      "Missing lipidwt_censoring values when lipidwt is present;\n",  
+      "this might result in data getting lost during basis conversion.",
+      call. = FALSE
+    )
+  }
+  
+  if (!all(data$drywt_censoring %in% c("", "<", "D", "Q", NA_character_))) {
+    stop(
+      "Unexpected drywt_censoring values: must be '', '<', 'D', 'Q' or NA.\n",
+      "If you have greater_than values, contact the HARSAT development team."
+    )
+  }  
+  
+  if (!all(data$lipidwt_censoring %in% c("", "<", "D", "Q", NA_character_))) {
+    stop(
+      "Unexpected lipidwt_censoring values: must be '', '<', 'D', 'Q' or NA.\n",
+      "If you have greater_than values, contact the HARSAT development team."
+    )
+  }  
+
+  invisible()
+}
+
+
 
 
 # four get_basis functions defined here

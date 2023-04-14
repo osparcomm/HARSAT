@@ -256,7 +256,7 @@ ctsm_parallel_objects <- function(imposex = FALSE) {
   # objects required for clusterExport
   
   out <- c(
-    "negTwiceLogLik", "convert.basis",
+    "negTwiceLogLik", 
     objects(".GlobalEnv", pattern = "^get*"),
     objects(".GlobalEnv", pattern = "^ctsm*"),
     objects(".GlobalEnv", pattern = "^info*")
