@@ -310,8 +310,10 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
     out$units <- paste(out$units, extra.text, sep = sep.html)
   }
   
-  
-  out$extraction <- paste("Data extraction: ", info$extraction, sep = "")
+  out$extraction <- "Data extraction:"
+  if (!is.null(info$extraction)) {
+    out$extraction <- paste(out$extraction, format(info$extraction, "%d %B %Y"))
+  }
 
   out
 }

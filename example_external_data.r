@@ -64,7 +64,7 @@ biota_data <- ctsm_read_data(
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 
   stations = "AMAP_external_new_stations_only.csv", 
   path = file.path("data", "example_external_data"), 
-  extraction = "2022/01/11",
+  # extraction = "2022/01/11",
   # max_year = 2020L, 
   data_format = "external", 
   control = list(region_id = "AMAP_region")
