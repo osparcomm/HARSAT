@@ -2,52 +2,128 @@
 
 # Set up functions ----
 
-ctsm.assessment.setup <- function(ctsm.ob, AC = NULL, recent.trend = 20) {
+ctsm_assessment <- function(
+  ctsm_ob, 
+  subset = NULL, 
+  AC = NULL, 
+  get_assessment_criteria = get.AC, 
+  recent_trend = 20, 
+  parallel = FALSE, 
+  ...) {
   
-  # set up assessment object (only needed for safety because trend assessment routines
-  # are now much slower and don't want things to crash near the end, losing everything)
+  # location: assessment_functions.R
 
-  ctsm.ob$call <- match.call()
+  # runs assessment
+  # subset can be used if the assessment is to be done in chunks because of size
 
-  ctsm.ob <- within(ctsm.ob, {
-    
-    info$AC <- AC
-    info$recent.trend <- recent.trend
-
-    assessment <- vector(mode = "list", length = nrow(timeSeries))
-    names(assessment) <- row.names(timeSeries)
-
-  })
+  # set up assessment structure
   
-  ctsm.ob$call.data <- ctsm.ob$QA <- NULL
-  ctsm.ob
+  ctsm_ob$call <- match.call()
 
+  ctsm_ob$info$AC <- AC
+  ctsm_ob$info$recent.trend <- recent_trend
+  ctsm_ob$info$get_assessment_criteria <- substitute(get_assessment_criteria)
+
+  ctsm_ob$assessment <- vector(mode = "list", length = nrow(ctsm_ob$timeSeries))
+  names(ctsm_ob$assessment) <- row.names(ctsm_ob$timeSeries)
+
+  ctsm_ob$call.data <- ctsm_ob$QA <- NULL
+
+  
+  # identify which series are to be assessed in this run - defaults to all
+  
+  series_id <- row.names(ctsm_ob$timeSeries)
+  
+  if (!is.null(substitute(subset))) {
+    timeSeries <- tibble::rownames_to_column(ctsm_ob$timeSeries, "series")
+    ok <- eval(substitute(subset), timeSeries, parent.frame())
+    series_id <- timeSeries[ok, "series"]
+  }
+
+  
+  # assess timeseries
+  
+  out <- ctsm_assessment_engine(
+    ctsm_ob, 
+    series_id,
+    get.assessment.criteria = get_assessment_criteria,
+    parallel = parallel, 
+    ...
+  )
+  
+  
+  # organise output
+  
+  ctsm_ob$assessment[names(out)] <- out
+  
+  ctsm_ob
+}
+
+
+ctsm_update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...) {
+  
+  # location: assessment_functions.R
+  
+  # updates an assessment
+  
+  
+  # check that ctsm_ob is a valid assessment object
+  
+  if (!"assessment" %in% names(ctsm_ob) || 
+      !identical(names(ctsm_ob$assessment), row.names(ctsm_ob$timeSeries))) {
+    stop("ctsm_ob is not a valid assessment object")
+  }
+  
+
+  # identify which series are to be assessed in this run
+  
+  if (is.null(substitute(subset))) {
+    stop("subset is NULL: nothing to update")
+  }
+  
+  timeSeries <- tibble::rownames_to_column(ctsm_ob$timeSeries, "series")
+  ok <- eval(substitute(subset), timeSeries, parent.frame())
+  series_id <- timeSeries[ok, "series"]
+
+  
+  # assess timeseries
+  
+  out <- ctsm_assessment_engine(
+    ctsm_ob, 
+    series_id,
+    get.assessment.criteria = get(ctsm_ob$info$get_assessment_criteria),
+    parallel = parallel, 
+    ...
+  )
+  
+  
+  # organise output
+  
+  ctsm_ob$assessment[names(out)] <- out
+  
+  ctsm_ob
 }
 
 
 
-ctsm.assessment <- function(
-  ctsm.ob, determinandID, seriesID, get.assessment.criteria = get.AC, 
+ctsm_assessment_engine <- function(
+  ctsm.ob, series_id, get.assessment.criteria = get.AC, 
   parallel = FALSE, ...) {
 
-  # assess each time series
+  # location: assessment_functions.R
+  
+  # assess each time series in turn
   
   library("dplyr")
   
   info <- ctsm.ob$info
 
-  timeSeries <- ctsm.ob$timeSeries
+  timeSeries <- ctsm.ob$timeSeries[series_id, ]
   
-  if (! missing(determinandID)) 
-    timeSeries <- droplevels(subset(timeSeries, determinand %in% determinandID))
+  data <- dplyr::filter(ctsm.ob$data, .data$seriesID %in% row.names(timeSeries))
+  data <- droplevels(data)
 
-  if (! missing(seriesID)) 
-    timeSeries <- droplevels(timeSeries[seriesID, ])
-  
-  data <- droplevels(subset(ctsm.ob$data, seriesID %in% row.names(timeSeries)))
-  
-  stations <- ctsm.ob$stations
-  stations <- tibble::column_to_rownames(stations, "station_code")
+  stations <- tibble::column_to_rownames(ctsm.ob$stations, "station_code")
   stations <- stations[timeSeries$station_code, ]
   
   

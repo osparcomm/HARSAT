@@ -134,17 +134,12 @@ if(info_AC_type != "EXTERNAL") {
 
 ## main runs ----
 
-biota_assessment <- ctsm.assessment.setup(
-  biota_timeSeries, 
-  recent.trend = 20
-)
-
-biota_assessment$assessment <- ctsm.assessment(biota_assessment)
+biota_assessment <- ctsm_assessment(biota_timeSeries)
 
 
 # use the code below if it takes a long time to run
 
-# biota_assessment$assessment <- ctsm.assessment(biota_assessment, parallel = TRUE)
+# biota_assessment <- ctsm_assessment(biota_timeSeries, parallel = TRUE)
 
 
 
@@ -157,8 +152,8 @@ biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 # "3371 HG Mytilus edulis SB Not_applicable"                       
 
 # refit with different numerical differencing arguments
-# biota_assessment$assessment[wk_check] <- 
-#   ctsm.assessment(biota_assessment, seriesID = wk_check, hess.d = 0.01, hess.r = 8)
+# biota_assessment <- 
+#   ctsm_update_assessment(biota_assessment, series == wk_check, hess.d = 0.01, hess.r = 8)
 
 # saveRDS(biota_assessment, file.path("RData", "biota assessment.rds"))
 
