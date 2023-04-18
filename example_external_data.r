@@ -180,7 +180,7 @@ ctsm_summary_table(
 
 # can subset assessment based on variables in either timeSeries or stations 
 # components of object: commonly by determinand, matrix, species, station_code 
-# or station_name
+# or station_name; can also use the series identifier in row.names(timeSeries)
 # if subset is NULL (default), all timeseries are plotted (can take some time)
 
 ctsm_plot_assessment(
@@ -207,4 +207,10 @@ ctsm_plot_assessment(
   file_format = "pdf"
 )
 
+ctsm_plot_assessment(
+  biota_assessment, 
+  subset = series == "A1 HG Phoca hispida LI adult",
+  output_dir = file.path("output", "graphics"), 
+  file_format = "pdf"
+)
 

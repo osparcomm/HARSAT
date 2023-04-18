@@ -31,7 +31,7 @@ ctsm_plot_assessment <- function(
   timeSeries <- ctsm_asmt_obj$timeSeries 
   
   
-  timeSeries <- rownames_to_column(timeSeries, ".series")
+  timeSeries <- rownames_to_column(timeSeries, "series")
   
   timeSeries <- left_join(
     timeSeries, 
@@ -39,14 +39,14 @@ ctsm_plot_assessment <- function(
     by = "station_code"
   )
   
-  timeSeries <- column_to_rownames(timeSeries, ".series")
-  
-
   if (!is.null(substitute(subset))) {
     ok <- eval(substitute(subset), timeSeries, parent.frame())
     timeSeries <- timeSeries[ok, ]
+    row.names(timeSeries) <- NULL
   }
-  
+
+  timeSeries <- column_to_rownames(timeSeries, "series")
+
   series <- row.names(timeSeries)
   
   
@@ -189,7 +189,7 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
     Biota = {
       txt <- paste0(txt, " (", ctsm_get_info("species", info$species, "common_name"), " ")
       if (length(matrixID) == 1) 
-        paste0(txt, matrixNames, ")") 
+        paste0(txt, matrixNames) 
       else {
         out <- sapply(matrixID, function(i) {
           seriesID <- names(info$matrix)[info$matrix == i]
@@ -197,20 +197,27 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
           paste0("(", paste0(detID, collapse = ", "), ")")
         })
         out <- paste(matrixNames, out, sep = " ")
-        paste0(txt, paste(out, collapse = "; "), ")")
+        paste0(txt, paste(out, collapse = "; "))
       }
     },
     Sediment = {
       if (length(matrixID) > 1)
         warning('multiple matrices not supported for sediment in ctsm.web.getKey')
-      paste0(txt, " (", matrixNames[1], ")")
+      paste0(txt, " (", matrixNames[1])
     },
     Water = {
       if (length(matrixID) > 1) 
         warning('multiple matrices not supported for water in ctsm.web.getKey')
-      paste0(txt, " (", matrixNames[1], ")")
+      paste0(txt, " (", matrixNames[1])
     }
   )
+  
+  if (is.na(info$subseries)) {
+    txt <- paste0(txt, ")")
+  } else {
+    txt <- paste0(txt, " - ", info$subseries, ")")
+  }
+    
 
   out <- list(media = txt)
 
