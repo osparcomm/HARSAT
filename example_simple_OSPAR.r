@@ -120,6 +120,13 @@ biota_assessment <- ctsm.assessment.setup(
 biota_assessment$assessment <- ctsm.assessment(biota_assessment)
 
 
+
+biota_assessment <- ctsm_assessment(
+  biota_timeSeries, 
+  AC = c("BAC", "EAC", "EQS.OSPAR", "HQS")
+)
+
+
 # check convergence - no errors this time
 
 ctsm_check_convergence(biota_assessment$assessment)

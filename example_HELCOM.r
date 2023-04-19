@@ -299,17 +299,8 @@ water_timeSeries <- ctsm_create_timeSeries(
 
 ### main runs ----
 
-
-sediment_assessment <- ctsm.assessment.setup(
-  sediment_timeSeries, 
-  AC = "EQS", 
-  recent.trend = 20
-)
-
-sediment_assessment$assessment <- ctsm.assessment(
-  sediment_assessment, 
-  parallel = TRUE
-)
+sediment_assessment <- ctsm_assessment(
+  sediment_timeSeries, AC = "EQS", parallel = TRUE)
 
 
 ### check convergence ----
@@ -325,13 +316,6 @@ ctsm_check_convergence(sediment_assessment$assessment)
 
 ### main runs ----
 
-biota_assessment <- ctsm.assessment.setup(
-  biota_timeSeries, 
-  AC = c("BAC", "EAC", "EQS", "MPC"), 
-  recent.trend = 20
-)
-
-
 # preliminary analysis required for imposex assessment 
 # takes a long time to run!!!!!
 # I need to turn this into a function
@@ -345,87 +329,61 @@ source("example_HELCOM_imposex_preparation.R")
 wk_determinands <- ctsm_get_determinands("biota")
 wk_group <- info.determinand[wk_determinands, "biota_group"]
 
-biota_Metals <- ctsm.assessment(
-  biota_assessment, 
-  determinandID = wk_determinands[wk_group == "Metals"], 
+biota_assessment <- ctsm_assessment(
+  biota_timeSeries, 
+  AC = c("BAC", "EAC", "EQS", "MPC"), 
+  subset = determinand %in% wk_determinands[wk_group == "Metals"], 
   parallel = TRUE
 )
-
 
 wk_organics <- c(
   "PAH_parent", "PBDEs", "Organobromines", "Organofluorines", 
   "Chlorobiphenyls", "Dioxins"
 )  
 
-biota_Organics <- ctsm.assessment(
+biota_assessment <- ctsm_update_assessment(
   biota_assessment, 
-  determinandID = wk_determinands[wk_group %in% wk_organics], 
+  subset = determinand %in% wk_determinands[wk_group %in% wk_organics], 
   parallel = TRUE
 )
 
-
-biota_Metabolites <- ctsm.assessment(
+biota_assessment <- ctsm_update_assessment(
   biota_assessment, 
-  determinandID = wk_determinands[wk_group %in% "Metabolites"]
+  subset = determinand %in% wk_determinands[wk_group %in% "Metabolites"]
 )
 
-
-biota_Imposex <- ctsm.assessment(
+biota_Imposex <- ctsm_update_assessment(
   biota_assessment, 
-  determinandID = wk_determinands[wk_group %in% "Imposex"],
-  parallel = TRUE
+  subset = determinand %in% wk_determinands[wk_group %in% "Imposex"]
 )
-
 
 
 ### check convergence ----
 
 # no checks for Imposex
 
-wk_group <- c("Metals", "Organics", "Metabolites")
-
-(wk_check <- sapply(
-  wk_group,
-  simplify = FALSE, FUN = function(id) {
-    assessment <- get(paste("biota", id, sep = "_"))
-    ctsm_check_convergence(assessment)
-  }))
+wk_id <- biota_assessment$timeSeries$determinand %in% 
+  wk_determinands[wk_group != "Imposex"] 
+wk_id <- row.names(biota_assessment$timeSeries)[wk_id]
+(wk_check <- ctsm_check_convergence(biota_assessment$assessment[wk_id]))
 
 
 # two time series need to be refitted
 
 # "2109 PB Perca fluviatilis MU" - fixed bounds
-(wk_id <- wk_check$Metals[1])
-biota_Metals[wk_id] <- 
-  ctsm.assessment(biota_assessment, seriesID = wk_id, fixed_bound = 20)
+biota_assessment <- ctsm_update_assessment( 
+  biota_assessment, series == wk_check[1], fixed_bound = 20
+)
 
 # "2299 PYR1OH Limanda limanda BI HPLC-FD" - standard errors
-(wk_id <- wk_check$Metabolites[1])
-biota_Metabolites[wk_id] <- 
-  ctsm.assessment(biota_assessment, seriesID = wk_id, hess.d = 0.0001, hess.r = 8)
+biota_assessment <- ctsm_update_assessment( 
+  biota_assessment, series == wk_check[2], hess.d = 0.0001, hess.r = 8
+)
 
 
 # check it has worked
 
-(wk_check <- sapply(
-  wk_group,
-  simplify = FALSE, FUN = function(id) {
-    assessment <- get(paste("biota", id, sep = "_"))
-    ctsm_check_convergence(assessment)
-  }))
-
-
-# put each compenent back into assessment object
-
-biota_assessment$assessment <- local({
-  out <- biota_assessment$assessment
-  for (group in c(wk_group, "Imposex")) {
-    assessment <- paste0("biota_", group)  
-    assessment <- get(assessment)
-    out[names(assessment)] <- assessment
-  }
-  out
-})
+ctsm_check_convergence(biota_assessment$assessment[wk_id])
 
 
 # saveRDS(biota_assessment, file.path("RData", "biota assessment.rds"))
@@ -435,13 +393,9 @@ biota_assessment$assessment <- local({
 
 ### main runs ----
 
-water_assessment <- ctsm.assessment.setup(
-  water_timeSeries, 
-  AC = "EQS", 
-  recent.trend = 20
+water_assessment <- ctsm_assessment(
+  water_timeSeries, AC = "EQS", parallel = TRUE
 )
-
-water_assessment$assessment <- ctsm.assessment(water_assessment, parallel = TRUE)
 
 
 ### check convergence ----
@@ -451,14 +405,12 @@ water_assessment$assessment <- ctsm.assessment(water_assessment, parallel = TRUE
 # refit a couple of time series
 
 # "5190 CD Yes" - fixed effects on bounds
-(wk_id <- wk_check[1])
-water_assessment$assessment[wk_id] <- 
-  ctsm.assessment(water_assessment, seriesID = wk_id, fixed_bound = 20)
-
 # "5192 CD Yes" - fixed effects on bounds
-(wk_id <- wk_check[2])
-water_assessment$assessment[wk_id] <- 
-  ctsm.assessment(water_assessment, seriesID = wk_id, fixed_bound = 20)
+
+water_assessment <- ctsm_update_assessment(
+  water_assessment, series %in% wk_check, fixed_bound = 20
+)
+
 
 ctsm_check_convergence(water_assessment$assessment)
 
