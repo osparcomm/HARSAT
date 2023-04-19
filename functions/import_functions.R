@@ -10,12 +10,14 @@ ctsm_read_data <- function(
   stations, 
   QA, 
   path = ".", 
-  extraction, 
+  extraction = NULL, 
   max_year = NULL, 
   control = list(), 
   data_format = c("ICES_old", "ICES_new", "external")) {
 
   # import_functions.R
+  # dependencies lubridate
+  
   # reads in data from an ICES extraction or from an external data file
   
   
@@ -37,34 +39,36 @@ ctsm_read_data <- function(
     }
   }    
     
+  if (!is.null(extraction)) {
+    if (length(extraction) > 1 | !is.character(extraction)) {
+      stop(
+        "extraction must be a single character string of the form ymd: e.g. \"",
+        lubridate::today(), ""
+      )
+    }
+  }  
+  
+  
+  # turn extraction into date object
 
-  # sort out extraction date
+  if (!is.null(extraction)) {
+    extraction <- suppressWarnings(lubridate::ymd(extraction))
+    if (is.na(extraction)) {
+      stop(
+        "extraction not recognised: it must be a valid date of the form ", 
+        "ymd: e.g. \"", lubridate::today(), "\""
+      )
+    }  
+  }  
+
     
-  if (length(extraction) > 1) {
-    stop("extraction must be a single date")
-  }
-  extraction <- as.POSIXlt(extraction)
-  
-  extraction_year <- as.numeric(format(extraction, "%Y"))
-  extraction_month <- as.numeric(format(extraction, "%m"))
-  
-  if (!is.null(max_year) && extraction_year < max_year) {
-    stop("extraction predates some monitoring data")
-  }
-  
-  extraction_text <- format(extraction, "%d %B %Y")
-  if (substring(extraction_text, 1, 1) == "0") { 
-    extraction_text <- substring(extraction_text, 2)
-  }
-  
-  
   # set up control (info) structure 
   # some of this should probably go in ctsm_create_timeSeries
     
   info <- list(
     compartment = compartment, 
     purpose = purpose, 
-    extraction = extraction_text,
+    extraction = extraction,
     data_format = data_format, 
     max_year = max_year
   )
