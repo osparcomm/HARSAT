@@ -1572,16 +1572,15 @@ ctsm_create_timeSeries <- function(
   if (info$compartment == "biota") {
 
     id <- paste0("LIPIDWT%", c("", ".uncertainty", ".limit_detection", ".limit_quantification"))
-    
+  
     data[id] <- lapply(
       data[id], 
-      convert.basis,  
+      ctsm_convert_basis,  
       from = data[["LIPIDWT%.basis"]], 
-      to = rep("W", nrow(data)),
+      to = "W",
       drywt = data[["DRYWT%"]], 
-      drywt.censoring = data[["DRYWT%.censoring"]], 
-      lipidwt = NA, 
-      lipidwt.censoring = NA
+      drywt_censoring = data[["DRYWT%.censoring"]], 
+      print_warning = FALSE
     )
   }
 
@@ -1605,14 +1604,23 @@ ctsm_create_timeSeries <- function(
     
       data[id] <- lapply(
         data[id], 
-        convert.basis,  
+        ctsm_convert_basis,  
         from = data$basis, 
         to = data$new.basis,
         drywt = data[["DRYWT%"]], 
-        drywt.censoring = data[["DRYWT%.censoring"]], 
-        lipidwt = switch(info$compartment, biota = data[["LIPIDWT%"]], NA), 
-        lipidwt.censoring = switch(info$compartment, biota = data[["LIPIDWT%.censoring"]], NA), 
-        exclude = data$group %in% c("Imposex", "Metabolites", "Effects")
+        drywt_censoring = data[["DRYWT%.censoring"]], 
+        lipidwt = switch(
+          info$compartment, 
+          biota = data[["LIPIDWT%"]], 
+          NA_real_
+        ), 
+        lipidwt_censoring = switch(
+          info$compartment, 
+          biota = data[["LIPIDWT%.censoring"]], 
+          NA_character_
+        ), 
+        exclude = data$group %in% c("Imposex", "Metabolites", "Effects"), 
+        print_warning = FALSE
       )
       
       # THIS CAN BE STREAMLINED!!!!!
@@ -1626,31 +1634,34 @@ ctsm_create_timeSeries <- function(
         id <- paste0("AL", wk_suffix)
         data[id] <- lapply(
           data[id], 
-          convert.basis, 
+          ctsm_convert_basis, 
           from = data$AL.basis,
           to = data$new.basis,
           drywt = data[["DRYWT%"]], 
-          drywt.censoring = data[["DRYWT%.censoring"]]
+          drywt_censoring = data[["DRYWT%.censoring"]],
+          print_warning = FALSE
         )
         
         id <- paste0("LI", wk_suffix)
         data[id] <- lapply(
           data[id], 
-          convert.basis, 
+          ctsm_convert_basis, 
           from = data$AL.basis,
           to = data$new.basis,
           drywt = data[["DRYWT%"]], 
-          drywt.censoring = data[["DRYWT%.censoring"]]
+          drywt_censoring = data[["DRYWT%.censoring"]],
+          print_warning = FALSE
         )
         
         id <- paste0("CORG", wk_suffix)
         data[id] <- lapply(
           data[id], 
-          convert.basis, 
+          ctsm_convert_basis, 
           from = data$CORG.basis,
           to = data$new.basis,
           drywt = data[["DRYWT%"]], 
-          drywt.censoring = data[["DRYWT%.censoring"]]
+          drywt_censoring = data[["DRYWT%.censoring"]],
+          print_warning = FALSE
         )
         
         if ("LOIGN" %in% names(data)) {
@@ -1658,11 +1669,12 @@ ctsm_create_timeSeries <- function(
           id <- paste0("LOIGN", wk_suffix)
           data[id] <- lapply(
             data[id], 
-            convert.basis, 
+            ctsm_convert_basis, 
             from = data$LOIGN.basis,
             to = data$new.basis,
             drywt = data[["DRYWT%"]], 
-            drywt.censoring = data[["DRYWT%.censoring"]]
+            drywt_censoring = data[["DRYWT%.censoring"]],
+            print_warning = FALSE
           )
         }        
       }
@@ -1703,20 +1715,47 @@ ctsm_create_timeSeries <- function(
   # no DRYWT% data and convert.basis falls over
   
   if (info$compartment %in% c("biota", "sediment")) {
-  
-    id <- c("concentration", "uncertainty", "limit_detection", "limit_quantification")
+    
+    id <- "concentration"
     data[id] <- lapply(
       data[id], 
-      convert.basis,  
+      ctsm_convert_basis,  
       from = data$basis, 
       to = data$new.basis,
       drywt = data[["DRYWT%"]], 
-      drywt.censoring = data[["DRYWT%.censoring"]], 
-      lipidwt = switch(info$compartment, biota = data[["LIPIDWT%"]], NA), 
-      lipidwt.censoring = switch(info$compartment, biota = data[["LIPIDWT%.censoring"]], NA), 
+      drywt_censoring = data[["DRYWT%.censoring"]], 
+      lipidwt = switch(
+        info$compartment, 
+        biota = data[["LIPIDWT%"]], 
+        NA_real_
+      ), 
+      lipidwt_censoring = switch(
+        info$compartment, 
+        biota = data[["LIPIDWT%.censoring"]], 
+        NA_character_), 
       exclude = data$group %in% c("Imposex", "Metabolites", "Effects")
     )
     
+    id <- c("uncertainty", "limit_detection", "limit_quantification")
+    data[id] <- lapply(
+      data[id], 
+      ctsm_convert_basis,  
+      from = data$basis, 
+      to = data$new.basis,
+      drywt = data[["DRYWT%"]], 
+      drywt_censoring = data[["DRYWT%.censoring"]], 
+      lipidwt = switch(
+        info$compartment, 
+        biota = data[["LIPIDWT%"]], 
+        NA_real_
+      ), 
+      lipidwt_censoring = switch(
+        info$compartment, 
+        biota = data[["LIPIDWT%.censoring"]], 
+        NA_character_), 
+      exclude = data$group %in% c("Imposex", "Metabolites", "Effects"),
+      print_warning = FALSE
+    )
   }
 
     
@@ -1733,31 +1772,34 @@ ctsm_create_timeSeries <- function(
     id <- paste0("AL", wk_suffix)
     data[id] <- lapply(
       data[id], 
-      convert.basis, 
+      ctsm_convert_basis, 
       from = data$AL.basis,
       to = data$new.basis,
       drywt = data[["DRYWT%"]], 
-      drywt.censoring = data[["DRYWT%.censoring"]]
+      drywt_censoring = data[["DRYWT%.censoring"]], 
+      print_warning = FALSE
     )
     
     id <- paste0("LI", wk_suffix)
     data[id] <- lapply(
       data[id], 
-      convert.basis, 
+      ctsm_convert_basis, 
       from = data$AL.basis,
       to = data$new.basis,
       drywt = data[["DRYWT%"]], 
-      drywt.censoring = data[["DRYWT%.censoring"]]
+      drywt_censoring = data[["DRYWT%.censoring"]], 
+      print_warning = FALSE
     )
     
     id <- paste0("CORG", wk_suffix)
     data[id] <- lapply(
       data[id], 
-      convert.basis, 
+      ctsm_convert_basis, 
       from = data$CORG.basis,
       to = data$new.basis,
       drywt = data[["DRYWT%"]], 
-      drywt.censoring = data[["DRYWT%.censoring"]]
+      drywt_censoring = data[["DRYWT%.censoring"]], 
+      print_warning = FALSE
     )
     
     if ("LOIGN" %in% names(data)) {
@@ -1765,11 +1807,12 @@ ctsm_create_timeSeries <- function(
       id <- paste0("LOIGN", wk_suffix)
       data[id] <- lapply(
         data[id], 
-        convert.basis, 
+        ctsm_convert_basis, 
         from = data$LOIGN.basis,
         to = data$new.basis,
         drywt = data[["DRYWT%"]], 
-        drywt.censoring = data[["DRYWT%.censoring"]]
+        drywt_censoring = data[["DRYWT%.censoring"]], 
+        print_warning = FALSE
       )
     }        
   }
@@ -4015,15 +4058,16 @@ ctsm_estimate_uncertainty <- function(data, response_id, compartment) {
   # a dry or lipid weight
 
   if (compartment == "biota") {
-    data$sd_constant <- convert.basis(
+    data$sd_constant <- ctsm_convert_basis(
       data$sd_constant, 
-      rep("W", length(data$sd_constant)), 
+      "W", 
       data$new.basis, 
       data[["DRYWT%"]], 
-      data[["DRYWT%.censoring"]], 
       data[["LIPIDWT%"]], 
-      data[["LIPIDWT%.censoring"]], 
-      exclude = data$group %in% c("Imposex", "Effects", "Metabolites")
+      drywt_censoring = data[["DRYWT%.censoring"]], 
+      lipidwt_censoring = data[["LIPIDWT%.censoring"]], 
+      exclude = data$group %in% c("Imposex", "Effects", "Metabolites"),
+      print_warning = FALSE
     )
   }
 
