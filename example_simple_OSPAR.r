@@ -111,16 +111,6 @@ biota_timeSeries <- ctsm_create_timeSeries(
 
 # do the statistical analysis
 
-biota_assessment <- ctsm.assessment.setup(
-  biota_timeSeries, 
-  AC = c("BAC", "EAC", "EQS.OSPAR", "HQS"), 
-  recent.trend = 20
-)
-
-biota_assessment$assessment <- ctsm.assessment(biota_assessment)
-
-
-
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
   AC = c("BAC", "EAC", "EQS.OSPAR", "HQS")

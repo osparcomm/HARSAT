@@ -352,7 +352,7 @@ biota_assessment <- ctsm_update_assessment(
   subset = determinand %in% wk_determinands[wk_group %in% "Metabolites"]
 )
 
-biota_Imposex <- ctsm_update_assessment(
+biota_assessment <- ctsm_update_assessment(
   biota_assessment, 
   subset = determinand %in% wk_determinands[wk_group %in% "Imposex"]
 )
