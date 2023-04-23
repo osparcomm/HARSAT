@@ -1,48 +1,4 @@
 
-# function to check if species numerical values are within pre-defined range 
-
-values_range_check_species <- function(species_data, min_value, max_value) {
-  library(tidyverse)
-  
-  # select subset of columns
-  numerical_columns <- select(species_data, ends_with("WT."))
-  
-  # convert to numerical type
-  numerical_columns <- transform(numerical_columns, 
-                                 MU_DRYWT.   = as.numeric(MU_DRYWT.), 
-                                 LI_DRYWT.   = as.numeric(LI_DRYWT.),
-                                 SB_DRYWT.   = as.numeric(SB_DRYWT.), 
-                                 TM_DRYWT.   = as.numeric(TM_DRYWT.), 
-                                 EH_DRYWT.   = as.numeric(EH_DRYWT.), 
-                                 HA_DRYWT.   = as.numeric(HA_DRYWT.), 
-                                 FE_DRYWT.   = as.numeric(FE_DRYWT.), 
-                                 BL_DRYWT.   = as.numeric(BL_DRYWT.), 
-                                 MU_LIPIDWT. = as.numeric(MU_LIPIDWT.),
-                                 LI_LIPIDWT. = as.numeric(LI_LIPIDWT.),
-                                 SB_LIPIDWT. = as.numeric(SB_LIPIDWT.), 
-                                 TM_LIPIDWT. = as.numeric(TM_LIPIDWT.), 
-                                 EH_LIPIDWT. = as.numeric(EH_LIPIDWT.), 
-                                 HA_LIPIDWT. = as.numeric(HA_LIPIDWT.), 
-                                 FE_LIPIDWT. = as.numeric(FE_LIPIDWT.), 
-                                 BL_LIPIDWT. = as.numeric(BL_LIPIDWT.)
-  )
-  
-  # check the condition if values in pre-defined range
-  condition <- (numerical_columns >= min_value) & (numerical_columns <= max_value)
-  
-  # convert NA to TRUE to only have boolean values
-  condition[is.na(condition)] <- TRUE
-  
-  # check if all values are TRUE
-  check <- all(condition == TRUE)
-  
-  if(!check)
-    print("Warning: not all values in species reference table are within range [min_value, max_value] !!!")
-  else
-    print("OK, all values in species reference table are within range [min_value, max_value]")
-}
-
-
 # Information extractor function ----
 
 ctsm_get_info <- function(
@@ -168,69 +124,120 @@ ctsm_check_reference_table <- function(x, info_type) {
 
 # Species information ----
 
-info.path <- sub("functions", "information", function_path)
-info.file <- function(file.name) file.path(info.path, file.name)
-
-info.species <- read.csv(
-    info.file(info_species_file_id), 
+ctsm_read_species <- function(file, path = "information") {
+  
+  out <- read.csv(
+    file.path(path, file), 
     row.names = "submitted_species", 
     na.strings = "", 
     check.names = FALSE
-)
+  )
+  
+  values_range_check_species(out, 0, 100)
+  
+  out
+}
 
 
-# Uncertainty estimates ----
+# function to check if species numerical values are within pre-defined range 
 
-# info.uncertainty <- read.csv(
-#   info.file(info_uncertainty_file_id), 
-#   row.names = "determinand", 
-#   na.strings = ""
-# )
+values_range_check_species <- function(species_data, min_value, max_value) {
+  library(tidyverse)
+  
+  # select subset of columns
+  numerical_columns <- select(species_data, ends_with("WT%"))
+  
+  # convert to numerical type
+  numerical_columns <- mutate(numerical_columns, across(.fns = as.numeric))
+  
+  # check the condition if values in pre-defined range
+  condition <- (numerical_columns >= min_value) & (numerical_columns <= max_value)
+  
+  # convert NA to TRUE to only have boolean values
+  condition[is.na(condition)] <- TRUE
+  
+  # check if all values are TRUE
+  check <- all(condition == TRUE)
+  
+  if(!check) {
+    print("Warning: not all values in species reference table are within range [min_value, max_value] !!!")
+  }
+}
+
+info.species <- ctsm_read_species("species_2020.csv")
+
 
 
 # Determinand information and functions ----
 
-info.determinand <- read.csv(
-  info.file(info_determinand_infile),
-  na.strings = "", 
-  colClasses = c(
-    determinand = "character",
-    common_name = "character",
-    pargroup = "character", 
-    biota_group = "character",
-    sediment_group = "character",
-    water_group = "character",
-    biota_assess = "logical",
-    sediment_assess = "logical",
-    water_assess = "logical",
-    biota_unit = "character",
-    sediment_unit = "character", 
-    water_unit = "character",       
-    biota_auxiliary = "character", 
-    sediment_auxiliary = "character", 
-    water_auxiliary = "character", 
-    biota_sd_constant = "numeric",
-    biota_sd_variable = "numeric",
-    sediment_sd_constant = "numeric",
-    sediment_sd_variable = "numeric",
-    water_sd_constant = "numeric",
-    water_sd_variable = "numeric",
-    distribution = "character", 
-    good_status = "character"
+ctsm_read_determinand <- function(file, path = "information") {
+  
+  out <- read.csv(
+    file.path(path, file), 
+    na.strings = "", 
+    colClasses = c(
+      determinand = "character",
+      common_name = "character",
+      pargroup = "character", 
+      biota_group = "character",
+      sediment_group = "character",
+      water_group = "character",
+      biota_assess = "logical",
+      sediment_assess = "logical",
+      water_assess = "logical",
+      biota_unit = "character",
+      sediment_unit = "character", 
+      water_unit = "character",       
+      biota_auxiliary = "character", 
+      sediment_auxiliary = "character", 
+      water_auxiliary = "character", 
+      biota_sd_constant = "numeric",
+      biota_sd_variable = "numeric",
+      sediment_sd_constant = "numeric",
+      sediment_sd_variable = "numeric",
+      water_sd_constant = "numeric",
+      water_sd_variable = "numeric",
+      distribution = "character", 
+      good_status = "character"
+    )
   )
-)
 
-info.determinand <- dplyr::mutate(
-  info.determinand, 
-  common_name = ifelse(
-    is.na(.data$common_name), 
-    .data$determinand, 
-    .data$common_name
+  
+  # fill in common name if missing
+  
+  out$common_name <- ifelse(
+    is.na(out$common_name), 
+    out$determinand, 
+    out$common_name 
   )
-)
 
-info.determinand <- tibble::column_to_rownames(info.determinand, "determinand")
 
+  # check all auxiliary variables are determinands in their own right
+  
+  lapply(c("biota", "sediment", "water"), function(compartment) {
+    
+    auxiliary <- out[[paste0(compartment, "_auxiliary")]] 
+    auxiliary <- strsplit(auxiliary, ", ")
+    auxiliary <- unlist(auxiliary)
+
+    auxiliary <- unique(na.omit(auxiliary))
+    
+    ok <- auxiliary %in% out$determinand
+    if(!all(ok)) {
+      stop(
+        'Not found in determinand information file: ', 
+        paste(auxiliary[!ok], collapse = ", ")
+      )
+    }
+  })
+  
+
+  # tidy up for output
+  
+  out <- tibble::column_to_rownames(out, "determinand")
+  
+  out
+}
 
 
 # extractor functions
@@ -288,22 +295,6 @@ ctsm_get_auxiliary <- function(
 }
 
 
-# check all auxiliary variables in info.determinand are recognised as 
-# determinands in their own right
-
-lapply(c("biota", "sediment", "water"), function(compartment) {
-  
-  determinands <- row.names(info.determinand)
-  auxiliary <- ctsm_get_auxiliary(determinands, compartment)
-
-  ok <- auxiliary %in% row.names(info.determinand)
-  if(!all(ok)) {
-    stop(
-      'Not found in determinand information file: ', 
-      paste(auxiliary[!ok], collapse = ", ")
-    )
-  }
-})
 
 
 
@@ -319,37 +310,35 @@ info_TEQ <- c(
 
 
 
-
-
 # Assessment criteria ----
 
-read.assessment.criteria <- function(infile)  {
-
-  sediment <- read.csv(
-    info.file(infile$sediment), 
-    na.strings = ""
-  )
-  sediment <- within(sediment, country[is.na(country)] <- "")
-
-  biota <- read.csv(
-    info.file(infile$biota), 
-    na.strings = ""
-  )
-  wk <- strsplit(biota$sub.family, ",", fixed = TRUE)
-  n <- sapply(wk, length)
-  biota <- biota[rep(1:nrow(biota), times = n),]
-  biota$sub.family <- unlist(wk)
-
-  water <- read.csv(
-    info.file(infile$water), 
-    na.strings = ""
-  )
+ctsm_read_assessment_criteria <- function(files, path = "information")  {
   
-  list(sediment = sediment, biota = biota, water = water)
+  out <- sapply(names(files), function(compartment) {
+    read.csv(
+      file.path(path, files[[compartment]]), 
+      na.strings = "",
+      strip.white = TRUE
+    )},
+    simplify = FALSE, 
+    USE.NAMES = TRUE
+  )
+    
+  if ("sediment" %in% names(out)) {
+    id <- is.na(out$sediment$country)
+    out$sediment$country[id] <- ""
+  }
+
+  if ("biota" %in% names(out)) {
+    wk <- strsplit(out$biota$sub.family, ",", fixed = TRUE)
+    n <- sapply(wk, length)
+    out$biota <- out$biota[rep(1:nrow(out$biota), times = n),]
+    out$biota$sub.family <- unlist(wk)
+  }
+
+  out
 }
 
-info.assessment.criteria <- read.assessment.criteria(info_AC_infile)
-rm(read.assessment.criteria)
 
 # gets Assessment Criteria
 # determinand is a vector of length n
@@ -2355,8 +2344,15 @@ get_basis_biota_OSPAR <- function(data, compartment = "biota") {
 
 # Matrix ----
 
+ctsm_read_matrix <- function(file, path = "information") {
+  read.csv(
+    file.path(path, "matrix.csv"), 
+    row.names = "matrix", 
+    strip.white = TRUE
+  )
+}
 
-info.matrix <- read.csv(info.file("matrix.csv"), row.names = "matrix", stringsAsFactors = FALSE)
+info.matrix <- ctsm_read_matrix("matrix.csv")
 
 
 # Regions ----
@@ -2364,7 +2360,8 @@ info.matrix <- read.csv(info.file("matrix.csv"), row.names = "matrix", stringsAs
 info.regions <- sapply(
   c("AMAP", "HELCOM", "OSPAR"), 
   function(x) {
-    infile <-info.file(paste(x, "regions.csv"))
+    infile <- paste(x, "regions.csv")
+    infile <- file.path("information", infile)
     row_names_id <- switch(
       x,
       OSPAR = "OSPAR_subregion",
@@ -2383,26 +2380,33 @@ info.regions <- sapply(
 
 # Method of extraction and pivot values ----
 
-info.methodExtraction <- read.csv(
-  info.file("method of extraction.csv"), 
-  row.names = "METCX",  
-  na.strings = ""
-)
+ctsm_read_method_extraction <- function(file, path = "information") {
+  read.csv(
+    file.path(path, file), 
+    row.names = "METCX",  
+    na.strings = "",
+    strip.white = TRUE
+  )
+}
 
-info.pivotValues <- read.csv(info.file("pivot values.csv"), na.strings = "")
+info.methodExtraction <- ctsm_read_method_extraction("method of extraction.csv") 
 
 
-# Html ----
+ctsm_read_pivot_values <- function(file, path = "information") {
+  read.csv(
+    file.path(path, file), 
+    na.strings = "",
+    strip.white = TRUE
+  )
+}
 
-# something has changed with this - need to investigate
-# but there are better replacement functions anyway
+info.pivotValues <- ctsm_read_pivot_values("pivot values.csv")
 
-# info.html <- read.csv(info.file("HTMLtranslate.csv"))
 
 
 # Imposex ----
 
-info.imposex <- read.csv(info.file("imposex.csv"))
+info.imposex <- read.csv(file.path("information", "imposex.csv"))
 
 get.info.imposex <- function(species, determinand, choice = c("min_value", "max_value"), 
                              na.action = c("fail", "ok")) {
@@ -2428,8 +2432,6 @@ get.info.imposex <- function(species, determinand, choice = c("min_value", "max_
   out
 }
 
-
-rm(info.path, info.file)
 
 
 # ICES RECO codes ----

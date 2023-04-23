@@ -33,26 +33,19 @@ source(file.path(function_path, "support_functions.R"))
 
 # source reference tables and associated information functions
 
-info_species_file_id <- "species_2020.csv"
-
 info_AC_type <- "HELCOM"
-
-info_AC_infile <- list(
-  biota = "assessment criteria biota HELCOM.csv",
-  sediment = "assessment criteria sediment HELCOM.csv",
-  water = "assessment criteria water.csv"
-)
-
-info_determinand_infile <- "determinand_HELCOM.csv"
 
 source(file.path(function_path, "information_functions.R"))
 
-# check if species values are within pre-defined range
-# constants
-min_value = 0L # min value for species values range check
-max_value = 100L # max value for species values range check
-species <- read.csv(file.path("information",info_species_file_id),header=TRUE,colClasses="character")
-values_range_check_species(species, min_value, max_value)
+info.determinand <- ctsm_read_determinand("determinand_HELCOM.csv")
+
+info.assessment.criteria <- ctsm_read_assessment_criteria(
+  list(
+    biota = "assessment criteria biota HELCOM.csv",
+    sediment = "assessment criteria sediment HELCOM.csv",
+    water = "assessment criteria water.csv"
+  )
+)
 
 
 
