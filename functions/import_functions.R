@@ -1216,7 +1216,6 @@ ctsm_create_timeSeries <- function(
   oddity_path = "oddities", 
   return_early = FALSE, 
   print_code_warnings = FALSE, 
-  output = c("time_series", "uncertainties"), 
   get_basis = get_basis_default,
   normalise = FALSE, 
   normalise.control = list()) {
@@ -1247,13 +1246,6 @@ ctsm_create_timeSeries <- function(
   }
 
     
-  # output: 
-  # time_series is default
-  # uncertainties provides data for estimating missing uncertainties - converts all 
-  #   concentrations to a wet weight basis
-
-  output = match.arg(output)
-  
   # normalisation can either be a logical (TRUE uses default normalisation function)
   # or a function
   
@@ -1478,19 +1470,20 @@ ctsm_create_timeSeries <- function(
     data, !is.na(uncertainty) & uncertainty_rel >= 100, action = "warning", 
     message = "Large uncertainties", fileName = "large uncertainties")
   
-  # keep these uncertainties if output = uncertainties, so we can see everything
+  # delete data with large relative uncertainties
   
-  if (output == "time_series") {
-    data <- mutate(
-      data, 
-      uncertainty_sd = if_else(.data$uncertainty_rel < 100, .data$uncertainty_sd, NA_real_)
-    )
-  }
-    
-  data <- within(data, {
-    uncertainty <- uncertainty_sd
-    rm(unit_uncertainty, uncertainty_sd, uncertainty_rel)
-  })
+  data <- dplyr::mutate(
+    data, 
+    uncertainty_sd = if_else(
+      .data$uncertainty_rel < 100, 
+      .data$uncertainty_sd, 
+      NA_real_
+    ),
+    uncertainty = .data$uncertainty_sd, 
+    unit_uncertainty = NULL,
+    uncertainty_sd = NULL, 
+    uncertainty_rel = NULL
+  )
   
 
   # sort out determinands where several determinands represent the same variable of interest
@@ -1526,7 +1519,6 @@ ctsm_create_timeSeries <- function(
   data <- ctsm_check_subseries(data)
     
 
-  
   # set rownames to NULL(ie. back to auto numeric)
   
   rownames(data) <- NULL
@@ -1569,266 +1561,10 @@ ctsm_create_timeSeries <- function(
     data <- ctsm.imposex.check.femalepop(data) 
   
 
-  # convert data to appropriate basis
-
-  # biota - first convert LIPIDWT% to wet weight (where necessary)
-  
-  if (info$compartment == "biota") {
-
-    id <- paste0("LIPIDWT%", c("", ".uncertainty", ".limit_detection", ".limit_quantification"))
-  
-    data[id] <- lapply(
-      data[id], 
-      ctsm_convert_basis,  
-      from = data[["LIPIDWT%.basis"]], 
-      to = "W",
-      drywt = data[["DRYWT%"]], 
-      drywt_censoring = data[["DRYWT%.censoring"]], 
-      print_warning = FALSE
-    )
-  }
-
-
-  # output = uncertainties
-  # convert data to a wet weight basis (biota and water) or dry weight basis (sediment)
-  #   for estimating constant and proportional errors and return
-  # assume water data are all W - no DRYWT data for water
-
-  if (output == "uncertainties") {
-  
-    data$new.basis <- switch(
-      info$compartment, 
-      sediment = factor(rep("D", nrow(data))),
-      factor(rep("W", nrow(data)))
-    )
-    
-    id <- c("concentration", "uncertainty", "limit_detection", "limit_quantification")
-    
-    if (info$compartment %in% c("biota", "sediment")) {
-    
-      data[id] <- lapply(
-        data[id], 
-        ctsm_convert_basis,  
-        from = data$basis, 
-        to = data$new.basis,
-        drywt = data[["DRYWT%"]], 
-        drywt_censoring = data[["DRYWT%.censoring"]], 
-        lipidwt = switch(
-          info$compartment, 
-          biota = data[["LIPIDWT%"]], 
-          NA_real_
-        ), 
-        lipidwt_censoring = switch(
-          info$compartment, 
-          biota = data[["LIPIDWT%.censoring"]], 
-          NA_character_
-        ), 
-        exclude = data$group %in% c("Imposex", "Metabolites", "Effects"), 
-        print_warning = FALSE
-      )
-      
-      # THIS CAN BE STREAMLINED!!!!!
-      
-      if (info$compartment == "sediment") {
-        
-        wk_suffix <- c(
-          "", ".uncertainty", ".limit_detection", ".limit_quantification"
-        )
-        
-        id <- paste0("AL", wk_suffix)
-        data[id] <- lapply(
-          data[id], 
-          ctsm_convert_basis, 
-          from = data$AL.basis,
-          to = data$new.basis,
-          drywt = data[["DRYWT%"]], 
-          drywt_censoring = data[["DRYWT%.censoring"]],
-          print_warning = FALSE
-        )
-        
-        id <- paste0("LI", wk_suffix)
-        data[id] <- lapply(
-          data[id], 
-          ctsm_convert_basis, 
-          from = data$AL.basis,
-          to = data$new.basis,
-          drywt = data[["DRYWT%"]], 
-          drywt_censoring = data[["DRYWT%.censoring"]],
-          print_warning = FALSE
-        )
-        
-        id <- paste0("CORG", wk_suffix)
-        data[id] <- lapply(
-          data[id], 
-          ctsm_convert_basis, 
-          from = data$CORG.basis,
-          to = data$new.basis,
-          drywt = data[["DRYWT%"]], 
-          drywt_censoring = data[["DRYWT%.censoring"]],
-          print_warning = FALSE
-        )
-        
-        if ("LOIGN" %in% names(data)) {
-          
-          id <- paste0("LOIGN", wk_suffix)
-          data[id] <- lapply(
-            data[id], 
-            ctsm_convert_basis, 
-            from = data$LOIGN.basis,
-            to = data$new.basis,
-            drywt = data[["DRYWT%"]], 
-            drywt_censoring = data[["DRYWT%.censoring"]],
-            print_warning = FALSE
-          )
-        }        
-      }
-    
-    }  
-      
-    # drop unwanted basis variables (apart from C13D and N15D which haven't been converted)
-    # need to retain new.basis (AMAP) when the basis is chosen depending on what has been 
-    # submitted
-    
-    id <- grep(".basis", names(data), value = TRUE)
-    id <- setdiff(id, c("new.basis", "C13D.basis", "N15D.basis"))
-    id <- setdiff(names(data), id)
-    data <- droplevels(data[id])
-    
-    out  = c(
-      out, 
-      ctsm_import_value(data, station_dictionary, info) 
-    )
-    
-    if (data_format == "old") out$QA <- QA
-    
-    return(out)
-
-  }
-    
-
-  # output = time_series
   # convert data to basis of assessment
   
-
-  cat("   Converting data to appropriate basis for statistical analysis", fill = TRUE)
-
-  data$new.basis <- get_basis(data, info$compartment)
-
-
-  # don't convert water because already assumed to be on a wet weight basis
-  # no DRYWT% data and convert.basis falls over
+  data <- ctsm_convert_to_target_basis(data, info$compartment, get_basis)
   
-  if (info$compartment %in% c("biota", "sediment")) {
-    
-    id <- "concentration"
-    data[id] <- lapply(
-      data[id], 
-      ctsm_convert_basis,  
-      from = data$basis, 
-      to = data$new.basis,
-      drywt = data[["DRYWT%"]], 
-      drywt_censoring = data[["DRYWT%.censoring"]], 
-      lipidwt = switch(
-        info$compartment, 
-        biota = data[["LIPIDWT%"]], 
-        NA_real_
-      ), 
-      lipidwt_censoring = switch(
-        info$compartment, 
-        biota = data[["LIPIDWT%.censoring"]], 
-        NA_character_), 
-      exclude = data$group %in% c("Imposex", "Metabolites", "Effects")
-    )
-    
-    id <- c("uncertainty", "limit_detection", "limit_quantification")
-    data[id] <- lapply(
-      data[id], 
-      ctsm_convert_basis,  
-      from = data$basis, 
-      to = data$new.basis,
-      drywt = data[["DRYWT%"]], 
-      drywt_censoring = data[["DRYWT%.censoring"]], 
-      lipidwt = switch(
-        info$compartment, 
-        biota = data[["LIPIDWT%"]], 
-        NA_real_
-      ), 
-      lipidwt_censoring = switch(
-        info$compartment, 
-        biota = data[["LIPIDWT%.censoring"]], 
-        NA_character_), 
-      exclude = data$group %in% c("Imposex", "Metabolites", "Effects"),
-      print_warning = FALSE
-    )
-  }
-
-    
-  if (info$compartment == "biota" & any(c("C13D", "N15D") %in% names(data)))
-    message("   Warning: Isotope ratios have not been converted to target basis")
-
-
-  if (info$compartment == "sediment") {
-
-    wk_suffix <- c(
-      "", ".uncertainty", ".limit_detection", ".limit_quantification"
-    )
-    
-    id <- paste0("AL", wk_suffix)
-    data[id] <- lapply(
-      data[id], 
-      ctsm_convert_basis, 
-      from = data$AL.basis,
-      to = data$new.basis,
-      drywt = data[["DRYWT%"]], 
-      drywt_censoring = data[["DRYWT%.censoring"]], 
-      print_warning = FALSE
-    )
-    
-    id <- paste0("LI", wk_suffix)
-    data[id] <- lapply(
-      data[id], 
-      ctsm_convert_basis, 
-      from = data$AL.basis,
-      to = data$new.basis,
-      drywt = data[["DRYWT%"]], 
-      drywt_censoring = data[["DRYWT%.censoring"]], 
-      print_warning = FALSE
-    )
-    
-    id <- paste0("CORG", wk_suffix)
-    data[id] <- lapply(
-      data[id], 
-      ctsm_convert_basis, 
-      from = data$CORG.basis,
-      to = data$new.basis,
-      drywt = data[["DRYWT%"]], 
-      drywt_censoring = data[["DRYWT%.censoring"]], 
-      print_warning = FALSE
-    )
-    
-    if ("LOIGN" %in% names(data)) {
-      
-      id <- paste0("LOIGN", wk_suffix)
-      data[id] <- lapply(
-        data[id], 
-        ctsm_convert_basis, 
-        from = data$LOIGN.basis,
-        to = data$new.basis,
-        drywt = data[["DRYWT%"]], 
-        drywt_censoring = data[["DRYWT%.censoring"]], 
-        print_warning = FALSE
-      )
-    }        
-  }
-
-  
-  # drop unwanted basis variables (apart from C13D and N15D which haven't been converted)
-  # retain new.basis for time series structure
-
-  id <- grep(".basis", names(data), value = TRUE)
-  id <- setdiff(id, c("new.basis", "C13D.basis", "N15D.basis"))
-  id <- setdiff(names(data), id)
-  data <- droplevels(data[id])
 
   if (return_early) {
     out  = c(
@@ -3133,7 +2869,6 @@ ctsm_merge_auxiliary <- function(data, info) {
   # sample will differ?  need to check
   
   
-
   for (aux_id in names(auxiliary)) {
 
     auxiliary_data <- auxiliary[[aux_id]]
@@ -3207,6 +2942,136 @@ ctsm_merge_auxiliary <- function(data, info) {
   data <- droplevels(data)
 }
 
+
+ctsm_convert_to_target_basis <- function(data, compartment, get_basis) {
+
+  # location: import_functions.R
+  # purpose:  convert data and auxiliary variables to their target basis as 
+  #           determined by get_basis function
+
+  # no conversion currently required for water, because all measurements
+  # already on a wet weight basis, and no auxiliaries need converting
+  
+  # routines are more complicated than they need to be because of the need
+  # to convert lipid data to a wet weight basis before further basis conversion
+   
+  # arguably can be done better by first merging dry and lipid data, converting 
+  # lipid data, converting remaining data, and then merging with remaining 
+  # auxiliaries - however, this requires more care with the exclude function and the 
+  # merge_auxiliary routine, which should strictly match determinand with auxiliary
+  
+  # getting rid of extra 'basis' variables at the end is something that needs to 
+  # be tidied up
+  
+  
+  cat("   Converting data to appropriate basis for statistical analysis", fill = TRUE)
+  
+  data$new.basis <- get_basis(data, compartment)
+  
+
+  if (compartment == "biota") {
+    
+    # convert lipid weight data
+    
+    id <- c("", ".uncertainty", ".limit_detection", ".limit_quantification") 
+    id <- paste0("LIPIDWT%", id)
+    
+    data[id] <- lapply(
+      data[id], 
+      ctsm_convert_basis,  
+      from = data[["LIPIDWT%.basis"]], 
+      to = "W",
+      drywt = data[["DRYWT%"]], 
+      drywt_censoring = data[["DRYWT%.censoring"]], 
+      print_warning = FALSE
+    )
+    
+    # convert measurement data
+    # print_warning gives the number of failures, which is the same for all id
+    # so only print first time round
+    
+    id <- c("concentration", "uncertainty", "limit_detection", "limit_quantification")
+    print_warning = c(TRUE, rep(FALSE, 3))
+    
+    data[id] <- mapply(
+      FUN = ctsm_convert_basis,  
+      conc = data[id], 
+      print_warning = print_warning, 
+      MoreArgs = list(
+        from = data$basis, 
+        to = data$new.basis,
+        drywt = data[["DRYWT%"]], 
+        drywt_censoring = data[["DRYWT%.censoring"]], 
+        lipidwt = data[["LIPIDWT%"]], 
+        lipidwt_censoring = data[["LIPIDWT%.censoring"]], 
+        exclude = data$group %in% c("Imposex", "Metabolites", "Effects")
+      ), 
+      SIMPLIFY = FALSE
+    )
+    
+  }
+ 
+  
+  if (compartment == "sediment") { 
+  
+    # convert measurement data
+    
+    id <- c("concentration", "uncertainty", "limit_detection", "limit_quantification")
+    print_warning = c(TRUE, rep(FALSE, 3))
+    
+    data[id] <- mapply(
+      FUN = ctsm_convert_basis,  
+      conc = data[id], 
+      print_warning = print_warning, 
+      MoreArgs = list(
+        from = data$basis, 
+        to = data$new.basis,
+        drywt = data[["DRYWT%"]], 
+        drywt_censoring = data[["DRYWT%.censoring"]]
+      ), 
+      SIMPLIFY = FALSE
+    )
+    
+    # convert auxiliary (normalisation) data
+    
+    norm_id <- c("AL", "LI", "CORG", "LOIGN")
+    ok <- norm_id %in% names(data)
+    norm_id <- norm_id[ok]
+    
+    id <- c("", ".uncertainty", ".limit_detection", ".limit_quantification")
+    
+    conc_id <- paste0(rep(norm_id, each = length(id)), id)
+    
+    from_id <- paste0(norm_id, ".basis")
+    from_id <- match(from_id, names(data))
+    from_id <- rep(from_id, each = length(id))
+    
+    data[conc_id] <- mapply(
+      FUN = ctsm_convert_basis, 
+      conc = data[conc_id], 
+      from = data[from_id], 
+      MoreArgs = list(
+        to = data$new.basis,
+        drywt = data[["DRYWT%"]], 
+        drywt_censoring = data[["DRYWT%.censoring"]], 
+        print_warning = FALSE
+      ), 
+      SIMPLIFY = FALSE
+    )
+    
+  }
+
+
+  # drop unwanted basis variables (apart from C13D and N15D which haven't been converted)
+  # retain new.basis for time series structure
+  
+  id <- grep(".basis", names(data), value = TRUE)
+  id <- setdiff(id, c("new.basis", "C13D.basis", "N15D.basis"))
+  id <- setdiff(names(data), id)
+  data <- droplevels(data[id])
+  
+  data
+}
 
   
 ctsm_normalise_sediment <- function(data, station_dictionary, control) {
