@@ -861,8 +861,7 @@ ctsm_tidy_stations <- function(stations, info) {
       station_id, 
       action = "delete.dups",
       message = "Duplicate stations - first one selected",
-      fileName = "duplicate stations", 
-      merge.stations = FALSE
+      fileName = "duplicate stations"
     )
     
     stations$station_id <- NULL
@@ -923,8 +922,7 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
     is.na(OSPAR_region) | is.na(OSPAR_subregion), 
     action = "delete", 
     message = "Stations outside OSPAR region", 
-    fileName = "stations outside area", 
-    merge.stations = FALSE
+    fileName = "stations outside area"
   )
   
   
@@ -942,7 +940,7 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
     ctsm.check(
       stations, !ok, action = "warning", 
       message = "OSPAR subregion in wrong OSPAR region", 
-      fileName = "Region information incorrect", merge.stations = FALSE
+      fileName = "Region information incorrect"
     )
     
   }    
@@ -1022,8 +1020,7 @@ ctsm_tidy_contaminants <- function(data, info) {
       not_ok, 
       action = "delete", 
       message = message_txt, 
-      fileName = "data_too_recent", 
-      merge.stations = FALSE
+      fileName = "data_too_recent"
     )
     
   }
@@ -1075,8 +1072,7 @@ ctsm_tidy_contaminants <- function(data, info) {
       odd, 
       action = "warning", 
       message = "Submitted.station not recognised by dictionary", 
-      fileName = "submitted station not recognised", 
-      merge.stations = FALSE
+      fileName = "submitted station not recognised"
     )
   }    
 
@@ -1167,8 +1163,7 @@ ctsm_tidy_QA <- function(QA, data, info) {
     paste(qalink, determinand), 
     action = "delete.dups",
     message = "Conflicting QA information - first one selected",
-    fileName = "conflicting QA", 
-    merge.stations = FALSE
+    fileName = "conflicting QA"
   )
   
   ctsm_link_QA(QA, data, info$compartment)
@@ -1325,8 +1320,7 @@ ctsm_create_timeSeries <- function(
     !ok, 
     action = "delete", 
     message = "Stations in data not found in station dictionary", 
-    fileName = "unidentified stations", 
-    merge.stations = FALSE
+    fileName = "unidentified stations"
   )
   
 
@@ -1440,9 +1434,12 @@ ctsm_create_timeSeries <- function(
   # necessarily the correct ones
   
   data <- ctsm.check(
-    data, paste(sample, determinand, matrix), action = "delete.dups", 
+    data, paste(sample, determinand, matrix), 
+    action = "delete.dups", 
     message = "Replicate measurements, only first retained", 
-    fileName = "replicate measurements")
+    fileName = "replicate measurements", 
+    stations = station_dictionary
+  )
 
 
   # ensure censoring, limit of detection and limit of quantification are consistent
@@ -1453,9 +1450,14 @@ ctsm_create_timeSeries <- function(
   # convert uncertainty into standard deviations, and remove any associated variables
   
   data <- ctsm.check(
-    data, !is.na(uncertainty) & uncertainty <= 0, action = "make.NA", 
+    data, 
+    !is.na(uncertainty) & uncertainty <= 0, 
+    action = "make.NA", 
     message = "Non-positive uncertainties", 
-    fileName = "non positive uncertainties", missingID = "uncertainty")
+    fileName = "non positive uncertainties", 
+    missingID = "uncertainty",
+    stations = station_dictionary
+  )
   
   data <- mutate(
     data, 
@@ -1475,8 +1477,13 @@ ctsm_create_timeSeries <- function(
     names(data)[(wk_id+1):(wk_n-2)])]
   
   ctsm.check(
-    data, !is.na(uncertainty) & uncertainty_rel >= 100, action = "warning", 
-    message = "Large uncertainties", fileName = "large uncertainties")
+    data, 
+    !is.na(uncertainty) & uncertainty_rel >= 100, 
+    action = "warning", 
+    message = "Large uncertainties", 
+    fileName = "large uncertainties",
+    stations = station_dictionary
+  )
   
   # keep these uncertainties if output = uncertainties, so we can see everything
   
@@ -1565,8 +1572,9 @@ ctsm_create_timeSeries <- function(
   # impute %femalepop when missing and sex = 1 - write out remaining
   # missing values for correction
   
-  if (info$compartment == "biota")
-    data <- ctsm.imposex.check.femalepop(data) 
+  if (info$compartment == "biota") {
+    data <- ctsm.imposex.check.femalepop(data)
+  }
   
 
   # convert data to appropriate basis
@@ -1949,7 +1957,7 @@ ctsm_create_timeSeries <- function(
 
 ctsm.check <- function(
   data, id, action = c("delete", "warning", "make.NA", "delete.dups"), 
-  message, fileName, merge.stations = TRUE, missingID) {
+  message, fileName, stations = NULL, missingID) {
 
   # action options: 
   # delete - delete oddities (in id) 
@@ -1967,8 +1975,7 @@ ctsm.check <- function(
   if (action == "delete.dups") {
     duplicateVar <- eval(substitute(id), data, parent.frame())
     odditiesID <- duplicated(duplicateVar) | duplicated(duplicateVar, fromLast = TRUE)
-  } 
-  else {
+  } else {
     odditiesID <- eval(substitute(id), data, parent.frame())
     if (!is.logical(odditiesID)) stop("'id' must be logical")
     odditiesID <- odditiesID & !is.na(odditiesID)
@@ -1986,12 +1993,14 @@ ctsm.check <- function(
   oddities <- data[odditiesID, ]
 
 
-  # merge with station dictionary if required - gets dictionary from top environment
+  # merge with station dictionary if required 
 
-  if (merge.stations) {
-    station_dictionary <- evalq(station_dictionary, sys.frame(1))
-    oddities <- left_join(oddities, station_dictionary, by = "station_code")
-    oddities <- relocate(oddities, all_of(names(station_dictionary)))
+  if (!is.null(stations)) {
+    var_id <- c("country", "station_code", "station_name")
+    var_id <- intersect(var_id, names(stations))
+    stations <- stations[var_id]
+    oddities <- left_join(oddities, stations, by = "station_code")
+    oddities <- relocate(oddities, all_of(names(stations)))
   }
 
   
@@ -2033,7 +2042,7 @@ ctsm.check <- function(
 }
   
 
-ctsm.check2 <- function(data, action, message, fileName, merge.stations = TRUE) {
+ctsm.check2 <- function(data, action, message, fileName, stations = NULL) {
 
   # check that all records have a valid action - if not, need to go back to
   # check function
@@ -2070,10 +2079,14 @@ ctsm.check2 <- function(data, action, message, fileName, merge.stations = TRUE) 
   
   # merge with station dictionary if required - gets dictionary from top environment
   
-  if (merge.stations) {
-    station_dictionary <- evalq(station_dictionary, sys.frame(1))
-    oddities <- left_join(oddities, station_dictionary, by = "station_code")
-    oddities <- relocate(oddities, all_of(names(station_dictionary)))
+  # merge with station dictionary if required 
+  
+  if (!is.null(stations)) {
+    var_id <- c("country", "station_code", "station_name")
+    var_id <- intersect(var_id, names(stations))
+    stations <- stations[var_id]
+    oddities <- left_join(oddities, stations, by = "station_code")
+    oddities <- relocate(oddities, all_of(names(stations)))
   }
   
   
@@ -2239,7 +2252,8 @@ ctsm_import_value <- function(data, station_dictionary, info) {
     paste(seriesID, sample), 
     action = "delete.dups",
     message = "Measurements still replicated, only first retained",
-    fileName = "replicate measurements extra"
+    fileName = "replicate measurements extra",
+    stations = station_dictionary
   )
   
 
@@ -2308,9 +2322,6 @@ ctsm_check_stations <- function(stations) {
 
 
 
-
-
-
 ctsm_get_digestion <- function(data) {
 
   # import_functions.R
@@ -2356,9 +2367,12 @@ ctsm_get_digestion <- function(data) {
   not_ok <- is_metal & is.na(data$digestion) 
 
   ctsm.check(
-    data, not_ok, action = "warning", 
+    data, 
+    not_ok, 
+    action = "warning", 
     message = "Missing digestion methods", 
-    fileName = "digestion_errors", merge.stations = FALSE)
+    fileName = "digestion_errors"
+  )
 
   data$digestion  
 }
@@ -2411,8 +2425,12 @@ ctsm.imposex.check.femalepop <- function(data) {
 
   missingID <- impID & is.na(data[["%FEMALEPOP"]])
   ctsm.check(
-    data[impID, ], missingID, action = "warning", 
-    message = "Missing FEMALEPOP values", fileName = "imposex missing FEMALEPOP")
+    data[impID, ], 
+    missingID, 
+    action = "warning", 
+    message = "Missing FEMALEPOP values", 
+    fileName = "imposex missing FEMALEPOP"
+  )
   
   return (data)
 }
@@ -2522,8 +2540,10 @@ determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...
     
     ctsm.check(
       data, dupsID, action = "warning",  
-      message = paste(keep, "and", dropTxt, "submitted in same sample - deleting", dropTxt, 
-                      "data"), 
+      message = paste(
+        keep, "and", dropTxt, "submitted in same sample - deleting", dropTxt, 
+        "data"
+      ), 
       fileName = paste("determinand link", keep), ...)
   }
   
@@ -2587,9 +2607,13 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
   dups <- visitID %in% names(ok)[!ok] & data$determinand %in% detID
   
   ctsm.check(
-    data, dups, action = "warning",  
+    data, 
+    dups, 
+    action = "warning",  
     message = paste("inconsistent", keep, "and", drop, "submitted in same year"), 
-    fileName = paste("determinand link", keep), ...)
+    fileName = paste("determinand link", keep), 
+    ...
+  )
   
   # delete indices submitted in same visit as individual data (whether consistent or not)
 
@@ -3091,8 +3115,7 @@ ctsm_check_subseries <- function(data) {
     not_ok, 
     action = "delete", 
     message = message_txt,  
-    fileName = "subseries unclassified data", 
-    merge.stations = TRUE
+    fileName = "subseries unclassified data"
   )
   
   # replace remaining missing values with Not_applicable
