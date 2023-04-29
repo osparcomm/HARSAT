@@ -59,7 +59,7 @@ biota_data <- ctsm_read_data(
   contaminants = "biota_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
-  path = file.path("data", "example_HELCOM"), 
+  data_path = file.path("data", "example_HELCOM"), 
   extraction = "2022/10/06",
   max_year = 2021L
 )  
@@ -72,8 +72,9 @@ biota_data <- ctsm_read_data(
 sediment_data <- ctsm_read_data(
   compartment = "sediment",
   purpose = "HELCOM",
-  contaminants = file.path("data", "example_HELCOM_new_format", "sediment_data.csv"),
-  stations = file.path("data", "example_HELCOM", "station_dictionary.csv"),
+  contaminants = file.path("example_HELCOM_new_format", "sediment_data.csv"),
+  stations = file.path("example_HELCOM", "station_dictionary.csv"),
+  data_path = "data",
   extraction = "2022/10/06",
   max_year = 2021L,
   data_format = "ICES_new"
@@ -87,8 +88,9 @@ sediment_data <- ctsm_read_data(
 water_data <- ctsm_read_data(
   compartment = "water", 
   purpose = "HELCOM",                               
-  contaminants = file.path("data", "example_HELCOM_new_format", "water_data.csv"), 
-  stations = file.path("data", "example_HELCOM", "station_dictionary.csv"), 
+  contaminants = file.path("example_HELCOM_new_format", "water_data.csv"), 
+  stations = file.path("example_HELCOM", "station_dictionary.csv"), 
+  data_path = "data", 
   extraction = "2022/10/06",
   max_year = 2021L, 
   data_format = "ICES_new"

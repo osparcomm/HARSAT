@@ -1,65 +1,96 @@
+ctsm_check_variable <- function(data, var_id, info) {
 
+  # location: import_check_functions.R
+  # purpose: wrapper function for checking that a data variable (var_id) has 
+  #   valid values, and for supplying / correcting values where possible 
 
-ctsm.check0 <- function(data, type, compartment, message, fileName) {
-
-  # wrapper function for checking routines
-  # type is the variable within data that is going to be checked
-  # compartment is one of biota, sediment
- 
-
-  if (!(type %in% names(data))) return(data)
+  if (!(var_id %in% names(data))) {
+    return(data)
+  }
   
   
-  # augment data with three variables: 
+  # augment data with four variables: 
   # ok says whether original value is ok and should be retained
-  # ok.delete says whether original value is correct but is not suitable for assessment
-  # action says what we do - none, warning, error or delete: initialised as NA to 
-  #   allow test of whether all cases have been considered (see ctsm.check2)
-  # delete means data are correct, but not suitable for inclusion in assessment
-  # new holds the revised version of type
+  # ok.delete says whether original value is valid but is not to be used in the  
+  #   assessment
+  # action says what we do - none, warning, error or delete: 
+  #   initialised as NA to test whether all cases have been considered; 
+  #   rows marked as error are deleted; 
+  #   rows marked as delete are valid but are not to be used in the assessment 
+  # new holds the revised version of var_id; this might happen even if action is
+  #   none, so always check for this
   
-  newNames <- c("new", "ok", "ok.delete", "action")
-  if (any(newNames %in% names(data))) 
+  data_names <- names(data)
+  new_names <- c("new", "ok", "ok.delete", "action")
+  if (any(new_names %in% data_names)) { 
     stop("variable(s) 'new', 'ok', 'ok.delete' or 'action' already exist")
+  }
   
-  data <- within(data, {
-    ok <- logical()
-    ok.delete <- logical()
-    action <- factor(NA, levels = c("none", "delete", "error", "warning"))
-  })
-  
-  data[["new"]] <- data[[type]]
-  typeIsFactor <- is.factor(data[[type]])
-  if (typeIsFactor) data <- within(data, new <- as.character(new))
-  
-  
+  data$ok <- NA
+  data$ok.delete <- NA
+  data$action <- factor(NA, levels = c("none", "delete", "error", "warning"))
+  data$new <- data[[var_id]]
+
+  if (is.factor(data$new)) {
+    data$new <- as.charcter(data$new)
+  }
+    
+
   # call checking function 
   
-  data <- do.call(paste("ctsm.check", type, compartment, sep = "."), list(data = data))
-  
-
-  # check all cases considered, print out data that have a warning or error and
-  # delete data if required
-  
-  summary <- data[newNames]
-  data <- data[setdiff(names(data), newNames)]
-  
-  if (missing(fileName)) fileName <- paste(type, "queries")
-  if (missing(message)) message <- paste("Unexpected or missing values for", type)
-  
-  data <- ctsm.check2(data, summary$action, message, fileName)
+  data <- do.call(
+    paste("ctsm.check", var_id, info$compartment, sep = "."), 
+    list(data = data)
+  )
 
   
-  # now replace type with new and return
-
-  data[[type]] <- with(summary, {
-    out <- new[action %in% c("none", "warning")]
-    if (typeIsFactor) out <- factor(out)
-    out
-  })
+  # output results 
   
+  outfile_name <- paste0(var_id, "_queries.csv")
+  outfile <- file.path(info$oddity_path, info$compartment, outfile_name)
+  
+
+  # check all records have a valid action - if not, probably need to update
+  # the check function for the variable in question
+  
+  if (any(is.na(data$action))) {
+    oddities <- data[is.na(data$action), data_names]
+    readr::write_excel_csv(oddities, outfile, na = "")
+    stop(
+      "Not all cases considered when checking '", var_id, "': see '", 
+      out_file_name, "'\n", 
+      "You might need to contact the HARSAT development team to fix this.", 
+    )
+  }
+
+
+  # write out oddities
+  
+  id <- data$action %in% c("error", "warning")
+  if (any(id)) {
+    message(
+      "   Unexpected or missing values for '", var_id, "': see ", outfile_name
+    )
+    oddities <- data[id, c("action", data_names)]
+    readr::write_excel_csv(oddities, outfile, na = "")
+  }
+  
+  
+    
+  # delete any errors or records that are not required
+
+  data <- data[data$action %in% c("none", "warning"), ]
+  
+  
+  # tidy up and return
+    
+  data[[var_id]] <- data$new
+  data <- data[data_names]
+    
   data
 }
+
+
 
 # NB I-RNC is for isotope ratios (used as an auxiliary) - check have correct pargroup
 

@@ -49,7 +49,7 @@ biota_data <- ctsm_read_data(
   contaminants = "test_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
-  path = file.path("data", "example_simple_OSPAR"), 
+  data_path = file.path("data", "example_simple_OSPAR"), 
   extraction = "2022/01/11",
   max_year = 2020L  
 )  
