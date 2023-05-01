@@ -9,9 +9,10 @@ ctsm_read_data <- function(
   contaminants, 
   stations, 
   QA, 
-  path = ".", 
+  data_path = ".", 
   extraction = NULL, 
-  max_year = NULL, 
+  max_year = NULL,
+  oddity_path = "oddities",
   control = list(), 
   data_format = c("ICES_old", "ICES_new", "external")) {
 
@@ -70,7 +71,8 @@ ctsm_read_data <- function(
     purpose = purpose, 
     extraction = extraction,
     data_format = data_format, 
-    max_year = max_year
+    max_year = max_year, 
+    oddity_path = oddity_path
   )
   
   control_default <- ctsm_control_default(purpose, compartment)
@@ -86,12 +88,13 @@ ctsm_read_data <- function(
 
   # read in station dictionary, contaminant and biological effects data and QA data
   
-  stations <- ctsm_read_stations(stations, path, info)
+  stations <- ctsm_read_stations(stations, data_path, info)
   
-  data <- ctsm_read_contaminants(contaminants, path, info)
+  data <- ctsm_read_contaminants(contaminants, data_path, info)
   
-  if (data_format == "ICES_old") 
-    QA <- ctsm_read_QA(QA, path, purpose)
+  if (data_format == "ICES_old") {
+    QA <- ctsm_read_QA(QA, data_path, purpose)
+  }
   
 
   # populate max_year if not set in function call
@@ -214,12 +217,12 @@ ctsm_control_modify <- function(control_default, control) {
 }
 
 
-ctsm_read_stations <- function(infile, path, info) {
+ctsm_read_stations <- function(file, path, info) {
 
   # import functions
   # read in station dictionary
   
-  infile <- file.path(path, infile)
+  infile <- file.path(path, file)
   cat("Reading station dictionary from '", infile, "'\n", sep = "")
 
   
@@ -345,12 +348,12 @@ ctsm_read_stations <- function(infile, path, info) {
 }
 
 
-ctsm_read_contaminants <- function(infile, path, info) {
+ctsm_read_contaminants <- function(file, path, info) {
   
   # import functions
   # read in contaminant (and biological effects) data
   
-  infile <- file.path(path, infile)
+  infile <- file.path(path, file)
   cat("\nReading contaminant and biological effects data from '", infile, "'\n", 
       sep = "")
 
@@ -714,14 +717,14 @@ ctsm_read_contaminants <- function(infile, path, info) {
 }
 
 
-ctsm_read_QA <- function(QA, path, purpose) {
+ctsm_read_QA <- function(file, path, purpose) {
   
   # import functions
   # read in method data (and additional crm information)
 
   # read in data
   
-  infile <- file.path(path, QA)
+  infile <- file.path(path, file)
   cat("\nReading QA data from '", infile, "'\n", sep = "")
   
   crm <- read.csv(
@@ -750,7 +753,7 @@ ctsm_read_QA <- function(QA, path, purpose) {
 }
 
 
-ctsm_tidy_data <- function(ctsm_obj, oddity_path = "oddities") {
+ctsm_tidy_data <- function(ctsm_obj) {
   
   # import_functions.R
   # reduces the size of the ICES extraction by removing redundant variables 
@@ -769,7 +772,7 @@ ctsm_tidy_data <- function(ctsm_obj, oddity_path = "oddities") {
   
   # set up oddity directory and back up any previous oddity files
   
-  oddity.dir <- ctsm.initialise.oddities(oddity_path)
+  ctsm_initialise_oddities(info$oddity_path, info$compartment)
   
   
   # tidy station dictionary and contaminant data
@@ -842,7 +845,7 @@ ctsm_tidy_stations <- function(stations, info) {
     # check whether any remaining duplicated stations 
     # if present, select most recent of these
     # crude method to sort by station, startYear and endYear (since NAs are sorted last)
-    # and then reverse the ordering of the whole data frame so it works with ctsm.check
+    # and then reverse the ordering of the whole data frame so it works with ctsm_check
     
     stations <- unite(
       stations, 
@@ -856,12 +859,13 @@ ctsm_tidy_stations <- function(stations, info) {
 
     stations <- arrange(stations, desc(row_number()))
     
-    stations <- ctsm.check(
+    stations <- ctsm_check(
       stations, 
       station_id, 
       action = "delete.dups",
       message = "Duplicate stations - first one selected",
-      fileName = "duplicate stations"
+      file_name = "duplicate_stations", 
+      info = info
     )
     
     stations$station_id <- NULL
@@ -917,12 +921,13 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
   
   # delete stations outside the OSPAR region
   
-  ctsm.check(
+  ctsm_check(
     stations, 
     is.na(OSPAR_region) | is.na(OSPAR_subregion), 
     action = "delete", 
     message = "Stations outside OSPAR region", 
-    fileName = "stations outside area"
+    file_name = "stations_outside_area",
+    info = info
   )
   
   
@@ -937,10 +942,11 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
       !is.na(id2) & id1 == id2
     })
     
-    ctsm.check(
+    ctsm_check(
       stations, !ok, action = "warning", 
       message = "OSPAR subregion in wrong OSPAR region", 
-      fileName = "Region information incorrect"
+      file_name = "region_information_incorrect", 
+      info = info
     )
     
   }    
@@ -1015,12 +1021,13 @@ ctsm_tidy_contaminants <- function(data, info) {
 
     not_ok <- data$year > info$max_year
       
-    data <- ctsm.check(
+    data <- ctsm_check(
       data, 
       not_ok, 
       action = "delete", 
       message = message_txt, 
-      fileName = "data_too_recent"
+      file_name = "data_too_recent", 
+      info = info
     )
     
   }
@@ -1067,12 +1074,13 @@ ctsm_tidy_contaminants <- function(data, info) {
       
     }    
     
-    ctsm.check(
+    ctsm_check(
       data, 
       odd, 
       action = "warning", 
-      message = "Submitted.station not recognised by dictionary", 
-      fileName = "submitted station not recognised"
+      message = "Submitted.station unrecognised by dictionary", 
+      file_name = "stations_unrecognised",
+      info = info
     )
   }    
 
@@ -1158,12 +1166,13 @@ ctsm_tidy_QA <- function(QA, data, info) {
   
   QA <- dplyr::arrange(QA, dplyr::across(c("qalink", "determinand", "method_extraction", "method_analysis")))
   
-  QA <- ctsm.check(
+  QA <- ctsm_check(
     QA, 
     paste(qalink, determinand), 
     action = "delete.dups",
     message = "Conflicting QA information - first one selected",
-    fileName = "conflicting QA"
+    file_name = "conflicting_QA", 
+    info = info
   )
   
   ctsm_link_QA(QA, data, info$compartment)
@@ -1270,7 +1279,7 @@ ctsm_create_timeSeries <- function(
   # lots of data cleansing - first ensure oddity directory exists and back up
   # any previous oddity files
 
-  oddity.dir <- ctsm.initialise.oddities(oddity_path)
+  oddity_path <- ctsm_initialise_oddities(info$oddity_path, info$compartment)
 
 
   # checks station dictionary:
@@ -1302,17 +1311,27 @@ ctsm_create_timeSeries <- function(
   id <- intersect(id, names(data))
   ord <- do.call("order", data[id])
   data <- data[ord, ]
-  
+
+  # merge with country and station_name from station dictionary to give more 
+  # meaningful output in oddity files
+
+  var_id <- c("country", "station_code", "station_name")
+  var_id <- intersect(var_id, names(station_dictionary))
+
+  data <- dplyr::left_join(data, station_dictionary[var_id], by = "station_code")
+  data <- dplyr::relocate(data, all_of(var_id))
+
 
   # check all stations are in station dictionary 
 
   ok <- data$station_code %in% station_dictionary$station_code
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, 
     !ok, 
     action = "delete", 
-    message = "Stations in data not found in station dictionary", 
-    fileName = "unidentified stations"
+    message = "Stations in data not in station dictionary", 
+    file_name = "unidentified_stations", 
+    info = info
   )
   
 
@@ -1325,18 +1344,15 @@ ctsm_create_timeSeries <- function(
     max(info$recent_years), "\n"
   )
 
+
   # recognised_species was replaced by species in line 507 -> species reference table
   
   if ("species" %in% names(data)) {
-    data <- within(data, {
-      species <- as.character(species)
-      species <- ifelse(
-        species %in% row.names(info.species), 
-        as.character(info.species[species, "reference_species"]), 
-        species
-      )
-      species <- factor(species)
-    })
+    data$species <- ifelse(
+        data$species %in% row.names(info.species), 
+        info.species[data$species, "reference_species"], 
+        data$species
+    )
   }
 
   
@@ -1389,24 +1405,24 @@ ctsm_create_timeSeries <- function(
     data <- data[ok, ]
   }  
 
-  # remove species that are not to be assessed and check family and sex appropriate 
-
-  for (varID in c("species", "family", "sex")) data <- ctsm.check0(data, varID, info$compartment)
-
-
-  # check all determinands have a valid matrix, basis and unit
   
-  for (varID in c("basis", "matrix", "unit")) data <- ctsm.check0(data, varID, info$compartment)
-
-
-  # check data have a valid method of analysis, value and 
-  # number of individuals (in each pool)
-
-  for (varID in c("method_analysis", "value", "n_individual")) {
-    data <- ctsm.check0(data, varID, info$compartment)
+  # check variables in the data file have valid values
+  # - biota: removes species that are not to be assessed
+  # - biota: check family, sex and n_individual are appropriate
+  # - check all determinands have a valid matrix, basis and unit
+  # - check method_analysis (only relevant for bile metabolites)
+  # - check value is valid (e.g. > 0 for concentrations)
+  
+  wk <- c(
+    "species", "family", "sex", "no_individual", "matrix", "basis", "unit", 
+    "method_analysis", "value"
+  )
+  
+  for (var_id in wk) {
+    data <- ctsm_check_variable(data, var_id, info)
   }
 
-  
+
   # get digestion method for metals in sediments and check that these are valid
   
   if (info$compartment == "sediment") {
@@ -1414,7 +1430,6 @@ ctsm_create_timeSeries <- function(
   }
 
   
-
   # check no replicate measurements (some are genuine replicates, mostly from
   # early years) but will just delete these for simplicity (taking the average
   # has been tried, but gets really messy when there are less thans, different
@@ -1425,30 +1440,30 @@ ctsm_create_timeSeries <- function(
   # should also come before the linking of e.g. CHR with CHRTR, otherwise the duplicates aren't 
   # necessarily the correct ones
   
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, paste(sample, determinand, matrix), 
     action = "delete.dups", 
     message = "Replicate measurements, only first retained", 
-    fileName = "replicate measurements", 
-    stations = station_dictionary
+    file_name = "replicate_measurements", 
+    info = info
   )
 
 
   # ensure censoring, limit of detection and limit of quantification are consistent
 
-  data <- ctsm_check_censoring(data, print_code_warnings)
+  data <- ctsm_check_censoring(data, info, print_code_warnings)
   
 
   # convert uncertainty into standard deviations, and remove any associated variables
   
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, 
     !is.na(uncertainty) & uncertainty <= 0, 
     action = "make.NA", 
     message = "Non-positive uncertainties", 
-    fileName = "non positive uncertainties", 
-    missingID = "uncertainty",
-    stations = station_dictionary
+    file_name = "non_positive_uncertainties", 
+    missing_id = "uncertainty",
+    info = info
   )
   
   data <- mutate(
@@ -1468,13 +1483,13 @@ ctsm_create_timeSeries <- function(
     "uncertainty_sd", "uncertainty_rel", 
     names(data)[(wk_id+1):(wk_n-2)])]
   
-  ctsm.check(
+  ctsm_check(
     data, 
     !is.na(uncertainty) & uncertainty_rel >= 100, 
     action = "warning", 
     message = "Large uncertainties", 
-    fileName = "large uncertainties",
-    stations = station_dictionary
+    file_name = "large uncertainties",
+    info = info
   )
   
   # delete data with large relative uncertainties
@@ -1508,7 +1523,7 @@ ctsm_create_timeSeries <- function(
     
     data <- do.call(
       linkFunction, 
-      list(data = data, keep = i, drop = wk$det)
+      list(data = data, keep = i, drop = wk$det, info = info)
     )
   }  
 
@@ -1691,10 +1706,14 @@ ctsm_create_timeSeries <- function(
 
 # default routine to check (and clean) data attributes when creating timeSeries
 
-ctsm.check <- function(
-  data, id, action = c("delete", "warning", "make.NA", "delete.dups"), 
-  message, fileName, stations = NULL, missingID) {
+ctsm_check <- function(
+  data, id, 
+  action = c("delete", "warning", "make.NA", "delete.dups"), 
+  message, file_name, info, missing_id) {
 
+  # location: import_functions.R
+  # purpose: general checking routine 
+  
   # action options: 
   # delete - delete oddities (in id) 
   # warning - print out oddities, but don't change data 
@@ -1705,157 +1724,54 @@ ctsm.check <- function(
   action <- match.arg(action)
 
   # evaluate logical identifying oddities:
-  # if action = remove duplicates, then find all the duplicated values in id
+  # if action = delete.dup find all duplicated values in id
   # else evaluate id to obtain logical of oddities
 
   if (action == "delete.dups") {
     duplicateVar <- eval(substitute(id), data, parent.frame())
-    odditiesID <- duplicated(duplicateVar) | duplicated(duplicateVar, fromLast = TRUE)
+    odd_id <- duplicated(duplicateVar) | duplicated(duplicateVar, fromLast = TRUE)
   } else {
-    odditiesID <- eval(substitute(id), data, parent.frame())
-    if (!is.logical(odditiesID)) stop("'id' must be logical")
-    odditiesID <- odditiesID & !is.na(odditiesID)
+    odd_id <- eval(substitute(id), data, parent.frame())
+    if (!is.logical(odd_id)) stop("'id' must be logical")
+    odd_id <- odd_id & !is.na(odd_id)
   }
 
   
   # do nothing if no oddities
   
-  if (!any(odditiesID)) 
-    if (action == "warning") return() else return(data)
- 
+  if (!any(odd_id)) return(data) 
 
-  # get oddities
+
+  # get oddities and output results
   
-  oddities <- data[odditiesID, ]
+  oddities <- data[odd_id, ]
 
 
-  # merge with station dictionary if required 
-
-  if (!is.null(stations)) {
-    var_id <- c("country", "station_code", "station_name")
-    var_id <- intersect(var_id, names(stations))
-    stations <- stations[var_id]
-    oddities <- left_join(oddities, stations, by = "station_code")
-    oddities <- relocate(oddities, all_of(names(stations)))
-  }
-
+  # output results 
   
-  # sort out columns that are all na and that are logicals for more robust writing
+  outfile_name <- paste0(file_name, ".csv")
+  outfile_name <- gsub(" ", "_", outfile_name)
+  outfile <- file.path(info$oddity_path, info$compartment, outfile_name)
   
-  wk <- vapply(oddities, function (x) all(is.na(x)), NA)
-  oddities[wk] <- lapply(oddities[wk], function(x) rep_len("", length(x)))
+  txt <- switch(action, delete = ": deleted data in '", ": see ")
+  message("   ", message, txt, outfile_name) 
 
-  wk <- vapply(oddities, is.logical, NA)
-  oddities[wk] <- lapply(oddities[wk], as.character)
-
-
-  # write out oddities
-  
-  oddity.dir <- evalq(oddity.dir, sys.frame(1))
-  oddity.file <- paste0(fileName, ".csv")
-  message(
-    "   Warning: ", message, 
-    switch(
-      action, 
-      delete = ": deleted data in '", 
-      ": see '"
-    ), 
-    oddity.file, "'"
-  )
-  
-  write.csv(oddities, file.path(oddity.dir, oddity.file), row.names = FALSE, na = "")
+  readr::write_excel_csv(oddities, outfile, na = "")
   
   if (action == "warning") return()
   
   data <- switch(
     action, 
-    delete = data[!odditiesID, ],
-    make.NA = {data[odditiesID, missingID] <- NA ; data},
+    delete = data[!odd_id, ],
+    make.NA = {data[odd_id, missing_id] <- NA ; data},
     delete.dups = data[!duplicated(duplicateVar), ]
   )
-  
-  return(droplevels(data))        
-}
-  
 
-ctsm.check2 <- function(data, action, message, fileName, stations = NULL) {
-
-  # check that all records have a valid action - if not, need to go back to
-  # check function
-  
-  if (any(is.na(action))) {
-    oddity.dir <- evalq(oddity.dir, sys.frame(1))
-    oddity.file <- paste0(fileName, ".csv")
+  data <- droplevels(data)
     
-    write.csv(data[is.na(action), ], file.path(oddity.dir, oddity.file), 
-              row.names = FALSE, na = "")
-    stop("Not all cases considered when checking ", message, ": see '", oddity.file, 
-         "'\n", sep = "")
-  }
-  
-  
-  # do nothing if no oddities
-  
-  if (all(action %in% "none")) return(data)
-  
-  
-  # if no errors or warnings, just delete data and return
-  
-  if (all(action %in% c("none", "delete"))) {
-    data <- data[action %in% "none", ]  
-    return(droplevels(data))
-  }  
-  
-
-  # get oddities
-  
-  notOK <- action %in% c("error", "warning")
-  oddities <- data[notOK, ]
-  
-  
-  # merge with station dictionary if required - gets dictionary from top environment
-  
-  # merge with station dictionary if required 
-  
-  if (!is.null(stations)) {
-    var_id <- c("country", "station_code", "station_name")
-    var_id <- intersect(var_id, names(stations))
-    stations <- stations[var_id]
-    oddities <- left_join(oddities, stations, by = "station_code")
-    oddities <- relocate(oddities, all_of(names(stations)))
-  }
-  
-  
-  # make action the first column
-  
-  oddities <- cbind(action = action[notOK], oddities)
-  
-  
-  # sort out columns that are all na and that are logicals for more robust writing
-  
-  wk <- vapply(oddities, function (x) all(is.na(x)), NA)
-  oddities[wk] <- lapply(oddities[wk], function(x) rep_len("", length(x)))
-  
-  wk <- vapply(oddities, is.logical, NA)
-  oddities[wk] <- lapply(oddities[wk], as.character)
-  
-  
-  # write out oddities
-  
-  oddity.dir <- evalq(oddity.dir, sys.frame(1))
-  oddity.file <- paste0(fileName, ".csv")
-  message("   Warning: ", message, ": see '", oddity.file)
-  
-  write.csv(oddities, file.path(oddity.dir, oddity.file), row.names = FALSE, na = "")
-  
-  
-  # delete rows where appropriate
-  
-  data <- data[action %in% c("none", "warning"), ]
-  
-  return(droplevels(data))
+  data        
 }
-
+  
 
 ctsm_import_value <- function(data, station_dictionary, info) {
   
@@ -1983,13 +1899,13 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   
   # check no replicate measurements within time series
   
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, 
     paste(seriesID, sample), 
     action = "delete.dups",
     message = "Measurements still replicated, only first retained",
-    fileName = "replicate measurements extra",
-    stations = station_dictionary
+    file_name = "replicate_measurements_extra",
+    info = info
   )
   
 
@@ -2058,7 +1974,7 @@ ctsm_check_stations <- function(stations) {
 
 
 
-ctsm_get_digestion <- function(data) {
+ctsm_get_digestion <- function(data, info) {
 
   # import_functions.R
   # get digestion method for metals based on method_extraction
@@ -2102,52 +2018,52 @@ ctsm_get_digestion <- function(data) {
 
   not_ok <- is_metal & is.na(data$digestion) 
 
-  ctsm.check(
+  ctsm_check(
     data, 
     not_ok, 
     action = "warning", 
     message = "Missing digestion methods", 
-    fileName = "digestion_errors"
+    file_name = "digestion_errors", 
+    info = info
   )
 
   data$digestion  
 }
 
 
+ctsm_initialise_oddities <- function(path, compartment) {
 
-
-ctsm.initialise.oddities <- function(path) {
-
+  # location: import_functions.R
+  # purpose: sets up oddity folder and backs up previous runs 
+  
   # create oddity directories and backup if necessary
   
-  if (!(path %in% list.dirs(full.names = FALSE, recursive = FALSE))) 
-    dir.create(path)
+  if (!dir.exists(path)) dir.create(path)
 
-  compartment <- evalq(info$compartment, sys.frame(1))  
   output <- file.path(path, compartment)
 
-  if (!(output %in% list.dirs(full.names = FALSE))) {
+  if (!dir.exists(output)) {
     dir.create(output)
-    cat("\nInfo: oddities will be written to '", output, "'\n", sep="")
+    cat("\nOddities will be written to '", output, "'\n", sep = "")
     return(output)
   } 
 
   backup <- file.path(path, paste(compartment, "backup", sep = "_"))
   
-  if (!(backup %in% list.dirs(full.names = FALSE))) dir.create(backup) 
+  if (!dir.exists(backup)) dir.create(backup) 
       
-  cat("\nInfo: oddities will be written to '", output, "' with previous oddities\n", 
-      "      backed up to '", backup, "'\n", sep="")
+  cat("\nOddities will be written to '", output, "' with previous oddities ", 
+      "backed up to\n   '", backup, "'\n", sep = "")
   
   old.files <- dir(output, full.names = TRUE)
   file.copy(from = old.files, to = backup, overwrite = TRUE)
   file.remove(old.files)
     
-  output  
+  invisible()  
 }
 
 
-ctsm.imposex.check.femalepop <- function(data) {
+ctsm.imposex.check.femalepop <- function(data, info) {
 
   # makes missing values == 100% if sex == F
   
@@ -2160,12 +2076,13 @@ ctsm.imposex.check.femalepop <- function(data) {
   data[replaceID, "%FEMALEPOP"] <- 100
 
   missingID <- impID & is.na(data[["%FEMALEPOP"]])
-  ctsm.check(
+  ctsm_check(
     data[impID, ], 
     missingID, 
     action = "warning", 
     message = "Missing FEMALEPOP values", 
-    fileName = "imposex missing FEMALEPOP"
+    file_name = "imposex_missing_FEMALEPOP",
+    info = info
   )
   
   return (data)
@@ -2258,7 +2175,7 @@ ctsm_check_determinands <- function(compartment, data, determinands, control = N
 determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...) {
 
   # check whether any drop and keep are both submitted for the same sample and 
-  # matrix and, if so, delete drop - note that ctsm.check doesn't do the
+  # matrix and, if so, delete drop - note that ctsm_check doesn't do the
   # deleting because it isn't necessarily the first instance that is retained
   
   ID <- with(data, paste(sample, matrix))
@@ -2274,13 +2191,17 @@ determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...
     
     dupsID <- dups & (dropID | keepID)
     
-    ctsm.check(
-      data, dupsID, action = "warning",  
+    ctsm_check(
+      data, 
+      dupsID, 
+      action = "warning",  
       message = paste(
         keep, "and", dropTxt, "submitted in same sample - deleting", dropTxt, 
         "data"
       ), 
-      fileName = paste("determinand link", keep), ...)
+      file_name = paste("determinand_link", keep, sep = "_"), 
+      ...
+    )
   }
   
   data[!(dups & dropID), ]
@@ -2307,11 +2228,8 @@ determinand.link.replace <- function(data, keep, drop, ...) {
   
   # relabel the levels so that drop becomes keep
   
-  data <- within(data, {
-    determinand <- as.character(determinand)
-    determinand[determinand %in% drop] <- keep
-    determinand <- factor(determinand)
-  })
+  id <- data$determinand %in% drop
+  data$determinand[id] <- keep
   
   data
 }  
@@ -2342,12 +2260,12 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
 
   dups <- visitID %in% names(ok)[!ok] & data$determinand %in% detID
   
-  ctsm.check(
+  ctsm_check(
     data, 
     dups, 
     action = "warning",  
     message = paste("inconsistent", keep, "and", drop, "submitted in same year"), 
-    fileName = paste("determinand link", keep), 
+    file_name = paste("determinand_link", keep, sep = "_"), 
     ...
   )
   
@@ -2365,12 +2283,10 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
     message("   Data submitted as ", drop, "relabelled as ", keep)
   else return(data)
   
-  data <- within(data, {
-    determinand <- as.character(determinand)
-    determinand[determinand %in% drop] <- keep
-    determinand <- factor(determinand)
-  })
-  
+  id <- data$determinand %in% drop
+  data$determinand[id] <- keep
+
+  data
 }  
 
 determinand.link.VDS <- determinand.link.IMPS <- determinand.link.INTS <- determinand.link.imposex
@@ -2415,11 +2331,8 @@ assign("determinand.link.LIPIDWT%", function(data, keep, drop, ...) {
   
   cat("   Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT%", "\n")
 
-  data <- within(data, {
-    determinand <- as.character(determinand)
-    determinand[determinand %in% drop] <- keep
-    determinand <- factor(determinand)
-  })
+  id <- data$determinand %in% drop
+  data$determinand[id] <- keep
   
   data
 })  
@@ -2673,11 +2586,11 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
 }  
 
 
-ctsm_check_censoring <- function(data, print_code_warnings) {
+ctsm_check_censoring <- function(data, info, print_code_warnings) {
   
-  # import_functions.R
-  # checks that censoring, limit_detection and limit_quantification are consistent
-  # and makes sensible adjustments to censoring
+  # location: import_functions.R
+  # purpose: checks that censoring, limit_detection and limit_quantification are 
+  #   consistent and makes sensible adjustments to censoring
   
   # define function for testing equality - also need a relative component to cope with some tiny
   # value submitted with units g/g
@@ -2701,35 +2614,38 @@ ctsm_check_censoring <- function(data, print_code_warnings) {
     )
   }  
   
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, 
     limit_detection <= 0, 
     action = "make.NA", 
     message = "Non-positive detection limits", 
-    fileName = "non positive det limits", 
-    missingID = "limit_detection"
+    file_name = "non_positive_det_limits", 
+    missing_id = "limit_detection",
+    info = info
   )
   
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, 
     limit_quantification <= 0, 
     action = "make.NA", 
     message = "Non-positive quantification limits", 
-    fileName = "non positive quant limits", 
-    missingID = "limit_quantification"
+    file_name = "non_positive_quant_limits", 
+    missing_id = "limit_quantification",
+    info = info
   )
 
 
   # limit_quantification must be greater than limit_detection - 
   # otherwise set both to missing
   
-  data <- ctsm.check(
+  data <- ctsm_check(
     data,  
     limit_quantification <= limit_detection, 
     action = "make.NA", 
     message = "Limit of quantification less than limit of detection", 
-    fileName = "limits inconsistent", 
-    missingID = c("limit_detection", "limit_quantification")
+    file_name = "limits_inconsistent", 
+    missing_id = c("limit_detection", "limit_quantification"), 
+    info = info
   )
 
 
@@ -2751,12 +2667,13 @@ ctsm_check_censoring <- function(data, print_code_warnings) {
     censoring <- recode(censoring, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
   })
 
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, 
     !censoring %in% c("", "D", "Q", "<"), 
     action = "delete", 
     message = "Unrecognised censoring values", 
-    fileName = "censoring codes unrecognised"
+    file_name = "censoring_codes_unrecognised", 
+    info = info
   )
 
 
@@ -2771,12 +2688,13 @@ ctsm_check_censoring <- function(data, print_code_warnings) {
     out1 | out2
   })
 
-  ctsm.check(
+  ctsm_check(
     data, 
     id, 
     action = "warning",
-    message = "censoring codes D and Q inconsistent with respective limits",
-    fileName = "censoring codes and limits inconsistent"
+    message = "Censoring codes D and Q inconsistent with respective limits",
+    file_name = "censoring_codes_inconsistent",
+    info = info
   )
 
 
@@ -2789,27 +2707,27 @@ ctsm_check_censoring <- function(data, print_code_warnings) {
       !is.na(limit_quantification) & my_near(value, limit_quantification) ~ "Q",
       TRUE ~ "<"
     )
-    censoring <- factor(censoring, levels = c("", "D", "Q", "<"))  
   })    
 
 
   # check limit_detection is less than (or equal to) concentration
   # NB would need to be revised if limits are submitted in different units to concentrations
   
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, 
     id = censoring %in% c("", "<") & limit_detection > value, 
     action = "make.NA", 
     message = "Detection limit higher than data", 
-    fileName = "detection limit high", 
-    missingID = c("limit_detection", "limit_quantification")
+    file_name = "detection_limit_high", 
+    missing_id = c("limit_detection", "limit_quantification"),
+    info = info
   )
 
   data
 }
 
 
-ctsm_check_subseries <- function(data) {
+ctsm_check_subseries <- function(data, info) {
 
   # import_functions.R
   
@@ -2846,12 +2764,13 @@ ctsm_check_subseries <- function(data) {
     "            unclassified records are deleted"
   )
   
-  data <- ctsm.check(
+  data <- ctsm_check(
     data, 
     not_ok, 
     action = "delete", 
     message = message_txt,  
-    fileName = "subseries unclassified data"
+    file_name = "subseries_unclassified_data", 
+    info = info
   )
   
   # replace remaining missing values with Not_applicable
@@ -2941,12 +2860,13 @@ ctsm_merge_auxiliary <- function(data, info) {
         "            than one matrix"
       )
       
-      auxiliary_data <- ctsm.check(
+      auxiliary_data <- ctsm_check(
         auxiliary_data, 
         dup_check %in% dup_check[duplicated(dup_check)], 
         action = "warning",
         message = message_txt,
-        fileName = "replicated_auxiliary_measurements"
+        file_name = "replicated_auxiliary_measurements", 
+        info = info
       )
       
       stop(
