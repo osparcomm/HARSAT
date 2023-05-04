@@ -1636,7 +1636,7 @@ ctsm_create_timeSeries <- function(
     data <- mutate(
       data, 
       .month = months(as.Date(.data$date)),
-      .not_ok = family %in% c("Bivalvia", "Gastropoda") & 
+      .not_ok = family %in% c("Bivalve", "Gastropod") & 
         (is.na(.month) | .month %in% info$bivalve_spawning_season) & 
         !group %in% c("Effects", "Imposex", "Metabolites") 
     )

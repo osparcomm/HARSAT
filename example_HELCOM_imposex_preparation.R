@@ -129,6 +129,8 @@ all(sapply(biota.VDS.estimates, "[[", "convergence") == 0)
 
 clusterExport(wk.cluster, "biota.VDS.estimates")
 
+set.seed(230504)
+
 biota.VDS.cl <- parLapply(wk.cluster, biota.VDS.estimates, ctsm.VDS.cl)
 biota.VDS.cl <- do.call(rbind, biota.VDS.cl)
 

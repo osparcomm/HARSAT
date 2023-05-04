@@ -984,8 +984,8 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
               switch(
                 family, 
                 Fish = "fish", 
-                Bivalvia = "shell", 
-                "Gastropoda" = "shell", 
+                Bivalve = "shell", 
+                Gastropod = "shell", 
                 ""
               ), 
               " length (", unit, ")", 

@@ -2314,11 +2314,11 @@ get_basis_biota_OSPAR <- function(data, compartment = "biota") {
     .lw = .data$group %in% lw_group & !(.data$determinand %in% c("MCCP", "SCCP")),
     new_basis = case_when(
       .data$group %in% c("Imposex", "Effects", "Metabolites")            ~ NA_character_,
-      .data$species_group %in% c("Bivalvia", "Gastropoda")               ~ "D",
-      .data$species_group %in% c("Fish", "Crustacea") & 
+      .data$species_group %in% c("Bivalve", "Gastropod")               ~ "D",
+      .data$species_group %in% c("Fish", "Crustacean") & 
         .lw &
         .data$lipid_wt >= lipid_high                                     ~ "L",
-      .data$species_group %in% c("Fish", "Crustacea")                    ~ "W",
+      .data$species_group %in% c("Fish", "Crustacean")                    ~ "W",
       .data$species_group %in% "Mammal" & .data$matrix %in% "HA"         ~ "D",
       .data$species_group %in% "Mammal" & .data$group %in% "Metals"      ~ "W",
       .data$species_group %in% "Mammal"                                  ~ "L",

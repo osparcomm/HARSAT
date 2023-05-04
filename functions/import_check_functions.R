@@ -223,8 +223,8 @@ ctsm.check.matrix.biota <- function(data) {
   if (any(id))
     data[id,] <- within(data[id,], {
       ok <- (family %in% "Fish" & matrix %in% c("MU", "LI", "MU&EP")) |
-        (family %in% c("Bivalvia", "Gastropoda") & matrix %in% "SB") |
-        (family %in% "Crustacea" & matrix %in% "TM") | 
+        (family %in% c("Bivalve", "Gastropod") & matrix %in% "SB") |
+        (family %in% "Crustacean" & matrix %in% "TM") | 
         (family %in% "Bird" & matrix %in% c("EH", "FE", "LI", "MU", "BL", "ER")) | 
         (family %in% "Mammal" & matrix %in% c("BB", "HA", "KI", "LI", "MU", "EP"))
       change <- family %in% "Bird" & matrix %in% "EG"
@@ -244,7 +244,7 @@ ctsm.check.matrix.biota <- function(data) {
     data[id,] <- within(data[id,], {
       ok <- (family %in% c("Fish", "Mammal") & matrix %in% "WO") |
         (family %in% "Bird" & matrix %in% c("WO", "ES")) |
-        (family %in% c("Bivalvia", "Gastropoda", "Crustacea") & matrix %in% "SH")
+        (family %in% c("Bivalve", "Gastropod", "Crustacean") & matrix %in% "SH")
       action <- ifelse(
         ok, "none", ifelse(
           family %in% "Bird" & ! (matrix %in% c("LI", "MU", "BL", "ER", "FE", "EH", "EG", "SH")), 
@@ -332,24 +332,24 @@ ctsm.check.matrix.biota <- function(data) {
   if (any(id))
     data[id,] <- within(data[id,], {    
       ok <- (family %in% "Fish" & matrix %in% c("MU", "BR")) |
-       (family %in% "Bivalvia" & matrix %in% "GI")  
+       (family %in% "Bivalve" & matrix %in% "GI")  
       action <- ifelse(
         ok, "none", 
         ifelse(family %in% "Fish", "error", "warning")
       )
-      new[!ok & family %in% "Bivalvia"] <- "GI" 
+      new[!ok & family %in% "Bivalve"] <- "GI" 
     })
 
   id <- data$determinand %in% "GST"
   if (any(id))
     data[id,] <- within(data[id,], {    
       ok <- (family %in% "Fish" & matrix %in% "LICYT") |
-        (family %in% "Bivalvia" & matrix %in% "SB")  
+        (family %in% "Bivalve" & matrix %in% "SB")  
       action <- ifelse(
         ok, "none", 
         ifelse(family %in% "Fish", "error", "warning")
       )
-      new[!ok & family %in% "Bivalvia"] <- "SB" 
+      new[!ok & family %in% "Bivalve"] <- "SB" 
     })
   
   
@@ -421,7 +421,7 @@ ctsm.check.family.biota <- function(data) {
   id <- data$group %in% "Imposex"
   if (any(id))
     data[id,] <- within(data[id,], {
-      ok <- family %in% "Gastropoda"
+      ok <- family %in% "Gastropod"
       action <- ifelse(ok, "none", "error")
     })    
     
@@ -435,14 +435,14 @@ ctsm.check.family.biota <- function(data) {
   id <- data$determinand %in% c("ACHE", "GST")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- family %in% c("Bivalvia", "Fish")
+      ok <- family %in% c("Bivalve", "Fish")
       action <- ifelse(ok, "none", "error")
     })
 
   id <- data$determinand %in% c("SFG", "%DNATAIL", "NRR", "SURVT")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- family %in% "Bivalvia"
+      ok <- family %in% "Bivalve"
       action <- ifelse(ok, "none", "error")
     })
   
