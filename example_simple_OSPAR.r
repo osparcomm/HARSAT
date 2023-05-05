@@ -29,10 +29,6 @@ info_AC_type <- "OSPAR"
 
 source(file.path(function_path, "information_functions.R"))
 
-info.determinand <- ctsm_read_determinand("determinand_simple_OSPAR.csv")
-
-info.species <- ctsm_read_species("species_OSPAR_2022.csv")
-
 info.assessment.criteria <- ctsm_read_assessment_criteria(
   list(biota = "assessment criteria biota.csv")
 )
@@ -52,6 +48,7 @@ biota_data <- ctsm_read_data(
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
   data_path = file.path("data", "example_simple_OSPAR"), 
+  info_path = "information", 
   extraction = "2022/01/11",
   max_year = 2020L  
 )  

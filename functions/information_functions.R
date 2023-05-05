@@ -1,12 +1,12 @@
-
 # Information extractor function ----
 
 ctsm_get_info <- function(
-  info_type, 
+  ref_table, 
   input, 
   output, 
   compartment = NULL, 
-  na_action = c("fail", "input_ok", "output_ok", "ok"), 
+  na_action = c("fail", "input_ok", "output_ok", "ok"),
+  info_type = NULL,
   sep = ".") {
   
   # information_functions.R
@@ -21,12 +21,27 @@ ctsm_get_info <- function(
   #   ok allows missing values everywhere
   
   na_action <- match.arg(na_action)
+
+  # if not supplied, pick up info_type from function call - designed for use
+  # internally; add trailing space for printing
   
-  # construct input variables and check that all input elements are recognised in 
-  # information files
+  if (is.null(info_type)) {
+    wk <- substitute(ref_table)
+    wk <- as.character(wk)
+    if (length(wk) == 3L && identical(wk[1:2], c("$", "info"))) {
+      info_type <- paste0(wk[3], " ")
+    } else {
+      info_type <- ""
+    }   
+  } else {
+    info_type <- paste0(info_type, " ")
+  }
+
   
-  info_file <- get(paste("info", info_type, sep = "."))
+  # ensure input is character
+    
   input <- as.character(input)
+  
   
   # check whether input is a combination of values - sometimes used when e.g. 
   # there are two methods used in the extraction of a chemical 
@@ -49,10 +64,9 @@ ctsm_get_info <- function(
   } 
   
   if (na_action != "ok") {
-    ctsm_check_reference_table(na.omit(wk), info_type)
+    ctsm_check_reference_table(na.omit(wk), ref_table, info_type)
   }
   
-
 
   # construct output variables and check that all information is present 
   
@@ -60,24 +74,31 @@ ctsm_get_info <- function(
     output <- paste(compartment, output, sep = sep)
   }
   
-  if (!(output %in% names(info_file))) { 
+  if (!(output %in% names(ref_table))) { 
     stop('Incorrect specification of output variable in function ctsm_get_info')
   }
   
   
-  # check that if the input has multiple values (i.e. has had to be split) each element
-  # gives the same output - then simplify input to just one of the relevant values
+  # check that if the input has multiple values (i.e. has had to be split) each 
+  # element gives the same output - then simplify input to just one of the 
+  # relevant values
   
   if (split_input) {
-    ok <- sapply(input2, function(i) length(unique(info_file[i, output])) == 1)
+    ok <- sapply(input2, function(i) {
+      wk <- ref_table[i, output]
+      length(unique(wk)) == 1L
+    })
     if (any(!ok)) {
-      stop('Incompatible data found in ', info_type, ' information file: ', 
-           paste(input[!ok], collapse = ", "))
+      stop(
+        '\nIncompatible data found in the ', info_type, 'reference table:\n', 
+        paste(input[!ok], collapse = ", "), 
+        call. = FALSE
+      )
     }
     input <- sapply(input2, "[", 1)
   }
   
-  out <- info_file[input, output]
+  out <- ref_table[input, output]
   
   ok <- switch(
     na_action,
@@ -87,22 +108,24 @@ ctsm_get_info <- function(
   )
   
   if (any(!ok)) { 
-    stop ('Missing values for following in ', info_type, ' information file: ', 
-          paste(unique(input[!ok]), collapse = ", "))
+    stop (
+      '\nMissing output for the following input values in the', info_type, 
+      'reference table:\n', 
+      paste(unique(input[!ok]), collapse = ", "), 
+      call. = FALSE
+    )
   }
 
   out
 }  
 
 
-ctsm_check_reference_table <- function(x, info_type) {
+ctsm_check_reference_table <- function(x, ref_table, info_type = "") {
 
   # information_functions.R
-  # checks whether x is in the info_type reference table
+  # checks whether x is in the reference table
   
   id <- unique(x)
-  
-  ref_table <- get(paste("info", info_type, sep = "."))
   
   ok <- id %in% row.names(ref_table)
   
@@ -110,11 +133,10 @@ ctsm_check_reference_table <- function(x, info_type) {
     id <- id[!ok]
     id <- sort(id)
     stop(
-      'The following values are present in the data but not in the ', 
-      info_type, 
-      ' reference table. ',
-      "Please add these to the reference table or edit your data to continue.\n",
-      paste(id, collapse = ", ")
+      '\nThe following values are not in the ', info_type, 'reference table.\n',
+      "Please add them to the reference table or edit your data to continue.\n",
+      paste(id, collapse = ", "), 
+      call. = FALSE
     )
   }
   
@@ -454,9 +476,7 @@ ctsm_get_determinands <- function(compartment = c("biota", "sediment", "water"))
 }  
 
 
-ctsm_get_auxiliary <- function(
-  determinands, 
-  compartment = c("biota", "sediment", "water")) {
+ctsm_get_auxiliary <- function(determinands, info) {
   
   # information_functions.R
   # gets required auxiliary variables for determinands
@@ -470,10 +490,10 @@ ctsm_get_auxiliary <- function(
   # auxiliary <- info.determinand[determinands, auxiliary_id]
   
   auxiliary <- ctsm_get_info(
-    "determinand", 
+    info$determinand, 
     determinands, 
     "auxiliary", 
-    compartment, 
+    info$compartment, 
     na_action = "output_ok", 
     sep = "_"
   )
@@ -2346,7 +2366,7 @@ ctsm_check_convert_basis <- function(data) {
 # biota_HELCOM is the current (2023) HELCOM biota configuration
 
 
-get_basis_default <- function(data, compartment = c("biota", "sediment", "water")) {
+get_basis_default <- function(data, info) {
   
   # gets default target basis - information_functions.r
   
@@ -2357,10 +2377,8 @@ get_basis_default <- function(data, compartment = c("biota", "sediment", "water"
   # the exceptions are biological effects measurements where it is assumed the 
   # data are submitted on the correct basis (or where basis isn't relevant)
   
-  compartment = match.arg(compartment)
-  
   basis_id <- switch(
-    compartment, 
+    info$compartment, 
     biota = "W", 
     sediment = "D",
     water = "W"
@@ -2376,7 +2394,7 @@ get_basis_default <- function(data, compartment = c("biota", "sediment", "water"
 }
 
 
-get_basis_most_common <- function(data, compartment = c("biota", "sediment", "water")) {
+get_basis_most_common <- function(data, info) {
 
   # gets target basis defined as the most commonly reported basis 
   # information_function.r
@@ -2433,14 +2451,16 @@ get_basis_most_common <- function(data, compartment = c("biota", "sediment", "wa
 
 
 
-get_basis_biota_OSPAR <- function(data, compartment = "biota") {
+get_basis_biota_OSPAR <- function(data, info) {
   
   # 2023 OSPAR biota target basis - information_functions.r
   
   # note hard-wiring of lipid_high which should be passed as a control variable
   
   
-  match.arg(compartment)
+  if (info$compartment != "biota"){
+    stop("Incorrect compartment specified")
+  }
   
   
   # define cut-off for using lipid as a basis 
@@ -2455,13 +2475,13 @@ get_basis_biota_OSPAR <- function(data, compartment = "biota") {
   out <- mutate(
     out,
     across(everything(), as.character),
-    species_group = ctsm_get_info("species", .data$species, "species_group")
+    species_group = ctsm_get_info(info$species, .data$species, "species_group")
   )
   
 
   # get typical lipid content by species and matrix 
   
-  lipid_info <- ctsm_get_species_cfs(info.species, "lipidwt")
+  lipid_info <- ctsm_get_species_cfs(info$species, "lipidwt")
   
   out <- left_join(out, lipid_info, by = c("species", "matrix"))
   

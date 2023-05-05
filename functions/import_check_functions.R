@@ -384,22 +384,7 @@ ctsm.check.matrix.water <- function(data) {
 }
 
 
-ctsm.check.species.biota <- function(data) {
 
-  # only assess species for which info.species$assess is TRUE
-  
-  data <- within(data, {
-    ok <- ctsm_get_info("species", species, "assess")
-    action <- ifelse(ok, "none", "delete")
-  })
-
-  with(data, if (!all(ok)) 
-    cat("   Dropping following species:", 
-        paste(unique(species[!ok]), collapse = ", "), "\n"))
-
-  data
-}
-  
 ctsm.check.family.biota <- function(data) {  
   
   # check family appropriate for each determinand
