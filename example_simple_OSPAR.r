@@ -31,6 +31,8 @@ source(file.path(function_path, "information_functions.R"))
 
 info.determinand <- ctsm_read_determinand("determinand_simple_OSPAR.csv")
 
+info.species <- ctsm_read_species("species_OSPAR_2022.csv")
+
 info.assessment.criteria <- ctsm_read_assessment_criteria(
   list(biota = "assessment criteria biota.csv")
 )

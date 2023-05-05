@@ -39,6 +39,8 @@ source(file.path(function_path, "information_functions.R"))
 
 info.determinand <- ctsm_read_determinand("determinand_HELCOM.csv")
 
+info.species <- ctsm_read_species("species_HELCOM_2023.csv")
+
 info.assessment.criteria <- ctsm_read_assessment_criteria(
   list(
     biota = "assessment criteria biota HELCOM.csv",
