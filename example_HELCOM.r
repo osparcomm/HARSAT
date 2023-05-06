@@ -37,10 +37,6 @@ info_AC_type <- "HELCOM"
 
 source(file.path(function_path, "information_functions.R"))
 
-info.determinand <- ctsm_read_determinand("determinand_HELCOM.csv")
-
-info.species <- ctsm_read_species("species_HELCOM_2023.csv")
-
 info.assessment.criteria <- ctsm_read_assessment_criteria(
   list(
     biota = "assessment criteria biota HELCOM.csv",
@@ -61,7 +57,8 @@ biota_data <- ctsm_read_data(
   contaminants = "biota_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
-  data_path = file.path("data", "example_HELCOM"), 
+  data_path = file.path("data", "example_HELCOM"),
+  info_path = "information",
   extraction = "2022/10/06",
   max_year = 2021L
 )  
@@ -77,6 +74,7 @@ sediment_data <- ctsm_read_data(
   contaminants = file.path("example_HELCOM_new_format", "sediment_data.csv"),
   stations = file.path("example_HELCOM", "station_dictionary.csv"),
   data_path = "data",
+  info_path = "information",
   extraction = "2022/10/06",
   max_year = 2021L,
   data_format = "ICES_new"
@@ -93,6 +91,7 @@ water_data <- ctsm_read_data(
   contaminants = file.path("example_HELCOM_new_format", "water_data.csv"), 
   stations = file.path("example_HELCOM", "station_dictionary.csv"), 
   data_path = "data", 
+  info_path = "information", 
   extraction = "2022/10/06",
   max_year = 2021L, 
   data_format = "ICES_new"

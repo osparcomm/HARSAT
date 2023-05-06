@@ -10,6 +10,7 @@ ctsm_read_data <- function(
   stations, 
   QA, 
   data_path = ".", 
+  info_files = list(),
   info_path = ".",
   extraction = NULL, 
   max_year = NULL,
@@ -89,7 +90,7 @@ ctsm_read_data <- function(
   
   # read in reference tables
   
-  info <- ctsm_read_info(info, info_path)
+  info <- ctsm_read_info(info, info_path, info_files)
   
 
   # read in station dictionary, contaminant and biological effects data and QA data
@@ -224,33 +225,91 @@ ctsm_control_modify <- function(control_default, control) {
 
 
 
-ctsm_read_info <- function(info, path) {
+ctsm_read_info <- function(info, path, info_files) {
   
-  # determinand reference table
+  # location: import_functions.R
+  # purpose: reads in reference tables, using default files unless overruled 
+  #  by info_control
   
-  file <- switch(
-    info$purpose, 
-    OSPAR = "determinand_simple_OSPAR.csv",
-    stop()
+  # default reference tables
+  
+  if (info$purpose == "OSPAR") {
+    files <- list(
+      determinand = "determinand_OSPAR_2022.csv", 
+      species = "species_OSPAR_2022.csv",
+      regions = "regions_OSPAR.csv"
+    )
+  } else if (info$purpose == "HELCOM") {
+    files <- list(
+      determinand = "determinand_HELCOM_2023.csv", 
+      species = "species_HELCOM_2023.csv",
+      regions = NULL
+    )
+  } else if (info$purpose == "AMAP") {
+    files <- list(
+      determinand = "determinand_AMAP_2022.csv", 
+      species = "species_AMAP_2022.csv",
+      regions = NULL
+    )
+  } else {
+    files <- list(
+      determinand = "determinand_default.csv", 
+      species = "species_default.csv",
+      regions = NULL
+    )
+  }
+
+  files$method_extraction <- "method_extraction.csv"
+  files$pivot_values <- "pivot_values.csv"
+  files$matrix <- "matrix.csv"  
+  
+  # modify with user supplied files
+  
+  files <- modifyList(files, info_files, keep.null = TRUE)
+  
+
+  # check determinand and species reference tables have not been made NULL
+  # threshold values do not need to be specified (if only interested in trends)
+  # other files unlikely to be altered by users at this stage
+
+  if (is.null(files$determinand)) {
+    stop(
+      "\nDeterminand reference table not specified.\n",
+      "Check for an error in argument 'info_files'",
+      call. = FALSE
+    )
+  }
+  
+  if (info$compartment == "biota" && is.null(files$species)) {
+    stop(
+      "\nSpecies reference table not specified.\n",
+      "Check for an error in argument 'info_files'",
+      call. = FALSE
+    )
+  }
+  
+
+  info$determinand <- ctsm_read_determinand(
+    files$determinand, path, info$compartment
   )
   
-  info$determinand <- ctsm_read_determinand(file, path, info$compartment)
-  
-  
-  # species reference table
+  info$matrix <- ctsm_read_matrix(files$matrix, path)
   
   if (info$compartment == "biota") {
-    
-    file <- switch(
-      info$purpose,
-      OSPAR = "species_OSPAR_2022.csv",
-      HELCOM = "species_HELCOM_2023.csv",
-      stop()
-    )
-    
-    info$species <- ctsm_read_species(file, path)
+    info$species <- ctsm_read_species(files$species, path)
   }
-    
+
+  if (info$compartment == "sediment") {
+    info$method_extraction <- ctsm_read_method_extraction(
+      files$method_extraction, path
+    ) 
+    info$pivot_values <- ctsm_read_pivot_values(files$pivot_values, path)
+  }  
+      
+  if (info$purpose == "OSPAR") {
+    info$regions <- ctsm_read_regions(files$region, path, info$purpose)
+  } 
+  
   info
 }
 
@@ -261,7 +320,7 @@ ctsm_read_stations <- function(file, path, info) {
   # read in station dictionary
   
   infile <- file.path(path, file)
-  cat("Reading station dictionary from '", infile, "'\n", sep = "")
+  cat("Reading station dictionary from:\n '", infile, "'\n", sep = "")
 
   
   if (info$data_format %in% c("ICES_old", "ICES_new")) {
@@ -392,8 +451,8 @@ ctsm_read_contaminants <- function(file, path, info) {
   # read in contaminant (and biological effects) data
   
   infile <- file.path(path, file)
-  cat("\nReading contaminant and biological effects data from '", infile, "'\n", 
-      sep = "")
+  cat("\nReading contaminant and biological effects data from:\n '", 
+      infile, "'\n", sep = "")
 
   if (info$data_format == "ICES_old") {  
 
@@ -976,7 +1035,7 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
     
     ok <- local({
       id1 <- stations$OSPAR_region
-      id2 <- info.regions[["OSPAR"]][stations$OSPAR_subregion, "OSPAR_region"]
+      id2 <- info$regions[stations$OSPAR_subregion, "OSPAR_region"]
       !is.na(id2) & id1 == id2
     })
     
@@ -1202,7 +1261,10 @@ ctsm_tidy_QA <- function(QA, data, info) {
   
   # qalink and determinand should be unique combinations 
   
-  QA <- dplyr::arrange(QA, dplyr::across(c("qalink", "determinand", "method_extraction", "method_analysis")))
+  QA <- dplyr::arrange(
+    QA, 
+    dplyr::across(c("qalink", "determinand", "method_extraction", "method_analysis"))
+  )
   
   QA <- ctsm_check(
     QA, 
@@ -1253,7 +1315,7 @@ ctsm_link_QA <- function(QA, data, compartment) {
 
 ctsm_create_timeSeries <- function(
   ctsm.obj, 
-  determinands = ctsm_get_determinands(ctsm.obj$info$compartment), 
+  determinands = ctsm_get_determinands(ctsm.obj$info), 
   determinands.control = NULL, 
   oddity_path = "oddities", 
   return_early = FALSE, 
@@ -1480,7 +1542,7 @@ ctsm_create_timeSeries <- function(
   # get digestion method for metals in sediments and check that these are valid
   
   if (info$compartment == "sediment") {
-    data$digestion <- ctsm_get_digestion(data)
+    data$digestion <- ctsm_get_digestion(data, info)
   }
 
   
@@ -1716,13 +1778,13 @@ ctsm_create_timeSeries <- function(
     data <- switch(
       info$compartment,
       biota = 
-        ctsm_normalise_biota(data, QA, station_dictionary, normalise.control),
+        ctsm_normalise_biota(data, station_dictionary, info, normalise.control),
       sediment = 
-        ctsm_normalise_sediment(data, station_dictionary, normalise.control),
+        ctsm_normalise_sediment(data, station_dictionary, info, normalise.control),
       water = stop("there is no default normalisation function for water")
     )
   } else if (is.function(normalise)) {
-    data <- normalise(data, station_dictionary, normalise.control)
+    data <- normalise(data, station_dictionary, info, normalise.control)
   }
     
 
@@ -2041,7 +2103,7 @@ ctsm_get_digestion <- function(data, info) {
   is_metal <- data$pargroup %in% "I-MET"  
   
   data[is_metal, "digestion"] <- ctsm_get_info(
-    "methodExtraction",
+    info$method_extraction,
     data[is_metal, "method_extraction"], 
     "digestion", 
     na_action = "input_ok"
@@ -3070,7 +3132,7 @@ ctsm_convert_to_target_basis <- function(data, info, get_basis) {
 }
 
   
-ctsm_normalise_sediment <- function(data, station_dictionary, control) {
+ctsm_normalise_sediment <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
   
@@ -3202,7 +3264,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
         # get pivot data and make row.names the appropriate combination of 
         #determinand and digestion
         
-        pivot <- info.pivotValues
+        pivot <- info$pivot_values
         pivot <- pivot[pivot$determinand %in% c(as.character(data$determinand), normaliser), ]
         rownames(pivot) <- with(pivot, paste(determinand, digestion))
         pivot <- droplevels(pivot)
@@ -3388,7 +3450,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
 }
 
 
-ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
+ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
   
@@ -3546,7 +3608,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
         # get pivot data and make row.names the appropriate combination of 
         #determinand and digestion
         
-        pivot <- info.pivotValues
+        pivot <- info$pivot_values
         pivot <- pivot[pivot$determinand %in% c(as.character(data$determinand), normaliser), ]
         rownames(pivot) <- with(pivot, paste(determinand, digestion))
         pivot <- droplevels(pivot)
@@ -3628,7 +3690,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
         # get pivot data and make row.names the appropriate combination of 
         # determinand and digestion
         
-        pivot <- info.pivotValues
+        pivot <- info$pivot_values
         pivot <- pivot[pivot$determinand %in% c(as.character(data$determinand), normaliser), ]
         rownames(pivot) <- with(pivot, paste(determinand, digestion))
         pivot <- droplevels(pivot)
@@ -3708,7 +3770,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
 }
 
 
-ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, control) {
+ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises fish concentrations in contaminants other than metals or 
   # organofluorines to 5% lipid

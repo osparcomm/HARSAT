@@ -30,8 +30,6 @@ info_AC_type <- "OSPAR"
 
 source(file.path(function_path, "information_functions.R"))
 
-info.determinand <- ctsm_read_determinand("determinand_external_data.csv")
-
 info.assessment.criteria <- ctsm_read_assessment_criteria(
   list(biota = "assessment criteria biota.csv")
 )
@@ -49,7 +47,9 @@ biota_data <- ctsm_read_data(
   contaminants = "mercury_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
-  data_path = file.path("data", "example_external_data"), 
+  data_path = file.path("data", "example_external_data"),
+  info_files = list(determinand = "determinand_external_data.csv"),
+  info_path = "information",
   extraction = "2022/01/11",
   max_year = 2020L)  
 

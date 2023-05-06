@@ -34,8 +34,6 @@ if(tolower(info_AC_type) != tolower("OSPAR") && tolower(info_AC_type) != tolower
 
 source(file.path(function_path, "information_functions.R"))
 
-info.determinand <- ctsm_read_determinand("determinand_external_data.csv")
-
 info.assessment.criteria <- ctsm_read_assessment_criteria(
   list(biota = "assessment criteria biota.csv")
 )
@@ -47,10 +45,12 @@ info.assessment.criteria <- ctsm_read_assessment_criteria(
 
 biota_data <- ctsm_read_data(
   compartment = "biota", 
+  purpose = "AMAP",
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 
   stations = "AMAP_external_new_stations_only.csv", 
   data_path = file.path("data", "example_external_data"), 
-  data_format = "external", 
+  data_format = "external",
+  info_path = "information",
   control = list(region_id = "AMAP_region")
 )  
 

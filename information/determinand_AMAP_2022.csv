@@ -1,4 +1,4 @@
-determinand,common_name,pargroup,biota_group,biota_assess,biota_unit,biota_auxiliary,biota_sd_constant,biota_sd_variabl,distribution,good_status
+determinand,common_name,pargroup,biota_group,biota_assess,biota_unit,biota_auxiliary,biota_sd_constant,biota_sd_variable,distribution,good_status
 HG,Mercury,I-MET,Metals,TRUE,ug/kg,"LNMEA, LIPIDWT%, DRYWT%",0.541,0.087966,lognormal,low
 LNMEA,mean length,B-BIO,Auxiliary,FALSE,cm,,,,,
 DRYWT%,dry weight,B-BIO,Auxiliary,FALSE,%,,,,,

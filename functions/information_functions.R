@@ -550,25 +550,24 @@ ctsm_read_determinand <- function(
 
 # extractor functions
 
-ctsm_get_determinands <- function(compartment = c("biota", "sediment", "water")) {
+ctsm_get_determinands <- function(info) {
   
   # information_functions.R
   # gets determinands to be assessed from determinand reference table
   
-  compartment <- match.arg(compartment)
-  
-  assess_id <- paste0(compartment, "_assess")
-  ok <- info.determinand[[assess_id]]
+  assess_id <- paste0(info$compartment, "_assess")
+  ok <- info$determinand[[assess_id]]
   
   if (!any(ok)) {
     stop(
-      "No determinands have been been selected for assessment:\n", 
-      "  please update the determinand reference table or supply the\n",
-      "  determinands directly via the determinands argument."
+      "\nNo determinands have been been selected for assessment.\n", 
+      "Update the determinand reference table or supply the determinands\n", 
+      "directly via the 'determinands' argument.", 
+      call. = FALSE
     )
   }
   
-  row.names(info.determinand)[ok]
+  row.names(info$determinand)[ok]
 }  
 
 
@@ -2644,29 +2643,25 @@ ctsm_read_matrix <- function(file, path = "information") {
   )
 }
 
-info.matrix <- ctsm_read_matrix("matrix.csv")
-
 
 # Regions ----
 
-info.regions <- sapply(
-  c("AMAP", "HELCOM", "OSPAR"), 
-  function(x) {
-    infile <- paste(x, "regions.csv")
-    infile <- file.path("information", infile)
-    row_names_id <- switch(
-      x,
-      OSPAR = "OSPAR_subregion",
-      HELCOM = "HELCOM_L4",
-      AMAP = NULL
+ctsm_read_regions <- function(file, path = "information", purpose) {
+
+  if (purpose != "OSPAR") {
+    stop(
+      "\nctsm_read_region not coded for purposes other than OSPAR.\n",
+      "Contact the HARSAT development team.",
+      call. = FALSE
     )
-    if (file.exists(infile))
-      read.csv(infile, row.names = row_names_id)
-    else 
-      NULL
-  },
-  simplify = FALSE
-)
+  }
+  
+  read.csv(
+    file.path(path, file), 
+    row.names = "OSPAR_subregion", 
+    strip.white = TRUE
+  )
+}  
 
 
 
@@ -2681,8 +2676,6 @@ ctsm_read_method_extraction <- function(file, path = "information") {
   )
 }
 
-info.methodExtraction <- ctsm_read_method_extraction("method of extraction.csv") 
-
 
 ctsm_read_pivot_values <- function(file, path = "information") {
   read.csv(
@@ -2691,8 +2684,6 @@ ctsm_read_pivot_values <- function(file, path = "information") {
     strip.white = TRUE
   )
 }
-
-info.pivotValues <- ctsm_read_pivot_values("pivot values.csv")
 
 
 
