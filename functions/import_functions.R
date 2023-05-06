@@ -234,7 +234,7 @@ ctsm_read_info <- function(info, path) {
     stop()
   )
   
-  info$determinand <- ctsm_read_determinand(file, path)
+  info$determinand <- ctsm_read_determinand(file, path, info$compartment)
   
   
   # species reference table

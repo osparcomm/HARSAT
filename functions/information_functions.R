@@ -174,7 +174,7 @@ ctsm_read_species <- function(file, path = "information") {
     id <- required[!ok]
     id <- sort(id)
     stop(
-      "The following variables are missing from ", file, ".\n", 
+      "\nThe following variables are missing from ", file, ".\n", 
       "Please update the file to continue, noting that variable names are case ", 
       "sensitive.\n",
       "Variables: ", paste(id, collapse = ", "),
@@ -215,7 +215,7 @@ ctsm_read_species <- function(file, path = "information") {
     id <- required[!ok]
     id <- sort(id)
     stop(
-      "The following variables have missing values in ", file, ".\n", 
+      "\nThe following variables have missing values in ", file, ".\n", 
       "Please update the file to continue.\n",
       "Variables: ", paste(id, collapse = ", "),
       .call = FALSE
@@ -230,7 +230,7 @@ ctsm_read_species <- function(file, path = "information") {
   if (!all(ok)) {
     id <- data$submitted_species[!ok]
     stop(
-      "Duplicate 'submitted_species' not allowed in ", file, ".\n",
+      "\nDuplicate 'submitted_species' not allowed in ", file, ".\n",
       "Please update the file to continue.\n",
       "Duplicated: ", paste(id, collapse = ", "),
       call. = FALSE
@@ -245,7 +245,7 @@ ctsm_read_species <- function(file, path = "information") {
   if (!all(ok)) {
     id <- data$recognised_species[!ok]
     stop(
-      "Some 'reference_species' are not in 'submitted_species' in ", file, ".\n",
+      "\nSome 'reference_species' are not in 'submitted_species' in ", file, ".\n",
       "Please update the file to continue.\n",
       "Missing reference_species: ", paste(id, collapse = ", "),
       call. = FALSE
@@ -266,7 +266,7 @@ ctsm_read_species <- function(file, path = "information") {
     id <- data$species_group[!ok]
     id <- sort(id)
     stop(
-      "Unrecongised 'species_group' values in ", file, ".\n",
+      "\nUnrecongised 'species_group' values in ", file, ".\n",
       "Please update the file to continue or contact the HARSAT development ",
       "team to update\nthe list of recognised values:\n", 
       paste(group_id, collapse = ", "), "\n",
@@ -285,7 +285,7 @@ ctsm_read_species <- function(file, path = "information") {
     id <- names(data)[bad]
     id <- sort(id)
     stop(
-      "Variables in ", file, " have forward slashes which are not allowed.\n", 
+      "\nVariables in ", file, " have forward slashes which are not allowed.\n", 
       "Please update the file to continue.\n",
       "Variables: ", paste(id, collapse = ", "), 
       call. = FALSE
@@ -382,73 +382,169 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
 
 # Determinand information and functions ----
 
-ctsm_read_determinand <- function(file, path = "information") {
+ctsm_read_determinand <- function(
+  file, 
+  path = "information", 
+  compartment = c("biota", "sediment", "water"), 
+  simplify = TRUE) {
   
-  out <- read.csv(
-    file.path(path, file), 
-    na.strings = "", 
-    colClasses = c(
-      determinand = "character",
-      common_name = "character",
-      pargroup = "character", 
-      biota_group = "character",
-      sediment_group = "character",
-      water_group = "character",
-      biota_assess = "logical",
-      sediment_assess = "logical",
-      water_assess = "logical",
-      biota_unit = "character",
-      sediment_unit = "character", 
-      water_unit = "character",       
-      biota_auxiliary = "character", 
-      sediment_auxiliary = "character", 
-      water_auxiliary = "character", 
-      biota_sd_constant = "numeric",
-      biota_sd_variable = "numeric",
-      sediment_sd_constant = "numeric",
-      sediment_sd_variable = "numeric",
-      water_sd_constant = "numeric",
-      water_sd_variable = "numeric",
-      distribution = "character", 
-      good_status = "character"
+  # location: information_functions.r
+  # purpose: reads determinand reference table
+  # arguments:
+  # - compartment only checks for variables relevant to those compartments
+  # - simplify only keeps relevant variables  
+  
+  # argument validation
+  
+  ok <- is.character(compartment) && length(compartment) %in% 1:3 &&
+    all(compartment %in% c("biota", "sediment", "water"))
+  if (!ok) {
+    stop(
+      "\nInvalid argment 'compartment' in function ctsm_read_determinand.\n", 
+      "Must be a character string with at least one of 'biota', 'sediment', ",
+      "'water'.\n",
+      call. = FALSE
     )
+  }
+
+  
+  # initialise key variables
+  
+  var_id <- c(
+    determinand = "character",
+    common_name = "character",
+    pargroup = "character", 
+    biota_group = "character",
+    sediment_group = "character",
+    water_group = "character",
+    biota_assess = "logical",
+    sediment_assess = "logical",
+    water_assess = "logical",
+    biota_unit = "character",
+    sediment_unit = "character", 
+    water_unit = "character",       
+    biota_auxiliary = "character", 
+    sediment_auxiliary = "character", 
+    water_auxiliary = "character", 
+    biota_sd_constant = "numeric",
+    biota_sd_variable = "numeric",
+    sediment_sd_constant = "numeric",
+    sediment_sd_variable = "numeric",
+    water_sd_constant = "numeric",
+    water_sd_variable = "numeric",
+    distribution = "character", 
+    good_status = "character"
+  )
+  
+  required <- c(
+    "determinand", "common_name", "pargroup", "distribution", "good_status"
+  )
+  
+  extra <- c("group", "assess", "unit", "auxiliary")
+  extra <- paste(rep(compartment, each = 4), extra, sep = "_")
+  required <- c(required, extra)
+    
+  optional <- c("sd_constant", "sd_variable")
+  optional <- paste(rep(compartment, each = 2), optional, sep = "_")
+
+  
+  # check required variables are present in data and issue message if optional
+  # variables are not
+  
+  data <- read.csv(
+    file.path(path, file), 
+    strip.white = TRUE, 
+    nrows = 1
+  )
+  
+  ok <- required %in% names(data)
+  
+  if (!all(ok)) {
+    id <- required[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following variables are missing from ", file, ".\n", 
+      "Use the 'compartment' argument to limit the required variables or update\n", 
+      "the reference table to continue. Note that variable names are case sensitive.\n",
+      "Variables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+    
+  ok <- optional %in% names(data)
+  
+  if (!all(ok)) {
+    id <- optional[!ok]
+    message(
+      "The following variables are missing from ", file, ".\n", 
+      "They will be created and populated with missing values: missing ", 
+      "uncertainties\ncan not be imputed and corresponding measurements will be ", 
+      "deleted.\n",
+      "Variables: ", paste(id, collapse = ", ")
+    )
+  }
+
+
+  ok <- names(var_id) %in% names(data)
+  
+  data <- read.csv(
+    file.path(path, file), 
+    na.strings = c("", "NULL"),
+    strip.white = TRUE,
+    colClasses = var_id[ok]
+  )
+  
+
+  # fill in common name if missing and create optional variables if missing
+  
+  data$common_name <- ifelse(
+    is.na(data$common_name), 
+    data$determinand, 
+    data$common_name 
   )
 
   
-  # fill in common name if missing
+  ok <- optional %in% names(data)
   
-  out$common_name <- ifelse(
-    is.na(out$common_name), 
-    out$determinand, 
-    out$common_name 
-  )
+  if (!all(ok)) {
+    id <- optional[!ok]
+    data[id] <- rep(NA_real_, nrow(data))
+  }
 
 
   # check all auxiliary variables are determinands in their own right
   
-  lapply(c("biota", "sediment", "water"), function(compartment) {
+  lapply(compartment, function(id) {
     
-    auxiliary <- out[[paste0(compartment, "_auxiliary")]] 
+    auxiliary <- data[[paste0(id, "_auxiliary")]] 
     auxiliary <- strsplit(auxiliary, ", ")
     auxiliary <- unlist(auxiliary)
 
     auxiliary <- unique(na.omit(auxiliary))
     
-    ok <- auxiliary %in% out$determinand
+    ok <- auxiliary %in% data$determinand
     if(!all(ok)) {
       stop(
-        'Not found in determinand information file: ', 
+        '\nNot found in determinand information file: ', 
         paste(auxiliary[!ok], collapse = ", ")
       )
     }
   })
   
+  
+  # retain relevant variables
+  
+  ok <- names(var_id) %in% c(required, optional)
+  id <- names(var_id)[ok]
+  data <- data[id]
+  
 
   # tidy up for output
   
-  out <- tibble::column_to_rownames(out, "determinand")
+  data <- tibble::column_to_rownames(data, "determinand")
   
-  out
+  data
 }
 
 
