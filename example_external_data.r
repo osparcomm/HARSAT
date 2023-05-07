@@ -27,16 +27,9 @@ source(file.path(function_path, "graphics_functions.R"))
 
 # source reference tables and associated information functions
 
-info_AC_type <- "EXTERNAL"
-if(tolower(info_AC_type) != tolower("OSPAR") && tolower(info_AC_type) != tolower("HELCOM") && tolower(info_AC_type) != tolower("EXTERNAL")){
-  stop("info_AC_type can only be OSPAR, HELCOM, or EXTERNAL")
-}
+info_AC_type <- "EXTERNAL"     # not needed much longer
 
 source(file.path(function_path, "information_functions.R"))
-
-info.assessment.criteria <- ctsm_read_assessment_criteria(
-  list(biota = "assessment criteria biota.csv")
-)
 
 
 # Read data ----

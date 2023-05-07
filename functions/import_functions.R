@@ -237,25 +237,29 @@ ctsm_read_info <- function(info, path, info_files) {
     files <- list(
       determinand = "determinand_OSPAR_2022.csv", 
       species = "species_OSPAR_2022.csv",
-      regions = "regions_OSPAR.csv"
+      region_values = "regions_OSPAR.csv", 
+      thresholds = paste0("thresholds_", info$compartment, "_OSPAR_2022.csv")
     )
   } else if (info$purpose == "HELCOM") {
     files <- list(
       determinand = "determinand_HELCOM_2023.csv", 
       species = "species_HELCOM_2023.csv",
-      regions = NULL
+      region_values = NULL,
+      thresholds = paste0("thresholds_", info$compartment, "_HELCOM_2023.csv")
     )
   } else if (info$purpose == "AMAP") {
     files <- list(
       determinand = "determinand_AMAP_2022.csv", 
       species = "species_AMAP_2022.csv",
-      regions = NULL
+      region_values = NULL,
+      thresholds = NULL
     )
   } else {
     files <- list(
       determinand = "determinand_default.csv", 
       species = "species_default.csv",
-      regions = NULL
+      region_values = NULL, 
+      thresholds = NULL
     )
   }
 
@@ -308,9 +312,17 @@ ctsm_read_info <- function(info, path, info_files) {
     info$pivot_values <- ctsm_read_pivot_values(files$pivot_values, path)
   }  
       
-  if (info$purpose == "OSPAR") {
-    info$regions <- ctsm_read_regions(files$region, path, info$purpose)
+  if (!is.null(files$region_values)) {
+    info$region_values <- ctsm_read_regions(
+      files$region_values, path, info$purpose
+    )
   } 
+  
+  if (!is.null(files$thresholds)) {
+    info$thresholds <- ctsm_read_thresholds(
+      files$thresholds, path, info$compartment
+    )
+  }
   
   info
 }
@@ -1037,7 +1049,7 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
     
     ok <- local({
       id1 <- stations$OSPAR_region
-      id2 <- info$regions[stations$OSPAR_subregion, "OSPAR_region"]
+      id2 <- info$region_values[stations$OSPAR_subregion, "OSPAR_region"]
       !is.na(id2) & id1 == id2
     })
     

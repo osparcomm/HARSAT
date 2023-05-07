@@ -224,6 +224,7 @@ ctsm_assessment_engine <- function(
         determinand, 
         seriesInfo, 
         info$AC, 
+        info$thresholds,
         info$determinand,
         info$species
       )
@@ -290,6 +291,7 @@ ctsm_assessment_engine <- function(
         station_code = station_code,
         thetaID = thetaID, 
         max.year = info$max_year, 
+        info.imposex = info$imposex, 
         recent.trend = info$recent.trend)
       )
     }

@@ -23,21 +23,41 @@ ctsm_plot_assessment <- function(
     )
   }
   
-  
-  # set up time series information:
-  # - merge with station information
-  # - subset if necessary
-  
+
+  info <- ctsm_asmt_obj$info
   timeSeries <- ctsm_asmt_obj$timeSeries 
   
-  
+
+  # set up time series information:
+  # - merge with station information
+  # - add in additional useful variables 
+  # - subset if necessary
+
   timeSeries <- rownames_to_column(timeSeries, "series")
-  
+    
   timeSeries <- left_join(
     timeSeries, 
     ctsm_asmt_obj$stations, 
     by = "station_code"
   )
+  
+  timeSeries$group <- ctsm_get_info(
+    info$determinand, 
+    timeSeries$determinand, 
+    "group", 
+    info$compartment,
+    sep = "_"
+  )
+
+  timeSeries$distribution <- ctsm_get_info(
+    info$determinand, 
+    timeSeries$determinand, 
+    "distribution"
+  )
+
+  if (info$compartment == "water") {
+    timeSeries$matrix <- "WT"
+  }
   
   if (!is.null(substitute(subset))) {
     ok <- eval(substitute(subset), timeSeries, parent.frame())
@@ -46,55 +66,30 @@ ctsm_plot_assessment <- function(
   }
 
   timeSeries <- column_to_rownames(timeSeries, "series")
+  
+  series_id <- row.names(timeSeries)
 
-  series <- row.names(timeSeries)
-  
-  
+
   # plot each timeSeries
   
-  lapply(series, function(id) {
+  lapply(series_id, function(id) {
     
     data <- filter(ctsm_asmt_obj$data, seriesID == id)
     
     assessment <- ctsm_asmt_obj$assessment[[id]]
 
-    
+
     # get relevant series info
         
-    info <- c(
-      ctsm_asmt_obj$info,
-      timeSeries[id, ]
-    )
-    
-    info$distribution <- ctsm_get_info(
-      "determinand", 
-      info$determinand, 
-      "distribution"
-    )
-    
-    info$group <- ctsm_get_info(
-      "determinand", 
-      info$determinand,
-      "group",
-      info$compartment, 
-      sep = "_"
-    )
-    
-    if (info$compartment == "sediment") {
-      info$matrix <- unique(data$matrix)
-    }  
-    
-    if (info$compartment == "water") {
-      info$matrix <- "WT"
-    }
+    series <- timeSeries[id, ]
     
     
     # get file name from id, and add country and station name 
     # for easier identification
     
     output_id <- gsub(
-      info$station_code, 
-      paste(info$station_code, info$country, info$station_name), 
+      series$station_code, 
+      paste(series$station_code, series$country, series$station_name), 
       id
     )
     
@@ -121,7 +116,7 @@ ctsm_plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot.data(data, assessment, info, type = "assessment", xykey.cex = 1.4) 
+      plot.data(data, assessment, series, info, type = "assessment", xykey.cex = 1.4) 
       dev.off()
       
     }    
@@ -140,7 +135,7 @@ ctsm_plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot.data(data, assessment, info, type = "data", xykey.cex = 1.4)
+      plot.data(data, assessment, series, info, type = "data", xykey.cex = 1.4)
       dev.off()
       
     }  
@@ -165,18 +160,18 @@ ctsm.format <- function(x, y = x, nsig = 3) {
 }
 
 
-ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
+ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) {
 
   compartment <- switch(info$compartment, biota = "Biota", sediment = "Sediment", water = "Water")
   
   txt <- paste("Compartment:", compartment)
   
-  matrixID <- unique(na.omit(info$matrix))
+  matrixID <- unique(na.omit(series$matrix))
   matrixID <- sort(matrixID)
   
   if (length(matrixID) == 0) stop('no valid matrix information')
   
-  matrixNames <- ctsm_get_info("matrix", matrixID, "name")
+  matrixNames <- ctsm_get_info(info$matrix, matrixID, "name")
   
   # ad-hoc fix to make names consistent with markdown
   
@@ -187,7 +182,7 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
 
   txt <- switch(compartment,
     Biota = {
-      txt <- paste0(txt, " (", ctsm_get_info("species", info$species, "common_name"), " ")
+      txt <- paste0(txt, " (", ctsm_get_info(info$species, series$species, "common_name"), " ")
       if (length(matrixID) == 1) 
         paste0(txt, matrixNames) 
       else {
@@ -212,34 +207,38 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
     }
   )
   
-  if (is.na(info$subseries)) {
+  if (is.na(series$subseries)) {
     txt <- paste0(txt, ")")
   } else {
-    txt <- paste0(txt, " - ", info$subseries, ")")
+    txt <- paste0(txt, " - ", series$subseries, ")")
   }
     
 
   out <- list(media = txt)
 
-  txt <- paste("Station: ", info$station_name, sep = "")
-  if (!is.na(info$station_longname)) txt <- paste(txt, " (", info$station_longname, ")", sep = "")
-
+  txt <- paste("Station: ", series$station_name, sep = "")
+  if (!is.na(series$station_longname)) {
+    txt <- paste(txt, " (", series$station_longname, ")", sep = "")
+  }
+  
   #out$station <- if (html) convert.html.characters(txt) else txt
   out$station <- txt
   
   out$determinand <- paste(
     "Determinand:", 
-    ctsm_get_info("determinand", info$determinand, "common_name")
+    ctsm_get_info(info$determinand, series$determinand, "common_name")
   )
 
 
-  unitID <- ctsm_get_info("determinand", info$determinand, "unit", info$compartment, sep = "_")
+  unitID <- ctsm_get_info(
+    info$determinand, series$determinand, "unit", info$compartment, sep = "_"
+  )
 
-  groupID = unique(info$group)
+  groupID = unique(series$group)
   if (length(groupID) > 1)
     stop('multiple determinand groups not supported in ctsm.web.getKey')
 
-  basis <- as.character(info$basis)
+  basis <- as.character(series$basis)
   
   sep.html <- if (html) " " else "~"
   
@@ -261,7 +260,8 @@ ctsm.web.getKey <- function(info, auxiliary.plot = FALSE, html = FALSE) {
 
   # extra.text deals with normalised sediments
 
-  is_extra <- info$compartment == "sediment" && (is.null(info$country) || info$country != "Spain")
+  is_extra <- info$compartment == "sediment" && 
+    (is.null(series$country) || series$country != "Spain")
   
   if (is_extra) {
     if (html) {
@@ -396,8 +396,9 @@ plot.AC <- function(AC, ylim, useLogs = TRUE) {
 
 
 
-plot.data <- function(data, assessment, info, type = c("data", "assessment"), 
-                      xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = FALSE, ...) {
+plot.data <- function(
+    data, assessment, series, info, type = c("data", "assessment"), 
+    xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = FALSE, ...) {
 
   type <- match.arg(type) 
 
@@ -410,34 +411,32 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
 
   # make data types compatible - i.e. raw data or assessment indices
  
-  distribution <- ctsm_get_info("determinand", info$determinand, "distribution")
-  
-  if (info$determinand %in% c("MNC")) {
+  if (series$determinand %in% c("MNC")) {
     warning("remember to fix distribution changes")
     distribution <- "normal"
   }
   
   
-  useLogs <- distribution %in% "lognormal"
+  useLogs <- series$distribution %in% "lognormal"
 
   data <- switch(type, 
-    data = 
-    {
+    data = {
       out <- subset(data, select = c(year, concentration, censoring))
       if (useLogs) out <- within(out, concentration <- log(concentration))
       out
     },
-    assessment = 
-    {
+    assessment = {
       out <- assessment$annualIndex
       names(out)[2] <- "concentration"
-      if (info$determinand %in% c("VDS", "IMPS", "INTS")) out$censoring <- rep("", nrow(out))
+      if (series$determinand %in% c("VDS", "IMPS", "INTS")) {
+        out$censoring <- rep("", nrow(out))
+      }
       out
     }
   )    
 
   
-  if (info$distribution == "beta" && is.pred) {
+  if (series$distribution == "beta" && is.pred) {
     assessment$pred <- dplyr::mutate(
       assessment$pred, 
       fit = 100 * plogis(.data$fit),
@@ -459,9 +458,9 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
     )
   }
   
-  if (info$determinand %in% c("VDS", "IMPS", "INTS")) {
-    wk <- info.imposex[
-      info.imposex$species %in% info$species & info.imposex$determinand %in% info$determinand, 
+  if (series$determinand %in% c("VDS", "IMPS", "INTS")) {
+    wk <- info$imposex[
+      info$imposex$species %in% series$species & info$imposex$determinand %in% series$determinand, 
       "max_value"]
     ylim <- extendrange(c(0, wk), f = 0.04)
   }            
@@ -605,13 +604,13 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
 
       pushViewport(viewport(clip = "off"))
       extra <- dplyr::case_when(
-        info$group %in% "Effects"               ~ "",
-        info$determinand %in% "VDS"             ~ "stage",
-        info$determinand %in% c("IMPS", "INTS") ~ "",
+        series$group %in% "Effects"               ~ "",
+        series$determinand %in% "VDS"             ~ "stage",
+        series$determinand %in% c("IMPS", "INTS") ~ "",
         TRUE                                    ~ "concentration"
       )
       ylabel <- paste(
-        ctsm_get_info("determinand", info$determinand, "common_name"), 
+        ctsm_get_info(info$determinand, series$determinand, "common_name"), 
         extra
       )
       grid.text(
@@ -625,7 +624,7 @@ plot.data <- function(data, assessment, info, type = c("data", "assessment"),
   print(data.plot, newpage = FALSE)
   upViewport()
   upViewport()
-  plot.info(info, ...)
+  plot.info(series, info, ...)
 }
 
 
@@ -1016,7 +1015,7 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
   upViewport()
   upViewport()
 
-  plot.info(info, plot.type = "auxiliary", ...)
+  plot.info(series, info, plot.type = "auxiliary", ...)
 }
 
 
@@ -1306,7 +1305,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
    upViewport()
    upViewport()
    
-   plot.info(info, ...)
+   plot.info(series, info, ...)
 }
 
 
@@ -1386,7 +1385,7 @@ plot.multidata <- function(data, info,  ...) {
   pushViewport(viewport(layout.pos.row = 1))
   print(data.plot, newpage = FALSE)
   upViewport()
-  plot.info(info, ...)
+  plot.info(series, info, ...)
 }
 
 
@@ -1511,10 +1510,10 @@ ctsm.panel.pairs <- function (z, panel = lattice.getOption("panel.splom"), lower
 
 
 
-plot.info <- function(info, plot.type = c("data", "auxiliary"), ...) {
+plot.info <- function(series, info, plot.type = c("data", "auxiliary"), ...) {
 
   plot.type <- match.arg(plot.type)
-  key <- ctsm.web.getKey(info, auxiliary.plot = plot.type == "auxiliary")
+  key <- ctsm.web.getKey(series, info, auxiliary.plot = plot.type == "auxiliary")
   
   pushViewport(viewport(layout.pos.row = 2))
   
@@ -1993,7 +1992,7 @@ plot.ratio <- function(data, info, ...) {
   
   # hack of plot.info to allow for dimensionless units
   
-  key <- ctsm.web.getKey(info, auxiliary.plot = FALSE)
+  key <- ctsm.web.getKey(series, info, auxiliary.plot = FALSE)
   
   plot_key <- function(txt, y_lines) {
     grid.text(
