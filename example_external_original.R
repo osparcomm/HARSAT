@@ -26,13 +26,10 @@ source(file.path(function_path, "support_functions.R"))
 
 # source reference tables and associated information functions
 
-info_AC_type <- "OSPAR"
+info_AC_type <- "OSPAR"   # not needed much longer
 
 source(file.path(function_path, "information_functions.R"))
 
-info.assessment.criteria <- ctsm_read_assessment_criteria(
-  list(biota = "assessment criteria biota.csv")
-)
 
 
 

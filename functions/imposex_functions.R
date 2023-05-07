@@ -1,6 +1,6 @@
 # functions to assess imposex data
 
-get.index.biota.Imposex <- function(data, determinand) {
+get.index.biota.Imposex <- function(data, determinand, info) {
 
   data$nfemale <- round(data$n_individual * data[["%FEMALEPOP"]] / 100)
   if (any(is.na(data$nfemale)))

@@ -33,17 +33,9 @@ source(file.path(function_path, "support_functions.R"))
 
 # source reference tables and associated information functions
 
-info_AC_type <- "HELCOM"
+info_AC_type <- "HELCOM"     # not needed for much longer
 
 source(file.path(function_path, "information_functions.R"))
-
-info.assessment.criteria <- ctsm_read_assessment_criteria(
-  list(
-    biota = "assessment criteria biota HELCOM.csv",
-    sediment = "assessment criteria sediment HELCOM.csv",
-    water = "assessment criteria water.csv"
-  )
-)
 
 
 
@@ -322,8 +314,10 @@ source("example_HELCOM_imposex_preparation.R")
 # can sometimes be useful to split up the assessment because of size limitations
 # not really needed here, but done to illustrate
 
-wk_determinands <- ctsm_get_determinands("biota")
-wk_group <- info.determinand[wk_determinands, "biota_group"]
+wk_determinands <- ctsm_get_determinands(biota_timeSeries$info)
+wk_group <- ctsm_get_info(
+  biota_timeSeries$info$determinand, wk_determinands, "biota_group"
+)
 
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
