@@ -651,10 +651,10 @@ ctsm_read_assessment_criteria <- function(files, path = "information")  {
 # if a list, then each element can be either a scalar (replicated to length n), or a vector of length n
 # AC is a character vector of assessment concentration types
 
-get.AC <- function(compartment, determinand, info, AC) {
+get.AC <- function(compartment, determinand, info, AC, determinand_rt, species_rt) {
 
   # check elements of info are of correct length
- 
+
   stopifnot(sapply(info, length) %in% c(1, length(determinand)))
   
 
@@ -671,7 +671,7 @@ get.AC <- function(compartment, determinand, info, AC) {
   # split by determinand groupings
   
   group <- ctsm_get_info(
-    "determinand", data$determinand, "group", compartment, sep = "_"
+    determinand_rt, data$determinand, "group", compartment, sep = "_"
   )
   
   data <- split(data, group, drop = TRUE)
@@ -680,14 +680,17 @@ get.AC <- function(compartment, determinand, info, AC) {
   # get assessment concentrations
    
   out <- lapply(names(data), function(i) {
-    do.call(paste("get.AC", compartment, i, sep = "."), list(data = data[[i]], AC = AC))
+    args <- list(data = data[[i]], AC = AC)
+    if (compartment == "biota") args$species_rt <- species_rt
+    do.call(paste("get.AC", compartment, i, sep = "."), args)
   }) 
   
   unsplit(out, group, drop = TRUE)
 }
 
 
-get.AC.biota.contaminant <- function(data, AC, export_cf = FALSE) {    
+get.AC.biota.contaminant <- function(
+    data, AC, species_rt, export_cf = FALSE) {    
   
   AC_data <- info.assessment.criteria$biota
   stopifnot(AC %in% names(AC_data))
@@ -697,13 +700,13 @@ get.AC.biota.contaminant <- function(data, AC, export_cf = FALSE) {
   data <- data %>% 
     rownames_to_column("rownames") %>% 
     mutate(
-      species_group = ctsm_get_info("species", species, "species_group"),
-      sub.family = ctsm_get_info("species", species, "species_subgroup")
+      species_group = ctsm_get_info(species_rt, species, "species_group"),
+      sub.family = ctsm_get_info(species_rt, species, "species_subgroup")
     ) 
   
-  lipid_info <- ctsm_get_species_cfs(info.species, "lipidwt")
+  lipid_info <- ctsm_get_species_cfs(species_rt, "lipidwt")
   
-  drywt_info <- ctsm_get_species_cfs(info.species, "drywt")
+  drywt_info <- ctsm_get_species_cfs(species_rt, "drywt")
   
   data <- left_join(data, lipid_info, by = c("species", "matrix"))
   data <- left_join(data, drywt_info, by = c("species", "matrix"))
@@ -742,9 +745,9 @@ if (info_AC_type == "OSPAR") {
   get.AC.biota.Organotins <- get.AC.biota.contaminant
   get.AC.biota.Organobromines <- get.AC.biota.contaminant
   
-  get.AC.biota.Metals <- function(data, AC, lipid_high = 3) {
+  get.AC.biota.Metals <- function(data, AC, species_rt, lipid_high = 3) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -756,8 +759,8 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        species_group = ctsm_get_info("species", .data$species, "species_group"),
-        sub.family = ctsm_get_info("species", .data$species, "species_subgroup")
+        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+        sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
       )
     
     
@@ -852,9 +855,9 @@ if (info_AC_type == "OSPAR") {
   }
   
   
-  get.AC.biota.Chlorobiphenyls <- function(data, AC, lipid_high = 3) {
+  get.AC.biota.Chlorobiphenyls <- function(data, AC, species_rt, lipid_high = 3) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -866,8 +869,8 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        species_group = ctsm_get_info("species", .data$species, "species_group"),
-        sub.family = ctsm_get_info("species", .data$species, "species_subgroup")
+        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+        sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
       )
     
     # BACs in fish only apply to high lipid tissue
@@ -905,9 +908,9 @@ if (info_AC_type == "OSPAR") {
   }
   
   
-  get.AC.biota.Organochlorines <- function(data, AC, lipid_high = 3) {
+  get.AC.biota.Organochlorines <- function(data, AC, species_rt, lipid_high = 3) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -919,7 +922,7 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        species_group = ctsm_get_info("species", .data$species, "species_group"),
+        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
         species = as.character(species)
       )
     
@@ -996,9 +999,9 @@ if (info_AC_type == "OSPAR") {
   }
   
   
-  get.AC.biota.Organofluorines <- function(data, AC) {
+  get.AC.biota.Organofluorines <- function(data, AC, species_rt) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1009,7 +1012,7 @@ if (info_AC_type == "OSPAR") {
     
     out <- out %>%
       rownames_to_column() %>%
-      mutate(species_group = ctsm_get_info("species", .data$species, "species_group"))
+      mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
     
     
     # fish liver - multiply by 5
@@ -1031,9 +1034,9 @@ if (info_AC_type == "OSPAR") {
   }
   
   
-  get.AC.biota.PBDEs <- function(data, AC) {
+  get.AC.biota.PBDEs <- function(data, AC, species_rt) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1045,7 +1048,7 @@ if (info_AC_type == "OSPAR") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        species_group = ctsm_get_info("species", .data$species, "species_group"),
+        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
         species = as.character(species)
       )
     
@@ -1076,9 +1079,9 @@ if (info_AC_type == "OSPAR") {
   }
   
   
-  get.AC.biota.Dioxins <- function(data, AC) {
+  get.AC.biota.Dioxins <- function(data, AC, species_rt) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1089,7 +1092,7 @@ if (info_AC_type == "OSPAR") {
     
     out <- out %>%
       rownames_to_column() %>%
-      mutate(species_group = ctsm_get_info("species", .data$species, "species_group"))
+      mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
     
     
     # add in HQS of 0.02 ww for fish liver
@@ -1111,7 +1114,7 @@ if (info_AC_type == "OSPAR") {
   }
   
   
-  get.AC.biota.Effects <- function(data, AC) {
+  get.AC.biota.Effects <- function(data, AC, species_rt) {
     
     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
     rownames(out) <- rownames(data)
@@ -1147,14 +1150,14 @@ if (info_AC_type == "OSPAR") {
       }
       
       if ("SFG" %in% data$determinand) {
-        id <- ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
+        id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
           determinand %in% "SFG"
         if ("BAC" %in% AC) out$BAC[id] <- 25
         if ("EAC" %in% AC) out$EAC[id] <- 15
       }
       
       if ("SURVT" %in% data$determinand) {
-        id <- ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
+        id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
           determinand %in% "SURVT"
         if ("BAC" %in% AC) out$BAC[id] <- 10
         if ("EAC" %in% AC) out$EAC[id] <- 5
@@ -1174,7 +1177,7 @@ if (info_AC_type == "OSPAR") {
       
       if ("MNC" %in% data$determinand) {
         
-        if (any(ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
+        if (any(ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
                 determinand %in% "MNC"))
           stop("AC not coded for MNC in mussels")
         
@@ -1202,7 +1205,7 @@ if (info_AC_type == "OSPAR") {
   }
   
   
-  get.AC.biota.Metabolites <- function(data, AC) {
+  get.AC.biota.Metabolites <- function(data, AC, species_rt) {
     
     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
     rownames(out) <- rownames(data)
@@ -1254,7 +1257,7 @@ if (info_AC_type == "OSPAR") {
   }
   
   
-  get.AC.biota.Imposex <- function(data, AC) {
+  get.AC.biota.Imposex <- function(data, AC, species_rt) {
     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
     rownames(out) <- rownames(data)
     
@@ -1291,7 +1294,7 @@ if (info_AC_type == "HELCOM") {
   get.AC.biota.Organochlorines<- get.AC.biota.contaminant
   get.AC.biota.Dioxins <- get.AC.biota.contaminant
   
-  get.AC.biota.Metals <- function(data, AC) {
+  get.AC.biota.Metals <- function(data, AC, species_rt) {
 
     out <- get.AC.biota.contaminant(data, AC)
 
@@ -1329,7 +1332,7 @@ if (info_AC_type == "HELCOM") {
   }
 
 
-  get.AC.biota.Organofluorines <- function(data, AC) {
+  get.AC.biota.Organofluorines <- function(data, AC, species_rt) {
 
     out <- get.AC.biota.contaminant(data, AC)
 
@@ -1361,7 +1364,7 @@ if (info_AC_type == "HELCOM") {
   }
 
   
-  get.AC.biota.Metabolites <- function(data, AC) {
+  get.AC.biota.Metabolites <- function(data, AC, species_rt) {
     
     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
     rownames(out) <- rownames(data)
@@ -1379,7 +1382,7 @@ if (info_AC_type == "HELCOM") {
   }
   
   
-  get.AC.biota.Imposex <- function(data, AC) {
+  get.AC.biota.Imposex <- function(data, AC, species_rt) {
     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
     rownames(out) <- rownames(data)
     
@@ -1410,9 +1413,9 @@ if (info_AC_type == "EXTERNAL") {
   get.AC.biota.Organotins <- get.AC.biota.contaminant
   get.AC.biota.Organobromines <- get.AC.biota.contaminant
   
-  get.AC.biota.Metals <- function(data, AC, lipid_high = 3) {
+  get.AC.biota.Metals <- function(data, AC, species_rt, lipid_high = 3) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1424,8 +1427,8 @@ if (info_AC_type == "EXTERNAL") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        species_group = ctsm_get_info("species", .data$species, "species_group"),
-        sub.family = ctsm_get_info("species", .data$species, "species_subgroup")
+        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+        sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
       )
     
     
@@ -1520,9 +1523,9 @@ if (info_AC_type == "EXTERNAL") {
   }
   
   
-  get.AC.biota.Chlorobiphenyls <- function(data, AC, lipid_high = 3) {
+  get.AC.biota.Chlorobiphenyls <- function(data, AC, species_rt, lipid_high = 3) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1534,8 +1537,8 @@ if (info_AC_type == "EXTERNAL") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        species_group = ctsm_get_info("species", .data$species, "species_group"),
-        sub.family = ctsm_get_info("species", .data$species, "species_subgroup")
+        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+        sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
       )
     
     # BACs in fish only apply to high lipid tissue
@@ -1573,9 +1576,9 @@ if (info_AC_type == "EXTERNAL") {
   }
   
   
-  get.AC.biota.Organochlorines <- function(data, AC, lipid_high = 3) {
+  get.AC.biota.Organochlorines <- function(data, AC, species_rt, lipid_high = 3) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1587,7 +1590,7 @@ if (info_AC_type == "EXTERNAL") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        species_group = ctsm_get_info("species", .data$species, "species_group"),
+        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
         species = as.character(species)
       )
     
@@ -1664,9 +1667,9 @@ if (info_AC_type == "EXTERNAL") {
   }
   
   
-  get.AC.biota.Organofluorines <- function(data, AC) {
+  get.AC.biota.Organofluorines <- function(data, AC, species_rt) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1677,7 +1680,7 @@ if (info_AC_type == "EXTERNAL") {
     
     out <- out %>%
       rownames_to_column() %>%
-      mutate(species_group = ctsm_get_info("species", .data$species, "species_group"))
+      mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
     
     
     # fish liver - multiply by 5
@@ -1699,9 +1702,9 @@ if (info_AC_type == "EXTERNAL") {
   }
   
   
-  get.AC.biota.PBDEs <- function(data, AC) {
+  get.AC.biota.PBDEs <- function(data, AC, species_rt) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1713,7 +1716,7 @@ if (info_AC_type == "EXTERNAL") {
     out <- out %>%
       rownames_to_column() %>%
       mutate(
-        species_group = ctsm_get_info("species", .data$species, "species_group"),
+        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
         species = as.character(species)
       )
     
@@ -1744,9 +1747,9 @@ if (info_AC_type == "EXTERNAL") {
   }
   
   
-  get.AC.biota.Dioxins <- function(data, AC) {
+  get.AC.biota.Dioxins <- function(data, AC, species_rt) {
     
-    out <- get.AC.biota.contaminant(data, AC, export_cf = TRUE)
+    out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
     
     stopifnot(
       length(intersect(names(data), names(out))) == 0,
@@ -1757,7 +1760,7 @@ if (info_AC_type == "EXTERNAL") {
     
     out <- out %>%
       rownames_to_column() %>%
-      mutate(species_group = ctsm_get_info("species", .data$species, "species_group"))
+      mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
     
     
     # add in HQS of 0.02 ww for fish liver
@@ -1779,7 +1782,7 @@ if (info_AC_type == "EXTERNAL") {
   }
   
   
-  get.AC.biota.Effects <- function(data, AC) {
+  get.AC.biota.Effects <- function(data, AC, species_rt) {
     
     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
     rownames(out) <- rownames(data)
@@ -1815,14 +1818,14 @@ if (info_AC_type == "EXTERNAL") {
       }
       
       if ("SFG" %in% data$determinand) {
-        id <- ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
+        id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
           determinand %in% "SFG"
         if ("BAC" %in% AC) out$BAC[id] <- 25
         if ("EAC" %in% AC) out$EAC[id] <- 15
       }
       
       if ("SURVT" %in% data$determinand) {
-        id <- ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
+        id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
           determinand %in% "SURVT"
         if ("BAC" %in% AC) out$BAC[id] <- 10
         if ("EAC" %in% AC) out$EAC[id] <- 5
@@ -1842,7 +1845,7 @@ if (info_AC_type == "EXTERNAL") {
       
       if ("MNC" %in% data$determinand) {
         
-        if (any(ctsm_get_info("species", species, "sub.family") %in% "Mussel" &
+        if (any(ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
                 determinand %in% "MNC"))
           stop("AC not coded for MNC in mussels")
         
@@ -1870,7 +1873,7 @@ if (info_AC_type == "EXTERNAL") {
   }
   
   
-  get.AC.biota.Metabolites <- function(data, AC) {
+  get.AC.biota.Metabolites <- function(data, AC, species_rt) {
     
     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
     rownames(out) <- rownames(data)
@@ -1922,7 +1925,7 @@ if (info_AC_type == "EXTERNAL") {
   }
   
   
-  get.AC.biota.Imposex <- function(data, AC) {
+  get.AC.biota.Imposex <- function(data, AC, species_rt) {
     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
     rownames(out) <- rownames(data)
     
@@ -2689,10 +2692,17 @@ ctsm_read_pivot_values <- function(file, path = "information") {
 
 # Imposex ----
 
-info.imposex <- read.csv(file.path("information", "imposex.csv"))
+ctsm_read_imposex <- function(file, path = "information") {
+  read.csv(
+    file.path(path, file), 
+    na.strings = "",
+    strip.white = TRUE
+  )
+} 
 
-get.info.imposex <- function(species, determinand, choice = c("min_value", "max_value"), 
-                             na.action = c("fail", "ok")) {
+get.info.imposex <- function(
+    species, determinand, info.imposex, choice = c("min_value", "max_value"), 
+    na.action = c("fail", "ok")) {
   
   choice <- match.arg(choice)
   na.action <- match.arg(na.action)

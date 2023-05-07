@@ -40,7 +40,7 @@ ctsm_check_variable <- function(data, var_id, info) {
   
   data <- do.call(
     paste("ctsm.check", var_id, info$compartment, sep = "."), 
-    list(data = data)
+    list(data = data, info = info)
   )
 
   
@@ -104,7 +104,7 @@ ctsm_is_contaminant <- function(pargroup, exclude = NULL) {
 }  
 
 
-ctsm.check.basis.sediment <- function(data) {
+ctsm.check.basis.sediment <- function(data, info) {
 
   id <- ctsm_is_contaminant(data$pargroup) | 
     data$determinand %in% c("CORG", "LOIGN")
@@ -125,7 +125,7 @@ ctsm.check.basis.sediment <- function(data) {
   data               
 }
 
-ctsm.check.basis.biota <- function(data) {
+ctsm.check.basis.biota <- function(data, info) {
 
   id <- ctsm_is_contaminant(data$pargroup)
   if (any(id))
@@ -180,7 +180,7 @@ ctsm.check.basis.biota <- function(data) {
   data             
 }             
 
-ctsm.check.basis.water <- function(data) {
+ctsm.check.basis.water <- function(data, info) {
   
   data <- within(data, {
     ok <- basis %in% "W"
@@ -192,7 +192,7 @@ ctsm.check.basis.water <- function(data) {
 }
 
 
-ctsm.check.matrix.sediment <- function(data) {
+ctsm.check.matrix.sediment <- function(data, info) {
   
   data <- within(data, {
     ok <- substr(matrix, 1, 3) %in% "SED"
@@ -216,7 +216,7 @@ ctsm.check.matrix.sediment <- function(data) {
   data               
 }
 
-ctsm.check.matrix.biota <- function(data) {
+ctsm.check.matrix.biota <- function(data, info) {
   
   id <- ctsm_is_contaminant(data$pargroup) | 
     data$determinand %in% c("DRYWT%", "EXLIP%", "FATWT%", "LIPIDWT%")
@@ -372,7 +372,7 @@ ctsm.check.matrix.biota <- function(data) {
   data             
 }             
 
-ctsm.check.matrix.water <- function(data) {
+ctsm.check.matrix.water <- function(data, info) {
   
   data <- within(data, {
     ok <- matrix %in% c("WT", "AF", "BF")
@@ -385,7 +385,7 @@ ctsm.check.matrix.water <- function(data) {
 
 
 
-ctsm.check.family.biota <- function(data) {  
+ctsm.check.family.biota <- function(data, info) {  
   
   # check family appropriate for each determinand
   
@@ -434,7 +434,7 @@ ctsm.check.family.biota <- function(data) {
   data             
 }             
 
-ctsm.check.sex.biota <- function(data) {
+ctsm.check.sex.biota <- function(data, info) {
 
   # NB any changes should really be made at the sub-sample level
   
@@ -482,7 +482,7 @@ ctsm.check.sex.biota <- function(data) {
 }             
 
 
-ctsm.check.unit.biota <- function(data) {
+ctsm.check.unit.biota <- function(data, info) {
 
   standard_unit <- c(
     "g/g", "mg/mg", "ug/ug", "ng/ng", "pg/pg", "mg/g", "ug/g", "ng/g", "pg/g", "g/kg", "mg/kg", 
@@ -631,7 +631,7 @@ ctsm.check.unit.biota <- function(data) {
   data             
 }             
 
-ctsm.check.unit.sediment <- function(data) {
+ctsm.check.unit.sediment <- function(data, info) {
 
   standard_unit <- c(
     "g/g", "mg/mg", "ug/ug", "ng/ng", "pg/pg", "mg/g", "ug/g", "ng/g", "pg/g", "g/kg", "mg/kg", 
@@ -661,7 +661,7 @@ ctsm.check.unit.sediment <- function(data) {
   data             
 }             
 
-ctsm.check.unit.water <- function(data) {
+ctsm.check.unit.water <- function(data, info) {
   
   id <- ctsm_is_contaminant(data$pargroup, exclude = "I-RNC")
   if (any(id))
@@ -674,7 +674,7 @@ ctsm.check.unit.water <- function(data) {
 }             
 
 
-ctsm.check.method_analysis.sediment <- function(data) {
+ctsm.check.method_analysis.sediment <- function(data, info) {
 
   data <- within(data, {
     ok <- TRUE
@@ -684,7 +684,7 @@ ctsm.check.method_analysis.sediment <- function(data) {
   data
 }  
 
-ctsm.check.method_analysis.water <- function(data) {
+ctsm.check.method_analysis.water <- function(data, info) {
   
   data <- within(data, {
     ok <- TRUE
@@ -694,7 +694,7 @@ ctsm.check.method_analysis.water <- function(data) {
   data
 }  
 
-ctsm.check.method_analysis.biota <- function(data) {
+ctsm.check.method_analysis.biota <- function(data, info) {
 
   id <- data$group != "Metabolites"
   if (any(id))
@@ -720,7 +720,7 @@ ctsm.check.method_analysis.biota <- function(data) {
 }             
 
 
-ctsm.check.value.biota <- function(data) {
+ctsm.check.value.biota <- function(data, info) {
 
   is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  
     abs(x - round(x)) < tol
@@ -765,8 +765,14 @@ ctsm.check.value.biota <- function(data) {
   
   id <- data$determinand %in% c("VDSI", "PCI", "INTSI")
   if (any(id)) {
-    min.imposex <- with(data[id,], get.info.imposex(species, determinand, "min_value", na.action = "ok"))
-    max.imposex <- with(data[id,], get.info.imposex(species, determinand, "max_value", na.action = "ok"))
+    min.imposex <- with(
+      data[id,], 
+      get.info.imposex(species, determinand, info$imposex, "min_value", na.action = "ok")
+    )
+    max.imposex <- with(
+      data[id,], 
+      get.info.imposex(species, determinand, info$imposex, "max_value", na.action = "ok")
+    )
     data[id,] <- within(data[id,], {
       ok <- !is.na(value) & !is.na(min.imposex) & !is.na(max.imposex) &
         value >= min.imposex & value <= max.imposex
@@ -777,8 +783,14 @@ ctsm.check.value.biota <- function(data) {
   
   id <- data$determinand %in% c("VDS", "IMPS", "INTS")
   if (any(id)) {
-    min.imposex <- with(data[id,], get.info.imposex(species, determinand, "min_value", na.action = "ok"))
-    max.imposex <- with(data[id,], get.info.imposex(species, determinand, "max_value", na.action = "ok"))
+    min.imposex <- with(
+      data[id,], 
+      get.info.imposex(species, determinand, info$imposex, "min_value", na.action = "ok")
+    )
+    max.imposex <- with(
+      data[id,], 
+      get.info.imposex(species, determinand, info$imposex, "max_value", na.action = "ok")
+    )
     data[id,] <- within(data[id,], {
       ok <- !is.na(value) & !is.na(min.imposex) & !is.na(max.imposex) &
         value >= min.imposex & value <= max.imposex & is.wholenumber(value)
@@ -819,7 +831,7 @@ ctsm.check.value.biota <- function(data) {
   data             
 }             
 
-ctsm.check.value.sediment <- function(data) {
+ctsm.check.value.sediment <- function(data, info) {
 
   id <- ctsm_is_contaminant(data$pargroup) & !data$determinand %in% c("AL", "LI")
   if (any(id))
@@ -846,7 +858,7 @@ ctsm.check.value.sediment <- function(data) {
   data             
 }             
 
-ctsm.check.value.water <- function(data) {
+ctsm.check.value.water <- function(data, info) {
   
   data <- within(data, {
     ok <- !is.na(value) & value > 0
@@ -857,7 +869,7 @@ ctsm.check.value.water <- function(data) {
 }             
 
 
-ctsm.check.n_individual.biota <- function(data) {
+ctsm.check.n_individual.biota <- function(data, info) {
 
   id <- data$group != "Imposex"
   if (any(id))

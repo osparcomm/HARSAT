@@ -163,7 +163,7 @@ ctsm_assessment_engine <- function(
   
     # get info about the time series
     
-    seriesID <- as.character(x$seriesID[1])
+    seriesID <- x$seriesID[1]
     seriesInfo <- sapply(
       timeSeries[seriesID,], 
       function(i) if (is.numeric(i)) i else as.character(i), 
@@ -212,16 +212,25 @@ ctsm_assessment_engine <- function(
     
     row.names(x) <- NULL
 
-    annualIndex <- get.index(info$compartment, determinand, x)
+    annualIndex <- get.index(determinand, x, info)
     
 
     # get assessment concentrations - need to extract some key variables first 
     # could streamline in future
     
-    if ("AC" %in% names(info))
-      AC <- unlist(get.AC(info$compartment, determinand, seriesInfo, info$AC))
-    else 
+    if ("AC" %in% names(info)) {
+      AC <- get.AC(
+        info$compartment, 
+        determinand, 
+        seriesInfo, 
+        info$AC, 
+        info$determinand,
+        info$species
+      )
+      AC <- unlist(AC)
+    } else { 
       AC <- NULL
+    }
     
     # initialise output from function
     
@@ -290,7 +299,8 @@ ctsm_assessment_engine <- function(
       # trap for any lognormal or normal distributed data that have missing 
       #   uncertainties
 
-      distribution <- ctsm_get_info("determinand", determinand, "distribution")
+      distribution <- ctsm_get_info(info$determinand, determinand, "distribution")
+      good.status <- ctsm_get_info(info$determinand, determinand, "good_status")
 
       if (determinand %in% "SFG" && any(is.na(x$uncertainty))) {      
         cat("  warning: ad-hoc fix to estimate missing uncertainties\n")
@@ -310,7 +320,10 @@ ctsm_assessment_engine <- function(
         recent.years = info$recent_years, 
         determinand = determinand, 
         max.year = info$max_year, 
-        recent.trend = info$recent.trend)
+        recent.trend = info$recent.trend, 
+        distribution = distribution, 
+        good.status = good.status
+      )
       
       args.list <- c(args.list, list(...))
       fit <- try(do.call("ctsm.anyyear.lmm", args.list))
@@ -355,21 +368,30 @@ ctsm_parallel_objects <- function(imposex = FALSE) {
 
 # Annual indices ----
 
-get.index <- function(compartment, determinand, data) {
-  group <- ctsm_get_info("determinand", determinand, "group", compartment, sep = "_")
-  function_id <- paste("get.index", compartment, group, sep = ".")
-  do.call(function_id, list(data = data, determinand = determinand)) 
+get.index <- function(determinand, data, info) {
+  
+  group <- ctsm_get_info(
+    info$determinand, 
+    determinand, 
+    "group", 
+    info$compartment, 
+    sep = "_"
+  )
+  
+  function_id <- paste("get.index", info$compartment, group, sep = ".")
+  
+  do.call(function_id, list(data = data, determinand = determinand, info = info)) 
 }
 
 
-get.index.default <- function(data, determinand) {
+get.index.default <- function(data, determinand, info) {
 
   data <- data[!is.na(data$concentration), ]
   
   # median (log) concentrations with flag to denote if less thans used in their 
   # construction
   
-  distribution <- ctsm_get_info("determinand", determinand, "distribution")
+  distribution <- ctsm_get_info(info$determinand, determinand, "distribution")
   
   data$response <- switch(
     distribution, 
@@ -417,7 +439,7 @@ get.index.biota.Organofluorines <- get.index.default
 get.index.biota.Dioxins <- get.index.default
 get.index.biota.Metabolites <- get.index.default
 
-get.index.biota.Effects <- function(data, determinand) {
+get.index.biota.Effects <- function(data, determinand, info) {
 
   # median value apart from MNC and %DNATAIL where we get a weighted average
   # based on the number of cells
@@ -425,9 +447,9 @@ get.index.biota.Effects <- function(data, determinand) {
   # have put in a trap for censoring values for anything that is not lognormally distributed
   # or that has good.status = high
   
-  distribution <- ctsm_get_info("determinand", determinand, "distribution")
+  distribution <- ctsm_get_info(info$determinand, determinand, "distribution")
   
-  good_status <- ctsm_get_info("determinand", determinand, "good_status")
+  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
   
   
   censoring_trap <- FALSE
@@ -498,15 +520,16 @@ get.index.water.Pesticides <- get.index.default
 
 # Mixed model assessment functions ----
 
-ctsm.anyyear.lmm <- function(data, annualIndex, AC, recent.years, determinand, max.year, 
-                             recent.trend = 20, choose_model, ...) {
+ctsm.anyyear.lmm <- function(
+    data, annualIndex, AC, recent.years, determinand, max.year, 
+    recent.trend = 20, distribution, good.status, choose_model, ...) {
 
   # choose_model forces exit with a particular model: 2 = linear, 3 = smooth on 2df etc, with an 
   # error if that model doesn't exist 
   # this should only be used with extreme care - it is provided for those very rare casese where a 
   # model has been 'over fit' and it is not possible to get standard errors
-  
-  
+
+
   # order data
 
   data <- data[order(data$year), ]
@@ -522,12 +545,6 @@ ctsm.anyyear.lmm <- function(data, annualIndex, AC, recent.years, determinand, m
   # deal with data sets that have crept in by mistake and have no recent data
   
   if (max(data$year) < min(recent.years)) return (NULL)
-  
-  
-  # sort out assumed distribution (lognormal or normal) and whether high or low indicates good status
-  
-  distribution <- ctsm_get_info("determinand", determinand, "distribution")
-  good.status <- ctsm_get_info("determinand", determinand, "good_status")
   
 
   data$response <- switch( 
@@ -1290,7 +1307,7 @@ ctsm_assess_survival <- function(
   
   # establish other info
   
-  good_status <- ctsm_get_info("determinand", determinand, "good_status")
+  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
   
 
   # type of fit depends on number of years:
@@ -1803,7 +1820,7 @@ ctsm_assess_beta <- function(
   
   # establish other info
   
-  good_status <- ctsm_get_info("determinand", determinand, "good_status")
+  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
   
   
   # type of fit depends on number of years:
@@ -2192,7 +2209,7 @@ ctsm_assess_negativebinomial <- function(
   
   # establish other info
   
-  good_status <- ctsm_get_info("determinand", determinand, "good_status")
+  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
   
   
   # type of fit depends on number of years:

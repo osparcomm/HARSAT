@@ -261,7 +261,8 @@ ctsm_read_info <- function(info, path, info_files) {
 
   files$method_extraction <- "method_extraction.csv"
   files$pivot_values <- "pivot_values.csv"
-  files$matrix <- "matrix.csv"  
+  files$matrix <- "matrix.csv"
+  files$imposex <- "imposex.csv"
   
   # modify with user supplied files
   
@@ -297,6 +298,7 @@ ctsm_read_info <- function(info, path, info_files) {
   
   if (info$compartment == "biota") {
     info$species <- ctsm_read_species(files$species, path)
+    info$imposex <- ctsm_read_imposex(files$imposex, path)
   }
 
   if (info$compartment == "sediment") {
@@ -2168,7 +2170,7 @@ ctsm_initialise_oddities <- function(path, compartment) {
   if (!dir.exists(backup)) dir.create(backup) 
       
   cat("\nOddities will be written to '", output, "' with previous oddities ", 
-      "backed up to\n   '", backup, "'\n", sep = "")
+      "backed up to\n '", backup, "'\n", sep = "")
   
   old.files <- dir(output, full.names = TRUE)
   file.copy(from = old.files, to = backup, overwrite = TRUE)
