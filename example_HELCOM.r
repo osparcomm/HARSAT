@@ -33,19 +33,9 @@ source(file.path(function_path, "support_functions.R"))
 
 # source reference tables and associated information functions
 
-info_AC_type <- "HELCOM"
+info_AC_type <- "HELCOM"     # not needed for much longer
 
 source(file.path(function_path, "information_functions.R"))
-
-info.determinand <- ctsm_read_determinand("determinand_HELCOM.csv")
-
-info.assessment.criteria <- ctsm_read_assessment_criteria(
-  list(
-    biota = "assessment criteria biota HELCOM.csv",
-    sediment = "assessment criteria sediment HELCOM.csv",
-    water = "assessment criteria water.csv"
-  )
-)
 
 
 
@@ -59,7 +49,8 @@ biota_data <- ctsm_read_data(
   contaminants = "biota_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
-  data_path = file.path("data", "example_HELCOM"), 
+  data_path = file.path("data", "example_HELCOM"),
+  info_path = "information",
   extraction = "2022/10/06",
   max_year = 2021L
 )  
@@ -75,6 +66,7 @@ sediment_data <- ctsm_read_data(
   contaminants = file.path("example_HELCOM_new_format", "sediment_data.csv"),
   stations = file.path("example_HELCOM", "station_dictionary.csv"),
   data_path = "data",
+  info_path = "information",
   extraction = "2022/10/06",
   max_year = 2021L,
   data_format = "ICES_new"
@@ -91,6 +83,7 @@ water_data <- ctsm_read_data(
   contaminants = file.path("example_HELCOM_new_format", "water_data.csv"), 
   stations = file.path("example_HELCOM", "station_dictionary.csv"), 
   data_path = "data", 
+  info_path = "information", 
   extraction = "2022/10/06",
   max_year = 2021L, 
   data_format = "ICES_new"
@@ -321,8 +314,10 @@ source("example_HELCOM_imposex_preparation.R")
 # can sometimes be useful to split up the assessment because of size limitations
 # not really needed here, but done to illustrate
 
-wk_determinands <- ctsm_get_determinands("biota")
-wk_group <- info.determinand[wk_determinands, "biota_group"]
+wk_determinands <- ctsm_get_determinands(biota_timeSeries$info)
+wk_group <- ctsm_get_info(
+  biota_timeSeries$info$determinand, wk_determinands, "biota_group"
+)
 
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 

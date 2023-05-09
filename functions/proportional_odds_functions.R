@@ -146,9 +146,9 @@ ctsm.VDS.cl <- function(fit, nsim = 1000) {
   names(cl) <- c("lower", "upper")
 
   n_tail = 2L
-  if (any(grepl("Tritia nitida / reticulata", row.names(cl), fixed = TRUE))) {
-    warning("ad-hoc fix for Tritia nitida / reticulata")
-    n_tail = 4L
+  if (any(grepl("Tritia nitida (reticulata)", row.names(cl), fixed = TRUE))) {
+    warning("ad-hoc fix for Tritia nitida (reticulata)")
+    n_tail = 3L
   }
   
   namesID <- strsplit(row.names(cl), " ", fixed = TRUE)
@@ -163,8 +163,8 @@ ctsm.VDS.cl <- function(fit, nsim = 1000) {
 }
 
 
-# finds station year species combinations for which both individual and pooled data have 
-# been submitted and checks for consistency
+# finds station year species combinations for which both individual and pooled 
+# data have been submitted and checks for consistency
 
 # ctsm.VDS.check <- function(ctsmOb) {
 #   

@@ -1,6 +1,6 @@
 # functions to assess imposex data
 
-get.index.biota.Imposex <- function(data, determinand) {
+get.index.biota.Imposex <- function(data, determinand, info) {
 
   data$nfemale <- round(data$n_individual * data[["%FEMALEPOP"]] / 100)
   if (any(is.na(data$nfemale)))
@@ -141,7 +141,7 @@ imposex.family <- list(
 
 assess_imposex <- function(
     data, annualIndex, AC, recent.years, determinand, species, 
-    station_code, thetaID, max.year, recent.trend = 20) {
+    station_code, thetaID, max.year, info.imposex, recent.trend = 20) {
   
   # main assessment routine for imposex data (imposex functions)
   
@@ -241,7 +241,7 @@ assess_imposex <- function(
   }
   else {
   
-    assessment <- imposex.assess.index(annualIndex, species, determinand)
+    assessment <- imposex.assess.index(annualIndex, species, determinand, info.imposex)
 
     # ad-hoc adjustment if individuals reported in last monitoring year 
     # needed to deal with steep declines in imposex following the ban
@@ -326,7 +326,7 @@ imposex_class <- function(species, x) {
 
 
 
-imposex.assess.index <- function(annualIndex, species, determinand) {
+imposex.assess.index <- function(annualIndex, species, determinand, info.imposex) {
   
   year <- annualIndex$year
   value <- annualIndex$index
@@ -386,8 +386,10 @@ imposex.assess.index <- function(annualIndex, species, determinand) {
   
   # now do assessment
   
-  max.value <- info.imposex[info.imposex$species %in% species & info.imposex$determinand %in% determinand, 
-                            "max_value"]
+  max.value <- info.imposex[
+    info.imposex$species %in% species & info.imposex$determinand %in% determinand, 
+    "max_value"
+  ]
     
   # scale to unity for everything but Nucella, where this is incoporated in the family object
     

@@ -1,8 +1,7 @@
 # Intro ----
 
 # An example to demonstrate the use of external data
-# It is based on an assessment of mercury concentrations with some data 
-# provided in an ICES extraction and other data provided from an external file
+# Mercury is the only determinand assessed
 
 
 # Setup ----
@@ -28,69 +27,30 @@ source(file.path(function_path, "graphics_functions.R"))
 
 # source reference tables and associated information functions
 
-info_AC_type <- "EXTERNAL"
-if(tolower(info_AC_type) != tolower("OSPAR") && tolower(info_AC_type) != tolower("HELCOM") && tolower(info_AC_type) != tolower("EXTERNAL")){
-  stop("info_AC_type can only be OSPAR, HELCOM, or EXTERNAL")
-}
+info_AC_type <- "EXTERNAL"     # not needed much longer
 
 source(file.path(function_path, "information_functions.R"))
 
-info.determinand <- ctsm_read_determinand("determinand_external_data.csv")
 
-info.assessment.criteria <- ctsm_read_assessment_criteria(
-  list(biota = "assessment criteria biota.csv")
-)
+# Read data ----
 
-
-# Read data from ICES extraction ----
-
-# mercury data with supporting variables, station dictionary, and 
-# quality assurance (methods) file
+# mercury data with supporting variables and station dictionary
 
 biota_data <- ctsm_read_data(
   compartment = "biota", 
-  # purpose = "OSPAR",                               
+  purpose = "AMAP",
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 
   stations = "AMAP_external_new_stations_only.csv", 
   data_path = file.path("data", "example_external_data"), 
-  # extraction = "2022/01/11",
-  # max_year = 2020L, 
-  data_format = "external", 
+  data_format = "external",
+  info_path = "information",
   control = list(region_id = "AMAP_region")
 )  
-
-# saveRDS(biota_data, file.path("RData", "biota data.rds"))
-
-
-# Adjust ICES extraction and import external AMAP data ----
-
-# corrects known errors in data
-# makes adjustments to data that can't be done easily in the core code
-
-# import external AMAP data 
-# uses functions in 'functions/import external data.r' 
-# the functions need to be generalised to deal with more determinands and to 
-# deal with the case where there is no ICES extraction; i.e. only external data
-
-# the markdown also resolves some inconsistencies where the 'same data' are in
-# both the ICES extraction and the external data file
-
-# the report of the adjustments can be sent anywhere
-
-if(info_AC_type != "EXTERNAL") {
-  rmarkdown::render(
-    "example_external_data_adjustments.Rmd", 
-    output_file = "mercury_adjustments.html",
-    output_dir = file.path("output", "example_external_data") 
-  )
-}
-
-# saveRDS(biota_data, file.path("RData", "biota data adjusted.rds"))
 
 
 # Prepare data for next stage ----
 
-# gets correct variables and streamlines some of the data files
+# get correct variables and streamline the data files
 
 biota_data <- ctsm_tidy_data(biota_data)
 
@@ -98,25 +58,12 @@ biota_data <- ctsm_tidy_data(biota_data)
 
 # Construct timeseries ----
 
-if (info_AC_type == "EXTERNAL") {
-  biota_timeSeries <- ctsm_create_timeSeries(
-    biota_data,
-    get_basis = get_basis_biota_OSPAR
-  )
-}
+# uses OSPAR basis choice for mercury
 
-# only need the liipid weight control structure if lipidwt% has been reported in 
-# multiple ways - typically an ICES extraction issue
-
-if(info_AC_type != "EXTERNAL") {
-  biota_timeSeries <- ctsm_create_timeSeries(
-    biota_data,
-    determinands.control = list(
-      "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-    ),
-    get_basis = get_basis_biota_OSPAR
-  )
-}  
+biota_timeSeries <- ctsm_create_timeSeries(
+  biota_data,
+  get_basis = get_basis_biota_OSPAR
+)
 
 
 # Assessment ----
@@ -131,20 +78,9 @@ biota_assessment <- ctsm_assessment(biota_timeSeries)
 # biota_assessment <- ctsm_assessment(biota_timeSeries, parallel = TRUE)
 
 
-
 ## check convergence ----
 
 (wk_check <- ctsm_check_convergence(biota_assessment$assessment))
-
-
-# this time series has missing standard errors   
-# "3371 HG Mytilus edulis SB Not_applicable"                       
-
-# refit with different numerical differencing arguments
-# biota_assessment <- 
-#   ctsm_update_assessment(biota_assessment, series == wk_check, hess.d = 0.01, hess.r = 8)
-
-# saveRDS(biota_assessment, file.path("RData", "biota assessment.rds"))
 
 
 # Summary files ----

@@ -5,11 +5,13 @@
 
 ctsm_read_data <- function(
   compartment = c("sediment", "biota", "water"), 
-  purpose = c("OSPAR", "HELCOM", "AMAP"), 
+  purpose = c("OSPAR", "HELCOM", "AMAP", "other"), 
   contaminants, 
   stations, 
   QA, 
   data_path = ".", 
+  info_files = list(),
+  info_path = ".",
   extraction = NULL, 
   max_year = NULL,
   oddity_path = "oddities",
@@ -84,6 +86,11 @@ ctsm_read_data <- function(
   }
   
   info <- append(info, control)
+  
+  
+  # read in reference tables
+  
+  info <- ctsm_read_info(info, info_path, info_files)
   
 
   # read in station dictionary, contaminant and biological effects data and QA data
@@ -217,13 +224,117 @@ ctsm_control_modify <- function(control_default, control) {
 }
 
 
+
+ctsm_read_info <- function(info, path, info_files) {
+  
+  # location: import_functions.R
+  # purpose: reads in reference tables, using default files unless overruled 
+  #  by info_control
+  
+  # default reference tables
+  
+  if (info$purpose == "OSPAR") {
+    files <- list(
+      determinand = "determinand_OSPAR_2022.csv", 
+      species = "species_OSPAR_2022.csv",
+      region_values = "regions_OSPAR.csv", 
+      thresholds = paste0("thresholds_", info$compartment, "_OSPAR_2022.csv")
+    )
+  } else if (info$purpose == "HELCOM") {
+    files <- list(
+      determinand = "determinand_HELCOM_2023.csv", 
+      species = "species_HELCOM_2023.csv",
+      region_values = NULL,
+      thresholds = paste0("thresholds_", info$compartment, "_HELCOM_2023.csv")
+    )
+  } else if (info$purpose == "AMAP") {
+    files <- list(
+      determinand = "determinand_AMAP_2022.csv", 
+      species = "species_AMAP_2022.csv",
+      region_values = NULL,
+      thresholds = NULL
+    )
+  } else {
+    files <- list(
+      determinand = "determinand_default.csv", 
+      species = "species_default.csv",
+      region_values = NULL, 
+      thresholds = NULL
+    )
+  }
+
+  files$method_extraction <- "method_extraction.csv"
+  files$pivot_values <- "pivot_values.csv"
+  files$matrix <- "matrix.csv"
+  files$imposex <- "imposex.csv"
+  
+  # modify with user supplied files
+  
+  files <- modifyList(files, info_files, keep.null = TRUE)
+  
+
+  # check determinand and species reference tables have not been made NULL
+  # threshold values do not need to be specified (if only interested in trends)
+  # other files unlikely to be altered by users at this stage
+
+  if (is.null(files$determinand)) {
+    stop(
+      "\nDeterminand reference table not specified.\n",
+      "Check for an error in argument 'info_files'",
+      call. = FALSE
+    )
+  }
+  
+  if (info$compartment == "biota" && is.null(files$species)) {
+    stop(
+      "\nSpecies reference table not specified.\n",
+      "Check for an error in argument 'info_files'",
+      call. = FALSE
+    )
+  }
+  
+
+  info$determinand <- ctsm_read_determinand(
+    files$determinand, path, info$compartment
+  )
+  
+  info$matrix <- ctsm_read_matrix(files$matrix, path)
+  
+  if (info$compartment == "biota") {
+    info$species <- ctsm_read_species(files$species, path)
+    info$imposex <- ctsm_read_imposex(files$imposex, path)
+  }
+
+  if (info$compartment == "sediment") {
+    info$method_extraction <- ctsm_read_method_extraction(
+      files$method_extraction, path
+    ) 
+    info$pivot_values <- ctsm_read_pivot_values(files$pivot_values, path)
+  }  
+      
+  if (!is.null(files$region_values)) {
+    info$region_values <- ctsm_read_regions(
+      files$region_values, path, info$purpose
+    )
+  } 
+  
+  if (!is.null(files$thresholds)) {
+    info$thresholds <- ctsm_read_thresholds(
+      files$thresholds, path, info$compartment
+    )
+  }
+  
+  info
+}
+
+
 ctsm_read_stations <- function(file, path, info) {
 
   # import functions
   # read in station dictionary
   
   infile <- file.path(path, file)
-  cat("Reading station dictionary from '", infile, "'\n", sep = "")
+  cat("Reading station dictionary from:\n '", infile, "'\n", sep = "")
 
   
   if (info$data_format %in% c("ICES_old", "ICES_new")) {
@@ -354,8 +465,8 @@ ctsm_read_contaminants <- function(file, path, info) {
   # read in contaminant (and biological effects) data
   
   infile <- file.path(path, file)
-  cat("\nReading contaminant and biological effects data from '", infile, "'\n", 
-      sep = "")
+  cat("\nReading contaminant and biological effects data from:\n '", 
+      infile, "'\n", sep = "")
 
   if (info$data_format == "ICES_old") {  
 
@@ -938,7 +1049,7 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
     
     ok <- local({
       id1 <- stations$OSPAR_region
-      id2 <- info.regions[["OSPAR"]][stations$OSPAR_subregion, "OSPAR_region"]
+      id2 <- info$region_values[stations$OSPAR_subregion, "OSPAR_region"]
       !is.na(id2) & id1 == id2
     })
     
@@ -1089,7 +1200,7 @@ ctsm_tidy_contaminants <- function(data, info) {
   
   if (info$data_format == "external") {
     data$replicate <- seq(from = 1, to = nrow(data), by = 1)
-    data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
+    data$pargroup <- ctsm_get_info(info$determinand, data$determinand, "pargroup")
   }
   
       
@@ -1164,7 +1275,10 @@ ctsm_tidy_QA <- function(QA, data, info) {
   
   # qalink and determinand should be unique combinations 
   
-  QA <- dplyr::arrange(QA, dplyr::across(c("qalink", "determinand", "method_extraction", "method_analysis")))
+  QA <- dplyr::arrange(
+    QA, 
+    dplyr::across(c("qalink", "determinand", "method_extraction", "method_analysis"))
+  )
   
   QA <- ctsm_check(
     QA, 
@@ -1215,7 +1329,7 @@ ctsm_link_QA <- function(QA, data, compartment) {
 
 ctsm_create_timeSeries <- function(
   ctsm.obj, 
-  determinands = ctsm_get_determinands(ctsm.obj$info$compartment), 
+  determinands = ctsm_get_determinands(ctsm.obj$info), 
   determinands.control = NULL, 
   oddity_path = "oddities", 
   return_early = FALSE, 
@@ -1291,14 +1405,9 @@ ctsm_create_timeSeries <- function(
   
   # retains determinands of interest, including auxiliary determinands and those
   # required by determinands.control$variables 
-  # checks all determinands of interest are recognised by info.determinand
+  # checks all determinands of interest are recognised by info$determinand
 
-  wk <- ctsm_check_determinands(
-    info$compartment, 
-    data, 
-    determinands, 
-    determinands.control
-  )
+  wk <- ctsm_check_determinands(info, data, determinands, determinands.control)
   
   data <- wk$data
   determinands <- wk$determinands
@@ -1333,8 +1442,19 @@ ctsm_create_timeSeries <- function(
     file_name = "unidentified_stations", 
     info = info
   )
-  
 
+  
+  # replace synonyms for species by reference_species 
+  
+  if (info$compartment == "biota") {
+    data$species <- ifelse(
+      data$species %in% row.names(info$species), 
+      info$species[data$species, "reference_species"], 
+      data$species
+    )
+  }  
+
+  
   # drop stations (sediment) or station / species combinations (biota) with no
   # data in the relatively recent period 
   # recent years reduces size of data and removes legacy species not in info files
@@ -1344,24 +1464,34 @@ ctsm_create_timeSeries <- function(
     max(info$recent_years), "\n"
   )
 
-
-  # recognised_species was replaced by species in line 507 -> species reference table
-  
-  if ("species" %in% names(data)) {
-    data$species <- ifelse(
-        data$species %in% row.names(info.species), 
-        info.species[data$species, "reference_species"], 
-        data$species
-    )
-  }
-
-  
   id.names <- intersect(c("station_code", "species"), names(data))
   id <- do.call("paste", data[id.names])
   ok <- id %in% id[is.recent(data$year)]
   data <- droplevels(data[ok, ])
   
 
+  # drop species that aren't going to be assessed
+  # do this after we drop station species combinations becuase legacy species
+  # then don't need to be in the reference tables
+  
+  if (info$compartment == "biota") {
+  
+    ok <- ctsm_get_info(info$species, data$species, "assess")
+    
+    if (!all(ok)) { 
+      id <- data$species[!ok]
+      id <- unique(id)
+      id <- sort(id)
+      cat(
+        "   Dropping following species - see species reference table:\n", 
+        paste(id, collapse = ", "), "\n"
+      )
+    }
+    
+    data <- data[ok, ]
+  }
+
+  
   # drop data corresponding to stations outside the region (mainly OSPAR or HELCOM requirement)
   
   if (info$all_in_region) {
@@ -1382,18 +1512,18 @@ ctsm_create_timeSeries <- function(
 
 
   # add variables that are going to be useful throughout
-  # pargroup in ICES extraction, but can also be got from info.determinand
+  # pargroup in ICES extraction, but can also be got from info$determinand
   
   data$group <- ctsm_get_info(
-    "determinand", data$determinand, "group", info$compartment, sep = "_"
+    info$determinand, data$determinand, "group", info$compartment, sep = "_"
   )
 
   if (info$compartment == "biota") {
-    data$family <- ctsm_get_info("species", data$species, "species_group")
+    data$family <- ctsm_get_info(info$species, data$species, "species_group")
   }
   
   if (!"pargroup" %in% names(data)) {
-    data$pargroup <- ctsm_get_info("determinand", data$determinand, "pargroup")
+    data$pargroup <- ctsm_get_info(info$determinand, data$determinand, "pargroup")
   }
   
 
@@ -1414,7 +1544,7 @@ ctsm_create_timeSeries <- function(
   # - check value is valid (e.g. > 0 for concentrations)
   
   wk <- c(
-    "species", "family", "sex", "no_individual", "matrix", "basis", "unit", 
+    "family", "sex", "no_individual", "matrix", "basis", "unit", 
     "method_analysis", "value"
   )
   
@@ -1426,7 +1556,7 @@ ctsm_create_timeSeries <- function(
   # get digestion method for metals in sediments and check that these are valid
   
   if (info$compartment == "sediment") {
-    data$digestion <- ctsm_get_digestion(data)
+    data$digestion <- ctsm_get_digestion(data, info)
   }
 
   
@@ -1530,7 +1660,7 @@ ctsm_create_timeSeries <- function(
   # drop any remaining unwanted determinands (from sum and perhaps bespoke functions);
   # could make this more elegant!
   
-  id <- c(determinands, ctsm_get_auxiliary(determinands, info$compartment))
+  id <- c(determinands, ctsm_get_auxiliary(determinands, info))
   
   data <- filter(data, .data$determinand %in% id)
 
@@ -1553,12 +1683,11 @@ ctsm_create_timeSeries <- function(
   # create new.unit and concentration columns comprising the details from the
   # determinand file in the information folder, required to get correct unit details
   
-  data <- within(data, {
-    new.unit <- ctsm_get_info(
-      "determinand", determinand, "unit", info$compartment, sep = "_"
-    )
-    concentration <- value
-  })
+  data$new.unit <- ctsm_get_info(
+    info$determinand, data$determinand, "unit", info$compartment, sep = "_"
+  )
+  
+  data$concentration <- data$value
   
 
   # convert data to conventional units - see "information determinands.csv"
@@ -1586,7 +1715,7 @@ ctsm_create_timeSeries <- function(
 
   # convert data to basis of assessment
   
-  data <- ctsm_convert_to_target_basis(data, info$compartment, get_basis)
+  data <- ctsm_convert_to_target_basis(data, info, get_basis)
   
 
   if (return_early) {
@@ -1606,7 +1735,7 @@ ctsm_create_timeSeries <- function(
 
   # estimate missing uncertainties
 
-  data$uncertainty <- ctsm_estimate_uncertainty(data, "concentration", info$compartment)
+  data$uncertainty <- ctsm_estimate_uncertainty(data, "concentration", info)
 
   if (info$compartment == "sediment") {
     
@@ -1614,7 +1743,7 @@ ctsm_create_timeSeries <- function(
       
       if (norm_id %in% names(data)) {
         norm_uncrt <- paste0(norm_id, ".uncertainty")
-        data[[norm_uncrt]] <- ctsm_estimate_uncertainty(data, norm_id, "sediment")
+        data[[norm_uncrt]] <- ctsm_estimate_uncertainty(data, norm_id, info)
       }    
     }
     
@@ -1636,7 +1765,7 @@ ctsm_create_timeSeries <- function(
     data <- mutate(
       data, 
       .month = months(as.Date(.data$date)),
-      .not_ok = family %in% c("Bivalvia", "Gastropoda") & 
+      .not_ok = family %in% c("Bivalve", "Gastropod") & 
         (is.na(.month) | .month %in% info$bivalve_spawning_season) & 
         !group %in% c("Effects", "Imposex", "Metabolites") 
     )
@@ -1663,13 +1792,13 @@ ctsm_create_timeSeries <- function(
     data <- switch(
       info$compartment,
       biota = 
-        ctsm_normalise_biota(data, QA, station_dictionary, normalise.control),
+        ctsm_normalise_biota(data, station_dictionary, info, normalise.control),
       sediment = 
-        ctsm_normalise_sediment(data, station_dictionary, normalise.control),
+        ctsm_normalise_sediment(data, station_dictionary, info, normalise.control),
       water = stop("there is no default normalisation function for water")
     )
   } else if (is.function(normalise)) {
-    data <- normalise(data, station_dictionary, normalise.control)
+    data <- normalise(data, station_dictionary, info, normalise.control)
   }
     
 
@@ -1803,7 +1932,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
     "limit_detection", "limit_quantification", "uncertainty"
   )
   
-  auxiliary <- ctsm_get_auxiliary(data$determinand, info$compartment)
+  auxiliary <- ctsm_get_auxiliary(data$determinand, info)
   auxiliary_id <- paste0(
     rep(auxiliary, each = 5), 
     c("", ".censoring", ".limit_detection", ".limit_quantification", ".uncertainty") 
@@ -1847,7 +1976,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
       timeSeries,
       sex = if_else(.data$determinand %in% "EROD", .data$sex, NA_character_),
       .group = ctsm_get_info(
-        "determinand", .data$determinand, "group", "biota", sep = "_"
+        info$determinand, .data$determinand, "group", "biota", sep = "_"
       ),
       method_analysis = if_else(
         .group %in% "Metabolites", 
@@ -1988,7 +2117,7 @@ ctsm_get_digestion <- function(data, info) {
   is_metal <- data$pargroup %in% "I-MET"  
   
   data[is_metal, "digestion"] <- ctsm_get_info(
-    "methodExtraction",
+    info$method_extraction,
     data[is_metal, "method_extraction"], 
     "digestion", 
     na_action = "input_ok"
@@ -2053,7 +2182,7 @@ ctsm_initialise_oddities <- function(path, compartment) {
   if (!dir.exists(backup)) dir.create(backup) 
       
   cat("\nOddities will be written to '", output, "' with previous oddities ", 
-      "backed up to\n   '", backup, "'\n", sep = "")
+      "backed up to\n '", backup, "'\n", sep = "")
   
   old.files <- dir(output, full.names = TRUE)
   file.copy(from = old.files, to = backup, overwrite = TRUE)
@@ -2089,7 +2218,7 @@ ctsm.imposex.check.femalepop <- function(data, info) {
 }
 
 
-ctsm_check_determinands <- function(compartment, data, determinands, control = NULL) {
+ctsm_check_determinands <- function(info, data, determinands, control = NULL) {
 
   # checks all determinands are recognised in info files
   # checks determinands are not also in control (if they are to be replaced)
@@ -2127,12 +2256,12 @@ ctsm_check_determinands <- function(compartment, data, determinands, control = N
   }
   
 
-  # check all determinands are recognised by info.determinands
-  # note all auxiliaries are guaranteed to be info.determinands
+  # check all determinands are recognised by info$determinands
+  # note all auxiliaries are guaranteed to be info$determinands
   
   id <- c(determinands, get_control_dets(control))
 
-  ctsm_check_reference_table(id, "determinand")  
+  ctsm_check_reference_table(id, info$determinand, "determinand")  
   
     
   # simplify determinands and determinand.control so they only contain values that are
@@ -2146,7 +2275,7 @@ ctsm_check_determinands <- function(compartment, data, determinands, control = N
   determinands <- intersect(determinands, id)
 
   
-  auxiliary <- ctsm_get_auxiliary(determinands, compartment)
+  auxiliary <- ctsm_get_auxiliary(determinands, info)
   
   if (!is.null(control)) {
     ok <- names(control) %in% c(determinands, auxiliary, get_control_dets(control, .names = FALSE))
@@ -2381,7 +2510,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
 
     
     # adjust values if units vary
-    # ideally use unit in info.determinand, but makes it more awkward because
+    # ideally use unit in info$determinand, but makes it more awkward because
     # have to pass in compartment
     
     if (n_distinct(x$unit) > 1) {
@@ -2788,7 +2917,7 @@ ctsm_merge_auxiliary <- function(data, info) {
 
   # identify auxiliary variables and split data set accordingly
     
-  auxiliary_var <- ctsm_get_auxiliary(data$determinand, info$compartment)
+  auxiliary_var <- ctsm_get_auxiliary(data$determinand, info)
 
   id <- data$determinand %in% auxiliary_var
     
@@ -2886,7 +3015,7 @@ ctsm_merge_auxiliary <- function(data, info) {
 }
 
 
-ctsm_convert_to_target_basis <- function(data, compartment, get_basis) {
+ctsm_convert_to_target_basis <- function(data, info, get_basis) {
 
   # location: import_functions.R
   # purpose:  convert data and auxiliary variables to their target basis as 
@@ -2909,10 +3038,10 @@ ctsm_convert_to_target_basis <- function(data, compartment, get_basis) {
   
   cat("   Converting data to appropriate basis for statistical analysis", fill = TRUE)
   
-  data$new.basis <- get_basis(data, compartment)
+  data$new.basis <- get_basis(data, info)
   
 
-  if (compartment == "biota") {
+  if (info$compartment == "biota") {
     
     # convert lipid weight data
     
@@ -2955,7 +3084,7 @@ ctsm_convert_to_target_basis <- function(data, compartment, get_basis) {
   }
  
   
-  if (compartment == "sediment") { 
+  if (info$compartment == "sediment") { 
   
     # convert measurement data
     
@@ -3017,7 +3146,7 @@ ctsm_convert_to_target_basis <- function(data, compartment, get_basis) {
 }
 
   
-ctsm_normalise_sediment <- function(data, station_dictionary, control) {
+ctsm_normalise_sediment <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
   
@@ -3111,7 +3240,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
         control$method,
         simple = {
           unit <- ctsm_get_info(
-            "determinand", normaliser, "unit", "sediment", sep = "_"
+            info$determinand, normaliser, "unit", "sediment", sep = "_"
           )
           message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
         },
@@ -3149,7 +3278,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
         # get pivot data and make row.names the appropriate combination of 
         #determinand and digestion
         
-        pivot <- info.pivotValues
+        pivot <- info$pivot_values
         pivot <- pivot[pivot$determinand %in% c(as.character(data$determinand), normaliser), ]
         rownames(pivot) <- with(pivot, paste(determinand, digestion))
         pivot <- droplevels(pivot)
@@ -3335,7 +3464,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, control) {
 }
 
 
-ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
+ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
   
@@ -3454,7 +3583,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
         control$method,
         simple = {
           unit <- ctsm_get_info(
-            "determinand", normaliser, "unit", "sediment", sep = "_"
+            info$determinand, normaliser, "unit", "sediment", sep = "_"
           )
           message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
         },
@@ -3493,7 +3622,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
         # get pivot data and make row.names the appropriate combination of 
         #determinand and digestion
         
-        pivot <- info.pivotValues
+        pivot <- info$pivot_values
         pivot <- pivot[pivot$determinand %in% c(as.character(data$determinand), normaliser), ]
         rownames(pivot) <- with(pivot, paste(determinand, digestion))
         pivot <- droplevels(pivot)
@@ -3575,7 +3704,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
         # get pivot data and make row.names the appropriate combination of 
         # determinand and digestion
         
-        pivot <- info.pivotValues
+        pivot <- info$pivot_values
         pivot <- pivot[pivot$determinand %in% c(as.character(data$determinand), normaliser), ]
         rownames(pivot) <- with(pivot, paste(determinand, digestion))
         pivot <- droplevels(pivot)
@@ -3655,7 +3784,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, control) {
 }
 
 
-ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, control) {
+ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises fish concentrations in contaminants other than metals or 
   # organofluorines to 5% lipid
@@ -3802,7 +3931,7 @@ ctsm_normalise_calculate <- function(Cm, Nm, Nss, var_Cm, var_Nm, Cx, Nx, var_Cx
 
 
 
-ctsm_estimate_uncertainty <- function(data, response_id, compartment) {
+ctsm_estimate_uncertainty <- function(data, response_id, info) {
 
   # import_functions.R
   
@@ -3815,11 +3944,11 @@ ctsm_estimate_uncertainty <- function(data, response_id, compartment) {
   
   stopifnot(
     is.character(response_id),
-    length(response_id) == 1,
+    length(response_id) == 1L,
     response_id %in% names(data),
     
-    is.character(compartment),
-    length(compartment) == 1
+    is.character(info$compartment),
+    length(info$compartment) == 1L
   )
   
 
@@ -3847,19 +3976,19 @@ ctsm_estimate_uncertainty <- function(data, response_id, compartment) {
   # get two components of variance
   
   data$sd_constant = ctsm_get_info(
-    "determinand", 
+    info$determinand, 
     data$determinand, 
     "sd_constant", 
-    compartment, 
+    info$compartment, 
     na_action = "output_ok", 
     sep = "_"
   )
   
   data$sd_variable = ctsm_get_info(
-    "determinand", 
+    info$determinand, 
     data$determinand, 
     "sd_variable", 
-    compartment, 
+    info$compartment, 
     na_action = "output_ok", 
     sep = "_"
   )
@@ -3869,7 +3998,7 @@ ctsm_estimate_uncertainty <- function(data, response_id, compartment) {
   # for biota sd_constant is on a wet weight basis but the sample might be on 
   # a dry or lipid weight
 
-  if (compartment == "biota") {
+  if (info$compartment == "biota") {
     data$sd_constant <- ctsm_convert_basis(
       data$sd_constant, 
       "W", 

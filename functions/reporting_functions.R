@@ -200,7 +200,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
     # when indicated by high concentrations, positive ACdiff is good
     # to make colour calculation 'simple' change sign on ACdiff when goodStatus == high
     
-    goodStatus <- ctsm_get_info("determinand", timeSeries$determinand, "good_status")
+    goodStatus <- ctsm_get_info(info$determinand, timeSeries$determinand, "good_status")
     
     wk <- summary[ACdiff]
     wk[] <- lapply(wk, "*", ifelse(goodStatus == "low", 1, -1))
@@ -449,7 +449,7 @@ ctsm_summary_table <- function(
   timeSeries <- rownames_to_column(timeSeries, ".series")
   
   timeSeries$detGroup <- ctsm_get_info(
-    "determinand", 
+    info$determinand, 
     timeSeries$determinand, 
     "group", 
     info$compartment, 
@@ -711,11 +711,16 @@ ctsm_OHAT_legends <- function(
 
     compartment <- assessment$info$compartment
     group <- ctsm_get_info(
-      "determinand", determinands, "group", compartment, sep = "_"
+      info$determinand, determinands, "group", compartment, sep = "_"
     )
-    web_group <- factor(group, levels = determinandGroups$levels, labels = determinandGroups$labels)[, drop = TRUE]
+    web_group <- factor(
+      group, 
+      levels = determinandGroups$levels, 
+      labels = determinandGroups$labels
+    )
+    web_group <- wk_group[, drop = TRUE]
     
-    goodStatus <- ctsm_get_info("determinand", determinands, "good_status")
+    goodStatus <- ctsm_get_info(info$determinand, determinands, "good_status")
     goodStatus <- as.character(goodStatus)
 
     legendName <- apply(legends, 1, function(i) paste(colnames(legends)[i], collapse = " "))
