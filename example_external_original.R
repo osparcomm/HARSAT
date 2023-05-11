@@ -23,11 +23,6 @@ source(file.path(function_path, "assessment_functions.R"))
 source(file.path(function_path, "ctsm_lmm.R"))
 source(file.path(function_path, "reporting_functions.R"))
 source(file.path(function_path, "support_functions.R"))
-
-# source reference tables and associated information functions
-
-info_AC_type <- "OSPAR"   # not needed much longer
-
 source(file.path(function_path, "information_functions.R"))
 
 
@@ -104,7 +99,8 @@ biota_timeSeries <- ctsm_create_timeSeries(
 
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
-  AC = c("BAC", "EQS.OSPAR", "HQS"), 
+  AC = c("BAC", "EQS.OSPAR", "HQS"),
+  get_assessment_criteria = get.AC.OSPAR,
   parallel = TRUE 
 )
 

@@ -219,7 +219,7 @@ ctsm_assessment_engine <- function(
     # could streamline in future
     
     if ("AC" %in% names(info)) {
-      AC <- get.AC(
+      AC <- get.assessment.criteria(
         info$compartment, 
         determinand, 
         seriesInfo, 

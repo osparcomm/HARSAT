@@ -29,12 +29,6 @@ source(file.path(function_path, "imposex_functions.R"))
 source(file.path(function_path, "imposex_clm.R"))
 source(file.path(function_path, "reporting_functions.R"))
 source(file.path(function_path, "support_functions.R"))
-
-
-# source reference tables and associated information functions
-
-info_AC_type <- "HELCOM"     # not needed for much longer
-
 source(file.path(function_path, "information_functions.R"))
 
 
@@ -95,6 +89,16 @@ water_data <- ctsm_read_data(
 ## adjustments ----
 
 # correct known errors in the data
+
+info_TEQ <- c(
+  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
+  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
+  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
+  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+)
+
 
 rmarkdown::render(
   "example_HELCOM_data_adjustments.Rmd", 
@@ -288,7 +292,11 @@ water_timeSeries <- ctsm_create_timeSeries(
 ### main runs ----
 
 sediment_assessment <- ctsm_assessment(
-  sediment_timeSeries, AC = "EQS", parallel = TRUE)
+  sediment_timeSeries, 
+  AC = "EQS",
+  get_assessment_criteria = get.AC.HELCOM,
+  parallel = TRUE
+)
 
 
 ### check convergence ----
@@ -322,6 +330,7 @@ wk_group <- ctsm_get_info(
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
   AC = c("BAC", "EAC", "EQS", "MPC"), 
+  get_assessment_criteria = get.AC.HELCOM,
   subset = determinand %in% wk_determinands[wk_group == "Metals"], 
   parallel = TRUE
 )
@@ -384,7 +393,10 @@ ctsm_check_convergence(biota_assessment$assessment[wk_id])
 ### main runs ----
 
 water_assessment <- ctsm_assessment(
-  water_timeSeries, AC = "EQS", parallel = TRUE
+  water_timeSeries, 
+  AC = "EQS", 
+  get_assessment_criteria = get.AC.HELCOM,
+  parallel = TRUE
 )
 
 
