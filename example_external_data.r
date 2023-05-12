@@ -23,12 +23,6 @@ source(file.path(function_path, "ctsm_lmm.R"))
 source(file.path(function_path, "reporting_functions.R"))
 source(file.path(function_path, "support_functions.R"))
 source(file.path(function_path, "graphics_functions.R"))
-
-
-# source reference tables and associated information functions
-
-info_AC_type <- "EXTERNAL"     # not needed much longer
-
 source(file.path(function_path, "information_functions.R"))
 
 

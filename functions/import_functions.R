@@ -1009,27 +1009,24 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
   # restrict to OSPAR stations used for temporal monitoring 
   # also includes grouped stations: Assessment Grouping for OSPAR MIME
   
-  if(info_AC_type != "EXTERNAL") {
-    
-    stations <- filter(
-      stations, 
-      grepl("OSPAR", .data$programGovernance) & grepl("T", .data$PURPM)
+  stations <- filter(
+    stations, 
+    grepl("OSPAR", .data$programGovernance) & grepl("T", .data$PURPM)
+  )
+  
+  
+  # and stations that are used for contaminants or biological effects
+  
+  stations <- filter(
+    stations, 
+    switch(
+      info$compartment, 
+      biota = grepl("CF|EF", .data$dataType), 
+      sediment = grepl("CS", .data$dataType), 
+      water = grepl("CW", .data$dataType)
     )
-  
-  
-    # and stations that are used for contaminants or biological effects
-  
-    stations <- filter(
-      stations, 
-      switch(
-        info$compartment, 
-        biota = grepl("CF|EF", .data$dataType), 
-        sediment = grepl("CS", .data$dataType), 
-        water = grepl("CW", .data$dataType)
-      )
-    )
-  }
-  
+  )
+
   # delete stations outside the OSPAR region
   
   ctsm_check(

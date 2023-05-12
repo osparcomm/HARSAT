@@ -605,13 +605,13 @@ ctsm_get_auxiliary <- function(determinands, info) {
 
 # Toxic EQuivalents for WHO_DFP (health)
 
-info_TEQ <- c(
-  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, "CB126" = 0.1, 
-  "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, "CB169" = 0.03, 
-  "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, "CDD9X" = 0.1, "CDDO" = 0.0003,
-  "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
-)
+# info_TEQ <- c(
+#   "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, "CB126" = 0.1, 
+#   "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, "CB169" = 0.03, 
+#   "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, "CDD9X" = 0.1, "CDDO" = 0.0003,
+#   "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+#   "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+# )
 
 
 
@@ -650,7 +650,7 @@ ctsm_read_thresholds <- function(
 # if a list, then each element can be either a scalar (replicated to length n), or a vector of length n
 # AC is a character vector of assessment concentration types
 
-get.AC <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
+get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
 
   # check elements of info are of correct length
 
@@ -681,11 +681,100 @@ get.AC <- function(compartment, determinand, info, AC, thresholds, determinand_r
   out <- lapply(names(data), function(i) {
     args <- list(data = data[[i]], AC = AC, AC_data = thresholds)
     if (compartment == "biota") args$species_rt <- species_rt
-    do.call(paste("get.AC", compartment, i, sep = "."), args)
+    
+    if (compartment == "sediment") {
+      if (i == "Metals") {
+        fn = "get.AC.sediment.Metals"
+      } else {
+        fn = "get.AC.sediment.contaminant"
+      }
+    }
+    
+    if (compartment == "water") {
+      fn = "get.AC.water.contaminant"
+    }
+
+    if (compartment == "biota") {
+      if (i %in% c(
+        "Metals", "Chlorobiphenyls", "Organochlorines", "Organofluorines", 
+        "PBDEs", "Dioxins", "Effects", "Metabolites", "Imposex")
+      ) {
+        fn = paste("get.AC.biota", i, "OSPAR", sep = ".")
+      } else {
+        fn = "get.AC.biota.contaminant"
+      }
+    }
+      
+    do.call(fn, args)
+    
   }) 
   
   unsplit(out, group, drop = TRUE)
 }
+
+
+get.AC.HELCOM <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
+  
+  # check elements of info are of correct length
+  
+  stopifnot(sapply(info, length) %in% c(1, length(determinand)))
+  
+  
+  # remove duplicate determinand information - need to fix this better
+  
+  info$determinand <- NULL
+  
+  
+  # turn info into a dataframe if necessary
+  
+  data <- cbind(determinand, as.data.frame(info))
+  
+  
+  # split by determinand groupings
+  
+  group <- ctsm_get_info(
+    determinand_rt, data$determinand, "group", compartment, sep = "_"
+  )
+  
+  data <- split(data, group, drop = TRUE)
+  
+  
+  # get assessment concentrations
+  
+  out <- lapply(names(data), function(i) {
+    args <- list(data = data[[i]], AC = AC, AC_data = thresholds)
+    if (compartment == "biota") args$species_rt <- species_rt
+    
+    if (compartment == "sediment") {
+      if (i == "Metals") {
+        fn = "get.AC.sediment.Metals"
+      } else {
+        fn = "get.AC.sediment.contaminant"
+      }
+    }
+    
+    if (compartment == "water") {
+      fn = "get.AC.water.contaminant"
+    }
+    
+    if (compartment == "biota") {
+      if (i %in% c(
+        "Metals", "Organofluorines", "Metabolites", "Imposex")
+      ) {
+        fn = paste("get.AC.biota", i, "HELCOM", sep = ".")
+      } else {
+        fn = "get.AC.biota.contaminant"
+      }
+    }
+    
+    do.call(fn, args)
+    
+  }) 
+  
+  unsplit(out, group, drop = TRUE)
+}
+
+
 
 
 get.AC.biota.contaminant <- function(
@@ -735,1219 +824,652 @@ get.AC.biota.contaminant <- function(
 }                           
 
 
-if (info_AC_type == "OSPAR") {
+get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
+    
+  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+  
+  stopifnot(
+    length(intersect(names(data), names(out))) == 0,
+    ! c("BAC", "EQS.OSPAR", "HQS") %in% names(AC)
+  )
+  
+  out <- bind_cols(out, data)
+  
+  out <- out %>%
+    rownames_to_column() %>%
+    mutate(
+      species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+      sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
+    )
+  
+  
+  # mercury
+  # only BAC is for mussels
+  # no MPC (HQS) for fish liver
+  # mammal liver 16000 (BAC), 64000 (EAC) ww
+  # mammal hair 6100 (BAC), 24400 (EAC) dw
+  # bird egg homongenate 110 (BAC), 470 (EAC) ww
+  # bird liver 1400 (BAC) 7300 (EAC) ww
+  # bird feather 1580 (BAC) 7920 (EAC) dw
+  # bird blood 200 (BAC) 1000 (EAC) ww
+  
+  id <- out$determinand %in% "HG"
+  
+  if (any(id)) {
+    
+    out[id, ] <- mutate(
+      out[id, ],
+      
+      BAC = case_when(
+        .data$species_group %in% "Fish"                            ~ NA_real_,
+        .data$sub.family %in% "Oyster"                             ~ NA_real_,
+        .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
+          ctsm_convert_basis(16000, "W", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
+          ctsm_convert_basis(6100, "D", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
+          ctsm_convert_basis(110, "W", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
+          ctsm_convert_basis(1400, "W", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
+          ctsm_convert_basis(1580, "D", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
+          ctsm_convert_basis(200, "W", .data$basis, .data$drywt, .data$lipidwt),
+        TRUE                                                       ~ .data$BAC
+      ),
+      
+      EQS.OSPAR = case_when(
+        .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
+          ctsm_convert_basis(64000, "W", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
+          ctsm_convert_basis(24400, "D", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
+          ctsm_convert_basis(470, "W", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
+          ctsm_convert_basis(7300, "W", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
+          ctsm_convert_basis(7920, "D", .data$basis, .data$drywt, .data$lipidwt),
+        .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
+          ctsm_convert_basis(1000, "W", .data$basis, .data$drywt, .data$lipidwt),
+        TRUE                                                       ~ .data$EQS.OSPAR
+      ),
+      
+      HQS = if_else(.data$species_group %in% "Fish" & .data$matrix %in% "LI", NA_real_, .data$HQS)
+    )
+  }
+  
+  
+  # cadmium and lead
+  # adjust HQS (MPC) for fish muscle
+  # BACs in fish only apply to high lipid tissue
+  
+  out <- mutate(
+    out,
+    
+    HQS = if_else(
+      .data$determinand %in% "CD" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
+      50,
+      .data$HQS
+    ),
+    
+    HQS = if_else(
+      .data$determinand %in% "PB" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
+      300,
+      .data$HQS
+    ),
+    
+    BAC = if_else(
+      .data$determinand %in% c("CD", "PB") & .data$species_group %in% "Fish" &
+        (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
+      NA_real_,
+      .data$BAC
+    )
+  )
+  
+  out <- out %>%
+    column_to_rownames() %>%
+    select(all_of(AC))
+  
+  out
+}
 
-  get.AC.biota.PAH_parent <- get.AC.biota.contaminant
-  get.AC.biota.PAH_alkylated <- get.AC.biota.contaminant
-  get.AC.biota.PBDEs <- get.AC.biota.contaminant
-  get.AC.biota.Organotins <- get.AC.biota.contaminant
-  get.AC.biota.Organobromines <- get.AC.biota.contaminant
+
+get.AC.biota.Chlorobiphenyls.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
+    
+  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
   
-  get.AC.biota.Metals <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
-    
-    out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-    
-    stopifnot(
-      length(intersect(names(data), names(out))) == 0,
-      ! c("BAC", "EQS.OSPAR", "HQS") %in% names(AC)
-    )
-    
-    out <- bind_cols(out, data)
-    
-    out <- out %>%
-      rownames_to_column() %>%
-      mutate(
-        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-        sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
-      )
-    
-    
-    # mercury
-    # only BAC is for mussels
-    # no MPC (HQS) for fish liver
-    # mammal liver 16000 (BAC), 64000 (EAC) ww
-    # mammal hair 6100 (BAC), 24400 (EAC) dw
-    # bird egg homongenate 110 (BAC), 470 (EAC) ww
-    # bird liver 1400 (BAC) 7300 (EAC) ww
-    # bird feather 1580 (BAC) 7920 (EAC) dw
-    # bird blood 200 (BAC) 1000 (EAC) ww
-    
-    id <- out$determinand %in% "HG"
-    
-    if (any(id)) {
+  stopifnot(
+    length(intersect(names(data), names(out))) == 0,
+    ! c("BAC", "EAC", "HQS") %in% names(AC)
+  )
   
-      out[id, ] <- mutate(
-        out[id, ],
-        
-        BAC = case_when(
-          .data$species_group %in% "Fish"                            ~ NA_real_,
-          .data$sub.family %in% "Oyster"                             ~ NA_real_,
-          .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-            ctsm_convert_basis(16000, "W", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-            ctsm_convert_basis(6100, "D", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-            ctsm_convert_basis(110, "W", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-            ctsm_convert_basis(1400, "W", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-            ctsm_convert_basis(1580, "D", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-            ctsm_convert_basis(200, "W", .data$basis, .data$drywt, .data$lipidwt),
-          TRUE                                                       ~ .data$BAC
-        ),
-        
-        EQS.OSPAR = case_when(
-          .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-            ctsm_convert_basis(64000, "W", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-            ctsm_convert_basis(24400, "D", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-            ctsm_convert_basis(470, "W", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-            ctsm_convert_basis(7300, "W", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-            ctsm_convert_basis(7920, "D", .data$basis, .data$drywt, .data$lipidwt),
-          .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-            ctsm_convert_basis(1000, "W", .data$basis, .data$drywt, .data$lipidwt),
-          TRUE                                                       ~ .data$EQS.OSPAR
-        ),
-        
-        HQS = if_else(.data$species_group %in% "Fish" & .data$matrix %in% "LI", NA_real_, .data$HQS)
-      )
-    }
-    
-    
-    # cadmium and lead
-    # adjust HQS (MPC) for fish muscle
-    # BACs in fish only apply to high lipid tissue
-    
-    out <- mutate(
-      out,
-      
-      HQS = if_else(
-        .data$determinand %in% "CD" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
-        50,
-        .data$HQS
-      ),
-      
-      HQS = if_else(
-        .data$determinand %in% "PB" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
-        300,
-        .data$HQS
-      ),
-      
-      BAC = if_else(
-        .data$determinand %in% c("CD", "PB") & .data$species_group %in% "Fish" &
-          (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-        NA_real_,
-        .data$BAC
-      )
+  out <- bind_cols(out, data)
+  
+  out <- out %>%
+    rownames_to_column() %>%
+    mutate(
+      species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+      sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
     )
+  
+  # BACs in fish only apply to high lipid tissue
+  # add in MPC (HQS) of 200 ww for fish liver
+  
+  out <- mutate(
+    out,
     
-    out <- out %>%
-      column_to_rownames() %>%
-      select(all_of(AC))
+    BAC = if_else(
+      .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
+      NA_real_,
+      .data$BAC
+    ),
     
-    out
+    HQS = if_else(
+      .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "SCB6",
+      ctsm_convert_basis(200, "W", .data$basis, .data$drywt, .data$lipidwt),
+      .data$HQS
+    ),
+    
+    EAC = if_else(
+      .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
+        .data$matrix %in% "EH" & .data$determinand %in% "SCB7",
+      ctsm_convert_basis(6.7, "W", .data$basis, .data$drywt, .data$lipidwt),
+      .data$EAC
+    )
+  )
+  
+  
+  out <- out %>%
+    column_to_rownames() %>%
+    select(all_of(AC))
+  
+  out
+}
+
+
+get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
+  
+  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+  
+  stopifnot(
+    length(intersect(names(data), names(out))) == 0,
+    ! c("BAC", "EAC", "EQS.OSPAR", "HQS") %in% names(AC)
+  )
+  
+  out <- bind_cols(out, data)
+  
+  out <- out %>%
+    rownames_to_column() %>%
+    mutate(
+      species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+      species = as.character(species)
+    )
+  
+  
+  # BAC in fish only apply to high lipid tissue
+  # EAC for birds fro HCB and HCH
+  
+  out <- mutate(
+    out,
+    
+    BAC = if_else(
+      .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
+      NA_real_,
+      .data$BAC
+    ),
+    
+    EAC = if_else(
+      .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
+        .data$matrix %in% "EH" & .data$determinand %in% "HCB",
+      ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
+      .data$EAC
+    ),
+    
+    EAC = if_else(
+      .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
+        .data$matrix %in% "EH" & .data$determinand %in% "HCH",
+      ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
+      .data$EAC
+    )
+  )
+  
+  
+  # HCHG HQS in liver converted from muscle using muscle lipid content
+  
+  id <- out$determinand %in% "HCHG" & out$species_group %in% "Fish" & out$matrix %in% "LI"
+  
+  if (any(id)) {
+    
+    out[id, ] <- mutate(
+      out[id, ],
+      .lipid_mu = info.species[.data$species, "MU_lipidwt"],
+      .dry_mu = info.species[.data$species, "MU_drywt"],
+      HQS = ctsm_convert_basis(61, "W", "L", .dry_mu, .lipid_mu),
+      HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
+      .lipid_mu = NULL,
+      .dry_mu = NULL
+    )
   }
   
   
-  get.AC.biota.Chlorobiphenyls <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
+  # HCB HQS in liver converted from muscle using muscle lipid content
+  
+  id <- out$determinand %in% "HCB" & out$species_group %in% "Fish" & out$matrix %in% "LI"
+  
+  if (any(id)) {
     
-    out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-    
-    stopifnot(
-      length(intersect(names(data), names(out))) == 0,
-      ! c("BAC", "EAC", "HQS") %in% names(AC)
+    out[id, ] <- mutate(
+      out[id, ],
+      .lipid_mu = info.species[.data$species, "MU_lipidwt"],
+      .dry_mu = info.species[.data$species, "MU_drywt"],
+      HQS = ctsm_convert_basis(10, "W", "L", .dry_mu, .lipid_mu),
+      HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
+      .lipid_mu = NULL,
+      .dry_mu = NULL
     )
-    
-    out <- bind_cols(out, data)
-    
-    out <- out %>%
-      rownames_to_column() %>%
-      mutate(
-        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-        sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
-      )
-    
-    # BACs in fish only apply to high lipid tissue
-    # add in MPC (HQS) of 200 ww for fish liver
-    
-    out <- mutate(
-      out,
-      
-      BAC = if_else(
-        .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-        NA_real_,
-        .data$BAC
-      ),
-      
-      HQS = if_else(
-        .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "SCB6",
-        ctsm_convert_basis(200, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$HQS
-      ),
-      
-      EAC = if_else(
-        .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-          .data$matrix %in% "EH" & .data$determinand %in% "SCB7",
-        ctsm_convert_basis(6.7, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$EAC
-      )
-    )
-    
-    
-    out <- out %>%
-      column_to_rownames() %>%
-      select(all_of(AC))
-    
-    out
   }
   
   
-  get.AC.biota.Organochlorines <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
-    
-    out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-    
-    stopifnot(
-      length(intersect(names(data), names(out))) == 0,
-      ! c("BAC", "EAC", "EQS.OSPAR", "HQS") %in% names(AC)
+  out <- out %>%
+    column_to_rownames() %>%
+    select(all_of(AC))
+  
+  out
+}
+
+
+get.AC.biota.Organofluorines.OSPAR <- function(data, AC, AC_data, species_rt) {
+  
+  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+  
+  stopifnot(
+    length(intersect(names(data), names(out))) == 0,
+    ! c("BAC", "EQS.OPAR", "HQS") %in% names(AC)
+  )
+  
+  out <- bind_cols(out, data)
+  
+  out <- out %>%
+    rownames_to_column() %>%
+    mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
+  
+  
+  # fish liver - multiply by 5
+  
+  out <- mutate(
+    out,
+    .id <- .data$species_group %in% "Fish" & .data$matrix %in% "LI" &
+      .data$determinand %in% "PFOS",
+    EQS.OSPAR = .data$EQS.OSPAR * if_else(.id, 5, 1),
+    HQS = .data$HQS * if_else(.id, 5, 1),
+    .id = NULL
+  )
+  
+  out <- out %>%
+    column_to_rownames() %>%
+    select(all_of(AC))
+  
+  out
+}
+
+
+get.AC.biota.PBDEs.OSPAR <- function(data, AC, AC_data, species_rt) {
+  
+  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+  
+  stopifnot(
+    length(intersect(names(data), names(out))) == 0,
+    ! c("BAC", "FEQG", "HQS") %in% names(AC)
+  )
+  
+  out <- bind_cols(out, data)
+  
+  out <- out %>%
+    rownames_to_column() %>%
+    mutate(
+      species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+      species = as.character(species)
     )
+  
+  
+  # HQS in liver converted from muscle using muscle lipid content
+  
+  id <- out$determinand %in% "SBDE6" & out$species_group %in% "Fish" & out$matrix %in% "LI"
+  
+  if (any(id)) {
     
-    out <- bind_cols(out, data)
-    
-    out <- out %>%
-      rownames_to_column() %>%
-      mutate(
-        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-        species = as.character(species)
-      )
-    
-    
-    # BAC in fish only apply to high lipid tissue
-    # EAC for birds fro HCB and HCH
-    
-    out <- mutate(
-      out,
-      
-      BAC = if_else(
-        .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-        NA_real_,
-        .data$BAC
-      ),
-      
-      EAC = if_else(
-        .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-          .data$matrix %in% "EH" & .data$determinand %in% "HCB",
-        ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$EAC
-      ),
-      
-      EAC = if_else(
-        .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-          .data$matrix %in% "EH" & .data$determinand %in% "HCH",
-        ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$EAC
-      )
+    out[id, ] <- mutate(
+      out[id, ],
+      .lipid_mu = info.species[.data$species, "MU_lipidwt"],
+      .dry_mu = info.species[.data$species, "MU_drywt"],
+      HQS = ctsm_convert_basis(0.0085, "W", "L", .dry_mu, .lipid_mu),
+      HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
+      .lipid_mu = NULL,
+      .dry_mu = NULL
     )
-    
-    
-    # HCHG HQS in liver converted from muscle using muscle lipid content
-    
-    id <- out$determinand %in% "HCHG" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-    
-    if (any(id)) {
-      
-      out[id, ] <- mutate(
-        out[id, ],
-        .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-        .dry_mu = info.species[.data$species, "MU_drywt"],
-        HQS = ctsm_convert_basis(61, "W", "L", .dry_mu, .lipid_mu),
-        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-        .lipid_mu = NULL,
-        .dry_mu = NULL
-      )
-    }
-    
-    
-    # HCB HQS in liver converted from muscle using muscle lipid content
-    
-    id <- out$determinand %in% "HCB" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-    
-    if (any(id)) {
-      
-      out[id, ] <- mutate(
-        out[id, ],
-        .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-        .dry_mu = info.species[.data$species, "MU_drywt"],
-        HQS = ctsm_convert_basis(10, "W", "L", .dry_mu, .lipid_mu),
-        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-        .lipid_mu = NULL,
-        .dry_mu = NULL
-      )
-    }
-    
-    
-    out <- out %>%
-      column_to_rownames() %>%
-      select(all_of(AC))
-    
-    out
   }
   
   
-  get.AC.biota.Organofluorines <- function(data, AC, AC_data, species_rt) {
-    
-    out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-    
-    stopifnot(
-      length(intersect(names(data), names(out))) == 0,
-      ! c("BAC", "EQS.OPAR", "HQS") %in% names(AC)
-    )
-    
-    out <- bind_cols(out, data)
-    
-    out <- out %>%
-      rownames_to_column() %>%
-      mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
-    
-    
-    # fish liver - multiply by 5
-    
-    out <- mutate(
-      out,
-      .id <- .data$species_group %in% "Fish" & .data$matrix %in% "LI" &
-        .data$determinand %in% "PFOS",
-      EQS.OSPAR = .data$EQS.OSPAR * if_else(.id, 5, 1),
-      HQS = .data$HQS * if_else(.id, 5, 1),
-      .id = NULL
-    )
-    
-    out <- out %>%
-      column_to_rownames() %>%
-      select(all_of(AC))
-    
-    out
-  }
+  out <- out %>%
+    column_to_rownames() %>%
+    select(all_of(AC))
+  
+  out
+}
+
+
+get.AC.biota.Dioxins.OSPAR <- function(data, AC, AC_data, species_rt) {
+  
+  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+  
+  stopifnot(
+    length(intersect(names(data), names(out))) == 0,
+    ! c("BAC", "EQS.OPAR", "HQS") %in% names(AC)
+  )
+  
+  out <- bind_cols(out, data)
+  
+  out <- out %>%
+    rownames_to_column() %>%
+    mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
   
   
-  get.AC.biota.PBDEs <- function(data, AC, AC_data, species_rt) {
-    
-    out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-    
-    stopifnot(
-      length(intersect(names(data), names(out))) == 0,
-      ! c("BAC", "FEQG", "HQS") %in% names(AC)
+  # add in HQS of 0.02 ww for fish liver
+  
+  out <- mutate(
+    out,
+    HQS = if_else(
+      .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
+      ctsm_convert_basis(0.02, "W", .data$basis, .data$drywt, .data$lipidwt),
+      .data$HQS
     )
+  )
+  
+  out <- out %>%
+    column_to_rownames() %>%
+    select(all_of(AC))
+  
+  out
+}
+
+
+get.AC.biota.Effects.OSPAR <- function(data, AC, AC_data, species_rt) {
+  
+  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
+  rownames(out) <- rownames(data)
+  
+  with(data, {
     
-    out <- bind_cols(out, data)
-    
-    out <- out %>%
-      rownames_to_column() %>%
-      mutate(
-        species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-        species = as.character(species)
-      )
-    
-    
-    # HQS in liver converted from muscle using muscle lipid content
-    
-    id <- out$determinand %in% "SBDE6" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-    
-    if (any(id)) {
+    if ("EROD" %in% data$determinand) {
       
-      out[id, ] <- mutate(
-        out[id, ],
-        .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-        .dry_mu = info.species[.data$species, "MU_drywt"],
-        HQS = ctsm_convert_basis(0.0085, "W", "L", .dry_mu, .lipid_mu),
-        HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-        .lipid_mu = NULL,
-        .dry_mu = NULL
-      )
-    }
-    
-    
-    out <- out %>%
-      column_to_rownames() %>%
-      select(all_of(AC))
-    
-    out
-  }
-  
-  
-  get.AC.biota.Dioxins <- function(data, AC, AC_data, species_rt) {
-    
-    out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-    
-    stopifnot(
-      length(intersect(names(data), names(out))) == 0,
-      ! c("BAC", "EQS.OPAR", "HQS") %in% names(AC)
-    )
-    
-    out <- bind_cols(out, data)
-    
-    out <- out %>%
-      rownames_to_column() %>%
-      mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
-    
-    
-    # add in HQS of 0.02 ww for fish liver
-    
-    out <- mutate(
-      out,
-      HQS = if_else(
-        .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
-        ctsm_convert_basis(0.02, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$HQS
-      )
-    )
-    
-    out <- out %>%
-      column_to_rownames() %>%
-      select(all_of(AC))
-    
-    out
-  }
-  
-  
-  get.AC.biota.Effects <- function(data, AC, AC_data, species_rt) {
-    
-    out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-    rownames(out) <- rownames(data)
-    
-    with(data, {
+      stopifnot("matrix" %in% names(data))
       
-      if ("EROD" %in% data$determinand) {
-        
-        stopifnot("matrix" %in% names(data))
-        
-        id <- determinand %in% "EROD" & matrix %in% "LIMIC"
-        if (any(id) & "BAC" %in% AC) {
-          out$BAC[id & species %in% "Limanda limanda"] <- 680
-          out$BAC[id & species %in% "Gadus morhua"] <- 145
-          out$BAC[id & species %in% "Pleuronectes platessa"] <- 255
-          out$BAC[id & species %in% "Lepidorhombus boscii"] <- 13
-          out$BAC[id & species %in% "Callionymus lyra"] <- 202
-        }
-        
-        if ("LIS9" %in% data$matrix) {
-          stopifnot("sex" %in% names(data))
-          
-          id <- determinand %in% "EROD" & matrix %in% "LIS9"
-          
-          if ("BAC" %in% AC) {
-            out$BAC[id & species %in% "Limanda limanda" & sex %in% "F"] <- 178
-            out$BAC[id & species %in% "Limanda limanda" & sex %in% "M"] <- 147
-            out$BAC[id & species %in% "Platichthys flesus" & sex %in% "M"] <- 24
-            out$BAC[id & species %in% "Pleuronectes platessa" & sex %in% "M"] <- 9.5
-            out$BAC[id & species %in% "Mullus barbatus" & sex %in% "M"] <- 208
-          }
-        }
+      id <- determinand %in% "EROD" & matrix %in% "LIMIC"
+      if (any(id) & "BAC" %in% AC) {
+        out$BAC[id & species %in% "Limanda limanda"] <- 680
+        out$BAC[id & species %in% "Gadus morhua"] <- 145
+        out$BAC[id & species %in% "Pleuronectes platessa"] <- 255
+        out$BAC[id & species %in% "Lepidorhombus boscii"] <- 13
+        out$BAC[id & species %in% "Callionymus lyra"] <- 202
       }
       
-      if ("SFG" %in% data$determinand) {
-        id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
-          determinand %in% "SFG"
-        if ("BAC" %in% AC) out$BAC[id] <- 25
-        if ("EAC" %in% AC) out$EAC[id] <- 15
-      }
-      
-      if ("SURVT" %in% data$determinand) {
-        id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
-          determinand %in% "SURVT"
-        if ("BAC" %in% AC) out$BAC[id] <- 10
-        if ("EAC" %in% AC) out$EAC[id] <- 5
-      }
-      
-      if ("NRR" %in% data$determinand) {
-        id <- determinand %in% "NRR"
-        if ("BAC" %in% AC) out$BAC[id] <- 120
-        if ("EAC" %in% AC) out$EAC[id] <- 50
-      }
-      
-      if ("LP" %in% data$determinand) {
-        id <- determinand %in% "LP"
-        if ("BAC" %in% AC) out$BAC[id] <- 20
-        if ("EAC" %in% AC) out$EAC[id] <- 10
-      }
-      
-      if ("MNC" %in% data$determinand) {
+      if ("LIS9" %in% data$matrix) {
+        stopifnot("sex" %in% names(data))
         
-        if (any(ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
-                determinand %in% "MNC"))
-          stop("AC not coded for MNC in mussels")
+        id <- determinand %in% "EROD" & matrix %in% "LIS9"
         
-        id <- determinand %in% "MNC"
         if ("BAC" %in% AC) {
-          out$BAC[id & species %in% "Platichthys flesus"] <- 0.3
-          out$BAC[id & species %in% "Limanda limanda"] <- 0.5
-          out$BAC[id & species %in% "Zoarces viviparus"] <- 0.4
-          out$BAC[id & species %in% "Gadus morhua"] <- 0.4
-          out$BAC[id & species %in% "Mullus barbatus"] <- 0.3
+          out$BAC[id & species %in% "Limanda limanda" & sex %in% "F"] <- 178
+          out$BAC[id & species %in% "Limanda limanda" & sex %in% "M"] <- 147
+          out$BAC[id & species %in% "Platichthys flesus" & sex %in% "M"] <- 24
+          out$BAC[id & species %in% "Pleuronectes platessa" & sex %in% "M"] <- 9.5
+          out$BAC[id & species %in% "Mullus barbatus" & sex %in% "M"] <- 208
         }
       }
-      
-      if ("%DNATAIL" %in% data$determinand) {
-        id <- determinand %in% "%DNATAIL"
-        if (any(id) & "BAC" %in% AC) {
-          out$BAC[id & species %in% "Mytilus edulis"] <- 10
-          out$BAC[id & species %in% "Gadus morhua"] <- 5
-          out$BAC[id & species %in% "Limanda limanda"] <- 5
-        }
-      }
-      
-      out
-    })
-  }
-  
-  
-  get.AC.biota.Metabolites <- function(data, AC, AC_data, species_rt) {
+    }
     
-    out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-    rownames(out) <- rownames(data)
+    if ("SFG" %in% data$determinand) {
+      id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
+        determinand %in% "SFG"
+      if ("BAC" %in% AC) out$BAC[id] <- 25
+      if ("EAC" %in% AC) out$EAC[id] <- 15
+    }
     
-    with(data, {
+    if ("SURVT" %in% data$determinand) {
+      id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
+        determinand %in% "SURVT"
+      if ("BAC" %in% AC) out$BAC[id] <- 10
+      if ("EAC" %in% AC) out$EAC[id] <- 5
+    }
+    
+    if ("NRR" %in% data$determinand) {
+      id <- determinand %in% "NRR"
+      if ("BAC" %in% AC) out$BAC[id] <- 120
+      if ("EAC" %in% AC) out$EAC[id] <- 50
+    }
+    
+    if ("LP" %in% data$determinand) {
+      id <- determinand %in% "LP"
+      if ("BAC" %in% AC) out$BAC[id] <- 20
+      if ("EAC" %in% AC) out$EAC[id] <- 10
+    }
+    
+    if ("MNC" %in% data$determinand) {
       
-      stopifnot("method_analysis" %in% names(data))
+      if (any(ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
+              determinand %in% "MNC"))
+        stop("AC not coded for MNC in mussels")
       
+      id <- determinand %in% "MNC"
       if ("BAC" %in% AC) {
-        id <- species %in% "Limanda limanda"
-        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
-        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 0.15
-        
-        id <- species %in% "Gadus morhua"
-        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 21
-        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 2.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.1
-        
-        id <- species %in% "Platichthys flesus"
-        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
-        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
-        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.3
-        
-        id <- species %in% "Melanogrammus aeglefinus"
-        out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 13
-        out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 0.8
-        out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.9
+        out$BAC[id & species %in% "Platichthys flesus"] <- 0.3
+        out$BAC[id & species %in% "Limanda limanda"] <- 0.5
+        out$BAC[id & species %in% "Zoarces viviparus"] <- 0.4
+        out$BAC[id & species %in% "Gadus morhua"] <- 0.4
+        out$BAC[id & species %in% "Mullus barbatus"] <- 0.3
       }
-      
-      if ("EAC" %in% AC) {
-        id <- species %in% "Limanda limanda"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 22
-        
-        id <- species %in% "Gadus morhua"
-        out$EAC[id & determinand %in% "PYR1OH" & method_analysis %in% "GC-MS"] <- 483
-        out$EAC[id & determinand %in% "PA1OH" & method_analysis %in% "GC-MS"] <- 528
-        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
-        
-        id <- species %in% "Platichthys flesus"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 29
-        
-        id <- species %in% "Melanogrammus aeglefinus"
-        out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
-      }
-      
-      out
-    })
-  }
-  
-  
-  get.AC.biota.Imposex <- function(data, AC, AC_data, species_rt) {
-    out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-    rownames(out) <- rownames(data)
+    }
     
-    with(data, {
-
-      if ("BAC" %in% AC)
-      {
-        out$BAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 0.3
-        out$BAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 0.3
+    if ("%DNATAIL" %in% data$determinand) {
+      id <- determinand %in% "%DNATAIL"
+      if (any(id) & "BAC" %in% AC) {
+        out$BAC[id & species %in% "Mytilus edulis"] <- 10
+        out$BAC[id & species %in% "Gadus morhua"] <- 5
+        out$BAC[id & species %in% "Limanda limanda"] <- 5
       }
-      
-      if ("EAC" %in% AC)
-      {
-        out$EAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 2.0
-        out$EAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 2.0
-        out$EAC[determinand %in% "VDS" & species %in% "Tritia nitida (reticulata)"] <- 0.3
-        out$EAC[determinand %in% "VDS" & species %in% "Buccinum undatum"] <- 0.3
-      }
-      
-      out
-    })
-  }
-
-}
-
-if (info_AC_type == "HELCOM") {
-  
-  get.AC.biota.PAH_parent <- get.AC.biota.contaminant
-  get.AC.biota.PAH_alkylated <- get.AC.biota.contaminant
-  get.AC.biota.PBDEs <- get.AC.biota.contaminant
-  get.AC.biota.Organotins <- get.AC.biota.contaminant
-  get.AC.biota.Organobromines <- get.AC.biota.contaminant
-  get.AC.biota.Chlorobiphenyls <- get.AC.biota.contaminant
-  get.AC.biota.Organochlorines<- get.AC.biota.contaminant
-  get.AC.biota.Dioxins <- get.AC.biota.contaminant
-  
-  get.AC.biota.Metals <- function(data, AC, AC_data, species_rt) {
-
-    out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt)
-
-    stopifnot(
-      length(intersect(names(data), names(out))) == 0,
-      ! c("BAC", "EQS") %in% names(AC)
-    )
-
-    out <- bind_cols(out, data)
-
-    out <- rownames_to_column(out)
-
-
-    # lead
-
-    out <- mutate(
-      out,
-      BAC = if_else(
-        .data$determinand %in% "PB" & .data$matrix %in% "MU",
-        NA_real_,
-        as.double(.data$BAC)
-      ),
-      EQS = if_else(
-        .data$determinand %in% "PB" & .data$matrix %in% "LI",
-        NA_real_,
-        .data$EQS
-      )
-    )
-
-    out <- out %>%
-      column_to_rownames() %>%
-      select(all_of(AC))
-
+    }
+    
     out
-  }
-
-
-  get.AC.biota.Organofluorines <- function(data, AC, AC_data, species_rt) {
-
-    out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt)
-
-    stopifnot(
-      length(intersect(names(data), names(out))) == 0,
-      !c("EQS") %in% names(AC)
-    )
-
-    out <- bind_cols(out, data)
-
-    out <- rownames_to_column(out)
-
-    # fish liver - multiply by 5
-
-    out <- mutate(
-      out,
-      EQS = if_else(
-        .data$matrix %in% "LI" & .data$determinand %in% "PFOS",
-        .data$EQS * 17.9,
-        .data$EQS
-      )
-    )
-
-    out <- out %>%
-      column_to_rownames() %>%
-      select(all_of(AC))
-
-    out
-  }
-
-  
-  get.AC.biota.Metabolites <- function(data, AC, AC_data, species_rt) {
-    
-    out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-    rownames(out) <- rownames(data)
-    
-    with(data, {
-      
-      stopifnot("method_analysis" %in% names(data))
-      
-      if ("EAC" %in% AC) {
-        out$EAC[determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 483
-      }
-      
-      out
-    })
-  }
-  
-  
-  get.AC.biota.Imposex <- function(data, AC, AC_data, species_rt) {
-    out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-    rownames(out) <- rownames(data)
-    
-    with(data, {
-      
-      if ("EAC" %in% AC)
-      {
-        out$EAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 2.0
-        out$EAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 2.0
-        out$EAC[determinand %in% "VDS" & species %in% "Tritia nitida (reticulata)"] <- 0.3
-        out$EAC[determinand %in% "VDS" & species %in% "Buccinum undatum"] <- 0.3
-        out$EAC[determinand %in% "VDS" & species %in% "Peringia ulvae"] <- 0.1
-        out$EAC[determinand %in% "INTS" & species %in% "Littorina littorea"] <- 0.3
-      }
-      
-      out
-    })
-  }
-
+  })
 }
 
 
-# if (info_AC_type == "EXTERNAL") {
-#   
-#   get.AC.biota.PAH_parent <- get.AC.biota.contaminant
-#   get.AC.biota.PAH_alkylated <- get.AC.biota.contaminant
-#   get.AC.biota.PBDEs <- get.AC.biota.contaminant
-#   get.AC.biota.Organotins <- get.AC.biota.contaminant
-#   get.AC.biota.Organobromines <- get.AC.biota.contaminant
-#   
-#   get.AC.biota.Metals <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
-#     
-#     out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-#     
-#     stopifnot(
-#       length(intersect(names(data), names(out))) == 0,
-#       ! c("BAC", "EQS.OSPAR", "HQS") %in% names(AC)
-#     )
-#     
-#     out <- bind_cols(out, data)
-#     
-#     out <- out %>%
-#       rownames_to_column() %>%
-#       mutate(
-#         species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-#         sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
-#       )
-#     
-#     
-#     # mercury
-#     # only BAC is for mussels
-#     # no MPC (HQS) for fish liver
-#     # mammal liver 16000 (BAC), 64000 (EAC) ww
-#     # mammal hair 6100 (BAC), 24400 (EAC) dw
-#     # bird egg homongenate 110 (BAC), 470 (EAC) ww
-#     # bird liver 1400 (BAC) 7300 (EAC) ww
-#     # bird feather 1580 (BAC) 7920 (EAC) dw
-#     # bird blood 200 (BAC) 1000 (EAC) ww
-#     
-#     id <- out$determinand %in% "HG"
-#     
-#     if (any(id)) {
-#       
-#       out[id, ] <- mutate(
-#         out[id, ],
-#         
-#         BAC = case_when(
-#           .data$species_group %in% "Fish"                            ~ NA_real_,
-#           .data$sub.family %in% "Oyster"                      ~ NA_real_,
-#           .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-#             ctsm_convert_basis(16000, "W", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-#             ctsm_convert_basis(6100, "D", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-#             ctsm_convert_basis(110, "W", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-#             ctsm_convert_basis(1400, "W", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-#             ctsm_convert_basis(1580, "D", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-#             ctsm_convert_basis(200, "W", .data$basis, .data$drywt, .data$lipidwt),
-#           TRUE                                                ~ .data$BAC
-#         ),
-#         
-#         EQS.OSPAR = case_when(
-#           .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-#             ctsm_convert_basis(64000, "W", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-#             ctsm_convert_basis(24400, "D", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-#             ctsm_convert_basis(470, "W", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-#             ctsm_convert_basis(7300, "W", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-#             ctsm_convert_basis(7920, "D", .data$basis, .data$drywt, .data$lipidwt),
-#           .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-#             ctsm_convert_basis(1000, "W", .data$basis, .data$drywt, .data$lipidwt),
-#           TRUE                                                ~ .data$EQS.OSPAR
-#         ),
-#         
-#         HQS = if_else(.data$species_group %in% "Fish" & .data$matrix %in% "LI", NA_real_, .data$HQS)
-#       )
-#     }
-#     
-#     
-#     # cadmium and lead
-#     # adjust HQS (MPC) for fish muscle
-#     # BACs in fish only apply to high lipid tissue
-#     
-#     out <- mutate(
-#       out,
-#       
-#       HQS = if_else(
-#         .data$determinand %in% "CD" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
-#         50,
-#         .data$HQS
-#       ),
-#       
-#       HQS = if_else(
-#         .data$determinand %in% "PB" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
-#         300,
-#         .data$HQS
-#       ),
-#       
-#       BAC = if_else(
-#         .data$determinand %in% c("CD", "PB") & .data$species_group %in% "Fish" &
-#           (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-#         NA_real_,
-#         .data$BAC
-#       )
-#     )
-#     
-#     out <- out %>%
-#       column_to_rownames() %>%
-#       select(all_of(AC))
-#     
-#     out
-#   }
-#   
-#   
-#   get.AC.biota.Chlorobiphenyls <- function(data, AC, species_rt, lipid_high = 3) {
-#     
-#     out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
-#     
-#     stopifnot(
-#       length(intersect(names(data), names(out))) == 0,
-#       ! c("BAC", "EAC", "HQS") %in% names(AC)
-#     )
-#     
-#     out <- bind_cols(out, data)
-#     
-#     out <- out %>%
-#       rownames_to_column() %>%
-#       mutate(
-#         species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-#         sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
-#       )
-#     
-#     # BACs in fish only apply to high lipid tissue
-#     # add in MPC (HQS) of 200 ww for fish liver
-#     
-#     out <- mutate(
-#       out,
-#       
-#       BAC = if_else(
-#         .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-#         NA_real_,
-#         .data$BAC
-#       ),
-#       
-#       HQS = if_else(
-#         .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "SCB6",
-#         ctsm_convert_basis(200, "W", .data$basis, .data$drywt, .data$lipidwt),
-#         .data$HQS
-#       ),
-#       
-#       EAC = if_else(
-#         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-#           .data$matrix %in% "EH" & .data$determinand %in% "SCB7",
-#         ctsm_convert_basis(6.7, "W", .data$basis, .data$drywt, .data$lipidwt),
-#         .data$EAC
-#       )
-#     )
-#     
-#     
-#     out <- out %>%
-#       column_to_rownames() %>%
-#       select(all_of(AC))
-#     
-#     out
-#   }
-#   
-#   
-#   get.AC.biota.Organochlorines <- function(data, AC, species_rt, lipid_high = 3) {
-#     
-#     out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
-#     
-#     stopifnot(
-#       length(intersect(names(data), names(out))) == 0,
-#       ! c("BAC", "EAC", "EQS.OSPAR", "HQS") %in% names(AC)
-#     )
-#     
-#     out <- bind_cols(out, data)
-#     
-#     out <- out %>%
-#       rownames_to_column() %>%
-#       mutate(
-#         species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-#         species = as.character(species)
-#       )
-#     
-#     
-#     # BAC in fish only apply to high lipid tissue
-#     # EAC for birds fro HCB and HCH
-#     
-#     out <- mutate(
-#       out,
-#       
-#       BAC = if_else(
-#         .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-#         NA_real_,
-#         .data$BAC
-#       ),
-#       
-#       EAC = if_else(
-#         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-#           .data$matrix %in% "EH" & .data$determinand %in% "HCB",
-#         ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
-#         .data$EAC
-#       ),
-#       
-#       EAC = if_else(
-#         .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-#           .data$matrix %in% "EH" & .data$determinand %in% "HCH",
-#         ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
-#         .data$EAC
-#       )
-#     )
-#     
-#     
-#     # HCHG HQS in liver converted from muscle using muscle lipid content
-#     
-#     id <- out$determinand %in% "HCHG" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-#     
-#     if (any(id)) {
-#       
-#       out[id, ] <- mutate(
-#         out[id, ],
-#         .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-#         .dry_mu = info.species[.data$species, "MU_drywt"],
-#         HQS = ctsm_convert_basis(61, "W", "L", .dry_mu, "", .lipid_mu, ""),
-#         HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-#         .lipid_mu = NULL,
-#         .dry_mu = NULL
-#       )
-#     }
-#     
-#     
-#     # HCB HQS in liver converted from muscle using muscle lipid content
-#     
-#     id <- out$determinand %in% "HCB" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-#     
-#     if (any(id)) {
-#       
-#       out[id, ] <- mutate(
-#         out[id, ],
-#         .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-#         .dry_mu = info.species[.data$species, "MU_drywt"],
-#         HQS = ctsm_convert_basis(10, "W", "L", .dry_mu, "", .lipid_mu, ""),
-#         HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-#         .lipid_mu = NULL,
-#         .dry_mu = NULL
-#       )
-#     }
-#     
-#     
-#     out <- out %>%
-#       column_to_rownames() %>%
-#       select(all_of(AC))
-#     
-#     out
-#   }
-#   
-#   
-#   get.AC.biota.Organofluorines <- function(data, AC, species_rt) {
-#     
-#     out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
-#     
-#     stopifnot(
-#       length(intersect(names(data), names(out))) == 0,
-#       ! c("BAC", "EQS.OPAR", "HQS") %in% names(AC)
-#     )
-#     
-#     out <- bind_cols(out, data)
-#     
-#     out <- out %>%
-#       rownames_to_column() %>%
-#       mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
-#     
-#     
-#     # fish liver - multiply by 5
-#     
-#     out <- mutate(
-#       out,
-#       .id <- .data$species_group %in% "Fish" & .data$matrix %in% "LI" &
-#         .data$determinand %in% "PFOS",
-#       EQS.OSPAR = .data$EQS.OSPAR * if_else(.id, 5, 1),
-#       HQS = .data$HQS * if_else(.id, 5, 1),
-#       .id = NULL
-#     )
-#     
-#     out <- out %>%
-#       column_to_rownames() %>%
-#       select(all_of(AC))
-#     
-#     out
-#   }
-#   
-#   
-#   get.AC.biota.PBDEs <- function(data, AC, species_rt) {
-#     
-#     out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
-#     
-#     stopifnot(
-#       length(intersect(names(data), names(out))) == 0,
-#       ! c("BAC", "FEQG", "HQS") %in% names(AC)
-#     )
-#     
-#     out <- bind_cols(out, data)
-#     
-#     out <- out %>%
-#       rownames_to_column() %>%
-#       mutate(
-#         species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-#         species = as.character(species)
-#       )
-#     
-#     
-#     # HQS in liver converted from muscle using muscle lipid content
-#     
-#     id <- out$determinand %in% "SBDE6" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-#     
-#     if (any(id)) {
-#       
-#       out[id, ] <- mutate(
-#         out[id, ],
-#         .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-#         .dry_mu = info.species[.data$species, "MU_drywt"],
-#         HQS = ctsm_convert_basis(0.0085, "W", "L", .dry_mu, "", .lipid_mu, ""),
-#         HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-#         .lipid_mu = NULL,
-#         .dry_mu = NULL
-#       )
-#     }
-#     
-#     
-#     out <- out %>%
-#       column_to_rownames() %>%
-#       select(all_of(AC))
-#     
-#     out
-#   }
-#   
-#   
-#   get.AC.biota.Dioxins <- function(data, AC, species_rt) {
-#     
-#     out <- get.AC.biota.contaminant(data, AC, species_rt, export_cf = TRUE)
-#     
-#     stopifnot(
-#       length(intersect(names(data), names(out))) == 0,
-#       ! c("BAC", "EQS.OPAR", "HQS") %in% names(AC)
-#     )
-#     
-#     out <- bind_cols(out, data)
-#     
-#     out <- out %>%
-#       rownames_to_column() %>%
-#       mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
-#     
-#     
-#     # add in HQS of 0.02 ww for fish liver
-#     
-#     out <- mutate(
-#       out,
-#       HQS = if_else(
-#         .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
-#         ctsm_convert_basis(0.02, "W", .data$basis, .data$drywt, .data$lipidwt),
-#         .data$HQS
-#       )
-#     )
-#     
-#     out <- out %>%
-#       column_to_rownames() %>%
-#       select(all_of(AC))
-#     
-#     out
-#   }
-#   
-#   
-#   get.AC.biota.Effects <- function(data, AC, species_rt) {
-#     
-#     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-#     rownames(out) <- rownames(data)
-#     
-#     with(data, {
-#       
-#       if ("EROD" %in% data$determinand) {
-#         
-#         stopifnot("matrix" %in% names(data))
-#         
-#         id <- determinand %in% "EROD" & matrix %in% "LIMIC"
-#         if (any(id) & "BAC" %in% AC) {
-#           out$BAC[id & species %in% "Limanda limanda"] <- 680
-#           out$BAC[id & species %in% "Gadus morhua"] <- 145
-#           out$BAC[id & species %in% "Pleuronectes platessa"] <- 255
-#           out$BAC[id & species %in% "Lepidorhombus boscii"] <- 13
-#           out$BAC[id & species %in% "Callionymus lyra"] <- 202
-#         }
-#         
-#         if ("LIS9" %in% data$matrix) {
-#           stopifnot("sex" %in% names(data))
-#           
-#           id <- determinand %in% "EROD" & matrix %in% "LIS9"
-#           
-#           if ("BAC" %in% AC) {
-#             out$BAC[id & species %in% "Limanda limanda" & sex %in% "F"] <- 178
-#             out$BAC[id & species %in% "Limanda limanda" & sex %in% "M"] <- 147
-#             out$BAC[id & species %in% "Platichthys flesus" & sex %in% "M"] <- 24
-#             out$BAC[id & species %in% "Pleuronectes platessa" & sex %in% "M"] <- 9.5
-#             out$BAC[id & species %in% "Mullus barbatus" & sex %in% "M"] <- 208
-#           }
-#         }
-#       }
-#       
-#       if ("SFG" %in% data$determinand) {
-#         id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
-#           determinand %in% "SFG"
-#         if ("BAC" %in% AC) out$BAC[id] <- 25
-#         if ("EAC" %in% AC) out$EAC[id] <- 15
-#       }
-#       
-#       if ("SURVT" %in% data$determinand) {
-#         id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
-#           determinand %in% "SURVT"
-#         if ("BAC" %in% AC) out$BAC[id] <- 10
-#         if ("EAC" %in% AC) out$EAC[id] <- 5
-#       }
-#       
-#       if ("NRR" %in% data$determinand) {
-#         id <- determinand %in% "NRR"
-#         if ("BAC" %in% AC) out$BAC[id] <- 120
-#         if ("EAC" %in% AC) out$EAC[id] <- 50
-#       }
-#       
-#       if ("LP" %in% data$determinand) {
-#         id <- determinand %in% "LP"
-#         if ("BAC" %in% AC) out$BAC[id] <- 20
-#         if ("EAC" %in% AC) out$EAC[id] <- 10
-#       }
-#       
-#       if ("MNC" %in% data$determinand) {
-#         
-#         if (any(ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
-#                 determinand %in% "MNC"))
-#           stop("AC not coded for MNC in mussels")
-#         
-#         id <- determinand %in% "MNC"
-#         if ("BAC" %in% AC) {
-#           out$BAC[id & species %in% "Platichthys flesus"] <- 0.3
-#           out$BAC[id & species %in% "Limanda limanda"] <- 0.5
-#           out$BAC[id & species %in% "Zoarces viviparus"] <- 0.4
-#           out$BAC[id & species %in% "Gadus morhua"] <- 0.4
-#           out$BAC[id & species %in% "Mullus barbatus"] <- 0.3
-#         }
-#       }
-#       
-#       if ("%DNATAIL" %in% data$determinand) {
-#         id <- determinand %in% "%DNATAIL"
-#         if (any(id) & "BAC" %in% AC) {
-#           out$BAC[id & species %in% "Mytilus edulis"] <- 10
-#           out$BAC[id & species %in% "Gadus morhua"] <- 5
-#           out$BAC[id & species %in% "Limanda limanda"] <- 5
-#         }
-#       }
-#       
-#       out
-#     })
-#   }
-#   
-#   
-#   get.AC.biota.Metabolites <- function(data, AC, species_rt) {
-#     
-#     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-#     rownames(out) <- rownames(data)
-#     
-#     with(data, {
-#       
-#       stopifnot("method_analysis" %in% names(data))
-#       
-#       if ("BAC" %in% AC) {
-#         id <- species %in% "Limanda limanda"
-#         out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
-#         out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
-#         out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 0.15
-#         
-#         id <- species %in% "Gadus morhua"
-#         out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 21
-#         out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 2.7
-#         out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.1
-#         
-#         id <- species %in% "Platichthys flesus"
-#         out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
-#         out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
-#         out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.3
-#         
-#         id <- species %in% "Melanogrammus aeglefinus"
-#         out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 13
-#         out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 0.8
-#         out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.9
-#       }
-#       
-#       if ("EAC" %in% AC) {
-#         id <- species %in% "Limanda limanda"
-#         out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 22
-#         
-#         id <- species %in% "Gadus morhua"
-#         out$EAC[id & determinand %in% "PYR1OH" & method_analysis %in% "GC-MS"] <- 483
-#         out$EAC[id & determinand %in% "PA1OH" & method_analysis %in% "GC-MS"] <- 528
-#         out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
-#         
-#         id <- species %in% "Platichthys flesus"
-#         out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 29
-#         
-#         id <- species %in% "Melanogrammus aeglefinus"
-#         out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
-#       }
-#       
-#       out
-#     })
-#   }
-#   
-#   
-#   get.AC.biota.Imposex <- function(data, AC, species_rt) {
-#     out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-#     rownames(out) <- rownames(data)
-#     
-#     with(data, {
-#       
-#       if ("BAC" %in% AC)
-#       {
-#         out$BAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 0.3
-#         out$BAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 0.3
-#       }
-#       
-#       if ("EAC" %in% AC)
-#       {
-#         out$EAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 2.0
-#         out$EAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 2.0
-#         out$EAC[determinand %in% "VDS" & species %in% "Tritia nitida (reticulata)"] <- 0.3
-#         out$EAC[determinand %in% "VDS" & species %in% "Buccinum undatum"] <- 0.3
-#       }
-#       
-#       out
-#     })
-#   }
-#   
-# }
+get.AC.biota.Metabolites.OSPAR <- function(data, AC, AC_data, species_rt) {
+    
+  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
+  rownames(out) <- rownames(data)
+  
+  with(data, {
+    
+    stopifnot("method_analysis" %in% names(data))
+    
+    if ("BAC" %in% AC) {
+      id <- species %in% "Limanda limanda"
+      out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
+      out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
+      out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 0.15
+      
+      id <- species %in% "Gadus morhua"
+      out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 21
+      out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 2.7
+      out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.1
+      
+      id <- species %in% "Platichthys flesus"
+      out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
+      out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
+      out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.3
+      
+      id <- species %in% "Melanogrammus aeglefinus"
+      out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 13
+      out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 0.8
+      out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.9
+    }
+    
+    if ("EAC" %in% AC) {
+      id <- species %in% "Limanda limanda"
+      out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 22
+      
+      id <- species %in% "Gadus morhua"
+      out$EAC[id & determinand %in% "PYR1OH" & method_analysis %in% "GC-MS"] <- 483
+      out$EAC[id & determinand %in% "PA1OH" & method_analysis %in% "GC-MS"] <- 528
+      out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
+      
+      id <- species %in% "Platichthys flesus"
+      out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 29
+      
+      id <- species %in% "Melanogrammus aeglefinus"
+      out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
+    }
+    
+    out
+  })
+}
+
+
+get.AC.biota.Imposex.OSPAR <- function(data, AC, AC_data, species_rt) {
+
+  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
+  rownames(out) <- rownames(data)
+  
+  with(data, {
+    
+    if ("BAC" %in% AC)
+    {
+      out$BAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 0.3
+      out$BAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 0.3
+    }
+    
+    if ("EAC" %in% AC)
+    {
+      out$EAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 2.0
+      out$EAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 2.0
+      out$EAC[determinand %in% "VDS" & species %in% "Tritia nitida (reticulata)"] <- 0.3
+      out$EAC[determinand %in% "VDS" & species %in% "Buccinum undatum"] <- 0.3
+    }
+    
+    out
+  })
+}
+
+
+get.AC.biota.Metals.HELCOM <- function(data, AC, AC_data, species_rt) {
+
+  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt)
+  
+  stopifnot(
+    length(intersect(names(data), names(out))) == 0,
+    ! c("BAC", "EQS") %in% names(AC)
+  )
+  
+  out <- bind_cols(out, data)
+  
+  out <- rownames_to_column(out)
+  
+  
+  # lead
+  
+  out <- mutate(
+    out,
+    BAC = if_else(
+      .data$determinand %in% "PB" & .data$matrix %in% "MU",
+      NA_real_,
+      as.double(.data$BAC)
+    ),
+    EQS = if_else(
+      .data$determinand %in% "PB" & .data$matrix %in% "LI",
+      NA_real_,
+      .data$EQS
+    )
+  )
+  
+  out <- out %>%
+    column_to_rownames() %>%
+    select(all_of(AC))
+  
+  out
+}
+
+
+get.AC.biota.Organofluorines.HELCOM <- function(data, AC, AC_data, species_rt) {
+  
+  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt)
+  
+  stopifnot(
+    length(intersect(names(data), names(out))) == 0,
+    !c("EQS") %in% names(AC)
+  )
+  
+  out <- bind_cols(out, data)
+  
+  out <- rownames_to_column(out)
+  
+  # fish liver - multiply by 5
+  
+  out <- mutate(
+    out,
+    EQS = if_else(
+      .data$matrix %in% "LI" & .data$determinand %in% "PFOS",
+      .data$EQS * 17.9,
+      .data$EQS
+    )
+  )
+  
+  out <- out %>%
+    column_to_rownames() %>%
+    select(all_of(AC))
+  
+  out
+}
+
+  
+get.AC.biota.Metabolites.HELCOM <- function(data, AC, AC_data, species_rt) {
+  
+  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
+  rownames(out) <- rownames(data)
+  
+  with(data, {
+    
+    stopifnot("method_analysis" %in% names(data))
+    
+    if ("EAC" %in% AC) {
+      out$EAC[determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 483
+    }
+    
+    out
+  })
+}
+
+  
+get.AC.biota.Imposex.HELCOM <- function(data, AC, AC_data, species_rt) {
+    
+  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
+  rownames(out) <- rownames(data)
+  
+  with(data, {
+    
+    if ("EAC" %in% AC)
+    {
+      out$EAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 2.0
+      out$EAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 2.0
+      out$EAC[determinand %in% "VDS" & species %in% "Tritia nitida (reticulata)"] <- 0.3
+      out$EAC[determinand %in% "VDS" & species %in% "Buccinum undatum"] <- 0.3
+      out$EAC[determinand %in% "VDS" & species %in% "Peringia ulvae"] <- 0.1
+      out$EAC[determinand %in% "INTS" & species %in% "Littorina littorea"] <- 0.3
+    }
+    
+    out
+  })
+}
 
 
 
@@ -2025,15 +1547,6 @@ get.AC.sediment.Metals <- function(data, AC, AC_data) {
   out[AC]
 }                           
 
-get.AC.sediment.PAH_parent <- get.AC.sediment.contaminant
-get.AC.sediment.PAH_alkylated <- get.AC.sediment.contaminant
-get.AC.sediment.Chlorobiphenyls <- get.AC.sediment.contaminant
-get.AC.sediment.PBDEs <- get.AC.sediment.contaminant
-get.AC.sediment.Organobromines <- get.AC.sediment.contaminant
-get.AC.sediment.Organofluorines <- get.AC.sediment.contaminant
-get.AC.sediment.Organochlorines <- get.AC.sediment.contaminant
-get.AC.sediment.Organotins <- get.AC.sediment.contaminant
-get.AC.sediment.Dioxins <- get.AC.sediment.contaminant
 
 
 get.AC.water.contaminant <- function(data, AC, AC_data) {   
@@ -2055,17 +1568,6 @@ get.AC.water.contaminant <- function(data, AC, AC_data) {
   out[AC]
 }                           
 
-get.AC.water.Metals <- get.AC.water.contaminant
-get.AC.water.PAH_parent <- get.AC.water.contaminant
-get.AC.water.PAH_alkylated <- get.AC.water.contaminant
-get.AC.water.Chlorobiphenyls <- get.AC.water.contaminant
-get.AC.water.PBDEs <- get.AC.water.contaminant
-get.AC.water.Organobromines <- get.AC.water.contaminant
-get.AC.water.Organochlorines <- get.AC.water.contaminant 
-get.AC.water.Organofluorines <- get.AC.water.contaminant
-get.AC.water.Organotins <- get.AC.water.contaminant
-get.AC.water.Dioxins <- get.AC.water.contaminant
-get.AC.water.Pesticides <- get.AC.water.contaminant
 
 
 # Unit conversion ----
