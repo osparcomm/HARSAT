@@ -3,6 +3,13 @@
 
 # read in data  ---- 
 
+#' @param compartment a string, one of "sediment", "biota", and "water"
+#' @param purpose a string, one of "OSPAR", "HELCOM", "AMAP" and "other"
+#' @param contaminants a file reference for contaminant data
+#' @param stations a file reference for station data
+#' @param QA a file reference for QA data
+#' @param data_path a file reference for data to read
+#' @export
 ctsm_read_data <- function(
   compartment = c("sediment", "biota", "water"), 
   purpose = c("OSPAR", "HELCOM", "AMAP", "other"), 
@@ -864,6 +871,7 @@ ctsm_read_QA <- function(file, path, purpose) {
 }
 
 
+#' @export
 ctsm_tidy_data <- function(ctsm_obj) {
   
   # import_functions.R
@@ -4046,6 +4054,7 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
 
 
 
+#' @export 
 ctsm_TBT_convert <- function(
   data, subset, action, from = c("tin", "cation"), 
   convert_var = c("value", "limit_detection", "limit_quantification", "uncertainty")) {

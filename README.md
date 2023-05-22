@@ -21,7 +21,7 @@ File -> New Project in RStudio to create a new project. File -> New Project -> V
 
 All example datasets can be run with the same basic directory structure. The following directories should be manually created:
 - data
-- functions
+- R
 - information
 - output
 - RData
@@ -49,7 +49,7 @@ Figure 1. Required Project File Structure for OSPAR dataset.
 <br/>
 Figure 2. Required Project File Structure for HELCOM dataset.
 
-All R functions from the GitHub code repository should be moved to ‘functions’, and csv files with the reference tables should go to ‘information’. 
+All R functions from the GitHub code repository should be moved to R, and csv files with the reference tables should go to ‘information’. 
 It is recommended that the R files with examples, and the data and output directories should be in the same (project) directory e.g.
 HARSAT\data
 HARSAT\output

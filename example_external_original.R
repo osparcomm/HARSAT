@@ -7,14 +7,14 @@
 
 # Setup ----
 
-# Sources functions (folder functions) and reference tables (folder information)
+# Sources functions (folder R) and reference tables (folder information)
 # Only those functions needed for this example are sourced here
 # The functions and reference tables folders are assumed to be in the current
 # R project folder
 
 rm(list = objects())
 
-function_path <- file.path("functions")
+function_path <- file.path("R")
 
 source(file.path(function_path, "import_functions.R"))
 source(file.path(function_path, "import_check_functions.R"))
@@ -54,7 +54,7 @@ biota_data <- ctsm_read_data(
 # makes adjustments to data that can't be done easily in the core code
 
 # import external AMAP data 
-# uses functions in 'functions/import external data.r' 
+# uses functions in 'R/import external data.r' 
 # the functions need to be generalised to deal with more determinands and to 
 # deal with the case where there is no ICES extraction; i.e. only external data
 

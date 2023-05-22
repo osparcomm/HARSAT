@@ -1572,6 +1572,7 @@ get.AC.water.contaminant <- function(data, AC, AC_data) {
 
 # Unit conversion ----
 
+#' @export
 convert_units <- function(conc, from, to) {
 
   # information_functions.R
@@ -2342,6 +2343,7 @@ get_RECO <- function(code, path = "information") {
 
 # get station code from station name
   
+#' @export
 get_station_code <- function(station_name, country, stations) {
   
   # gets the station code corresponding to the station name and country from the 
