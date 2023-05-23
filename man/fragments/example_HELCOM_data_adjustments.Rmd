@@ -1,0 +1,1683 @@
+---
+title: "HELCOM data adjustments"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{HELCOM data adjustments}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Data adjustments: water
+
+We'll use the `DT` package for some of these adjustments, and 
+`lattice` to plot some of the data so we can see it as we go.
+
+```{r helcom-data-adjust-datatables}
+library(DT)
+library(lattice)
+```
+
+### Data summary
+
+Here is a summary of the submissions for each country, first by determinand and then by year. 
+
+```{r helcom-data-adjust-water1}
+water_data$data %>% 
+  with(table(country, determinand)) %>% 
+  print(zero.print = ".")
+
+water_data$data %>% 
+  with(table(country, year)) %>% 
+  print(zero.print = ".")
+```
+
+### Matrix issues
+
+Here is a summary of the matrix and filtration data. Data with matrix SPM are deleted.
+
+```{r helcom-data-adjust-water_matrix1}
+water_data$data <- mutate(
+  water_data$data,
+  filtered = if_else(grepl("NF", method_pretreatment), "No", "Yes")
+)
+
+water_data$data %>% 
+  with(table(matrix, filtered, useNA = "ifany")) %>% 
+  print(zero.print = ".")
+
+water_data$data <- filter(
+  water_data$data, 
+  matrix == "WT"
+)
+```
+
+### Duplicate records
+
+The following samples have duplicated records - only the first is retained.
+
+```{r helcom-data-adjust-water_dup1}
+
+wk <- water_data$data %>%  
+  group_by(sample, determinand, filtered) %>% 
+  filter(n() >= 2) %>% 
+  ungroup()
+  
+wk %>% 
+  select(country, year, station_name, sample, determinand, filtered, replicate, value) %>% 
+  arrange(country, year, sample, determinand, replicate) %>%
+  as.data.frame() %>% 
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+```{r helcom-data-adjust-water_dup2}
+wk_rep <- wk$replicate
+
+wk_keep <- wk %>% 
+  select(sample, determinand, filtered, replicate, station_name, value) %>% 
+  arrange(replicate) %>% 
+  distinct(sample, determinand, filtered, value, .keep_all = TRUE) %>% 
+  pull(replicate)
+
+wk_drop <- setdiff(wk_rep, wk_keep)
+
+water_data$data <- filter(
+  water_data$data, 
+  !replicate %in% wk_drop
+)
+```
+
+### Filtration issues
+
+Here's a summary of whether the data have been filtered or not by determinand. All PFOS and TBSN+ are unfiltered, which is fine. However, there could be issues with the metals data, since there are both filtered (preferred) and unfiltered samples.  
+
+```{r helcom-data-adjust-water_filter1}
+water_data$data %>% 
+  with(table(determinand, filtered)) %>% 
+  print(zero.print = ".")
+```
+
+Here's a more detailed look at the metals data (having excluded the Russian data which are too old).  
+
+* **Estonia**: all samples are filtered.
+* **Germany**: a real mixture which is explored more below. 
+* **Lithuania**: the only unfiltered data are from 2007 (the first year of data). Maybe these were filtered data and have been submitted incorrectly. For now they are treated as unfiltered (and will drop out of the assessment because there are no unfiltered data in the last six monitoring years)
+* **Poland**: all samples are filtered.
+
+```{r helcom-data-adjust-water_filter2}
+wk <- filter(
+  water_data$data, 
+  country != "Russia",
+  determinand %in% c("CD", "PB")
+) 
+  
+wk %>% 
+  with(table(filtered, country)) %>% 
+  print(zero.print = ".")
+
+wk %>% 
+  with(table(filtered, year, country)) %>% 
+  print(zero.print = ".")
+```
+
+#### German metals data
+
+Here are the stations with metals data in the last six monitoring years (2016-2021); the second column shows whether the metal samples in this period were all filtered, all unfiltered, or a mixture.
+
+```{r helcom-data-adjust-water_filter4}
+wk <- wk %>% 
+  filter(country == "Germany") %>%
+  group_by(station_name) %>% 
+  filter(max(year) >= 2016) %>%
+  ungroup()
+
+
+wk_fun <- function(x) {
+  if (all(x == "Yes")) return("filtered")
+  if (all(x == "No")) return("unfiltered")
+  "mixture"
+}
+
+wk1 <- wk %>% 
+  filter(year >= 2016) %>% 
+  group_by(station_name) %>% 
+  summarise(type = wk_fun(filtered), .groups = "drop_last")
+
+as.data.frame(wk1) %>% 
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+There are three stations where there is a mixture. Here are the full records of 
+samples at these stations. These look intentional. Filtered and unfiltered 
+samples will be analysed as separate time series.
+
+```{r helcom-data-adjust-water_filter5}
+wk_id <- wk1 %>% 
+  filter(type == "mixture") %>% 
+  pull(station_name)
+
+wk %>% 
+  filter(station_name %in% wk_id) %>% 
+  with(table(filtered, year, station_name)) %>% 
+  print(zero.print = ".")
+```
+
+#### Zero concentrations
+
+Some metals concentrations from Lithuania in 2008 have been reported with value = 0. These measurements are less than the LoQ (Nijole 22 August) so the value has been replaced by the LoQ. (There are no uncertainties reported, so there is no need to adjust these.)
+
+```{r helcom-data-adjust-water_zero1}
+water_data$data <- mutate(
+  water_data$data, 
+  .id = value == 0
+)
+
+if (sum(water_data$data$.id) != 23) {
+  stop("something has changed - investigate")
+}  
+
+water_data$data %>% 
+  filter(.id) %>% 
+  select(
+    country, year, determinand, value, censoring, limit_detection, 
+    limit_quantification, uncertainty, unit_uncertainty
+  ) %>% 
+  as.data.frame() %>% 
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+```{r helcom-data-adjust-water_zero2}
+water_data$data <- mutate(
+  water_data$data, 
+  value = if_else(.id, limit_quantification, value),
+  .id = NULL
+)
+```
+
+## Sediment
+
+### Data summary
+
+Here is a summary of the submissions for each country, first by determinand and then 
+by year. The grain size fraction data have been omitted for simplicity.  
+
+```{r helcom-data-adjust-sed_summary1}
+wk <- filter(
+  sediment_data$data, 
+  !grepl("GSMF", determinand)
+)
+
+wk %>% 
+  with(table(country, determinand)) %>% 
+  print(zero.print = ".")
+
+wk %>% 
+  with(table(country, year)) %>% 
+  print(zero.print = ".")
+```
+
+### Organotins
+
+Denmark, Germany and Sweden have submitted TBTIN data (as opposed to TBSN+ data). 
+TBTIN data are ambiguous and are no longer allowed.  They could represent the
+tin ion concentration or the trybutyltin cation concentration. (TBSN+ is the 
+cation concentration). Here is a more detailed breakdown by year.
+
+```{r helcom-data-adjust-sed_tin1}
+wk <- sediment_data$data %>% 
+  filter(
+    determinand %in% c("TBSN+", "TBTIN"),
+    country %in% c("Denmark", "Germany", "Sweden")
+  )    
+
+wk %>% 
+  with(table(determinand, year, country)) %>%
+  print(zero.print = ".")
+```
+
+* **Sweden**: the four TBTIN samples are from 1990 and would drop out of the 
+  assessment anyway because there is too big a gap until the next monitoring 
+  year in 2003 - they are deleted below to avoid any ambiguity
+* **Germany**: the 34 TBTIN samples are from 2000, 2002 and 2004 - they are 
+  all 'old' data, so they are deleted to avoid any ambiguity
+* **Denmark**: all the data are reported as TBTIN. These are tin 
+  concentrations (Owen 22 August) so are converted to cation concentrations 
+  below by multiplying by 2.44. Use the `ctsm_TBT_convert` helper function to 
+  help with this.
+
+```{r helcom-data-adjust-sed_tin2}
+sediment_data$data <- filter(
+  sediment_data$data, 
+  !(determinand %in% "TBTIN" & country %in% c("Germany", "Sweden"))
+)
+
+sediment_data$data <- ctsm_TBT_convert(
+  sediment_data$data, 
+  country %in% "Denmark", 
+  action = c("relabel", "convert")
+)
+``` 
+
+## Stations
+
+### Germany station BMP K4
+
+Data submitted as stations BMP K4 and OMBMPK4 should both be regarded as 
+BMP K4 (Berit, 6 October 2022).  The submitted stations and the resulting 
+station names from the extraction procedure (based on coordinates) are 
+given below by year.   
+
+```{r helcom-data-adjust-sed_station1}
+wk_data <- filter(
+  sediment_data$data,
+  submitted.station %in% c("BMP K4", "OMBMPK4")
+) 
+
+wk_data %>% 
+  with(table(station_name, year, submitted.station)) %>% 
+  print(zero.print = ".")
+```
+
+
+There is the possibility of some duplication in 2011 and 2017 when data were 
+submitted as both BMP K4 and OMBPK4. Here are the determinands submitted in 
+each year. There is no duplication in 2017, but eight values have been submitted 
+twice in 2011. Delete the 2011 values from OMBPK4 and then relabel OMBPK4 data 
+as BMP K4
+
+```{r helcom-data-adjust-sed_station2}
+wk_data %>% 
+  filter(year %in% c(2011, 2017)) %>% 
+  with(table(submitted.station, determinand, year)) %>% 
+  print(zero.print = ".")
+
+wk_data %>% 
+  filter(year %in% 2011) %>%
+  select(submitted.station, determinand, matrix, value) %>% 
+  arrange(determinand, submitted.station)
+
+wk_code <- get_station_code("BMP K4", "Germany", sediment_data$stations)
+
+sediment_data$data <- sediment_data$data %>% 
+  filter(!(year == 2011 & submitted.station == "OMBMPK4")) %>% 
+  mutate(
+    .change = submitted.station == "OMBMPK4",
+    station_name = if_else(.change, "BMP K4", station_name),
+    station_code = if_else(.change, wk_code, station_code),
+    .change = NULL
+  )
+```
+
+### Matrix issues
+
+Here is a summary of matrix submissions by country. To focus on 'relevant' 
+data, only stations that have been monitored in the last six monitoring 
+years (2016-2021) have been considered. Grain size fraction data have also 
+been omitted. Only Germany and Poland have submitted in multiple matrices 
+and it is worth investigating what is going on. Note that SED62 is treated 
+as SED63 in the code; similarly SED2000 is treated as SEDTOT. 
+
+```{r helcom-data-adjust-sed_matrix1}
+wk <- sediment_data$data %>% 
+  filter(
+    !is.na(station_name), 
+    !grepl("GSMF", determinand)
+  ) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>% 
+  ungroup()  
+
+wk %>% 
+  with(table(matrix, country)) %>% 
+  print(zero.print = ".")
+
+```
+
+### Poland
+
+All SED2000 data are from 2000 or earlier, so they are deleted to 
+avoid confusion with the SED63 (or SED62) data.
+
+```{r helcom-data-adjust-sed_matrix2}
+wk %>% 
+  filter(country == "Poland") %>% 
+  with(table(matrix, year)) %>% 
+  print(zero.print = ".")
+
+sediment_data$data <- filter(
+  sediment_data$data,  
+  !(country == "Poland" & matrix == "SED2000")
+)
+```
+
+### Germany
+
+Here is a summary of German data by matrix. All organics (apart 
+from three TBSN+ samples) are measured in SED2000 (or SEDTOT). 
+The metals are measured in SED20, SED63 or SED2000.  
+
+```{r helcom-data-adjust-sed_matrix3}
+wk <- filter(wk, country == "Germany")
+
+wk %>% 
+  with(table(determinand, matrix)) %>% 
+  print(zero.print = ".")
+```
+
+The three TBSN+ samples in SED63 are the only TBSN+ data from 
+station OMBMPK8 and were last sampled in 2012, so we don't need 
+to worry about them. Here is a summary of the TBSN+ submissions 
+from stations where SDE63 has been used.
+
+```{r helcom-data-adjust-sed_matrix4}
+wk %>% 
+  filter(determinand %in% "TBSN+") %>% 
+  group_by(station_name) %>% 
+  filter(any(matrix %in% "SED63")) %>% 
+  ungroup() %>% 
+  with(table(matrix, year, station_name)) %>% 
+  print(zero.print = ".")
+```
+
+Here is a summary of matrix sumbissions for the metals by station 
+and matrix. Most of the data are in SED20. 
+
+```{r helcom-data-adjust-matrix_Germany_1}
+sediment_data$data <- sediment_data$data %>%
+  mutate(
+    .id = country %in% "Germany" & determinand %in% c("CD", "PB", "CU"), 
+    .recent = station_name %in% wk$station_name,
+    .target_matrix = matrix %in% "SED20"
+  ) %>% 
+  unite(".sample", sample, determinand, remove = FALSE)
+
+sediment_data$data %>% 
+  filter(.id & .recent) %>%
+  with(table(station_name, matrix)) %>% 
+  print(zero.print = ".")
+```
+
+It turns out that the SED2000 measurements are 'replicates' in the sense 
+that the same samples already have SED20 measurements. Since SED20 
+appears to be the target matrix, it makes sense to delete the SED2000 
+measurements. Here is what is left.
+
+```{r helcom-data-adjust-matrix_Germany_2}
+
+wk_sample <- sediment_data$data %>% 
+  filter(.id & .target_matrix) %>% 
+  pull(.sample) %>% 
+  unique()
+
+sediment_data$data <- filter(
+  sediment_data$data,
+  !(.sample %in% wk_sample & matrix %in% "SED2000")
+)
+
+sediment_data$data %>% 
+  filter(.id & .recent) %>%
+  with(table(station_name, matrix)) %>% 
+  print(zero.print = ".")
+```
+
+There appears to have been a change in strategy at some stations, 
+switching to SED63 in 2012. Here are the matrix records for those 
+stations where metals have been sampled in both SED20 and SED63.  
+
+```{r helcom-data-adjust-matrix_Germany_3}
+
+wk_id <- sediment_data$data %>% 
+  filter(.id & .recent) %>% 
+  group_by(station_name) %>% 
+  filter(all(c("SED63", "SED20") %in% matrix)) %>% 
+  ungroup() %>% 
+  pull(station_name) %>% 
+  unique()
+
+sediment_data$data %>% 
+  filter(.id & .recent & station_name %in% wk_id) %>%
+  with(table(matrix, year)) %>% 
+  print(zero.print = ".")
+```
+
+To ensure the time series have a consistent matrix, the SED20 records 
+from these stations from before 2012 are deleted. 
+
+```{r helcom-data-adjust-matrix_Germany_4}
+
+sediment_data$data <- sediment_data$data %>% 
+  filter(!(.id & station_name %in% wk_id & matrix %in% "SED20")) %>%
+  mutate(
+    .id = NULL, 
+    .recent = NULL,
+    .sample = NULL,
+    .target_matrix = NULL
+  )
+```
+
+### SBDE6
+
+For info, here are the PBDE measurements by country (again filtered on 
+stations that have been monitored in the last six years). When constructing 
+the sum of the six PBDEs, we will lose the following data due to incomplete 
+submissions: 2012 data from Lithuania (no BDE28) and 2003 and 2008 data from 
+Sweden. (Note that HOLAS 2 required all six PBDEs to be present, although 
+it turned out that no sample had a corresponding organic carbon measurement, 
+so all the data dropped out anyway.)     
+
+```{r helcom-data-adjust-sed_PBDE1}
+wk <- sediment_data$data %>%
+  filter(grepl("BD", determinand)) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>% 
+  ungroup()
+
+wk %>% 
+  with(table(determinand, year, country)) %>% 
+  print(zero.print = ".")
+
+```
+
+### Basis
+
+Here is the basis of submissions (apart from grain size fractions 
+and drywt%). 
+
+```{r helcom-data-adjust-sed_basis1}
+wk <- sediment_data$data %>% 
+  filter(
+    !grepl("GSMF", determinand), 
+    determinand != "DRYWT%", 
+    !is.na(station_name)
+  ) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>% 
+  with(table(country, basis)) %>% 
+  print(zero.print = ".")
+```
+
+Wet weight submissions are unusual. The Lithuanian submissions have been 
+confirmed as correct (Nijole, 19 August 2022). The Finnish submissions 
+should be dry weight (Emmi, 16 August 2022) and this is corrected below.
+
+```{r helcom-data-adjust-sed_basis2}
+wk %>% 
+  filter(basis == "W") %>% 
+  with(table(determinand, year, country)) %>% 
+  print(zero.print = ".")
+
+sediment_data$data <- mutate(
+  sediment_data$data, 
+  .id = basis == "W" & country == "Finland" & year == 2020
+)
+
+if (sum(sediment_data$data$.id) != 6) {
+  stop("something has changed - investigate")
+}
+
+sediment_data$data <- mutate(
+  sediment_data$data, 
+  basis = if_else(.id, "D", basis),
+  .id = NULL
+)
+```
+
+### Poland - multiple depths
+
+Poland have analysed auxiliary data (AL, DRYWT% and LOIGN) at multiple 
+depths. Just retain the surface measurements for compatibility with 
+the contaminant measurements.
+
+```{r helcom-data-adjust-sed_depth1}
+sediment_data$data %>% 
+  filter(
+    country == "Poland"
+  ) %>% 
+  with(table(determinand, depth)) %>% 
+  print(zero.print = ".")
+
+sediment_data$data <- filter(
+  sediment_data$data, 
+  !(country == "Poland" & depth >= 0.01)
+)
+```
+
+## Normalisers
+
+#### Aluminium
+
+Here is a plot of the aluminium concentrations (%) in 'relevant' time 
+series by year and country. Most values seem broadly compatible with 
+normalising to 5% aluminium. However, the values from Lithuania and 
+Estonia are suspiciously small and worth looking at in more detail.  
+
+```{r helcom-data-adjust-sed_AL1}
+wk <- sediment_data$data %>% 
+  filter(!is.na(station_name)) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>% 
+  ungroup() 
+
+wk <- wk %>% 
+  filter(determinand %in% c("AL", "CORG", "LOIGN")) %>% 
+  mutate(value = convert_units(value, unit, "%"))
+
+lattice::xyplot(
+  value ~ year | country, 
+  data = subset(wk, determinand == "AL"), 
+  col = "black", 
+  scales = list(alternating = FALSE)
+)
+```
+
+Here are the Lithuanian aluminium measurements on their own. They 
+have been confirmed correct (Nijole, 19 August 2022) but are mostly 
+lower than the values you would find in pure sand (even with a weak 
+digestion method). 
+
+```{r helcom-data-adjust-sed_AL2}
+wk1 <- filter(wk, determinand == "AL" & country == "Lithuania")
+
+lattice::xyplot(
+  value ~ year, 
+  data = wk1, 
+  col = "black", 
+)
+```
+
+Here are the Estonian aluminium measurements. They are low relative to 
+other countries, but not as pronounced as for Lithuania. The corresponding 
+organic carbon measurements are also very low, so they are probably 
+monitoring very sandy sediments without sieving. 
+
+```{r helcom-data-adjust-sed_AL3}
+wk1 <- filter(wk, determinand == "AL" & country == "Estonia")
+
+lattice::xyplot(
+  value ~ year, 
+  data = wk1, 
+  col = "black", 
+)
+```
+
+### CORG / LOIGN
+
+Here is a plot of the CORG (blue) and LOIGN (purple) concentrations 
+(%) in 'relevant' time series by year and country. LOIGN will be used 
+for normalising whenever CORG is not available. Assuming 
+CORG = 0.35 $\times$ LOIGN (Owen, 17 August 2022) then normalising 
+to 5% CORG is equivalent to normalising to `r round(5/0.35, 1)`% LOIGN.
+ 
+```{r helcom-data-adjust-sed_corg}
+lattice::xyplot(
+  value ~ year | country, 
+  data = subset(wk, determinand %in% c("CORG", "LOIGN")), 
+  groups = determinand,
+  scales = list(alternating = FALSE)
+)
+```
+
+Here is a plot of the CORG values on their own, without the distortion 
+caused by the LOIGN values. The values for Estonia are nearly all 
+less-thans (<0.1%) which supports the interpretation that their 
+sediments are nearly pure sand.
+
+```{r helcom-data-adjust-sed_corg2}
+wk <- sediment_data$data %>% 
+  filter(!is.na(station_name)) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>% 
+  ungroup() 
+
+wk <- wk %>% 
+  filter(determinand %in% "CORG") %>% 
+  mutate(value = convert_units(value, unit, "%"))
+
+
+lattice::xyplot(
+  value ~ year | country, 
+  data = wk, 
+  col = "black",
+  scales = list(alternating = FALSE)
+)
+```
+
+### Sweden - missing CORG
+
+Sweden is missing CORG from sediment samples in 2020 and 2021 in which 
+organic contaminants were measured. Apparently, the samples were 
+damaged / lost before CORG could be measured. For 2021, values are provided 
+by Johan (3 October 2022) based on new samples taken at the same locations. 
+Here are the 2021 samples in the extraction:
+
+```{r helcom-data-adjust-sed_SweCORG1}
+wk_data <- sediment_data$data %>% 
+  filter(
+    country == "Sweden", 
+    year == 2021
+  ) 
+
+with(wk_data, table(sample, determinand))
+```
+
+Next, let's find out whether we're using an "old" or "new" data format,
+and store that in a variable so we can use it.
+
+```{r helcom-data-adjust-sed_setup}
+
+# By default, set a format flag to "old"
+wk_data_format <- "old"
+
+# Overwrite this value if a format was specified in the call
+if (!is.null(sediment_data$call$data_format)) {
+  wk_data_format <- sediment_data$call$data_format
+}
+```
+
+And here are the values of CORG provided by Johan, which are merged with 
+the main data set.
+
+```{r helcom-data-adjust-sed_SweCORG2}
+wk_new <- 
+  read.csv(
+    file.path(working.directory, "data", "example_HELCOM", "SE_missing_CORG_sediment.csv"),
+    na.string = ""
+  ) %>%
+  select(tblSampleID, Value, MUNIT)
+
+wk_new
+
+wk_new <- wk_new %>%
+  select(- MUNIT) %>%
+  mutate(tblSampleID = as.character(tblSampleID))
+
+wk_data <- filter(wk_data, determinand == "ANT")
+
+wk_data <- left_join(wk_data, wk_new, by = c("sample" = "tblSampleID"))
+
+wk_data <- mutate(
+  wk_data,
+  indicator = "Supplemental",
+  pargroup = "O-MAJ",
+  determinand = "CORG",
+  value = Value,
+  unit = "%",
+  censoring = NA_character_,
+  method_analysis = NA_character_,
+  limit_detection = NA_real_,
+  limit_quantification = NA_real_, 
+  uncertainty = NA_real_, 
+  unit_uncertainty = NA_character_, 
+  alabo = "NSLS",
+  qalink = 0,
+  replicate = 1:nrow(wk_data) + max(sediment_data$data$replicate),
+  Value = NULL
+)
+
+if (wk_data_format == "new") wk_data$indicator <- NULL
+
+sediment_data$data <- bind_rows(sediment_data$data, wk_data)
+```
+
+In 2020, some samples have supporting CORG and others don't. Here are the 
+number of samples by station, and the corresponding number of CORG 
+measurements. (At some stations there are replicate measurements in the 
+same sample.) The 'missing' CORG values are taken to be the median CORG 
+measurement from the station.
+
+```{r helcom-data-adjust-sed_SweCORG3}
+wk_data <- filter(
+  sediment_data$data,
+  country == "Sweden",
+  year == 2020
+)
+
+wk_data %>% 
+  group_by(station_name) %>%
+  summarise(n_sample = length(unique(sample)), n_CORG = sum(determinand %in% "CORG"), .groups = "drop") %>%
+  as.data.frame()
+
+wk_CORG <- filter(wk_data, determinand %in% "CORG")
+
+# identify samples in wk_data with no CORG
+
+wk_data <- wk_data %>% 
+  filter(!(sample %in% wk_CORG$sample)) %>%
+  distinct(sample, .keep_all = TRUE)
+
+wk_CORG <- by(wk_CORG, wk_CORG$station_name, function(x) {
+  x <- arrange(x, value)
+  id <- floor((nrow(x) + 1) / 2)
+  x[id, ]
+})
+
+wk_CORG <- do.call(rbind, wk_CORG)
+
+
+wk_id <- c(
+  "pargroup", "determinand", "basis", "unit",
+  "value", "censoring", "limit_detection", "limit_quantification", "uncertainty",
+  "unit_uncertainty", "alabo", "method_analysis", "smtyp", "qalink"
+)
+
+if (wk_data_format == "old") {
+  wk_id <- append(wk_id, c("indicator", "ges_matrix"), after = 0)
+}
+
+wk_data[, wk_id] <- wk_CORG[wk_data$station_name, wk_id]
+
+wk_data$replicate <- 1:nrow(wk_data) + max(sediment_data$data$replicate)
+
+sediment_data$data <- bind_rows(sediment_data$data, wk_data)
+
+rm(wk_data, wk_CORG)
+```
+
+### Multiple method_extraction
+
+`r if (wk_data_format == "new") "This section is only actioned for the old data format - the issue has been resolved for the new format. "` There are a few instances of multiple method_extraction for sediment in the QA file. These are unusual. If they are single methods, new method_extraction codes should be set up. Unfortunately, the R code can't currently deal with them, so we have to modify them sensibly. Here are the methods and the determinands they are used for (relevant to the HELCOM assessment)
+
+```{r helcom-data-adjust-sed_metcx1, eval = wk_data_format == "old"}
+
+sediment_data$QA %>% 
+  filter(
+    data_type == "CS",
+    determinand %in% c(
+      ctsm_get_determinands("sediment"),
+      "BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154", "HBCDA", "HBCDB", "HBCDG"
+    ),
+    grepl("~", method_extraction, fixed = TRUE)
+  ) %>%
+  distinct(method_extraction, determinand, alabo) %>%
+  arrange(method_extraction, alabo) %>%
+  select(method_extraction, alabo, determinand) %>%
+  as.data.frame() %>%
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+Fortunately, most of these are for organics, for which method_extraction 
+isn't used. So replace e.g. `ACH~PLE` by `ACE` etc. 
+
+`HNO-CM~LMF-A-L` is more problematic, because it is for metals and is a 
+combination of a strong and a total digestion method, which doesn't make 
+sense. Fortunately, it doesn't matter because the only time series with 
+metals data analysed by this method finished in 2014 (see below). So we 
+can replace this code by `HNO-CM` without it having any impact on the assessment.
+
+
+```{r helcom-data-adjust-sed_metcx2, eval = wk_data_format == "old"}
+
+sediment_data$QA <- mutate(
+  sediment_data$QA,
+  method_extraction = recode(
+    method_extraction,
+    "ACH~PLE" = "ACH",
+    "ACE~PLE~TOL" = "ACE",
+    "DCM~METH" = "DCM",
+    "HAC~METH" = "HAC",
+    "HX~SPE-DCM~PLE" = "HX",
+    "SOX~TOL" = "SOX"
+  )
+)
+
+wk_id <- sediment_data$QA %>%
+  filter(
+    data_type == "CS", 
+    determinand %in% c("CD", "HG", "CU"),
+    method_extraction == "HNO-CM~LMF-A-L"
+  ) %>%
+  distinct(alabo, year) %>%
+  unite(.id) %>%
+  pull(.id)
+
+wk_id <- sediment_data$data %>%
+  unite(".id", alabo, year) %>%
+  filter(.id %in% wk_id) %>%
+  pull(station_code) %>%
+  unique()
+
+sediment_data$data %>%
+  filter(
+    determinand %in% c("CD", "PB", "CU"),
+    station_code == 11167
+  ) %>%
+  select(country, station_code, station_name, alabo, determinand, year) %>%
+  arrange(year)
+
+sediment_data$QA <- mutate(
+  sediment_data$QA,
+  method_extraction = recode(method_extraction, "HNO-CM~LMF-A-L" = "HNO-CM")
+)
+```
+
+### Missing uncertainties LOIGN
+
+Missing uncertainties for all determinands other than LOIGN are imputed 
+using the fixed and relative standard deviations derived for the 
+OSPAR 2022 assessment. Fixed and relative standard deviations for LOIGN 
+need to be estimated from the HELCOM data (because LOIGN was not used in 
+the OSPAR 2022 assessment). Here is a plot of the relative uncertainties 
+for LOIGN that have been reported, by country. (Some very large Danish 
+uncertainties have been omitted - these are probably due to unit errors.) 
+
+```{r helcom-data-adjust-sed_uncrt1}
+
+wk <- sediment_data$data %>% 
+  filter(determinand %in% "LOIGN") %>%
+  mutate(
+    value = convert_units(value, unit, "%"),
+    uncertainty = case_when(
+      unit_uncertainty == "U2" ~ 100 * (uncertainty / 2) / value,
+      unit_uncertainty == "SD" ~ 100 * uncertainty / value,
+      TRUE                      ~ uncertainty
+    ),
+    uncertainty = if_else(uncertainty >= 100, NA_real_, uncertainty)
+  ) %>%
+  drop_na(uncertainty)
+
+xyplot(
+  uncertainty ~ value | country,
+  data = wk,
+  col = "black",
+  scales = list(alternating = FALSE),
+  ylab = "relative uncertainty (%)",
+  xlab = "concentration (%)"
+)
+```
+
+The relative standard deviations is estimated using the same procedures 
+as used by OSPAR, and gives a value of 0.1 (10%). The constant standard 
+deviation is set to 0 (because there are hardly any less-than measurements 
+on which to base it). 
+
+```{r helcom-data-adjust-sed_uncrt2}
+out_relative <- wk %>%
+  filter(
+    is.na(.data$censoring),
+    !is.na(alabo)
+  ) %>% 
+  group_by(.data$determinand, .data$alabo, .data$country) %>%
+  summarise(sd_variable = median(.data$uncertainty) / 100, .groups = "drop")
+
+# now the median value across alabos
+out_relative <- summarise(out_relative, sd_variable = median(sd_variable))
+```
+
+## Biota
+
+### Data summary
+
+Here is a summary of the submissions for each country, first by determinand 
+and then by year. Some of the less useful supporting data have been omitted 
+for simplicity (as have the four UK records from 1999).
+
+```{r helcom-data-adjust-bio_summary1}
+wk <- filter(
+  biota_data$data,
+  !grepl("TIN", determinand),
+  determinand != "IMPF%",
+  country != "United Kingdom",
+)
+
+wk %>%
+  with(table(country, determinand)) %>%
+  print(zero.print = ".")
+
+wk %>%
+  with(table(country, year)) %>%
+  print(zero.print = ".")
+```
+
+### Duplicate records
+
+#### Finland - PFOS, FATWT%
+
+Some PFOS and FATWT% records from Finland in 2014 and 2015 appear to be 
+duplicated (see below). Only the first are retained. (There is one set 
+of FATWT% records which differ, and these are both kept for now - I wonder 
+whether one of these should actually be MU.)
+
+```{r helcom-data-adjust-bio_dup1}
+wk <- biota_data$data %>%
+  filter(
+    country == "Finland",
+    year >= 2014
+  ) %>%
+  group_by(sub.sample, determinand, matrix) %>%
+  filter(n() >= 2) %>%
+  ungroup()
+
+wk %>%
+  select(country, year, station_name, sub.sample, determinand, matrix, replicate, value) %>%
+  arrange(sub.sample, determinand, replicate) %>%
+  as.data.frame() %>%
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+```{r helcom-data-adjust-bio_dup1a}
+wk_rep <- wk$replicate
+
+wk_keep <- wk %>% 
+  select(sub.sample, matrix, determinand, replicate, value) %>%
+  arrange(replicate) %>%
+  distinct(sub.sample, matrix, determinand, value, .keep_all = TRUE) %>%
+  pull(replicate)
+
+wk_drop <- setdiff(wk_rep, wk_keep)
+
+biota_data$data <- filter(
+  biota_data$data,
+  !replicate %in% wk_drop
+)
+```
+
+#### Sweden - dioxins
+
+There are some dioxin measurements from Sweden in 2009 and 2011 which have 
+been submitted on both a wet and a lipid basis. These are summarised below 
+for relevant stations (where there are some data in the last six monitoring 
+years). The 'duplicates' should be interchangeable, and I have retained the 
+measurements on a lipid basis.  
+
+```{r helcom-data-adjust-biota_dup2}
+get_relevant_biota <- function() {
+  biota_data$data %>% 
+    filter(!is.na(station_name)) %>%
+    group_by(station_name) %>%
+    filter(any(year >= 2016)) %>%
+    ungroup()
+}
+
+relevant_biota <- get_relevant_biota()
+
+wk <- relevant_biota %>% 
+  filter(pargroup %in% c("OC-DX", "O-BR", "OC-CB")) %>%
+  group_by(sub.sample, matrix, determinand) %>%
+  filter(all(c("L", "W") %in% basis)) %>%
+  ungroup() %>%
+  arrange(country, station_name, year, determinand, sub.sample, basis)
+
+wk %>%
+  mutate(across(where(is.character), factor)) %>%
+  summary()
+
+wk_id <- wk %>% 
+  filter(basis == "W") %>%
+  pull(replicate)
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !replicate %in% wk_id
+)
+```
+
+#### Germany - FATWT%
+
+Some FATWT% records from Germany appear to be duplicated (see below). 
+One set of uncertainty measurements are unusually small, so accept the 
+other (where either uncertainty is reported as a percentage, or where 
+the U2 is ten percent of the value).
+
+```{r helcom-data-adjust-bio_dup3}
+wk <- biota_data$data %>%
+  filter(
+    country == "Germany", 
+    determinand %in% "FATWT%"
+  ) %>%
+  group_by(sub.sample, determinand, matrix) %>%
+  filter(n() >= 2) %>%
+  ungroup()
+  
+wk %>% 
+  select(year, station_name, sub.sample, determinand, matrix, 
+         replicate, value, uncertainty, unit_uncertainty) %>% 
+  arrange(year, sub.sample, determinand, replicate) %>%
+  as.data.frame() %>% 
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+```{r helcom-data-adjust-bio_dup3a}
+wk_rep <- wk$replicate
+
+wk_keep <- wk %>% 
+  filter(
+    unit_uncertainty == "%" |
+      100 * uncertainty / value > 5  
+  ) %>% 
+  pull(replicate)
+
+stopifnot(2 * length(wk_keep) == length(wk_rep))
+
+wk_drop <- setdiff(wk_rep, wk_keep)
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !replicate %in% wk_drop
+)
+```
+
+### PCBs and dioxins
+
+Here's a summary of the determinands submitted for PCBs, 
+dioxins and furans.
+
+```{r helcom-data-adjust-biota_PCB1}
+wk <- biota_data$data %>%
+  filter(
+    !is.na(station_name),
+    pargroup %in% c("OC-CB", "OC-DX", "OC-DX~OC-CB")
+  )
+
+table(wk$determinand)
+```
+
+There are some summed values which need to be accounted for. Here they are 
+by year.
+
+```{r helcom-data-adjust-biota_PCB2}
+wk_id <- c("PCB", "SCB", "SCB7", "SUM_PCB", "SUM_PCDD_PCDF", "SUM_PCDD_PCDF_PCB")
+
+wk %>%
+  filter(determinand %in% wk_id) %>%
+  with(table(determinand, year)) %>%
+  print(zero.print = ".")
+```
+
+* PCB is ambiguous, deprecated and old
+* SCB is ambiguous, deprecated and only occurs in 2006
+* SCB7 is not relevant because it combines non-planar CBs 
+  with the dioxin-like CB118 (and is also pretty old)
+* SUM_PCB, SUM_PCDD_PCDF and SUM_PCDD_PCDF_PCB are, I think, 
+  Lithuanian food safety data which we made special arrangements 
+  for last time; however, there are no data in the last six 
+  monitoring years for these combinations, nor for individual 
+  congeners at the same stations; these data therefore fall out 
+  of the assessment
+
+The assessment code doesn't recognise some of these ad-hoc determinands 
+without modification, so it is a lot easier to get rid of them here.
+
+```{r helcom-data-adjust-biota_PCB3}
+wk_check <- wk %>%
+  group_by(station_name) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk_id2 <- c("SUM_PCB", "SUM_PCDD_PCDF", "SUM_PCDD_PCDF_PCB")
+
+if (any(wk_id2 %in% wk_check$determinand)) {
+  stop("have current summed Lithuanian data")
+}
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !determinand %in% wk_id
+)
+```
+
+### Replicate measurements
+
+#### Sweden - PCBs
+
+Some Swedish PCBs (predominantly CB118) have been measured twice in the 
+same individual, I presume once for the standard set of PCB reporting 
+and once for dioxin reporting. Here are the number of measurements 
+affected, with the corresponding analytical laboratory (restricted to 
+relevant stations where there are data in the last six monitoring years).
+
+```{r helcom-data-adjust-biota_rep1}
+relevant_biota <- get_relevant_biota()
+
+wk <- relevant_biota %>%
+  filter(
+    pargroup %in% "OC-CB",
+    country == "Sweden"
+  ) %>%
+  group_by(sub.sample, matrix, determinand) %>%
+  filter(n() >= 2) %>%
+  ungroup() %>%
+  as.data.frame()
+
+wk %>%
+  with(table(determinand, alabo))
+```
+
+Here are the analtyical laboratories that also measured dioxins in 
+these sub-samples.
+
+```{r helcom-data-adjust-biota_rep2}
+wk_id <- wk$sub.sample
+
+relevant_biota %>%
+  filter(
+    sub.sample %in% wk_id,
+    pargroup == "OC-DX"
+  ) %>%
+  with(table(determinand, alabo))
+```
+
+Sensible decision seems to be to retain the CB118 measurements from analytical 
+laboratory UMSC, since they are part of the same analysis suite.  This leaves 
+two replicates for six PCBs in a single sub.sample. These appear to be genuine 
+replicates. Will leave them both in, and the code will select one of them for 
+the analysis.
+
+```{r helcom-data-adjust-biota_rep3}
+wk_id <- wk %>%
+  filter(!alabo %in% "UMSC") %>%
+  pull(replicate)
+
+biota_data$data <- filter(
+  biota_data$data,
+  !replicate %in% wk_id
+)
+
+get_relevant_biota() %>%
+  filter(
+    pargroup %in% "OC-CB",
+    country == "Sweden"
+  ) %>% 
+  group_by(sub.sample, matrix, determinand) %>%
+  filter(n() >= 2) %>%
+  ungroup() %>%
+  as.data.frame() %>%
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+### Poland PCB 2014 data
+
+The following plot shows concentrations of CB153 at each station over time. 
+All measurements are in fish muscle and units are ug/kg ww. The species varies 
+between stations, but is consistent within stations. There are some strange 
+things going on here, but the results from 2014 (red) are particularly strange 
+and are deleted (as are all the other PCB data for that year for consistency.)
+
+```{r helcom-data-adjust-bio_CB153_1}
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  .id = country == "Poland" & pargroup == "OC-CB"
+)
+
+wk_data <- biota_data$data %>%
+  filter(.id & determinand == "CB153") %>%
+  mutate(concentration = convert_units(value, unit, "ug/kg"))
+
+stopifnot(
+  wk_data$matrix == "MU",
+  wk_data$basis == "W"
+)
+
+xyplot(
+  concentration ~ year | station_name,
+  data = wk_data,
+  scales = list(alternating = FALSE, y = list(log = TRUE, equispaced.log = FALSE)),
+  panel = function(x, y, subscripts) {
+    col = if_else(wk_data$year[subscripts] == 2014, "red", "blue")
+    lpoints(x, y, pch = 16, col = col)
+  }
+)
+```
+
+Here is what the data look like without the 2014 values. Many less-than values are 
+implausibly low relative to the bulk of the data (see LWLA and LKOL in 2013, and 
+many stations between 2005 and 2008), and the data could do with further scrutiny. 
+The other PCBs might exhibit similar features, but this hasn't been investigated.
+
+```{r helcom-data-adjust-bio_CB153_2}
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !(.id & year == 2014)
+)
+
+wk_data <- biota_data$data %>%
+  filter(.id & determinand == "CB153") %>%
+  mutate(concentration = convert_units(value, unit, "ug/kg"))
+
+biota_data$data$'.id' <- NULL
+
+xyplot(
+  concentration ~ year | station_name,
+  data = wk_data,
+  scales = list(alternating = FALSE, y = list(log = TRUE, equispaced.log = FALSE)),
+  panel = function(x, y, subscripts) {
+    col = if_else(wk_data$year[subscripts] == 2014, "red", "blue")
+    lpoints(x, y, pch = 16, col = col)
+  }
+)
+```
+
+### Strange censoring values
+
+The following data from relevant stations (with data in the last six years) 
+have censoring = ">", which is unusual. The German data appear to be well 
+above the limits of detection, so the ">" has been removed. The Swedish data 
+appear to be values below the limit of detection and have been replaced with 
+censoring = "D".
+
+```{r helcom-data-adjust-bio_censoring1}
+get_relevant_biota() %>%
+  filter(grepl(">", censoring)) %>%
+  select(country, year, determinand, value, censoring, limit_detection, limit_quantification) %>%
+  arrange(country, year, determinand) %>%
+  as.data.frame() %>%
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+```{r helcom-data-adjust-bio_censoring1a}
+biota_data$data <- mutate(
+  biota_data$data, 
+  .id = grepl(">", censoring),
+  censoring = if_else(.id & country == "Germany", NA_character_, censoring),
+  censoring = if_else(.id & country == "Sweden", "D", censoring),
+  .id = NULL
+)
+```
+
+### Matrix MU&EP 
+
+Here's a summary of matrices and species for 'relevant' stations 
+(with data in the last six monitoring years).
+
+```{r helcom-data-adjust-bio_matrix1}
+relevant_biota <- get_relevant_biota()
+
+relevant_biota %>%
+  with(table(species, matrix)) %>%
+  print(zero.print = ".")
+```
+
+There are no contaminant data in BI, POP, SH or WO, so we can 
+ignore these for the current discussion.
+
+```{r helcom-data-adjust-bio_matrix1a}
+relevant_biota %>%
+  filter(matrix %in% c("BI", "POP", "SH", "WO")) %>%
+  with(table(determinand, matrix)) %>%
+  print(zero.print = ".")
+```
+
+Thus, all contaminant data are in MU and LI (fish) or SB (shellfish) apart 
+from some measurements in MU&EP.  These are all in Perch from Finland where 
+there also MU measurements. These need to be teased apart. Here's a summary 
+of the number of records in perch from Finland by matrix and year.    
+
+```{r helcom-data-adjust-bio_matrix2}
+wk <- relevant_biota %>%
+  filter(
+    country == "Finland",
+    species == "Perca fluviatilis"
+  )
+
+wk %>%
+  with(table(matrix, year)) %>%
+  print(zero.print = ".")
+```
+
+Muscle and skin measurements all start in 2014.  Here are the matrices for 
+CD, HG, PB, PFOS and everything else by year.
+
+```{r helcom-data-adjust-bio_matrix3}
+wk %>%
+  filter(determinand != "FATWT%") %>%
+  mutate(
+    determinand = if_else(
+      determinand %in% c("CD", "PB", "HG", "PFOS"),
+      determinand,
+      "other"
+    )
+  ) %>%
+  with(table(matrix, year, determinand)) %>%
+  print(zero.print = ".")
+```
+
+Routes forward:  
+
+* Cadmium and lead: look at liver and drop the single MU&EP measurement 
+  (the extraction table only mentions LI and MU for these metals)
+* Mercury: all in muscle, so all good
+* PFOS: there is no lipid adjustment and it doesn't make sense to combine 
+  MU and MU&EP measurements in the same time series as there appears to 
+  be a systematic difference in concentration between matrices (see below); 
+  select MU&EP as these are the most recent data (Emmi, 16 August); note 
+  that the liver and muscle data drop out automatically as there are no 
+  data in the last six monitoring years
+* Others (organics): combine MU&EP and MU measurements in the same time 
+  series following lipid normalisation; the time series will be labelled as 
+  matrix MU&EP in the summary file since these are the most recent measurements
+
+```{r helcom-data-adjust-bio_matrix4}
+wk %>%
+  filter(determinand == "PFOS") %>%
+  filter(matrix != "LI") %>%
+  group_by(station_name, year) %>%
+  filter(any(matrix %in% "MU")) %>%
+  ungroup() %>%
+  select(station_name, year, matrix, value) %>%
+  arrange(station_name, year, matrix) %>%
+  as.data.frame()
+
+biota_data$data <- biota_data$data %>%
+  mutate(
+    .id = country == "Finland" &
+      species == "Perca fluviatilis"
+  ) %>%
+  filter(
+    !(.id &
+      matrix == "MU&EP" &
+      determinand %in% c("CD", "PB")
+    ),
+    !(.id &
+      matrix == "MU" &
+      determinand %in% c("PFOS")
+    )
+  ) %>%
+  mutate(.id = NULL)
+```
+
+### Germany station issues
+
+Some data are submitted for station OMMVKHO (number of samples by 
+year below), but this station is not in the station dictionary. 
+However, there is a station called KHO with compatible co-ordinates, 
+so the station has been relabelled as KHO.
+
+```{r helcom-data-adjust-bio_DK_station}
+biota_data$data <- mutate(
+  biota_data$data,
+  .id = country == "Germany" & submitted.station == "OMMVKHO"
+)
+
+biota_data$data %>%
+  filter(.id) %>%
+  distinct(sample, year, .keep_all = TRUE) %>%
+  with(table(submitted.station, year))
+
+wk_code <- get_station_code("KHO", "Germany", biota_data$stations)
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  station_name = if_else(.id, "KHO", station_name),
+  station_code = if_else(.id, wk_code, station_code),
+  .id = NULL
+)
+```
+
+### PYR1OH
+
+A quick summary of the data.
+
+```{r helcom-data-adjust-bio_eff1}
+relevant_biota <- get_relevant_biota()
+
+relevant_biota %>% 
+  filter(determinand %in% "PYR1OH") %>%
+  with(table(species, year, country)) %>%
+  print(zero.print = ".")
+```
+
+PAH metabolite units can be the concentration of the metabolite 
+itself (ng/g or similar), or the concentration relative to that of bile 
+pigments (e.g. ng g-1 a380-1). For the assessment only consider the 
+metabolite concentrations. Delete concentration data relative to bile 
+pigments.  
+
+```{r helcom-data-adjust-bio_eff2}
+relevant_biota %>%
+  filter(determinand %in% "PYR1OH") %>%
+  with(table(species, unit)) %>%
+  print(zero.print = ".")
+
+biota_data$data <- filter(
+  biota_data$data,
+  !unit %in% c("ng g-1 a380-1 ng", "ng g-1 a660-1")
+)
+```
+
+Here is a summary of the data by method of analysis (which is important 
+for application of the EAC). Drop GRS data, as these were part of a 
+one-off project (Ulrike, 2 September). 
+
+```{r helcom-data-adjust-bio_eff3}
+get_relevant_biota() %>%
+  filter(determinand %in% "PYR1OH") %>%
+  with(table(method_analysis, year)) %>%
+  print(zero.print = ".")
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !(determinand %in% "PYR1OH" & method_analysis %in% "GRS")
+)
+```
+
+And here is what is left by species and country. Conventionally, 
+separate time series are modelled for each method of analysis. 
+However, for this assessment, the remaining methods of analysis will 
+be regarded as comparable (Ulrike, 15 August). They will be labelled 
+as being HPLC-FD in the summary file, since these correspond to the 
+bulk of the measurements for both Germany and Poland. (This is coded 
+in the main assessment file.)
+
+```{r helcom-data-adjust-bio_eff4}
+get_relevant_biota() %>%
+  filter(determinand %in% "PYR1OH") %>%
+  with(table(method_analysis, year, country)) %>%
+  print(zero.print = ".")
+```
+
+### SBDE6
+
+For info, here are the PBDE measurements by country (again filtered on 
+stations that have been monitored in the last six years). For simplicity, 
+I've restricted it to the last twelve years. Some historic data from Denmark 
+and Sweden will be lost when computing the sum of the six PBDEs. Note that 
+HOLAS2 assessed SBDE4 = BDE47 + BDE99 + BD100 + BD153, because many BDE28 
+and BD154 measurements, predominantly from Denmark and Sweden, were missing; 
+this is far less of an issue now.  
+
+
+```{r helcom-data-adjust-bio_PBDE1}
+wk <- biota_data$data %>%
+  filter(grepl("BD", determinand)) %>%
+  group_by(station_name) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>% filter(year >= 2010) %>%
+  with(table(determinand, year, country)) %>%
+  print(zero.print = ".")
+```
+
+### TEQ DFP
+
+Here are the PCB and dioxin measurements that contribute to the TEQ DFP 
+by country (since 2010). Estonia, Finland, Germany and Lithuania are 
+largely missing CDFO, and Germany is missing three measurements of CDFP2.
+
+```{r helcom-data-adjust-bio_TEQ1}
+wk <- biota_data$data %>%
+  filter(
+    determinand %in% names(info_TEQ)
+  ) %>%
+  group_by(sub.sample) %>%
+  filter(any(pargroup %in% "OC-DX")) %>%
+  ungroup() %>%
+  group_by(station_name) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>%
+  filter(year >= 2010) %>%
+  with(table(determinand, country)) %>%
+  print(zero.print = ".")
+```
+
+However, it turns out that these countries have submitted similar (identical?) 
+compounds under related codes. OCDF will be recoded as CDFO and CDFDN will be 
+recoded as CDFP2.
+
+```{r helcom-data-adjust-bio_TEQ2}
+wk <- biota_data$data %>%
+  filter(
+    pargroup %in% "OC-DX",
+    !determinand %in% names(info_TEQ),
+    country %in% c("Estonia", "Finland", "Germany", "Lithuania")
+  ) %>%
+  group_by(station_name) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>% filter(year >= 2010) %>%
+  with(table(determinand, country)) %>%
+  print(zero.print = ".")
+
+biota_data$data <- mutate(
+  biota_data$data,
+  determinand = if_else(
+    country %in% c("Estonia", "Finland", "Germany", "Lithuania") &
+      determinand %in% "OCDF",
+    "CDFO",
+    determinand
+  ),
+  determinand = if_else(
+    country %in% "Germany" & determinand %in% "CDFDN",
+    "CDFP2",
+    determinand
+  )
+)
+```
+
+### Imposex
+
+#### Data summary
+
+Here is a summary of the imposex measurements by species.
+
+```{r helcom-data-adjust-bio_VDS1}
+wk <- biota_data$data %>%
+  filter(
+    !is.na(station_name),
+    determinand %in% c("VDS", "VDSI", "INTS", "INTSI", "IMPS", "IMPSI", "PCI")
+  )
+
+wk %>%
+  with(table(species, determinand)) %>%
+  print(zero.print = ".")
+```
+
+Nassarius reticulatus is equivalent to Hinia reticulata so combine (called 
+Tritia nitida / reticulata in the assessment output). Having done so, here 
+are the number of measurements for relevant stations (with data in the last 
+six years).
+
+```{r helcom-data-adjust-bio_VDS2}
+wk <- wk %>%
+  mutate(
+    species = recode(species, "Nassarius reticulatus" = "Hinia reticulata")
+  ) %>%
+  group_by(station_name, species) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>%
+  with(table(species, determinand)) %>%
+  print(zero.print = ".")
+```
+
+Will only assess VDS and VDSI for Buccinum, Hinia, Neptunea and Peringia and 
+INTS for Littorina.  Here is a simple summary of the individual measurements.
+
+```{r helcom-data-adjust-bio_VDS3} 
+wk <- wk %>%
+  filter(
+    (determinand %in% c("VDS", "VDSI") & !species %in% "Littorina littorea") |
+      species %in% "Littorina littorea"
+  )
+
+wk %>%
+  with(table(species, determinand)) %>%
+  print(zero.print = ".")
+
+wk %>%
+  filter(determinand %in% c("VDS", "INTS")) %>%
+  with(table(species, value, determinand)) %>%
+  print(zero.print = ".")
+```
+
+#### Sweden - missing zeros
+
+Sweden have a legacy problem in that, for some years, individual 
+measurements were not submitted when VDS = 0. This biases the assessment 
+and creates problems in the statistical models used.  The Swedish individual 
+measurements (for relevant stations) are shown below by year and species. 
+There are no zero values in 2010 which is incompatible with all other years. 
+(The same can be found for 2007 2008 and 2010 Swedish Nassarius data, although 
+Nassarius have not been monitored since 2015, so do not show here.) 
+Consequently, will delete the 2010 data. 
+
+```{r helcom-data-adjust-bio_VDS4} 
+wk %>%
+  filter(
+    determinand %in% "VDS",
+    country == "Sweden"
+  ) %>%
+  with(table(value, year, species)) %>%
+  print(zero.print = ".")
+
+biota_data$data <- filter(
+  biota_data$data,
+  !(country %in% "Sweden" &
+      determinand %in% c("VDS", "VDSI") &
+      year == 2010
+  )
+)
+```
+
+The four measurements with VDS = 6 in 2019 and 2020 are very strange. 
+They are well separated from the bulk of the data, which are all $\le$ 2 
+in those years. Further, VDSI submissions for the same stations and 
+years suggest that the four measurements with VDS = 6 have not been 
+included in the index calculations. These four large measurements 
+are excluded. 
+
+```{r helcom-data-adjust-bio_VDS5} 
+biota_data$data <- filter(
+  biota_data$data,
+  !(country %in% "Sweden" &
+      determinand %in% "VDS" &
+      year %in% c(2019, 2020) &
+      value == 6
+  )
+)
+```
+
+#### Denmark - replicates
+
+Denmark has reported two results for VDSI in the same sub-sample at 
+DMU D2 in 2015 (see below).  Have deleted the larger value, which is 
+suspiciously high for Buccinum. It looks more like a sample of 
+Neptunea anitqua (see results from 2009) although there is no record of 
+Neptunea being sampled at this station in any year other than 2009.
+
+```{r helcom-data-adjust-bio_VDS6} 
+biota_data$data %>%
+  filter(
+    determinand %in% "VDSI",
+    station_name == "DMU D2"
+  ) %>%
+  select(year, date, station_name, species, sub.sample, replicate, n_individual, value) %>%
+  arrange(year)
+
+biota_data$data <- filter(
+  biota_data$data,
+  !(station_name == "DMU D2" &
+      year == 2015 &
+      determinand %in% "VDSI" &
+      value > 2
+  )
+)
+```
+

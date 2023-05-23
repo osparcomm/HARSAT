@@ -1,0 +1,108 @@
+---
+title: "HELCOM"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{HELCOM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This is a brief example of using the `harsat` with HELCOM-style
+data.
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+First, load the `harsat` the library
+
+```{r}
+library(harsat)
+```
+
+And load the R package `here`, because we use the working directory to find
+the data files. If you use your own data files, you will need to point to
+a directory containing a copy.
+
+```{r}
+library(here)
+working.directory <- here()
+```
+
+Load the biota data, using HELCOM-style.
+
+```{r helcom-read-biota}
+biota_data <- ctsm_read_data(
+  compartment = "biota",
+  purpose = "HELCOM",
+  contaminants = "biota_data.csv", 
+  stations = "station_dictionary.csv", 
+  QA = "quality_assurance.csv",
+  data_path = file.path(working.directory, "data", "example_HELCOM"),
+  info_path = file.path(working.directory, "information"),
+  extraction = "2022/10/06",
+  max_year = 2021L
+)
+```
+
+Next, load the sediment data, again using HELCOM-style.
+
+```{r helcom-read-sediment}
+sediment_data <- ctsm_read_data(
+  compartment = "sediment",
+  purpose = "HELCOM",
+  contaminants = file.path("..", "example_HELCOM_new_format", "sediment_data.csv"),
+  stations = "station_dictionary.csv",
+  data_path = file.path(working.directory, "data", "example_HELCOM"),
+  info_path = file.path(working.directory, "information"),
+  extraction = "2022/10/06",
+  max_year = 2021L,
+  data_format = "ICES_new"
+)
+```
+
+And finally, read the water data.
+
+```{r helcom-read-water}
+water_data <- ctsm_read_data(
+  compartment = "water",
+  purpose = "HELCOM",
+  contaminants = file.path("..", "example_HELCOM_new_format", "water_data.csv"),
+  stations = "station_dictionary.csv",
+  data_path = file.path(working.directory, "data", "example_HELCOM"),
+  info_path = file.path(working.directory, "information"),
+  extraction = "2022/10/06",
+  max_year = 2021L, 
+  data_format = "ICES_new"
+)
+```
+
+Now we can perform any adjustments we need to make. In this
+case, we're correcting known errors in the data. 
+
+```{r helcom-set-info-teq}
+info_TEQ <- c(
+  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003,
+  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003,
+  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1,
+  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1,
+  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+)
+```
+
+```{r child="../man/fragments/example_HELCOM_data_adjustments.Rmd"}
+```
+
+## Prepare data for next stage
+
+This gets the correct variable and streamlines some of the data files.
+
+```{r helcom-set-variables}
+biota_data <- ctsm_tidy_data(biota_data)
+sediment_data <- ctsm_tidy_data(sediment_data)
+water_data <- ctsm_tidy_data(water_data)
+```

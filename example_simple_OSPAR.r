@@ -6,7 +6,7 @@
 
 # Setup ----
 
-# Sources functions (folder functions) and reference tables (folder information)
+# Sources functions (folder R) and reference tables (folder information)
 # Only those functions needed for this example are sourced here
 # The functions and reference tables folders are assumed to be in the current
 # R project folder
@@ -14,7 +14,7 @@
 
 rm(list = objects())
 
-function_path <- file.path("functions")
+function_path <- file.path("R")
 
 source(file.path(function_path, "import_functions.R"))
 source(file.path(function_path, "import_check_functions.R"))
