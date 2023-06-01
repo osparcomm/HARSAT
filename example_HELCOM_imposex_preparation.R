@@ -4,23 +4,29 @@ library(dplyr)
 library(tibble)
 library(tidyr)
 
-wk_timeSeries <- biota_timeSeries
+wk_data <- mutate(
+  biota_timeSeries$data,
+  .imposex = ctsm_get_info(
+    biota_timeSeries$info$determinand, 
+    .data$determinand, 
+    "group", 
+    "biota", 
+    sep = "_"
+  )
+)
+  
+wk_data <- filter(wk_data, .imposex %in% "Imposex")
 
-wk_data <- wk_timeSeries$data %>% 
-  filter(
-    ctsm_get_info("determinand", determinand, "group", "biota", sep = "_") %in% 
-      "Imposex"
-  ) %>% 
-  select(c("seriesID", "station_code", "year", "species", "determinand", 
-           "concentration", "n_individual", "%FEMALEPOP"))
+wk_data <- wk_data[c(
+  "seriesID", "station_code", "year", "species", "determinand", 
+  "concentration", "n_individual", "%FEMALEPOP"
+)]
 
 wk_data <- left_join(
   wk_data, 
-  wk_timeSeries$stations[c("station_code", "country", "HELCOM_subbasin")],
+  biota_timeSeries$stations[c("station_code", "country", "HELCOM_subbasin")],
   by = "station_code"
 )
-
-rm(wk_timeSeries)
 
 
 # see where we have individual data 
@@ -57,7 +63,7 @@ wk_data <- wk_data %>%
   select(-determinand, -"%FEMALEPOP") %>%
   droplevels()
 
-summary(wk_data)
+wk_data %>% mutate(across(where(is.character), factor)) %>% summary()
 
 
 # construct new variable VDS so we can combine larger categories with few observations without 
@@ -104,9 +110,9 @@ wk.cluster <- makeCluster(wk.cores - 1)
 
 clusterExport(wk.cluster, c("wk_split", ctsm.VDS.varlist))
 
-clusterEvalQ(wk.cluster, {
-  library("MASS")
-})  
+# clusterEvalQ(wk.cluster, {
+#   library("MASS")
+# })  
 
 biota.VDS.estimates <- pblapply(
   wk_split, 
@@ -114,6 +120,9 @@ biota.VDS.estimates <- pblapply(
   calc.vcov = TRUE, 
   cl = wk.cluster
 )
+
+stopCluster(wk.cluster)
+
 
 # check convergence
 
@@ -127,24 +136,22 @@ all(sapply(biota.VDS.estimates, "[[", "convergence") == 0)
 
 # get confidence limits on estimated VDSI for each indexID
 
-clusterExport(wk.cluster, "biota.VDS.estimates")
-
 set.seed(230504)
 
-biota.VDS.cl <- parLapply(wk.cluster, biota.VDS.estimates, ctsm.VDS.cl)
+biota.VDS.cl <- lapply(biota.VDS.estimates, ctsm.VDS.cl)
 biota.VDS.cl <- do.call(rbind, biota.VDS.cl)
 
 row.names(biota.VDS.cl) <- do.call(
   paste, 
   biota.VDS.cl[c("station_code", "year", "species")]
 )
-summary(biota.VDS.cl)
+
+biota.VDS.cl %>% mutate(across(where(is.character), factor)) %>% summary()
 
 # saveRDS(
 #   biota.VDS.cl,
 #   file.path("RData", "VDS confidence limits.rds")
 # )
 
-stopCluster(wk.cluster)
 
 rm(wk_data, wk_split, wk.cluster, wk.cores)

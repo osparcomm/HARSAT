@@ -1211,10 +1211,11 @@ ctsm_tidy_contaminants <- function(data, info) {
       
   # drop data with no stations  
   
-  cat("   Dropping data with no stations\n")  
-  
   ok <- !is.na(data$station_name)
-  data <- droplevels(data[ok, ])
+  if (!all(ok)) {
+    cat("   Dropping data with no stations\n")  
+    data <- data[ok, ]
+  }
   
   
   # ICES biota data: sample is the species identifier (within a haul say) and 
@@ -1780,8 +1781,7 @@ ctsm_create_timeSeries <- function(
         "   Dropping bivalve and gastropod contaminant data collected during the\n", 
         "   spawning season, which is taken to be the following months:\n   ",
         paste(info$bivalve_spawning_season, collapse = ", "), 
-        ".\n", 
-        sep = ""
+        "\n"
       )
       data <- filter(data, !.not_ok)
     }
