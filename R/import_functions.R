@@ -1780,7 +1780,8 @@ ctsm_create_timeSeries <- function(
         "   Dropping bivalve and gastropod contaminant data collected during the\n", 
         "   spawning season, which is taken to be the following months:\n   ",
         paste(info$bivalve_spawning_season, collapse = ", "), 
-        ".\n"
+        ".\n", 
+        sep = ""
       )
       data <- filter(data, !.not_ok)
     }

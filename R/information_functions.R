@@ -256,8 +256,8 @@ ctsm_read_species <- function(file, path = "information") {
   # check species_group values are recognised
   
   group_id <- c(
-    "Bird", "Bivalve", "Crustacean", "Fish", "Gastropod", "Macrophyte", 
-    "Mammal", "Other"
+    "Bird", "Bivalve", "Crustacean", "Echinoderm", "Fish", "Gastropod", 
+    "Macrophyte", "Mammal", "Other"
   )
   
   ok <- data$species_group %in% group_id
@@ -265,6 +265,7 @@ ctsm_read_species <- function(file, path = "information") {
   if (!all(ok)) {
     id <- data$species_group[!ok]
     id <- sort(id)
+    id <- unique(id)
     stop(
       "\nUnrecongised 'species_group' values in ", file, ".\n",
       "Please update the file to continue or contact the HARSAT development ",
