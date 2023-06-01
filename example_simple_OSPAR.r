@@ -95,7 +95,7 @@ biota_timeSeries <- ctsm_create_timeSeries(
 
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
-  AC = c("BAC", "EAC", "EQS.OSPAR", "HQS"), 
+  AC = c("BAC", "EAC", "EQS", "HQS"), 
   get_assessment_criteria = get.AC.OSPAR
 )
 
@@ -118,13 +118,13 @@ classColour <- list(
   below = c(
     "BAC" = "blue", 
     "EAC" = "green", 
-    "EQS.OSPAR" = "green",
+    "EQS" = "green",
     "HQS" = "green"
   ),
   above = c(
     "BAC" = "orange", 
     "EAC" = "red", 
-    "EQS.OSPAR" = "red",
+    "EQS" = "red",
     "HQS" = "red"
   ), 
   none = "black"
@@ -134,7 +134,7 @@ ctsm_summary_table(
   biota_assessment, 
   determinandGroups = webGroups,
   classColour = classColour,
-  collapse_AC = list(EAC = c("EAC", "EQS.OSPAR")),
+  collapse_AC = list(EAC = c("EAC", "EQS")),
   output_dir = file.path("output", "example_simple_OSPAR"), 
 )
 
