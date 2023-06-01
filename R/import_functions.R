@@ -1476,7 +1476,7 @@ ctsm_create_timeSeries <- function(
   
 
   # drop species that aren't going to be assessed
-  # do this after we drop station species combinations becuase legacy species
+  # do this after we drop station species combinations because legacy species
   # then don't need to be in the reference tables
   
   if (info$compartment == "biota") {
@@ -1524,7 +1524,7 @@ ctsm_create_timeSeries <- function(
   )
 
   if (info$compartment == "biota") {
-    data$family <- ctsm_get_info(info$species, data$species, "species_group")
+    data$species_group <- ctsm_get_info(info$species, data$species, "species_group")
   }
   
   if (!"pargroup" %in% names(data)) {
@@ -1543,13 +1543,13 @@ ctsm_create_timeSeries <- function(
   
   # check variables in the data file have valid values
   # - biota: removes species that are not to be assessed
-  # - biota: check family, sex and n_individual are appropriate
+  # - biota: check species_group, sex and n_individual are appropriate
   # - check all determinands have a valid matrix, basis and unit
   # - check method_analysis (only relevant for bile metabolites)
   # - check value is valid (e.g. > 0 for concentrations)
   
   wk <- c(
-    "family", "sex", "no_individual", "matrix", "basis", "unit", 
+    "species_group", "sex", "no_individual", "matrix", "basis", "unit", 
     "method_analysis", "value"
   )
   
@@ -1770,7 +1770,7 @@ ctsm_create_timeSeries <- function(
     data <- mutate(
       data, 
       .month = months(as.Date(.data$date)),
-      .not_ok = family %in% c("Bivalve", "Gastropod") & 
+      .not_ok = species_group %in% c("Bivalve", "Gastropod") & 
         (is.na(.month) | .month %in% info$bivalve_spawning_season) & 
         !group %in% c("Effects", "Imposex", "Metabolites") 
     )
@@ -3846,7 +3846,7 @@ ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, info, control)
   # others
   
   groupID <- if_else(
-    data$family %in% "Fish" & 
+    data$species_group %in% "Fish" & 
       !(data$group  %in% c("Metals", "Organofluorines", "Metabolites")), 
     "lipid", 
     "other"
