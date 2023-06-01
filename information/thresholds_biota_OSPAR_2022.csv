@@ -1,4 +1,4 @@
-determinand,sub.family,basis.BAC,basis.EAC,basis.MPC,basis.EQS,basis.FEQG,basis.HQS,BAC,EAC,MPC,EQS,FEQG,HQS
+determinand,species_subgroup,basis.BAC,basis.EAC,basis.MPC,basis.EQS,basis.FEQG,basis.HQS,BAC,EAC,MPC,EQS,FEQG,HQS
 CD,Fish,W,,W,,,W,26,,1000,,,1000
 HG,Fish,W,,W,W,,W,35,,500,20,,500
 PB,Fish,W,,W,,,W,26,,1500,,,1500

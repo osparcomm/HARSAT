@@ -1,4 +1,4 @@
-determinand,sub.family,basis.BAC,basis.MPC,basis.EQS,basis.EAC,BAC,MPC,EQS,EAC
+determinand,species_subgroup,basis.BAC,basis.MPC,basis.EQS,basis.EAC,BAC,MPC,EQS,EAC
 CD,"Fish,Mussel,Oyster,Clam,Scallop",,,W,,,,160,
 HG,"Fish,Mussel,Oyster,Clam,Scallop",,,W,,,,20,
 PB,Fish,W,,W,,26,,110,
