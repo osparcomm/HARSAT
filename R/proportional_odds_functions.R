@@ -116,16 +116,14 @@ ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
 
 
 ctsm.VDS.cl <- function(fit, nsim = 1000) {
-
-  library(MASS)
-
+  
   nCuts <- fit$K
   cutsID <- as.character(0:(nCuts-1))
   categories <- 0:nCuts
   
   indexID <- setdiff(names(fit$par), cutsID)
 
-  data <- mvrnorm(nsim, fit$par, fit$vcov)
+  data <- MASS::mvrnorm(nsim, fit$par, fit$vcov)
 
   data.cuts <- data[, cutsID, drop = FALSE]
   if (nCuts > 1) data.cuts <- t(apply(data.cuts, 1, cumsum))
@@ -147,7 +145,7 @@ ctsm.VDS.cl <- function(fit, nsim = 1000) {
 
   n_tail = 2L
   if (any(grepl("Tritia nitida (reticulata)", row.names(cl), fixed = TRUE))) {
-    warning("ad-hoc fix for Tritia nitida (reticulata)")
+    # warning("ad-hoc fix for Tritia nitida (reticulata)")
     n_tail = 3L
   }
   

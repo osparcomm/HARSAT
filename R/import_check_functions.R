@@ -222,12 +222,12 @@ ctsm.check.matrix.biota <- function(data, info) {
     data$determinand %in% c("DRYWT%", "EXLIP%", "FATWT%", "LIPIDWT%")
   if (any(id))
     data[id,] <- within(data[id,], {
-      ok <- (family %in% "Fish" & matrix %in% c("MU", "LI", "MU&EP")) |
-        (family %in% c("Bivalve", "Gastropod") & matrix %in% "SB") |
-        (family %in% "Crustacean" & matrix %in% "TM") | 
-        (family %in% "Bird" & matrix %in% c("EH", "FE", "LI", "MU", "BL", "ER")) | 
-        (family %in% "Mammal" & matrix %in% c("BB", "HA", "KI", "LI", "MU", "EP"))
-      change <- family %in% "Bird" & matrix %in% "EG"
+      ok <- (species_group %in% "Fish" & matrix %in% c("MU", "LI", "MU&EP")) |
+        (species_group %in% c("Bivalve", "Gastropod") & matrix %in% "SB") |
+        (species_group %in% "Crustacean" & matrix %in% "TM") | 
+        (species_group %in% "Bird" & matrix %in% c("EH", "FE", "LI", "MU", "BL", "ER")) | 
+        (species_group %in% "Mammal" & matrix %in% c("BB", "HA", "KI", "LI", "MU", "EP"))
+      change <- species_group %in% "Bird" & matrix %in% "EG"
       action <- ifelse(ok, "none", ifelse(change, "warning", "error"))
       new[change] <- "EH"
       rm(change)
@@ -242,18 +242,18 @@ ctsm.check.matrix.biota <- function(data, info) {
   id <- data$determinand %in% "LNMEA"
   if (any(id))
     data[id,] <- within(data[id,], {
-      ok <- (family %in% c("Fish", "Mammal") & matrix %in% "WO") |
-        (family %in% "Bird" & matrix %in% c("WO", "ES")) |
-        (family %in% c("Bivalve", "Gastropod", "Crustacean") & matrix %in% "SH")
+      ok <- (species_group %in% c("Fish", "Mammal") & matrix %in% "WO") |
+        (species_group %in% "Bird" & matrix %in% c("WO", "ES")) |
+        (species_group %in% c("Bivalve", "Gastropod", "Crustacean") & matrix %in% "SH")
       action <- ifelse(
         ok, "none", ifelse(
-          family %in% "Bird" & ! (matrix %in% c("LI", "MU", "BL", "ER", "FE", "EH", "EG", "SH")), 
+          species_group %in% "Bird" & ! (matrix %in% c("LI", "MU", "BL", "ER", "FE", "EH", "EG", "SH")), 
           "error", "warning"))
       new[!ok] <- ifelse(
-        family[!ok] %in% c("Fish", "Mammal"), "WO", ifelse(
-          family[!ok] %in% "Bird" & matrix[!ok] %in% c("LI", "MU", "BL", "ER", "FE"), "WO", ifelse(
-            family[!ok] %in% "Bird" & matrix[!ok] %in% c("EG", "EH", "SH"), "ES", ifelse(
-              family[!ok] %in% "Bird", NA, "SH"))))
+        species_group[!ok] %in% c("Fish", "Mammal"), "WO", ifelse(
+          species_group[!ok] %in% "Bird" & matrix[!ok] %in% c("LI", "MU", "BL", "ER", "FE"), "WO", ifelse(
+            species_group[!ok] %in% "Bird" & matrix[!ok] %in% c("EG", "EH", "SH"), "ES", ifelse(
+              species_group[!ok] %in% "Bird", NA, "SH"))))
     })
 
   # could maybe measure age of eggs as well, but have assumed always WO
@@ -331,25 +331,25 @@ ctsm.check.matrix.biota <- function(data, info) {
   id <- data$determinand %in% "ACHE"
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- (family %in% "Fish" & matrix %in% c("MU", "BR")) |
-       (family %in% "Bivalve" & matrix %in% "GI")  
+      ok <- (species_group %in% "Fish" & matrix %in% c("MU", "BR")) |
+       (species_group %in% "Bivalve" & matrix %in% "GI")  
       action <- ifelse(
         ok, "none", 
-        ifelse(family %in% "Fish", "error", "warning")
+        ifelse(species_group %in% "Fish", "error", "warning")
       )
-      new[!ok & family %in% "Bivalve"] <- "GI" 
+      new[!ok & species_group %in% "Bivalve"] <- "GI" 
     })
 
   id <- data$determinand %in% "GST"
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- (family %in% "Fish" & matrix %in% "LICYT") |
-        (family %in% "Bivalve" & matrix %in% "SB")  
+      ok <- (species_group %in% "Fish" & matrix %in% "LICYT") |
+        (species_group %in% "Bivalve" & matrix %in% "SB")  
       action <- ifelse(
         ok, "none", 
-        ifelse(family %in% "Fish", "error", "warning")
+        ifelse(species_group %in% "Fish", "error", "warning")
       )
-      new[!ok & family %in% "Bivalve"] <- "SB" 
+      new[!ok & species_group %in% "Bivalve"] <- "SB" 
     })
   
   
@@ -385,9 +385,9 @@ ctsm.check.matrix.water <- function(data, info) {
 
 
 
-ctsm.check.family.biota <- function(data, info) {  
+ctsm.check.species_group.biota <- function(data, info) {  
   
-  # check family appropriate for each determinand
+  # check species_group appropriate for each determinand
   
   id <- ctsm_is_contaminant(data$pargroup, exclude = "O-PAH") | data$group %in% "Auxiliary"
   if (any(id))
@@ -399,35 +399,35 @@ ctsm.check.family.biota <- function(data, info) {
   id <- data$pargroup %in% "O-PAH"
   if (any(id))
     data[id,] <- within(data[id,], {
-      ok <- !family %in% "Fish"
+      ok <- !species_group %in% "Fish"
       action <- ifelse(ok, "none", "error")    
     })
 
   id <- data$group %in% "Imposex"
   if (any(id))
     data[id,] <- within(data[id,], {
-      ok <- family %in% "Gastropod"
+      ok <- species_group %in% "Gastropod"
       action <- ifelse(ok, "none", "error")
     })    
     
   id <- data$group %in% "Metabolites" | data$determinand %in% c("EROD", "ALAD", "LP", "MNC")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- family %in% "Fish"
+      ok <- species_group %in% "Fish"
       action <- ifelse(ok, "none", "error")
     })
        
   id <- data$determinand %in% c("ACHE", "GST")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- family %in% c("Bivalve", "Fish")
+      ok <- species_group %in% c("Bivalve", "Fish")
       action <- ifelse(ok, "none", "error")
     })
 
   id <- data$determinand %in% c("SFG", "%DNATAIL", "NRR", "SURVT")
   if (any(id))
     data[id,] <- within(data[id,], {    
-      ok <- family %in% "Bivalve"
+      ok <- species_group %in% "Bivalve"
       action <- ifelse(ok, "none", "error")
     })
   

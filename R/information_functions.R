@@ -256,8 +256,8 @@ ctsm_read_species <- function(file, path = "information") {
   # check species_group values are recognised
   
   group_id <- c(
-    "Bird", "Bivalve", "Crustacean", "Fish", "Gastropod", "Macrophyte", 
-    "Mammal", "Other"
+    "Bird", "Bivalve", "Crustacean", "Echinoderm", "Fish", "Gastropod", 
+    "Macrophyte", "Mammal", "Other"
   )
   
   ok <- data$species_group %in% group_id
@@ -265,6 +265,7 @@ ctsm_read_species <- function(file, path = "information") {
   if (!all(ok)) {
     id <- data$species_group[!ok]
     id <- sort(id)
+    id <- unique(id)
     stop(
       "\nUnrecongised 'species_group' values in ", file, ".\n",
       "Please update the file to continue or contact the HARSAT development ",
@@ -634,10 +635,10 @@ ctsm_read_thresholds <- function(
   }
 
   if (compartment == "biota") {
-    wk <- strsplit(data$sub.family, ",", fixed = TRUE)
+    wk <- strsplit(data$species_subgroup, ",", fixed = TRUE)
     n <- sapply(wk, length)
     data <- data[rep(1:nrow(data), times = n),]
-    data$sub.family <- unlist(wk)
+    data$species_subgroup <- unlist(wk)
   }
 
   data
@@ -788,7 +789,7 @@ get.AC.biota.contaminant <- function(
     rownames_to_column("rownames") %>% 
     mutate(
       species_group = ctsm_get_info(species_rt, species, "species_group"),
-      sub.family = ctsm_get_info(species_rt, species, "species_subgroup")
+      species_subgroup = ctsm_get_info(species_rt, species, "species_subgroup")
     ) 
   
   lipid_info <- ctsm_get_species_cfs(species_rt, "lipidwt")
@@ -798,9 +799,9 @@ get.AC.biota.contaminant <- function(
   data <- left_join(data, lipid_info, by = c("species", "matrix"))
   data <- left_join(data, drywt_info, by = c("species", "matrix"))
   
-  data <- data[c("rownames", "determinand", "sub.family", "basis", "drywt", "lipidwt")]
+  data <- data[c("rownames", "determinand", "species_subgroup", "basis", "drywt", "lipidwt")]
   
-  data <- left_join(data, AC_data, by = c("determinand", "sub.family"))
+  data <- left_join(data, AC_data, by = c("determinand", "species_subgroup"))
   
   out <- sapply(AC, simplify = FALSE, FUN = function(i) {
     basis_AC <- paste("basis", i, sep = ".")
@@ -839,7 +840,7 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
     rownames_to_column() %>%
     mutate(
       species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-      sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
+      species_subgroup = ctsm_get_info(species_rt, .data$species, "species_subgroup")
     )
   
   
@@ -862,7 +863,7 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
       
       BAC = case_when(
         .data$species_group %in% "Fish"                            ~ NA_real_,
-        .data$sub.family %in% "Oyster"                             ~ NA_real_,
+        .data$species_subgroup %in% "Oyster"                             ~ NA_real_,
         .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
           ctsm_convert_basis(16000, "W", .data$basis, .data$drywt, .data$lipidwt),
         .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
@@ -949,7 +950,7 @@ get.AC.biota.Chlorobiphenyls.OSPAR <- function(data, AC, AC_data, species_rt, li
     rownames_to_column() %>%
     mutate(
       species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-      sub.family = ctsm_get_info(species_rt, .data$species, "species_subgroup")
+      species_subgroup = ctsm_get_info(species_rt, .data$species, "species_subgroup")
     )
   
   # BACs in fish only apply to high lipid tissue
@@ -1229,14 +1230,14 @@ get.AC.biota.Effects.OSPAR <- function(data, AC, AC_data, species_rt) {
     }
     
     if ("SFG" %in% data$determinand) {
-      id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
+      id <- ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
         determinand %in% "SFG"
       if ("BAC" %in% AC) out$BAC[id] <- 25
       if ("EAC" %in% AC) out$EAC[id] <- 15
     }
     
     if ("SURVT" %in% data$determinand) {
-      id <- ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
+      id <- ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
         determinand %in% "SURVT"
       if ("BAC" %in% AC) out$BAC[id] <- 10
       if ("EAC" %in% AC) out$EAC[id] <- 5
@@ -1256,7 +1257,7 @@ get.AC.biota.Effects.OSPAR <- function(data, AC, AC_data, species_rt) {
     
     if ("MNC" %in% data$determinand) {
       
-      if (any(ctsm_get_info(species_rt, species, "sub.family") %in% "Mussel" &
+      if (any(ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
               determinand %in% "MNC"))
         stop("AC not coded for MNC in mussels")
       
