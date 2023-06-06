@@ -106,3 +106,200 @@ biota_data <- ctsm_tidy_data(biota_data)
 sediment_data <- ctsm_tidy_data(sediment_data)
 water_data <- ctsm_tidy_data(water_data)
 ```
+
+## Construct timeseries
+
+## Biota
+
+Ad-hoc change to merge MU and MU&EP data for organics for Finnish perch
+only need to do this for years up to and including 2013 when there are 
+no MU&EP measurements, so no risk of mixing up MU and MU&EP data.
+
+```{r helcom-time-series1}
+biota_data$data <- left_join(
+  biota_data$data,
+  biota_data$stations[c("station_code", "country")],
+  by = "station_code"
+)
+
+biota_data$data <- mutate(
+  biota_data$data,
+  .id = country == "Finland" &
+    species == "Perca fluviatilis" &
+    year <= 2013 & 
+    !(determinand %in% c("CD", "HG", "PB", "PFOS")),
+  matrix = if_else(
+    .id & !(determinand %in% c("DRYWT%", "FATWT%")),
+    "MU&EP",
+    matrix
+  )
+)
+
+wk <- biota_data$data %>%
+  filter(.id & determinand %in% c("DRYWT%", "FATWT%")) %>%
+  mutate(
+    replicate = max(biota_data$data$replicate) + 1:n(),
+    matrix = "MU&EP",
+    .id = NULL
+  )
+
+biota_data$data <- mutate(biota_data$data, .id = NULL)
+
+biota_data$data <- bind_rows(biota_data$data, wk)
+```
+
+Ad-hoc change to merge methods of analysis for Poland for PYR10H
+
+```{r helcom-time-series2}
+biota_data$data <- mutate(
+  biota_data$data,
+  method_analysis = if_else(
+    alabo %in% "IMWP" &
+      determinand %in% "PYR1OH" &
+      year %in% 2020:2021,
+    "HPLC-FD",
+    method_analysis
+  )
+)
+```
+
+Ad-hoc change to `info_TEQ` to make it appropriate for human health QS
+
+```{r helcom-time-series3}
+info_TEQ["CDFO"] <- 0.0003
+
+biota_data$data$country <- NULL
+
+biota_timeSeries <- ctsm_create_timeSeries(
+  biota_data,
+  determinands.control = list(
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
+    SBDE6 = list(
+      det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
+      action = "sum"
+    ),
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
+    CB138 = list(det = "CB138+163", action = "replace"),
+    SCB6 = list(
+      det = c("CB28", "CB52", "CB101", "CB138", "CB153", "CB180"), 
+      action = "sum"
+    ),
+    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    VDS = list(det = "VDSI", action = "bespoke"), 
+    INTS = list(det = "INTSI", action = "bespoke"),
+    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+  ),
+  normalise = ctsm_normalise_biota_HELCOM,
+  normalise.control = list(
+    lipid = list(method = "simple", value = 5), 
+    other = list(method = "none") 
+  )
+)
+```
+
+Resolve Finnish perch changes
+
+```{r helcom-time-series4}
+biota_timeSeries$data <- mutate(
+  biota_timeSeries$data, 
+  matrix = if_else(
+    year <= 2013 & matrix == "MU&EP", 
+    "MU", 
+    matrix
+  )
+)
+```
+
+Resolve Polish metoa changes
+
+```{r helcom-time-series5}
+biota_timeSeries$data <- left_join(
+  biota_timeSeries$data, 
+  biota_data$stations[c("station_code", "country")],
+  by = "station_code"
+)
+
+biota_timeSeries$data <- mutate(
+  biota_timeSeries$data, 
+  method_analysis = if_else(
+    country == "Poland" &  
+      determinand %in% "PYR1OH" &
+      year %in% 2020,
+    "HPLC-ESI-MS-MS", 
+    method_analysis
+  ), 
+  method_analysis = if_else(
+    country == "Poland" &  
+      determinand %in% "PYR1OH" &
+      year %in% 2021,
+    "GC-MS-MS", 
+    method_analysis
+  ),
+)
+
+biota_timeSeries$data$country <- NULL
+```
+
+## Sediment
+
+```{r helcom-time-series6}
+sediment_timeSeries <- ctsm_create_timeSeries(
+  sediment_data,
+  determinands.control = list(
+    SBDE6 = list(
+      det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
+      action = "sum"
+    ),
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum")
+  ),
+  normalise = ctsm_normalise_sediment_HELCOM,
+  normalise.control = list(
+    metals = list(method = "pivot", normaliser = "AL"), 
+    copper = list(method = "hybrid", normaliser = "CORG", value = 5),
+    organics = list(method = "simple", normaliser = "CORG", value = 5) 
+  )
+)
+```
+
+## Water
+
+```{r helcom-time-series7}
+water_timeSeries <- ctsm_create_timeSeries(
+  water_data,
+  determinands.control = list(
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
+  )
+)
+```
+
+# Assessment
+
+## Sediment
+
+Main runs
+
+```{r helcom-run1}
+sediment_assessment <- ctsm_assessment(
+  sediment_timeSeries,
+  AC = "EQS",
+  get_assessment_criteria = get.AC.HELCOM,
+  parallel = FALSE
+)
+```
+
+Check convergence
+
+```{r helcom-run2}
+ctsm_check_convergence(sediment_assessment$assessment)
+```
+
+## Biota
+
+Main runs
+
+Preliminary analysis required for imposex assessment. 
+Takes a long time to run!!!!!
+
+```{r child="../man/fragments/example_HELCOM_imposex_preparation.Rmd"}
+```
+

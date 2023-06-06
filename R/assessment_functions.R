@@ -2,6 +2,7 @@
 
 # Set up functions ----
 
+#' @export
 ctsm_assessment <- function(
   ctsm_ob, 
   subset = NULL, 
@@ -147,6 +148,7 @@ ctsm_assessment_engine <- function(
       {
         library("lme4")
         library("tidyverse")
+        library("harsat")
       }
     )  
 
@@ -382,7 +384,7 @@ get.index <- function(determinand, data, info) {
   
   function_id <- paste("get.index", info$compartment, group, sep = ".")
   
-  do.call(function_id, list(data = data, determinand = determinand, info = info)) 
+  do.call(function_id, list(data = data, determinand = determinand, info = info), envir = rlang::ns_env("harsat")) 
 }
 
 
@@ -1057,6 +1059,7 @@ ctsm.lmm.contrast <- function(ctsm.ob, start, end) {
 }
 
 
+#' @export
 ctsm_check_convergence <- function(assessment_ob, coeff_se_tol = 0.001) {
   ok <- sapply(assessment_ob, function(x) {
     

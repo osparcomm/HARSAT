@@ -1,3 +1,4 @@
+#' @export
 ctsm_plot_assessment <- function(
     ctsm_asmt_obj, 
     subset = NULL, 

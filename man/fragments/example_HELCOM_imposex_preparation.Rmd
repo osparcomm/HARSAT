@@ -1,9 +1,27 @@
-# get imposex data 
+---
+title: "HELCOM imposex preparation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{HELCOM imposex preparation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-library(dplyr)
-library(tibble)
-library(tidyr)
+## HELCOM imposex preparation
 
+Load the libraries
+
+```{r helcom-imposex-libraries}
+library("dplyr")
+library("tibble")
+library("tidyr")
+library("parallel")
+library("pbapply")
+```
+
+Get the data
+
+```{r helcom-imposex-get-data}
 wk_data <- mutate(
   biota_timeSeries$data,
   .imposex = ctsm_get_info(
@@ -14,7 +32,7 @@ wk_data <- mutate(
     sep = "_"
   )
 )
-  
+
 wk_data <- filter(wk_data, .imposex %in% "Imposex")
 
 wk_data <- wk_data[c(
@@ -27,36 +45,37 @@ wk_data <- left_join(
   biota_timeSeries$stations[c("station_code", "country", "HELCOM_subbasin")],
   by = "station_code"
 )
+```
 
 
-# see where we have individual data 
+See where we have individual data 
 
+```{r helcom-imposex-check-for-individual-data}
 stopifnot(is.integer(wk_data$n_individual))
+```
 
+```{r helcom-imposex-prepare-individual-data}
 wk_data <- wk_data %>%
   group_by(station_code, determinand, species, year) %>% 
   filter(all(n_individual == 1L)) %>% 
   ungroup() %>% 
   droplevels() %>% 
   select(-n_individual)
-  
+```
 
 
-# get cut points by country 
-# have used terminology from MIME code (
-# e.g. regionID = country here, whereas regionID ~ country + region for 
-# MIME)
+Get cut points by country. We have used terminology from MIME code
+(e.g. `regionID` = `country` here, whereas `regionID` ~ `country` + `region` for MIME).
 
+```{r helcom-imposex-get-cut-points}
 wk_data <- unite(wk_data, "regionID", country, sep = " ", remove = FALSE)
+```
 
+We have difficulty dealing with Neptunea because nearly all zero and gap in values 
+(no records for class 2 or 3) for example: `Denmark 28 1 0 0 1 0 0`. 
 
-# have difficulty dealing with Neptunea because nearly all zero and gap in values 
-# (no records for class 2 or 3)
-# for example: 
-# Denmark 28 1 0 0 1 0 0 
-
+```{r helcom-imposex-records}
 with(wk_data, table(regionID, concentration, species))
-
 
 wk_data <- wk_data %>% 
   filter(!.data$species %in% "Neptunea antiqua") %>% 
@@ -64,18 +83,20 @@ wk_data <- wk_data %>%
   droplevels()
 
 wk_data %>% mutate(across(where(is.character), factor)) %>% summary()
+```
 
+Construct new variable VDS so we can combine larger categories with few observations without 
+changing the raw data.
 
-# construct new variable VDS so we can combine larger categories with few observations without 
-# changing the raw data
-
+```{r helcom-imposex-vds}
 wk_data <- mutate(wk_data, VDS = .data$concentration)
 
 with(wk_data, table(regionID, VDS, species))
+```
 
+Combine larger categories with few observations
 
-# combine larger categories with few observations
-
+```{r helcom-imposex-combine-categories}
 wk_data <- within(wk_data, {
   
   id <- species == "Buccinum undatum"
@@ -84,10 +105,11 @@ wk_data <- within(wk_data, {
 })
 
 with(wk_data, table(regionID, VDS, species))
+```
 
+Redefine `indexID` and `regionID` so don't have to worry about multiple species.
 
-# redefine indexID and regionID so don't have to worry about multiple species
-
+```{r helcom-imposex-recoding}
 wk_data <- wk_data %>% 
   unite("indexID", station_code, year, species, sep = " ", remove = FALSE) %>% 
   unite("regionID", regionID, species, sep = " ", remove = FALSE) %>% 
@@ -95,15 +117,12 @@ wk_data <- wk_data %>%
   as.data.frame()
 
 with(wk_data, table(regionID, VDS))
+```
 
+Split by `regionID`, estimate cut points and level for each `indexID`.
 
-# split by regionID, estimate cut points and level for each indexID
-
+```{r helcom-imposex-split}
 wk_split <- split(wk_data, wk_data$regionID)
-
-
-library("parallel")
-library("pbapply")
 
 wk.cores <- detectCores()
 wk.cluster <- makeCluster(wk.cores - 1)
@@ -112,7 +131,7 @@ clusterExport(wk.cluster, c("wk_split", ctsm.VDS.varlist))
 
 # clusterEvalQ(wk.cluster, {
 #   library("MASS")
-# })  
+# })
 
 biota.VDS.estimates <- pblapply(
   wk_split, 
@@ -122,20 +141,22 @@ biota.VDS.estimates <- pblapply(
 )
 
 stopCluster(wk.cluster)
+```
 
+Check convergence
 
-# check convergence
-
+```{r helcom-imposex-check-convergence}
 all(sapply(biota.VDS.estimates, "[[", "convergence") == 0)
 
 # saveRDS(
 #   biota.VDS.estimates,
 #   file.path("RData", "VDS estimates.rds")
 # )
+```
 
+Get confidence limits on estimated VDSI for each `indexID`.
 
-# get confidence limits on estimated VDSI for each indexID
-
+```{r helcom-imposex-get-confidence-limits}
 set.seed(230504)
 
 biota.VDS.cl <- lapply(biota.VDS.estimates, ctsm.VDS.cl)
@@ -153,5 +174,6 @@ biota.VDS.cl %>% mutate(across(where(is.character), factor)) %>% summary()
 #   file.path("RData", "VDS confidence limits.rds")
 # )
 
-
 rm(wk_data, wk_split, wk.cluster, wk.cores)
+```
+

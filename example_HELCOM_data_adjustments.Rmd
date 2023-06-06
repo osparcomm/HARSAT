@@ -823,21 +823,20 @@ rm(wk_data, wk_CORG)
 
 ```{r sed_metcx1, eval = wk_data_format == "old"}
 
-sediment_data$QA %>% 
+sediment_data$QA %>%
   filter(
     data_type == "CS",
     determinand %in% c(
       ctsm_get_determinands("sediment"), 
       "BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154", "HBCDA", "HBCDB", "HBCDG"
     ),
-    grepl("~", method_extraction, fixed = TRUE) 
-  ) %>% 
-  distinct(method_extraction, determinand, alabo) %>% 
+    grepl("~", method_extraction, fixed = TRUE)
+  ) %>%
+  distinct(method_extraction, determinand, alabo) %>%
   arrange(method_extraction, alabo) %>% 
-  select(method_extraction, alabo, determinand) %>% 
+  select(method_extraction, alabo, determinand) %>%
   as.data.frame() %>% 
   DT::datatable(options = DT_options, rownames = FALSE)
-
 ```
 
 <br>

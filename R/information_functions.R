@@ -1,5 +1,6 @@
 # Information extractor function ----
 
+#' @export
 ctsm_get_info <- function(
   ref_table, 
   input, 
@@ -551,6 +552,7 @@ ctsm_read_determinand <- function(
 
 # extractor functions
 
+#' @export
 ctsm_get_determinands <- function(info) {
   
   # information_functions.R
@@ -651,6 +653,7 @@ ctsm_read_thresholds <- function(
 # if a list, then each element can be either a scalar (replicated to length n), or a vector of length n
 # AC is a character vector of assessment concentration types
 
+#' @export
 get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
 
   # check elements of info are of correct length
@@ -714,6 +717,7 @@ get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determi
 }
 
 
+#' @export
 get.AC.HELCOM <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
   
   # check elements of info are of correct length
@@ -2049,6 +2053,7 @@ get_basis_most_common <- function(data, info) {
 
 
 
+#' @export
 get_basis_biota_OSPAR <- function(data, info) {
   
   # 2023 OSPAR biota target basis - information_functions.r
