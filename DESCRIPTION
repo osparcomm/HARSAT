@@ -2,14 +2,14 @@ Package: harsat
 Title: Harmonized Regional Seas Assessment Tool
 Version: 1.1.0.1000
 Authors@R: c(
-    person("Rob", "Fryer", "rob.fryer@gov.scot", role = c("aut")),
-    person("Leszek", "Kaliciak", "leszek@ambiesense.com", role = c("aut")),
-    person("Scottish Government", , email = "marinescotland@gov.scot", role = c("fnd", "aut")),
-    person("AmbieSense Ltd", , email = "info@ambiesense.com", role = c("cph", "cre", "aut")),
-    person("Helsinki Commission (HELCOM)", , "secretariat@helcom.fi", role = c("cph", "fnd", "ctb")),
-    person("Arctic Monitoring and Assessment Programme (AMAP)", , "amap@amap.no", role = c("cph", "fnd", "ctb")),
-    person("OSPAR Commission (OSPAR)", , "secretariat@ospar.org", role = c("cph", "fnd", "ctb")),
-    person("International Council for the Exploration of the Sea (ICES)", , "info@ices.dk", role = c("cph", "ctb"))
+    person(given = "Rob", family = "Fryer", email = "rob.fryer@gov.scot", role = c("aut")),
+    person(given = "Leszek", family = "Kaliciak", email = "leszek@ambiesense.com", role = c("aut")),
+    person(given = "Scottish Government", email = "marinescotland@gov.scot", role = c("fnd", "aut")),
+    person(given = "AmbieSense Ltd", email = "info@ambiesense.com", role = c("cph", "cre", "aut")),
+    person(given = "Helsinki Commission (HELCOM)", email = "secretariat@helcom.fi", role = c("cph", "fnd", "ctb")),
+    person(given = "Arctic Monitoring and Assessment Programme (AMAP)", email = "amap@amap.no", role = c("cph", "fnd", "ctb")),
+    person(given = "OSPAR Commission (OSPAR)", email = "secretariat@ospar.org", role = c("cph", "fnd", "ctb")),
+    person(given = "International Council for the Exploration of the Sea (ICES)", email = "info@ices.dk", role = c("cph", "ctb"))
   )
 Description: Assessment of concentrations of hazardous substances and their
   biological effects in the marine environment. The code supports periodic
