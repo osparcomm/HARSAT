@@ -302,6 +302,7 @@ ctsm.lmm.dcalc <- function(x, censoring, mean, sd, log = FALSE) {
 }
 
 
+#' @export
 negTwiceLogLik <- function(data, mu, varComp) {
 
   library(mvtnorm)

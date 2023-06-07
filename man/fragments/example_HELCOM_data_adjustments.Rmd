@@ -13,8 +13,15 @@ We'll use the `DT` package for some of these adjustments, and
 `lattice` to plot some of the data so we can see it as we go.
 
 ```{r helcom-data-adjust-datatables}
-library(DT)
+library(tidyverse)
 library(lattice)
+
+DT_options <- list(
+  initComplete = htmlwidgets::JS(
+    "function(settings, json) {",
+    paste0("$(this.api().table().container()).css({'font-size': '", "10pt", "'});"),
+    "}")
+) 
 ```
 
 ### Data summary

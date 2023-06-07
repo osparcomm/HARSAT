@@ -1332,7 +1332,7 @@ ctsm_link_QA <- function(QA, data, compartment) {
 }
 
 
-
+#' @export
 ctsm_create_timeSeries <- function(
   ctsm.obj, 
   determinands = ctsm_get_determinands(ctsm.obj$info), 
@@ -3469,7 +3469,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, info, control) {
   data
 }
 
-
+#' @export
 ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
@@ -3789,7 +3789,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, info, contr
   data
 }
 
-
+#' @export
 ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises fish concentrations in contaminants other than metals or 

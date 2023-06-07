@@ -6,8 +6,10 @@
 
 # names of functions for clusterExport
 
+#' @export
 ctsm.VDS.varlist <- paste("ctsm.VDS", c("p.calc", "loglik.calc", "index.opt", "cl"), sep = ".")
 
+#' @export
 ctsm.VDS.p.calc <- function(theta, cumulate = FALSE) {
   if (cumulate) theta <- cumsum(theta)
   cumProb <- c(plogis(theta), 1)
@@ -16,6 +18,7 @@ ctsm.VDS.p.calc <- function(theta, cumulate = FALSE) {
   c(cumProb[1], diff(cumProb))
 }
 
+#' @export
 ctsm.VDS.loglik.calc <- function(
   theta, data, index.theta, minus.twice = FALSE, cumulate = FALSE) {
 
@@ -40,7 +43,7 @@ ctsm.VDS.loglik.calc <- function(
   out
 }
 
-
+#' @export
 ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
 
   data <- droplevels(data)
@@ -115,6 +118,7 @@ ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
 }
 
 
+#' @export
 ctsm.VDS.cl <- function(fit, nsim = 1000) {
   
   nCuts <- fit$K

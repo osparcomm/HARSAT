@@ -335,6 +335,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 
 # summary table ----
 
+#' @export
 ctsm_summary_table <- function(
   assessment_obj, determinandGroups = NULL, classColour = NULL, output_dir = NULL, 
   output_file = NULL, export = TRUE, collapse_AC = NULL) {

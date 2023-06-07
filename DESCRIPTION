@@ -34,7 +34,8 @@ Imports:
   parallel,
   pbapply,
   MASS,
-  mvtnorm
+  mvtnorm,
+  DT
 Suggests: 
     knitr,
     rmarkdown,
