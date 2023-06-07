@@ -315,7 +315,7 @@ values_range_check_species <- function(species_data, min_value, max_value) {
   library(tidyverse)
   
   # select conversion factor columns
-  conversion_factors <- select(
+  conversion_factors <- dplyr::select(
     species_data, 
     ends_with("_drywt") | ends_with("_lipidwt")
   )
@@ -353,7 +353,7 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   wt_adj <- paste0("_", wt)
 
   data <- rownames_to_column(data, "species")
-  data <- select(data, .data$species, ends_with(wt_adj)) 
+  data <- dplyr::select(data, "species", ends_with(wt_adj)) 
 
   
   # deal with null case where there are no conversion factors 
@@ -835,7 +835,7 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
   
   stopifnot(
     length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EQS.OSPAR", "HQS") %in% names(AC)
+    ! c("BAC", "EQS", "HQS") %in% names(AC)
   )
   
   out <- bind_cols(out, data)
@@ -883,7 +883,7 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
         TRUE                                                       ~ .data$BAC
       ),
       
-      EQS.OSPAR = case_when(
+      EQS = case_when(
         .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
           ctsm_convert_basis(64000, "W", .data$basis, .data$drywt, .data$lipidwt),
         .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
@@ -896,7 +896,7 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
           ctsm_convert_basis(7920, "D", .data$basis, .data$drywt, .data$lipidwt),
         .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
           ctsm_convert_basis(1000, "W", .data$basis, .data$drywt, .data$lipidwt),
-        TRUE                                                       ~ .data$EQS.OSPAR
+        TRUE                                                       ~ .data$EQS
       ),
       
       HQS = if_else(.data$species_group %in% "Fish" & .data$matrix %in% "LI", NA_real_, .data$HQS)
@@ -998,7 +998,7 @@ get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, li
   
   stopifnot(
     length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EAC", "EQS.OSPAR", "HQS") %in% names(AC)
+    ! c("BAC", "EAC", "EQS", "HQS") %in% names(AC)
   )
   
   out <- bind_cols(out, data)
@@ -1089,7 +1089,7 @@ get.AC.biota.Organofluorines.OSPAR <- function(data, AC, AC_data, species_rt) {
   
   stopifnot(
     length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EQS.OPAR", "HQS") %in% names(AC)
+    ! c("BAC", "EQS", "HQS") %in% names(AC)
   )
   
   out <- bind_cols(out, data)
@@ -1105,7 +1105,7 @@ get.AC.biota.Organofluorines.OSPAR <- function(data, AC, AC_data, species_rt) {
     out,
     .id <- .data$species_group %in% "Fish" & .data$matrix %in% "LI" &
       .data$determinand %in% "PFOS",
-    EQS.OSPAR = .data$EQS.OSPAR * if_else(.id, 5, 1),
+    EQS = .data$EQS * if_else(.id, 5, 1),
     HQS = .data$HQS * if_else(.id, 5, 1),
     .id = NULL
   )
@@ -1169,7 +1169,7 @@ get.AC.biota.Dioxins.OSPAR <- function(data, AC, AC_data, species_rt) {
   
   stopifnot(
     length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EQS.OPAR", "HQS") %in% names(AC)
+    ! c("BAC", "EQS", "HQS") %in% names(AC)
   )
   
   out <- bind_cols(out, data)

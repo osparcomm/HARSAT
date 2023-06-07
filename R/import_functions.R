@@ -966,11 +966,10 @@ ctsm_tidy_stations <- function(stations, info) {
     # crude method to sort by station, startYear and endYear (since NAs are sorted last)
     # and then reverse the ordering of the whole data frame so it works with ctsm_check
     
-    stations <- unite(
+    stations <- tidyr::unite(
       stations, 
       "station_id", 
-      .data$country, 
-      .data$station_name,
+      all_of(c("country", "station_name")), 
       remove = FALSE
     )
     
@@ -1076,7 +1075,7 @@ ctsm_tidy_stations_HELCOM <- function(stations, info) {
   
   # restrict to stations that have a HELCOM region
   
-  stations <- drop_na(stations, .data$HELCOM_subbasin)
+  stations <- tidyr::drop_na(stations, "HELCOM_subbasin")
   
   
   stations
@@ -1307,9 +1306,19 @@ ctsm_link_QA <- function(QA, data, compartment) {
   
   var_id <- c("determinand", "qalink", "alabo", "year")
   
-  data <- tidyr::unite(data, "qaID", dplyr::all_of(var_id), remove = FALSE)
+  data <- tidyr::unite(
+    data, 
+    "qaID", 
+    all_of(var_id), 
+    remove = FALSE
+  )
   
-  QA <- tidyr::unite(QA, "qaID", dplyr::all_of(var_id), remove = FALSE)
+  QA <- tidyr::unite(
+    QA, 
+    "qaID", 
+    all_of(var_id), 
+    remove = FALSE
+  )
   
   
   # restrict QA to those values found in data
@@ -1510,7 +1519,7 @@ ctsm_create_timeSeries <- function(
     
     if (any(is.na(data[info$region.id]))) {
       cat("   Dropping stations with missing region information in station dictionary\n")
-      data <- drop_na(data, all_of(info$region_id))
+      data <- tidyr::drop_na(data, all_of(info$region_id))
     }
     
     data <- data[setdiff(names(data), info$region_id)]
@@ -1997,7 +2006,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   # create seriesID column in data, filled with the concatenated values of timeSeries and 
   # reorder variables
 
-  timeSeries <- unite(
+  timeSeries <- tidyr::unite(
     timeSeries, 
     "seriesID", 
     all_of(names(timeSeries)), 
@@ -2875,7 +2884,7 @@ ctsm_check_subseries <- function(data, info) {
   # note that this should probably be done other after 'grouping' variables
   # have been identified (e.g. sex for EROD) - future enhancement
 
-  data <- unite(
+  data <- tidyr::unite(
     data, 
     ".series", 
     any_of(c("station_code", "species", "determinand", "matrix")), 
