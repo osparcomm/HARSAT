@@ -1,0 +1,165 @@
+---
+title: "External data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{External data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This is a brief example of using the `harsat` with external
+data.
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+First, load the `harsat` the library
+
+```{r}
+library(harsat)
+```
+
+And load the R package `here`, because we use the working directory to find
+the data files. If you use your own data files, you will need to point to
+a directory containing a copy.
+
+```{r}
+library(here)
+working.directory <- here()
+```
+
+# Read data
+
+Mercury data with supporting variables and station dictionary
+
+```{r external-biota}
+biota_data <- ctsm_read_data(
+  compartment = "biota",
+  purpose = "AMAP",
+  contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv",
+  stations = "AMAP_external_new_stations_only.csv",
+  data_path = file.path(working.directory, "data", "example_external_data"),
+  data_format = "external",
+  info_path = file.path(working.directory, "information"),
+  control = list(region_id = "AMAP_region")
+)
+```
+
+# Prepare data for next stage
+
+Get correct variables and streamline the data files
+
+```{r external-prepare}
+biota_data <- ctsm_tidy_data(biota_data)
+```
+
+# Construct timeseries
+
+Uses OSPAR basis choice for mercury
+
+```{r external-timeseries}
+biota_timeSeries <- ctsm_create_timeSeries(
+  biota_data,
+  get_basis = get_basis_biota_OSPAR
+)
+```
+
+# Assessment
+
+Main runs
+
+```{r external-assessment}
+biota_assessment <- ctsm_assessment(biota_timeSeries)
+```
+
+Use the code below if it takes a long time to run
+
+```
+biota_assessment <- ctsm_assessment(biota_timeSeries, parallel = TRUE)
+```
+
+## Check convergence
+
+```{r external-convergence}
+(wk_check <- ctsm_check_convergence(biota_assessment$assessment))
+```
+
+# Summary files
+
+This writes the summary data to a file in `output/example_external_data`.
+
+```{r external-summary}
+summary.dir <- file.path(working.directory, "output", "example_external_data")
+
+if (!dir.exists(summary.dir)) {
+  dir.create(summary.dir, recursive = TRUE)
+} 
+
+ctsm_summary_table(
+  biota_assessment,
+  output_dir = summary.dir
+)
+```
+
+# Graphics output
+
+Plots assessment with either data (file_type = "data") or annual index 
+(file_type = "index") or both (default)
+
+Outputs can be png or pdf
+
+Can subset assessment based on variables in either timeSeries or stations 
+components of object: commonly by determinand, matrix, species, station_code 
+or station_name; can also use the series identifier in row.names(timeSeries)
+if subset is NULL (default), all timeseries are plotted (can take some time)
+
+Graphics plots are written to files in `output/graphics`.
+
+```{r external-graphics1}
+graphics.dir <- file.path(working.directory, "output", "graphics")
+
+if (!dir.exists(graphics.dir)) {
+  dir.create(graphics.dir, recursive = TRUE)
+} 
+
+ctsm_plot_assessment(
+  biota_assessment,
+  subset = species %in% "Phoca hispida",
+  output_dir = graphics.dir, 
+  file_type = "data",
+  file_format = "png"
+)
+```
+
+```{r external-graphics2}
+ctsm_plot_assessment(
+  biota_assessment,
+  subset = matrix %in% "LI",
+  output_dir = graphics.dir, 
+  file_type = "index",
+  file_format = "pdf"
+)
+```
+
+```{r external-graphics3}
+ctsm_plot_assessment(
+  biota_assessment,
+  subset = station_code %in% "A1",
+  output_dir = graphics.dir, 
+  file_type = "data",
+  file_format = "pdf"
+)
+```
+
+```{r external-graphics4}
+ctsm_plot_assessment(
+  biota_assessment, 
+  subset = series == "A1 HG Phoca hispida LI adult",
+  output_dir = graphics.dir, 
+  file_format = "pdf"
+)
+```

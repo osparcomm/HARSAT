@@ -10,16 +10,12 @@ vignette: >
 This is a brief example of using the `harsat` with external
 data.
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
+
 
 First, load the `harsat` the library
 
-```{r}
+
+```r
 library(harsat)
 ```
 
@@ -27,7 +23,8 @@ And load the R package `here`, because we use the working directory to find
 the data files. If you use your own data files, you will need to point to
 a directory containing a copy.
 
-```{r}
+
+```r
 library(here)
 working.directory <- here()
 ```
@@ -36,7 +33,8 @@ working.directory <- here()
 
 Mercury data with supporting variables and station dictionary
 
-```{r external-biota}
+
+```r
 biota_data <- ctsm_read_data(
   compartment = "biota",
   purpose = "AMAP",
@@ -47,33 +45,150 @@ biota_data <- ctsm_read_data(
   info_path = file.path(working.directory, "information"),
   control = list(region_id = "AMAP_region")
 )
+#> Reading station dictionary from:
+#>  '/Users/stuart/git/HARSAT/data/example_external_data/AMAP_external_new_stations_only.csv'
+#> 
+#> Reading contaminant and biological effects data from:
+#>  '/Users/stuart/git/HARSAT/data/example_external_data/AMAP_external_data_new_data_only_CAN_MarineMammals.csv'
+#> 
+#> Argument max_year taken to be the maximum year in the data: 2017
 ```
 
 # Prepare data for next stage
 
 Get correct variables and streamline the data files
 
-```{r external-prepare}
+
+```r
 biota_data <- ctsm_tidy_data(biota_data)
+#> 
+#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
+#>  'oddities/biota_backup'
+#> 
+#> Cleaning station dictionary
+#> 
+#> Cleaning contaminant and biological effects data
 ```
 
 # Construct timeseries
 
 Uses OSPAR basis choice for mercury
 
-```{r external-timeseries}
+
+```r
 biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
   get_basis = get_basis_biota_OSPAR
 )
+#> 
+#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
+#>  'oddities/biota_backup'
+#> 
+#> Cleaning data
+#>    Dropping stations with no data between 2012 and 2017
+#>    Unexpected or missing values for 'basis': see basis_queries.csv
+#>    Unexpected or missing values for 'value': see value_queries.csv
+#> 
+#> Creating time series data
+#>    Converting data to appropriate basis for statistical analysis
+#>    Losing 25 out of 4629 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Dropping groups of compounds / stations with no data between 2012 and 2017
 ```
 
 # Assessment
 
 Main runs
 
-```{r external-assessment}
+
+```r
 biota_assessment <- ctsm_assessment(biota_timeSeries)
+#> 
+#> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries juvenile; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix MU; subseries adult; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A20; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A20; determinand HG; species Phoca hispida; matrix LI; subseries juvenile; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A20; determinand HG; species Phoca hispida; matrix MU; subseries adult; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A20; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix LI; subseries large; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix LI; subseries small; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix MU; subseries large; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix MU; subseries small; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix LI; subseries juvenile; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix MU; subseries adult; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix LI; subseries juvenile; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix MU; subseries adult; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix EP; subseries large; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix EP; subseries small; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix KI; subseries large; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix KI; subseries small; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix LI; subseries large; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix LI; subseries small; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix MU; subseries large; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix MU; subseries small; basis W; unit ug/kg
 ```
 
 Use the code below if it takes a long time to run
@@ -84,15 +199,18 @@ biota_assessment <- ctsm_assessment(biota_timeSeries, parallel = TRUE)
 
 ## Check convergence
 
-```{r external-convergence}
+
+```r
 (wk_check <- ctsm_check_convergence(biota_assessment$assessment))
+#> character(0)
 ```
 
 # Summary files
 
 This writes the summary data to a file in `output/example_external_data`.
 
-```{r external-summary}
+
+```r
 summary.dir <- file.path(working.directory, "output", "example_external_data")
 
 if (!dir.exists(summary.dir)) {
@@ -119,7 +237,8 @@ if subset is NULL (default), all timeseries are plotted (can take some time)
 
 Graphics plots are written to files in `output/graphics`.
 
-```{r external-graphics1}
+
+```r
 graphics.dir <- file.path(working.directory, "output", "graphics")
 
 if (!dir.exists(graphics.dir)) {
@@ -135,7 +254,8 @@ ctsm_plot_assessment(
 )
 ```
 
-```{r external-graphics2}
+
+```r
 ctsm_plot_assessment(
   biota_assessment,
   subset = matrix %in% "LI",
@@ -145,7 +265,8 @@ ctsm_plot_assessment(
 )
 ```
 
-```{r external-graphics3}
+
+```r
 ctsm_plot_assessment(
   biota_assessment,
   subset = station_code %in% "A1",
@@ -155,7 +276,8 @@ ctsm_plot_assessment(
 )
 ```
 
-```{r external-graphics4}
+
+```r
 ctsm_plot_assessment(
   biota_assessment, 
   subset = series == "A1 HG Phoca hispida LI adult",

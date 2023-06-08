@@ -1,0 +1,158 @@
+---
+title: "Simple OSPAR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simple OSPAR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This is a simple example of using the `harsat` with OSPAR.
+
+```{r}
+library(harsat)
+```
+
+# Read data from ICES extraction
+
+There are three input data sets: 
+- the contaminant data
+- the station dictionary
+- the quality assurance data (more accurately called a chemical methods file)
+
+Load the R package `here`, because we use the working directory to find
+the data files. If you use your own data files, you will need to point to
+a directory containing a copy.
+
+```{r}
+library(here)
+working.directory <- here()
+```
+
+
+```{r ospar-read-data}
+biota_data <- ctsm_read_data(
+  compartment = "biota", 
+  purpose = "OSPAR",                               
+  contaminants = "test_data.csv", 
+  stations = "station_dictionary.csv", 
+  QA = "quality_assurance.csv",
+  data_path = file.path(working.directory, "data", "example_simple_OSPAR"),
+  info_files = list(determinand = "determinand_simple_OSPAR.csv"),
+  info_path = file.path(working.directory, "information"), 
+  extraction = "2022/01/11",
+  max_year = 2020L  
+)
+```
+
+## Prepare data for next stage
+
+Gets correct variable and streamlines some of the data files
+
+```{r ospar-tidy-data}
+biota_data <- ctsm_tidy_data(biota_data)
+```
+
+## Construct timeseries
+
+Identifies groups of data that form a coherent timeseries.
+Also does a lot of data cleaning and processing (creates oddities folder).
+
+```{r ospar-create-timeseries}
+biota_timeSeries <- ctsm_create_timeSeries(
+  biota_data,
+  determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"), 
+  determinands.control = list(
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
+    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+  ), 
+  get_basis = get_basis_biota_OSPAR
+)
+```
+
+Identical (apart from call) to: 
+
+```{r eval=FALSE}
+ctsm_create_timeSeries(
+  biota_data,
+  determinands = ctsm_get_determinands("biota"),
+  determinands.control = list(
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
+    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+  )
+)
+
+ctsm_create_timeSeries(
+  biota_data,
+  determinands.control = list(
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
+    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+  )
+)
+```
+
+# Assessment
+
+Do the statistical analysis
+
+```{r ospar-assessment}
+biota_assessment <- ctsm_assessment(
+  biota_timeSeries, 
+  AC = c("BAC", "EAC", "EQS", "HQS"), 
+  get_assessment_criteria = get.AC.OSPAR
+)
+```
+
+Check convergence - no errors this time
+
+```{r ospar-convergence}
+ctsm_check_convergence(biota_assessment$assessment)
+```
+
+# Summary files
+
+```{r ospar-summary}
+summary.dir <- file.path(working.directory, "output", "example_simple_OSPAR")
+
+if (!dir.exists(summary.dir)) {
+  dir.create(summary.dir, recursive = TRUE)
+}
+
+webGroups <- list(
+  levels = c("Metals", "Metabolites", "Organobromines", "Chlorobiphenyls"),  
+  labels = c(
+    "Metals", "PAH metabolites", "Organobromines",  "Polychlorinated biphenyls"
+  )
+)
+
+classColour <- list(
+  below = c(
+    "BAC" = "blue", 
+    "EAC" = "green", 
+    "EQS" = "green",
+    "HQS" = "green"
+  ),
+  above = c(
+    "BAC" = "orange", 
+    "EAC" = "red", 
+    "EQS" = "red",
+    "HQS" = "red"
+  ), 
+  none = "black"
+)
+
+ctsm_summary_table(
+  biota_assessment, 
+  determinandGroups = webGroups,
+  classColour = classColour,
+  collapse_AC = list(EAC = c("EAC", "EQS")),
+  output_dir = summary.dir, 
+)
+```

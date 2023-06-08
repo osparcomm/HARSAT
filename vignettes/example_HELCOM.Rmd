@@ -10,16 +10,12 @@ vignette: >
 This is a brief example of using the `harsat` with HELCOM-style
 data.
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
+
 
 First, load the `harsat` the library
 
-```{r}
+
+```r
 library(harsat)
 ```
 
@@ -27,14 +23,17 @@ And load the R package `here`, because we use the working directory to find
 the data files. If you use your own data files, you will need to point to
 a directory containing a copy.
 
-```{r}
+
+```r
 library(here)
+#> here() starts at /Users/stuart/git/HARSAT
 working.directory <- here()
 ```
 
 Load the biota data, using HELCOM-style.
 
-```{r helcom-read-biota}
+
+```r
 biota_data <- ctsm_read_data(
   compartment = "biota",
   purpose = "HELCOM",
@@ -46,11 +45,19 @@ biota_data <- ctsm_read_data(
   extraction = "2022/10/06",
   max_year = 2021L
 )
+#> Reading station dictionary from:
+#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/station_dictionary.csv'
+#> 
+#> Reading contaminant and biological effects data from:
+#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/biota_data.csv'
+#> 
+#> Reading QA data from '/Users/stuart/git/HARSAT/data/example_HELCOM/quality_assurance.csv'
 ```
 
 Next, load the sediment data, again using HELCOM-style.
 
-```{r helcom-read-sediment}
+
+```r
 sediment_data <- ctsm_read_data(
   compartment = "sediment",
   purpose = "HELCOM",
@@ -62,11 +69,17 @@ sediment_data <- ctsm_read_data(
   max_year = 2021L,
   data_format = "ICES_new"
 )
+#> Reading station dictionary from:
+#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/station_dictionary.csv'
+#> 
+#> Reading contaminant and biological effects data from:
+#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/../example_HELCOM_new_format/sediment_data.csv'
 ```
 
 And finally, read the water data.
 
-```{r helcom-read-water}
+
+```r
 water_data <- ctsm_read_data(
   compartment = "water",
   purpose = "HELCOM",
@@ -78,12 +91,18 @@ water_data <- ctsm_read_data(
   max_year = 2021L, 
   data_format = "ICES_new"
 )
+#> Reading station dictionary from:
+#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/station_dictionary.csv'
+#> 
+#> Reading contaminant and biological effects data from:
+#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/../example_HELCOM_new_format/water_data.csv'
 ```
 
 Now we can perform any adjustments we need to make. In this
 case, we're correcting known errors in the data. 
 
-```{r helcom-set-info-teq}
+
+```r
 info_TEQ <- c(
   "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003,
   "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003,
@@ -94,17 +113,2967 @@ info_TEQ <- c(
 )
 ```
 
-```{r child="../man/fragments/example_HELCOM_data_adjustments.Rmd"}
+
+
+
+
+
+
+
+
+
+
+## Data adjustments: water
+
+We'll use the `DT` package for some of these adjustments, and 
+`lattice` to plot some of the data so we can see it as we go.
+
+
+```r
+library(tidyverse)
+#> ── Attaching core tidyverse packages ─────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 2.0.0 ──
+#> ✔ dplyr     1.1.2     ✔ readr     2.1.4
+#> ✔ forcats   1.0.0     ✔ stringr   1.5.0
+#> ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+#> ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+#> ✔ purrr     1.0.1     
+#> ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+#> ✖ dplyr::filter() masks stats::filter()
+#> ✖ dplyr::lag()    masks stats::lag()
+#> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+library(lattice)
+
+DT_options <- list(
+  initComplete = htmlwidgets::JS(
+    "function(settings, json) {",
+    paste0("$(this.api().table().container()).css({'font-size': '", "10pt", "'});"),
+    "}")
+) 
 ```
+
+### Data summary
+
+Here is a summary of the submissions for each country, first by determinand and then by year. 
+
+
+```r
+water_data$data %>% 
+  with(table(country, determinand)) %>% 
+  print(zero.print = ".")
+#>            determinand
+#> country       CD   PB PFOS TBSN+
+#>   Estonia     29   29   28    23
+#>   Germany   1371 1349    5   156
+#>   Lithuania  267  267   47    55
+#>   Poland     862  854   36   375
+#>   Russia      23   23    .     .
+
+water_data$data %>% 
+  with(table(country, year)) %>% 
+  print(zero.print = ".")
+#>            year
+#> country     1995 1998 1999 2000 2003 2004 2005 2006 2007 2008 2009 2010 2011
+#>   Estonia      .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Germany      .   88   87  176   73  154  158  114  138  206  189  213   82
+#>   Lithuania    .    .    .    .    .    .    .    .   46   46   48   38   49
+#>   Poland       .    .    .    .    .    .    .    .    .    .    .    .  133
+#>   Russia       4   42    .    .    .    .    .    .    .    .    .    .    .
+#>            year
+#> country     2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>   Estonia      .    .    .    .    .   17    4   36   20   32
+#>   Germany     98  134   82  122  121  142  136  129  135  104
+#>   Lithuania   52   42   42   66   16    .   81   46   64    .
+#>   Poland     181   72  144   72  479  540  143  159  108   96
+#>   Russia       .    .    .    .    .    .    .    .    .    .
+```
+
+### Matrix issues
+
+Here is a summary of the matrix and filtration data. Data with matrix SPM are deleted.
+
+
+```r
+water_data$data <- mutate(
+  water_data$data,
+  filtered = if_else(grepl("NF", method_pretreatment), "No", "Yes")
+)
+
+water_data$data %>% 
+  with(table(matrix, filtered, useNA = "ifany")) %>% 
+  print(zero.print = ".")
+#>       filtered
+#> matrix   No  Yes
+#>    SPM   36    .
+#>    WT  2074 3689
+
+water_data$data <- filter(
+  water_data$data, 
+  matrix == "WT"
+)
+```
+
+### Duplicate records
+
+The following samples have duplicated records - only the first is retained.
+
+
+```r
+
+wk <- water_data$data %>%  
+  group_by(sample, determinand, filtered) %>% 
+  filter(n() >= 2) %>% 
+  ungroup()
+  
+wk %>% 
+  select(country, year, station_name, sample, determinand, filtered, replicate, value) %>% 
+  arrange(country, year, sample, determinand, replicate) %>%
+  as.data.frame() %>% 
+  DT::datatable(options = DT_options, rownames = FALSE)
+#> Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+
+```r
+wk_rep <- wk$replicate
+
+wk_keep <- wk %>% 
+  select(sample, determinand, filtered, replicate, station_name, value) %>% 
+  arrange(replicate) %>% 
+  distinct(sample, determinand, filtered, value, .keep_all = TRUE) %>% 
+  pull(replicate)
+
+wk_drop <- setdiff(wk_rep, wk_keep)
+
+water_data$data <- filter(
+  water_data$data, 
+  !replicate %in% wk_drop
+)
+```
+
+### Filtration issues
+
+Here's a summary of whether the data have been filtered or not by determinand. All PFOS and TBSN+ are unfiltered, which is fine. However, there could be issues with the metals data, since there are both filtered (preferred) and unfiltered samples.  
+
+
+```r
+water_data$data %>% 
+  with(table(determinand, filtered)) %>% 
+  print(zero.print = ".")
+#>            filtered
+#> determinand   No  Yes
+#>       CD     677 1831
+#>       PB     659 1845
+#>       PFOS   116    .
+#>       TBSN+  609    .
+```
+
+Here's a more detailed look at the metals data (having excluded the Russian data which are too old).  
+
+* **Estonia**: all samples are filtered.
+* **Germany**: a real mixture which is explored more below. 
+* **Lithuania**: the only unfiltered data are from 2007 (the first year of data). Maybe these were filtered data and have been submitted incorrectly. For now they are treated as unfiltered (and will drop out of the assessment because there are no unfiltered data in the last six monitoring years)
+* **Poland**: all samples are filtered.
+
+
+```r
+wk <- filter(
+  water_data$data, 
+  country != "Russia",
+  determinand %in% c("CD", "PB")
+) 
+  
+wk %>% 
+  with(table(filtered, country)) %>% 
+  print(zero.print = ".")
+#>         country
+#> filtered Estonia Germany Lithuania Poland
+#>      No        .    1244        46      .
+#>      Yes      58    1414       488   1716
+
+wk %>% 
+  with(table(filtered, year, country)) %>% 
+  print(zero.print = ".")
+#> , , country = Estonia
+#> 
+#>         year
+#> filtered 1998 1999 2000 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013
+#>      No     .    .    .    .    .    .    .    .    .    .    .    .    .    .
+#>      Yes    .    .    .    .    .    .    .    .    .    .    .    .    .    .
+#>         year
+#> filtered 2014 2015 2016 2017 2018 2019 2020 2021
+#>      No     .    .    .    .    .    .    .    .
+#>      Yes    .    .    .   12    2   18   10   16
+#> 
+#> , , country = Germany
+#> 
+#>         year
+#> filtered 1998 1999 2000 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013
+#>      No    88   87  176   73  154  119   24   24   32   32   69   62   36   32
+#>      Yes    .    .    .    .    .   13   90  114  174  121  144   20   62  102
+#>         year
+#> filtered 2014 2015 2016 2017 2018 2019 2020 2021
+#>      No    24   32   20   44   48   22   46    .
+#>      Yes   58   90   96   68   66   72   58   66
+#> 
+#> , , country = Lithuania
+#> 
+#>         year
+#> filtered 1998 1999 2000 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013
+#>      No     .    .    .    .    .    .    .   46    .    .    .    .    .    .
+#>      Yes    .    .    .    .    .    .    .    .   46   48   34   40   40   42
+#>         year
+#> filtered 2014 2015 2016 2017 2018 2019 2020 2021
+#>      No     .    .    .    .    .    .    .    .
+#>      Yes   42   34    .    .   58   46   58    .
+#> 
+#> , , country = Poland
+#> 
+#>         year
+#> filtered 1998 1999 2000 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013
+#>      No     .    .    .    .    .    .    .    .    .    .    .    .    .    .
+#>      Yes    .    .    .    .    .    .    .    .    .    .    .  123  151   72
+#>         year
+#> filtered 2014 2015 2016 2017 2018 2019 2020 2021
+#>      No     .    .    .    .    .    .    .    .
+#>      Yes  144   72  336  348  143  147   96   84
+```
+
+#### German metals data
+
+Here are the stations with metals data in the last six monitoring years (2016-2021); the second column shows whether the metal samples in this period were all filtered, all unfiltered, or a mixture.
+
+
+```r
+wk <- wk %>% 
+  filter(country == "Germany") %>%
+  group_by(station_name) %>% 
+  filter(max(year) >= 2016) %>%
+  ungroup()
+
+
+wk_fun <- function(x) {
+  if (all(x == "Yes")) return("filtered")
+  if (all(x == "No")) return("unfiltered")
+  "mixture"
+}
+
+wk1 <- wk %>% 
+  filter(year >= 2016) %>% 
+  group_by(station_name) %>% 
+  summarise(type = wk_fun(filtered), .groups = "drop_last")
+
+as.data.frame(wk1) %>% 
+  DT::datatable(options = DT_options, rownames = FALSE)
+#> Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+There are three stations where there is a mixture. Here are the full records of 
+samples at these stations. These look intentional. Filtered and unfiltered 
+samples will be analysed as separate time series.
+
+
+```r
+wk_id <- wk1 %>% 
+  filter(type == "mixture") %>% 
+  pull(station_name)
+
+wk %>% 
+  filter(station_name %in% wk_id) %>% 
+  with(table(filtered, year, station_name)) %>% 
+  print(zero.print = ".")
+#> , , station_name = OMBMPM2
+#> 
+#>         year
+#> filtered 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018
+#>      No     1    2    4    4    4    8    4    4    4    2    2    2    4    4
+#>      Yes    1    2    2    2    4    .    .    .    .    .    .    2    .    .
+#>         year
+#> filtered 2019 2020
+#>      No     2    4
+#>      Yes    .    .
+#> 
+#> , , station_name = OMBMPN3
+#> 
+#>         year
+#> filtered 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018
+#>      No     .    .    .    4    4    8    4    4    4    2    4    2    4    4
+#>      Yes    .    .    .    2    4    .    .    .    .    .    .    2    .    .
+#>         year
+#> filtered 2019 2020
+#>      No     2    2
+#>      Yes    .    .
+#> 
+#> , , station_name = OMO22
+#> 
+#>         year
+#> filtered 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018
+#>      No     .    .    4    4    4    4    4    4    4    2    2    2    4    4
+#>      Yes    .    .    .    .    .   20    .    .    .    .    .    .   12    .
+#>         year
+#> filtered 2019 2020
+#>      No     2    4
+#>      Yes    .    8
+```
+
+#### Zero concentrations
+
+Some metals concentrations from Lithuania in 2008 have been reported with value = 0. These measurements are less than the LoQ (Nijole 22 August) so the value has been replaced by the LoQ. (There are no uncertainties reported, so there is no need to adjust these.)
+
+
+```r
+water_data$data <- mutate(
+  water_data$data, 
+  .id = value == 0
+)
+
+if (sum(water_data$data$.id) != 23) {
+  stop("something has changed - investigate")
+}  
+
+water_data$data %>% 
+  filter(.id) %>% 
+  select(
+    country, year, determinand, value, censoring, limit_detection, 
+    limit_quantification, uncertainty, unit_uncertainty
+  ) %>% 
+  as.data.frame() %>% 
+  DT::datatable(options = DT_options, rownames = FALSE)
+#> Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+
+```r
+water_data$data <- mutate(
+  water_data$data, 
+  value = if_else(.id, limit_quantification, value),
+  .id = NULL
+)
+```
+
+## Sediment
+
+### Data summary
+
+Here is a summary of the submissions for each country, first by determinand and then 
+by year. The grain size fraction data have been omitted for simplicity.  
+
+
+```r
+wk <- filter(
+  sediment_data$data, 
+  !grepl("GSMF", determinand)
+)
+
+wk %>% 
+  with(table(country, determinand)) %>% 
+  print(zero.print = ".")
+#>            determinand
+#> country      AL ANT BD100 BD153 BD154 BDE28 BDE47 BDE99  CD CORG CTOT  CU
+#>   Denmark   498 374   111    56   114     .    98   104 479  467   30 485
+#>   Estonia    23  28    30    30    30    30    30    30  28   23    .  28
+#>   Finland     8  22     9     9     9     9     9     9  20    8    .   8
+#>   Germany   307 129     4     4     3     5     4     4 362  411    . 327
+#>   Latvia      .   .     .     .     .     .     .     .   .    .    .   1
+#>   Lithuania 125  43    14    14    14    12    14    14 187    8    . 172
+#>   Norway      6   6     .     .     .     .     .     .   6    6    .   6
+#>   Poland    136  10     .     .     .     .     .     .  43    .    .  43
+#>   Russia      .  13     .     .     .     .     .     .   9    .    .   9
+#>   Sweden    237  60    56    42    42    28    56    56 245  225  126 245
+#>            determinand
+#> country     DRYWT% FLU HBCD HBCDA HBCDB HBCDG  LI LOIGN  PB TBSN+ TBTIN
+#>   Denmark      481 448    .     .     .     . 469   515 482     .   402
+#>   Estonia        2  28    .     .     .     .   .     .  28    28     .
+#>   Finland        8  22    .     4     4     4   8     .  20    21     .
+#>   Germany       15 127    .     .     .     . 233    70 367   102    34
+#>   Latvia         .   .    .     .     .     .   .     .   1     .     .
+#>   Lithuania      8  43    8     8     8     8   .     . 187     7     .
+#>   Norway         .   6    .     .     .     .   6     .   6     .     .
+#>   Poland       327  27    .     .     .     .   .   278  43     8     .
+#>   Russia         .  13    .     .     .     .   .     .   9     .     .
+#>   Sweden       255  60   14    14    14    14 139   108 245    56     4
+
+wk %>% 
+  with(table(country, year)) %>% 
+  print(zero.print = ".")
+#>            year
+#> country     1985 1990 1991 1993 1995 1996 1997 1998 1999 2000 2001 2002 2003
+#>   Denmark     10    .  135    .    .    .    .    .  217  452  152    .  711
+#>   Estonia      .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Finland      .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Germany      .    .    .  461    .    .    .   94   75  138   48  166   42
+#>   Latvia       .    .    .    .    .    2    .    .    .    .    .    .    .
+#>   Lithuania    .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Norway       .   48    .    .    .    .    .    .    .    .    .    .    .
+#>   Poland       .    .    .    .    .    .    .    6    6   12    .   78   39
+#>   Russia       .    .    .    .   10    .   35    8    .    .    .    .    .
+#>   Sweden       .   28    .    .    .    .    .    .    .    .    4    .  196
+#>            year
+#> country     2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016
+#>   Denmark     40    .    .  329 1221  328  121  351  360  351  451  209  175
+#>   Estonia      .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Finland      .    .    .    .    .    .    .    .   28    .    .    4    .
+#>   Germany    138   84   40   56  184   70  175  191  107   98   81    .  105
+#>   Latvia       .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Lithuania   21    .    .   45   33   51   44   65   70   60   92  116   44
+#>   Norway       .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Poland       .    .    .   95    .    .    .    .  189   27    .   56   80
+#>   Russia       .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Sweden       .    .    5    .  238    .    .    5    .    .  859    .    .
+#>            year
+#> country     2017 2018 2019 2020 2021
+#>   Denmark      .    .    .    .    .
+#>   Estonia     60   13  128   83  112
+#>   Finland     42    .   68   31   38
+#>   Germany     45   90    .   20    .
+#>   Latvia       .    .    .    .    .
+#>   Lithuania   44   48   42  119    .
+#>   Norway       .    .    .    .    .
+#>   Poland       .  174    .   35  118
+#>   Russia       .    .    .    .    .
+#>   Sweden       .    .    .  910   96
+```
+
+### Organotins
+
+Denmark, Germany and Sweden have submitted TBTIN data (as opposed to TBSN+ data). 
+TBTIN data are ambiguous and are no longer allowed.  They could represent the
+tin ion concentration or the trybutyltin cation concentration. (TBSN+ is the 
+cation concentration). Here is a more detailed breakdown by year.
+
+
+```r
+wk <- sediment_data$data %>% 
+  filter(
+    determinand %in% c("TBSN+", "TBTIN"),
+    country %in% c("Denmark", "Germany", "Sweden")
+  )    
+
+wk %>% 
+  with(table(determinand, year, country)) %>%
+  print(zero.print = ".")
+#> , , country = Denmark
+#> 
+#>            year
+#> determinand 1990 1999 2000 2001 2002 2003 2004 2007 2008 2009 2010 2011 2012
+#>       TBSN+    .    .    .    .    .    .    .    .    .    .    .    .    .
+#>       TBTIN    .   12   41   14    .   72    4    6   59   15    2   32   33
+#>            year
+#> determinand 2013 2014 2015 2016 2018 2020 2021
+#>       TBSN+    .    .    .    .    .    .    .
+#>       TBTIN   32   43   21   16    .    .    .
+#> 
+#> , , country = Germany
+#> 
+#>            year
+#> determinand 1990 1999 2000 2001 2002 2003 2004 2007 2008 2009 2010 2011 2012
+#>       TBSN+    .    .    .    .    .    .    .    .   16    7   18   12    9
+#>       TBTIN    .    .   10    .   14    .   10    .    .    .    .    .    .
+#>            year
+#> determinand 2013 2014 2015 2016 2018 2020 2021
+#>       TBSN+    8    2    .   10   15    5    .
+#>       TBTIN    .    .    .    .    .    .    .
+#> 
+#> , , country = Sweden
+#> 
+#>            year
+#> determinand 1990 1999 2000 2001 2002 2003 2004 2007 2008 2009 2010 2011 2012
+#>       TBSN+    .    .    .    .    .   14    .    .   14    .    .    .    .
+#>       TBTIN    4    .    .    .    .    .    .    .    .    .    .    .    .
+#>            year
+#> determinand 2013 2014 2015 2016 2018 2020 2021
+#>       TBSN+    .   14    .    .    .    6    8
+#>       TBTIN    .    .    .    .    .    .    .
+```
+
+* **Sweden**: the four TBTIN samples are from 1990 and would drop out of the 
+  assessment anyway because there is too big a gap until the next monitoring 
+  year in 2003 - they are deleted below to avoid any ambiguity
+* **Germany**: the 34 TBTIN samples are from 2000, 2002 and 2004 - they are 
+  all 'old' data, so they are deleted to avoid any ambiguity
+* **Denmark**: all the data are reported as TBTIN. These are tin 
+  concentrations (Owen 22 August) so are converted to cation concentrations 
+  below by multiplying by 2.44. Use the `ctsm_TBT_convert` helper function to 
+  help with this.
+
+
+```r
+sediment_data$data <- filter(
+  sediment_data$data, 
+  !(determinand %in% "TBTIN" & country %in% c("Germany", "Sweden"))
+)
+
+sediment_data$data <- ctsm_TBT_convert(
+  sediment_data$data, 
+  country %in% "Denmark", 
+  action = c("relabel", "convert")
+)
+```
+
+## Stations
+
+### Germany station BMP K4
+
+Data submitted as stations BMP K4 and OMBMPK4 should both be regarded as 
+BMP K4 (Berit, 6 October 2022).  The submitted stations and the resulting 
+station names from the extraction procedure (based on coordinates) are 
+given below by year.   
+
+
+```r
+wk_data <- filter(
+  sediment_data$data,
+  submitted.station %in% c("BMP K4", "OMBMPK4")
+) 
+
+wk_data %>% 
+  with(table(station_name, year, submitted.station)) %>% 
+  print(zero.print = ".")
+#> , , submitted.station = BMP K4
+#> 
+#>             year
+#> station_name 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2016
+#>      BMP K4     .    .    .    .    .    .    .    .    9    3    9    .    6
+#>      OMBMPK4    .    .    .    .    .    .    .    .    .    .    .    .    .
+#>             year
+#> station_name 2017 2018 2020
+#>      BMP K4     7    .    .
+#>      OMBMPK4    .    .    .
+#> 
+#> , , submitted.station = OMBMPK4
+#> 
+#>             year
+#> station_name 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2016
+#>      BMP K4     .    .    .    7   10    8    8   14    8    .    .    9    .
+#>      OMBMPK4    8   10   18    2    .    .    .    .    .    .    .    .    .
+#>             year
+#> station_name 2017 2018 2020
+#>      BMP K4     .    .    .
+#>      OMBMPK4    3    4    4
+```
+
+
+There is the possibility of some duplication in 2011 and 2017 when data were 
+submitted as both BMP K4 and OMBPK4. Here are the determinands submitted in 
+each year. There is no duplication in 2017, but eight values have been submitted 
+twice in 2011. Delete the 2011 values from OMBPK4 and then relabel OMBPK4 data 
+as BMP K4
+
+
+```r
+wk_data %>% 
+  filter(year %in% c(2011, 2017)) %>% 
+  with(table(submitted.station, determinand, year)) %>% 
+  print(zero.print = ".")
+#> , , year = 2011
+#> 
+#>                  determinand
+#> submitted.station AL ANT CD CORG CU FLU GSMF20 GSMF2000 LI PB
+#>           BMP K4   1   1  1    2  1   1      .        .  1  1
+#>           OMBMPK4  1   1  1    1  1   1      .        .  1  1
+#> 
+#> , , year = 2017
+#> 
+#>                  determinand
+#> submitted.station AL ANT CD CORG CU FLU GSMF20 GSMF2000 LI PB
+#>           BMP K4   1   .  1    .  1   .      1        1  1  1
+#>           OMBMPK4  .   1  .    1  .   1      .        .  .  .
+
+wk_data %>% 
+  filter(year %in% 2011) %>%
+  select(submitted.station, determinand, matrix, value) %>% 
+  arrange(determinand, submitted.station)
+#>    submitted.station determinand matrix     value
+#> 1             BMP K4          AL  SED20    39.300
+#> 2            OMBMPK4          AL  SED20    39.300
+#> 3             BMP K4         ANT SEDTOT     1.057
+#> 4            OMBMPK4         ANT SEDTOT     1.057
+#> 5             BMP K4          CD  SED20   120.000
+#> 6            OMBMPK4          CD  SED20   120.000
+#> 7             BMP K4        CORG  SED20    58.400
+#> 8             BMP K4        CORG SEDTOT    60.900
+#> 9            OMBMPK4        CORG  SED20    58.400
+#> 10            BMP K4          CU  SED20 41000.000
+#> 11           OMBMPK4          CU  SED20 41000.000
+#> 12            BMP K4         FLU SEDTOT     4.917
+#> 13           OMBMPK4         FLU SEDTOT     4.917
+#> 14            BMP K4          LI  SED20    41.000
+#> 15           OMBMPK4          LI  SED20    41.000
+#> 16            BMP K4          PB  SED20 79000.000
+#> 17           OMBMPK4          PB  SED20 79000.000
+
+wk_code <- get_station_code("BMP K4", "Germany", sediment_data$stations)
+#> Warning: There was 1 warning in `mutate()`.
+#> ℹ In argument: `across(.fns = as.character)`.
+#> Caused by warning:
+#> ! Using `across()` without supplying `.cols` was deprecated in dplyr 1.1.0.
+#> ℹ Please supply `.cols` instead.
+
+sediment_data$data <- sediment_data$data %>% 
+  filter(!(year == 2011 & submitted.station == "OMBMPK4")) %>% 
+  mutate(
+    .change = submitted.station == "OMBMPK4",
+    station_name = if_else(.change, "BMP K4", station_name),
+    station_code = if_else(.change, wk_code, station_code),
+    .change = NULL
+  )
+```
+
+### Matrix issues
+
+Here is a summary of matrix submissions by country. To focus on 'relevant' 
+data, only stations that have been monitored in the last six monitoring 
+years (2016-2021) have been considered. Grain size fraction data have also 
+been omitted. Only Germany and Poland have submitted in multiple matrices 
+and it is worth investigating what is going on. Note that SED62 is treated 
+as SED63 in the code; similarly SED2000 is treated as SEDTOT. 
+
+
+```r
+wk <- sediment_data$data %>% 
+  filter(
+    !is.na(station_name), 
+    !grepl("GSMF", determinand)
+  ) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>% 
+  ungroup()  
+
+wk %>% 
+  with(table(matrix, country)) %>% 
+  print(zero.print = ".")
+#>          country
+#> matrix    Denmark Estonia Finland Germany Lithuania Poland Sweden
+#>   SED20         .       .       .     849         .      .      .
+#>   SED2000     247       .       .     229         .     12      .
+#>   SED62         .       .       .       .         .      1      .
+#>   SED63         .       .       .      82         .    838   2294
+#>   SEDTOT        .     396     183     213       787      .      .
+```
+
+### Poland
+
+All SED2000 data are from 2000 or earlier, so they are deleted to 
+avoid confusion with the SED63 (or SED62) data.
+
+
+```r
+wk %>% 
+  filter(country == "Poland") %>% 
+  with(table(matrix, year)) %>% 
+  print(zero.print = ".")
+#>          year
+#> matrix    1998 1999 2000 2002 2003 2007 2012 2013 2015 2016 2018 2020 2021
+#>   SED2000    6    3    3    .    .    .    .    .    .    .    .    .    .
+#>   SED62      .    .    .    1    .    .    .    .    .    .    .    .    .
+#>   SED63      .    .    .   51   13   95  189   27   56   80  174   35  118
+
+sediment_data$data <- filter(
+  sediment_data$data,  
+  !(country == "Poland" & matrix == "SED2000")
+)
+```
+
+### Germany
+
+Here is a summary of German data by matrix. All organics (apart 
+from three TBSN+ samples) are measured in SED2000 (or SEDTOT). 
+The metals are measured in SED20, SED63 or SED2000.  
+
+
+```r
+wk <- filter(wk, country == "Germany")
+
+wk %>% 
+  with(table(determinand, matrix)) %>% 
+  print(zero.print = ".")
+#>            matrix
+#> determinand SED20 SED2000 SED63 SEDTOT
+#>      AL       148       3     .      .
+#>      ANT        .      47     .     58
+#>      BD100      .       3     .      .
+#>      BD153      .       3     .      .
+#>      BD154      .       3     .      .
+#>      BDE28      .       4     .      .
+#>      BDE47      .       3     .      .
+#>      BDE99      .       3     .      .
+#>      CD       147       3    38      .
+#>      CORG     134      33     3     61
+#>      CU       147       3     .      .
+#>      DRYWT%     .       .     .     15
+#>      FLU        .      44     .     59
+#>      LI        97       3     .      .
+#>      LOIGN     30      30     .     10
+#>      PB       146       3    38      .
+#>      TBSN+      .      41     3     10
+```
+
+The three TBSN+ samples in SED63 are the only TBSN+ data from 
+station OMBMPK8 and were last sampled in 2012, so we don't need 
+to worry about them. Here is a summary of the TBSN+ submissions 
+from stations where SDE63 has been used.
+
+
+```r
+wk %>% 
+  filter(determinand %in% "TBSN+") %>% 
+  group_by(station_name) %>% 
+  filter(any(matrix %in% "SED63")) %>% 
+  ungroup() %>% 
+  with(table(matrix, year, station_name)) %>% 
+  print(zero.print = ".")
+#> , , station_name = OMBMPK8
+#> 
+#>        year
+#> matrix  2009 2011 2012
+#>   SED63    1    1    1
+```
+
+Here is a summary of matrix sumbissions for the metals by station 
+and matrix. Most of the data are in SED20. 
+
+
+```r
+sediment_data$data <- sediment_data$data %>%
+  mutate(
+    .id = country %in% "Germany" & determinand %in% c("CD", "PB", "CU"), 
+    .recent = station_name %in% wk$station_name,
+    .target_matrix = matrix %in% "SED20"
+  ) %>% 
+  unite(".sample", sample, determinand, remove = FALSE)
+
+sediment_data$data %>% 
+  filter(.id & .recent) %>%
+  with(table(station_name, matrix)) %>% 
+  print(zero.print = ".")
+#>             matrix
+#> station_name SED20 SED2000 SED63
+#>     BMP K4      42       .     .
+#>     Oderbank    12       .     .
+#>     OM225027    15       .     8
+#>     OM225054     .       .     2
+#>     OM225059    15       .     8
+#>     OM701       15       .     8
+#>     OM708       15       .     8
+#>     OM714       15       .     8
+#>     OMBMPK7     55       3     .
+#>     OMBMPK8     58       3     .
+#>     OMBMPM2     63       3     .
+#>     OMBMPN1     30       .     .
+#>     OMBMPN3     30       .     .
+#>     OMF1        15       .     8
+#>     OMMB3       15       .     8
+#>     OMMB6       15       .     6
+#>     OMS2        15       .     6
+#>     OMS3        15       .     6
+```
+
+It turns out that the SED2000 measurements are 'replicates' in the sense 
+that the same samples already have SED20 measurements. Since SED20 
+appears to be the target matrix, it makes sense to delete the SED2000 
+measurements. Here is what is left.
+
+
+```r
+
+wk_sample <- sediment_data$data %>% 
+  filter(.id & .target_matrix) %>% 
+  pull(.sample) %>% 
+  unique()
+
+sediment_data$data <- filter(
+  sediment_data$data,
+  !(.sample %in% wk_sample & matrix %in% "SED2000")
+)
+
+sediment_data$data %>% 
+  filter(.id & .recent) %>%
+  with(table(station_name, matrix)) %>% 
+  print(zero.print = ".")
+#>             matrix
+#> station_name SED20 SED63
+#>     BMP K4      42     .
+#>     Oderbank    12     .
+#>     OM225027    15     8
+#>     OM225054     .     2
+#>     OM225059    15     8
+#>     OM701       15     8
+#>     OM708       15     8
+#>     OM714       15     8
+#>     OMBMPK7     55     .
+#>     OMBMPK8     58     .
+#>     OMBMPM2     63     .
+#>     OMBMPN1     30     .
+#>     OMBMPN3     30     .
+#>     OMF1        15     8
+#>     OMMB3       15     8
+#>     OMMB6       15     6
+#>     OMS2        15     6
+#>     OMS3        15     6
+```
+
+There appears to have been a change in strategy at some stations, 
+switching to SED63 in 2012. Here are the matrix records for those 
+stations where metals have been sampled in both SED20 and SED63.  
+
+
+```r
+
+wk_id <- sediment_data$data %>% 
+  filter(.id & .recent) %>% 
+  group_by(station_name) %>% 
+  filter(all(c("SED63", "SED20") %in% matrix)) %>% 
+  ungroup() %>% 
+  pull(station_name) %>% 
+  unique()
+
+sediment_data$data %>% 
+  filter(.id & .recent & station_name %in% wk_id) %>%
+  with(table(matrix, year)) %>% 
+  print(zero.print = ".")
+#>        year
+#> matrix  2000 2002 2004 2008 2010 2012 2014 2016 2018
+#>   SED20   30   30   30   30   30    .    .    .    .
+#>   SED63    .    .    .    .    .   20   16   18   20
+```
+
+To ensure the time series have a consistent matrix, the SED20 records 
+from these stations from before 2012 are deleted. 
+
+
+```r
+
+sediment_data$data <- sediment_data$data %>% 
+  filter(!(.id & station_name %in% wk_id & matrix %in% "SED20")) %>%
+  mutate(
+    .id = NULL, 
+    .recent = NULL,
+    .sample = NULL,
+    .target_matrix = NULL
+  )
+```
+
+### SBDE6
+
+For info, here are the PBDE measurements by country (again filtered on 
+stations that have been monitored in the last six years). When constructing 
+the sum of the six PBDEs, we will lose the following data due to incomplete 
+submissions: 2012 data from Lithuania (no BDE28) and 2003 and 2008 data from 
+Sweden. (Note that HOLAS 2 required all six PBDEs to be present, although 
+it turned out that no sample had a corresponding organic carbon measurement, 
+so all the data dropped out anyway.)     
+
+
+```r
+wk <- sediment_data$data %>%
+  filter(grepl("BD", determinand)) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>% 
+  ungroup()
+
+wk %>% 
+  with(table(determinand, year, country)) %>% 
+  print(zero.print = ".")
+#> , , country = Estonia
+#> 
+#>            year
+#> determinand 2003 2008 2012 2014 2017 2018 2019 2020 2021
+#>       BD100    .    .    .    .    5    1    9    7    8
+#>       BD153    .    .    .    .    5    1    9    7    8
+#>       BD154    .    .    .    .    5    1    9    7    8
+#>       BDE28    .    .    .    .    5    1    9    7    8
+#>       BDE47    .    .    .    .    5    1    9    7    8
+#>       BDE99    .    .    .    .    5    1    9    7    8
+#> 
+#> , , country = Finland
+#> 
+#>            year
+#> determinand 2003 2008 2012 2014 2017 2018 2019 2020 2021
+#>       BD100    .    .    .    .    .    .    4    2    3
+#>       BD153    .    .    .    .    .    .    4    2    3
+#>       BD154    .    .    .    .    .    .    4    2    3
+#>       BDE28    .    .    .    .    .    .    4    2    3
+#>       BDE47    .    .    .    .    .    .    4    2    3
+#>       BDE99    .    .    .    .    .    .    4    2    3
+#> 
+#> , , country = Lithuania
+#> 
+#>            year
+#> determinand 2003 2008 2012 2014 2017 2018 2019 2020 2021
+#>       BD100    .    .    2    3    .    .    .    8    .
+#>       BD153    .    .    2    3    .    .    .    8    .
+#>       BD154    .    .    2    3    .    .    .    8    .
+#>       BDE28    .    .    .    3    .    .    .    8    .
+#>       BDE47    .    .    2    3    .    .    .    8    .
+#>       BDE99    .    .    2    3    .    .    .    8    .
+#> 
+#> , , country = Sweden
+#> 
+#>            year
+#> determinand 2003 2008 2012 2014 2017 2018 2019 2020 2021
+#>       BD100   14   14    .   14    .    .    .    6    8
+#>       BD153    .   14    .   14    .    .    .    6    8
+#>       BD154    .   14    .   14    .    .    .    6    8
+#>       BDE28    .    .    .   14    .    .    .    6    8
+#>       BDE47   14   14    .   14    .    .    .    6    8
+#>       BDE99   14   14    .   14    .    .    .    6    8
+```
+
+### Basis
+
+Here is the basis of submissions (apart from grain size fractions 
+and drywt%). 
+
+
+```r
+wk <- sediment_data$data %>% 
+  filter(
+    !grepl("GSMF", determinand), 
+    determinand != "DRYWT%", 
+    !is.na(station_name)
+  ) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>% 
+  with(table(country, basis)) %>% 
+  print(zero.print = ".")
+#>            basis
+#> country        D    W
+#>   Denmark    227    .
+#>   Estonia    394    .
+#>   Finland    169    6
+#>   Germany   1199    .
+#>   Lithuania  748   33
+#>   Poland     532    .
+#>   Sweden    2043    .
+```
+
+Wet weight submissions are unusual. The Lithuanian submissions have been 
+confirmed as correct (Nijole, 19 August 2022). The Finnish submissions 
+should be dry weight (Emmi, 16 August 2022) and this is corrected below.
+
+
+```r
+wk %>% 
+  filter(basis == "W") %>% 
+  with(table(determinand, year, country)) %>% 
+  print(zero.print = ".")
+#> , , country = Finland
+#> 
+#>            year
+#> determinand 2015 2020
+#>       CD       .    3
+#>       CORG     .    .
+#>       HBCD     .    .
+#>       HBCDA    .    .
+#>       HBCDB    .    .
+#>       HBCDG    .    .
+#>       PB       .    3
+#>       TBSN+    .    .
+#> 
+#> , , country = Lithuania
+#> 
+#>            year
+#> determinand 2015 2020
+#>       CD       .    .
+#>       CORG     6    .
+#>       HBCD     6    .
+#>       HBCDA    6    .
+#>       HBCDB    6    .
+#>       HBCDG    6    .
+#>       PB       .    .
+#>       TBSN+    3    .
+
+sediment_data$data <- mutate(
+  sediment_data$data, 
+  .id = basis == "W" & country == "Finland" & year == 2020
+)
+
+if (sum(sediment_data$data$.id) != 6) {
+  stop("something has changed - investigate")
+}
+
+sediment_data$data <- mutate(
+  sediment_data$data, 
+  basis = if_else(.id, "D", basis),
+  .id = NULL
+)
+```
+
+### Poland - multiple depths
+
+Poland have analysed auxiliary data (AL, DRYWT% and LOIGN) at multiple 
+depths. Just retain the surface measurements for compatibility with 
+the contaminant measurements.
+
+
+```r
+sediment_data$data %>% 
+  filter(
+    country == "Poland"
+  ) %>% 
+  with(table(determinand, depth)) %>% 
+  print(zero.print = ".")
+#>            depth
+#> determinand  0 0.01 0.02 0.03 0.04 0.06 0.08 0.15 0.22 0.29
+#>      AL     17    .   17    .   17   17   17   17   17   17
+#>      ANT    10    .    .    .    .    .    .    .    .    .
+#>      CD     35    .    .    .    .    .    .    .    .    .
+#>      CU     35    .    .    .    .    .    .    .    .    .
+#>      DRYWT% 48   10   48   10   48   38   38   29   29   29
+#>      FLU    27    .    .    .    .    .    .    .    .    .
+#>      LOIGN  40    5   40    5   40   35   35   26   26   26
+#>      PB     35    .    .    .    .    .    .    .    .    .
+#>      TBSN+   8    .    .    .    .    .    .    .    .    .
+
+sediment_data$data <- filter(
+  sediment_data$data, 
+  !(country == "Poland" & depth >= 0.01)
+)
+```
+
+## Normalisers
+
+#### Aluminium
+
+Here is a plot of the aluminium concentrations (%) in 'relevant' time 
+series by year and country. Most values seem broadly compatible with 
+normalising to 5% aluminium. However, the values from Lithuania and 
+Estonia are suspiciously small and worth looking at in more detail.  
+
+
+```r
+wk <- sediment_data$data %>% 
+  filter(!is.na(station_name)) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>% 
+  ungroup() 
+
+wk <- wk %>% 
+  filter(determinand %in% c("AL", "CORG", "LOIGN")) %>% 
+  mutate(value = convert_units(value, unit, "%"))
+
+lattice::xyplot(
+  value ~ year | country, 
+  data = subset(wk, determinand == "AL"), 
+  col = "black", 
+  scales = list(alternating = FALSE)
+)
+```
+
+![plot of chunk helcom-data-adjust-sed_AL1](figure/helcom-data-adjust-sed_AL1-1.png)
+
+Here are the Lithuanian aluminium measurements on their own. They 
+have been confirmed correct (Nijole, 19 August 2022) but are mostly 
+lower than the values you would find in pure sand (even with a weak 
+digestion method). 
+
+
+```r
+wk1 <- filter(wk, determinand == "AL" & country == "Lithuania")
+
+lattice::xyplot(
+  value ~ year, 
+  data = wk1, 
+  col = "black", 
+)
+```
+
+![plot of chunk helcom-data-adjust-sed_AL2](figure/helcom-data-adjust-sed_AL2-1.png)
+
+Here are the Estonian aluminium measurements. They are low relative to 
+other countries, but not as pronounced as for Lithuania. The corresponding 
+organic carbon measurements are also very low, so they are probably 
+monitoring very sandy sediments without sieving. 
+
+
+```r
+wk1 <- filter(wk, determinand == "AL" & country == "Estonia")
+
+lattice::xyplot(
+  value ~ year, 
+  data = wk1, 
+  col = "black", 
+)
+```
+
+![plot of chunk helcom-data-adjust-sed_AL3](figure/helcom-data-adjust-sed_AL3-1.png)
+
+### CORG / LOIGN
+
+Here is a plot of the CORG (blue) and LOIGN (purple) concentrations 
+(%) in 'relevant' time series by year and country. LOIGN will be used 
+for normalising whenever CORG is not available. Assuming 
+CORG = 0.35 $\times$ LOIGN (Owen, 17 August 2022) then normalising 
+to 5% CORG is equivalent to normalising to 14.3% LOIGN.
+ 
+
+```r
+lattice::xyplot(
+  value ~ year | country, 
+  data = subset(wk, determinand %in% c("CORG", "LOIGN")), 
+  groups = determinand,
+  scales = list(alternating = FALSE)
+)
+```
+
+![plot of chunk helcom-data-adjust-sed_corg](figure/helcom-data-adjust-sed_corg-1.png)
+
+Here is a plot of the CORG values on their own, without the distortion 
+caused by the LOIGN values. The values for Estonia are nearly all 
+less-thans (<0.1%) which supports the interpretation that their 
+sediments are nearly pure sand.
+
+
+```r
+wk <- sediment_data$data %>% 
+  filter(!is.na(station_name)) %>% 
+  group_by(station_name) %>% 
+  filter(any(year >= 2016)) %>% 
+  ungroup() 
+
+wk <- wk %>% 
+  filter(determinand %in% "CORG") %>% 
+  mutate(value = convert_units(value, unit, "%"))
+
+
+lattice::xyplot(
+  value ~ year | country, 
+  data = wk, 
+  col = "black",
+  scales = list(alternating = FALSE)
+)
+```
+
+![plot of chunk helcom-data-adjust-sed_corg2](figure/helcom-data-adjust-sed_corg2-1.png)
+
+### Sweden - missing CORG
+
+Sweden is missing CORG from sediment samples in 2020 and 2021 in which 
+organic contaminants were measured. Apparently, the samples were 
+damaged / lost before CORG could be measured. For 2021, values are provided 
+by Johan (3 October 2022) based on new samples taken at the same locations. 
+Here are the 2021 samples in the extraction:
+
+
+```r
+wk_data <- sediment_data$data %>% 
+  filter(
+    country == "Sweden", 
+    year == 2021
+  ) 
+
+with(wk_data, table(sample, determinand))
+#>          determinand
+#> sample    ANT BD100 BD153 BD154 BDE28 BDE47 BDE99 FLU HBCDA HBCDB HBCDG TBSN+
+#>   3624467   1     1     1     1     1     1     1   1     1     1     1     1
+#>   3624468   1     1     1     1     1     1     1   1     1     1     1     1
+#>   3624469   1     1     1     1     1     1     1   1     1     1     1     1
+#>   3624470   1     1     1     1     1     1     1   1     1     1     1     1
+#>   3624471   1     1     1     1     1     1     1   1     1     1     1     1
+#>   3624472   1     1     1     1     1     1     1   1     1     1     1     1
+#>   3624473   1     1     1     1     1     1     1   1     1     1     1     1
+#>   3624476   1     1     1     1     1     1     1   1     1     1     1     1
+```
+
+Next, let's find out whether we're using an "old" or "new" data format,
+and store that in a variable so we can use it.
+
+
+```r
+
+# By default, set a format flag to "old"
+wk_data_format <- "old"
+
+# Overwrite this value if a format was specified in the call
+if (!is.null(sediment_data$call$data_format)) {
+  wk_data_format <- sediment_data$call$data_format
+}
+```
+
+And here are the values of CORG provided by Johan, which are merged with 
+the main data set.
+
+
+```r
+wk_new <- 
+  read.csv(
+    file.path(working.directory, "data", "example_HELCOM", "SE_missing_CORG_sediment.csv"),
+    na.string = ""
+  ) %>%
+  select(tblSampleID, Value, MUNIT)
+
+wk_new
+#>   tblSampleID Value MUNIT
+#> 1     3624469 12.27     %
+#> 2     3624467  5.79     %
+#> 3     3624468  6.08     %
+#> 4     3624476  2.42     %
+#> 5     3624471 12.37     %
+#> 6     3624470 11.41     %
+#> 7     3624473 14.02     %
+#> 8     3624472 11.48     %
+
+wk_new <- wk_new %>%
+  select(- MUNIT) %>%
+  mutate(tblSampleID = as.character(tblSampleID))
+
+wk_data <- filter(wk_data, determinand == "ANT")
+
+wk_data <- left_join(wk_data, wk_new, by = c("sample" = "tblSampleID"))
+
+wk_data <- mutate(
+  wk_data,
+  indicator = "Supplemental",
+  pargroup = "O-MAJ",
+  determinand = "CORG",
+  value = Value,
+  unit = "%",
+  censoring = NA_character_,
+  method_analysis = NA_character_,
+  limit_detection = NA_real_,
+  limit_quantification = NA_real_, 
+  uncertainty = NA_real_, 
+  unit_uncertainty = NA_character_, 
+  alabo = "NSLS",
+  qalink = 0,
+  replicate = 1:nrow(wk_data) + max(sediment_data$data$replicate),
+  Value = NULL
+)
+
+if (wk_data_format == "new") wk_data$indicator <- NULL
+
+sediment_data$data <- bind_rows(sediment_data$data, wk_data)
+```
+
+In 2020, some samples have supporting CORG and others don't. Here are the 
+number of samples by station, and the corresponding number of CORG 
+measurements. (At some stations there are replicate measurements in the 
+same sample.) The 'missing' CORG values are taken to be the median CORG 
+measurement from the station.
+
+
+```r
+wk_data <- filter(
+  sediment_data$data,
+  country == "Sweden",
+  year == 2020
+)
+
+wk_data %>% 
+  group_by(station_name) %>%
+  summarise(n_sample = length(unique(sample)), n_CORG = sum(determinand %in% "CORG"), .groups = "drop") %>%
+  as.data.frame()
+#>    station_name n_sample n_CORG
+#> 1          SE-1        9      5
+#> 2         SE-10        8      5
+#> 3         SE-11        8      5
+#> 4         SE-12        8      9
+#> 5         SE-13        8      5
+#> 6         SE-17        9      5
+#> 7          SE-2        9      5
+#> 8          SE-3        9      5
+#> 9          SE-4        9      5
+#> 10         SE-5        9      9
+#> 11         SE-6        7      5
+#> 12         SE-7        8      5
+#> 13         SE-8        8      5
+#> 14         SE-9        8      5
+
+wk_CORG <- filter(wk_data, determinand %in% "CORG")
+
+# identify samples in wk_data with no CORG
+
+wk_data <- wk_data %>% 
+  filter(!(sample %in% wk_CORG$sample)) %>%
+  distinct(sample, .keep_all = TRUE)
+
+wk_CORG <- by(wk_CORG, wk_CORG$station_name, function(x) {
+  x <- arrange(x, value)
+  id <- floor((nrow(x) + 1) / 2)
+  x[id, ]
+})
+
+wk_CORG <- do.call(rbind, wk_CORG)
+
+
+wk_id <- c(
+  "pargroup", "determinand", "basis", "unit",
+  "value", "censoring", "limit_detection", "limit_quantification", "uncertainty",
+  "unit_uncertainty", "alabo", "method_analysis", "smtyp", "qalink"
+)
+
+if (wk_data_format == "old") {
+  wk_id <- append(wk_id, c("indicator", "ges_matrix"), after = 0)
+}
+
+wk_data[, wk_id] <- wk_CORG[wk_data$station_name, wk_id]
+
+wk_data$replicate <- 1:nrow(wk_data) + max(sediment_data$data$replicate)
+
+sediment_data$data <- bind_rows(sediment_data$data, wk_data)
+
+rm(wk_data, wk_CORG)
+```
+
+### Multiple method_extraction
+
+ There are a few instances of multiple method_extraction for sediment in the QA file. These are unusual. If they are single methods, new method_extraction codes should be set up. Unfortunately, the R code can't currently deal with them, so we have to modify them sensibly. Here are the methods and the determinands they are used for (relevant to the HELCOM assessment)
+
+
+```r
+
+sediment_data$QA %>% 
+  filter(
+    data_type == "CS",
+    determinand %in% c(
+      ctsm_get_determinands("sediment"),
+      "BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154", "HBCDA", "HBCDB", "HBCDG"
+    ),
+    grepl("~", method_extraction, fixed = TRUE)
+  ) %>%
+  distinct(method_extraction, determinand, alabo) %>%
+  arrange(method_extraction, alabo) %>%
+  select(method_extraction, alabo, determinand) %>%
+  as.data.frame() %>%
+  DT::datatable(options = DT_options, rownames = FALSE)
+```
+
+Fortunately, most of these are for organics, for which method_extraction 
+isn't used. So replace e.g. `ACH~PLE` by `ACE` etc. 
+
+`HNO-CM~LMF-A-L` is more problematic, because it is for metals and is a 
+combination of a strong and a total digestion method, which doesn't make 
+sense. Fortunately, it doesn't matter because the only time series with 
+metals data analysed by this method finished in 2014 (see below). So we 
+can replace this code by `HNO-CM` without it having any impact on the assessment.
+
+
+
+```r
+
+sediment_data$QA <- mutate(
+  sediment_data$QA,
+  method_extraction = recode(
+    method_extraction,
+    "ACH~PLE" = "ACH",
+    "ACE~PLE~TOL" = "ACE",
+    "DCM~METH" = "DCM",
+    "HAC~METH" = "HAC",
+    "HX~SPE-DCM~PLE" = "HX",
+    "SOX~TOL" = "SOX"
+  )
+)
+
+wk_id <- sediment_data$QA %>%
+  filter(
+    data_type == "CS", 
+    determinand %in% c("CD", "HG", "CU"),
+    method_extraction == "HNO-CM~LMF-A-L"
+  ) %>%
+  distinct(alabo, year) %>%
+  unite(.id) %>%
+  pull(.id)
+
+wk_id <- sediment_data$data %>%
+  unite(".id", alabo, year) %>%
+  filter(.id %in% wk_id) %>%
+  pull(station_code) %>%
+  unique()
+
+sediment_data$data %>%
+  filter(
+    determinand %in% c("CD", "PB", "CU"),
+    station_code == 11167
+  ) %>%
+  select(country, station_code, station_name, alabo, determinand, year) %>%
+  arrange(year)
+
+sediment_data$QA <- mutate(
+  sediment_data$QA,
+  method_extraction = recode(method_extraction, "HNO-CM~LMF-A-L" = "HNO-CM")
+)
+```
+
+### Missing uncertainties LOIGN
+
+Missing uncertainties for all determinands other than LOIGN are imputed 
+using the fixed and relative standard deviations derived for the 
+OSPAR 2022 assessment. Fixed and relative standard deviations for LOIGN 
+need to be estimated from the HELCOM data (because LOIGN was not used in 
+the OSPAR 2022 assessment). Here is a plot of the relative uncertainties 
+for LOIGN that have been reported, by country. (Some very large Danish 
+uncertainties have been omitted - these are probably due to unit errors.) 
+
+
+```r
+
+wk <- sediment_data$data %>% 
+  filter(determinand %in% "LOIGN") %>%
+  mutate(
+    value = convert_units(value, unit, "%"),
+    uncertainty = case_when(
+      unit_uncertainty == "U2" ~ 100 * (uncertainty / 2) / value,
+      unit_uncertainty == "SD" ~ 100 * uncertainty / value,
+      TRUE                      ~ uncertainty
+    ),
+    uncertainty = if_else(uncertainty >= 100, NA_real_, uncertainty)
+  ) %>%
+  drop_na(uncertainty)
+
+xyplot(
+  uncertainty ~ value | country,
+  data = wk,
+  col = "black",
+  scales = list(alternating = FALSE),
+  ylab = "relative uncertainty (%)",
+  xlab = "concentration (%)"
+)
+```
+
+![plot of chunk helcom-data-adjust-sed_uncrt1](figure/helcom-data-adjust-sed_uncrt1-1.png)
+
+The relative standard deviations is estimated using the same procedures 
+as used by OSPAR, and gives a value of 0.1 (10%). The constant standard 
+deviation is set to 0 (because there are hardly any less-than measurements 
+on which to base it). 
+
+
+```r
+out_relative <- wk %>%
+  filter(
+    is.na(.data$censoring),
+    !is.na(alabo)
+  ) %>% 
+  group_by(.data$determinand, .data$alabo, .data$country) %>%
+  summarise(sd_variable = median(.data$uncertainty) / 100, .groups = "drop")
+
+# now the median value across alabos
+out_relative <- summarise(out_relative, sd_variable = median(sd_variable))
+```
+
+## Biota
+
+### Data summary
+
+Here is a summary of the submissions for each country, first by determinand 
+and then by year. Some of the less useful supporting data have been omitted 
+for simplicity (as have the four UK records from 1999).
+
+
+```r
+wk <- filter(
+  biota_data$data,
+  !grepl("TIN", determinand),
+  determinand != "IMPF%",
+  country != "United Kingdom",
+)
+
+wk %>%
+  with(table(country, determinand)) %>%
+  print(zero.print = ".")
+#>            determinand
+#> country     %FEMALEPOP   BAP BD100 BD153 BD154 BDE28 BDE47 BDE99 BR-PFOS CB101
+#>   Denmark            .  1012   124   123   124    88   107   119       .   519
+#>   Estonia            .     .    27    27    27    27    27    27       .   210
+#>   Finland            .     .   134   134   134   134   134   134       .   749
+#>   Germany            .   156   353   314   367   355   358   367       .   569
+#>   Latvia             .     .     6     6     6     6     6     6       .     9
+#>   Lithuania          .     4    12    12    12    12    12    12       .     .
+#>   Poland             .    18   620   620   620   620   620   620       .  1152
+#>   Sweden           298    31  1103  1078   467   470  2011  1997     282  2783
+#>            determinand
+#> country     CB105 CB110 CB114 CB118 CB122 CB123 CB126 CB128 CB138 CB138+163
+#>   Denmark     522   294    38   513     .    38    88   425   520         .
+#>   Estonia      28     .    28   211     .    28    28     .   211         .
+#>   Finland     155   119   107   749    48   107   107    71   748         .
+#>   Germany     443     .    14   524     .    14    14    99   569         .
+#>   Latvia        6     .     6     9     .     6     6     .     9         .
+#>   Lithuania    12     .    12    12     .    12    12     .     .         .
+#>   Poland        .     .     .  1152     .     .     .     .  1152         .
+#>   Sweden      505     .   425  3328     .   425   425     .  2283       503
+#>            determinand
+#> country     CB141 CB149 CB151 CB153 CB156 CB157 CB167 CB169 CB170  CB18 CB180
+#>   Denmark       .   377   246   521   523   108    38    89   446     .   520
+#>   Estonia       .     .     .   211    28    28    28    28     .     .   208
+#>   Finland      71    48     .   749   155   107   107   107   119    71   747
+#>   Germany       .    98     .   568   445    14    14    14    24     .   569
+#>   Latvia        .     .     .     9     6     6     6     6     .     .     9
+#>   Lithuania     .     .     .     .    12    12    12    12     .     .     .
+#>   Poland        .     .     .  1152     .     .     .     .     .     .  1152
+#>   Sweden        .     .     .  2785   505   505   505   505     .     .  2785
+#>            determinand
+#> country     CB183 CB187 CB189 CB194 CB206 CB209  CB28  CB31  CB33  CB44  CB47
+#>   Denmark       .   174    38     .     .     6   517   504     .   246     .
+#>   Estonia       .     .    28    10     .     .   209     .     .     .     .
+#>   Finland      71   119   107    71    71    71   708    48    71     .    71
+#>   Germany       .     .    14     .     .     .   559     .     .     .     .
+#>   Latvia        .     .     6     .     .     .     8     .     .     .     .
+#>   Lithuania     .     .    12     .     .     .     .     .     .     .     .
+#>   Poland        .     .     .     .     .     .  1152     .     .     .     .
+#>   Sweden        .     .   425     .     .     .  2663     .     .     .     .
+#>            determinand
+#> country      CB49  CB51  CB52  CB60  CB66  CB74  CB77  CB81  CB99    CD CDD1N
+#>   Denmark     246     .   519     .     .     .    88    37   247  1913   105
+#>   Estonia       .     .   211     .     .     .    28    28     .    98    26
+#>   Finland      71    48   730    48   119    71   107   107    71   780   109
+#>   Germany       .     .   559     .     .     .    14    14     .   743    14
+#>   Latvia        .     .     9     .     .     .     6     6     .   262     .
+#>   Lithuania     .     .     .     .     .     .    12    12     .    96    12
+#>   Poland        .     .  1152     .     .     .     .     .     .  1419     .
+#>   Sweden        .     .  2674     .     .     .   505   425     .  2835   585
+#>            determinand
+#> country     CDD4X CDD6P CDD6X CDD9X  CDDO CDDSN CDDSP CDDST CDDSX CDF2N CDF2T
+#>   Denmark     106   105   106   105    80     .     .     .     .   105   105
+#>   Estonia      26    26    26    26    26     .     .     .     .    26    26
+#>   Finland     109   109   109   109   109     .     .     .     .   109   109
+#>   Germany      14    14    14    14    14     .     .     .     .    14    14
+#>   Latvia        .     .     .     .     6     6     6     6     6     .     6
+#>   Lithuania    12    12    12    10     7     .     .     .     .    12    12
+#>   Poland        .     .     .     .     .     .     .     .     .     .     .
+#>   Sweden      585   585   585   585   585     .     .     .     .   665   585
+#>            determinand
+#> country     CDF4X CDF6P CDF6X CDF9P CDF9X CDFDN  CDFO CDFP2 CDFSN CDFSP CDFST
+#>   Denmark     105   104   106   105   105     .   102   105     .     .     .
+#>   Estonia      26    26    26    26    26     .     .    26     .     .     .
+#>   Finland     109   109   109   109   109     .     .   109     .     .     .
+#>   Germany      14    14    14    14    14     3     .    11     .     .     .
+#>   Latvia        .     .     .     .     .     .     .     .     6     6     6
+#>   Lithuania    12    12    12    12    12     .     .    12     .     .     .
+#>   Poland        .     .     .     .     .     .     .     .     .     .     .
+#>   Sweden      585   585   585   585   585   320   583   425     .     .     .
+#>            determinand
+#> country     CDFSX CDFX1 DRYWT% EXLIP% FATWT%   FLU  HBCD HBCDA HBCDB HBCDG
+#>   Denmark       .   105   2562    617   1107  1034     .    93    89    89
+#>   Estonia       .    26     63      .     18     .     1    21    21    21
+#>   Finland       .   109   1006    309    558     .     .    70    70    70
+#>   Germany       .    14    805    345    910   156    10     1     1     1
+#>   Latvia        6     .    429      .      6     .     2     2     2     2
+#>   Lithuania     .    12     51      .      .     4    12    12    12    12
+#>   Poland        .     .   1702    380      .    18   620     .     .     .
+#>   Sweden        .   425   5781   3843      5    31  1957     .     .     .
+#>            determinand
+#> country        HG  IMPS  INTS LIPIDWT% LNMEA N-PFOS  OCDF    PB   PCB  PFOS
+#>   Denmark    2370   813  4718        .  1878      .     .  1782     .   102
+#>   Estonia     175     .     .      156     .      .    26    98     .    22
+#>   Finland    1412     .     .        .   697      .   109   779    28   164
+#>   Germany     918     .     .        .  2151      .    14   770     .    12
+#>   Latvia      294     .     .        .   267      .     6   170     .     4
+#>   Lithuania   103     .     .       31    17      .    12    96     .    12
+#>   Poland     1429     .     .      909  2538      .     .  1411     .   532
+#>   Sweden     3279     .     .        . 12673    282     2  2834     .   241
+#>            determinand
+#> country     PYR1OH   SCB  SCB7 SUM_PCB SUM_PCDD_PCDF SUM_PCDD_PCDF_PCB  TCDD
+#>   Denmark        .     .     .       .             .                 .   105
+#>   Estonia        .    10     .       .             .                 .    26
+#>   Finland        .     .   181       .             .                 .   109
+#>   Germany     1311     .     .       .             .                 .    14
+#>   Latvia         .     .     .       .             .                 .     6
+#>   Lithuania      .     .     .      18            32                32     7
+#>   Poland        54     .     .       .             .                 .     .
+#>   Sweden         .     .     .       .             .                 .   585
+#>            determinand
+#> country       VDS  VDSI
+#>   Denmark    3273    76
+#>   Estonia       .     .
+#>   Finland       .     .
+#>   Germany       .     .
+#>   Latvia        .     .
+#>   Lithuania     .     .
+#>   Poland        .     .
+#>   Sweden     8942   298
+
+wk %>%
+  with(table(country, year)) %>%
+  print(zero.print = ".")
+#>            year
+#> country     1979 1981 1982 1983 1984 1985 1986 1987 1988 1989 1990 1991 1992
+#>   Denmark      .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Estonia      .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Finland     13   14   14   44   39   49   59   60   73  163   92  108   81
+#>   Germany      .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Latvia       .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Lithuania    .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Poland       .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Sweden       .    .    .    .    .    .    .    .    .    .    .    .    .
+#>            year
+#> country     1993 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006
+#>   Denmark      .    .    .  300 1232  893  980 1646 1475 1624 1331  993 1012
+#>   Estonia      .    .    .    .    .    .    .    .    .    .    4  108  126
+#>   Finland    108   79   81   28  905  909  234  369  450  142  144  571  576
+#>   Germany      .    .    .    .  110  209  211   81   96  110    .  159  156
+#>   Latvia       .    .    .    .    .    .    2   37  120    .    .    .   44
+#>   Lithuania    .    .    .    .    .    .    .    .    .    .    .    .    .
+#>   Poland       .    .    .    .  284  241  315  318  307  280  785  785  785
+#>   Sweden       .    .    . 1663 2049 2235 2148 2413 2180 2720 2446 2439 2193
+#>            year
+#> country     2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
+#>   Denmark   1034 1540 2442 1306 3732 1789 3208 1546  585  793 1132 1107  965
+#>   Estonia     84   14    .    .  276  368  296  246  247    .   54  235  303
+#>   Finland    557  320  317  371 1019 1382  439 1451  366 1683   47  410 1269
+#>   Germany    839  545 1372 1237 1118 1063 1623 1526 1602  602  915  500  446
+#>   Latvia      67    .    .    .  143   91  149   76   45   85  160  164  125
+#>   Lithuania    8    .   12   21   37   73   58   40  246  353    8   40   24
+#>   Poland     525  525  525  525  525 1226 1428 1700 1588 1600 1590 1596 1639
+#>   Sweden    2404 3544 5325 4670 5447 5395 5192 4562 1492 4559 4892 5227 4920
+#>            year
+#> country     2020 2021
+#>   Denmark   1151  603
+#>   Estonia    400  336
+#>   Finland   1023  743
+#>   Germany    859  415
+#>   Latvia     368    .
+#>   Lithuania   32    .
+#>   Poland    1824 1898
+#>   Sweden    4635  972
+```
+
+### Duplicate records
+
+#### Finland - PFOS, FATWT%
+
+Some PFOS and FATWT% records from Finland in 2014 and 2015 appear to be 
+duplicated (see below). Only the first are retained. (There is one set 
+of FATWT% records which differ, and these are both kept for now - I wonder 
+whether one of these should actually be MU.)
+
+
+```r
+wk <- biota_data$data %>%
+  filter(
+    country == "Finland",
+    year >= 2014
+  ) %>%
+  group_by(sub.sample, determinand, matrix) %>%
+  filter(n() >= 2) %>%
+  ungroup()
+
+wk %>%
+  select(country, year, station_name, sub.sample, determinand, matrix, replicate, value) %>%
+  arrange(sub.sample, determinand, replicate) %>%
+  as.data.frame() %>%
+  DT::datatable(options = DT_options, rownames = FALSE)
+#> Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+
+```r
+wk_rep <- wk$replicate
+
+wk_keep <- wk %>% 
+  select(sub.sample, matrix, determinand, replicate, value) %>%
+  arrange(replicate) %>%
+  distinct(sub.sample, matrix, determinand, value, .keep_all = TRUE) %>%
+  pull(replicate)
+
+wk_drop <- setdiff(wk_rep, wk_keep)
+
+biota_data$data <- filter(
+  biota_data$data,
+  !replicate %in% wk_drop
+)
+```
+
+#### Sweden - dioxins
+
+There are some dioxin measurements from Sweden in 2009 and 2011 which have 
+been submitted on both a wet and a lipid basis. These are summarised below 
+for relevant stations (where there are some data in the last six monitoring 
+years). The 'duplicates' should be interchangeable, and I have retained the 
+measurements on a lipid basis.  
+
+
+```r
+get_relevant_biota <- function() {
+  biota_data$data %>% 
+    filter(!is.na(station_name)) %>%
+    group_by(station_name) %>%
+    filter(any(year >= 2016)) %>%
+    ungroup()
+}
+
+relevant_biota <- get_relevant_biota()
+
+wk <- relevant_biota %>% 
+  filter(pargroup %in% c("OC-DX", "O-BR", "OC-CB")) %>%
+  group_by(sub.sample, matrix, determinand) %>%
+  filter(all(c("L", "W") %in% basis)) %>%
+  ungroup() %>%
+  arrange(country, station_name, year, determinand, sub.sample, basis)
+
+wk %>%
+  mutate(across(where(is.character), factor)) %>%
+  summary()
+#>                           indicator      ges_matrix     country    
+#>  dl-PCBs and dioxins and furans:2432   Primary:2432   Sweden:2432  
+#>                                                                    
+#>                                                                    
+#>                                                                    
+#>                                                                    
+#>                                                                    
+#>                                                                    
+#>        mprog       rlabo                    HELCOM_subbasin   HELCOM_L3  
+#>  CEMP~COMB: 128   SERI:2432   Bothnian Sea          :576    6      :448  
+#>  COMB     :2304               Bornholm Basin        :384    2      :384  
+#>                               Bothnian Bay          :384    SEA-007:384  
+#>                               Western Gotland Basin :320    4      :256  
+#>                               Northern Baltic Proper:256    SEA-010:256  
+#>                               The Quark             :256    9      :128  
+#>                               (Other)               :256    (Other):576  
+#>    HELCOM_L4                submitted.station    sd_code    
+#>  SEA-007:384   Ängskärsklubb         : 256    6140   : 256  
+#>  SWE-016:384   Utlängan              : 256    6226   : 256  
+#>  SEA-010:256   Holmöarna             : 192    5809   : 192  
+#>  SWE-022:256   Abbekås               : 128    11188  : 128  
+#>  SWE-021:192   Bothnian Sea off shore: 128    11189  : 128  
+#>  SEA-001:128   Byxelkrok             : 128    5803   : 128  
+#>  (Other):832   (Other)               :1344    (Other):1344  
+#>                    sd_name      station_code                  station_name 
+#>  Ängskärsklubb         : 256   6140   : 256   Ängskärsklubb         : 256  
+#>  Utlängan              : 256   6226   : 256   Utlängan              : 256  
+#>  Holmöarna             : 192   5809   : 192   Holmöarna             : 192  
+#>  Abbekås               : 128   11188  : 128   Abbekås               : 128  
+#>  Bothnian Sea off shore: 128   11189  : 128   Bothnian Sea off shore: 128  
+#>  Byxelkrok             : 128   5803   : 128   Byxelkrok             : 128  
+#>  (Other)               :1344   (Other):1344   (Other)               :1344  
+#>       year              date      sample_latitude sample_longitude purpm   
+#>  Min.   :2009   11/05/2009: 128   Min.   :55.32   Min.   :11.83    T:2432  
+#>  1st Qu.:2009   12/10/2010: 128   1st Qu.:57.22   1st Qu.:15.78            
+#>  Median :2009   01/10/2010:  64   Median :60.05   Median :18.16            
+#>  Mean   :2009   04/10/2010:  64   Mean   :60.13   Mean   :18.14            
+#>  3rd Qu.:2010   06/09/2010:  64   3rd Qu.:63.53   3rd Qu.:20.50            
+#>  Max.   :2010   07/08/2009:  64   Max.   :65.76   Max.   :22.88            
+#>                 (Other)   :1920                                            
+#>   finfl                   species       sex        n_individual    pargroup   
+#>  NA's:2432   Clupea harengus  :2240   F   :1280   Min.   : 7.00   OC-DX:2432  
+#>              Perca fluviatilis: 192   M   :1120   1st Qu.:12.00               
+#>                                       NA's:  32   Median :12.00               
+#>                                                   Mean   :11.78               
+#>                                                   3rd Qu.:12.00               
+#>                                                   Max.   :12.00               
+#>                                                                               
+#>   determinand   matrix    basis       unit          value           censoring  
+#>  CDD1N  : 152   MU:2432   L:1216   ng/kg:  76   Min.   :  0.00047   D   : 336  
+#>  CDD4X  : 152             W:1216   pg/g :2356   1st Qu.:  0.07486   NA's:2096  
+#>  CDD6P  : 152                                   Median :  0.69600              
+#>  CDD6X  : 152                                   Mean   :  4.14714              
+#>  CDD9X  : 152                                   3rd Qu.:  3.10000              
+#>  CDDO   : 152                                   Max.   :150.00000              
+#>  (Other):1520                                                                  
+#>   vflag      limit_detection    limit_quantification  uncertainty  
+#>  NA's:2432   Min.   : 0.00047   Min.   : NA          Min.   : NA   
+#>              1st Qu.: 0.07486   1st Qu.: NA          1st Qu.: NA   
+#>              Median : 0.20000   Median : NA          Median : NA   
+#>              Mean   : 0.40771   Mean   :NaN          Mean   :NaN   
+#>              3rd Qu.: 0.60970   3rd Qu.: NA          3rd Qu.: NA   
+#>              Max.   :15.00000   Max.   : NA          Max.   : NA   
+#>                                 NA's   :2432         NA's   :2432  
+#>  unit_uncertainty  alabo      method_analysis  smtyp       dcflgs    
+#>  NA's:2432        UMSC:2432   GC-MS:2432      NA's:2432   NA's:2432  
+#>                                                                      
+#>                                                                      
+#>                                                                      
+#>                                                                      
+#>                                                                      
+#>                                                                      
+#>      smpno             subno          qalink         replicate       
+#>  34649  :  64   1022010229:  32   Min.   :516368   Min.   :47976502  
+#>  34650  :  64   1070810719:  32   1st Qu.:516375   1st Qu.:47984157  
+#>  34651  :  64   1072010731:  32   Median :516383   Median :47985670  
+#>  34652  :  64   1098710998:  32   Mean   :516416   Mean   :47988683  
+#>  34653  :  64   1099911010:  32   3rd Qu.:516458   3rd Qu.:47994241  
+#>  34654  :  64   1125311259:  32   Max.   :516466   Max.   :47996074  
+#>  (Other):2048   (Other)   :2240                                      
+#>    sub.sample       sample       tblspotid          upload      subseries  
+#>  3741770:  32   2112871:  64   Min.   :367894   Min.   :10335   NA's:2432  
+#>  3741771:  32   2112872:  64   1st Qu.:367929   1st Qu.:10335              
+#>  3741784:  32   2112873:  64   Median :367950   Median :10335              
+#>  3741785:  32   2112875:  64   Mean   :367952   Mean   :10335              
+#>  3741798:  32   2112876:  64   3rd Qu.:367982   3rd Qu.:10336              
+#>  3741799:  32   2112877:  64   Max.   :368010   Max.   :10336              
+#>  (Other):2240   (Other):2048
+
+wk_id <- wk %>% 
+  filter(basis == "W") %>%
+  pull(replicate)
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !replicate %in% wk_id
+)
+```
+
+#### Germany - FATWT%
+
+Some FATWT% records from Germany appear to be duplicated (see below). 
+One set of uncertainty measurements are unusually small, so accept the 
+other (where either uncertainty is reported as a percentage, or where 
+the U2 is ten percent of the value).
+
+
+```r
+wk <- biota_data$data %>%
+  filter(
+    country == "Germany", 
+    determinand %in% "FATWT%"
+  ) %>%
+  group_by(sub.sample, determinand, matrix) %>%
+  filter(n() >= 2) %>%
+  ungroup()
+  
+wk %>% 
+  select(year, station_name, sub.sample, determinand, matrix, 
+         replicate, value, uncertainty, unit_uncertainty) %>% 
+  arrange(year, sub.sample, determinand, replicate) %>%
+  as.data.frame() %>% 
+  DT::datatable(options = DT_options, rownames = FALSE)
+#> Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+
+```r
+wk_rep <- wk$replicate
+
+wk_keep <- wk %>% 
+  filter(
+    unit_uncertainty == "%" |
+      100 * uncertainty / value > 5  
+  ) %>% 
+  pull(replicate)
+
+stopifnot(2 * length(wk_keep) == length(wk_rep))
+
+wk_drop <- setdiff(wk_rep, wk_keep)
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !replicate %in% wk_drop
+)
+```
+
+### PCBs and dioxins
+
+Here's a summary of the determinands submitted for PCBs, 
+dioxins and furans.
+
+
+```r
+wk <- biota_data$data %>%
+  filter(
+    !is.na(station_name),
+    pargroup %in% c("OC-CB", "OC-DX", "OC-DX~OC-CB")
+  )
+
+table(wk$determinand)
+#> 
+#>             CB101             CB105             CB110             CB114 
+#>              5963              1643               411               605 
+#>             CB118             CB122             CB123             CB126 
+#>              6469                48               605               655 
+#>             CB128             CB138         CB138+163             CB141 
+#>               593              5464               503                69 
+#>             CB149             CB151             CB153             CB156 
+#>               523               246              5967              1646 
+#>             CB157             CB167             CB169             CB170 
+#>               755               685               736               587 
+#>              CB18             CB180             CB183             CB187 
+#>                69              5962                69               291 
+#>             CB189             CB194             CB206             CB209 
+#>               605                76                69                75 
+#>              CB28              CB31              CB33              CB44 
+#>              5788               545                69               246 
+#>              CB47              CB49              CB51              CB52 
+#>                69               315                48              5826 
+#>              CB60              CB66              CB74              CB77 
+#>                48               117                69               735 
+#>              CB81              CB99             CDD1N             CDD4X 
+#>               604               316               750               751 
+#>             CDD6P             CDD6X             CDD9X              CDDO 
+#>               750               751               748               726 
+#>             CDDSN             CDDSP             CDDST             CDDSX 
+#>                 6                 6                 6                 6 
+#>             CDF2N             CDF2T             CDF4X             CDF6P 
+#>               830               756               750               749 
+#>             CDF6X             CDF9P             CDF9X             CDFDN 
+#>               751               750               750               247 
+#>              CDFO             CDFP2             CDFSN             CDFSP 
+#>               605               663                 6                 6 
+#>             CDFST             CDFSX             CDFX1              OCDF 
+#>                 6                 6               666               148 
+#>               PCB               SCB              SCB7           SUM_PCB 
+#>                28                10               181                18 
+#>     SUM_PCDD_PCDF SUM_PCDD_PCDF_PCB              TCDD 
+#>                32                32               751
+```
+
+There are some summed values which need to be accounted for. Here they are 
+by year.
+
+
+```r
+wk_id <- c("PCB", "SCB", "SCB7", "SUM_PCB", "SUM_PCDD_PCDF", "SUM_PCDD_PCDF_PCB")
+
+wk %>%
+  filter(determinand %in% wk_id) %>%
+  with(table(determinand, year)) %>%
+  print(zero.print = ".")
+#>                    year
+#> determinand         1979 1981 1982 1983 1984 1985 1986 1987 1988 1989 1990 1991
+#>   PCB                  2    2    2    4    6    4    4    4    .    .    .    .
+#>   SCB                  .    .    .    .    .    .    .    .    .    .    .    .
+#>   SCB7                 .    .    .    .    .    .    .    .    6   15    8    8
+#>   SUM_PCB              .    .    .    .    .    .    .    .    .    .    .    .
+#>   SUM_PCDD_PCDF        .    .    .    .    .    .    .    .    .    .    .    .
+#>   SUM_PCDD_PCDF_PCB    .    .    .    .    .    .    .    .    .    .    .    .
+#>                    year
+#> determinand         1992 1993 1995 1996 1998 1999 2006 2010 2011 2012 2013 2014
+#>   PCB                  .    .    .    .    .    .    .    .    .    .    .    .
+#>   SCB                  .    .    .    .    .    .   10    .    .    .    .    .
+#>   SCB7                 6    8    6    6   60   58    .    .    .    .    .    .
+#>   SUM_PCB              .    .    .    .    .    .    .    .    .    5    4    4
+#>   SUM_PCDD_PCDF        .    .    .    .    .    .    .    5    5    8    5    4
+#>   SUM_PCDD_PCDF_PCB    .    .    .    .    .    .    .    5    5    8    5    4
+#>                    year
+#> determinand         2015
+#>   PCB                  .
+#>   SCB                  .
+#>   SCB7                 .
+#>   SUM_PCB              5
+#>   SUM_PCDD_PCDF        5
+#>   SUM_PCDD_PCDF_PCB    5
+```
+
+* PCB is ambiguous, deprecated and old
+* SCB is ambiguous, deprecated and only occurs in 2006
+* SCB7 is not relevant because it combines non-planar CBs 
+  with the dioxin-like CB118 (and is also pretty old)
+* SUM_PCB, SUM_PCDD_PCDF and SUM_PCDD_PCDF_PCB are, I think, 
+  Lithuanian food safety data which we made special arrangements 
+  for last time; however, there are no data in the last six 
+  monitoring years for these combinations, nor for individual 
+  congeners at the same stations; these data therefore fall out 
+  of the assessment
+
+The assessment code doesn't recognise some of these ad-hoc determinands 
+without modification, so it is a lot easier to get rid of them here.
+
+
+```r
+wk_check <- wk %>%
+  group_by(station_name) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk_id2 <- c("SUM_PCB", "SUM_PCDD_PCDF", "SUM_PCDD_PCDF_PCB")
+
+if (any(wk_id2 %in% wk_check$determinand)) {
+  stop("have current summed Lithuanian data")
+}
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !determinand %in% wk_id
+)
+```
+
+### Replicate measurements
+
+#### Sweden - PCBs
+
+Some Swedish PCBs (predominantly CB118) have been measured twice in the 
+same individual, I presume once for the standard set of PCB reporting 
+and once for dioxin reporting. Here are the number of measurements 
+affected, with the corresponding analytical laboratory (restricted to 
+relevant stations where there are data in the last six monitoring years).
+
+
+```r
+relevant_biota <- get_relevant_biota()
+
+wk <- relevant_biota %>%
+  filter(
+    pargroup %in% "OC-CB",
+    country == "Sweden"
+  ) %>%
+  group_by(sub.sample, matrix, determinand) %>%
+  filter(n() >= 2) %>%
+  ungroup() %>%
+  as.data.frame()
+
+wk %>%
+  with(table(determinand, alabo))
+#>            alabo
+#> determinand NSLS SLMV UMSC
+#>       CB114    0    0    2
+#>       CB118  247   32  280
+#>       CB123    0    0    2
+#>       CB126    0    0    2
+#>       CB189    0    0    2
+#>       CB81     0    0    2
+```
+
+Here are the analtyical laboratories that also measured dioxins in 
+these sub-samples.
+
+
+```r
+wk_id <- wk$sub.sample
+
+relevant_biota %>%
+  filter(
+    sub.sample %in% wk_id,
+    pargroup == "OC-DX"
+  ) %>%
+  with(table(determinand, alabo))
+#>            alabo
+#> determinand UMSC
+#>       CDD1N  279
+#>       CDD4X  279
+#>       CDD6P  279
+#>       CDD6X  279
+#>       CDD9X  279
+#>       CDDO   279
+#>       CDF2N  279
+#>       CDF2T  279
+#>       CDF4X  279
+#>       CDF6P  279
+#>       CDF6X  279
+#>       CDF9P  279
+#>       CDF9X  279
+#>       CDFDN  101
+#>       CDFO   279
+#>       CDFP2  280
+#>       CDFX1  280
+#>       TCDD   280
+```
+
+Sensible decision seems to be to retain the CB118 measurements from analytical 
+laboratory UMSC, since they are part of the same analysis suite.  This leaves 
+two replicates for six PCBs in a single sub.sample. These appear to be genuine 
+replicates. Will leave them both in, and the code will select one of them for 
+the analysis.
+
+
+```r
+wk_id <- wk %>%
+  filter(!alabo %in% "UMSC") %>%
+  pull(replicate)
+
+biota_data$data <- filter(
+  biota_data$data,
+  !replicate %in% wk_id
+)
+
+get_relevant_biota() %>%
+  filter(
+    pargroup %in% "OC-CB",
+    country == "Sweden"
+  ) %>% 
+  group_by(sub.sample, matrix, determinand) %>%
+  filter(n() >= 2) %>%
+  ungroup() %>%
+  as.data.frame() %>%
+  DT::datatable(options = DT_options, rownames = FALSE)
+#> Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+### Poland PCB 2014 data
+
+The following plot shows concentrations of CB153 at each station over time. 
+All measurements are in fish muscle and units are ug/kg ww. The species varies 
+between stations, but is consistent within stations. There are some strange 
+things going on here, but the results from 2014 (red) are particularly strange 
+and are deleted (as are all the other PCB data for that year for consistency.)
+
+
+```r
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  .id = country == "Poland" & pargroup == "OC-CB"
+)
+
+wk_data <- biota_data$data %>%
+  filter(.id & determinand == "CB153") %>%
+  mutate(concentration = convert_units(value, unit, "ug/kg"))
+
+stopifnot(
+  wk_data$matrix == "MU",
+  wk_data$basis == "W"
+)
+
+xyplot(
+  concentration ~ year | station_name,
+  data = wk_data,
+  scales = list(alternating = FALSE, y = list(log = TRUE, equispaced.log = FALSE)),
+  panel = function(x, y, subscripts) {
+    col = if_else(wk_data$year[subscripts] == 2014, "red", "blue")
+    lpoints(x, y, pch = 16, col = col)
+  }
+)
+```
+
+![plot of chunk helcom-data-adjust-bio_CB153_1](figure/helcom-data-adjust-bio_CB153_1-1.png)
+
+Here is what the data look like without the 2014 values. Many less-than values are 
+implausibly low relative to the bulk of the data (see LWLA and LKOL in 2013, and 
+many stations between 2005 and 2008), and the data could do with further scrutiny. 
+The other PCBs might exhibit similar features, but this hasn't been investigated.
+
+
+```r
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !(.id & year == 2014)
+)
+
+wk_data <- biota_data$data %>%
+  filter(.id & determinand == "CB153") %>%
+  mutate(concentration = convert_units(value, unit, "ug/kg"))
+
+biota_data$data$'.id' <- NULL
+
+xyplot(
+  concentration ~ year | station_name,
+  data = wk_data,
+  scales = list(alternating = FALSE, y = list(log = TRUE, equispaced.log = FALSE)),
+  panel = function(x, y, subscripts) {
+    col = if_else(wk_data$year[subscripts] == 2014, "red", "blue")
+    lpoints(x, y, pch = 16, col = col)
+  }
+)
+```
+
+![plot of chunk helcom-data-adjust-bio_CB153_2](figure/helcom-data-adjust-bio_CB153_2-1.png)
+
+### Strange censoring values
+
+The following data from relevant stations (with data in the last six years) 
+have censoring = ">", which is unusual. The German data appear to be well 
+above the limits of detection, so the ">" has been removed. The Swedish data 
+appear to be values below the limit of detection and have been replaced with 
+censoring = "D".
+
+
+```r
+get_relevant_biota() %>%
+  filter(grepl(">", censoring)) %>%
+  select(country, year, determinand, value, censoring, limit_detection, limit_quantification) %>%
+  arrange(country, year, determinand) %>%
+  as.data.frame() %>%
+  DT::datatable(options = DT_options, rownames = FALSE)
+#> Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+
+```r
+biota_data$data <- mutate(
+  biota_data$data, 
+  .id = grepl(">", censoring),
+  censoring = if_else(.id & country == "Germany", NA_character_, censoring),
+  censoring = if_else(.id & country == "Sweden", "D", censoring),
+  .id = NULL
+)
+```
+
+### Matrix MU&EP 
+
+Here's a summary of matrices and species for 'relevant' stations 
+(with data in the last six monitoring years).
+
+
+```r
+relevant_biota <- get_relevant_biota()
+
+relevant_biota %>%
+  with(table(species, matrix)) %>%
+  print(zero.print = ".")
+#>                     matrix
+#> species                 BI    LI    MU MU&EP   POP    SB    SH    WO
+#>   Buccinum undatum       .     .     .     .     .  2400     .     9
+#>   Clupea harengus       39  9399 59324     .     .     .     .  4443
+#>   Gadus morhua         275  7060  1066     .     .     .     .   840
+#>   Hinia reticulata       .     .     .     .     .   684     .     .
+#>   Limanda limanda      231  2307   279     .     .     .     .   501
+#>   Limecola balthica      .     .     .     .     .    12     .     .
+#>   Littorina littorea     .     .     .     .     .   379     .     .
+#>   Macoma balthica        .     .     .     .     .    26     .     .
+#>   Mytilus edulis         .     .     .     .     .  7191   925   147
+#>   Neptunea antiqua       .     .     .     .     .   443     .     6
+#>   Perca fluviatilis     16  2421 12190  2423     .     .     .  1253
+#>   Peringia ulvae         .     .     .     .    94  6491  6055     .
+#>   Platichthys flesus   338  4964  5923     .     .     .     .   907
+#>   Zoarces viviparus      .   858  4599     .     .     .     .   269
+```
+
+There are no contaminant data in BI, POP, SH or WO, so we can 
+ignore these for the current discussion.
+
+
+```r
+relevant_biota %>%
+  filter(matrix %in% c("BI", "POP", "SH", "WO")) %>%
+  with(table(determinand, matrix)) %>%
+  print(zero.print = ".")
+#>             matrix
+#> determinand    BI  POP   SH   WO
+#>   %FEMALEPOP    .   94    .    .
+#>   LNMEA         .    . 6980 8360
+#>   PYR1OH      899    .    .    .
+#>   VDSI          .    .    .   15
+```
+
+Thus, all contaminant data are in MU and LI (fish) or SB (shellfish) apart 
+from some measurements in MU&EP.  These are all in Perch from Finland where 
+there also MU measurements. These need to be teased apart. Here's a summary 
+of the number of records in perch from Finland by matrix and year.    
+
+
+```r
+wk <- relevant_biota %>%
+  filter(
+    country == "Finland",
+    species == "Perca fluviatilis"
+  )
+
+wk %>%
+  with(table(matrix, year)) %>%
+  print(zero.print = ".")
+#>        year
+#> matrix  2011 2012 2014 2015 2016 2019 2020 2021
+#>   LI       .    .    2    3    4    8   12   10
+#>   MU      51  321    9   26   40   89   63   10
+#>   MU&EP    .    .   12  209  595  632  540  435
+```
+
+Muscle and skin measurements all start in 2014.  Here are the matrices for 
+CD, HG, PB, PFOS and everything else by year.
+
+
+```r
+wk %>%
+  filter(determinand != "FATWT%") %>%
+  mutate(
+    determinand = if_else(
+      determinand %in% c("CD", "PB", "HG", "PFOS"),
+      determinand,
+      "other"
+    )
+  ) %>%
+  with(table(matrix, year, determinand)) %>%
+  print(zero.print = ".")
+#> , , determinand = CD
+#> 
+#>        year
+#> matrix  2011 2012 2014 2015 2016 2019 2020 2021
+#>   LI       .    .    .    .    2    4    6    5
+#>   MU       .    .    .    .    .    .    .    .
+#>   MU&EP    .    .    .    .    .    1    .    .
+#> 
+#> , , determinand = HG
+#> 
+#>        year
+#> matrix  2011 2012 2014 2015 2016 2019 2020 2021
+#>   LI       .    .    .    .    .    .    .    .
+#>   MU      15   55    5   20   40   89   63   10
+#>   MU&EP    .    .    .    .    .    .    .    .
+#> 
+#> , , determinand = other
+#> 
+#>        year
+#> matrix  2011 2012 2014 2015 2016 2019 2020 2021
+#>   LI       .    .    .    .    .    .    .    .
+#>   MU      34  248    .    .    .    .    .    .
+#>   MU&EP    .    .    6  192  575  610  528  425
+#> 
+#> , , determinand = PB
+#> 
+#>        year
+#> matrix  2011 2012 2014 2015 2016 2019 2020 2021
+#>   LI       .    .    .    .    2    4    6    5
+#>   MU       .    .    .    .    .    .    .    .
+#>   MU&EP    .    .    .    .    .    1    .    .
+#> 
+#> , , determinand = PFOS
+#> 
+#>        year
+#> matrix  2011 2012 2014 2015 2016 2019 2020 2021
+#>   LI       .    .    2    3    .    .    .    .
+#>   MU       .    2    2    3    .    .    .    .
+#>   MU&EP    .    .    2    3   10   10   12   10
+```
+
+Routes forward:  
+
+* Cadmium and lead: look at liver and drop the single MU&EP measurement 
+  (the extraction table only mentions LI and MU for these metals)
+* Mercury: all in muscle, so all good
+* PFOS: there is no lipid adjustment and it doesn't make sense to combine 
+  MU and MU&EP measurements in the same time series as there appears to 
+  be a systematic difference in concentration between matrices (see below); 
+  select MU&EP as these are the most recent data (Emmi, 16 August); note 
+  that the liver and muscle data drop out automatically as there are no 
+  data in the last six monitoring years
+* Others (organics): combine MU&EP and MU measurements in the same time 
+  series following lipid normalisation; the time series will be labelled as 
+  matrix MU&EP in the summary file since these are the most recent measurements
+
+
+```r
+wk %>%
+  filter(determinand == "PFOS") %>%
+  filter(matrix != "LI") %>%
+  group_by(station_name, year) %>%
+  filter(any(matrix %in% "MU")) %>%
+  ungroup() %>%
+  select(station_name, year, matrix, value) %>%
+  arrange(station_name, year, matrix) %>%
+  as.data.frame()
+#>            station_name year matrix value
+#> 1              Ahlainen 2015     MU  1.45
+#> 2              Ahlainen 2015  MU&EP  2.37
+#> 3           Kellonlahti 2014     MU  1.37
+#> 4           Kellonlahti 2014  MU&EP  2.42
+#> 5              Parainen 2015     MU  1.00
+#> 6              Parainen 2015  MU&EP  1.61
+#> 7      Seurasaarenselkä 2012     MU  1.79
+#> 8      Seurasaarenselkä 2012     MU  1.79
+#> 9  Vanhankaupunginlahti 2015     MU 10.60
+#> 10 Vanhankaupunginlahti 2015  MU&EP 18.00
+#> 11           Vaskiluoto 2014     MU  4.98
+#> 12           Vaskiluoto 2014  MU&EP  7.92
+
+biota_data$data <- biota_data$data %>%
+  mutate(
+    .id = country == "Finland" &
+      species == "Perca fluviatilis"
+  ) %>%
+  filter(
+    !(.id &
+      matrix == "MU&EP" &
+      determinand %in% c("CD", "PB")
+    ),
+    !(.id &
+      matrix == "MU" &
+      determinand %in% c("PFOS")
+    )
+  ) %>%
+  mutate(.id = NULL)
+```
+
+### Germany station issues
+
+Some data are submitted for station OMMVKHO (number of samples by 
+year below), but this station is not in the station dictionary. 
+However, there is a station called KHO with compatible co-ordinates, 
+so the station has been relabelled as KHO.
+
+
+```r
+biota_data$data <- mutate(
+  biota_data$data,
+  .id = country == "Germany" & submitted.station == "OMMVKHO"
+)
+
+biota_data$data %>%
+  filter(.id) %>%
+  distinct(sample, year, .keep_all = TRUE) %>%
+  with(table(submitted.station, year))
+#>                  year
+#> submitted.station 2017 2020
+#>           OMMVKHO    1    2
+
+wk_code <- get_station_code("KHO", "Germany", biota_data$stations)
+
+biota_data$data <- mutate(
+  biota_data$data, 
+  station_name = if_else(.id, "KHO", station_name),
+  station_code = if_else(.id, wk_code, station_code),
+  .id = NULL
+)
+```
+
+### PYR1OH
+
+A quick summary of the data.
+
+
+```r
+relevant_biota <- get_relevant_biota()
+
+relevant_biota %>% 
+  filter(determinand %in% "PYR1OH") %>%
+  with(table(species, year, country)) %>%
+  print(zero.print = ".")
+#> , , country = Germany
+#> 
+#>                     year
+#> species              2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
+#>   Clupea harengus       .   21    .    .    .    .    .    .    .    .    .
+#>   Gadus morhua          .    .    .    .   34    .   78    .   51   54   42
+#>   Limanda limanda      60   11   12   10   15   17   21    .   19   19   14
+#>   Perca fluviatilis     .    .    .    .    .    .    .    .    .    .    .
+#>   Platichthys flesus   99   23   28   34    .   58   59    .   20    .    .
+#>                     year
+#> species              2020 2021
+#>   Clupea harengus       .    .
+#>   Gadus morhua         16    .
+#>   Limanda limanda      33    .
+#>   Perca fluviatilis     .    .
+#>   Platichthys flesus    .    .
+#> 
+#> , , country = Poland
+#> 
+#>                     year
+#> species              2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019
+#>   Clupea harengus       .    .    .    2    .    2    2    2    2    2    2
+#>   Gadus morhua          .    .    .    .    .    .    .    .    .    .    .
+#>   Limanda limanda       .    .    .    .    .    .    .    .    .    .    .
+#>   Perca fluviatilis     .    .    .    .    .    2    2    2    2    2    2
+#>   Platichthys flesus    .    .    .    1    .    1    1    2    2    2    2
+#>                     year
+#> species              2020 2021
+#>   Clupea harengus       2    2
+#>   Gadus morhua          .    .
+#>   Limanda limanda       .    .
+#>   Perca fluviatilis     2    2
+#>   Platichthys flesus    3    3
+```
+
+PAH metabolite units can be the concentration of the metabolite 
+itself (ng/g or similar), or the concentration relative to that of bile 
+pigments (e.g. ng g-1 a380-1). For the assessment only consider the 
+metabolite concentrations. Delete concentration data relative to bile 
+pigments.  
+
+
+```r
+relevant_biota %>%
+  filter(determinand %in% "PYR1OH") %>%
+  with(table(species, unit)) %>%
+  print(zero.print = ".")
+#>                     unit
+#> species              ng g-1 a380-1 ng g-1 a660-1 ng/g ng/ml ug/ml
+#>   Clupea harengus                .             .   25     2    12
+#>   Gadus morhua                   .             .  275     .     .
+#>   Limanda limanda               20            20  191     .     .
+#>   Perca fluviatilis              .             .    4     .    12
+#>   Platichthys flesus            33            33  261     1    10
+
+biota_data$data <- filter(
+  biota_data$data,
+  !unit %in% c("ng g-1 a380-1 ng", "ng g-1 a660-1")
+)
+```
+
+Here is a summary of the data by method of analysis (which is important 
+for application of the EAC). Drop GRS data, as these were part of a 
+one-off project (Ulrike, 2 September). 
+
+
+```r
+get_relevant_biota() %>%
+  filter(determinand %in% "PYR1OH") %>%
+  with(table(method_analysis, year)) %>%
+  print(zero.print = ".")
+#>                 year
+#> method_analysis  2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020
+#>   GC-MS-MS          .    .    .    .    .    .    .    .    .    .    .    .
+#>   GRS             106    .    .    .    .    .    .    .    .    .    .    .
+#>   HPLC-ESI-MS-MS    .    .    .    .    .    .    .    .    .    .    .    7
+#>   HPLC-FD           .   55   40   47   49   80  163    6   96   79   62   49
+#>                 year
+#> method_analysis  2021
+#>   GC-MS-MS          7
+#>   GRS               .
+#>   HPLC-ESI-MS-MS    .
+#>   HPLC-FD           .
+
+biota_data$data <- filter(
+  biota_data$data, 
+  !(determinand %in% "PYR1OH" & method_analysis %in% "GRS")
+)
+```
+
+And here is what is left by species and country. Conventionally, 
+separate time series are modelled for each method of analysis. 
+However, for this assessment, the remaining methods of analysis will 
+be regarded as comparable (Ulrike, 15 August). They will be labelled 
+as being HPLC-FD in the summary file, since these correspond to the 
+bulk of the measurements for both Germany and Poland. (This is coded 
+in the main assessment file.)
+
+
+```r
+get_relevant_biota() %>%
+  filter(determinand %in% "PYR1OH") %>%
+  with(table(method_analysis, year, country)) %>%
+  print(zero.print = ".")
+#> , , country = Germany
+#> 
+#>                 year
+#> method_analysis  2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>   GC-MS-MS          .    .    .    .    .    .    .    .    .    .    .    .
+#>   HPLC-ESI-MS-MS    .    .    .    .    .    .    .    .    .    .    .    .
+#>   HPLC-FD          55   40   44   49   75  158    .   90   73   56   49    .
+#> 
+#> , , country = Poland
+#> 
+#>                 year
+#> method_analysis  2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>   GC-MS-MS          .    .    .    .    .    .    .    .    .    .    .    7
+#>   HPLC-ESI-MS-MS    .    .    .    .    .    .    .    .    .    .    7    .
+#>   HPLC-FD           .    .    3    .    5    5    6    6    6    6    .    .
+```
+
+### SBDE6
+
+For info, here are the PBDE measurements by country (again filtered on 
+stations that have been monitored in the last six years). For simplicity, 
+I've restricted it to the last twelve years. Some historic data from Denmark 
+and Sweden will be lost when computing the sum of the six PBDEs. Note that 
+HOLAS2 assessed SBDE4 = BDE47 + BDE99 + BD100 + BD153, because many BDE28 
+and BD154 measurements, predominantly from Denmark and Sweden, were missing; 
+this is far less of an issue now.  
+
+
+
+```r
+wk <- biota_data$data %>%
+  filter(grepl("BD", determinand)) %>%
+  group_by(station_name) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>% filter(year >= 2010) %>%
+  with(table(determinand, year, country)) %>%
+  print(zero.print = ".")
+#> , , country = Denmark
+#> 
+#>            year
+#> determinand 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>       BD100    .    6    8    7    8    3    7   21   14   14   13    8
+#>       BD153    .    6    8    7    8    3    7   20   14   14   13    8
+#>       BD154    .    6    8    7    8    3    7   21   14   14   13    8
+#>       BDE28    .    .    .    .    8    3    6   20   14   14   13    8
+#>       BDE47    .    6    4    4    3    2    7   20   14   14   13    8
+#>       BDE99    .    6    6    7    8    2    7   21   14   14   13    8
+#> 
+#> , , country = Estonia
+#> 
+#>            year
+#> determinand 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>       BD100    .    .    .    .    .    .    .    1    5    6    8    7
+#>       BD153    .    .    .    .    .    .    .    1    5    6    8    7
+#>       BD154    .    .    .    .    .    .    .    1    5    6    8    7
+#>       BDE28    .    .    .    .    .    .    .    1    5    6    8    7
+#>       BDE47    .    .    .    .    .    .    .    1    5    6    8    7
+#>       BDE99    .    .    .    .    .    .    .    1    5    6    8    7
+#> 
+#> , , country = Finland
+#> 
+#>            year
+#> determinand 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>       BD100    .    4    8    .   17    3   19    .    5   18   20   16
+#>       BD153    .    4    8    .   17    3   19    .    5   18   20   16
+#>       BD154    .    4    8    .   17    3   19    .    5   18   20   16
+#>       BDE28    .    4    8    .   17    3   19    .    5   18   20   16
+#>       BDE47    .    4    8    .   17    3   19    .    5   18   20   16
+#>       BDE99    .    4    8    .   17    3   19    .    5   18   20   16
+#> 
+#> , , country = Germany
+#> 
+#>            year
+#> determinand 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>       BD100    .    .    .    .    .    .    .    1    2    2    4    2
+#>       BD153    .    .    .    .    .    .    .    1    2    2    4    2
+#>       BD154    .    .    .    .    .    .    .    1    2    2    4    2
+#>       BDE28    .    .    .    .    .    .    .    1    2    2    4    2
+#>       BDE47    .    .    .    .    .    .    .    1    2    2    4    2
+#>       BDE99    .    .    .    .    .    .    .    1    2    2    4    2
+#> 
+#> , , country = Latvia
+#> 
+#>            year
+#> determinand 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>       BD100    .    .    .    .    .    .    .    2    .    .    4    .
+#>       BD153    .    .    .    .    .    .    .    2    .    .    4    .
+#>       BD154    .    .    .    .    .    .    .    2    .    .    4    .
+#>       BDE28    .    .    .    .    .    .    .    2    .    .    4    .
+#>       BDE47    .    .    .    .    .    .    .    2    .    .    4    .
+#>       BDE99    .    .    .    .    .    .    .    2    .    .    4    .
+#> 
+#> , , country = Lithuania
+#> 
+#>            year
+#> determinand 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>       BD100    .    .    .    .    .    3    7    .    .    .    .    .
+#>       BD153    .    .    .    .    .    3    7    .    .    .    .    .
+#>       BD154    .    .    .    .    .    3    7    .    .    .    .    .
+#>       BDE28    .    .    .    .    .    3    7    .    .    .    .    .
+#>       BDE47    .    .    .    .    .    3    7    .    .    .    .    .
+#>       BDE99    .    .    .    .    .    3    7    .    .    .    .    .
+#> 
+#> , , country = Poland
+#> 
+#>            year
+#> determinand 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>       BD100    .    .   34   34   54   54   64   64   64   64   74   74
+#>       BD153    .    .   34   34   54   54   64   64   64   64   74   74
+#>       BD154    .    .   34   34   54   54   64   64   64   64   74   74
+#>       BDE28    .    .   34   34   54   54   64   64   64   64   74   74
+#>       BDE47    .    .   34   34   54   54   64   64   64   64   74   74
+#>       BDE99    .    .   34   34   54   54   64   64   64   64   74   74
+#> 
+#> , , country = Sweden
+#> 
+#>            year
+#> determinand 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>       BD100  102  106  106  106   94    .   92  104  100   86   88    .
+#>       BD153  102  106  106  106   94    .   92  104  100   86   88    .
+#>       BD154    .    .    .    .    .    .   92  104   98   85   88    .
+#>       BDE28    .    .    .    .    .    .   92  104  100   86   88    .
+#>       BDE47  102  106  106  106   94    .   92  104  100   86   88    .
+#>       BDE99  102  106  106  106   94    .   92  104   99   86   88    .
+```
+
+### TEQ DFP
+
+Here are the PCB and dioxin measurements that contribute to the TEQ DFP 
+by country (since 2010). Estonia, Finland, Germany and Lithuania are 
+largely missing CDFO, and Germany is missing three measurements of CDFP2.
+
+
+```r
+wk <- biota_data$data %>%
+  filter(
+    determinand %in% names(info_TEQ)
+  ) %>%
+  group_by(sub.sample) %>%
+  filter(any(pargroup %in% "OC-DX")) %>%
+  ungroup() %>%
+  group_by(station_name) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>%
+  filter(year >= 2010) %>%
+  with(table(determinand, country)) %>%
+  print(zero.print = ".")
+#>            country
+#> determinand Denmark Estonia Finland Germany Latvia Lithuania Sweden
+#>       CB105      74      26      63      14      6        10    452
+#>       CB118      73      26      63      17      6        10    452
+#>       CB126      70      26      63      14      6        10    415
+#>       CB156      74      26      63      14      6        10    452
+#>       CB157      34      26      63      14      6        10    452
+#>       CB167      34      26      63      14      6        10    452
+#>       CB169      71      26      63      14      6        10    452
+#>       CB77       70      26      63      14      6        10    452
+#>       CB81       34      26      63      14      6        10    415
+#>       CDD1N      91      26     100      14      .        10    452
+#>       CDD4X      92      26     100      14      .        10    452
+#>       CDD6P      91      26     100      14      .        10    452
+#>       CDD6X      92      26     100      14      .        10    452
+#>       CDD9X      91      26     100      14      .         8    452
+#>       CDDO       74      26     100      14      6         7    452
+#>       CDF2N      91      26     100      14      .        10    452
+#>       CDF2T      91      26     100      14      6        10    452
+#>       CDF4X      91      26     100      14      .        10    452
+#>       CDF6P      90      26     100      14      .        10    452
+#>       CDF6X      92      26     100      14      .        10    452
+#>       CDF9P      91      26     100      14      .        10    452
+#>       CDF9X      91      26     100      14      .        10    452
+#>       CDFO       90       .       .       .      .         .    452
+#>       CDFP2      91      26     100      11      .        10    415
+#>       CDFX1      91      26     100      14      .        10    415
+#>       TCDD       91      26     100      14      6         7    452
+```
+
+However, it turns out that these countries have submitted similar (identical?) 
+compounds under related codes. OCDF will be recoded as CDFO and CDFDN will be 
+recoded as CDFP2.
+
+
+```r
+wk <- biota_data$data %>%
+  filter(
+    pargroup %in% "OC-DX",
+    !determinand %in% names(info_TEQ),
+    country %in% c("Estonia", "Finland", "Germany", "Lithuania")
+  ) %>%
+  group_by(station_name) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>% filter(year >= 2010) %>%
+  with(table(determinand, country)) %>%
+  print(zero.print = ".")
+#>            country
+#> determinand Estonia Finland Germany Lithuania
+#>       CDFDN       .       .       3         .
+#>       OCDF       26     100      14        10
+
+biota_data$data <- mutate(
+  biota_data$data,
+  determinand = if_else(
+    country %in% c("Estonia", "Finland", "Germany", "Lithuania") &
+      determinand %in% "OCDF",
+    "CDFO",
+    determinand
+  ),
+  determinand = if_else(
+    country %in% "Germany" & determinand %in% "CDFDN",
+    "CDFP2",
+    determinand
+  )
+)
+```
+
+### Imposex
+
+#### Data summary
+
+Here is a summary of the imposex measurements by species.
+
+
+```r
+wk <- biota_data$data %>%
+  filter(
+    !is.na(station_name),
+    determinand %in% c("VDS", "VDSI", "INTS", "INTSI", "IMPS", "IMPSI", "PCI")
+  )
+
+wk %>%
+  with(table(species, determinand)) %>%
+  print(zero.print = ".")
+#>                        determinand
+#> species                 IMPS INTS  VDS VDSI
+#>   Buccinum undatum       680  670 1525   40
+#>   Hinia reticulata         . 1244 1394    .
+#>   Littorina littorea       . 2580    .    .
+#>   Nassarius reticulatus    .    . 2856   84
+#>   Neptunea antiqua       133  121  280   31
+#>   Nucella lapillus         .    .   21    5
+#>   Peringia ulvae           .    . 6022  212
+```
+
+Nassarius reticulatus is equivalent to Hinia reticulata so combine (called 
+Tritia nitida / reticulata in the assessment output). Having done so, here 
+are the number of measurements for relevant stations (with data in the last 
+six years).
+
+
+```r
+wk <- wk %>%
+  mutate(
+    species = recode(species, "Nassarius reticulatus" = "Hinia reticulata")
+  ) %>%
+  group_by(station_name, species) %>%
+  filter(any(year >= 2016)) %>%
+  ungroup()
+
+wk %>%
+  with(table(species, determinand)) %>%
+  print(zero.print = ".")
+#>                     determinand
+#> species              IMPS INTS  VDS VDSI
+#>   Buccinum undatum    259  424  859   28
+#>   Hinia reticulata      .  112  206    .
+#>   Littorina littorea    .  379    .    .
+#>   Neptunea antiqua      1    3   30    1
+#>   Peringia ulvae        .    . 5955  210
+```
+
+Will only assess VDS and VDSI for Buccinum, Hinia, Neptunea and Peringia and 
+INTS for Littorina.  Here is a simple summary of the individual measurements.
+
+
+```r
+wk <- wk %>%
+  filter(
+    (determinand %in% c("VDS", "VDSI") & !species %in% "Littorina littorea") |
+      species %in% "Littorina littorea"
+  )
+
+wk %>%
+  with(table(species, determinand)) %>%
+  print(zero.print = ".")
+#>                     determinand
+#> species              INTS  VDS VDSI
+#>   Buccinum undatum      .  859   28
+#>   Hinia reticulata      .  206    .
+#>   Littorina littorea  379    .    .
+#>   Neptunea antiqua      .   30    1
+#>   Peringia ulvae        . 5955  210
+
+wk %>%
+  filter(determinand %in% c("VDS", "INTS")) %>%
+  with(table(species, value, determinand)) %>%
+  print(zero.print = ".")
+#> , , determinand = INTS
+#> 
+#>                     value
+#> species                 0    1    2    3 4 5 6
+#>   Buccinum undatum      .    .    .    . . . .
+#>   Hinia reticulata      .    .    .    . . . .
+#>   Littorina littorea  227   75    8   69 . . .
+#>   Neptunea antiqua      .    .    .    . . . .
+#>   Peringia ulvae        .    .    .    . . . .
+#> 
+#> , , determinand = VDS
+#> 
+#>                     value
+#> species                 0    1    2    3    4    5    6
+#>   Buccinum undatum    815   35    2    3    4    .    .
+#>   Hinia reticulata     37   55   13   47   54    .    .
+#>   Littorina littorea    .    .    .    .    .    .    .
+#>   Neptunea antiqua     28    1    .    .    1    .    .
+#>   Peringia ulvae     4243 1337  191   23   57   82   22
+```
+
+#### Sweden - missing zeros
+
+Sweden have a legacy problem in that, for some years, individual 
+measurements were not submitted when VDS = 0. This biases the assessment 
+and creates problems in the statistical models used.  The Swedish individual 
+measurements (for relevant stations) are shown below by year and species. 
+There are no zero values in 2010 which is incompatible with all other years. 
+(The same can be found for 2007 2008 and 2010 Swedish Nassarius data, although 
+Nassarius have not been monitored since 2015, so do not show here.) 
+Consequently, will delete the 2010 data. 
+
+
+```r
+wk %>%
+  filter(
+    determinand %in% "VDS",
+    country == "Sweden"
+  ) %>%
+  with(table(value, year, species)) %>%
+  print(zero.print = ".")
+#> , , species = Peringia ulvae
+#> 
+#>      year
+#> value 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021
+#>     0  257  282    .  310  331  348  350  316  333  317  324  356  359  360
+#>     1   59   67   85  128  127  115   87  103   74   97  110   96   87  102
+#>     2    9   16   20   19   24   18   21    8   11   11   13    4   12    5
+#>     3    1    .    1    3    1    2    2    3    .    2    6    .    .    2
+#>     4    7   19    3   15    3    1    1    .    5    2    .    .    .    1
+#>     5   29    6    7    9   10    7    7    6    .    1    .    .    .    .
+#>     6    1    2    7    1    3    2    2    .    .    .    .    3    1    .
+
+biota_data$data <- filter(
+  biota_data$data,
+  !(country %in% "Sweden" &
+      determinand %in% c("VDS", "VDSI") &
+      year == 2010
+  )
+)
+```
+
+The four measurements with VDS = 6 in 2019 and 2020 are very strange. 
+They are well separated from the bulk of the data, which are all $\le$ 2 
+in those years. Further, VDSI submissions for the same stations and 
+years suggest that the four measurements with VDS = 6 have not been 
+included in the index calculations. These four large measurements 
+are excluded. 
+
+
+```r
+biota_data$data <- filter(
+  biota_data$data,
+  !(country %in% "Sweden" &
+      determinand %in% "VDS" &
+      year %in% c(2019, 2020) &
+      value == 6
+  )
+)
+```
+
+#### Denmark - replicates
+
+Denmark has reported two results for VDSI in the same sub-sample at 
+DMU D2 in 2015 (see below).  Have deleted the larger value, which is 
+suspiciously high for Buccinum. It looks more like a sample of 
+Neptunea anitqua (see results from 2009) although there is no record of 
+Neptunea being sampled at this station in any year other than 2009.
+
+
+```r
+biota_data$data %>%
+  filter(
+    determinand %in% "VDSI",
+    station_name == "DMU D2"
+  ) %>%
+  select(year, date, station_name, species, sub.sample, replicate, n_individual, value) %>%
+  arrange(year)
+#>   year       date station_name          species sub.sample replicate
+#> 1 2009 11/09/2009       DMU D2 Neptunea antiqua    3948136  60544584
+#> 2 2009 11/09/2009       DMU D2 Buccinum undatum    3948135  60544583
+#> 3 2011 11/08/2011       DMU D2 Buccinum undatum    3936822  60503664
+#> 4 2015 23/08/2015       DMU D2 Buccinum undatum    3725887  45634490
+#> 5 2015 23/08/2015       DMU D2 Buccinum undatum    3725887  45634489
+#>   n_individual value
+#> 1           27  3.42
+#> 2           51  0.14
+#> 3           48  0.02
+#> 4           20  2.50
+#> 5           20  0.00
+
+biota_data$data <- filter(
+  biota_data$data,
+  !(station_name == "DMU D2" &
+      year == 2015 &
+      determinand %in% "VDSI" &
+      value > 2
+  )
+)
+```
+
 
 ## Prepare data for next stage
 
 This gets the correct variable and streamlines some of the data files.
 
-```{r helcom-set-variables}
+
+```r
 biota_data <- ctsm_tidy_data(biota_data)
+#> 
+#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
+#>  'oddities/biota_backup'
+#> 
+#> Cleaning station dictionary
+#>    Duplicate stations - first one selected: see duplicate_stations.csv
+#> 
+#> Cleaning contaminant and biological effects data
+#>    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv
+#>    Dropping data with no stations
+#>    Conflicting QA information - first one selected: see conflicting_QA.csv
 sediment_data <- ctsm_tidy_data(sediment_data)
+#> 
+#> Oddities will be written to 'oddities/sediment' with previous oddities backed up to
+#>  'oddities/sediment_backup'
+#> 
+#> Cleaning station dictionary
+#>    Duplicate stations - first one selected: see duplicate_stations.csv
+#> 
+#> Cleaning contaminant and biological effects data
+#>    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv
+#>    Dropping data with no stations
 water_data <- ctsm_tidy_data(water_data)
+#> 
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
+#> 
+#> Cleaning station dictionary
+#>    Duplicate stations - first one selected: see duplicate_stations.csv
+#> 
+#> Cleaning contaminant and biological effects data
+#>    Dropping data with no stations
 ```
 
 ## Construct timeseries
@@ -115,7 +3084,8 @@ Ad-hoc change to merge MU and MU&EP data for organics for Finnish perch
 only need to do this for years up to and including 2013 when there are 
 no MU&EP measurements, so no risk of mixing up MU and MU&EP data.
 
-```{r helcom-time-series1}
+
+```r
 biota_data$data <- left_join(
   biota_data$data,
   biota_data$stations[c("station_code", "country")],
@@ -150,7 +3120,8 @@ biota_data$data <- bind_rows(biota_data$data, wk)
 
 Ad-hoc change to merge methods of analysis for Poland for PYR10H
 
-```{r helcom-time-series2}
+
+```r
 biota_data$data <- mutate(
   biota_data$data,
   method_analysis = if_else(
@@ -165,7 +3136,8 @@ biota_data$data <- mutate(
 
 Ad-hoc change to `info_TEQ` to make it appropriate for human health QS
 
-```{r helcom-time-series3}
+
+```r
 info_TEQ["CDFO"] <- 0.0003
 
 biota_data$data$country <- NULL
@@ -195,11 +3167,69 @@ biota_timeSeries <- ctsm_create_timeSeries(
     other = list(method = "none") 
   )
 )
+#> 
+#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
+#>  'oddities/biota_backup'
+#> 
+#> Cleaning data
+#>    Stations in data not in station dictionary: deleted data in 'unidentified_stations.csv
+#>    Dropping stations with no data between 2016 and 2021 
+#>    Dropping samples with only auxiliary variables
+#>    Unexpected or missing values for 'sex': see sex_queries.csv
+#>    Unexpected or missing values for 'matrix': see matrix_queries.csv
+#>    Unexpected or missing values for 'basis': see basis_queries.csv
+#>    imposex index units changed from 'idx' to 'st' before merging with individual data
+#>    Bile metabolite units changed from 'ng/g' to 'ng/ml' and from 'ug/kg' to 'ug/l'
+#> Warning in get.info.imposex(species, determinand, info$imposex, "min_value", :
+#> Species determinand combinations not recognised: Tritia nitida (reticulata)
+#> INTS, Buccinum undatum INTS, Buccinum undatum IMPS, Neptunea antiqua IMPS,
+#> Neptunea antiqua INTS
+#> Warning in get.info.imposex(species, determinand, info$imposex, "max_value", :
+#> Species determinand combinations not recognised: Tritia nitida (reticulata)
+#> INTS, Buccinum undatum INTS, Buccinum undatum IMPS, Neptunea antiqua IMPS,
+#> Neptunea antiqua INTS
+#>    Unexpected or missing values for 'value': see value_queries.csv
+#>    Replicate measurements, only first retained: see replicate_measurements.csv
+#>    Non-positive detection limits: see non_positive_det_limits.csv
+#>    Non-positive quantification limits: see non_positive_quant_limits.csv
+#>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
+#>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
+#>    Detection limit higher than data: see detection_limit_high.csv
+#>    Non-positive uncertainties: see non_positive_uncertainties.csv
+#>    Large uncertainties: see large_uncertainties.csv
+#>    Data submitted as N-PFOS, BR-PFOS summed to give PFOS
+#>    Data submitted as BDE28, BDE47, BDE99, BD100, BD153, BD154 summed to give 
+#> SBDE6
+#>      1624 of 3119 samples lost due to incomplete submissions
+#>    Data submitted as HBCDA, HBCDB, HBCDG summed to give HBCD
+#>      7 of 153 samples lost due to incomplete submissions
+#>    Data submitted as CB138+163 relabelled as CB138 
+#>    Data submitted as CB28, CB52, CB101, CB138, CB153, CB180 summed to give SCB6
+#>      228 of 5190 samples lost due to incomplete submissions
+#>    Data submitted as 
+#> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1, TCDD 
+#> summed to give TEQDFP
+#>      4989 of 5517 samples lost due to incomplete submissions
+#>    inconsistent VDS and VDSI submitted in same year: see determinand_link_VDS.csv
+#>    Data submitted as VDSIrelabelled as VDS
+#>    Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT% 
+#> 
+#> Creating time series data
+#>    Converting data to appropriate basis for statistical analysis
+#>    Losing 595 out of 40828 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Dropping bivalve and gastropod contaminant data collected during the
+#>     spawning season, which is taken to be the following months:
+#>     April, May, June, July
+#>    Normalising lipid to 5%
+#>    No normalisation for other
+#>    Dropping groups of compounds / stations with no data between 2016 and 2021
 ```
 
 Resolve Finnish perch changes
 
-```{r helcom-time-series4}
+
+```r
 biota_timeSeries$data <- mutate(
   biota_timeSeries$data, 
   matrix = if_else(
@@ -212,7 +3242,8 @@ biota_timeSeries$data <- mutate(
 
 Resolve Polish metoa changes
 
-```{r helcom-time-series5}
+
+```r
 biota_timeSeries$data <- left_join(
   biota_timeSeries$data, 
   biota_data$stations[c("station_code", "country")],
@@ -242,7 +3273,8 @@ biota_timeSeries$data$country <- NULL
 
 ## Sediment
 
-```{r helcom-time-series6}
+
+```r
 sediment_timeSeries <- ctsm_create_timeSeries(
   sediment_data,
   determinands.control = list(
@@ -259,17 +3291,65 @@ sediment_timeSeries <- ctsm_create_timeSeries(
     organics = list(method = "simple", normaliser = "CORG", value = 5) 
   )
 )
+#> 
+#> Oddities will be written to 'oddities/sediment' with previous oddities backed up to
+#>  'oddities/sediment_backup'
+#> 
+#> Cleaning data
+#>    Stations in data not in station dictionary: deleted data in 'unidentified_stations.csv
+#>    Dropping stations with no data between 2016 and 2021 
+#>    Dropping samples with only auxiliary variables
+#>    Relabelling matrix SED62 as SED63 and SED500, SED1000, SED2000 as SEDTOT
+#>    Unexpected or missing values for 'basis': see basis_queries.csv
+#>    Unexpected or missing values for 'value': see value_queries.csv
+#>    Replicate measurements, only first retained: see replicate_measurements.csv
+#>    Non-positive detection limits: see non_positive_det_limits.csv
+#>    Non-positive quantification limits: see non_positive_quant_limits.csv
+#>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
+#>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
+#>    Detection limit higher than data: see detection_limit_high.csv
+#>    Non-positive uncertainties: see non_positive_uncertainties.csv
+#>    Large uncertainties: see large_uncertainties.csv
+#>    Data submitted as BDE28, BDE47, BDE99, BD100, BD153, BD154 summed to give 
+#> SBDE6
+#>      33 of 115 samples lost due to incomplete submissions
+#>    Data submitted as HBCDA, HBCDB, HBCDG summed to give HBCD
+#> 
+#> Creating time series data
+#>    Converting data to appropriate basis for statistical analysis
+#>    Normalising copper to CORG using pivot values
+#>    Removing sediment data where normaliser is a less than
+#>    Normalising metals to AL using pivot values
+#>    Normalising organics to 5% CORG
+#>    Removing sediment data where normaliser is a less than
+#>    Dropping groups of compounds / stations with no data between 2016 and 2021
 ```
 
 ## Water
 
-```{r helcom-time-series7}
+
+```r
 water_timeSeries <- ctsm_create_timeSeries(
   water_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
   )
 )
+#> 
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
+#> 
+#> Cleaning data
+#>    Dropping stations with no data between 2016 and 2021
+#>    Unexpected or missing values for 'basis': see basis_queries.csv
+#>    Unexpected or missing values for 'unit': see unit_queries.csv
+#>    Non-positive detection limits: see non_positive_det_limits.csv
+#>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
+#>    Detection limit higher than data: see detection_limit_high.csv
+#> 
+#> Creating time series data
+#>    Converting data to appropriate basis for statistical analysis
+#>    Dropping groups of compounds / stations with no data between 2016 and 2021
 ```
 
 # Assessment
@@ -278,19 +3358,738 @@ water_timeSeries <- ctsm_create_timeSeries(
 
 Main runs
 
-```{r helcom-run1}
+
+```r
 sediment_assessment <- ctsm_assessment(
   sediment_timeSeries,
   AC = "EQS",
   get_assessment_criteria = get.AC.HELCOM,
   parallel = FALSE
 )
+#> 
+#> assessing series:  station_code 1060; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1060; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1060; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1060; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1060; determinand HBCD; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1060; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1060; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1066; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1066; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1066; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1066; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1066; determinand HBCD; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1066; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1066; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1072; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1072; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1072; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1072; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1072; determinand HBCD; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1072; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1072; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1095; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1095; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1095; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1095; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1095; determinand HBCD; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 1095; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 1095; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 10984; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 10984; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 10984; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 10984; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 10984; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 10984; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11098; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11098; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11098; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11098; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11098; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11098; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11099; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11099; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11099; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11099; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11099; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11099; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11200; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11200; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11200; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11200; determinand SBDE6; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11200; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 11228; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11228; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11273; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 11273; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12208; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12208; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12286; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12286; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12286; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12286; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12286; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12286; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12287; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12287; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12287; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12287; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12287; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12288; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12288; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12288; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12288; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12288; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12288; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12337; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12337; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12337; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12835; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12835; determinand CU; matrix SED63; basis D; unit mg/kg
+#> Loading required package: Matrix
+#> 
+#> Attaching package: 'Matrix'
+#> The following objects are masked from 'package:tidyr':
+#> 
+#>     expand, pack, unpack
+#> Loading required package: nlme
+#> 
+#> Attaching package: 'nlme'
+#> The following object is masked from 'package:lme4':
+#> 
+#>     lmList
+#> The following object is masked from 'package:dplyr':
+#> 
+#>     collapse
+#> This is mgcv 1.8-42. For overview type 'help("mgcv-package")'.
+#> 
+#> Attaching package: 'optimx'
+#> The following object is masked from 'package:nlme':
+#> 
+#>     coef<-
+#> 
+#> assessing series:  station_code 12835; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 12835; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 12835; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 13068; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 13068; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 13069; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 13069; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 13070; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 13070; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2113; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2113; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2113; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2132; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2132; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2132; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2158; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2158; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2158; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2159; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2159; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2159; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2162; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2162; determinand CD; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2162; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2162; determinand PB; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2162; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2188; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2188; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2188; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2189; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2189; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2189; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2203; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2203; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2203; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2204; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2204; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2204; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2554; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2554; determinand CD; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2554; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2554; determinand PB; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2554; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2555; determinand CD; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2555; determinand PB; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2557; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2557; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2557; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2584; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2584; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2584; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2664; determinand CD; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2664; determinand PB; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2709; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2709; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2709; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2765; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2765; determinand CD; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2765; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2765; determinand PB; matrix SED20; basis D; unit mg/kg
+#> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+#> unable to evaluate scaled gradient
+#> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+#> Model failed to converge: degenerate Hessian with 1 negative eigenvalues
+#> 
+#> assessing series:  station_code 2765; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2828; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2828; determinand CD; matrix SED20; basis D; unit mg/kg
+#> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+#> unable to evaluate scaled gradient
+
+#> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+#> Model failed to converge: degenerate Hessian with 1 negative eigenvalues
+#> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+#> unable to evaluate scaled gradient
+#> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+#> Model failed to converge: degenerate Hessian with 1 negative eigenvalues
+#> 
+#> assessing series:  station_code 2828; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2828; determinand PB; matrix SED20; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 2828; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2906; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2906; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2906; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2926; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2926; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 2926; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 410; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 410; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 410; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 410; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 410; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 410; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 4570; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 4570; determinand PB; matrix SEDTOT; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 4576; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 4576; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5134; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5134; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5134; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5134; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5134; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5135; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5135; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5135; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5135; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5135; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5141; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5141; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5147; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5147; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5160; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5160; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5160; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5160; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5160; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5161; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5161; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5161; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5161; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5161; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5262; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5262; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5262; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 5262; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 5262; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6037; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6037; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6037; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6037; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6037; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6037; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6037; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6037; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6038; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6038; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6038; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6038; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6038; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6038; determinand PB; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6038; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6038; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6039; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6039; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6039; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6039; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6039; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6039; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6039; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6039; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6041; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6041; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6041; determinand CU; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6041; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6041; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6041; determinand PB; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6041; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6041; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6042; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6042; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6042; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6042; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6042; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6042; determinand PB; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6042; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6042; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6045; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6045; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6045; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6045; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6045; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6045; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6045; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6045; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6046; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6046; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6046; determinand CU; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6046; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6046; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6046; determinand PB; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6046; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6046; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6047; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6047; determinand CD; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6047; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6047; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6047; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6047; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6047; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6047; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6048; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6048; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6048; determinand CU; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6048; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6048; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6048; determinand PB; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6048; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6048; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6049; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6049; determinand CD; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6049; determinand CU; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6049; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6049; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6049; determinand PB; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6049; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6049; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6050; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6050; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6050; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6050; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6050; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6050; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6050; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6050; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6051; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6051; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6051; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6051; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6051; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6051; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6051; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6051; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6052; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6052; determinand CD; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6052; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6052; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6052; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6052; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6052; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6052; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6053; determinand ANT; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6053; determinand CD; matrix SED63; basis D; unit mg/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code 6053; determinand CU; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6053; determinand FLU; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6053; determinand HBCD; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6053; determinand PB; matrix SED63; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 6053; determinand SBDE6; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 6053; determinand TBSN+; matrix SED63; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 704; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 704; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 704; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 704; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 704; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 704; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 850; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 850; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 850; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 850; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 850; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 850; determinand SBDE6; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 850; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 851; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 851; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 854; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 866; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 866; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 895; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 895; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 895; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 895; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 895; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 895; determinand SBDE6; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 895; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 898; determinand ANT; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 898; determinand CD; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 898; determinand CU; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 898; determinand FLU; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 898; determinand PB; matrix SEDTOT; basis D; unit mg/kg 
+#> 
+#> assessing series:  station_code 898; determinand SBDE6; matrix SEDTOT; basis D; unit ug/kg 
+#> 
+#> assessing series:  station_code 898; determinand TBSN+; matrix SEDTOT; basis D; unit ug/kg
 ```
 
 Check convergence
 
-```{r helcom-run2}
+
+```r
 ctsm_check_convergence(sediment_assessment$assessment)
+#> character(0)
 ```
 
 ## Biota
@@ -300,6 +4099,331 @@ Main runs
 Preliminary analysis required for imposex assessment. 
 Takes a long time to run!!!!!
 
-```{r child="../man/fragments/example_HELCOM_imposex_preparation.Rmd"}
+
+
+
+
+
+
+
+
+
+
+## HELCOM imposex preparation
+
+Load the libraries
+
+
+```r
+library("dplyr")
+library("tibble")
+library("tidyr")
+library("parallel")
+library("pbapply")
 ```
+
+Get the data
+
+
+```r
+wk_data <- mutate(
+  biota_timeSeries$data,
+  .imposex = ctsm_get_info(
+    biota_timeSeries$info$determinand, 
+    .data$determinand, 
+    "group", 
+    "biota", 
+    sep = "_"
+  )
+)
+
+wk_data <- filter(wk_data, .imposex %in% "Imposex")
+
+wk_data <- wk_data[c(
+  "seriesID", "station_code", "year", "species", "determinand", 
+  "concentration", "n_individual", "%FEMALEPOP"
+)]
+
+wk_data <- left_join(
+  wk_data, 
+  biota_timeSeries$stations[c("station_code", "country", "HELCOM_subbasin")],
+  by = "station_code"
+)
+```
+
+
+See where we have individual data 
+
+
+```r
+stopifnot(is.integer(wk_data$n_individual))
+```
+
+
+```r
+wk_data <- wk_data %>%
+  group_by(station_code, determinand, species, year) %>% 
+  filter(all(n_individual == 1L)) %>% 
+  ungroup() %>% 
+  droplevels() %>% 
+  select(-n_individual)
+```
+
+
+Get cut points by country. We have used terminology from MIME code
+(e.g. `regionID` = `country` here, whereas `regionID` ~ `country` + `region` for MIME).
+
+
+```r
+wk_data <- unite(wk_data, "regionID", country, sep = " ", remove = FALSE)
+```
+
+We have difficulty dealing with Neptunea because nearly all zero and gap in values 
+(no records for class 2 or 3) for example: `Denmark 28 1 0 0 1 0 0`. 
+
+
+```r
+with(wk_data, table(regionID, concentration, species))
+#> , , species = Buccinum undatum
+#> 
+#>          concentration
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark  815   35    2    3    4    0    0
+#>   Sweden     0    0    0    0    0    0    0
+#> 
+#> , , species = Littorina littorea
+#> 
+#>          concentration
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark  227   75    8   69    0    0    0
+#>   Sweden     0    0    0    0    0    0    0
+#> 
+#> , , species = Neptunea antiqua
+#> 
+#>          concentration
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark   28    1    0    0    1    0    0
+#>   Sweden     0    0    0    0    0    0    0
+#> 
+#> , , species = Peringia ulvae
+#> 
+#>          concentration
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark    0    0    0    0    0    0    0
+#>   Sweden  4243 1252  171   22   54   75   11
+#> 
+#> , , species = Tritia nitida (reticulata)
+#> 
+#>          concentration
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark   37   55   13   47   54    0    0
+#>   Sweden     0    0    0    0    0    0    0
+
+wk_data <- wk_data %>% 
+  filter(!.data$species %in% "Neptunea antiqua") %>% 
+  select(-determinand, -"%FEMALEPOP") %>%
+  droplevels()
+
+wk_data %>% mutate(across(where(is.character), factor)) %>% summary()
+#>                        seriesID     station_code       year     
+#>  5972 VDS Peringia ulvae SB: 519   5972   : 519   Min.   :2007  
+#>  6253 VDS Peringia ulvae SB: 457   6253   : 457   1st Qu.:2011  
+#>  5846 VDS Peringia ulvae SB: 445   5846   : 445   Median :2014  
+#>  6020 VDS Peringia ulvae SB: 423   6020   : 423   Mean   :2015  
+#>  6241 VDS Peringia ulvae SB: 404   6241   : 404   3rd Qu.:2018  
+#>  6098 VDS Peringia ulvae SB: 387   6098   : 387   Max.   :2021  
+#>  (Other)                   :4637   (Other):4637                 
+#>                        species     concentration       regionID   
+#>  Buccinum undatum          : 859   Min.   :0.0000   Denmark:1444  
+#>  Littorina littorea        : 379   1st Qu.:0.0000   Sweden :5828  
+#>  Peringia ulvae            :5828   Median :0.0000                 
+#>  Tritia nitida (reticulata): 206   Mean   :0.4286                 
+#>                                    3rd Qu.:1.0000                 
+#>                                    Max.   :6.0000                 
+#>                                                                   
+#>     country                   HELCOM_subbasin
+#>  Denmark:1444   Arkona Basin          : 394  
+#>  Sweden :5828   Bornholm Basin        :1222  
+#>                 Great Belt            : 474  
+#>                 Kattegat              : 877  
+#>                 Northern Baltic Proper:1289  
+#>                 The Sound             : 666  
+#>                 Western Gotland Basin :2350
+```
+
+Construct new variable VDS so we can combine larger categories with few observations without 
+changing the raw data.
+
+
+```r
+wk_data <- mutate(wk_data, VDS = .data$concentration)
+
+with(wk_data, table(regionID, VDS, species))
+#> , , species = Buccinum undatum
+#> 
+#>          VDS
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark  815   35    2    3    4    0    0
+#>   Sweden     0    0    0    0    0    0    0
+#> 
+#> , , species = Littorina littorea
+#> 
+#>          VDS
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark  227   75    8   69    0    0    0
+#>   Sweden     0    0    0    0    0    0    0
+#> 
+#> , , species = Peringia ulvae
+#> 
+#>          VDS
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark    0    0    0    0    0    0    0
+#>   Sweden  4243 1252  171   22   54   75   11
+#> 
+#> , , species = Tritia nitida (reticulata)
+#> 
+#>          VDS
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark   37   55   13   47   54    0    0
+#>   Sweden     0    0    0    0    0    0    0
+```
+
+Combine larger categories with few observations
+
+
+```r
+wk_data <- within(wk_data, {
+  
+  id <- species == "Buccinum undatum"
+  VDS[id & VDS >= 2] <- 2
+  
+})
+
+with(wk_data, table(regionID, VDS, species))
+#> , , species = Buccinum undatum
+#> 
+#>          VDS
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark  815   35    9    0    0    0    0
+#>   Sweden     0    0    0    0    0    0    0
+#> 
+#> , , species = Littorina littorea
+#> 
+#>          VDS
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark  227   75    8   69    0    0    0
+#>   Sweden     0    0    0    0    0    0    0
+#> 
+#> , , species = Peringia ulvae
+#> 
+#>          VDS
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark    0    0    0    0    0    0    0
+#>   Sweden  4243 1252  171   22   54   75   11
+#> 
+#> , , species = Tritia nitida (reticulata)
+#> 
+#>          VDS
+#> regionID     0    1    2    3    4    5    6
+#>   Denmark   37   55   13   47   54    0    0
+#>   Sweden     0    0    0    0    0    0    0
+```
+
+Redefine `indexID` and `regionID` so don't have to worry about multiple species.
+
+
+```r
+wk_data <- wk_data %>% 
+  unite("indexID", station_code, year, species, sep = " ", remove = FALSE) %>% 
+  unite("regionID", regionID, species, sep = " ", remove = FALSE) %>% 
+  mutate(indexID = factor(indexID)) %>% 
+  as.data.frame()
+
+with(wk_data, table(regionID, VDS))
+#>                                     VDS
+#> regionID                                0    1    2    3    4    5    6
+#>   Denmark Buccinum undatum            815   35    9    0    0    0    0
+#>   Denmark Littorina littorea          227   75    8   69    0    0    0
+#>   Denmark Tritia nitida (reticulata)   37   55   13   47   54    0    0
+#>   Sweden Peringia ulvae              4243 1252  171   22   54   75   11
+```
+
+Split by `regionID`, estimate cut points and level for each `indexID`.
+
+
+```r
+wk_split <- split(wk_data, wk_data$regionID)
+
+wk.cores <- detectCores()
+wk.cluster <- makeCluster(wk.cores - 1)
+
+clusterExport(wk.cluster, c("wk_split", ctsm.VDS.varlist))
+
+# clusterEvalQ(wk.cluster, {
+#   library("MASS")
+# })
+
+biota.VDS.estimates <- pblapply(
+  wk_split, 
+  ctsm.VDS.index.opt, 
+  calc.vcov = TRUE, 
+  cl = wk.cluster
+)
+
+stopCluster(wk.cluster)
+```
+
+Check convergence
+
+
+```r
+all(sapply(biota.VDS.estimates, "[[", "convergence") == 0)
+#> [1] TRUE
+
+# saveRDS(
+#   biota.VDS.estimates,
+#   file.path("RData", "VDS estimates.rds")
+# )
+```
+
+Get confidence limits on estimated VDSI for each `indexID`.
+
+
+```r
+set.seed(230504)
+
+biota.VDS.cl <- lapply(biota.VDS.estimates, ctsm.VDS.cl)
+biota.VDS.cl <- do.call(rbind, biota.VDS.cl)
+
+row.names(biota.VDS.cl) <- do.call(
+  paste, 
+  biota.VDS.cl[c("station_code", "year", "species")]
+)
+
+biota.VDS.cl %>% mutate(across(where(is.character), factor)) %>% summary()
+#>      lower              upper                              species   
+#>  Min.   :0.003795   Min.   :0.1038   Buccinum undatum          : 26  
+#>  1st Qu.:0.053665   1st Qu.:0.3215   Littorina littorea        : 17  
+#>  Median :0.147798   Median :0.5178   Peringia ulvae            :196  
+#>  Mean   :0.315700   Mean   :0.7408   Tritia nitida (reticulata): 10  
+#>  3rd Qu.:0.423762   3rd Qu.:0.9429                                   
+#>  Max.   :3.529276   Max.   :3.9709                                   
+#>                                                                      
+#>       year       station_code
+#>  Min.   :2007   5799   : 13  
+#>  1st Qu.:2011   5846   : 13  
+#>  Median :2015   5972   : 13  
+#>  Mean   :2015   6020   : 13  
+#>  3rd Qu.:2018   6086   : 13  
+#>  Max.   :2021   6098   : 13  
+#>                 (Other):171
+
+# saveRDS(
+#   biota.VDS.cl,
+#   file.path("RData", "VDS confidence limits.rds")
+# )
+
+rm(wk_data, wk_split, wk.cluster, wk.cores)
+```
+
 
