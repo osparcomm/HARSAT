@@ -179,7 +179,7 @@ ctsm_read_species <- function(file, path = "information") {
       "Please update the file to continue, noting that variable names are case ", 
       "sensitive.\n",
       "Variables: ", paste(id, collapse = ", "),
-      .call = FALSE
+      call. = FALSE
     )
   }
   
@@ -219,7 +219,7 @@ ctsm_read_species <- function(file, path = "information") {
       "\nThe following variables have missing values in ", file, ".\n", 
       "Please update the file to continue.\n",
       "Variables: ", paste(id, collapse = ", "),
-      .call = FALSE
+      call. = FALSE
     )
   }
   
@@ -309,11 +309,10 @@ ctsm_read_species <- function(file, path = "information") {
 }
 
 
-# function to check if species conversion factorsnumerical values are within pre-defined range 
+# function to check if species conversion factors are within pre-defined range 
 
 values_range_check_species <- function(species_data, min_value, max_value) {
-  library(tidyverse)
-  
+
   # select conversion factor columns
   conversion_factors <- dplyr::select(
     species_data, 
@@ -630,19 +629,53 @@ ctsm_read_thresholds <- function(
     na.strings = "",
     strip.white = TRUE
   )
-    
+
+
   if (compartment == "sediment") {
     id <- is.na(data$country)
     data$country[id] <- ""
   }
-
-  if (compartment == "biota") {
+  
+  test_name <- "thresholds_biota_HELCOM_new.csv"
+  
+  if (compartment == "biota" && file != test_name) {
     wk <- strsplit(data$species_subgroup, ",", fixed = TRUE)
     n <- sapply(wk, length)
     data <- data[rep(1:nrow(data), times = n),]
     data$species_subgroup <- unlist(wk)
   }
 
+  # check all species are in the reference table
+  # check combinations of species, species_group and species_subgroup are 
+  # consistent with those in the reference table
+  # check basis present for all contaminants 
+    
+  if (compartment == "biota" && file == test_name) {
+    
+    if (any(is.na(data$matrix))) {
+      stop(
+        "'matrix' must be supplied in threshold reference table", 
+        call. = FALSE
+      )
+    }
+    
+    if (any(is.na(data$species) & is.na(data$species_group) & 
+            is.na(data$species_subgroup))) {
+      stop(
+        "at least one of 'species', 'species_group' and 'species_subgroup' must be\n", 
+        "supplied in threshold reference table", 
+        call. = FALSE
+      )
+    }
+    
+    wk <- strsplit(data$matrix, "~")
+    n <- sapply(wk, length)
+    data <- data[rep(1:nrow(data), times = n), ]
+    data$matrix <- unlist(wk)
+  }
+  
+  rownames(data) <- NULL
+  
   data
 }
 
@@ -763,12 +796,10 @@ get.AC.HELCOM <- function(compartment, determinand, info, AC, thresholds, determ
     }
     
     if (compartment == "biota") {
-      if (i %in% c(
-        "Metals", "Organofluorines", "Metabolites", "Imposex")
-      ) {
+      if (i %in% c("Metabolites", "Imposex")) {
         fn = paste("get.AC.biota", i, "HELCOM", sep = ".")
       } else {
-        fn = "get.AC.biota.contaminant"
+        fn = "get_AC_biota_contaminant"
       }
     }
     
@@ -827,6 +858,149 @@ get.AC.biota.contaminant <- function(
   rownames(out) <- data$rownames
   out
 }                           
+
+
+
+get_AC_biota_contaminant <- function(
+    data, AC, AC_data, species_rt, export_cf = FALSE) {    
+  
+  ok <- AC %in% names(AC_data)
+  
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following thresholds are not in the thresholds reference table.\n", 
+      "Thresholds: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+
+  var_id <- c("determinand", "species", "matrix", "basis")
+  
+  ok <- var_id %in% names(data)
+  
+  if (!all(ok)) {
+    id <- var_id[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following variables are not in 'data'.\n", 
+      "Variables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  data <- data[var_id]
+  
+
+  # AC_data: fill out empty species, species_group and species_subgroup fields 
+  # by joining with species reference table
+  
+  index <- paste(
+    is.na(AC_data$species), 
+    is.na(AC_data$species_group),
+    is.na(AC_data$species_subgroup)
+  )
+
+  
+  species_rt <- tibble::rownames_to_column(species_rt, "species")
+  
+  AC_data <- by(
+    AC_data, 
+    index, 
+    FUN = function(x) {
+      var_id = c("species", "species_group", "species_subgroup")
+      ok <- sapply(x[var_id], function(y) !any(is.na(y)))
+      if (all(ok)) return(x)
+      by_id <- var_id[ok]
+      add_id <- var_id[!ok]
+      dplyr::left_join(
+        dplyr::select(x, -all_of(add_id)),
+        dplyr::select(species_rt, all_of(var_id)),
+        by = by_id,
+        relationship = "many-to-many"  
+      )
+    }
+  )
+  
+  # need to convert to class list before binding rows
+      
+  AC_data <- lapply(AC_data, "[")
+  
+  AC_data <- bind_rows(AC_data)
+
+  if (any(duplicated(AC_data[c("species", "determinand", "matrix")]))) {
+    stop(
+      "\nThe threshold reference table is ambiguous with multiple values for\n", 
+      "the same combination of species, determinand, matrix, and threshold", 
+      call. = FALSE
+    )
+  }
+  
+
+  # match AC to data
+
+  data <- dplyr::left_join(
+    data, 
+    AC_data, 
+    by = c("determinand", "species", "matrix"), 
+    relationship = "many-to-one"
+  )
+
+
+  # add in lipid and dry weight information for basis conversion
+  
+  species_rt <- tibble::column_to_rownames(species_rt, "species")
+  
+  lipid_info <- ctsm_get_species_cfs(species_rt, "lipidwt")
+  drywt_info <- ctsm_get_species_cfs(species_rt, "drywt")
+  
+  data <- dplyr::left_join(
+    data, 
+    drywt_info, 
+    by = c("species", "matrix"), 
+    relationship = "many-to-one"
+  )
+  
+  data <- dplyr::left_join(
+    data, 
+    lipid_info, 
+    by = c("species", "matrix"), 
+    relationship = "many-to-one"
+  )
+  
+  
+  # convert basis where necessary
+    
+  out <- sapply(
+    AC, 
+    simplify = FALSE, 
+    FUN = function(i) {
+      AC_basis <- paste(i, "basis", sep = "_")
+      ctsm_convert_basis(
+        data[[i]], 
+        from = data[[AC_basis]], 
+        to = data$basis, 
+        drywt = data$drywt, 
+        lipidwt = data$lipidwt
+      )
+    }
+  )
+  
+  out <- data.frame(out)
+  
+  if (export_cf) {
+    out <- dplyr::bind_cols(out, data[c("drywt", "lipidwt")])
+  }
+
+  rownames(out) <- NULL
+
+  out
+}                           
+
+
+
 
 
 get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {

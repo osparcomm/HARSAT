@@ -44,6 +44,7 @@ biota_data <- ctsm_read_data(
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
   data_path = file.path("data", "example_HELCOM"),
+  info_files = list(thresholds = "thresholds_biota_HELCOM_new.csv"),
   info_path = "information",
   extraction = "2022/10/06",
   max_year = 2021L
