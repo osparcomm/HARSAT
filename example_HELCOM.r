@@ -18,18 +18,20 @@
 
 rm(list = objects())
 
-function_path <- file.path("R")
+devtools::load_all()
 
-source(file.path(function_path, "import_functions.R"))
-source(file.path(function_path, "import_check_functions.R"))
-source(file.path(function_path, "assessment_functions.R"))
-source(file.path(function_path, "ctsm_lmm.R"))
-source(file.path(function_path, "proportional_odds_functions.R"))
-source(file.path(function_path, "imposex_functions.R"))
-source(file.path(function_path, "imposex_clm.R"))
-source(file.path(function_path, "reporting_functions.R"))
-source(file.path(function_path, "support_functions.R"))
-source(file.path(function_path, "information_functions.R"))
+# function_path <- file.path("R")
+# 
+# source(file.path(function_path, "import_functions.R"))
+# source(file.path(function_path, "import_check_functions.R"))
+# source(file.path(function_path, "assessment_functions.R"))
+# source(file.path(function_path, "ctsm_lmm.R"))
+# source(file.path(function_path, "proportional_odds_functions.R"))
+# source(file.path(function_path, "imposex_functions.R"))
+# source(file.path(function_path, "imposex_clm.R"))
+# source(file.path(function_path, "reporting_functions.R"))
+# source(file.path(function_path, "support_functions.R"))
+# source(file.path(function_path, "information_functions.R"))
 
 
 
@@ -44,7 +46,6 @@ biota_data <- ctsm_read_data(
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
   data_path = file.path("data", "example_HELCOM"),
-  info_files = list(thresholds = "thresholds_biota_HELCOM_new.csv"),
   info_path = "information",
   extraction = "2022/10/06",
   max_year = 2021L
@@ -333,7 +334,7 @@ biota_assessment <- ctsm_assessment(
   AC = c("BAC", "EAC", "EQS", "MPC"), 
   get_assessment_criteria = get.AC.HELCOM,
   subset = determinand %in% wk_determinands[wk_group == "Metals"], 
-  parallel = TRUE
+  parallel = FALSE
 )
 
 wk_organics <- c(
@@ -344,7 +345,7 @@ wk_organics <- c(
 biota_assessment <- ctsm_update_assessment(
   biota_assessment, 
   subset = determinand %in% wk_determinands[wk_group %in% wk_organics], 
-  parallel = TRUE
+  parallel = FALSE
 )
 
 biota_assessment <- ctsm_update_assessment(
