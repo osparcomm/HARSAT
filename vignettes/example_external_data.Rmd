@@ -105,6 +105,27 @@ Main runs
 biota_assessment <- ctsm_assessment(biota_timeSeries)
 #> 
 #> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg
+#> Loading required package: Matrix
+#> 
+#> Attaching package: 'Matrix'
+#> The following objects are masked from 'package:tidyr':
+#> 
+#>     expand, pack, unpack
+#> Loading required package: nlme
+#> 
+#> Attaching package: 'nlme'
+#> The following object is masked from 'package:lme4':
+#> 
+#>     lmList
+#> The following object is masked from 'package:dplyr':
+#> 
+#>     collapse
+#> This is mgcv 1.8-42. For overview type 'help("mgcv-package")'.
+#> 
+#> Attaching package: 'optimx'
+#> The following object is masked from 'package:nlme':
+#> 
+#>     coef<-
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> 
