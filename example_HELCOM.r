@@ -20,20 +20,6 @@ rm(list = objects())
 
 devtools::load_all()
 
-# function_path <- file.path("R")
-# 
-# source(file.path(function_path, "import_functions.R"))
-# source(file.path(function_path, "import_check_functions.R"))
-# source(file.path(function_path, "assessment_functions.R"))
-# source(file.path(function_path, "ctsm_lmm.R"))
-# source(file.path(function_path, "proportional_odds_functions.R"))
-# source(file.path(function_path, "imposex_functions.R"))
-# source(file.path(function_path, "imposex_clm.R"))
-# source(file.path(function_path, "reporting_functions.R"))
-# source(file.path(function_path, "support_functions.R"))
-# source(file.path(function_path, "information_functions.R"))
-
-
 
 # Read data and make adjustments ----
 
@@ -296,8 +282,7 @@ water_timeSeries <- ctsm_create_timeSeries(
 sediment_assessment <- ctsm_assessment(
   sediment_timeSeries, 
   AC = "EQS",
-  get_assessment_criteria = get.AC.HELCOM,
-  parallel = TRUE
+  parallel = FALSE
 )
 
 
@@ -395,9 +380,7 @@ ctsm_check_convergence(biota_assessment$assessment[wk_id])
 
 water_assessment <- ctsm_assessment(
   water_timeSeries, 
-  AC = "EQS", 
-  get_assessment_criteria = get.AC.HELCOM,
-  parallel = TRUE
+  AC = "EQS"
 )
 
 

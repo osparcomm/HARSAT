@@ -1,5 +1,5 @@
-determinand,basis,EQS
-CD,W,0.2
-PB,W,1.3
-TBSN+,W,0.2
-PFOS,W,0.13
+determinand,filtered,EQS_basis,EQS
+CD,Yes~No,W,0.2
+PB,Yes~No,W,1.3
+TBSN+,Yes~No,W,0.2
+PFOS,Yes~No,W,0.13

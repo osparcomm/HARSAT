@@ -224,13 +224,16 @@ ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
     # could streamline in future
     
     if ("AC" %in% names(info)) {
-      AC <- info$get_AC(
-        as.data.frame(seriesInfo), 
-        info$AC, 
-        info$thresholds,
-        info$determinand,
-        info$species
+      args <- list(
+        data = as.data.frame(seriesInfo), 
+        AC = info$AC,
+        threshold_rt = info$thresholds,
+        determinand_rt = info$determinand
       )
+      if (info$compartment == "biota") {
+        args$species_rt <- info$species 
+      }
+      AC <- do.call(info$get_AC, args)
       AC <- unlist(AC)
     } else { 
       AC <- NULL

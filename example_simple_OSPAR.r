@@ -14,16 +14,7 @@
 
 rm(list = objects())
 
-function_path <- file.path("R")
-
-source(file.path(function_path, "import_functions.R"))
-source(file.path(function_path, "import_check_functions.R"))
-source(file.path(function_path, "assessment_functions.R"))
-source(file.path(function_path, "ctsm_lmm.R"))
-source(file.path(function_path, "reporting_functions.R"))
-source(file.path(function_path, "support_functions.R"))
-source(file.path(function_path, "information_functions.R"))
-
+devtools::load_all()
 
 
 # Read data from ICES extraction ----
@@ -40,7 +31,9 @@ biota_data <- ctsm_read_data(
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
   data_path = file.path("data", "example_simple_OSPAR"),
-  info_files = list(determinand = "determinand_simple_OSPAR.csv"),
+  info_files = list(
+    determinand = "determinand_simple_OSPAR.csv", 
+    thresholds = "thresholds_biota_simple_OSPAR.csv"),
   info_path = "information", 
   extraction = "2022/01/11",
   max_year = 2020L  
@@ -95,8 +88,7 @@ biota_timeSeries <- ctsm_create_timeSeries(
 
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
-  AC = c("BAC", "EAC", "EQS", "HQS"), 
-  get_assessment_criteria = get.AC.OSPAR
+  AC = c("BAC", "EAC", "EQS", "HQS")
 )
 
 
