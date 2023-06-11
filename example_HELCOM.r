@@ -332,7 +332,6 @@ wk_group <- ctsm_get_info(
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
   AC = c("BAC", "EAC", "EQS", "MPC"), 
-  get_assessment_criteria = get.AC.HELCOM,
   subset = determinand %in% wk_determinands[wk_group == "Metals"], 
   parallel = FALSE
 )

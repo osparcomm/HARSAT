@@ -7,7 +7,7 @@ ctsm_assessment <- function(
   ctsm_ob, 
   subset = NULL, 
   AC = NULL, 
-  get_assessment_criteria = get.AC, 
+  get_AC = NULL, 
   recent_trend = 20, 
   parallel = FALSE, 
   ...) {
@@ -21,9 +21,17 @@ ctsm_assessment <- function(
   
   ctsm_ob$call <- match.call()
 
-  ctsm_ob$info$AC <- AC
   ctsm_ob$info$recent.trend <- recent_trend
-  ctsm_ob$info$get_assessment_criteria <- substitute(get_assessment_criteria)
+
+  ctsm_ob$info$AC <- AC
+  
+  ctsm_ob$info$get_AC <- get_AC
+  if (!is.null(AC) && is.null(ctsm_ob$info$get_AC)) {
+    ctsm_ob$info$get_AC <- get(
+      paste0("get_AC_", ctsm_ob$info$compartment), 
+      envir = rlang::ns_env("harsat")
+    ) 
+  }
 
   ctsm_ob$assessment <- vector(mode = "list", length = nrow(ctsm_ob$timeSeries))
   names(ctsm_ob$assessment) <- row.names(ctsm_ob$timeSeries)
@@ -47,7 +55,6 @@ ctsm_assessment <- function(
   out <- ctsm_assessment_engine(
     ctsm_ob, 
     series_id,
-    get.assessment.criteria = get_assessment_criteria,
     parallel = parallel, 
     ...
   )
@@ -92,7 +99,6 @@ ctsm_update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...
   out <- ctsm_assessment_engine(
     ctsm_ob, 
     series_id,
-    get.assessment.criteria = get(ctsm_ob$info$get_assessment_criteria),
     parallel = parallel, 
     ...
   )
@@ -107,9 +113,7 @@ ctsm_update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...
 
 
 
-ctsm_assessment_engine <- function(
-  ctsm.ob, series_id, get.assessment.criteria = get.AC, 
-  parallel = FALSE, ...) {
+ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
 
   # location: assessment_functions.R
   
@@ -126,8 +130,7 @@ ctsm_assessment_engine <- function(
 
   stations <- tibble::column_to_rownames(ctsm.ob$stations, "station_code")
   stations <- stations[timeSeries$station_code, ]
-  
-  
+
   
   # set up parallel processing information 
   
@@ -221,10 +224,8 @@ ctsm_assessment_engine <- function(
     # could streamline in future
     
     if ("AC" %in% names(info)) {
-      AC <- get.assessment.criteria(
-        info$compartment, 
-        determinand, 
-        seriesInfo, 
+      AC <- info$get_AC(
+        as.data.frame(seriesInfo), 
         info$AC, 
         info$thresholds,
         info$determinand,

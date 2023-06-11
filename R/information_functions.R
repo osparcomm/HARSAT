@@ -364,7 +364,7 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   }
     
   
-  data <- dplyr::pivot_longer(
+  data <- tidyr::pivot_longer(
     data, 
     ends_with(wt_adj), 
     names_to = "matrix", 
@@ -372,10 +372,12 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
     values_drop_na = TRUE
   )
   
-  browser()
-  
   data <- tidyr::separate_wider_delim(
-    data, .data$matrix, delim = "_", c("matrix", NA)) 
+    data, 
+    .data$matrix, 
+    delim = "_", 
+    names = c("matrix", NA)
+  ) 
   
   data <- as.data.frame(data)
   
@@ -688,21 +690,13 @@ ctsm_read_thresholds <- function(
     data$country[id] <- ""
   }
   
-  test_name <- "thresholds_biota_HELCOM_new.csv"
-  
-  if (compartment == "biota" && file != test_name) {
-    wk <- strsplit(data$species_subgroup, ",", fixed = TRUE)
-    n <- sapply(wk, length)
-    data <- data[rep(1:nrow(data), times = n),]
-    data$species_subgroup <- unlist(wk)
-  }
 
   # check all species are in the reference table
   # check combinations of species, species_group and species_subgroup are 
   # consistent with those in the reference table
   # check basis present for all contaminants 
     
-  if (compartment == "biota" && file == test_name) {
+  if (compartment == "biota") {
     
     if (any(is.na(data$matrix))) {
       stop(
@@ -803,34 +797,16 @@ get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determi
 
 
 #' @export
-get.AC.HELCOM <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
-  
-  # check elements of info are of correct length
-  
-  stopifnot(sapply(info, length) %in% c(1, length(determinand)))
-  
-  
-  # remove duplicate determinand information - need to fix this better
-  
-  info$determinand <- NULL
-  
-  
-  # turn info into a dataframe if necessary
-  
-  data <- cbind(determinand, as.data.frame(info))
-
-  
+get.AC.HELCOM <- function(compartment, data, AC, thresholds_rt, determinand_rt, species_rt) {
   
   if (compartment == "biota") {
-    out <- get_AC_biota_contaminant(data, AC, thresholds, determinand_rt, species_rt)
+    out <- get_AC_biota_contaminant(data, AC, thresholds_rt, determinand_rt, species_rt)
     return(out)
   }
 
 
   # split by determinand group
     
-  # get determinand grouping
-  
   group <- ctsm_get_info(
     determinand_rt, data$determinand, "group", compartment, sep = "_"
   )
@@ -841,7 +817,7 @@ get.AC.HELCOM <- function(compartment, determinand, info, AC, thresholds, determ
   # get assessment concentrations
   
   out <- lapply(names(data), function(i) {
-    args <- list(data = data[[i]], AC = AC, AC_data = thresholds)
+    args <- list(data = data[[i]], AC = AC, AC_data = thresholds_rt)
     if (compartment == "biota") args$species_rt <- species_rt
     
     if (compartment == "sediment") {
@@ -854,14 +830,6 @@ get.AC.HELCOM <- function(compartment, determinand, info, AC, thresholds, determ
     
     if (compartment == "water") {
       fn = "get.AC.water.contaminant"
-    }
-    
-    if (compartment == "biota") {
-      if (i %in% c("Metabolites", "Imposex")) {
-        fn = paste("get.AC.biota", i, "HELCOM", sep = ".")
-      } else {
-        fn = "get_AC_biota_contaminant"
-      }
     }
     
     do.call(fn, args)
@@ -922,10 +890,10 @@ get.AC.biota.contaminant <- function(
 
 
 
-get_AC_biota_contaminant <- function(
-    data, AC, thresholds, determinand_rt, species_rt, export_cf = FALSE) {    
+get_AC_biota <- function(
+    data, AC, threshold_rt, determinand_rt, species_rt, export_cf = FALSE) {    
     
-  ok <- AC %in% names(thresholds)
+  ok <- AC %in% names(threshold_rt)
   
   if (!all(ok)) {
     id <- AC[!ok]
@@ -977,16 +945,16 @@ get_AC_biota_contaminant <- function(
   # by joining with species reference table
   
   index <- paste(
-    is.na(thresholds$species), 
-    is.na(thresholds$species_group),
-    is.na(thresholds$species_subgroup)
+    is.na(threshold_rt$species), 
+    is.na(threshold_rt$species_group),
+    is.na(threshold_rt$species_subgroup)
   )
 
-  
+
   species_rt <- tibble::rownames_to_column(species_rt, "species")
   
-  thresholds <- by(
-    thresholds, 
+  threshold_rt <- by(
+    threshold_rt, 
     index, 
     FUN = function(x) {
       var_id = c("species", "species_group", "species_subgroup")
@@ -1005,15 +973,15 @@ get_AC_biota_contaminant <- function(
   
   # need to convert to class list before binding rows
       
-  thresholds <- lapply(thresholds, "[")
+  threshold_rt <- lapply(threshold_rt, "[")
   
-  thresholds <- dplyr::bind_rows(thresholds)
+  threshold_rt <- dplyr::bind_rows(threshold_rt)
   
   
   # check no ambiguous cases
   
   check <- dplyr::select(
-    thresholds, 
+    threshold_rt, 
     any_of(c("species", "determinand", "matrix", "method_analysis", "sex"))
   )
   
@@ -1073,7 +1041,7 @@ get_AC_biota_contaminant <- function(
       )
       dplyr::left_join(
         wk_data, 
-        thresholds, 
+        threshold_rt, 
         by = by_id, 
         relationship = "many-to-one"
       )
