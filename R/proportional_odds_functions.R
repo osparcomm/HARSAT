@@ -9,6 +9,11 @@
 #' @export
 ctsm.VDS.varlist <- paste("ctsm.VDS", c("p.calc", "loglik.calc", "index.opt", "cl"), sep = ".")
 
+#' @export 
+cstm.VDS.environment <- function() {
+  environment(sys.function())
+}
+
 #' @export
 ctsm.VDS.p.calc <- function(theta, cumulate = FALSE) {
   if (cumulate) theta <- cumsum(theta)

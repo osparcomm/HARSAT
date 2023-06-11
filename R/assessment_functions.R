@@ -136,7 +136,7 @@ ctsm_assessment_engine <- function(
     cat("Setting up clusters: be patient, it can take a while!")
         
     n_cores <- parallel::detectCores()
-    cluster_id <- parallel::makeCluster(n_cores - 1)
+    cluster_id <- parallel::makeCluster(n_cores - 1, outfile = "")
     on.exit(parallel::stopCluster(cluster_id))
 
     is_imposex <- "Imposex" %in% data$group
@@ -148,7 +148,6 @@ ctsm_assessment_engine <- function(
       {
         library("lme4")
         library("tidyverse")
-        library("harsat")
       }
     )  
 
@@ -343,18 +342,21 @@ ctsm_assessment_engine <- function(
 }
 
 
+#' @export
 ctsm_parallel_objects <- function(imposex = FALSE) {
   
   # assessment_functions.R
   # objects required for clusterExport
+
+  package.environment <- environment(sys.function())
   
   out <- c(
     "negTwiceLogLik", 
-    objects(".GlobalEnv", pattern = "^get*"),
-    objects(".GlobalEnv", pattern = "^ctsm*"),
-    objects(".GlobalEnv", pattern = "^info*")
+    objects(package.environment, pattern = "^get*"),
+    objects(package.environment, pattern = "^ctsm*"),
+    objects(package.environment, pattern = "^info*")
   )
-  
+
   if (imposex) {
     out <- c(
       out, 
@@ -384,7 +386,7 @@ get.index <- function(determinand, data, info) {
   
   function_id <- paste("get.index", info$compartment, group, sep = ".")
   
-  do.call(function_id, list(data = data, determinand = determinand, info = info), envir = rlang::ns_env("harsat")) 
+  do.call(function_id, list(data = data, determinand = determinand, info = info), envir = sys.frame()) 
 }
 
 

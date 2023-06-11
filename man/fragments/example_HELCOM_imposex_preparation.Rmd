@@ -125,9 +125,10 @@ Split by `regionID`, estimate cut points and level for each `indexID`.
 wk_split <- split(wk_data, wk_data$regionID)
 
 wk.cores <- detectCores()
-wk.cluster <- makeCluster(wk.cores - 1)
+wk.cluster <- makeCluster(wk.cores - 1, outfile = "")
 
-clusterExport(wk.cluster, c("wk_split", ctsm.VDS.varlist))
+clusterExport(wk.cluster, c("wk_split"))
+clusterExport(wk.cluster, ctsm.VDS.varlist, envir = cstm.VDS.environment())
 
 # clusterEvalQ(wk.cluster, {
 #   library("MASS")
