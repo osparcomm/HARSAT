@@ -282,7 +282,7 @@ water_timeSeries <- ctsm_create_timeSeries(
 sediment_assessment <- ctsm_assessment(
   sediment_timeSeries, 
   AC = "EQS",
-  parallel = FALSE
+  parallel = TRUE
 )
 
 
@@ -317,8 +317,8 @@ wk_group <- ctsm_get_info(
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
   AC = c("BAC", "EAC", "EQS", "MPC"), 
-  subset = determinand %in% wk_determinands[wk_group == "Metals"], 
-  parallel = FALSE
+  subset = determinand %in% wk_determinands[wk_group == "Metals"],
+  parallel = TRUE
 )
 
 wk_organics <- c(
@@ -329,7 +329,7 @@ wk_organics <- c(
 biota_assessment <- ctsm_update_assessment(
   biota_assessment, 
   subset = determinand %in% wk_determinands[wk_group %in% wk_organics], 
-  parallel = FALSE
+  parallel = TRUE
 )
 
 biota_assessment <- ctsm_update_assessment(
@@ -380,7 +380,8 @@ ctsm_check_convergence(biota_assessment$assessment[wk_id])
 
 water_assessment <- ctsm_assessment(
   water_timeSeries, 
-  AC = "EQS"
+  AC = "EQS", 
+  parallel = TRUE
 )
 
 

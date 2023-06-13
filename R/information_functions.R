@@ -741,75 +741,28 @@ ctsm_read_thresholds <- function(
 # if a list, then each element can be either a scalar (replicated to length n), or a vector of length n
 # AC is a character vector of assessment concentration types
 
-get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
 
-  # check elements of info are of correct length
+#' @export
+get_AC <- vector("list", 3L)
 
-  stopifnot(sapply(info, length) %in% c(1, length(determinand)))
-  
+names(get_AC) <- c("biota", "sediment", "water")
 
-  # remove duplicate determinand information - need to fix this better
-  
-  info$determinand <- NULL
-  
+get_AC$biota <- function(data, AC, rt, export_cf = FALSE) {    
     
-  # turn info into a dataframe if necessary
-
-  data <- cbind(determinand, as.data.frame(info))
+  ok <- c("thresholds", "determinand", "species") %in% names(rt)
   
-                
-  # split by determinand groupings
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following reference tables are not provided.\n", 
+      "Reference tables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
   
-  group <- ctsm_get_info(
-    determinand_rt, data$determinand, "group", compartment, sep = "_"
-  )
-  
-  data <- split(data, group, drop = TRUE)
 
-  
-  # get assessment concentrations
-   
-  out <- lapply(names(data), function(i) {
-    args <- list(data = data[[i]], AC = AC, AC_data = thresholds)
-    if (compartment == "biota") args$species_rt <- species_rt
-    
-    if (compartment == "sediment") {
-      if (i == "Metals") {
-        fn = "get.AC.sediment.Metals"
-      } else {
-        fn = "get.AC.sediment.contaminant"
-      }
-    }
-    
-    if (compartment == "water") {
-      fn = "get.AC.water.contaminant"
-    }
-
-    if (compartment == "biota") {
-      if (i %in% c(
-        "Metals", "Chlorobiphenyls", "Organochlorines", "Organofluorines", 
-        "PBDEs", "Dioxins", "Effects", "Metabolites", "Imposex")
-      ) {
-        fn = paste("get.AC.biota", i, "OSPAR", sep = ".")
-      } else {
-        fn = "get.AC.biota.contaminant"
-      }
-    }
-      
-    do.call(fn, args)
-    
-  }) 
-  
-  unsplit(out, group, drop = TRUE)
-}
-
-
-
-
-get_AC_biota <- function(
-    data, AC, threshold_rt, determinand_rt, species_rt, export_cf = FALSE) {    
-    
-  ok <- AC %in% names(threshold_rt)
+  ok <- AC %in% names(rt$thresholds)
   
   if (!all(ok)) {
     id <- AC[!ok]
@@ -837,7 +790,7 @@ get_AC_biota <- function(
   }
   
   
-  check <- ctsm_get_datatype(data$determinand, list(determinand = determinand_rt))
+  check <- ctsm_get_datatype(data$determinand, rt)
   no_basis <- !"basis" %in% names(data)
   
   if (any(check %in% "contaminant") && no_basis) {
@@ -861,16 +814,16 @@ get_AC_biota <- function(
   # by joining with species reference table
   
   index <- paste(
-    is.na(threshold_rt$species), 
-    is.na(threshold_rt$species_group),
-    is.na(threshold_rt$species_subgroup)
+    is.na(rt$thresholds$species), 
+    is.na(rt$thresholds$species_group),
+    is.na(rt$thresholds$species_subgroup)
   )
 
 
-  species_rt <- tibble::rownames_to_column(species_rt, "species")
+  rt$species <- tibble::rownames_to_column(rt$species, "species")
   
-  threshold_rt <- by(
-    threshold_rt, 
+  rt$thresholds <- by(
+    rt$thresholds, 
     index, 
     FUN = function(x) {
       var_id = c("species", "species_group", "species_subgroup")
@@ -880,7 +833,7 @@ get_AC_biota <- function(
       add_id <- var_id[!ok]
       dplyr::left_join(
         dplyr::select(x, -all_of(add_id)),
-        dplyr::select(species_rt, all_of(var_id)),
+        dplyr::select(rt$species, all_of(var_id)),
         by = by_id,
         relationship = "many-to-many"  
       )
@@ -889,15 +842,15 @@ get_AC_biota <- function(
   
   # need to convert to class list before binding rows
       
-  threshold_rt <- lapply(threshold_rt, "[")
+  rt$thresholds <- lapply(rt$thresholds, "[")
   
-  threshold_rt <- dplyr::bind_rows(threshold_rt)
+  rt$thresholds <- dplyr::bind_rows(rt$thresholds)
   
   
   # check no ambiguous cases
   
   check <- dplyr::select(
-    threshold_rt, 
+    rt$thresholds, 
     any_of(c("species", "determinand", "matrix", "method_analysis", "sex"))
   )
   
@@ -914,12 +867,10 @@ get_AC_biota <- function(
   # depends on data type and, within effects, on determinand (group)
 
   data$determinand_group <- ctsm_get_info(
-    determinand_rt, data$determinand, "group", compartment = "biota", sep = "_"
+    rt$determinand, data$determinand, "group", compartment = "biota", sep = "_"
   )
 
-  data$datatype <- ctsm_get_datatype(
-    data$determinand, list(determinand = determinand_rt)
-  )
+  data$datatype <- ctsm_get_datatype(data$determinand, rt)
   
   if (!all(data$datatype %in% c("contaminant", "effect"))) {
     stop("unrecognised datatype")
@@ -957,7 +908,7 @@ get_AC_biota <- function(
       )
       dplyr::left_join(
         wk_data, 
-        threshold_rt, 
+        rt$thresholds, 
         by = by_id, 
         relationship = "many-to-one"
       )
@@ -972,10 +923,10 @@ get_AC_biota <- function(
   
   # add in lipid and dry weight information for basis conversion
     
-  species_rt <- tibble::column_to_rownames(species_rt, "species")
+  rt$species <- tibble::column_to_rownames(rt$species, "species")
   
-  lipid_info <- ctsm_get_species_cfs(species_rt, "lipidwt")
-  drywt_info <- ctsm_get_species_cfs(species_rt, "drywt")
+  lipid_info <- ctsm_get_species_cfs(rt$species, "lipidwt")
+  drywt_info <- ctsm_get_species_cfs(rt$species, "drywt")
   
   data <- dplyr::left_join(
     data, 
@@ -1022,7 +973,191 @@ get_AC_biota <- function(
 }                           
 
 
+get_AC$sediment <- function(data, AC, rt, export_all = FALSE) {   
+  
+  ok <- "thresholds" %in% names(rt)
+  
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following reference tables are not provided.\n", 
+      "Reference tables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  
+  ok <- AC %in% names(rt$thresholds)
+  
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following thresholds are not in the thresholds reference table.\n", 
+      "Thresholds: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  
+  var_id <- "determinand"
+  
+  ok <- var_id %in% names(data)
+  
+  if (!all(ok)) {
+    id <- var_id[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following variables are not in 'data'.\n", 
+      "Variables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  
+  data <- dplyr::left_join(
+    data, 
+    rt$thresholds, 
+    by = "determinand", 
+    relationship = "many-to-one"
+  )
+  
+  if (export_all) {
+    return(data)
+  } 
+  
+  row.names(data) <- NULL
+  
+  data[AC]
+}                           
 
+
+
+get_AC$water <- function(data, AC, rt, export_all = FALSE) {   
+  
+  ok <- "thresholds" %in% names(rt)
+  
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following reference tables are not provided.\n", 
+      "Reference tables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  
+  ok <- AC %in% names(rt$thresholds)
+  
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following thresholds are not in the thresholds reference table.\n", 
+      "Thresholds: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  
+  var_id <- c("determinand", "filtered")
+  
+  ok <- var_id %in% names(data)
+  
+  if (!all(ok)) {
+    id <- var_id[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following variables are not in 'data'.\n", 
+      "Variables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  
+  data <- dplyr::left_join(
+    data, 
+    rt$thresholds, 
+    by = c("determinand", "filtered"),
+    relationship = "many-to-one"
+  )
+  
+  if (export_all) {
+    return(data)
+  } 
+  
+  row.names(data) <- NULL
+  
+  data[AC]
+}                           
+
+
+# Most of the following functions are deprecated - but need to get an OSPAR 
+# threshold rt sorted
+
+get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
+  
+  # check elements of info are of correct length
+  
+  stopifnot(sapply(info, length) %in% c(1, length(determinand)))
+  
+  
+  # remove duplicate determinand information - need to fix this better
+  
+  info$determinand <- NULL
+  
+  
+  # turn info into a dataframe if necessary
+  
+  data <- cbind(determinand, as.data.frame(info))
+  
+  
+  # split by determinand groupings
+  
+  group <- ctsm_get_info(
+    determinand_rt, data$determinand, "group", compartment, sep = "_"
+  )
+  
+  data <- split(data, group, drop = TRUE)
+  
+  
+  # get assessment concentrations
+  
+  out <- lapply(names(data), function(i) {
+    args <- list(data = data[[i]], AC = AC, AC_data = thresholds)
+    if (compartment == "biota") args$species_rt <- species_rt
+    
+    if (compartment == "sediment") {
+      if (i == "Metals") {
+        fn = "get.AC.sediment.Metals"
+      } else {
+        fn = "get.AC.sediment.contaminant"
+      }
+    }
+    
+    if (compartment == "water") {
+      fn = "get.AC.water.contaminant"
+    }
+    
+    if (compartment == "biota") {
+      if (i %in% c(
+        "Metals", "Chlorobiphenyls", "Organochlorines", "Organofluorines", 
+        "PBDEs", "Dioxins", "Effects", "Metabolites", "Imposex")
+      ) {
+        fn = paste("get.AC.biota", i, "OSPAR", sep = ".")
+      } else {
+        fn = "get.AC.biota.contaminant"
+      }
+    }
+    
+    do.call(fn, args)
+    
+  }) 
+  
+  unsplit(out, group, drop = TRUE)
+}
 
 
 get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
@@ -1564,51 +1699,6 @@ get.AC.biota.Imposex.OSPAR <- function(data, AC, AC_data, species_rt) {
 
 
 
-get_AC_sediment <- function(data, AC, threshold_rt, determinand_rt, export_all = FALSE) {   
-  
-  ok <- AC %in% names(threshold_rt)
-  
-  if (!all(ok)) {
-    id <- AC[!ok]
-    id <- sort(id)
-    stop(
-      "\nThe following thresholds are not in the thresholds reference table.\n", 
-      "Thresholds: ", paste(id, collapse = ", "),
-      call. = FALSE
-    )
-  }
-  
-  
-  var_id <- "determinand"
-  
-  ok <- var_id %in% names(data)
-  
-  if (!all(ok)) {
-    id <- var_id[!ok]
-    id <- sort(id)
-    stop(
-      "\nThe following variables are not in 'data'.\n", 
-      "Variables: ", paste(id, collapse = ", "),
-      call. = FALSE
-    )
-  }
-  
-
-  data <- dplyr::left_join(
-    data, 
-    threshold_rt, 
-    by = "determinand", 
-    relationship = "many-to-one"
-  )
-    
-  if (export_all) {
-    return(data)
-  } 
-
-  row.names(data) <- NULL
-    
-  data[AC]
-}                           
 
 
 
@@ -1689,51 +1779,6 @@ get.AC.sediment.Metals <- function(data, AC, AC_data) {
 }                           
 
 
-get_AC_water <- function(data, AC, threshold_rt, determinand_rt, export_all = FALSE) {   
-  
-  ok <- AC %in% names(threshold_rt)
-  
-  if (!all(ok)) {
-    id <- AC[!ok]
-    id <- sort(id)
-    stop(
-      "\nThe following thresholds are not in the thresholds reference table.\n", 
-      "Thresholds: ", paste(id, collapse = ", "),
-      call. = FALSE
-    )
-  }
-  
-  
-  var_id <- c("determinand", "filtered")
-  
-  ok <- var_id %in% names(data)
-  
-  if (!all(ok)) {
-    id <- var_id[!ok]
-    id <- sort(id)
-    stop(
-      "\nThe following variables are not in 'data'.\n", 
-      "Variables: ", paste(id, collapse = ", "),
-      call. = FALSE
-    )
-  }
-  
-  
-  data <- dplyr::left_join(
-    data, 
-    threshold_rt, 
-    by = c("determinand", "filtered"),
-    relationship = "many-to-one"
-  )
-  
-  if (export_all) {
-    return(data)
-  } 
-  
-  row.names(data) <- NULL
-  
-  data[AC]
-}                           
 
 
 

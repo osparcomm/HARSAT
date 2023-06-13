@@ -79,7 +79,11 @@ biota_assessment <- ctsm_assessment(biota_timeSeries)
 Use the code below if it takes a long time to run
 
 ```
-biota_assessment <- ctsm_assessment(biota_timeSeries, parallel = TRUE)
+biota_assessment <- ctsm_assessment(
+  biota_timeSeries,
+  AC = c("NRC", "LRC", "MRC", "HRC")
+  parallel = TRUE
+)
 ```
 
 ## Check convergence
@@ -101,7 +105,12 @@ if (!dir.exists(summary.dir)) {
 
 ctsm_summary_table(
   biota_assessment,
-  output_dir = summary.dir
+  output_dir = summary.dir,
+    classColour = list(
+    below = c("NRC" = "blue", "LRC" = "green", "MRC" = "orange", "HRC" = "darkorange"),
+    above = c("NRC" = "red", "LRC" = "red", "MRC" = "red", "HRC" = "red"),
+    none = "black"
+  )
 )
 ```
 

@@ -7,7 +7,6 @@
 # Setup ----
 
 # Sources functions (folder R) and reference tables (folder information)
-# Only those functions needed for this example are sourced here
 # The functions and reference tables folders are assumed to be in the current
 # R project folder
 
@@ -22,7 +21,8 @@ devtools::load_all()
 # There are three input data sets: 
 # - the contaminant data
 # - the station dictionary
-# - the quality assurance data (more accurately called a chemical methods file)
+# - the quality assurance data (more accurately called a chemical methods file);
+#     this will disappear before release
 
 biota_data <- ctsm_read_data(
   compartment = "biota", 
@@ -33,7 +33,8 @@ biota_data <- ctsm_read_data(
   data_path = file.path("data", "example_simple_OSPAR"),
   info_files = list(
     determinand = "determinand_simple_OSPAR.csv", 
-    thresholds = "thresholds_biota_simple_OSPAR.csv"),
+    thresholds = "thresholds_biota_simple_OSPAR.csv"
+  ),
   info_path = "information", 
   extraction = "2022/01/11",
   max_year = 2020L  
@@ -90,6 +91,19 @@ biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
   AC = c("BAC", "EAC", "EQS", "HQS")
 )
+
+
+# can supply own function for calculating AC - in the example below it
+# will generate exactly the same results
+
+# my_get_AC <- get_AC$biota
+# 
+# biota_assessment <- ctsm_assessment(
+#   biota_timeSeries, 
+#   AC = c("BAC", "EAC", "EQS", "HQS"), 
+#   get_AC_fn = my_get_AC
+# )
+
 
 
 # check convergence - no errors this time
