@@ -179,7 +179,7 @@ ctsm_read_species <- function(file, path = "information") {
       "Please update the file to continue, noting that variable names are case ", 
       "sensitive.\n",
       "Variables: ", paste(id, collapse = ", "),
-      .call = FALSE
+      call. = FALSE
     )
   }
   
@@ -219,7 +219,7 @@ ctsm_read_species <- function(file, path = "information") {
       "\nThe following variables have missing values in ", file, ".\n", 
       "Please update the file to continue.\n",
       "Variables: ", paste(id, collapse = ", "),
-      .call = FALSE
+      call. = FALSE
     )
   }
   
@@ -309,11 +309,10 @@ ctsm_read_species <- function(file, path = "information") {
 }
 
 
-# function to check if species conversion factorsnumerical values are within pre-defined range 
+# function to check if species conversion factors are within pre-defined range 
 
 values_range_check_species <- function(species_data, min_value, max_value) {
-  library(tidyverse)
-  
+
   # select conversion factor columns
   conversion_factors <- dplyr::select(
     species_data, 
@@ -352,7 +351,7 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   wt <- match.arg(wt)
   wt_adj <- paste0("_", wt)
 
-  data <- rownames_to_column(data, "species")
+  data <- tibble::rownames_to_column(data, "species")
   data <- dplyr::select(data, "species", ends_with(wt_adj)) 
 
   
@@ -365,7 +364,7 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   }
     
   
-  data <- pivot_longer(
+  data <- tidyr::pivot_longer(
     data, 
     ends_with(wt_adj), 
     names_to = "matrix", 
@@ -373,7 +372,13 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
     values_drop_na = TRUE
   )
   
-  data <- separate(data, .data$matrix, c("matrix", NA), sep = "_") 
+  data <- tidyr::separate_wider_delim(
+    data, 
+    .data$matrix, 
+    delim = "_", 
+    names = c("matrix", NA)
+  ) 
+  
   data <- as.data.frame(data)
   
   data
@@ -574,6 +579,56 @@ ctsm_get_determinands <- function(info) {
 }  
 
 
+ctsm_get_datatype <- function(determinand, info, abbr = FALSE){
+  
+  # information_functions.R
+  # gets the ICES data type of each determinand
+  # abbr = FALSE: gives contaminant, effect, disease, auxiliary
+  # abrr = TRUE: gives CF, EF, DF, AUX (biota), CS, ES, AUX (sediment), 
+  #   CW, EW, AUX (water)
+  
+  pargroup <- ctsm_get_info(info$determinand, determinand, "pargroup")
+  
+  datatype <- dplyr::case_when(
+    startsWith(pargroup, "O-")                 ~ "contaminant",
+    startsWith(pargroup, "OC-")                ~ "contaminant",
+    pargroup %in% c("I-MET", "I-RNC")          ~ "contaminant",
+    pargroup %in% c("B-MBA", "B-TOX", "B-END") ~ "effect",
+    pargroup %in% c("B-GRS", "B-HST")          ~ "disease",
+    TRUE                                       ~ "auxiliary"
+  )
+  
+  if (abbr) {
+
+    if (info$compartment %in% c("sediment", "water") & any(datatype %in% "disease")) {
+      warning(
+        "Disease data associated with sediment o water - sounds fishy to me."
+      )
+    }    
+      
+    datatype <- dplyr::case_match(
+      datatype,
+      "contaminant" ~ "C",
+      "effect"      ~ "E",
+      "disease"     ~ "D", 
+      "auxiliary"   ~ "AUX"
+    )
+
+    suffix <- switch(info$compartment, biota = "F", sediment = "S", water = "W")
+    
+    datatype <- dplyr::if_else(
+      datatype %in% "auxiliary", 
+      datatype, 
+      paste0(datatype, suffix)
+    )
+
+  }    
+    
+  datatype
+}
+
+
+
 ctsm_get_auxiliary <- function(determinands, info) {
   
   # information_functions.R
@@ -604,8 +659,6 @@ ctsm_get_auxiliary <- function(determinands, info) {
 
 
 
-
-
 # Toxic EQuivalents for WHO_DFP (health)
 
 # info_TEQ <- c(
@@ -630,19 +683,54 @@ ctsm_read_thresholds <- function(
     na.strings = "",
     strip.white = TRUE
   )
+
+
+  # check all species are in the reference table
+  # check combinations of species, species_group and species_subgroup are 
+  # consistent with those in the reference table
+  # check basis present for all contaminants 
     
-  if (compartment == "sediment") {
-    id <- is.na(data$country)
-    data$country[id] <- ""
-  }
-
   if (compartment == "biota") {
-    wk <- strsplit(data$species_subgroup, ",", fixed = TRUE)
+    
+    if (any(is.na(data$matrix))) {
+      stop(
+        "'matrix' must be supplied in threshold reference table", 
+        call. = FALSE
+      )
+    }
+    
+    if (any(is.na(data$species) & is.na(data$species_group) & 
+            is.na(data$species_subgroup))) {
+      stop(
+        "at least one of 'species', 'species_group' and 'species_subgroup' must be\n", 
+        "supplied in threshold reference table", 
+        call. = FALSE
+      )
+    }
+    
+    wk <- strsplit(data$matrix, "~")
     n <- sapply(wk, length)
-    data <- data[rep(1:nrow(data), times = n),]
-    data$species_subgroup <- unlist(wk)
+    data <- data[rep(1:nrow(data), times = n), ]
+    data$matrix <- unlist(wk)
   }
 
+  if (compartment == "water") {
+    
+    if (any(is.na(data$filtered))) {
+      stop(
+        "'filtered' must be supplied in threshold reference table", 
+        call. = FALSE
+      )
+    }
+    
+    wk <- strsplit(data$filtered, "~")
+    n <- sapply(wk, length)
+    data <- data[rep(1:nrow(data), times = n), ]
+    data$filtered <- unlist(wk)
+  }
+  
+  rownames(data) <- NULL
+  
   data
 }
 
@@ -653,7 +741,6 @@ ctsm_read_thresholds <- function(
 # if a list, then each element can be either a scalar (replicated to length n), or a vector of length n
 # AC is a character vector of assessment concentration types
 
-#' @export
 get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
 
   # check elements of info are of correct length
@@ -717,116 +804,225 @@ get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determi
 }
 
 
-#' @export
-get.AC.HELCOM <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
+
+
+get_AC_biota <- function(
+    data, AC, threshold_rt, determinand_rt, species_rt, export_cf = FALSE) {    
+    
+  ok <- AC %in% names(threshold_rt)
   
-  # check elements of info are of correct length
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following thresholds are not in the thresholds reference table.\n", 
+      "Thresholds: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+
+  var_id <- c("determinand", "species", "matrix")
   
-  stopifnot(sapply(info, length) %in% c(1, length(determinand)))
+  ok <- var_id %in% names(data)
+  
+  if (!all(ok)) {
+    id <- var_id[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following variables are not in 'data'.\n", 
+      "Variables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
   
   
-  # remove duplicate determinand information - need to fix this better
+  check <- ctsm_get_datatype(data$determinand, list(determinand = determinand_rt))
+  no_basis <- !"basis" %in% names(data)
   
-  info$determinand <- NULL
-  
-  
-  # turn info into a dataframe if necessary
-  
-  data <- cbind(determinand, as.data.frame(info))
-  
-  
-  # split by determinand groupings
-  
-  group <- ctsm_get_info(
-    determinand_rt, data$determinand, "group", compartment, sep = "_"
+  if (any(check %in% "contaminant") && no_basis) {
+    stop(
+      "\nVariable 'basis' is not in data and is required for contaminant data."
+    )
+  }
+
+  if (no_basis) {
+    data$basis <- rep(NA_character_, nrow(data))
+  }
+
+  data <- dplyr::select(
+    data,
+    all_of(c(var_id, "basis")), 
+    any_of(c("method_analysis", "sex"))
   )
   
-  data <- split(data, group, drop = TRUE)
+
+  # AC_data: fill out empty species, species_group and species_subgroup fields 
+  # by joining with species reference table
   
+  index <- paste(
+    is.na(threshold_rt$species), 
+    is.na(threshold_rt$species_group),
+    is.na(threshold_rt$species_subgroup)
+  )
+
+
+  species_rt <- tibble::rownames_to_column(species_rt, "species")
   
-  # get assessment concentrations
-  
-  out <- lapply(names(data), function(i) {
-    args <- list(data = data[[i]], AC = AC, AC_data = thresholds)
-    if (compartment == "biota") args$species_rt <- species_rt
-    
-    if (compartment == "sediment") {
-      if (i == "Metals") {
-        fn = "get.AC.sediment.Metals"
-      } else {
-        fn = "get.AC.sediment.contaminant"
-      }
+  threshold_rt <- by(
+    threshold_rt, 
+    index, 
+    FUN = function(x) {
+      var_id = c("species", "species_group", "species_subgroup")
+      ok <- sapply(x[var_id], function(y) !any(is.na(y)))
+      if (all(ok)) return(x)
+      by_id <- var_id[ok]
+      add_id <- var_id[!ok]
+      dplyr::left_join(
+        dplyr::select(x, -all_of(add_id)),
+        dplyr::select(species_rt, all_of(var_id)),
+        by = by_id,
+        relationship = "many-to-many"  
+      )
     }
-    
-    if (compartment == "water") {
-      fn = "get.AC.water.contaminant"
+  )
+  
+  # need to convert to class list before binding rows
+      
+  threshold_rt <- lapply(threshold_rt, "[")
+  
+  threshold_rt <- dplyr::bind_rows(threshold_rt)
+  
+  
+  # check no ambiguous cases
+  
+  check <- dplyr::select(
+    threshold_rt, 
+    any_of(c("species", "determinand", "matrix", "method_analysis", "sex"))
+  )
+  
+  if (any(duplicated(check))) {
+    stop(
+      "\nThe threshold reference table is ambiguous with multiple values for\n", 
+      "the same combination of species, determinand, matrix, and threshold", 
+      call. = FALSE
+    )
+  }
+
+  
+  # split into contaminants and biological effects, because joining variable
+  # depends on data type and, within effects, on determinand (group)
+
+  data$determinand_group <- ctsm_get_info(
+    determinand_rt, data$determinand, "group", compartment = "biota", sep = "_"
+  )
+
+  data$datatype <- ctsm_get_datatype(
+    data$determinand, list(determinand = determinand_rt)
+  )
+  
+  if (!all(data$datatype %in% c("contaminant", "effect"))) {
+    stop("unrecognised datatype")
+  }
+
+  data$datatype <- dplyr::case_when(
+    data$datatype %in% "contaminant"          ~ "contaminant", 
+    data$determinand %in% "EROD"              ~ "EROD",
+    data$determinand_group %in% "Metabolites" ~ "metabolites",
+    TRUE                                      ~ "effect"
+  )
+  
+  
+  # match AC to data
+
+  data$order <- 1:nrow(data)
+  
+  data <- split(data, data$datatype, drop = TRUE)
+
+  data <- lapply(
+    names(data), 
+    FUN = function(i) {
+      by_id <- c("determinand", "species", "matrix")
+      extra_id <- switch(
+        i, 
+        metabolites = "method_analysis", 
+        EROD = "sex", 
+        NULL
+      )
+      by_id <- c(by_id, extra_id)
+      wk_data <- data[[i]]
+      wk_data <- dplyr::select(
+        wk_data, 
+        all_of(c(by_id, "basis", "datatype", "order"))
+      )
+      dplyr::left_join(
+        wk_data, 
+        threshold_rt, 
+        by = by_id, 
+        relationship = "many-to-one"
+      )
     }
-    
-    if (compartment == "biota") {
-      if (i %in% c(
-        "Metals", "Organofluorines", "Metabolites", "Imposex")
-      ) {
-        fn = paste("get.AC.biota", i, "HELCOM", sep = ".")
-      } else {
-        fn = "get.AC.biota.contaminant"
-      }
-    }
-    
-    do.call(fn, args)
-    
-  }) 
+  )
+
+  data <- dplyr::bind_rows(data)
+  data <- dplyr::arrange(data, "order")
+  data$order <- NULL
   
-  unsplit(out, group, drop = TRUE)
-}
-
-
-
-
-get.AC.biota.contaminant <- function(
-    data, AC, AC_data, species_rt, export_cf = FALSE) {    
   
-  stopifnot(AC %in% names(AC_data))
   
-  AC_data <- mutate_if(AC_data, is.factor, as.character)
-
-  data <- data %>% 
-    rownames_to_column("rownames") %>% 
-    mutate(
-      species_group = ctsm_get_info(species_rt, species, "species_group"),
-      species_subgroup = ctsm_get_info(species_rt, species, "species_subgroup")
-    ) 
+  # add in lipid and dry weight information for basis conversion
+    
+  species_rt <- tibble::column_to_rownames(species_rt, "species")
   
   lipid_info <- ctsm_get_species_cfs(species_rt, "lipidwt")
-  
   drywt_info <- ctsm_get_species_cfs(species_rt, "drywt")
   
-  data <- left_join(data, lipid_info, by = c("species", "matrix"))
-  data <- left_join(data, drywt_info, by = c("species", "matrix"))
+  data <- dplyr::left_join(
+    data, 
+    drywt_info, 
+    by = c("species", "matrix"), 
+    relationship = "many-to-one"
+  )
   
-  data <- data[c("rownames", "determinand", "species_subgroup", "basis", "drywt", "lipidwt")]
+  data <- dplyr::left_join(
+    data, 
+    lipid_info, 
+    by = c("species", "matrix"), 
+    relationship = "many-to-one"
+  )
   
-  data <- left_join(data, AC_data, by = c("determinand", "species_subgroup"))
   
-  out <- sapply(AC, simplify = FALSE, FUN = function(i) {
-    basis_AC <- paste("basis", i, sep = ".")
-    ctsm_convert_basis(
-      data[[i]], 
-      from = data[[basis_AC]], 
-      to = data$basis, 
-      drywt = data$drywt, 
-      lipidwt = data$lipidwt
-    )
-  })
+  # convert basis where necessary
+    
+  out <- sapply(
+    AC, 
+    simplify = FALSE, 
+    FUN = function(i) {
+      AC_basis <- paste(i, "basis", sep = "_")
+      ctsm_convert_basis(
+        data[[i]], 
+        from = data[[AC_basis]], 
+        to = data$basis, 
+        drywt = data$drywt, 
+        lipidwt = data$lipidwt,
+        exclude = data$datatype != "contaminant"
+      )
+    }
+  )
   
   out <- data.frame(out)
   
   if (export_cf) {
-    out <- bind_cols(out, data[c("drywt", "lipidwt")])
+    out <- dplyr::bind_cols(out, data[c("drywt", "lipidwt")])
   }
-  
-  rownames(out) <- data$rownames
+
+  rownames(out) <- NULL
+
   out
 }                           
+
+
+
 
 
 get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
@@ -1367,114 +1563,54 @@ get.AC.biota.Imposex.OSPAR <- function(data, AC, AC_data, species_rt) {
 }
 
 
-get.AC.biota.Metals.HELCOM <- function(data, AC, AC_data, species_rt) {
 
-  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt)
+get_AC_sediment <- function(data, AC, threshold_rt, determinand_rt, export_all = FALSE) {   
   
-  stopifnot(
-    length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EQS") %in% names(AC)
-  )
+  ok <- AC %in% names(threshold_rt)
   
-  out <- bind_cols(out, data)
-  
-  out <- rownames_to_column(out)
-  
-  
-  # lead
-  
-  out <- mutate(
-    out,
-    BAC = if_else(
-      .data$determinand %in% "PB" & .data$matrix %in% "MU",
-      NA_real_,
-      as.double(.data$BAC)
-    ),
-    EQS = if_else(
-      .data$determinand %in% "PB" & .data$matrix %in% "LI",
-      NA_real_,
-      .data$EQS
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following thresholds are not in the thresholds reference table.\n", 
+      "Thresholds: ", paste(id, collapse = ", "),
+      call. = FALSE
     )
-  )
+  }
   
-  out <- out %>%
-    column_to_rownames() %>%
-    select(all_of(AC))
   
-  out
-}
-
-
-get.AC.biota.Organofluorines.HELCOM <- function(data, AC, AC_data, species_rt) {
+  var_id <- "determinand"
   
-  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt)
+  ok <- var_id %in% names(data)
   
-  stopifnot(
-    length(intersect(names(data), names(out))) == 0,
-    !c("EQS") %in% names(AC)
-  )
-  
-  out <- bind_cols(out, data)
-  
-  out <- rownames_to_column(out)
-  
-  # fish liver - multiply by 5
-  
-  out <- mutate(
-    out,
-    EQS = if_else(
-      .data$matrix %in% "LI" & .data$determinand %in% "PFOS",
-      .data$EQS * 17.9,
-      .data$EQS
+  if (!all(ok)) {
+    id <- var_id[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following variables are not in 'data'.\n", 
+      "Variables: ", paste(id, collapse = ", "),
+      call. = FALSE
     )
+  }
+  
+
+  data <- dplyr::left_join(
+    data, 
+    threshold_rt, 
+    by = "determinand", 
+    relationship = "many-to-one"
   )
-  
-  out <- out %>%
-    column_to_rownames() %>%
-    select(all_of(AC))
-  
-  out
-}
+    
+  if (export_all) {
+    return(data)
+  } 
 
-  
-get.AC.biota.Metabolites.HELCOM <- function(data, AC, AC_data, species_rt) {
-  
-  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-  rownames(out) <- rownames(data)
-  
-  with(data, {
+  row.names(data) <- NULL
     
-    stopifnot("method_analysis" %in% names(data))
-    
-    if ("EAC" %in% AC) {
-      out$EAC[determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 483
-    }
-    
-    out
-  })
-}
+  data[AC]
+}                           
 
-  
-get.AC.biota.Imposex.HELCOM <- function(data, AC, AC_data, species_rt) {
-    
-  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-  rownames(out) <- rownames(data)
-  
-  with(data, {
-    
-    if ("EAC" %in% AC)
-    {
-      out$EAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 2.0
-      out$EAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 2.0
-      out$EAC[determinand %in% "VDS" & species %in% "Tritia nitida (reticulata)"] <- 0.3
-      out$EAC[determinand %in% "VDS" & species %in% "Buccinum undatum"] <- 0.3
-      out$EAC[determinand %in% "VDS" & species %in% "Peringia ulvae"] <- 0.1
-      out$EAC[determinand %in% "INTS" & species %in% "Littorina littorea"] <- 0.3
-    }
-    
-    out
-  })
-}
+
 
 
 
@@ -1553,25 +1689,52 @@ get.AC.sediment.Metals <- function(data, AC, AC_data) {
 }                           
 
 
-
-get.AC.water.contaminant <- function(data, AC, AC_data) {   
-
-  stopifnot(AC %in% names(AC_data))
+get_AC_water <- function(data, AC, threshold_rt, determinand_rt, export_all = FALSE) {   
   
-  out <- data[c("determinand", "basis")]
-
-  out <- within(out, {
-    determinand <- as.character(determinand)
-    basis <- as.character(basis)
-    id = 1:length(determinand)
-  })
+  ok <- AC %in% names(threshold_rt)
   
-  out <- merge(out, AC_data, all.x = TRUE)
-  out <- out[order(out$id),]
-
-  rownames(out) <- rownames(data)
-  out[AC]
+  if (!all(ok)) {
+    id <- AC[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following thresholds are not in the thresholds reference table.\n", 
+      "Thresholds: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  
+  var_id <- c("determinand", "filtered")
+  
+  ok <- var_id %in% names(data)
+  
+  if (!all(ok)) {
+    id <- var_id[!ok]
+    id <- sort(id)
+    stop(
+      "\nThe following variables are not in 'data'.\n", 
+      "Variables: ", paste(id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  
+  
+  data <- dplyr::left_join(
+    data, 
+    threshold_rt, 
+    by = c("determinand", "filtered"),
+    relationship = "many-to-one"
+  )
+  
+  if (export_all) {
+    return(data)
+  } 
+  
+  row.names(data) <- NULL
+  
+  data[AC]
 }                           
+
 
 
 

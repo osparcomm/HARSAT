@@ -13,17 +13,8 @@
 
 rm(list = objects())
 
-function_path <- file.path("R")
+devtools::load_all()
 
-source(file.path(function_path, "import_functions.R"))
-source(file.path(function_path, "import_check_functions.R"))
-source(file.path(function_path, "import_external_data.R"))
-source(file.path(function_path, "assessment_functions.R"))
-source(file.path(function_path, "ctsm_lmm.R"))
-source(file.path(function_path, "reporting_functions.R"))
-source(file.path(function_path, "support_functions.R"))
-source(file.path(function_path, "graphics_functions.R"))
-source(file.path(function_path, "information_functions.R"))
 
 
 # Read data ----
@@ -64,7 +55,10 @@ biota_timeSeries <- ctsm_create_timeSeries(
 
 ## main runs ----
 
-biota_assessment <- ctsm_assessment(biota_timeSeries)
+biota_assessment <- ctsm_assessment(
+  biota_timeSeries, 
+  AC = c("NRC", "LRC", "MRC", "HRC")
+)
 
 
 # use the code below if it takes a long time to run
@@ -81,7 +75,12 @@ biota_assessment <- ctsm_assessment(biota_timeSeries)
 
 ctsm_summary_table(
   biota_assessment,
-  output_dir = file.path("output", "example_external_data")
+  output_dir = file.path("output", "example_external_data"), 
+  classColour = list(
+    below = c("NRC" = "blue", "LRC" = "green", "MRC" = "orange", "HRC" = "darkorange"),
+    above = c("NRC" = "red", "LRC" = "red", "MRC" = "red", "HRC" = "red"),
+    none = "black"
+  )
 )
 
 

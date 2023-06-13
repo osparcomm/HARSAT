@@ -1,12 +1,23 @@
-determinand,species_subgroup,basis.BAC,basis.MPC,basis.EQS,basis.EAC,BAC,MPC,EQS,EAC
-CD,"Fish,Mussel,Oyster,Clam,Scallop",,,W,,,,160,
-HG,"Fish,Mussel,Oyster,Clam,Scallop",,,W,,,,20,
-PB,Fish,W,,W,,26,,110,
-PB,"Mussel,Oyster,Clam,Scallop",,,W,,,,110,
-SCB6,Fish,,W,,,,75,,
-SBDE6,Fish,,,W,,,,0.0085,
-HBCD,Fish,,,W,,,,167,
-PFOS,Fish,,,W,,,,9.1,
-TEQDFP,Fish,,,W,,,,0.0065,
-FLU,"Mussel,Oyster,Clam,Scallop",,,W,,,,30,
-BAP,"Mussel,Oyster,Clam,Scallop",,,W,,,,5,
+determinand,species_group,species_subgroup,species,matrix,method_analysis,sex,BAC_basis,MPC_basis,EQS_basis,EAC_basis,BAC,MPC,EQS,EAC
+CD,Fish,,,MU~MU&EP~LI,,,,,W,,,,160,
+CD,Bivalve,,,SB,,,,,W,,,,160,
+HG,Fish,,,MU~MU&EP~LI,,,,,W,,,,20,
+HG,Bivalve,,,SB,,,,,W,,,,20,
+PB,Fish,,,MU~MU&EP,,,,,W,,,,110,
+PB,Fish,,,LI,,,W,,,,26,,,
+PB,Bivalve,,,SB,,,,,W,,,,110,
+SCB6,Fish,,,MU~MU&EP~LI,,,,W,,,,75,,
+SBDE6,Fish,,,MU~MU&EP~LI,,,,,W,,,,0.0085,
+HBCD,Fish,,,MU~MU&EP~LI,,,,,W,,,,167,
+PFOS,Fish,,,MU~MU&EP,,,,,W,,,,9.1,
+PFOS,Fish,,,LI,,,,,W,,,,162.89,
+TEQDFP,Fish,,,MU~MU&EP~LI,,,,,W,,,,0.0065,
+FLU,Bivalve,,,SB,,,,,W,,,,30,
+BAP,Bivalve,,,SB,,,,,W,,,,5,
+PYR1OH,Fish,,,BI,HPLC-FD,,,,,,,,,483
+VDS,,,Nucella lapillus,SB,,,,,,,,,,2
+VDS,,,Neptunea antiqua,SB,,,,,,,,,,2
+VDS,,,Tritia nitida (reticulata),SB,,,,,,,,,,0.3
+VDS,,,Buccinum undatum,SB,,,,,,,,,,0.3
+VDS,,,Peringia ulvae,SB,,,,,,,,,,0.1
+INTS,,,Littorina littorea,SB,,,,,,,,,,0.3

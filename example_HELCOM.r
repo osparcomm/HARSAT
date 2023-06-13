@@ -18,19 +18,7 @@
 
 rm(list = objects())
 
-function_path <- file.path("R")
-
-source(file.path(function_path, "import_functions.R"))
-source(file.path(function_path, "import_check_functions.R"))
-source(file.path(function_path, "assessment_functions.R"))
-source(file.path(function_path, "ctsm_lmm.R"))
-source(file.path(function_path, "proportional_odds_functions.R"))
-source(file.path(function_path, "imposex_functions.R"))
-source(file.path(function_path, "imposex_clm.R"))
-source(file.path(function_path, "reporting_functions.R"))
-source(file.path(function_path, "support_functions.R"))
-source(file.path(function_path, "information_functions.R"))
-
+devtools::load_all()
 
 
 # Read data and make adjustments ----
@@ -294,8 +282,7 @@ water_timeSeries <- ctsm_create_timeSeries(
 sediment_assessment <- ctsm_assessment(
   sediment_timeSeries, 
   AC = "EQS",
-  get_assessment_criteria = get.AC.HELCOM,
-  parallel = TRUE
+  parallel = FALSE
 )
 
 
@@ -330,9 +317,8 @@ wk_group <- ctsm_get_info(
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
   AC = c("BAC", "EAC", "EQS", "MPC"), 
-  get_assessment_criteria = get.AC.HELCOM,
   subset = determinand %in% wk_determinands[wk_group == "Metals"], 
-  parallel = TRUE
+  parallel = FALSE
 )
 
 wk_organics <- c(
@@ -343,7 +329,7 @@ wk_organics <- c(
 biota_assessment <- ctsm_update_assessment(
   biota_assessment, 
   subset = determinand %in% wk_determinands[wk_group %in% wk_organics], 
-  parallel = TRUE
+  parallel = FALSE
 )
 
 biota_assessment <- ctsm_update_assessment(
@@ -394,9 +380,7 @@ ctsm_check_convergence(biota_assessment$assessment[wk_id])
 
 water_assessment <- ctsm_assessment(
   water_timeSeries, 
-  AC = "EQS", 
-  get_assessment_criteria = get.AC.HELCOM,
-  parallel = TRUE
+  AC = "EQS"
 )
 
 

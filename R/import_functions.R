@@ -259,7 +259,11 @@ ctsm_read_info <- function(info, path, info_files) {
       determinand = "determinand_AMAP_2022.csv", 
       species = "species_AMAP_2022.csv",
       region_values = NULL,
-      thresholds = NULL
+      thresholds = if (info$compartment == "biota") {
+        "thresholds_biota_AMAP.csv"}
+      else {
+        NULL
+      }
     )
   } else {
     files <- list(
