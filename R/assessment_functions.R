@@ -7,7 +7,7 @@ ctsm_assessment <- function(
   ctsm_ob, 
   subset = NULL, 
   AC = NULL, 
-  get_AC = NULL, 
+  get_AC_fn = NULL, 
   recent_trend = 20, 
   parallel = FALSE, 
   ...) {
@@ -25,12 +25,9 @@ ctsm_assessment <- function(
 
   ctsm_ob$info$AC <- AC
   
-  ctsm_ob$info$get_AC <- get_AC
+  ctsm_ob$info$get_AC_fn <- get_AC_fn
   if (!is.null(AC) && is.null(ctsm_ob$info$get_AC)) {
-    ctsm_ob$info$get_AC <- get(
-      paste0("get_AC_", ctsm_ob$info$compartment), 
-      envir = rlang::ns_env("harsat")
-    ) 
+    ctsm_ob$info$get_AC_fn <- get_AC[[ctsm_ob$info$compartment]]
   }
 
   ctsm_ob$assessment <- vector(mode = "list", length = nrow(ctsm_ob$timeSeries))
@@ -223,16 +220,13 @@ ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
     # could streamline in future
     
     if ("AC" %in% names(info)) {
-      args <- list(
+      rt_id <- c("thresholds", "determinand", "species")
+      rt_id <- rt_id[rt_id %in% names(info)]
+      AC <- info$get_AC_fn(
         data = as.data.frame(seriesInfo), 
         AC = info$AC,
-        threshold_rt = info$thresholds,
-        determinand_rt = info$determinand
+        rt = info[rt_id]
       )
-      if (info$compartment == "biota") {
-        args$species_rt <- info$species 
-      }
-      AC <- do.call(info$get_AC, args)
       AC <- unlist(AC)
     } else { 
       AC <- NULL
