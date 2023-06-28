@@ -2,6 +2,8 @@
 
 # Set up functions ----
 
+#' Run an assessment
+#' 
 #' @export
 ctsm_assessment <- function(
   ctsm_ob, 
