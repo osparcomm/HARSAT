@@ -1,0 +1,57 @@
+---
+title: "External data file formats"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{External data file formats}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+These are the column headers for CSV-formatted external data files.
+
+## Contaminant data 
+
+| column name   | type      | mandatory | comments              |
+| ------------- | --------- | :-------: | --------------------- |
+| `country` | character | yes | must match country in station file<br>no missing values |
+| `station_code` | alphanumeric | yes | must match station_code in station file<br>no missing values |
+| `station_name` | character | yes | must match station_name in station file<br>no missing values |
+| `sample_latitude` | numeric (decimal degrees)  |  | doesn’t need to match station latitude in station file |
+| `sample_longitude` | numeric (decimal degrees)  |  | doesn’t need to match station longitude in station file |
+| `year` | integer | yes | monitoring year<br>doesn’t necessarily match date since a sampling season running from e.g. November 2021 to May 2022 might all be considered the 2022 monitoring year<br>no missing values |
+| `date` | date: use ISO 8601 standard e.g. 2023-06-28 |  | sampling date |
+| `depth` | numeric (m) |  | sediment: assumed to be a surface sediment sample with depth being the lower depth of the grab; water: assumed to be a surface water sample with depth being the upper depth of the sample; biota: not used, so can supply whatever is useful (or omit) |
+| `species` | character  | yes (biota) | latin name which must match a `submitted_species` in the species reference table | no missing values (biota) |
+| `sex` | character |  | see ICES reference codes for SEXCO<br>required for EROD assessments<br>desirable if sex is used to subdivide timeseries (see subseries) |
+| `n_individual` | integer |  | number of pooled individuals in the sample<br>required for imposex assessments  |
+| `subseries` | character |  | used to split up timeseries by e.g. sex or age<br>for example: `juvenile`, `adult_male`, `adult_female`<br>missing values indicate that all records in a timeseries will be considered together (no subdivision) |
+| `sample` | alphanumeric  | yes | links measurements made on the same individuals (biota), in the same sediment grab or in the same water sample<br>no missing values |
+| `determinand` | character | yes | must match values in determinand reference table<br>most will be in ICES reference codes for PARAM but can provide own values<br>no missing values |
+| `matrix` | character  | yes | see ICES reference codes for MATRX basis | character | yes (biota & sediment) | W, D or L<br>no missing values for chemical measurements in biota or sediment<br>not mandatory for water where basis is always taken to be W |
+| `unit` | character | yes | see ICES reference codes for MUNIT<br>no missing values |
+| `value` | numeric | yes | no missing values |
+| `censoring` | character |  | typically `D`, `Q` or `<` indicating a value less than the limit of detection, less than the limit of quantification, or some other (non-specified) less than<br>a missing value indicates that the measurement is not a less-than (i.e. is uncensored)   |
+| `limit_detection` | numeric |  | same unit as value  |
+| `limit_quantification` | numeric |  | same unit as value |
+| `uncertainty` | numeric  |  | analytical uncertainty in the measurement<br>same unit as value |
+| `unit_uncertainty` | character |  | `SD`, `U2` or `%`<br>if `uncertainty` is present, `unit_uncertainty` must also be present |
+| `method_pretreatment` | character (ICES metpt list) |  | see ICES reference codes for METPT |
+| `method_analysis` | character (ICES metpt list) |  | see ICES reference codes for METOA<br>required for bile metabolite measurements |
+| `method_extraction` | character (ICES metpt list) |  | see ICES reference codes for METCX<br>required for sediment normalisation (typically for metals) |
+ 
+## Station data
+
+| current_name | Type     | mandatory  | Comments              |
+| ------------ | -------- | :--------: | --------------------- |
+| `OSPAR_region` | character |  | the regional columns can be called anything (and are optional)<br>OSPAR: use `OSPAR_region` and `OSPAR_subregion`<br>HELCOM: use `HELCOM_subbasin`, `HELCOM_L3` and `HELCOM_L4` |
+| `OSPAR_subregion` | character |  | see above |
+| `country` | character | yes | no missing values |
+| `station_code` | alphanumeric | yes | no missing values |
+| `station_name` | character | yes | no missing values |
+| `station_longname` | character |  | typically a more intuitive name for the station than `station_name`  |
+| `station_latitude` | numeric (decimal degrees) | yes | no missing values |
+| `station_longitude` | numeric (decimal degrees)  | yes | no missing values |
+| `station_type` | character |   | see ICES reference codes for MSTAT<br>typically `B` (baseline), `RH` (representative) or `IH` (impacted) |
+| `waterbody_type` | character |  | see ICES reference codes for WLTYP<br>typically a code indicating transitional (estuarine) waters, coastal waters or open sea  |
+
+
