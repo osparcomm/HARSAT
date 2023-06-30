@@ -32,6 +32,10 @@ ctsm_read_data(
 \item{QA}{a file reference for QA data}
 
 \item{data_path}{a file reference for data to read}
+
+\item{oddity_path}{a file path for where to write oddities data}
+
+\item{data_format}{a string, one of "ICES_old", "ICES_new", and "external"}
 }
 \description{
 Read harsat data

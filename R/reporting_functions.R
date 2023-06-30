@@ -335,13 +335,22 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 
 # summary table ----
 
+#' Generates a summary table
+#' 
+#' Creates a summary file and adds symbology
+#' @param assessment_obj
+#' @param determinandGroups
+#' @param classColour
+#' @param output_dir
+#' @param output_file the output file -- it must be a CSV file
+#' @param export
+#' @param collapse_AC
 #' @export
 ctsm_summary_table <- function(
   assessment_obj, determinandGroups = NULL, classColour = NULL, output_dir = NULL, 
   output_file = NULL, export = TRUE, collapse_AC = NULL) {
 
   # reporting_functions.R
-  # create summary file and add symbology 
   
   library(dplyr)
   

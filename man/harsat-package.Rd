@@ -12,6 +12,7 @@ Assessment of concentrations of hazardous substances and their biological effect
 Useful links:
 \itemize{
   \item \url{https://github.com/osparcomm/HARSAT}
+  \item \url{https://osparcomm.github.io/HARSAT/}
   \item Report bugs at \url{https://github.com/osparcomm/HARSAT/issues}
 }
 

@@ -1,5 +1,7 @@
 # Information extractor function ----
 
+#' Gets data from the standard reference tables
+#'
 #' @export
 ctsm_get_info <- function(
   ref_table, 
@@ -11,7 +13,6 @@ ctsm_get_info <- function(
   sep = ".") {
   
   # information_functions.R
-  # gets data from standard reference tables 
   
   # na_action: 
   #   fail doesn't allow any missing values
@@ -557,11 +558,14 @@ ctsm_read_determinand <- function(
 
 # extractor functions
 
+#' Get the determinands
+#' 
+#' Gets the determinands to be assessed from the determinand reference table
+#' @param info
 #' @export
 ctsm_get_determinands <- function(info) {
   
   # information_functions.R
-  # gets determinands to be assessed from determinand reference table
   
   assess_id <- paste0(info$compartment, "_assess")
   ok <- info$determinand[[assess_id]]
@@ -742,6 +746,8 @@ ctsm_read_thresholds <- function(
 # AC is a character vector of assessment concentration types
 
 
+#' Access function map
+#' 
 #' @export
 get_AC <- vector("list", 3L)
 
@@ -1785,17 +1791,19 @@ get.AC.sediment.Metals <- function(data, AC, AC_data) {
 
 # Unit conversion ----
 
+#' Converts units, e.g., from mg/kg to ug/kg
+#' 
+#' Can accept non-standard units (e.g. for biological effects) provided that 
+#' `from` and `to` for these rows are identical (in which case no attempt is made 
+#' to convert.
+#'
+#' @param conc the value to convert
+#' @param from the current units
+#' @param to the required units
 #' @export
 convert_units <- function(conc, from, to) {
 
   # information_functions.R
-  # converts units; e.g. mg/kg to ug/kg
-  
-  # can supply non-standard units (e.g. for biological effects) provided that 
-  #   from and to for these rows are identical (in which case no attempt is made 
-  #   to convert
-  # missing values are permitted provided consistent in from and to
-  
   # error checking
     
   from = as.character(from)
@@ -2261,10 +2269,12 @@ get_basis_most_common <- function(data, info) {
 
 
 
+#' Gets the OSPAR biota target basis
+#' 
+#' @param data
+#' @param info
 #' @export
 get_basis_biota_OSPAR <- function(data, info) {
-  
-  # 2023 OSPAR biota target basis - information_functions.r
   
   # note hard-wiring of lipid_high which should be passed as a control variable
   
@@ -2555,16 +2565,17 @@ get_RECO <- function(code, path = "information") {
 
 # Station utility functions ----
 
-# get station code from station name
-  
+#' Get station code from station name
+#'
+#' Gets the station code corresponding to the station name and country from the 
+#' station dictionary. Only works for one country at a time
+#'
+#' @param station_name
+#' @param country
+#' @param stations
 #' @export
 get_station_code <- function(station_name, country, stations) {
-  
-  # gets the station code corresponding to the station name and country from the 
-  # station dictionary
-  
-  # only works for one country at a time
-  
+    
   stopifnot(length(country) == 1)
   n <- length(station_name)
   

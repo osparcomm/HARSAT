@@ -1,4 +1,20 @@
-url: http://morungos.com/HARSAT/
+url: http://osparcomm.github.io/HARSAT/
 template:
   bootstrap: 5
 
+navbar:
+ components:
+   articles:
+    text: Articles
+    menu:
+    - text: "File formats"
+    - text: External file format
+      href: articles/external-file-format.html
+    - text: -------
+    - text: "Examples"
+    - text: External data
+      href: articles/example_external_data.html
+    - text: Simple OSPAR
+      href: articles/example_simple_ospar.html
+    - text: HELCOM
+      href: articles/example_helcom.html

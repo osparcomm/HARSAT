@@ -4,6 +4,12 @@
 
 #' Run an assessment
 #' 
+#' @param ctsm_ob
+#' @param subset can be used if the assessment is to be done in chunks because of size
+#' @param AC
+#' @param get_AC_fn
+#' @param recent_trend
+#' @param parallel a boolean, whether or not to use parallel computation 
 #' @export
 ctsm_assessment <- function(
   ctsm_ob, 
@@ -15,9 +21,6 @@ ctsm_assessment <- function(
   ...) {
   
   # location: assessment_functions.R
-
-  # runs assessment
-  # subset can be used if the assessment is to be done in chunks because of size
 
   # set up assessment structure
   
@@ -1060,7 +1063,8 @@ ctsm.lmm.contrast <- function(ctsm.ob, start, end) {
   data.frame(start, end, estimate = contrast, se = se.contrast, p = p.contrast)
 }
 
-
+#' Check for convergence
+#' 
 #' @export
 ctsm_check_convergence <- function(assessment_ob, coeff_se_tol = 0.001) {
   ok <- sapply(assessment_ob, function(x) {
