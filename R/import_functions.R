@@ -3,6 +3,8 @@
 
 # read in data  ---- 
 
+#' Read harsat data
+#' 
 #' @param compartment a string, one of "sediment", "biota", and "water"
 #' @param purpose a string, one of "OSPAR", "HELCOM", "AMAP" and "other"
 #' @param contaminants a file reference for contaminant data

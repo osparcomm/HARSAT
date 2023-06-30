@@ -3347,7 +3347,6 @@ Main runs
 sediment_assessment <- ctsm_assessment(
   sediment_timeSeries,
   AC = "EQS",
-  get_assessment_criteria = get.AC.HELCOM,
   parallel = TRUE
 )
 #> Setting up clusters: be patient, it can take a while!
