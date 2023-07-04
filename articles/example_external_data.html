@@ -36,15 +36,21 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="nav-link" href="../articles/harsat.html">Get started</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
+    <h6 class="dropdown-header" data-toc-skip>File formats</h6>
+    <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="../articles/example_simple_OSPAR.html">Simple OSPAR</a>
-    <a class="dropdown-item" href="../articles/external-file-format.html">External data file formats</a>
+    <a class="dropdown-item" href="../articles/example_simple_ospar.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="../articles/example_helcom.html">HELCOM</a>
   </div>
 </li>
       </ul>
@@ -119,7 +125,7 @@ will need to point to a directory containing a copy.</p>
 </h2>
 <p>Get correct variables and streamline the data files</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_tidy_data.html">ctsm_tidy_data</a></span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
@@ -133,7 +139,7 @@ will need to point to a directory containing a copy.</p>
 </h2>
 <p>Uses OSPAR basis choice for mercury</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  get_basis <span class="op">=</span> <span class="va">get_basis_biota_OSPAR</span></span>
 <span><span class="op">)</span></span>
@@ -271,7 +277,7 @@ will need to point to a directory containing a copy.</p>
 <h3 id="check-convergence">Check convergence<a class="anchor" aria-label="anchor" href="#check-convergence"></a>
 </h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="op">(</span><span class="va">wk_check</span> <span class="op">&lt;-</span> <span class="fu">ctsm_check_convergence</span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="op">(</span><span class="va">wk_check</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_check_convergence.html">ctsm_check_convergence</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 </div>
@@ -287,7 +293,7 @@ will need to point to a directory containing a copy.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">summary.dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span> </span>
 <span></span>
-<span><span class="fu">ctsm_summary_table</span><span class="op">(</span></span>
+<span><span class="fu"><a href="../reference/ctsm_summary_table.html">ctsm_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -312,7 +318,7 @@ plotted (can take some time)</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">graphics.dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span> </span>
 <span></span>
-<span><span class="fu">ctsm_plot_assessment</span><span class="op">(</span></span>
+<span><span class="fu"><a href="../reference/ctsm_plot_assessment.html">ctsm_plot_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  subset <span class="op">=</span> <span class="va">species</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"Phoca hispida"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>, </span>
@@ -320,7 +326,7 @@ plotted (can take some time)</p>
 <span>  file_format <span class="op">=</span> <span class="st">"png"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ctsm_plot_assessment</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_plot_assessment.html">ctsm_plot_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  subset <span class="op">=</span> <span class="va">matrix</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"LI"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>, </span>
@@ -328,7 +334,7 @@ plotted (can take some time)</p>
 <span>  file_format <span class="op">=</span> <span class="st">"pdf"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ctsm_plot_assessment</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_plot_assessment.html">ctsm_plot_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  subset <span class="op">=</span> <span class="va">station_code</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"A1"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>, </span>
@@ -336,7 +342,7 @@ plotted (can take some time)</p>
 <span>  file_format <span class="op">=</span> <span class="st">"pdf"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ctsm_plot_assessment</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_plot_assessment.html">ctsm_plot_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>, </span>
 <span>  subset <span class="op">=</span> <span class="va">series</span> <span class="op">==</span> <span class="st">"A1 HG Phoca hispida LI adult"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>, </span>

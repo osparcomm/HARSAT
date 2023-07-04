@@ -36,15 +36,21 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="nav-link" href="../articles/harsat.html">Get started</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
+    <h6 class="dropdown-header" data-toc-skip>File formats</h6>
+    <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="../articles/example_simple_OSPAR.html">Simple OSPAR</a>
-    <a class="dropdown-item" href="../articles/external-file-format.html">External data file formats</a>
+    <a class="dropdown-item" href="../articles/example_simple_ospar.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="../articles/example_helcom.html">HELCOM</a>
   </div>
 </li>
       </ul>
@@ -121,7 +127,7 @@ will need to point to a directory containing a copy.</p>
 </h3>
 <p>Gets correct variable and streamlines some of the data files</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_tidy_data.html">ctsm_tidy_data</a></span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
@@ -139,7 +145,7 @@ will need to point to a directory containing a copy.</p>
 <p>Identifies groups of data that form a coherent timeseries. Also does
 a lot of data cleaning and processing (creates oddities folder).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD"</span>, <span class="st">"CB153"</span>, <span class="st">"HBCD"</span>,<span class="st">"HBCDA"</span>, <span class="st">"HBCDG"</span>, <span class="st">"PYR1OH"</span><span class="op">)</span>, </span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -174,16 +180,16 @@ a lot of data cleaning and processing (creates oddities folder).</p>
 <span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2015 and 2020</span></span></code></pre></div>
 <p>Identical (apart from call) to:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
-<span>  determinands <span class="op">=</span> <span class="fu">ctsm_get_determinands</span><span class="op">(</span><span class="st">"biota"</span><span class="op">)</span>,</span>
+<span>  determinands <span class="op">=</span> <span class="fu"><a href="../reference/ctsm_get_determinands.html">ctsm_get_determinands</a></span><span class="op">(</span><span class="st">"biota"</span><span class="op">)</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    HBCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HBCDA"</span>, <span class="st">"HBCDB"</span>, <span class="st">"HBCDG"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
 <span>    <span class="st">"LIPIDWT%"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EXLIP%"</span>, <span class="st">"FATWT%"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"bespoke"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<span><span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    HBCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HBCDA"</span>, <span class="st">"HBCDB"</span>, <span class="st">"HBCDG"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
@@ -285,7 +291,7 @@ a lot of data cleaning and processing (creates oddities folder).</p>
 <span><span class="co">#&gt; assessing series:  station_code 7132; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg</span></span></code></pre></div>
 <p>Check convergence - no errors this time</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ctsm_check_convergence</span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_check_convergence.html">ctsm_check_convergence</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -321,7 +327,7 @@ a lot of data cleaning and processing (creates oddities folder).</p>
 <span>  none <span class="op">=</span> <span class="st">"black"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ctsm_summary_table</span><span class="op">(</span></span>
+<span><span class="fu"><a href="../reference/ctsm_summary_table.html">ctsm_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>, </span>
 <span>  determinandGroups <span class="op">=</span> <span class="va">webGroups</span>,</span>
 <span>  classColour <span class="op">=</span> <span class="va">classColour</span>,</span>

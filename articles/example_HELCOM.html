@@ -36,15 +36,21 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="nav-link" href="../articles/harsat.html">Get started</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
+    <h6 class="dropdown-header" data-toc-skip>File formats</h6>
+    <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="../articles/example_simple_OSPAR.html">Simple OSPAR</a>
-    <a class="dropdown-item" href="../articles/external-file-format.html">External data file formats</a>
+    <a class="dropdown-item" href="../articles/example_simple_ospar.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="../articles/example_helcom.html">HELCOM</a>
   </div>
 </li>
       </ul>
@@ -719,7 +725,7 @@ OMBPK4 and then relabel OMBPK4 data as BMP K4</p>
 <span><span class="co">#&gt; 16            BMP K4          PB  SED20 79000.000</span></span>
 <span><span class="co">#&gt; 17           OMBMPK4          PB  SED20 79000.000</span></span>
 <span></span>
-<span><span class="va">wk_code</span> <span class="op">&lt;-</span> <span class="fu">get_station_code</span><span class="op">(</span><span class="st">"BMP K4"</span>, <span class="st">"Germany"</span>, <span class="va">sediment_data</span><span class="op">$</span><span class="va">stations</span><span class="op">)</span></span>
+<span><span class="va">wk_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_station_code.html">get_station_code</a></span><span class="op">(</span><span class="st">"BMP K4"</span>, <span class="st">"Germany"</span>, <span class="va">sediment_data</span><span class="op">$</span><span class="va">stations</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">sediment_data</span><span class="op">$</span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">sediment_data</span><span class="op">$</span><span class="va">data</span> <span class="op">%&gt;%</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2011</span> <span class="op">&amp;</span> <span class="va">submitted.station</span> <span class="op">==</span> <span class="st">"OMBMPK4"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
@@ -1132,7 +1138,7 @@ Estonia are suspiciously small and worth looking at in more detail.</p>
 <span></span>
 <span><span class="va">wk</span> <span class="op">&lt;-</span> <span class="va">wk</span> <span class="op">%&gt;%</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">determinand</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AL"</span>, <span class="st">"CORG"</span>, <span class="st">"LOIGN"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>value <span class="op">=</span> <span class="fu">convert_units</span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>value <span class="op">=</span> <span class="fu"><a href="../reference/convert_units.html">convert_units</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">lattice</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lattice/man/xyplot.html" class="external-link">xyplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">value</span> <span class="op">~</span> <span class="va">year</span> <span class="op">|</span> <span class="va">country</span>, </span>
@@ -1206,7 +1212,7 @@ sediments are nearly pure sand.</p>
 <span></span>
 <span><span class="va">wk</span> <span class="op">&lt;-</span> <span class="va">wk</span> <span class="op">%&gt;%</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">determinand</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"CORG"</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>value <span class="op">=</span> <span class="fu">convert_units</span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>value <span class="op">=</span> <span class="fu"><a href="../reference/convert_units.html">convert_units</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="fu">lattice</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lattice/man/xyplot.html" class="external-link">xyplot</a></span><span class="op">(</span></span>
@@ -1389,7 +1395,7 @@ HELCOM assessment)</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
 <span>    <span class="va">data_type</span> <span class="op">==</span> <span class="st">"CS"</span>,</span>
 <span>    <span class="va">determinand</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="fu">ctsm_get_determinands</span><span class="op">(</span><span class="st">"sediment"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="../reference/ctsm_get_determinands.html">ctsm_get_determinands</a></span><span class="op">(</span><span class="st">"sediment"</span><span class="op">)</span>,</span>
 <span>      <span class="st">"BDE28"</span>, <span class="st">"BDE47"</span>, <span class="st">"BDE99"</span>, <span class="st">"BD100"</span>, <span class="st">"BD153"</span>, <span class="st">"BD154"</span>, <span class="st">"HBCDA"</span>, <span class="st">"HBCDB"</span>, <span class="st">"HBCDG"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"~"</span>, <span class="va">method_extraction</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -1468,7 +1474,7 @@ errors.)</p>
 <span><span class="va">wk</span> <span class="op">&lt;-</span> <span class="va">sediment_data</span><span class="op">$</span><span class="va">data</span> <span class="op">%&gt;%</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">determinand</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"LOIGN"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span></span>
-<span>    value <span class="op">=</span> <span class="fu">convert_units</span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"%"</span><span class="op">)</span>,</span>
+<span>    value <span class="op">=</span> <span class="fu"><a href="../reference/convert_units.html">convert_units</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"%"</span><span class="op">)</span>,</span>
 <span>    uncertainty <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
 <span>      <span class="va">unit_uncertainty</span> <span class="op">==</span> <span class="st">"U2"</span> <span class="op">~</span> <span class="fl">100</span> <span class="op">*</span> <span class="op">(</span><span class="va">uncertainty</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="va">value</span>,</span>
 <span>      <span class="va">unit_uncertainty</span> <span class="op">==</span> <span class="st">"SD"</span> <span class="op">~</span> <span class="fl">100</span> <span class="op">*</span> <span class="va">uncertainty</span> <span class="op">/</span> <span class="va">value</span>,</span>
@@ -2123,7 +2129,7 @@ data for that year for consistency.)</p>
 <span></span>
 <span><span class="va">wk_data</span> <span class="op">&lt;-</span> <span class="va">biota_data</span><span class="op">$</span><span class="va">data</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.id</span> <span class="op">&amp;</span> <span class="va">determinand</span> <span class="op">==</span> <span class="st">"CB153"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>concentration <span class="op">=</span> <span class="fu">convert_units</span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"ug/kg"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>concentration <span class="op">=</span> <span class="fu"><a href="../reference/convert_units.html">convert_units</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"ug/kg"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span></span>
 <span>  <span class="va">wk_data</span><span class="op">$</span><span class="va">matrix</span> <span class="op">==</span> <span class="st">"MU"</span>,</span>
@@ -2156,7 +2162,7 @@ exhibit similar features, but this hasn’t been investigated.</p>
 <span></span>
 <span><span class="va">wk_data</span> <span class="op">&lt;-</span> <span class="va">biota_data</span><span class="op">$</span><span class="va">data</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.id</span> <span class="op">&amp;</span> <span class="va">determinand</span> <span class="op">==</span> <span class="st">"CB153"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>concentration <span class="op">=</span> <span class="fu">convert_units</span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"ug/kg"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>concentration <span class="op">=</span> <span class="fu"><a href="../reference/convert_units.html">convert_units</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">unit</span>, <span class="st">"ug/kg"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">biota_data</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="st">'.id'</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span></span>
@@ -2390,7 +2396,7 @@ station has been relabelled as KHO.</p>
 <span><span class="co">#&gt; submitted.station 2017 2020</span></span>
 <span><span class="co">#&gt;           OMMVKHO    1    2</span></span>
 <span></span>
-<span><span class="va">wk_code</span> <span class="op">&lt;-</span> <span class="fu">get_station_code</span><span class="op">(</span><span class="st">"KHO"</span>, <span class="st">"Germany"</span>, <span class="va">biota_data</span><span class="op">$</span><span class="va">stations</span><span class="op">)</span></span>
+<span><span class="va">wk_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_station_code.html">get_station_code</a></span><span class="op">(</span><span class="st">"KHO"</span>, <span class="st">"Germany"</span>, <span class="va">biota_data</span><span class="op">$</span><span class="va">stations</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">biota_data</span><span class="op">$</span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">mutate</span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span><span class="op">$</span><span class="va">data</span>, </span>
@@ -2907,7 +2913,7 @@ being sampled at this station in any year other than 2009.</p>
 <p>This gets the correct variable and streamlines some of the data
 files.</p>
 <div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_tidy_data.html">ctsm_tidy_data</a></span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
@@ -2919,7 +2925,7 @@ files.</p>
 <span><span class="co">#&gt;    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv</span></span>
 <span><span class="co">#&gt;    Dropping data with no stations</span></span>
 <span><span class="co">#&gt;    Conflicting QA information - first one selected: see conflicting_QA.csv</span></span>
-<span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">sediment_data</span><span class="op">)</span></span>
+<span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_tidy_data.html">ctsm_tidy_data</a></span><span class="op">(</span><span class="va">sediment_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/sediment' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/sediment_backup'</span></span>
@@ -2930,7 +2936,7 @@ files.</p>
 <span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span>
 <span><span class="co">#&gt;    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv</span></span>
 <span><span class="co">#&gt;    Dropping data with no stations</span></span>
-<span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">water_data</span><span class="op">)</span></span>
+<span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_tidy_data.html">ctsm_tidy_data</a></span><span class="op">(</span><span class="va">water_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/water' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/water_backup'</span></span>
@@ -3002,7 +3008,7 @@ human health QS</p>
 <span></span>
 <span><span class="va">biota_data</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">country</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span></span>
-<span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    PFOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N-PFOS"</span>, <span class="st">"BR-PFOS"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
@@ -3126,7 +3132,7 @@ human health QS</p>
 <h3 id="sediment-1">Sediment<a class="anchor" aria-label="anchor" href="#sediment-1"></a>
 </h3>
 <div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sediment_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">sediment_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">sediment_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    SBDE6 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -3179,7 +3185,7 @@ human health QS</p>
 <h3 id="water">Water<a class="anchor" aria-label="anchor" href="#water"></a>
 </h3>
 <div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">water_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">water_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">water_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    PFOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N-PFOS"</span>, <span class="st">"BR-PFOS"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span>
@@ -3217,7 +3223,7 @@ human health QS</p>
 <span><span class="co">#&gt; Setting up clusters: be patient, it can take a while!</span></span></code></pre></div>
 <p>Check convergence</p>
 <div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ctsm_check_convergence</span><span class="op">(</span><span class="va">sediment_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_check_convergence.html">ctsm_check_convergence</a></span><span class="op">(</span><span class="va">sediment_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -3241,7 +3247,7 @@ time to run!!!!!</p>
 <div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wk_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_timeSeries</span><span class="op">$</span><span class="va">data</span>,</span>
-<span>  .imposex <span class="op">=</span> <span class="fu">ctsm_get_info</span><span class="op">(</span></span>
+<span>  .imposex <span class="op">=</span> <span class="fu"><a href="../reference/ctsm_get_info.html">ctsm_get_info</a></span><span class="op">(</span></span>
 <span>    <span class="va">biota_timeSeries</span><span class="op">$</span><span class="va">info</span><span class="op">$</span><span class="va">determinand</span>, </span>
 <span>    <span class="va">.data</span><span class="op">$</span><span class="va">determinand</span>, </span>
 <span>    <span class="st">"group"</span>, </span>
@@ -3443,7 +3449,7 @@ each <code>indexID</code>.</p>
 <span><span class="va">wk.cluster</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster</a></span><span class="op">(</span><span class="va">wk.cores</span> <span class="op">-</span> <span class="fl">1</span>, outfile <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/parallel/clusterApply.html" class="external-link">clusterExport</a></span><span class="op">(</span><span class="va">wk.cluster</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wk_split"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/parallel/clusterApply.html" class="external-link">clusterExport</a></span><span class="op">(</span><span class="va">wk.cluster</span>, <span class="va">ctsm.VDS.varlist</span>, envir <span class="op">=</span> <span class="fu">cstm.VDS.environment</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/parallel/clusterApply.html" class="external-link">clusterExport</a></span><span class="op">(</span><span class="va">wk.cluster</span>, <span class="va">ctsm.VDS.varlist</span>, envir <span class="op">=</span> <span class="fu"><a href="../reference/cstm.VDS.environment.html">cstm.VDS.environment</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># clusterEvalQ(wk.cluster, {</span></span>
 <span><span class="co">#   library("MASS")</span></span>

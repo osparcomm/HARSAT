@@ -1,42 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://morungos.com/HARSAT/404.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/404.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/LICENSE-text.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/articles/example_HELCOM.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/articles/example_HELCOM.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/articles/example_external_data.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/articles/example_external_data.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/articles/example_simple_OSPAR.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/articles/example_simple_OSPAR.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/articles/external-file-format.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/articles/external-file-format.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/articles/index.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/articles/harsat.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/authors.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/articles/index.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/index.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/authors.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/reference/ctsm_assessment.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/index.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/reference/ctsm_read_data.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/reference/convert_units.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/reference/harsat-package.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/reference/cstm.VDS.environment.html</loc>
   </url>
   <url>
-    <loc>http://morungos.com/HARSAT/reference/index.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_assessment.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_check_convergence.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_create_timeSeries.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_determinands.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_info.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_plot_assessment.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_read_data.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_summary_table.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_tidy_data.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/get_AC.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/get_basis_biota_OSPAR.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/get_station_code.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/harsat-package.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/negTwiceLogLik.html</loc>
   </url>
 </urlset>
