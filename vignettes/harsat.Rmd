@@ -1,0 +1,25 @@
+---
+title: "Getting started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Installing harsat from GitHub
+
+To install the latest development version, use the `remotes` package:
+
+```
+library(remotes)
+remotes::install_github("osparcomm/harsat", auth_token = 'XXXX') 
+```
+
+> Note: during development the repository is marked as private on GitHub, so you
+> will need a Personal Access Token (or PAT) to access it. Follow
+> [these instructions to create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token).
+> It'll be a short string, probably beginning with `ghp_`. Put the whole
+> string into the `auth_token` parameter, and that should install the 
+> `harsat` package directly.
+

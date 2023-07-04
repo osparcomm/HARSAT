@@ -302,6 +302,11 @@ ctsm.lmm.dcalc <- function(x, censoring, mean, sd, log = FALSE) {
 }
 
 
+#' Utility function that returns double the negative log likelihood
+#' 
+#' @param data
+#' @param mu
+#' @param varComp
 #' @export
 negTwiceLogLik <- function(data, mu, varComp) {
 

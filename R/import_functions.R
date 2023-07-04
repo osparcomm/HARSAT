@@ -11,6 +11,13 @@
 #' @param stations a file reference for station data
 #' @param QA a file reference for QA data
 #' @param data_path a file reference for data to read
+#' @param info_files
+#' @param info_path
+#' @param extraction
+#' @param max_year
+#' @param oddity_path a file path for where to write oddities data
+#' @param control
+#' @param data_format a string, one of "ICES_old", "ICES_new", and "external"
 #' @export
 ctsm_read_data <- function(
   compartment = c("sediment", "biota", "water"), 
@@ -876,16 +883,17 @@ ctsm_read_QA <- function(file, path, purpose) {
   crm
 }
 
-
+#' Tidy the data
+#' 
+#' Reduces the size of the extraction by removing redundant variables.
+#' Any ad-hoc changes will usually be made between `read_data` and `simplify_data`.
+#' The output is in the correct format for `create_timeSeries`.
+#'
+#' @param ctsm_obj 
 #' @export
 ctsm_tidy_data <- function(ctsm_obj) {
   
   # import_functions.R
-  # reduces the size of the ICES extraction by removing redundant variables 
-
-  # any ad-hoc changes will usually be made between read_data and simplify_data
-  
-  # output is in the correct format for create_timeSeries
   
   library(tidyverse)
   
@@ -1347,6 +1355,10 @@ ctsm_link_QA <- function(QA, data, compartment) {
 }
 
 
+#' Create a time series
+#' 
+#' Cleans the data and turns it into time series structures ready for assessment
+#' 
 #' @export
 ctsm_create_timeSeries <- function(
   ctsm.obj, 
@@ -1360,7 +1372,6 @@ ctsm_create_timeSeries <- function(
   normalise.control = list()) {
 
   # import_functions.R
-  # cleans data and turns into time series structures ready for assessment
   
   library(tidyverse)
 
@@ -4070,6 +4081,10 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
 
 
 
+#' Convert tin concentrations
+#'
+#' Convert tin concentrations to cation concentrations.
+#' Also `change_unit` moves units from tin units to conventional units
 #' @export 
 ctsm_TBT_convert <- function(
   data, subset, action, from = c("tin", "cation"), 

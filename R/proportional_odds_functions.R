@@ -4,16 +4,31 @@
 #  change factors to characters in output
 
 
-# names of functions for clusterExport
-
+#' ctsm.VDS.varlist
+#' 
+#' A list of names for functions and values necessary to export to
+#' cluster prcesses for parallel computation
+#' 
 #' @export
 ctsm.VDS.varlist <- paste("ctsm.VDS", c("p.calc", "loglik.calc", "index.opt", "cl"), sep = ".")
 
+#' Detects the environment from the call
+#' 
+#' This is a utility function that detects the package environment.
+#' If you have imported `harsat` as a package, it returns the package
+#' environment. Otherwise, it returns the global environment. You can safely
+#' export functions from the result of this, for example, when you are
+#' setting up a cluster of child processes for parallel computation.
+#' 
 #' @export 
 cstm.VDS.environment <- function() {
   environment(sys.function())
 }
 
+#' ctsm.VDS.p.calc
+#' 
+#' @param theta
+#' @param cumulate a boolean, whether to use cumulative probabilities
 #' @export
 ctsm.VDS.p.calc <- function(theta, cumulate = FALSE) {
   if (cumulate) theta <- cumsum(theta)
@@ -23,6 +38,13 @@ ctsm.VDS.p.calc <- function(theta, cumulate = FALSE) {
   c(cumProb[1], diff(cumProb))
 }
 
+#' ctsm.VDS.loglik.calc
+#' 
+#' @param theta
+#' @param data
+#' @param index.theta
+#' @param minus.twice
+#' @param cumulate a boolean, whether to use cumulative probabilities
 #' @export
 ctsm.VDS.loglik.calc <- function(
   theta, data, index.theta, minus.twice = FALSE, cumulate = FALSE) {
@@ -48,6 +70,12 @@ ctsm.VDS.loglik.calc <- function(
   out
 }
 
+#' ctsm.VDS.index.opt
+#' 
+#' @param data
+#' @param theta
+#' @param refLevel
+#' @param calc.vcov
 #' @export
 ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
 
@@ -123,6 +151,8 @@ ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
 }
 
 
+#' ctsm.VDS.cl
+#' 
 #' @export
 ctsm.VDS.cl <- function(fit, nsim = 1000) {
   

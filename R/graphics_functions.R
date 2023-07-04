@@ -1,3 +1,8 @@
+#' Plot the assessment
+#'
+#' Generates a series of assessment plots with the raw data, or the annual
+#' indices, or both
+#'
 #' @export
 ctsm_plot_assessment <- function(
     ctsm_asmt_obj, 
@@ -8,8 +13,7 @@ ctsm_plot_assessment <- function(
   
   # graphics_functions.R
   
-  # plots a series of assessment plots with the raw data or the annual indices
-  # or both
+  # 
   
   
   library("lattice")
