@@ -1,10 +1,10 @@
-determinand,common_name,pargroup,biota_group,sediment_group,water_group,biota_assess,sediment_assess,water_assess,biota_unit,sediment_unit,water_unit,biota_auxiliary,sediment_auxiliary,water_auxiliary,biota_sd_constant,biota_sd_variable,sediment_sd_constant,sediment_sd_variable,water_sd_constant,water_sd_variable,distribution,good_status
-CD,Cadmium,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%, LI",,0.526867,0.07022,0.005,0.109988,0.002333,0.121905,lognormal,low
-CB153,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,0.033333,0.139136,0.033333,0.143928,0,0.1875,lognormal,low
-HBCD,,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,0.016667,0.25,0.07,0.321167,,,lognormal,low
-HBCDA,alpha-HBCD,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,0.002238,0.25,0.023333,0.3,,,lognormal,low
-HBCDB,beta-HBCD,O-BR,Organobromines,Organobromines,Organobromines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,0.043333,0.25,0.023333,0.3,,,lognormal,low
-HBCDG,gamma-HBCD,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,"LNMEA, LIPIDWT%, DRYWT%","AL, CORG, DRYWT%",,0.023333,0.3,0.023333,0.329599,,,lognormal,low
+﻿determinand,common_name,pargroup,biota_group,sediment_group,water_group,biota_assess,sediment_assess,water_assess,biota_unit,sediment_unit,water_unit,biota_auxiliary,sediment_auxiliary,water_auxiliary,biota_sd_constant,biota_sd_variable,sediment_sd_constant,sediment_sd_variable,water_sd_constant,water_sd_variable,distribution,good_status
+CD,Cadmium,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,0.526867,0.07022,0.005,0.109988,0.002333,0.121905,lognormal,low
+CB153,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.033333,0.139136,0.033333,0.143928,0,0.1875,lognormal,low
+HBCD,,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.016667,0.25,0.07,0.321167,,,lognormal,low
+HBCDA,alpha-HBCD,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.002238,0.25,0.023333,0.3,,,lognormal,low
+HBCDB,beta-HBCD,O-BR,Organobromines,Organobromines,Organobromines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.043333,0.25,0.023333,0.3,,,lognormal,low
+HBCDG,gamma-HBCD,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.023333,0.3,0.023333,0.329599,,,lognormal,low
 AGMEA,mean age,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,y,,,,,,,,,,,,,
 LNMEA,mean length,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,
 WTMEA,mean weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,g,,,,,,,,,,,,,
@@ -12,4 +12,4 @@ DRYWT%,dry weight,B-BIO,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,,
 EXLIP%,extractable lipid,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 LIPIDWT%,lipid weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 FATWT%,fat weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
-PYR1OH,1-hydroxy pyrene,B-MBA,Metabolites,,,TRUE,FALSE,FALSE,ng/ml,,,"LNMEA, LIPIDWT%, DRYWT%",,,0.123333,0.15,,,,,lognormal,low
+PYR1OH,1-hydroxy pyrene,B-MBA,Metabolites,,,TRUE,FALSE,FALSE,ng/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.15,,,,,lognormal,low
