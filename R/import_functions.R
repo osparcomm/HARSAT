@@ -957,12 +957,12 @@ ctsm_tidy_stations <- function(stations, info) {
   
   # ensure country is consistent
   
-  stations <- mutate(stations, country = str_to_title(.data$country))
+  stations <- dplyr::mutate(stations, country = str_to_title(.data$country))
   
   
  # replace backward slash with forward slash in station (long) name
 
-  stations <- mutate(
+  stations <- dplyr::mutate(
     stations, 
     station_longname = gsub("\\", "/", .data$station_longname, fixed = TRUE)
   )
@@ -972,7 +972,7 @@ ctsm_tidy_stations <- function(stations, info) {
       
     # remove stations that have been replaced
     
-    stations <- filter(stations, is.na(.data$replacedBy))
+    stations <- dplyr::filter(stations, is.na(.data$replacedBy))
     
 
     # check whether any remaining duplicated stations 
@@ -987,9 +987,9 @@ ctsm_tidy_stations <- function(stations, info) {
       remove = FALSE
     )
     
-    stations <- arrange(stations, .data$station_id, .data$startYear, .data$endYear)
+    stations <- dplyr::arrange(stations, .data$station_id, .data$startYear, .data$endYear)
 
-    stations <- arrange(stations, desc(row_number()))
+    stations <- dplyr::arrange(stations, desc(row_number()))
     
     stations <- ctsm_check(
       stations, 
@@ -1019,7 +1019,7 @@ ctsm_tidy_stations <- function(stations, info) {
   
   col_id <- c(info$region_id, "country", "station_name")
   
-  stations <- arrange(stations, across(all_of(col_id))) 
+  stations <- dplyr::arrange(stations, dplyr::across(all_of(col_id))) 
   
   stations
 }
@@ -1030,7 +1030,7 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
   # restrict to OSPAR stations used for temporal monitoring 
   # also includes grouped stations: Assessment Grouping for OSPAR MIME
   
-  stations <- filter(
+  stations <- dplyr::filter(
     stations, 
     grepl("OSPAR", .data$programGovernance) & grepl("T", .data$PURPM)
   )
@@ -1038,7 +1038,7 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
   
   # and stations that are used for contaminants or biological effects
   
-  stations <- filter(
+  stations <- dplyr::filter(
     stations, 
     switch(
       info$compartment, 
@@ -1122,7 +1122,10 @@ ctsm_tidy_stations_AMAP <- function(stations, info) {
   
   # add in regional information for East AMAP area
   
-  stations <- dplyr::mutate_at(stations, c("OSPAR_region", "OSPAR_subregion"), as.character)
+  stations <- dplyr::mutate(
+    stations, 
+    across(c("OSPAR_region", "OSPAR_subregion"), as.character)
+  )
   
   stations <- within(stations, {
     OSPAR_region[is.na(OSPAR_region)] <- "0"
@@ -1375,7 +1378,6 @@ ctsm_create_timeSeries <- function(
   
   library(tidyverse)
 
-  
   # arguments
   
   # determinands: character string of determinands to be assessed; default is to 
@@ -1628,9 +1630,9 @@ ctsm_create_timeSeries <- function(
     info = info
   )
   
-  data <- mutate(
+  data <- dplyr::mutate(
     data, 
-    uncertainty_sd = case_when(
+    uncertainty_sd = dplyr::case_when(
       unit_uncertainty %in% "U2" ~ uncertainty / 2, 
       unit_uncertainty %in% "%" ~ value * uncertainty / 100, 
       TRUE ~ uncertainty
@@ -1658,7 +1660,7 @@ ctsm_create_timeSeries <- function(
   
   data <- dplyr::mutate(
     data, 
-    uncertainty_sd = if_else(
+    uncertainty_sd = dplyr::if_else(
       .data$uncertainty_rel < 100, 
       .data$uncertainty_sd, 
       NA_real_
@@ -1694,7 +1696,7 @@ ctsm_create_timeSeries <- function(
   
   id <- c(determinands, ctsm_get_auxiliary(determinands, info))
   
-  data <- filter(data, .data$determinand %in% id)
+  data <- dplyr::filter(data, .data$determinand %in% id)
 
 
   # remove 'extra' data from time series which have a subseries classification 
@@ -1794,7 +1796,7 @@ ctsm_create_timeSeries <- function(
 
   if (info$compartment == "biota" && !is.null(info$bivalve_spawning_season)) {
 
-    data <- mutate(
+    data <- dplyr::mutate(
       data, 
       .month = months(as.Date(.data$date)),
       .not_ok = species_group %in% c("Bivalve", "Gastropod") & 
@@ -1809,7 +1811,7 @@ ctsm_create_timeSeries <- function(
         paste(info$bivalve_spawning_season, collapse = ", "), 
         "\n"
       )
-      data <- filter(data, !.not_ok)
+      data <- dplyr::filter(data, !.not_ok)
     }
     
     data[c(".month", ".not_ok")] <- NULL
@@ -1948,7 +1950,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
     "determinand"
   )
   
-  data <- arrange(data, across(any_of(id)))
+  data <- dplyr::arrange(data, dplyr::across(any_of(id)))
 
 
   # select variables of interest
@@ -2004,13 +2006,13 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   # future enhancement 
 
   if (info$compartment == "biota") {
-    timeSeries <- mutate(
+    timeSeries <- dplyr::mutate(
       timeSeries,
-      sex = if_else(.data$determinand %in% "EROD", .data$sex, NA_character_),
+      sex = dplyr::if_else(.data$determinand %in% "EROD", .data$sex, NA_character_),
       .group = ctsm_get_info(
         info$determinand, .data$determinand, "group", "biota", sep = "_"
       ),
-      method_analysis = if_else(
+      method_analysis = dplyr::if_else(
         .group %in% "Metabolites", 
         .data$method_analysis, 
         NA_character_
@@ -2045,7 +2047,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
 
   # timeSeries is now the unique rows of timeSeries
   
-  timeSeries <- droplevels(distinct(timeSeries))
+  timeSeries <- droplevels(dplyr::distinct(timeSeries))
   
   # id <- setdiff(names(timeSeries), c("basis", "unit"))
   
@@ -2757,8 +2759,8 @@ ctsm_check_censoring <- function(data, info, print_code_warnings) {
   # value submitted with units g/g
   
   my_near <- function(x, y) {
-    abs <- near(x, y) 
-    rel <- case_when(
+    abs <- dplyr::near(x, y) 
+    rel <- dplyr::case_when(
       x > 0   ~ abs((x - y) / y) < 1e-5,
       TRUE    ~ TRUE
     )
@@ -2825,7 +2827,7 @@ ctsm_check_censoring <- function(data, info, print_code_warnings) {
   data <- within(data, {
     levels(censoring) <- c(levels(censoring), "")
     censoring[is.na(censoring)] <- ""
-    censoring <- recode(censoring, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
+    censoring <- dplyr::recode(censoring, "<~D" = "D", "D~<" = "D", "<~Q" = "Q", "Q~<" = "Q")
   })
 
   data <- ctsm_check(
@@ -2862,7 +2864,7 @@ ctsm_check_censoring <- function(data, info, print_code_warnings) {
   # resolve these inconsistencies
   
   data <- within(data, {
-    censoring <- case_when(
+    censoring <- dplyr::case_when(
       censoring %in% "" ~ "",
       !is.na(limit_detection) & my_near(value, limit_detection) ~ "D",
       !is.na(limit_quantification) & my_near(value, limit_quantification) ~ "Q",
@@ -2936,7 +2938,7 @@ ctsm_check_subseries <- function(data, info) {
   
   # replace remaining missing values with Not_applicable
   
-  # data <- mutate(data, subseries = replace_na(subseries, "Not_applicable"))
+  # data <- dplyr::mutate(data, subseries = replace_na(subseries, "Not_applicable"))
 
   data
 }
@@ -3075,20 +3077,41 @@ ctsm_convert_to_target_basis <- function(data, info, get_basis) {
 
   if (info$compartment == "biota") {
     
-    # convert lipid weight data
+    # ensure lipidwt and drywt columns are present (if they haven't been supplied)
     
-    id <- c("", ".uncertainty", ".limit_detection", ".limit_quantification") 
-    id <- paste0("LIPIDWT%", id)
+    is_lipid <- "LIPIDWT%" %in% names(data)
+    is_dry <- "DRYWT%" %in% names(data)
+     
+    if (!is_lipid) {
+      data[["LIPIDWT%"]] <- NA_real_
+      data[["LIPIDWT%.censoring"]] <- NA_character_
+    }
     
-    data[id] <- lapply(
-      data[id], 
-      ctsm_convert_basis,  
-      from = data[["LIPIDWT%.basis"]], 
-      to = "W",
-      drywt = data[["DRYWT%"]], 
-      drywt_censoring = data[["DRYWT%.censoring"]], 
-      print_warning = FALSE
-    )
+    if (!is_dry) {
+      data[["DRYWT%"]] <- NA_real_
+      data[["DRYWT%.censoring"]] <- NA_character_
+    }
+    
+        
+    # convert lipid weight data to wet weight basis (if present)
+    
+    if (is_lipid) {
+    
+      id <- c("", ".uncertainty", ".limit_detection", ".limit_quantification") 
+      id <- paste0("LIPIDWT%", id)
+      
+      data[id] <- lapply(
+        data[id], 
+        ctsm_convert_basis,  
+        from = data[["LIPIDWT%.basis"]], 
+        to = "W",
+        drywt = data[["DRYWT%"]], 
+        drywt_censoring = data[["DRYWT%.censoring"]], 
+        print_warning = FALSE
+      )
+
+    }
+          
     
     # convert measurement data
     # print_warning gives the number of failures, which is the same for all id
@@ -3113,11 +3136,34 @@ ctsm_convert_to_target_basis <- function(data, info, get_basis) {
       SIMPLIFY = FALSE
     )
     
+
+    # remove dummy lipidwt and drywt variables
+    
+    if (!is_lipid) {
+      data[["LIPIDWT%"]] <- NULL
+      data[["LIPIDWT%.censoring"]] <- NULL
+    }
+    
+    if (!is_dry) {
+      data[["DRYWT%"]] <- NULL
+      data[["DRYWT%.censoring"]] <- NULL
+    }
+    
   }
  
   
   if (info$compartment == "sediment") { 
-  
+
+    # ensure drywt columns are present (if they haven't been supplied)
+    
+    is_dry <- "DRYWT%" %in% names(data)
+    
+    if (!is_dry) {
+      data[["DRYWT%"]] <- NA_real_
+      data[["DRYWT%.censoring"]] <- NA_character_
+    }
+    
+    
     # convert measurement data
     
     id <- c("concentration", "uncertainty", "limit_detection", "limit_quantification")
@@ -3162,7 +3208,15 @@ ctsm_convert_to_target_basis <- function(data, info, get_basis) {
       ), 
       SIMPLIFY = FALSE
     )
+
+
+    # remove dummy drywt variables
     
+    if (!is_dry) {
+      data[["DRYWT%"]] <- NULL
+      data[["DRYWT%.censoring"]] <- NULL
+    }
+
   }
 
 
@@ -3197,7 +3251,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, info, control) {
   # later on
   # also save uncertainties just in case
   
-  data <- mutate(
+  data <- dplyr::mutate(
     data, 
     concOriginal = .data$concentration,     
     censoringOriginal = .data$censoring,
@@ -3516,7 +3570,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, info, contr
   # later on
   # also save uncertainties just in case
   
-  data <- mutate(
+  data <- dplyr::mutate(
     data, 
     concOriginal = .data$concentration,     
     censoringOriginal = .data$censoring,
@@ -3550,26 +3604,26 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, info, contr
   # make ad-hoc change to deal with LOIGN
   # must undo at the end of the code
 
-  data <- mutate(
+  data <- dplyr::mutate(
     data, 
     .tmp = CORG,
     .tmp.censoring = CORG.censoring,
     .tmp.uncertainty = CORG.uncertainty,
-    CORG = if_else(is.na(.tmp), 0.35 * LOIGN, CORG),
-    CORG.censoring = if_else(
+    CORG = dplyr::if_else(is.na(.tmp), 0.35 * LOIGN, CORG),
+    CORG.censoring = dplyr::if_else(
       is.na(.tmp), 
       as.character(LOIGN.censoring), 
       as.character(CORG.censoring)
     ),
     CORG.censoring = factor(CORG.censoring),
-    CORG.uncertainty = if_else(is.na(.tmp), 0.35 * LOIGN.uncertainty, CORG.uncertainty)
+    CORG.uncertainty = dplyr::if_else(is.na(.tmp), 0.35 * LOIGN.uncertainty, CORG.uncertainty)
   )
 
   
   # split into metals (CD, PB), copper and organics and then normalise each 
   # with AL, CORG (LOIGN) and CORG (LOIGN) respectively#
   
-  groupID <- case_when(
+  groupID <- dplyr::case_when(
     data$determinand %in% c("CD", "PB") ~ "metals",
     data$determinand %in% "CU"          ~ "copper",
     TRUE                                ~ "organics"
@@ -3798,7 +3852,7 @@ ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, info, contr
   data <- unsplit(data, groupID)
 
 
-  data <- mutate(
+  data <- dplyr::mutate(
     data, 
     CORG = .tmp,
     CORG.censoring = .tmp.censoring,
@@ -3837,7 +3891,7 @@ ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, info, control)
   # later on
   # also save uncertainties just in case
   
-  data <- mutate(
+  data <- dplyr::mutate(
     data, 
     concOriginal = .data$concentration,     
     censoringOriginal = .data$censoring,
@@ -3871,7 +3925,7 @@ ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, info, control)
   # split into contaminants that are to be normalised to 5% lipid and 
   # others
   
-  groupID <- if_else(
+  groupID <- dplyr::if_else(
     data$species_group %in% "Fish" & 
       !(data$group  %in% c("Metals", "Organofluorines", "Metabolites")), 
     "lipid", 
@@ -3908,7 +3962,7 @@ ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, info, control)
       
       message("   Normalising ", group, " to ", control$value, "%")
 
-      conversion <- if_else(
+      conversion <- dplyr::if_else(
         data[["LIPIDWT%.censoring"]] %in% "", 
         control$value / data[["LIPIDWT%"]],
         NA_real_
@@ -3952,11 +4006,11 @@ ctsm_normalise_calculate <- function(Cm, Nm, Nss, var_Cm, var_Nm, Cx, Nx, var_Cx
   
   ok <- Nm > Nx  &  Cm * (Nss - Nx) > Cx * (Nss - Nm)     
   
-  Css <- if_else(ok, (Cm - Cx) * (Nss - Nx) / (Nm - Nx) + Cx, NA_real_)
+  Css <- dplyr::if_else(ok, (Cm - Cx) * (Nss - Nx) / (Nm - Nx) + Cx, NA_real_)
   
-  var_Css <- if_else(ok, ((Cm - Cx) / (Nm - Nx))^2, NA_real_)
+  var_Css <- dplyr::if_else(ok, ((Cm - Cx) / (Nm - Nx))^2, NA_real_)
   var_Css <- (Nss - Nx)^2 * (var_Cm + var_Nm * var_Css) + (Nss - Nm)^2 * (var_Cx + var_Nx * var_Css)
-  var_Css <- if_else(ok, var_Css / ((Nm - Nx)^2), NA_real_)
+  var_Css <- dplyr::if_else(ok, var_Css / ((Nm - Nx)^2), NA_real_)
   
   data.frame(Cm, Nm, Css, var_Css)
 }
@@ -3987,7 +4041,7 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
   # standardise variable names when response_id is an auxiliary variable
 
   if (response_id != "concentration") {
-    data <- mutate(data, determinand = rep(response_id, nrow(data)))
+    data <- dplyr::mutate(data, determinand = rep(response_id, nrow(data)))
 
     var1 <- c("uncertainty", "censoring", "limit_detection", "limit_quantification")  
     var2  <- paste(response_id, var1, sep = ".")
@@ -4051,7 +4105,7 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
   # censoring = "" is also difficult to work with because we can't trust the lod and loq 
   #   option - again take lower of many options
   
-  data$sd_constant <- case_when(
+  data$sd_constant <- dplyr::case_when(
     data$censoring %in% "D" ~ data$limit_detection / 3,
     data$censoring %in% "Q" ~ data$limit_quantification / 10,
     data$censoring %in% "<" ~ pmin(data$sd_constant, 
@@ -4071,7 +4125,7 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
     estimated_uncrt = .data$sd_constant ^ 2 + 
       (.data$sd_variable * .data$concentration) ^ 2,
     estimated_uncrt = sqrt(.data$estimated_uncrt),
-    uncertainty = if_else(
+    uncertainty = dplyr::if_else(
       is.na(.data$uncertainty), .data$estimated_uncrt, .data$uncertainty
     )
   )

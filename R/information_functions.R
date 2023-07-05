@@ -1985,7 +1985,7 @@ ctsm_convert_basis <- function(
   # ensure variables are stored as characters (rather than factors)
   
   var_id <- c("from", "to", "drywt_censoring", "lipidwt_censoring")
-  data <- dplyr::mutate(data, dplyr::across(all_of(var_id), as.character))
+  data <- dplyr::mutate(data, across(all_of(var_id), as.character))
 
   
   # check arguments have admissible values
