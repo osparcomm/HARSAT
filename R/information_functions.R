@@ -526,7 +526,7 @@ ctsm_read_determinand <- function(
   lapply(compartment, function(id) {
     
     auxiliary <- data[[paste0(id, "_auxiliary")]] 
-    auxiliary <- strsplit(auxiliary, ", ")
+    auxiliary <- strsplit(auxiliary, "~")
     auxiliary <- unlist(auxiliary)
 
     auxiliary <- unique(na.omit(auxiliary))
@@ -655,7 +655,7 @@ ctsm_get_auxiliary <- function(determinands, info) {
     sep = "_"
   )
   
-  auxiliary <- strsplit(auxiliary, ", ")
+  auxiliary <- strsplit(auxiliary, "~")
   auxiliary <- unlist(auxiliary)
   
   unique(c(na.omit(auxiliary)))
@@ -2460,9 +2460,6 @@ get.info.imposex <- function(
 
 get_RECO <- function(code, path = "information") {
   
-  library(tidyverse)
-  library(lubridate)
-  
   # check code argument and convert to upper case
   
   if(!is.character(code) | length(code) != 1L)
@@ -2485,9 +2482,8 @@ get_RECO <- function(code, path = "information") {
   
   # get relevant file
   
-  file_codes <- files %>% 
-    strsplit("_") %>% 
-    sapply("[[", 2)
+  file_codes <- strsplit(files, "_") 
+  file_codes <- sapply(file_codes, "[[", 2)
   
   ok <- file_codes %in% code
 
@@ -2505,20 +2501,21 @@ get_RECO <- function(code, path = "information") {
   # read in file - need to do something different for PARAM
   
   if (!code %in% "PARAM") {
-    out <- infile %>%
-      read_csv(
-        col_types = cols(
-          tblCodeID = col_integer(),
-          Code = col_character(),
-          Description = col_character(),
-          tblCodeTypeID = col_integer(),
-          CodeType = col_character(),
-          Created = col_date(format = ""),
-          Modified = col_date(format = ""),
-          Deprecated = col_logical()
-        )
-      ) %>%
-      as.data.frame()
+    out <- readr::read_csv(
+      infile, 
+      col_types = cols(
+        tblCodeID = col_integer(),
+        Code = col_character(),
+        Description = col_character(),
+        tblCodeTypeID = col_integer(),
+        CodeType = col_character(),
+        Created = col_date(format = ""),
+        Modified = col_date(format = ""),
+        Deprecated = col_logical()
+      )
+    ) 
+    
+    out <- as.data.frame(out)
     
     names(out)[2] <- code
     return(out)
@@ -2529,17 +2526,18 @@ get_RECO <- function(code, path = "information") {
   
   # read in each row as a single character string and split by commas
   
-  data <- infile %>% 
-    read_delim(
-      delim = "\n",
-      col_types = cols(
-        `tblCodeID,Code,Description,tblCodeTypeID,CodeType,Created,Modified,Deprecated` = col_character()
-      )
-    ) %>% 
-    as.data.frame() %>%
-    set_names("X") %>% 
-    pull(.data$X) %>% 
-    strsplit(",")
+  data <- readr::read_delim(
+    infile, 
+    delim = "\n",
+    col_types = cols(
+      `tblCodeID,Code,Description,tblCodeTypeID,CodeType,Created,Modified,Deprecated` = col_character()
+    )
+  ) 
+  
+  data <- as.data.frame(data)
+  names(data) <- "X" 
+  
+  data <- strsplit(data$X, ",")
   
   out <- data.frame(
     tblCodeID = sapply(data, function(x) {n <- length(x); x[1]}),
@@ -2553,10 +2551,12 @@ get_RECO <- function(code, path = "information") {
     stringsAsFactors = FALSE
   )
 
-  out <- out %>% 
-    mutate_at(c("tblCodeID", "tblCodeTypeID"), as.integer) %>% 
-    mutate_at(c("Created", "Modified"), as_date) %>% 
-    mutate_at(c("Deprecated"), as.logical)
+  out <- dplyr::mutate(
+    out, 
+    across(c("tblCodeID", "tblCodeTypeID"), as.integer),  
+    across(c("Created", "Modified"), as_date), 
+    across("Deprecated", as.logical)
+  )
 
   names(out)[2] <- code
   out
