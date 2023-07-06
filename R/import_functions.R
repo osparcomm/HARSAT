@@ -5,22 +5,27 @@
 
 #' Read harsat data
 #' 
-#' @param compartment a string, one of "sediment", "biota", and "water"
+#' @param compartment a string, one of "biota", "sediment", and "water"
 #' @param purpose a string, one of "OSPAR", "HELCOM", "AMAP" and "other"
 #' @param contaminants a file reference for contaminant data
 #' @param stations a file reference for station data
 #' @param QA a file reference for QA data
-#' @param data_path a file reference for data to read
-#' @param info_files
-#' @param info_path
-#' @param extraction
+#' @param data_path A file path where the data files can be found. Defaults to
+#'   "."; i.e. the working directory.
+#' @param info_files A list of files specifying reference tables which override
+#'   the defaults. See examples.
+#' @param info_path A file path where the reference tables can be found.
+#'   Defaults to "."; i.e. the working directory
+#' @param extraction A date saying when the extraction was made. Optional. This
+#'   should be provided according to ISO 8601; for example, 29 February 2024
+#'   should be supplied as "2024-02-29".
 #' @param max_year
 #' @param oddity_path a file path for where to write oddities data
 #' @param control
 #' @param data_format a string, one of "ICES_old", "ICES_new", and "external"
 #' @export
 ctsm_read_data <- function(
-  compartment = c("sediment", "biota", "water"), 
+  compartment = c("biota", "sediment", "water"), 
   purpose = c("OSPAR", "HELCOM", "AMAP", "other"), 
   contaminants, 
   stations, 
@@ -3048,7 +3053,6 @@ ctsm_merge_auxiliary <- function(data, info) {
   data <- droplevels(data)
 }
 
-
 ctsm_convert_to_target_basis <- function(data, info, get_basis) {
 
   # location: import_functions.R
@@ -3231,7 +3235,8 @@ ctsm_convert_to_target_basis <- function(data, info, get_basis) {
   data
 }
 
-  
+
+#' @export
 ctsm_normalise_sediment <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
@@ -4200,7 +4205,7 @@ ctsm_TBT_convert <- function(
   data
 }  
 
-
+#' @export
 ctsm_TBT_remove_early_data <- function(ctsm_obj, recent_year = min(ctsm_obj$info$recent_years)) {
   
   tin <- c("TBTIN", "TPTIN", "DBTIN", "DPTIN", "MBTIN", "MPTIN")

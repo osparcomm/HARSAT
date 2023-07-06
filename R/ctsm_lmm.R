@@ -1,14 +1,5 @@
 # edit history
 
-# 30/01/16 allow for SFG (normally distributed data)
-# 31/01/16 deal with pathological data where all concentrations are equal
-# 04/03/16 allow control parameters to be passed to optim
-# 30/10/17 ctsm.lmm.fit replace bobyqa with L-BFGS-B in initial fit
-# 08/12/17 ctsm.lmm.fit control fixed effects bounds
-# 13/02/18 ctsm.lmm.fit control random effects bounds
-# 14/02/18 ctsm.lmm.fit deal with pathological data where all within-year concentrations are equal 
-
-
 ctsm.lmm.fit <- function(
   data, dfSmooth, varComp.start, fixed_bound = 5, random_bound = 3, controlLmmFit = NULL, ...) {
 
@@ -302,12 +293,8 @@ ctsm.lmm.dcalc <- function(x, censoring, mean, sd, log = FALSE) {
 }
 
 
-#' Utility function that returns double the negative log likelihood
-#' 
-#' @param data
-#' @param mu
-#' @param varComp
-#' @export
+# Utility function that returns double the negative log likelihood
+
 negTwiceLogLik <- function(data, mu, varComp) {
 
   library(mvtnorm)

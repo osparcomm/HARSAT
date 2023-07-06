@@ -69,7 +69,7 @@ ctsm_assessment <- function(
   ctsm_ob
 }
 
-
+#' @export
 ctsm_update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...) {
   
   # location: assessment_functions.R
