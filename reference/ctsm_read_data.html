@@ -64,7 +64,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ctsm_read_data</span><span class="op">(</span></span>
-<span>  compartment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sediment"</span>, <span class="st">"biota"</span>, <span class="st">"water"</span><span class="op">)</span>,</span>
+<span>  compartment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"biota"</span>, <span class="st">"sediment"</span>, <span class="st">"water"</span><span class="op">)</span>,</span>
 <span>  purpose <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"OSPAR"</span>, <span class="st">"HELCOM"</span>, <span class="st">"AMAP"</span>, <span class="st">"other"</span><span class="op">)</span>,</span>
 <span>  <span class="va">contaminants</span>,</span>
 <span>  <span class="va">stations</span>,</span>
@@ -83,7 +83,7 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>compartment</dt>
-<dd><p>a string, one of "sediment", "biota", and "water"</p></dd>
+<dd><p>a string, one of "biota", "sediment", and "water"</p></dd>
 
 
 <dt>purpose</dt>
@@ -103,7 +103,24 @@
 
 
 <dt>data_path</dt>
-<dd><p>a file reference for data to read</p></dd>
+<dd><p>A file path where the data files can be found. Defaults to
+"."; i.e. the working directory.</p></dd>
+
+
+<dt>info_files</dt>
+<dd><p>A list of files specifying reference tables which override
+the defaults. See examples.</p></dd>
+
+
+<dt>info_path</dt>
+<dd><p>A file path where the reference tables can be found.
+Defaults to "."; i.e. the working directory</p></dd>
+
+
+<dt>extraction</dt>
+<dd><p>A date saying when the extraction was made. Optional. This
+should be provided according to ISO 8601; for example, 29 February 2024
+should be supplied as "2024-02-29".</p></dd>
 
 
 <dt>oddity_path</dt>

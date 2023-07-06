@@ -40,6 +40,24 @@
     <loc>http://osparcomm.github.io/HARSAT/reference/cstm.VDS.environment.html</loc>
   </url>
   <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.cl.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.index.opt.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.loglik.calc.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.p.calc.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.varlist.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_TBT_convert.html</loc>
+  </url>
+  <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_assessment.html</loc>
   </url>
   <url>
@@ -80,8 +98,5 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/negTwiceLogLik.html</loc>
   </url>
 </urlset>
