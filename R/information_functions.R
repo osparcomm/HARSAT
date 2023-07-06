@@ -148,6 +148,7 @@ ctsm_check_reference_table <- function(x, ref_table, info_type = "") {
 
 # Species information ----
 
+#' @export
 ctsm_read_species <- function(file, path = "information") {
 
   var_id <- c(
@@ -390,6 +391,7 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
 
 # Determinand information and functions ----
 
+#' @export
 ctsm_read_determinand <- function(
   file, 
   path = "information", 
@@ -632,7 +634,7 @@ ctsm_get_datatype <- function(determinand, info, abbr = FALSE){
 }
 
 
-
+#' @export
 ctsm_get_auxiliary <- function(determinands, info) {
   
   # information_functions.R
@@ -677,6 +679,7 @@ ctsm_get_auxiliary <- function(determinands, info) {
 
 # Assessment criteria ----
 
+#' @export
 ctsm_read_thresholds <- function(
     file, path = "information", compartment = c("biota", "sediment", "water"))  {
   
@@ -1948,6 +1951,7 @@ convert_units_workup <- function(units) {
 
 # Basis and matrix information and basis conversion ----
 
+#' @export
 ctsm_convert_basis <- function(
   conc, from, to, 
   drywt = NA_real_, 
@@ -2183,7 +2187,7 @@ ctsm_check_convert_basis <- function(data) {
 # biota_OSPAR is the current (2023) OSPAR biota configuration
 # biota_HELCOM is the current (2023) HELCOM biota configuration
 
-
+#' @export
 get_basis_default <- function(data, info) {
   
   # gets default target basis - information_functions.r
@@ -2211,7 +2215,7 @@ get_basis_default <- function(data, info) {
   new_basis  
 }
 
-
+#' @export
 get_basis_most_common <- function(data, info) {
 
   # gets target basis defined as the most commonly reported basis 

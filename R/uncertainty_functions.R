@@ -1,4 +1,5 @@
-ctsm.uncrt.workup <- function(clean_data) {
+#' @export
+ctsm_uncrt_workup <- function(clean_data) {
 
   library(dplyr)
   
@@ -145,8 +146,8 @@ ctsm.uncrt.workup <- function(clean_data) {
   list(compartment = compartment, data = data)
 }
 
-
-ctsm.uncrt.estimate <- function(data) {
+#' @export
+ctsm_uncrt_estimate <- function(data) {
   
   # initialise output with total number of values by determinand
   
@@ -230,9 +231,8 @@ ctsm.uncrt.estimate <- function(data) {
   out
 }
 
-
-
-ctsm.uncrt.plot.estimates <- function(uncrt_obj, old_estimates, group_id) {
+#' @export
+ctsm_uncrt_plot_estimates <- function(uncrt_obj, old_estimates, group_id) {
 
   library(lattice)
 
@@ -281,7 +281,8 @@ ctsm.uncrt.plot.estimates <- function(uncrt_obj, old_estimates, group_id) {
 }
 
 
-ctsm.uncrt.plot.data <- function(uncrt_obj, det_id) {
+#' @export
+ctsm_uncrt_plot_data <- function(uncrt_obj, det_id) {
   
   library(lattice)
 

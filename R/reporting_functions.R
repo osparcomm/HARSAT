@@ -2,6 +2,7 @@
 
 ctsm.Mercator <- function(x) atanh(sin(x * pi / 180))
 
+#' @export
 ctsm.projection <- function(latitude, longitude) {
   # calculates easting and northing in Lambert Azimuthal Equal Area North Polar aspect projection
   
@@ -56,6 +57,7 @@ ctsm.projection <- function(latitude, longitude) {
 
 # support functions ----
 
+#' @export
 ctsm_subset_assessment <- function(assessment_obj, subset) {
   
   # reporting_functions.R
@@ -91,6 +93,7 @@ ctsm_subset_assessment <- function(assessment_obj, subset) {
 }  
 
 
+#' @export
 ctsm_summary_overview <- function(
     assessment, timeSeries, info, classColour, fullSummary = FALSE) {
   
@@ -143,6 +146,7 @@ ctsm_summary_overview <- function(
 }
 
 
+#' @export
 ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha = 0.05) {
   
   # reporting_functions.R
@@ -702,6 +706,7 @@ ctsm_collapse_AC <- function(x, type = c("real", "character")) {
 
 # OHAT ----
 
+#' @export
 ctsm_OHAT_legends <- function(
   assessments, determinandGroups, regionalGroups = NULL, distanceGroups = NULL, path) {
 
