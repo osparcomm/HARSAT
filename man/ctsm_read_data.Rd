@@ -5,7 +5,7 @@
 \title{Read harsat data}
 \usage{
 ctsm_read_data(
-  compartment = c("sediment", "biota", "water"),
+  compartment = c("biota", "sediment", "water"),
   purpose = c("OSPAR", "HELCOM", "AMAP", "other"),
   contaminants,
   stations,
@@ -21,7 +21,7 @@ ctsm_read_data(
 )
 }
 \arguments{
-\item{compartment}{a string, one of "sediment", "biota", and "water"}
+\item{compartment}{a string, one of "biota", "sediment", and "water"}
 
 \item{purpose}{a string, one of "OSPAR", "HELCOM", "AMAP" and "other"}
 
@@ -31,7 +31,18 @@ ctsm_read_data(
 
 \item{QA}{a file reference for QA data}
 
-\item{data_path}{a file reference for data to read}
+\item{data_path}{A file path where the data files can be found. Defaults to
+"."; i.e. the working directory.}
+
+\item{info_files}{A list of files specifying reference tables which override
+the defaults. See examples.}
+
+\item{info_path}{A file path where the reference tables can be found.
+Defaults to "."; i.e. the working directory}
+
+\item{extraction}{A date saying when the extraction was made. Optional. This
+should be provided according to ISO 8601; for example, 29 February 2024
+should be supplied as "2024-02-29".}
 
 \item{oddity_path}{a file path for where to write oddities data}
 

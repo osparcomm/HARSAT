@@ -12,12 +12,15 @@ Requirements:
 
 Additional R packages to those which come with the standard RStudio installation. They have to be installed, either using the RStudio GUI or by the command install.packages e.g. `install.packages("lme4")`:
 
-*	rmvtnorm
-*	tidyverse
+*	mvtnorm
+*	tidyverse version 2.0.0
 *	lme4
 *	numDeriv
 *	optimx
 *	pbapply
+
+The following R packages need to be installed to run the HELCOM example:
+
 *	rmarkdown
 *	htmlwidgets
 *	DT
@@ -30,7 +33,6 @@ All example datasets can be run with the same basic directory structure. The fol
 - R
 - information
 - output
-- RData
 
 The example scripts currently use subfolders within the data and output folders
 

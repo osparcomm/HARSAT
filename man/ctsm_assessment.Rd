@@ -14,6 +14,11 @@ ctsm_assessment(
   ...
 )
 }
+\arguments{
+\item{subset}{can be used if the assessment is to be done in chunks because of size}
+
+\item{parallel}{a boolean, whether or not to use parallel computation}
+}
 \description{
 Run an assessment
 }
