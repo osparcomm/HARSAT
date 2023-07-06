@@ -21,7 +21,8 @@ library(harsat)
 There are three input data sets: 
 - the contaminant data
 - the station dictionary
-- the quality assurance data (more accurately called a chemical methods file)
+- the quality assurance data (more accurately called a chemical methods file); 
+note that this will disappear before the first release of the harsat package
 
 Load the R package `here`, because we use the working directory to find
 the data files. If you use your own data files, you will need to point to
@@ -43,7 +44,10 @@ biota_data <- ctsm_read_data(
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
   data_path = file.path(working.directory, "data", "example_simple_OSPAR"),
-  info_files = list(determinand = "determinand_simple_OSPAR.csv"),
+  info_files = list(
+    determinand = "determinand_simple_OSPAR.csv", 
+    thresholds = "thresholds_biota_simple_OSPAR.csv"
+  ),
   info_path = file.path(working.directory, "information"), 
   extraction = "2022/01/11",
   max_year = 2020L  
@@ -148,8 +152,7 @@ Do the statistical analysis
 ```r
 biota_assessment <- ctsm_assessment(
   biota_timeSeries, 
-  AC = c("BAC", "EAC", "EQS", "HQS"), 
-  get_assessment_criteria = get.AC.OSPAR
+  AC = c("BAC", "EAC", "EQS", "HQS")
 )
 #> 
 #> assessing series:  station_code 11461; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 

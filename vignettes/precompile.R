@@ -8,6 +8,7 @@ setwd('vignettes')
 knit("example_HELCOM.Rmd.orig", "example_HELCOM.Rmd")
 knit("example_external_data.Rmd.orig", "example_external_data.Rmd")
 knit("example_simple_OSPAR.Rmd.orig", "example_simple_OSPAR.Rmd")
+knit("harsat.Rmd.orig", "harsat.Rmd")
 
 setwd('..')
 devtools::build_vignettes()

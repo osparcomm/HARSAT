@@ -7,7 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 ## Getting started
 
@@ -40,8 +45,7 @@ remotes::install_github("osparcomm/harsat", auth_token = 'XXXX')
 
 Now, within R, you can load the library in the usual way
 
-
-```r
+```{r}
 library(harsat)
 ```
 
@@ -61,8 +65,7 @@ working.directory <- here()
 The first step is to read in the data that we've got.
 We will go through some of these arguments.
 
-
-```r
+```{r getting-started-read}
 biota_data <- ctsm_read_data(
   compartment = "biota",
   purpose = "OSPAR",
@@ -78,13 +81,6 @@ biota_data <- ctsm_read_data(
   extraction = "2022/01/11",
   max_year = 2020L
 )
-#> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/station_dictionary.csv'
-#> 
-#> Reading contaminant and biological effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/test_data.csv'
-#> 
-#> Reading QA data from '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/quality_assurance.csv'
 ```
 
 The main arguments here are as follows:
@@ -124,19 +120,8 @@ we've may find some data from stations which are unrecognized by the station dic
 Warnings are supported by output files which allow you to come in and have a look and 
 see which values are affected, so you can go and check them out in more detail.
 
-
-```r
+```{r getting-started-tidy}
 biota_data <- ctsm_tidy_data(biota_data)
-#> 
-#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
-#>  'oddities/biota_backup'
-#> 
-#> Cleaning station dictionary
-#>    Duplicate stations - first one selected: see duplicate_stations.csv
-#> 
-#> Cleaning contaminant and biological effects data
-#>    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv
-#>    Dropping data with no stations
 ```
 
 To this point, we've still not done anything with the datasets.
@@ -152,8 +137,7 @@ want to assess. In this case, the `determinands` parameter specifies cadmium, CP
 HBCDG, and some biological metabolites. There are various other arguments which allow you to control 
 just how the data are manipulated.
 
-
-```r
+```{r getting-started-time-series}
 biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
   determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"),
@@ -163,30 +147,6 @@ biota_timeSeries <- ctsm_create_timeSeries(
   ),
   get_basis = get_basis_biota_OSPAR
 )
-#> 
-#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
-#>  'oddities/biota_backup'
-#> 
-#> Cleaning data
-#>    Dropping stations with no data between 2015 and 2020 
-#>    Dropping samples with only auxiliary variables
-#>    Unexpected or missing values for 'matrix': see matrix_queries.csv
-#>    Unexpected or missing values for 'basis': see basis_queries.csv
-#>    Bile metabolite units changed from 'ng/g' to 'ng/ml' and from 'ug/kg' to 'ug/l'
-#>    Replicate measurements, only first retained: see replicate_measurements.csv
-#>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
-#>    Detection limit higher than data: see detection_limit_high.csv
-#>    Data submitted as HBCDA, HBCDB, HBCDG summed to give HBCD
-#>    Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT% 
-#> 
-#> Creating time series data
-#>    Converting data to appropriate basis for statistical analysis
-#>    Losing 32 out of 392 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Dropping bivalve and gastropod contaminant data collected during the
-#>     spawning season, which is taken to be the following months:
-#>     April, May, June, July 
-#>    Dropping groups of compounds / stations with no data between 2015 and 2020
 ```
 
 ## Assessment
@@ -199,103 +159,19 @@ But this will just run.
 You can see that it tells you which time series we're actually assessing as it progresses.
 This gives you an idea of how how many cups of tea you can drink before it's all finished.
 
-
-```r
+```{r getting-started-assessment}
 biota_assessment <- ctsm_assessment(
   biota_timeSeries,
   AC = c("BAC", "EAC", "EQS", "HQS")
 )
-#> 
-#> assessing series:  station_code 11461; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 11461; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 12156; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 12164; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 12164; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1235; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1235; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 1235; determinand HBCD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1235; determinand HBCDA; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1235; determinand HBCDG; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 13059; determinand CB153; species Spisula solida; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 13059; determinand CD; species Spisula solida; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 1345; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1345; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 1345; determinand HBCD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1345; determinand HBCDA; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1345; determinand HBCDG; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand HBCD; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand HBCDA; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand HBCDG; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1388; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1388; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 2717; determinand PYR1OH; species Limanda limanda; matrix BI; method_analysis HPLC-FD; unit ng/ml 
-#> 
-#> assessing series:  station_code 3282; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3282; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3433; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3433; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3441; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3441; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 7132; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 7132; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg
 ```
 
 There are various little warnings: these ones are nothing to worry about.
 
 We can then check that everything is converged.
 
-
-```r
+```{r getting-started-convergence}
 ctsm_check_convergence(biota_assessment$assessment)
-#> character(0)
 ```
 
 ## Reporting
@@ -305,8 +181,7 @@ we can put it. And `harsat` won't create a directory if there's nothing
 there, so let's make a new directory, `./output/tutorial`, and put the full
 path into `summary.dir`, so we can tell `harsat` where to write to.
 
-
-```r
+```{r getting-started-summary-dir}
 summary.dir <- file.path(working.directory, "output", "tutorial")
 
 if (!dir.exists(summary.dir)) {
@@ -316,8 +191,7 @@ if (!dir.exists(summary.dir)) {
 
 Next, we set up a few variables to manage the display.
 
-
-```r
+```{r getting-started-summary-1}
 webGroups <- list(
   levels = c("Metals", "Metabolites", "Organobromines", "Chlorobiphenyls"),  
   labels = c(
@@ -349,8 +223,7 @@ what the time series represents (which is the first set of columns), followed
 by statistical results, such as p values, and summary values such as the number of years in the data set,
 when it starts and finishes. And towards the end, we've got comparisons against various different threshold values.
 
-
-```r
+```{r getting-started-summary-2}
 ctsm_summary_table(
   biota_assessment, 
   determinandGroups = webGroups,
