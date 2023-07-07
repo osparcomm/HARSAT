@@ -207,7 +207,7 @@ a lot of data cleaning and processing (creates oddities folder).</p>
 </h2>
 <p>Do the statistical analysis</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_assessment.html">ctsm_assessment</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu">ctsm_assessment</span><span class="op">(</span></span>
 <span>  <span class="va">biota_timeSeries</span>, </span>
 <span>  AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span>, <span class="st">"EAC"</span>, <span class="st">"EQS"</span>, <span class="st">"HQS"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -294,7 +294,7 @@ a lot of data cleaning and processing (creates oddities folder).</p>
 <span><span class="co">#&gt; assessing series:  station_code 7132; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg</span></span></code></pre></div>
 <p>Check convergence - no errors this time</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_check_convergence.html">ctsm_check_convergence</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu">ctsm_check_convergence</span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 <div class="section level2">

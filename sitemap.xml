@@ -34,6 +34,12 @@
     <loc>http://osparcomm.github.io/HARSAT/index.html</loc>
   </url>
   <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/check_assessment.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/check_convergence_lmm.html</loc>
+  </url>
+  <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/convert_units.html</loc>
   </url>
   <url>
@@ -56,12 +62,6 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_TBT_convert.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_assessment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_check_convergence.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_create_timeSeries.html</loc>
@@ -98,5 +98,11 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/run_assessment.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/update_assessment.html</loc>
   </url>
 </urlset>

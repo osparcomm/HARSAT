@@ -163,7 +163,7 @@ will need to point to a directory containing a copy.</p>
 </h2>
 <p>Main runs</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_assessment.html">ctsm_assessment</a></span><span class="op">(</span><span class="va">biota_timeSeries</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu">ctsm_assessment</span><span class="op">(</span><span class="va">biota_timeSeries</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg</span></span>
 <span><span class="co">#&gt; Loading required package: Matrix</span></span>
@@ -281,7 +281,7 @@ will need to point to a directory containing a copy.</p>
 <h3 id="check-convergence">Check convergence<a class="anchor" aria-label="anchor" href="#check-convergence"></a>
 </h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="op">(</span><span class="va">wk_check</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_check_convergence.html">ctsm_check_convergence</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="op">(</span><span class="va">wk_check</span> <span class="op">&lt;-</span> <span class="fu">ctsm_check_convergence</span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 </div>
