@@ -73,13 +73,16 @@ biota_timeSeries <- ctsm_create_timeSeries(
 Main runs
 
 ```{r external-assessment}
-biota_assessment <- ctsm_assessment(biota_timeSeries)
+biota_assessment <- run_assessment(
+  biota_timeSeries, 
+  AC = c("NRC", "LRC", "MRC", "HRC")
+)
 ```
 
 Use the code below if it takes a long time to run
 
 ```
-biota_assessment <- ctsm_assessment(
+biota_assessment <- run_assessment(
   biota_timeSeries,
   AC = c("NRC", "LRC", "MRC", "HRC")
   parallel = TRUE
@@ -89,7 +92,7 @@ biota_assessment <- ctsm_assessment(
 ## Check convergence
 
 ```{r external-convergence}
-(wk_check <- ctsm_check_convergence(biota_assessment$assessment))
+check_assessment(biota_assessment)
 ```
 
 # Summary files

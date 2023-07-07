@@ -2,21 +2,36 @@
 
 # Set up functions ----
 
-#' Run an assessment
-#' 
-#' @param ctsm_ob
-#' @param subset can be used if the assessment is to be done in chunks because of size
-#' @param AC
-#' @param get_AC_fn
-#' @param recent_trend
-#' @param parallel a boolean, whether or not to use parallel computation 
+#' Assess timeseries for trends and status
+#'
+#' Fits a model to each timeseries, test for any temporal trend and compare with
+#' thresholds. Need to add a lot more in details.
+#'
+#' @param ctsm_ob A HARSAT object resulting from a call to create_timeSeries
+#' @param subset An optional vector specifying which timeseries are to be
+#'   assessed. Might be used if the assessment is to be done in chunks because
+#'   of size, or when refitting a timeseries model which has not converged. An
+#'   expression will be evaluated in the timeSeries component of ctsm_ob; use
+#'   'series' to identify individual timeseries.
+#' @param AC A character vector identifying the thresholds to be used in status
+#'   assessments. These should be in the threshold reference table. Defaults to
+#'   NULL; i.e. no thresholds are used.
+#' @param get_AC_fn An optional function that overrides get_AC_default. See
+#'   details (which need to be written).
+#' @param recent_trend An integer giving the number of years which are used in
+#'   the assessment of recent trends. For example, a value of 20 (the default)
+#'   consider trends in the last twenty year.
+#' @param parallel A logical which determines whether to use parallel
+#'   computation; default = FALSE.
+#' @param ... Extra arguments which are passed to assessment_engine.  See
+#'   details (which need to be written).
 #' @export
-ctsm_assessment <- function(
+run_assessment <- function(
   ctsm_ob, 
   subset = NULL, 
   AC = NULL, 
   get_AC_fn = NULL, 
-  recent_trend = 20, 
+  recent_trend = 20L, 
   parallel = FALSE, 
   ...) {
   
@@ -54,7 +69,7 @@ ctsm_assessment <- function(
   
   # assess timeseries
   
-  out <- ctsm_assessment_engine(
+  out <- assessment_engine(
     ctsm_ob, 
     series_id,
     parallel = parallel, 
@@ -69,8 +84,23 @@ ctsm_assessment <- function(
   ctsm_ob
 }
 
+
+#' Update timeseries assessments
+#'
+#' Refits models for particular timeseries, or does fits new models when an
+#' assessment is being done in chunks.
+#'
+#' @param ctsm_ob A HARSAT object resulting from a call to run_assessment
+#' @param subset A vector specifying which timeseries assessements are to be
+#'   updated or fit for the first time. An expression will be evaluated in the
+#'   timeSeries component of ctsm_ob; use 'series' to identify individual
+#'   timeseries.
+#' @param parallel A logical which determines whether to use parallel
+#'   computation; default = FALSE.
+#' @param ... Extra arguments which are passed to assessment_engine.  See
+#'   details (which need to be written).
 #' @export
-ctsm_update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...) {
+update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...) {
   
   # location: assessment_functions.R
   
@@ -98,7 +128,7 @@ ctsm_update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...
   
   # assess timeseries
   
-  out <- ctsm_assessment_engine(
+  out <- assessment_engine(
     ctsm_ob, 
     series_id,
     parallel = parallel, 
@@ -115,7 +145,7 @@ ctsm_update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...
 
 
 
-ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
+assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
 
   # location: assessment_functions.R
   
@@ -145,7 +175,7 @@ ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
     on.exit(parallel::stopCluster(cluster_id))
 
     is_imposex <- "Imposex" %in% data$group
-    export_objects <- ctsm_parallel_objects(is_imposex)
+    export_objects <- parallel_objects(is_imposex)
     parallel::clusterExport(cluster_id, export_objects)
 
     parallel::clusterEvalQ(
@@ -285,7 +315,7 @@ ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
         })  
       }  
       
-      c(out, assess_imposex(
+      out <- c(out, assess_imposex(
         data = x, 
         annualIndex = out$annualIndex, 
         AC = AC, 
@@ -298,6 +328,10 @@ ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
         info.imposex = info$imposex, 
         recent.trend = info$recent.trend)
       )
+      
+      out$convergence <- 0L
+      
+      out
     }
     else {
 
@@ -332,11 +366,16 @@ ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
       )
       
       args.list <- c(args.list, list(...))
-      fit <- try(do.call("ctsm.anyyear.lmm", args.list))
-      if (is.character(fit) & length(fit) == 1) 
-        return(c(out, error = fit))
-      else
-        return(c(out, fit))			
+      fit <- try(do.call("assess_lmm", args.list))
+      if (is.character(fit) & length(fit) == 1L) {
+        out <- c(out, error = fit)
+      } else {
+        out <- c(out, fit)
+      }
+      
+      out$convergence <- check_convergence_lmm(out)
+      
+      out
     }
     
   })
@@ -345,8 +384,7 @@ ctsm_assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
 }
 
 
-#' @export
-ctsm_parallel_objects <- function(imposex = FALSE) {
+parallel_objects <- function(imposex = FALSE) {
   
   # assessment_functions.R
   # objects required for clusterExport
@@ -355,15 +393,16 @@ ctsm_parallel_objects <- function(imposex = FALSE) {
   
   out <- c(
     "negTwiceLogLik", 
+    "check_convergence_lmm",
+    objects(package.environment, pattern = "^assess_*"),
     objects(package.environment, pattern = "^get*"),
-    objects(package.environment, pattern = "^ctsm*"),
-    objects(package.environment, pattern = "^info*")
+    objects(package.environment, pattern = "^ctsm*")
   )
 
   if (imposex) {
     out <- c(
       out, 
-      "assess_imposex", "imposex.assess.index", "imposex_class", 
+      "imposex.assess.index", "imposex_class", 
       "imposex.family", "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", 
       "imposex_assess_clm", "imposex.clm.fit", "imposex.clm.X", 
       "imposex.clm.X.change", "imposex.clm.loglik.calc", "imposex.VDS.p.calc", 
@@ -529,7 +568,7 @@ get.index.water.Pesticides <- get.index.default
 
 # Mixed model assessment functions ----
 
-ctsm.anyyear.lmm <- function(
+assess_lmm <- function(
     data, annualIndex, AC, recent.years, determinand, max.year, 
     recent.trend = 20, distribution, good.status, choose_model, ...) {
 
@@ -612,7 +651,7 @@ ctsm.anyyear.lmm <- function(
   # split off to assess other distributions - need to harmonise this
   
   if (!distribution %in% c("lognormal", "normal")) {
-    wk_fn <- paste0("ctsm_assess_", distribution)
+    wk_fn <- paste0("assess_", distribution)
     output <- do.call(
       wk_fn, 
       args = list(
@@ -627,6 +666,7 @@ ctsm.anyyear.lmm <- function(
         firstYearFull = firstYearFull
       )
     )
+    output$convergence <- 0L
     return(output)
   }
 
@@ -1063,51 +1103,160 @@ ctsm.lmm.contrast <- function(ctsm.ob, start, end) {
   data.frame(start, end, estimate = contrast, se = se.contrast, p = p.contrast)
 }
 
-#' Check for convergence
+
+#' Check whether the assessments have converged
+#'
+#' @description Checks whether the assessments in a HARSAT assessment object
+#'   have converged. Currently only does detailed checks for models with normal
+#'   or lognormal errors (all chemical timeseries and some biological effects).
+#'   Here it checks whether:
+#'
+#' * fixed effect estimates are away from their bounds
+#' * random effect estimates are lower than their upper bounds; they can of
+#'   course be equal to zero
+#' * standard errors are present for model predictions and fixed effects
+#'   estimates
+#' * standard errors of the fixed effects estimates are realistic (very small standard errors indicate problems with
+#'   the numerical differencing used to compute the standard errors)
+#'
+#'
+#' @param assessment_ob A HARSAT assessment object resulting from a call to
+#'   ctsm_assessment
+#' @param save_result Saves the identifiers of the timeseries that have not
+#'   converged; defaults to FALSE. When an assessment has been done in stages, the output also identifies those 
+#'   timeseries that have not yet been assessed
+#'
+#' @returns A list of two character vectors: 
 #' 
+#' * not_converged identifies timeseries that have not converged
+#' * not_assessed identifies timeseries that have not been assessed
+#'
 #' @export
-ctsm_check_convergence <- function(assessment_ob, coeff_se_tol = 0.001) {
-  ok <- sapply(assessment_ob, function(x) {
-    
-    # trap errors in convergence 
-    
-    if ("error" %in% names(x)) 
-      return(FALSE)
+check_assessment <- function(assessment_ob, save_result = FALSE) {
 
-    # nothing to check if no model fitting (determined by presence of pred component)
-    
-    if (! "pred" %in% names(x))
-      return(TRUE)
-    
-    # all standard errors from pred component should be present
-      
-    if (any(is.na(x$pred$se)))
-      return(FALSE)
-    
-    # fixed effect coefficients: standard errors should be there and not ridiculously small
-    # fixed effect coefficients should not be on bounds
-    # random effect coefficients should not be on upper bounds
-    
-    coeff <- x$coefficients
-    
-    random_id <- grepl("sd", row.names(coeff))
-    fixed <- coeff[!random_id, ]
-    random <- coeff[random_id, ]
+  assessment <- assessment_ob$assessment
 
-    if (any(is.na(fixed$se)) || min(fixed$se) < coeff_se_tol)
-      return(FALSE)
-    
-    if (any(fixed$onBound))
-      return(FALSE)
-    
-    if (any(random$onBound & random$est > 0.0001))
-      return(FALSE)
-    
-    TRUE
-  })
+  n <- length(assessment)
   
-  names(ok[!ok])
+  
+  # deal with situation where not all time series have been assessed 
+    
+  assessed <- sapply(assessment, function(x) !is.null(x))
+  
+  if (!any(assessed)) {
+    warning(
+      "No timeseries have been assessed\n", 
+      call. = FALSE, immediate. = TRUE
+    )
+    return(invisible())
+  }
+  
+  if (!all(assessed)) {
+    warning(
+      "Not all timeseries have been assessed; to see which ones, set argument\n",
+      "'save_result' to TRUE\n", 
+      call. = FALSE, immediate. = TRUE
+    )
+  }
+  
+  
+  # restrict assessment to those time series that have been assessed
+  
+  assessment <- assessment[assessed]
+  
+  converged <- sapply(assessment, function(x) x$convergence == 0L)
+
+  
+  # identify time series that have not been assessed or have not converged  
+  
+  result <- list(
+    not_converged = names(converged)[!converged],
+    not_assessed = names(assessed[!assessed])
+  )
+  
+  if (all(converged)) {
+    cat("All assessment models have converged\n")
+  } else {
+    cat(
+      "The following assessment models have not converged:\n",
+      paste(result$not_converged, collapse = "\n"), 
+      sep = ""
+    )
+  } 
+  
+  if (save_result) result else invisible()
 }
+
+
+#' Checks convergence of an assessment model
+#'
+#' @description Utilty function for use within assess_lmm. Checks whether a
+#'   model has converged. Currently only checks assessments with normal (or
+#'   lognormal) errors, where it considers whether:
+#'
+#' * fixed effect estimates are away from their bounds
+#' * random effect estimates are lower than their upper bounds; they can of
+#'   course be equal to zero
+#' * standard errors are present for model predictions and fixed effects
+#'   estimates
+#' * standard errors of the fixed effects estimates are not unrealistically small;
+#'   the tolerance is chosen to be much smaller than seen in typical OSPAR
+#'   assessments which have converged
+#'
+#'   Model fits based on other distributions are assumed to have converged. Some
+#'   checking is needed here in future
+#'
+#' @param assessment An assessment from assess_lmm
+#' @param coeff_se_tol The tolerance for checking whether standard errors on the
+#'   fixed effects estimates are unrealistically small; defaults to 0.001
+#'
+#' @returns An integer: 0 indicates convergence, 1 indicates an issue
+check_convergence_lmm <- function(assessment, coeff_se_tol = 0.001) {
+
+  # error in model fit
+  
+  if ("error" %in% names(assessment)) {
+    return(1L)
+  }
+  
+  # nothing to check if no model fitting (determined by presence of pred component)
+  
+  if (!"pred" %in% names(assessment)) {
+    return(0L)
+  }
+  
+  # all standard errors from pred component should be present
+  
+  if (any(is.na(assessment$pred$se))) {
+    return(1L)
+  }
+  
+  # fixed effect coefficients: standard errors should be present and not 
+  #   ridiculously small
+  # fixed effect coefficients should not be on bounds
+  # random effect coefficients should not be on upper bounds
+  
+  coeff <- assessment$coefficients
+  
+  random_id <- grepl("sd", row.names(coeff))
+  fixed <- coeff[!random_id, ]
+  random <- coeff[random_id, ]
+  
+  if (any(is.na(fixed$se)) || min(fixed$se) < coeff_se_tol) {
+    return(1L)
+  }
+  
+  if (any(fixed$onBound)) {
+    return(1L)
+  }
+  
+  if (any(random$onBound & random$est > 0.0001)) {
+    return(1L)
+  }
+  
+  0L
+}
+
 
 ctsm.power <- function(
   q, year, sigma, alpha = 0.05, sigma_type = c("index", "slope"), 
@@ -1217,7 +1366,7 @@ ctsm.dyear <- function(
 
 # Other distributions ----
 
-ctsm_assess_survival <- function(
+assess_survival <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
 
@@ -1703,7 +1852,7 @@ ctsm_assess_survival <- function(
 
 
 
-ctsm_assess_survival_contrast <- function(ctsm.ob, start, end) {
+assess_survival_contrast <- function(ctsm.ob, start, end) {
 
   # based on ctsm.lmm.contrast - should be able to make it almost identical but
   # first need to get variance covariance matrix of fitted values
@@ -1735,7 +1884,7 @@ ctsm_assess_survival_contrast <- function(ctsm.ob, start, end) {
 
 
 
-ctsm_assess_survival_refvalue <- function(
+assess_survival_refvalue <- function(
   ctsm_ob, year_id, refvalue, good_status, ...) {
 
   ok <- ctsm_ob$pred$year %in% year_id 
@@ -1781,7 +1930,7 @@ ctsm_assess_survival_refvalue <- function(
 
 
 
-ctsm_assess_beta <- function(
+assess_beta <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
   
@@ -2180,7 +2329,7 @@ ctsm_assess_beta <- function(
 
 
 
-ctsm_assess_negativebinomial <- function(
+assess_negativebinomial <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
   

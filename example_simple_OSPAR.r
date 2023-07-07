@@ -87,7 +87,7 @@ biota_timeSeries <- ctsm_create_timeSeries(
 
 # do the statistical analysis
 
-biota_assessment <- ctsm_assessment(
+biota_assessment <- run_assessment(
   biota_timeSeries, 
   AC = c("BAC", "EAC", "EQS", "HQS")
 )
@@ -108,7 +108,7 @@ biota_assessment <- ctsm_assessment(
 
 # check convergence - no errors this time
 
-ctsm_check_convergence(biota_assessment$assessment)
+check_convergence(biota_assessment)
 
 
 # Summary files ----

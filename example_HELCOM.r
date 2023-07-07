@@ -279,7 +279,7 @@ water_timeSeries <- ctsm_create_timeSeries(
 
 ### main runs ----
 
-sediment_assessment <- ctsm_assessment(
+sediment_assessment <- run_assessment(
   sediment_timeSeries, 
   AC = "EQS",
   parallel = TRUE
@@ -288,7 +288,7 @@ sediment_assessment <- ctsm_assessment(
 
 ### check convergence ----
 
-ctsm_check_convergence(sediment_assessment$assessment)
+check_convergence(sediment_assessment)
 
 
 # saveRDS(sediment_assessment, file.path("RData", "sediment assessment.rds"))
@@ -303,7 +303,14 @@ ctsm_check_convergence(sediment_assessment$assessment)
 # takes a long time to run!!!!!
 # I need to turn this into a function
 
-source("example_HELCOM_imposex_preparation.R")
+rmarkdown::render(
+  file.path("man", "fragments", "example_HELCOM_imposex_preparation.Rmd"), 
+  output_file = "HELCOM_imposex_preparation.html",
+  output_dir = file.path("output", "example_HELCOM") 
+)
+
+
+# source("example_HELCOM_imposex_preparation.R")
 
 
 # can sometimes be useful to split up the assessment because of size limitations
@@ -314,7 +321,7 @@ wk_group <- ctsm_get_info(
   biota_timeSeries$info$determinand, wk_determinands, "biota_group"
 )
 
-biota_assessment <- ctsm_assessment(
+biota_assessment <- run_assessment(
   biota_timeSeries, 
   AC = c("BAC", "EAC", "EQS", "MPC"), 
   subset = determinand %in% wk_determinands[wk_group == "Metals"],
@@ -326,18 +333,18 @@ wk_organics <- c(
   "Chlorobiphenyls", "Dioxins"
 )  
 
-biota_assessment <- ctsm_update_assessment(
+biota_assessment <- update_assessment(
   biota_assessment, 
   subset = determinand %in% wk_determinands[wk_group %in% wk_organics], 
   parallel = TRUE
 )
 
-biota_assessment <- ctsm_update_assessment(
+biota_assessment <- update_assessment(
   biota_assessment, 
   subset = determinand %in% wk_determinands[wk_group %in% "Metabolites"]
 )
 
-biota_assessment <- ctsm_update_assessment(
+biota_assessment <- update_assessment(
   biota_assessment, 
   subset = determinand %in% wk_determinands[wk_group %in% "Imposex"]
 )
@@ -345,40 +352,37 @@ biota_assessment <- ctsm_update_assessment(
 
 ### check convergence ----
 
-# no checks for Imposex
-
-wk_id <- biota_assessment$timeSeries$determinand %in% 
-  wk_determinands[wk_group != "Imposex"] 
-wk_id <- row.names(biota_assessment$timeSeries)[wk_id]
-(wk_check <- ctsm_check_convergence(biota_assessment$assessment[wk_id]))
+check_assessment(biota_assessment)
 
 
 # two time series need to be refitted
 
 # "2109 PB Perca fluviatilis MU" - fixed bounds
-biota_assessment <- ctsm_update_assessment( 
-  biota_assessment, series == wk_check[1], fixed_bound = 20
+biota_assessment <- update_assessment( 
+  biota_assessment, 
+  series == "2109 PB Perca fluviatilis MU", 
+  fixed_bound = 20
 )
 
 # "2299 PYR1OH Limanda limanda BI HPLC-FD" - standard errors
-biota_assessment <- ctsm_update_assessment( 
-  biota_assessment, series == wk_check[2], hess.d = 0.0001, hess.r = 8
+biota_assessment <- update_assessment( 
+  biota_assessment, 
+  series == "2299 PYR1OH Limanda limanda BI HPLC-FD", 
+  hess.d = 0.0001, hess.r = 8
 )
 
 
 # check it has worked
 
-ctsm_check_convergence(biota_assessment$assessment[wk_id])
+check_assessment(biota_assessment)
 
-
-# saveRDS(biota_assessment, file.path("RData", "biota assessment.rds"))
 
 
 ## water ----
 
 ### main runs ----
 
-water_assessment <- ctsm_assessment(
+water_assessment <- run_assessment(
   water_timeSeries, 
   AC = "EQS", 
   parallel = TRUE
@@ -387,19 +391,26 @@ water_assessment <- ctsm_assessment(
 
 ### check convergence ----
 
-(wk_check <- ctsm_check_convergence(water_assessment$assessment))
+check_convergence(water_assessment)
 
-# refit a couple of time series
+
+# refit a couple of time series where the fixed effects are on their bounds
 
 # "5190 CD Yes" - fixed effects on bounds
 # "5192 CD Yes" - fixed effects on bounds
 
-water_assessment <- ctsm_update_assessment(
-  water_assessment, series %in% wk_check, fixed_bound = 20
+wk_id <- check_convergence(water_assessment, save_result = TRUE)
+
+water_assessment <- update_assessment(
+  water_assessment, 
+  series %in% wk_id$not_converged, 
+  fixed_bound = 20
 )
 
 
-ctsm_check_convergence(water_assessment$assessment)
+# check that refitted timeseries have converged
+
+check_convergence(water_assessment)
 
 
 # saveRDS(water_assessment, file.path("RData", "water assessment.rds"))

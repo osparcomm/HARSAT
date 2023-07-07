@@ -279,7 +279,7 @@ water_timeSeries <- ctsm_create_timeSeries(
 Main runs
 
 ```{r helcom-run1}
-sediment_assessment <- ctsm_assessment(
+sediment_assessment <- run_assessment(
   sediment_timeSeries,
   AC = "EQS",
   parallel = TRUE
@@ -289,7 +289,7 @@ sediment_assessment <- ctsm_assessment(
 Check convergence
 
 ```{r helcom-run2}
-ctsm_check_convergence(sediment_assessment$assessment)
+check_assessment(sediment_assessment)
 ```
 
 ## Biota
