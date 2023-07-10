@@ -4,25 +4,29 @@
 # read in data  ---- 
 
 #' Read harsat data
-#' 
+#'
 #' @param compartment a string, one of "biota", "sediment", and "water"
 #' @param purpose a string, one of "OSPAR", "HELCOM", "AMAP" and "other"
 #' @param contaminants a file reference for contaminant data
 #' @param stations a file reference for station data
 #' @param QA a file reference for QA data
-#' @param data_path A file path where the data files can be found. Defaults to
-#'   "."; i.e. the working directory.
+#' @param data_dir The directory where the data files can be found (sometimes
+#'   supplied using 'file.path'). Defaults to "."; i.e. the working directory.
 #' @param info_files A list of files specifying reference tables which override
 #'   the defaults. See examples.
-#' @param info_path A file path where the reference tables can be found.
-#'   Defaults to "."; i.e. the working directory
+#' @param info_dir The directory where the reference tables can be found
+#'   (sometimes supplied using 'file.path'). Defaults to "."; i.e. the working
+#'   directory
 #' @param extraction A date saying when the extraction was made. Optional. This
 #'   should be provided according to ISO 8601; for example, 29 February 2024
 #'   should be supplied as "2024-02-29".
 #' @param max_year
-#' @param oddity_path a file path for where to write oddities data
+#' @param oddity_dir The directory where the 'oddities' will be written
+#'   (sometimes supplied using 'file.path'). This directory (and subdirectories)
+#'   will be created if it does not already exist.
 #' @param control
 #' @param data_format a string, one of "ICES_old", "ICES_new", and "external"
+#'
 #' @export
 ctsm_read_data <- function(
   compartment = c("biota", "sediment", "water"), 
@@ -30,12 +34,12 @@ ctsm_read_data <- function(
   contaminants, 
   stations, 
   QA, 
-  data_path = ".", 
+  data_dir = ".", 
   info_files = list(),
-  info_path = ".",
+  info_dir = ".",
   extraction = NULL, 
   max_year = NULL,
-  oddity_path = "oddities",
+  oddity_dir = "oddities",
   control = list(), 
   data_format = c("ICES_old", "ICES_new", "external")) {
 
@@ -95,7 +99,7 @@ ctsm_read_data <- function(
     extraction = extraction,
     data_format = data_format, 
     max_year = max_year, 
-    oddity_path = oddity_path
+    oddity_dir = oddity_dir
   )
   
   control_default <- ctsm_control_default(purpose, compartment)
@@ -111,17 +115,17 @@ ctsm_read_data <- function(
   
   # read in reference tables
   
-  info <- ctsm_read_info(info, info_path, info_files)
+  info <- ctsm_read_info(info, info_dir, info_files)
   
 
   # read in station dictionary, contaminant and biological effects data and QA data
   
-  stations <- ctsm_read_stations(stations, data_path, info)
+  stations <- ctsm_read_stations(stations, data_dir, info)
   
-  data <- ctsm_read_contaminants(contaminants, data_path, info)
+  data <- ctsm_read_contaminants(contaminants, data_dir, info)
   
   if (data_format == "ICES_old") {
-    QA <- ctsm_read_QA(QA, data_path, purpose)
+    QA <- ctsm_read_QA(QA, data_dir, purpose)
   }
   
 
@@ -910,7 +914,7 @@ ctsm_tidy_data <- function(ctsm_obj) {
   
   # set up oddity directory and back up any previous oddity files
   
-  ctsm_initialise_oddities(info$oddity_path, info$compartment)
+  ctsm_initialise_oddities(info$oddity_dir, info$compartment)
   
   
   # tidy station dictionary and contaminant data
@@ -1432,7 +1436,7 @@ ctsm_create_timeSeries <- function(
   # lots of data cleansing - first ensure oddity directory exists and back up
   # any previous oddity files
 
-  oddity_path <- ctsm_initialise_oddities(info$oddity_path, info$compartment)
+  oddity_path <- ctsm_initialise_oddities(info$oddity_dir, info$compartment)
 
 
   # checks station dictionary:
@@ -1919,7 +1923,7 @@ ctsm_check <- function(
   
   outfile_name <- paste0(file_name, ".csv")
   outfile_name <- gsub(" ", "_", outfile_name)
-  outfile <- file.path(info$oddity_path, info$compartment, outfile_name)
+  outfile <- file.path(info$oddity_dir, info$compartment, outfile_name)
   
   txt <- switch(action, delete = ": deleted data in '", ": see ")
   message("   ", message, txt, outfile_name) 

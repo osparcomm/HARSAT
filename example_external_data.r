@@ -26,9 +26,9 @@ biota_data <- ctsm_read_data(
   purpose = "AMAP",
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 
   stations = "AMAP_external_new_stations_only.csv", 
-  data_path = file.path("data", "example_external_data"), 
+  data_dir = file.path("data", "example_external_data"), 
   data_format = "external",
-  info_path = "information",
+  info_dir = "information",
   control = list(region_id = "AMAP_region")
 )  
 
@@ -73,7 +73,7 @@ check_assessment(biota_assessment)
 
 # Summary files ----
 
-ctsm_summary_table(
+write_summary_table(
   biota_assessment,
   output_dir = file.path("output", "example_external_data"), 
   classColour = list(
@@ -96,7 +96,7 @@ ctsm_summary_table(
 # or station_name; can also use the series identifier in row.names(timeSeries)
 # if subset is NULL (default), all timeseries are plotted (can take some time)
 
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = species %in% "Phoca hispida",
   output_dir = file.path("output", "graphics"), 
@@ -104,7 +104,7 @@ ctsm_plot_assessment(
   file_format = "png"
 )
 
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = matrix %in% "LI",
   output_dir = file.path("output", "graphics"), 
@@ -112,7 +112,7 @@ ctsm_plot_assessment(
   file_format = "pdf"
 )
 
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = station_code %in% "A1",
   output_dir = file.path("output", "graphics"), 
@@ -120,7 +120,7 @@ ctsm_plot_assessment(
   file_format = "pdf"
 )
 
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment, 
   subset = series == "A1 HG Phoca hispida LI adult",
   output_dir = file.path("output", "graphics"), 

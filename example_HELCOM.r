@@ -31,13 +31,12 @@ biota_data <- ctsm_read_data(
   contaminants = "biota_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
-  data_path = file.path("data", "example_HELCOM"),
-  info_path = "information",
+  data_dir = file.path("data", "example_HELCOM"),
+  info_dir = "information",
   extraction = "2022/10/06",
   max_year = 2021L
 )  
 
-# saveRDS(biota_data, file.path("RData", "biota data.rds"))
 
 
 ## sediment ----
@@ -47,14 +46,13 @@ sediment_data <- ctsm_read_data(
   purpose = "HELCOM",
   contaminants = file.path("example_HELCOM_new_format", "sediment_data.csv"),
   stations = file.path("example_HELCOM", "station_dictionary.csv"),
-  data_path = "data",
-  info_path = "information",
+  data_dir = "data",
+  info_dir = "information",
   extraction = "2022/10/06",
   max_year = 2021L,
   data_format = "ICES_new"
 )
 
-# saveRDS(sediment_data, file = file.path("RData", "sediment data.rds"))
 
 
 ## water ----
@@ -64,14 +62,13 @@ water_data <- ctsm_read_data(
   purpose = "HELCOM",                               
   contaminants = file.path("example_HELCOM_new_format", "water_data.csv"), 
   stations = file.path("example_HELCOM", "station_dictionary.csv"), 
-  data_path = "data", 
-  info_path = "information", 
+  data_dir = "data", 
+  info_dir = "information", 
   extraction = "2022/10/06",
   max_year = 2021L, 
   data_format = "ICES_new"
 )  
 
-# saveRDS(water_data, file.path("RData", "water data.rds"))
 
 
 ## adjustments ----
@@ -94,8 +91,6 @@ rmarkdown::render(
   output_dir = file.path("output", "example_HELCOM") 
 )
 
-# saveRDS(sediment_data, file = file.path("RData", "sediment data adjusted.rds"))
-# saveRDS(water_data, file = file.path("RData", "water data adjusted.rds"))
 
 
 # Prepare data for next stage ----
@@ -236,7 +231,6 @@ biota_timeSeries$data <- mutate(
 
 biota_timeSeries$data$country <- NULL
 
-# saveRDS(biota_timeSeries, file.path("RData", "biota timeSeries.rds"))
 
 
 ## sediment ----
@@ -258,7 +252,6 @@ sediment_timeSeries <- ctsm_create_timeSeries(
   )
 )
 
-# saveRDS(sediment_timeSeries, file = file.path("RData", "sediment timeSeries.rds"))
 
 
 ## water ----
@@ -270,7 +263,6 @@ water_timeSeries <- ctsm_create_timeSeries(
   )
 )
 
-# saveRDS(water_timeSeries, file.path("RData", "water timeSeries.rds"))
 
 
 # Assessment ----
@@ -289,9 +281,6 @@ sediment_assessment <- run_assessment(
 ### check convergence ----
 
 check_convergence(sediment_assessment)
-
-
-# saveRDS(sediment_assessment, file.path("RData", "sediment assessment.rds"))
 
 
 
@@ -413,12 +402,9 @@ water_assessment <- update_assessment(
 check_convergence(water_assessment)
 
 
-# saveRDS(water_assessment, file.path("RData", "water assessment.rds"))
 
 
 # Summary files ----
-
-## web objects ----
 
 webGroups <- list(
   levels = c(
@@ -439,7 +425,7 @@ webGroups <- list(
   )
 )
 
-ctsm_summary_table(
+write_summary_table(
   biota_assessment,
   determinandGroups = webGroups,
   classColour = list(
@@ -451,7 +437,7 @@ ctsm_summary_table(
   output_dir = file.path("output", "example_HELCOM")
 )
 
-ctsm_summary_table(
+write_summary_table(
   sediment_assessment,
   determinandGroups = webGroups,
   classColour = list(
@@ -463,7 +449,7 @@ ctsm_summary_table(
   output_dir = file.path("output", "example_HELCOM")
 )
 
-ctsm_summary_table(
+write_summary_table(
   water_assessment,
   determinandGroups = webGroups,
   classColour = list(
