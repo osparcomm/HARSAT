@@ -42,9 +42,9 @@ biota_data <- ctsm_read_data(
   purpose = "AMAP",
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv",
   stations = "AMAP_external_new_stations_only.csv",
-  data_path = file.path(working.directory, "data", "example_external_data"),
+  data_dir = file.path(working.directory, "data", "example_external_data"),
   data_format = "external",
-  info_path = file.path(working.directory, "information"),
+  info_dir = file.path(working.directory, "information"),
   control = list(region_id = "AMAP_region")
 )
 ```
@@ -106,7 +106,7 @@ if (!dir.exists(summary.dir)) {
   dir.create(summary.dir, recursive = TRUE)
 } 
 
-ctsm_summary_table(
+write_summary_table(
   biota_assessment,
   output_dir = summary.dir,
     classColour = list(
@@ -138,7 +138,7 @@ if (!dir.exists(graphics.dir)) {
   dir.create(graphics.dir, recursive = TRUE)
 } 
 
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = species %in% "Phoca hispida",
   output_dir = graphics.dir, 
@@ -148,7 +148,7 @@ ctsm_plot_assessment(
 ```
 
 ```{r external-graphics2}
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = matrix %in% "LI",
   output_dir = graphics.dir, 
@@ -158,7 +158,7 @@ ctsm_plot_assessment(
 ```
 
 ```{r external-graphics3}
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = station_code %in% "A1",
   output_dir = graphics.dir, 
@@ -168,7 +168,7 @@ ctsm_plot_assessment(
 ```
 
 ```{r external-graphics4}
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment, 
   subset = series == "A1 HG Phoca hispida LI adult",
   output_dir = graphics.dir, 

@@ -339,20 +339,47 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 
 # summary table ----
 
-#' Generates a summary table
-#' 
-#' Creates a summary file and adds symbology
-#' @param assessment_obj
+#' Write assessment summary to a csv file
+#'
+#' @description
+#'
+#' Creates a data frame summarising the assessment of each time series and
+#' writes it to a csv file. The summary includes:
+#'
+#' * meta-data such as the monitoring location and number of years of data for
+#' each time series
+#' * the fitted values in the last monitoring year with associated upper
+#' one-sided 95% confidence limits
+#' * the trend assessments (p-values and trend estimates)
+#' * the status assessments (if there any thresholds
+#' * (optionally) a symbology summarising the trend (shape) and status (colour)
+#' of each time series
+#'
+#' @param assessment_obj An assessment object resulting from a call to
+#'   run_assessment.
+#' @param output_file The name of the output csv file. If using NULL, the file
+#'   will be called biota_summary.csv, sediment_summary.csv or water_summary.csv
+#'   as appropriate. By default the file will be written to the working
+#'   directory. If a file name is provided, a path to the output file can also
+#'   be provided (e.g. using `file.path`). The output_dir option can also be
+#'   used to specify the output file directory.
+#' @param output_dir The output directory for `output_file`. The default is the
+#'   working directory. Any file path provided in `output_file`, will be
+#'   appended to `output_dir`. The resulting output directory must already
+#'   exist.
+#' @param export Logical. TRUE (the default) writes the summary table to a csv
+#'   file. FALSE returns the summary table as an R object (and does not write to
+#'   a csv file).
 #' @param determinandGroups
 #' @param classColour
-#' @param output_dir
-#' @param output_file the output file -- it must be a CSV file
-#' @param export
 #' @param collapse_AC
+#'
+#' @returns
+#'
 #' @export
-ctsm_summary_table <- function(
-  assessment_obj, determinandGroups = NULL, classColour = NULL, output_dir = NULL, 
-  output_file = NULL, export = TRUE, collapse_AC = NULL) {
+write_summary_table <- function(
+  assessment_obj, output_file = NULL, output_dir = ".", export = TRUE, 
+  determinandGroups = NULL, classColour = NULL, collapse_AC = NULL) {
 
   # reporting_functions.R
   
@@ -363,16 +390,42 @@ ctsm_summary_table <- function(
   info <- assessment_obj$info
   
   
-  ## error checking
+  # output information
+  # check valid extension and path
+  # merge output_file and output_dir to give final output destination
   
-  # output file name must be a .csv file
-  
-  if (export && !is.null(output_file)) {
-    n_filename <- nchar(output_file)
-    ext_filename <- substring(output_file, n_filename - 3, n_filename)
-    if (ext_filename != ".csv") {
-      stop("output_file must has a .csv extension", call. = FALSE)
+  if (export) {
+
+    # get default output_file 
+    
+    if (is.null(output_file)) {
+      output_file <- paste0(info$compartment, "_summary.csv")
     } 
+    
+    # check output_file has valid extension
+    
+    if (!endsWith(output_file, ".csv")) {
+      stop(
+        "\nThe output file '", output_file, "' does not have a .csv extension.\n", 
+        "Check the information supplied to argument 'output_file'.",
+        call. = FALSE
+      )
+    }    
+    
+    # combine output_file and output_dir and check output directory exists
+    
+    output_file <- file.path(output_dir, output_file)
+
+    wk <- dirname(output_file)
+    if (!dir.exists(wk)) {
+      stop(
+        "\nThe output directory '", wk, "' does not exist.\n", 
+        "Create it or check the information supplied to argument 'output_dir'",
+        " is correct.",
+        call. = FALSE
+      )
+    }
+
   }
   
     
@@ -669,20 +722,15 @@ ctsm_summary_table <- function(
   }
   
 
-  # write summary to output_file
+  # write summary to output_file or return summary object
     
   if (export) {
-    if (is.null(output_file)) {
-      output_file <- paste0(info$compartment, "_summary.csv")
-    } 
-    if (!is.null(output_dir)) {
-      output_file <- file.path(output_dir, output_file)
-    }
     readr::write_excel_csv(summary, output_file, na = "")
+    return(invisible())
+  } else {
+    return(summary)
   }
     
-  
-  if (export) invisible() else summary
 }
 
 

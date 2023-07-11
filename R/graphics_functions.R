@@ -1,11 +1,33 @@
-#' Plot the assessment
+# Graphical routines ----
+
+#' Graphical summaries of an assessment
 #'
 #' Generates a series of assessment plots with the raw data, or the annual
-#' indices, or both
+#' indices, or both. The plots are exported as either png or pdf files.
+#'
+#' @param assessment_obj An assessment object resulting from a call to
+#'   run_assessment
+#' @param subset An optional vector specifying which timeseries are to be
+#'   plotted. An expression will be evaluated in the timeSeries component of
+#'   assessment_obj; use 'series' to identify individual timeseries.
+#' @param output_dir The output directory for the assessment plots (possibly
+#'   supplied using 'file.path'). The default is the working directory. The
+#'   output directory must already exist.
+#' @param file_type Specifies whether the plots show the raw data ('file_type =
+#'   "data"'), annual indices summarising the data for each year ('file_type =
+#'   "index"'), or (the default) whether two files should be produced for each
+#'   time series, one with the raw data and one with the annual indices.
+#' @param file_format Whether the files should be png (the default) or pdf.
+#'
+#' @returns A series of png or pdf files with graphical summaries of an
+#'   assessment. The plots show the fitted trends with pointwise two-sided 90%
+#'   confidence limits and either the raw data, or indices summarising the data
+#'   for each year.
+#'
 #'
 #' @export
-ctsm_plot_assessment <- function(
-    ctsm_asmt_obj, 
+plot_assessment <- function(
+    assessment_obj, 
     subset = NULL, 
     output_dir = ".",
     file_type = c("data", "index"),
@@ -13,24 +35,38 @@ ctsm_plot_assessment <- function(
   
   # graphics_functions.R
   
-  # 
-  
   
   library("lattice")
   library("grid")
+  
+  
+  # check file_type, file_format and output_dir are valid
   
   file_format = match.arg(file_format)
   
   if (!all(file_type %in% c("data", "index"))) {
     stop(
-      "argument file_type is invalid: ", 
-      "must be 'data' or 'index' or both of them"
+      "\nArgument 'file_type' is invalid: ", 
+      "must be 'data' or 'index' or both of them", 
+      call. = FALSE
     )
   }
   
+  if (!dir.exists(output_dir)) {
+    stop(
+      "\nThe output directory '", output_dir, "' does not exist.\n", 
+      "Create it or check the information supplied to argument 'output_dir'",
+      " is correct.",
+      call. = FALSE
+    )
+  }
 
-  info <- ctsm_asmt_obj$info
-  timeSeries <- ctsm_asmt_obj$timeSeries 
+  
+  
+  
+
+  info <- assessment_obj$info
+  timeSeries <- assessment_obj$timeSeries 
   
 
   # set up time series information:
@@ -42,7 +78,7 @@ ctsm_plot_assessment <- function(
     
   timeSeries <- left_join(
     timeSeries, 
-    ctsm_asmt_obj$stations, 
+    assessment_obj$stations, 
     by = "station_code"
   )
   
@@ -79,9 +115,9 @@ ctsm_plot_assessment <- function(
   
   lapply(series_id, function(id) {
     
-    data <- filter(ctsm_asmt_obj$data, seriesID == id)
+    data <- filter(assessment_obj$data, seriesID == id)
     
-    assessment <- ctsm_asmt_obj$assessment[[id]]
+    assessment <- assessment_obj$assessment[[id]]
 
 
     # get relevant series info

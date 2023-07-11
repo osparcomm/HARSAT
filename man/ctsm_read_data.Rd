@@ -10,12 +10,12 @@ ctsm_read_data(
   contaminants,
   stations,
   QA,
-  data_path = ".",
+  data_dir = ".",
   info_files = list(),
-  info_path = ".",
+  info_dir = ".",
   extraction = NULL,
   max_year = NULL,
-  oddity_path = "oddities",
+  oddity_dir = "oddities",
   control = list(),
   data_format = c("ICES_old", "ICES_new", "external")
 )
@@ -31,20 +31,23 @@ ctsm_read_data(
 
 \item{QA}{a file reference for QA data}
 
-\item{data_path}{A file path where the data files can be found. Defaults to
-"."; i.e. the working directory.}
+\item{data_dir}{The directory where the data files can be found (sometimes
+supplied using 'file.path'). Defaults to "."; i.e. the working directory.}
 
 \item{info_files}{A list of files specifying reference tables which override
 the defaults. See examples.}
 
-\item{info_path}{A file path where the reference tables can be found.
-Defaults to "."; i.e. the working directory}
+\item{info_dir}{The directory where the reference tables can be found
+(sometimes supplied using 'file.path'). Defaults to "."; i.e. the working
+directory}
 
 \item{extraction}{A date saying when the extraction was made. Optional. This
 should be provided according to ISO 8601; for example, 29 February 2024
 should be supplied as "2024-02-29".}
 
-\item{oddity_path}{a file path for where to write oddities data}
+\item{oddity_dir}{The directory where the 'oddities' will be written
+(sometimes supplied using 'file.path'). This directory (and subdirectories)
+will be created if it does not already exist.}
 
 \item{data_format}{a string, one of "ICES_old", "ICES_new", and "external"}
 }

@@ -47,7 +47,7 @@ ctsm_check_variable <- function(data, var_id, info) {
   # output results 
   
   outfile_name <- paste0(var_id, "_queries.csv")
-  outfile <- file.path(info$oddity_path, info$compartment, outfile_name)
+  outfile <- file.path(info$oddity_dir, info$compartment, outfile_name)
   
 
   # check all records have a valid action - if not, probably need to update
