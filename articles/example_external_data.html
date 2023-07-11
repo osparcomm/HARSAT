@@ -297,7 +297,7 @@ will need to point to a directory containing a copy.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">summary.dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span> </span>
 <span></span>
-<span><span class="fu"><a href="../reference/ctsm_summary_table.html">ctsm_summary_table</a></span><span class="op">(</span></span>
+<span><span class="fu">ctsm_summary_table</span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span>,</span>
 <span>    classColour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -327,7 +327,7 @@ plotted (can take some time)</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">graphics.dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span> </span>
 <span></span>
-<span><span class="fu"><a href="../reference/ctsm_plot_assessment.html">ctsm_plot_assessment</a></span><span class="op">(</span></span>
+<span><span class="fu">ctsm_plot_assessment</span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  subset <span class="op">=</span> <span class="va">species</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"Phoca hispida"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>, </span>
@@ -335,7 +335,7 @@ plotted (can take some time)</p>
 <span>  file_format <span class="op">=</span> <span class="st">"png"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_plot_assessment.html">ctsm_plot_assessment</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">ctsm_plot_assessment</span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  subset <span class="op">=</span> <span class="va">matrix</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"LI"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>, </span>
@@ -343,7 +343,7 @@ plotted (can take some time)</p>
 <span>  file_format <span class="op">=</span> <span class="st">"pdf"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_plot_assessment.html">ctsm_plot_assessment</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">ctsm_plot_assessment</span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  subset <span class="op">=</span> <span class="va">station_code</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"A1"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>, </span>
@@ -351,7 +351,7 @@ plotted (can take some time)</p>
 <span>  file_format <span class="op">=</span> <span class="st">"pdf"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_plot_assessment.html">ctsm_plot_assessment</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">ctsm_plot_assessment</span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>, </span>
 <span>  subset <span class="op">=</span> <span class="va">series</span> <span class="op">==</span> <span class="st">"A1 HG Phoca hispida LI adult"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>, </span>
