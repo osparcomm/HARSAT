@@ -39,13 +39,14 @@ working.directory <- here()
 
 
 ```{r ospar-read-data}
-biota_data <- ctsm_read_data(
+biota_data <- read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
   contaminants = "test_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
   data_dir = file.path(working.directory, "data", "example_simple_OSPAR"),
+  data_format = "ICES_old",
   info_files = list(
     determinand = "determinand_simple_OSPAR.csv", 
     thresholds = "thresholds_biota_simple_OSPAR.csv"

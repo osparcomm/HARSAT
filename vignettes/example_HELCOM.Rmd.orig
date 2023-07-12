@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-First, load the `harsat` the library
+First, load the `harsat` library
 
 ```{r}
 library(harsat)
@@ -35,13 +35,14 @@ working.directory <- here()
 Load the biota data, using HELCOM-style.
 
 ```{r helcom-read-biota}
-biota_data <- ctsm_read_data(
+biota_data <- read_data(
   compartment = "biota",
   purpose = "HELCOM",
   contaminants = "biota_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
   data_dir = file.path(working.directory, "data", "example_HELCOM"),
+  data_format = "ICES_old",
   info_dir = file.path(working.directory, "information"),
   extraction = "2022/10/06",
   max_year = 2021L
@@ -51,32 +52,32 @@ biota_data <- ctsm_read_data(
 Next, load the sediment data, again using HELCOM-style.
 
 ```{r helcom-read-sediment}
-sediment_data <- ctsm_read_data(
+sediment_data <- read_data(
   compartment = "sediment",
   purpose = "HELCOM",
   contaminants = file.path("..", "example_HELCOM_new_format", "sediment_data.csv"),
   stations = "station_dictionary.csv",
   data_dir = file.path(working.directory, "data", "example_HELCOM"),
+  data_format = "ICES_new",
   info_dir = file.path(working.directory, "information"),
   extraction = "2022/10/06",
-  max_year = 2021L,
-  data_format = "ICES_new"
+  max_year = 2021L
 )
 ```
 
 And finally, read the water data.
 
 ```{r helcom-read-water}
-water_data <- ctsm_read_data(
+water_data <- read_data(
   compartment = "water",
   purpose = "HELCOM",
   contaminants = file.path("..", "example_HELCOM_new_format", "water_data.csv"),
   stations = "station_dictionary.csv",
   data_dir = file.path(working.directory, "data", "example_HELCOM"),
+  data_format = "ICES_new",
   info_dir = file.path(working.directory, "information"),
   extraction = "2022/10/06",
-  max_year = 2021L, 
-  data_format = "ICES_new"
+  max_year = 2021L
 )
 ```
 

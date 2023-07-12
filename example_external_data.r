@@ -21,7 +21,7 @@ devtools::load_all()
 
 # mercury data with supporting variables and station dictionary
 
-biota_data <- ctsm_read_data(
+biota_data <- read_data(
   compartment = "biota", 
   purpose = "AMAP",
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 

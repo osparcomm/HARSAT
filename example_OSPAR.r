@@ -10,7 +10,6 @@
 # The functions and reference tables folders are assumed to be in the current
 # R project folder
 
-
 rm(list = objects())
 
 devtools::load_all()
@@ -18,27 +17,21 @@ devtools::load_all()
 
 # Read data from ICES extraction ----
 
-# There are three input data sets: 
+# There are two input data sets: 
 # - the contaminant data
 # - the station dictionary
-# - the quality assurance data (more accurately called a chemical methods file);
-#     this will disappear before release
 
 biota_data <- read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
-  contaminants = "test_data.csv", 
-  stations = "station_dictionary.csv", 
-  QA = "quality_assurance.csv",
-  data_dir = file.path("data", "example_simple_OSPAR"),
-  data_format = "ICES_old",
+  contaminants = "ICES_DOME_XHAT_biota_data_2023071211435199.txt",
+  stations = "ICES_DOME_XHAT_station_data_2023071211380640.txt", 
+  data_dir = file.path("data", "example_OSPAR"),
   info_files = list(
     determinand = "determinand_simple_OSPAR.csv", 
     thresholds = "thresholds_biota_simple_OSPAR.csv"
   ),
-  info_dir = "information", 
-  extraction = "2022/01/11",
-  max_year = 2020L
+  info_dir = "information"
 )  
 
 

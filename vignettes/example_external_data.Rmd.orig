@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-First, load the `harsat` the library
+First, load the `harsat` library
 
 ```{r}
 library(harsat)
@@ -37,7 +37,7 @@ working.directory <- here()
 Mercury data with supporting variables and station dictionary
 
 ```{r external-biota}
-biota_data <- ctsm_read_data(
+biota_data <- read_data(
   compartment = "biota",
   purpose = "AMAP",
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv",

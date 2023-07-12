@@ -3,7 +3,7 @@
 
 # read in data  ---- 
 
-#' Read harsat data
+#' Read HARSAT data
 #'
 #' @param compartment a string, one of "biota", "sediment", and "water"
 #' @param purpose a string, one of "OSPAR", "HELCOM", "AMAP" and "other"
@@ -12,6 +12,10 @@
 #' @param QA a file reference for QA data
 #' @param data_dir The directory where the data files can be found (sometimes
 #'   supplied using 'file.path'). Defaults to "."; i.e. the working directory.
+#' @param data_format A string specifying whether the data were extracted from
+#'   the ICES webservice ("ICES" - the default) or are in the simplified format
+#'   designed for other data sources ("external"). The values "ICES_old" and
+#'   "ICES_new" are deprecated.
 #' @param info_files A list of files specifying reference tables which override
 #'   the defaults. See examples.
 #' @param info_dir The directory where the reference tables can be found
@@ -19,36 +23,36 @@
 #'   directory
 #' @param extraction A date saying when the extraction was made. Optional. This
 #'   should be provided according to ISO 8601; for example, 29 February 2024
-#'   should be supplied as "2024-02-29".
-#' @param max_year
+#'   should be supplied as "2024-02-29". If the contaminant data were extracted
+#'   from the ICES webservice and the download file name has not been changed,
+#'   the extraction data will be taken from the contaminant file name.
+#' @param max_year An integer giving the last monitoring year that should be
+#'   included in the assessment. Data from monitoring years after `max_year`
+#'   will be deleted. If not specified `max_year` is taken to be the last
+#'   monitoring year in the contaminant data file.
 #' @param oddity_dir The directory where the 'oddities' will be written
 #'   (sometimes supplied using 'file.path'). This directory (and subdirectories)
 #'   will be created if it does not already exist.
 #' @param control
-#' @param data_format a string, one of "ICES_old", "ICES_new", and "external"
 #'
 #' @export
-ctsm_read_data <- function(
+read_data <- function(
   compartment = c("biota", "sediment", "water"), 
   purpose = c("OSPAR", "HELCOM", "AMAP", "other"), 
   contaminants, 
   stations, 
   QA, 
   data_dir = ".", 
+  data_format = c("ICES", "external", "ICES_old", "ICES_new"),
   info_files = list(),
   info_dir = ".",
   extraction = NULL, 
   max_year = NULL,
   oddity_dir = "oddities",
-  control = list(), 
-  data_format = c("ICES_old", "ICES_new", "external")) {
+  control = list()) {
 
   # import_functions.R
-  # dependencies lubridate
-  
-  # reads in data from an ICES extraction or from an external data file
-  
-  
+
   # validate arguments
   
   compartment <- match.arg(compartment)
@@ -70,8 +74,9 @@ ctsm_read_data <- function(
   if (!is.null(extraction)) {
     if (length(extraction) > 1 | !is.character(extraction)) {
       stop(
-        "extraction must be a single character string of the form ymd: e.g. \"",
-        lubridate::today(), ""
+        "'extraction' must be a single character string of the form ", 
+        "\"yyyy-mm-dd\": e.g. \"",  lubridate::today(), "\"", 
+        call. = FALSE
       )
     }
   }  
@@ -84,7 +89,8 @@ ctsm_read_data <- function(
     if (is.na(extraction)) {
       stop(
         "extraction not recognised: it must be a valid date of the form ", 
-        "ymd: e.g. \"", lubridate::today(), "\""
+        "\"yyyy-mm-dd\": e.g. \"", lubridate::today(), "\"",
+        call. = FALSE
       )
     }  
   }  
@@ -120,8 +126,12 @@ ctsm_read_data <- function(
 
   # read in station dictionary, contaminant and biological effects data and QA data
   
-  stations <- ctsm_read_stations(stations, data_dir, info)
+  stations <- read_stations(stations, data_dir, info)
   
+  if (data_format == "ICES") {
+    return(stations)
+  }
+    
   data <- ctsm_read_contaminants(contaminants, data_dir, info)
   
   if (data_format == "ICES_old") {
@@ -357,7 +367,7 @@ ctsm_read_info <- function(info, path, info_files) {
 }
 
 
-ctsm_read_stations <- function(file, path, info) {
+read_stations <- function(file, path, info) {
 
   # import functions
   # read in station dictionary
@@ -412,10 +422,70 @@ ctsm_read_stations <- function(file, path, info) {
 
   }    
         
+
+  if (info$data_format == "ICES") {
+
+    var_id <- c(
+      station_code = "character",
+      station_country = "character", 
+      helcom_subbasin = "character", 
+      helcom_l3 = "character", 
+      helcom_l4 = "character", 
+      ices_ecoregion = "character", 
+      ospar_region = "character", 
+      ospar_subregion = "character", 
+      is_amap_area = "logical", 
+      is_helcom_area = "logical", 
+      is_ospar_area = "logical", 
+      station_name = "character", 
+      station_longname = "character", 
+      station_replacedby = "character",
+      station_asmtmimeparent = "character",
+      station_activefromdate = "character", 
+      station_activeuntildate = "character", 
+      station_programgovernance = "character", 
+      station_governance = "character", 
+      station_purpm = "character",             
+      station_latitude = "numeric",
+      station_latituderange = "numeric",
+      station_longitude = "numeric", 
+      station_longituderange = "numeric",
+      station_geometry = "character", 
+      station_datatype = "character",         
+      station_wltyp = "character", 
+      station_mstat = "character",             
+      station_notes = "character", 
+      station_deprecated = "logical"
+    )
+    
+    stations <- read.delim(
+      infile, 
+      sep = "\t",
+      na.strings = c("", "NULL"), 
+      strip.white = TRUE, 
+      colClasses = var_id
+    )
+    
+    # rename columns to suit!
+    
+    # stations <- dplyr::rename(
+    #   stations, 
+    #   startYear = "station_activefromdate",
+    #   endYear = "station_activeuntildate",
+    #   parent_code = AsmtMimeParent,
+    #   replacedBy = ReplacedBy,
+    #   programGovernance = ProgramGovernance,
+    #   dataType = DataType,
+    #   station_type = MSTAT,
+    #   waterbody_type = WLTYP
+    # )
+    
+  }    
   
+
   if (info$data_format == "external") {  
     
-    var_id<- c(
+    var_id <- c(
       country = "character",
       station_name = "character",
       station_code = "character",
