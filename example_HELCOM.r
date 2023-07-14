@@ -25,13 +25,14 @@ devtools::load_all()
 
 ## biota ----
 
-biota_data <- ctsm_read_data(
+biota_data <- read_data(
   compartment = "biota", 
   purpose = "HELCOM",                               
   contaminants = "biota_data.csv", 
   stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
   data_dir = file.path("data", "example_HELCOM"),
+  data_format = "ICES_old",
   info_dir = "information",
   extraction = "2022/10/06",
   max_year = 2021L
@@ -47,10 +48,10 @@ sediment_data <- ctsm_read_data(
   contaminants = file.path("example_HELCOM_new_format", "sediment_data.csv"),
   stations = file.path("example_HELCOM", "station_dictionary.csv"),
   data_dir = "data",
+  data_format = "ICES_new",
   info_dir = "information",
   extraction = "2022/10/06",
-  max_year = 2021L,
-  data_format = "ICES_new"
+  max_year = 2021L
 )
 
 
@@ -62,11 +63,11 @@ water_data <- ctsm_read_data(
   purpose = "HELCOM",                               
   contaminants = file.path("example_HELCOM_new_format", "water_data.csv"), 
   stations = file.path("example_HELCOM", "station_dictionary.csv"), 
-  data_dir = "data", 
+  data_dir = "data",
+  data_format = "ICES_new",
   info_dir = "information", 
   extraction = "2022/10/06",
-  max_year = 2021L, 
-  data_format = "ICES_new"
+  max_year = 2021L
 )  
 
 
