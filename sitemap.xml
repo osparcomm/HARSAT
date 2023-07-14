@@ -73,9 +73,6 @@
     <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_info.html</loc>
   </url>
   <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_read_data.html</loc>
-  </url>
-  <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_tidy_data.html</loc>
   </url>
   <url>
@@ -95,6 +92,9 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/plot_assessment.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/read_data.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/run_assessment.html</loc>

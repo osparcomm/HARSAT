@@ -100,7 +100,7 @@ will need to point to a directory containing a copy.</p>
 <span><span class="va">working.directory</span> <span class="op">&lt;-</span> <span class="fu">here</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Load the biota data, using HELCOM-style.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_read_data.html">ctsm_read_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_read_data</span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"biota"</span>,</span>
 <span>  purpose <span class="op">=</span> <span class="st">"HELCOM"</span>,</span>
 <span>  contaminants <span class="op">=</span> <span class="st">"biota_data.csv"</span>, </span>
@@ -120,7 +120,7 @@ will need to point to a directory containing a copy.</p>
 <span><span class="co">#&gt; Reading QA data from '/Users/stuart/git/HARSAT/data/example_HELCOM/quality_assurance.csv'</span></span></code></pre></div>
 <p>Next, load the sediment data, again using HELCOM-style.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_read_data.html">ctsm_read_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_read_data</span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"sediment"</span>,</span>
 <span>  purpose <span class="op">=</span> <span class="st">"HELCOM"</span>,</span>
 <span>  contaminants <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">".."</span>, <span class="st">"example_HELCOM_new_format"</span>, <span class="st">"sediment_data.csv"</span><span class="op">)</span>,</span>
@@ -138,7 +138,7 @@ will need to point to a directory containing a copy.</p>
 <span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_HELCOM/../example_HELCOM_new_format/sediment_data.csv'</span></span></code></pre></div>
 <p>And finally, read the water data.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_read_data.html">ctsm_read_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_read_data</span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"water"</span>,</span>
 <span>  purpose <span class="op">=</span> <span class="st">"HELCOM"</span>,</span>
 <span>  contaminants <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">".."</span>, <span class="st">"example_HELCOM_new_format"</span>, <span class="st">"water_data.csv"</span><span class="op">)</span>,</span>
