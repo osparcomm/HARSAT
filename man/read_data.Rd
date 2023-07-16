@@ -6,7 +6,7 @@
 \usage{
 read_data(
   compartment = c("biota", "sediment", "water"),
-  purpose = c("OSPAR", "HELCOM", "AMAP", "other"),
+  purpose = c("OSPAR", "HELCOM", "AMAP", "custom"),
   contaminants,
   stations,
   QA,
@@ -21,15 +21,17 @@ read_data(
 )
 }
 \arguments{
-\item{compartment}{a string, one of "biota", "sediment", and "water"}
+\item{compartment}{A string: \code{"biota"}, \code{"sediment"} or \code{"water"}}
 
-\item{purpose}{a string, one of "OSPAR", "HELCOM", "AMAP" and "other"}
+\item{purpose}{A string specifying whether to use the default set up for
+\code{"OSPAR"}, \code{"HELCOM"}, or \code{"AMAP"} or whether to do a customised setup
+\code{"custom"}}
 
-\item{contaminants}{a file reference for contaminant data}
+\item{contaminants}{A file reference for the contaminant data}
 
-\item{stations}{a file reference for station data}
+\item{stations}{A file reference for the station data}
 
-\item{QA}{a file reference for QA data}
+\item{QA}{A file reference for the QA data}
 
 \item{data_dir}{The directory where the data files can be found (sometimes
 supplied using 'file.path'). Defaults to "."; i.e. the working directory.}
@@ -63,6 +65,16 @@ will be created if it does not already exist.}
 
 \item{control}{}
 }
+\value{
+A list containing the following components:
+\itemize{
+\item \code{call}
+\item \code{info}
+\item \code{data}
+\item \code{stations}
+}
+}
 \description{
-Read HARSAT data
+Reads in contaminant data, station dictionary and reference table. Also
+allows the user to set various control parameters.
 }
