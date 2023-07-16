@@ -1,15 +1,20 @@
 # main import and data processing functions ----
 
 
-# read in data  ---- 
+# read data  ---- 
 
 #' Read HARSAT data
 #'
-#' @param compartment a string, one of "biota", "sediment", and "water"
-#' @param purpose a string, one of "OSPAR", "HELCOM", "AMAP" and "other"
-#' @param contaminants a file reference for contaminant data
-#' @param stations a file reference for station data
-#' @param QA a file reference for QA data
+#' Reads in contaminant data, station dictionary and reference table. Also
+#' allows the user to set various control parameters.
+#'
+#' @param compartment A string: `"biota"`, `"sediment"` or `"water"`
+#' @param purpose A string specifying whether to use the default set up for
+#'   `"OSPAR"`, `"HELCOM"`, or `"AMAP"` or whether to do a customised setup
+#'   `"custom"`
+#' @param contaminants A file reference for the contaminant data
+#' @param stations A file reference for the station data
+#' @param QA A file reference for the QA data
 #' @param data_dir The directory where the data files can be found (sometimes
 #'   supplied using 'file.path'). Defaults to "."; i.e. the working directory.
 #' @param data_format A string specifying whether the data were extracted from
@@ -35,10 +40,16 @@
 #'   will be created if it does not already exist.
 #' @param control
 #'
+#' @returns A list containing the following components:
+#' * `call`
+#' * `info`
+#' * `data`
+#' * `stations`
+#'
 #' @export
 read_data <- function(
   compartment = c("biota", "sediment", "water"), 
-  purpose = c("OSPAR", "HELCOM", "AMAP", "other"), 
+  purpose = c("OSPAR", "HELCOM", "AMAP", "custom"), 
   contaminants, 
   stations, 
   QA, 
@@ -121,23 +132,23 @@ read_data <- function(
   
   # read in reference tables
   
-  info <- ctsm_read_info(info, info_dir, info_files)
+  info <- read_info(info, info_dir, info_files)
   
 
   # read in station dictionary, contaminant and biological effects data and QA data
   
   stations <- read_stations(stations, data_dir, info)
   
-  if (data_format == "ICES") {
-    return(stations)
-  }
-    
-  data <- ctsm_read_contaminants(contaminants, data_dir, info)
+  data <- read_contaminants(contaminants, data_dir, info)
   
   if (data_format == "ICES_old") {
     QA <- ctsm_read_QA(QA, data_dir, purpose)
   }
-  
+
+  if (data_format == "ICES") {
+    data <- dplyr::rename(data, year = "myear")
+  }
+    
 
   # populate max_year if not set in function call
   
@@ -260,7 +271,7 @@ ctsm_control_modify <- function(control_default, control) {
 
 
 
-ctsm_read_info <- function(info, path, info_files) {
+read_info <- function(info, path, info_files) {
   
   # location: import_functions.R
   # purpose: reads in reference tables, using default files unless overruled 
@@ -367,12 +378,20 @@ ctsm_read_info <- function(info, path, info_files) {
 }
 
 
-read_stations <- function(file, path, info) {
+#' Reads station dictionary
+#'
+#' @param file A file reference for the station dictionary.
+#' @param data_dir A path to the directory holding the station dictionary.
+#'   Defaults to the working directory.
+#' @param info A list containing at least the following two elements:
+#' * compartment: `"biota"`, `"sediment"` or `"water"`
+#' * data_format: `"ICES"` or `"external"`
+#' @returns A data frame containing the station dictionary.
+read_stations <- function(file, data_dir = ".", info) {
 
   # import functions
-  # read in station dictionary
-  
-  infile <- file.path(path, file)
+
+  infile <- file.path(data_dir, file)
   cat("Reading station dictionary from:\n '", infile, "'\n", sep = "")
 
   
@@ -558,15 +577,118 @@ read_stations <- function(file, path, info) {
 }
 
 
-ctsm_read_contaminants <- function(file, path, info) {
+#' Reads contaminant data 
+#'
+#' @param file A file reference for the contaminant data.
+#' @param data_dir A path to the directory holding the contaminant data.
+#'   Defaults to the working directory.
+#' @param info A list containing at least the following two elements:
+#' * compartment: `"biota"`, `"sediment"` or `"water"`
+#' * data_format: `"ICES"` or `"external"`
+#' @returns A data frame containing the contaminant data.
+read_contaminants <- function(file, data_dir = ".", info) {
   
   # import functions
   # read in contaminant (and biological effects) data
   
-  infile <- file.path(path, file)
+  infile <- file.path(data_dir, file)
   cat("\nReading contaminant and biological effects data from:\n '", 
       infile, "'\n", sep = "")
 
+  
+  if (info$data_format == "ICES") {
+
+    var_id <- c(
+      country = "character",
+      mprog = "character", 
+      helcom_subbasin = "character",     
+      helcom_l3 = "character",
+      helcom_l4 = "character",
+      ices_ecoregion = "character",
+      ospar_region = "character", 
+      ospar_subregion = "character", 
+      is_amap_monitoring = "logical",
+      is_helcom_monitoring = "logical", 
+      is_medpol_monitoring = "logical", 
+      is_ospar_monitoring = "logical",  
+      is_amap_area = "logical", 
+      is_helcom_area = "logical",
+      is_ospar_area = "logical",
+      rlabo = "character",
+      slabo = "character",
+      alabo = "character",               
+      statn = "character",
+      myear = "integer",
+      date = "Date",                
+      latitude = "numeric",
+      longitude = "numeric",
+      dephu = "numeric",               
+      dephl = "numeric",
+      purpm = "character",
+      finfl = "character",
+      param = "character",
+      pargroup = "character",
+      matrx = "character",              
+      basis = "character",
+      value = "numeric",
+      munit = "character",              
+      detli = "numeric",
+      lmqnt = "numeric",
+      uncrt = "numeric",              
+      metcu = "character",
+      qflag = "character",
+      vflag = "character",              
+      metoa = "character",
+      metcx = "character",
+      metpt = "character",
+      metst = "character",
+      metps = "character",
+      metfp = "character",               
+      smtyp = "character",
+      smpno = "character",
+      subno = "character",              
+      dcflgs = "character",
+      tblanalysisid = "integer",
+      tblparamid = "integer",          
+      tblsampleid = "character",
+      tblspotid = "integer",
+      tbluploadid = "integer"
+    )
+
+    if (info$compartment == "biota") {
+      
+      extra <- c(
+        rlist = "character",
+        speci = "character",  
+        speci_name = "character",
+        aphiaid = "integer",
+        worms_name = "character",          
+        aphiaid_accepted = "integer",
+        worms_accepted_name = "character", 
+        sexco = "character", 
+        noinp = "integer",               
+        bulkid = "character", 
+        tblbioid = "character",
+        accessionid = "integer"
+      )
+
+      var_id <- c(var_id, extra)
+      
+    }
+       
+    data <- read.delim(
+      infile, 
+      sep = "\t",
+      na.strings = c("", "NULL"), 
+      strip.white = TRUE,
+      colClasses = var_id
+    )
+
+  }  
+  
+  return(data)
+  
+  
   if (info$data_format == "ICES_old") {  
 
     data <- read.csv(
@@ -927,6 +1049,404 @@ ctsm_read_contaminants <- function(file, path, info) {
 }
 
 
+
+# Function to match stations in a file to the DOME station dictionary, 
+# Authors: Adriana Villamor, Hans Mose Jensen & Rob Fryer
+# July 2023
+
+# argument "data" is the sample data file
+# argument "stations" is the stations file
+# compartment argument can have values "biota", "sediment" or "water"
+# purpose argument can have values "OSPAR", "AMAP", "HELCOM", "other"
+# if purpose "other" then requires argument "method", which can have values "coordinates" or "name" 
+
+# library(dplyr)
+# library(tidyr)
+# library(sf)
+# library(data.table)
+
+# Only for testing purposes:
+# stations1<- fread("station.txt", header = T)
+# biota <- fread("biota.txt", header = T)
+# sediment <- fread("sediment.txt", header = T)
+# water <- fread("water.txt", header = T)
+
+merge_stations <- function(data,stations,compartment, purpose, method = NA){
+  
+  # Checking input conditions
+  # check compartment
+  if (!compartment %in% c("biota", "sediment", "water")) {
+    message("Please specify compartment:",
+            "\n\t\tbiota",
+            "\n\t\tsediment",
+            "\n\t\twater")
+    return(FALSE)
+  }
+  
+  # check purpose
+  if (!purpose %in% c("OSPAR", "AMAP", "HELCOM", "other")) {
+    message("Please specify compartment:",
+            "\n\t\tOSPAR",
+            "\n\t\tAMAP",
+            "\n\t\tHELCOM",
+            "\n\t\tother")
+    return(FALSE)
+  }
+  
+  # check purpose <> other and method specified
+  if (!purpose %in% c("other",'') & !method %in% c(NA)) {
+    message("Method is only specified when purpose is 'other'")
+    return(FALSE)
+  }
+  
+  # check purpose = other and method not specified
+  if (purpose %in% c("other",'') & method %in% c(NA)) {
+    message("Method must be specified when purpose is 'other'")
+    return(FALSE)
+  }
+  
+  # check method
+  if (!method %in% c("coordinates", "name")) {
+    message("Please specify method:",
+            "\n\t\tcoordinates",
+            "\n\t\tname")
+    return(FALSE)
+  }
+  
+  
+  #Transform .year to the year in date, some small inconsistencies, plus minus a year
+  # names(biota)
+  data$.year <- substr(data$date, 0, 4)
+  data$.year <- as.numeric(data$.year)
+  x <- data %>% rename(station_name = statn)
+  stations <- stations %>% filter(station_deprecated == "FALSE")
+  
+  
+  if(purpose == "OSPAR"){
+    stations_subset <- stations %>%filter(is_ospar_area == TRUE)
+  }
+  
+  if(purpose == "AMAP"){
+    stations_subset <- stations %>%filter(is_amap_area == TRUE)
+  }
+  
+  if(purpose == "HELCOM"){
+    stations_subset <- stations %>%filter(is_helcom_area == TRUE)
+  }
+  
+  if(purpose == "other"){
+    stations_subset <- stations 
+  }
+  
+  #Make sure in the stations file only year is in the validity dates variables
+  stations_subset$station_activefromdate <- substr(stations_subset$station_activefromdate, 0, 4)
+  stations_subset$station_activeuntildate <- substr(stations_subset$station_activeuntildate, 0, 4)
+  
+  
+  
+  # for all purposes we create the data_type variable (we ignore it later in the loop if its Helcom)
+  # for purpose "other" we dont do the selection of countries and years to be matched by name or coordinates,
+  # as that is stated in the method
+  
+  
+  if(compartment == "biota"){
+    
+    x <- x %>% mutate(
+      data_type = ifelse(pargroup %like% c("^OC-"),"CF",
+                         ifelse(pargroup %like% c("^O-"),"CF",
+                                ifelse(pargroup %in% c("I-MET", "I-RNC"),"CF",    
+                                       ifelse(pargroup %in% c("B-MBA", "B-TOX", "B-END"), "EF",
+                                              ifelse(pargroup %in% c("B-GRS", "B-HST"), "DF","AUX"))))))
+    
+    if(purpose != "other"){
+      countries <- c("Denmark", "Ireland", "Norway", "Sweden", "United Kingdom", "Portugal", "France")
+      x1 <- x %>% filter(country %in% countries)
+      x2 <- x %>% filter(country == "Spain"& .year > 2004)
+      x3 <- x %>% filter(country == "Netherlands"& .year > 2006)
+      
+      
+      x4 <- rbind(x1, x2, x3)
+      
+      #these ones have to be matched by coordinates
+      x_coor <- setdiff(x, x4)
+    }
+    else{
+      if(method=="name"){
+        x4 <-x
+        x_coor <- x4[FALSE,]
+      }
+      else{x_coor <-x
+      x4 <- x_coor[FALSE,]}
+    }
+  }
+  
+  if(compartment =="sediment"){
+    x <- x %>% mutate(data_type = "CS")
+    if(purpose != "other"){
+      countries <- c("Denmark", "Ireland", "Norway", "Sweden", "United Kingdom", "Portugal")
+      x1 <- x %>% filter(country %in% countries)
+      x2 <- x %>% filter(country == "Spain"& .year > 2004)
+      x3 <- x %>% filter(country == "France"& .year > 2008)
+      x5 <- x %>% filter(country == "Netherlands"& .year > 2006)
+      
+      # biota3 <- biota %>% filter(ï..country == "France"& myear > 2008)
+      
+      x4 <- rbind(x1, x2, x3, x5)
+      
+      #these ones have to be matched by coordinates
+      x_coor <- setdiff(x, x4)
+    }
+    else{
+      if(method=="name"){
+        x4 <-x
+        x_coor <- x4[FALSE,]
+      }
+      else{x_coor <-x
+      x4 <- x_coor[FALSE,]}
+    }
+  }
+  
+  if(compartment =="water"){
+    x <- x %>% mutate(data_type = "CW")
+    if(purpose != "other"){
+      countries <- c("Denmark", "Ireland", "Norway", "Sweden", "United Kingdom", "Portugal")
+      x1 <- x %>% filter(country %in% countries)
+      x2 <- x %>% filter(country == "Spain"& .year > 2004)
+      x3 <- x %>% filter(country == "Netherlands"& .year > 2006)
+      
+      
+      x4 <- rbind(x1, x2, x3)
+      
+      #these ones have to be matched by coordinates
+      x_coor <- setdiff(x, x4)
+    }
+    else{
+      if(method=="name"){
+        x4 <-x
+        x_coor <- x4[FALSE,]
+      }
+      else{x_coor <-x
+      x4 <- x_coor[FALSE,]}
+    }
+  }
+  
+  
+  
+  ## Start of loop for coordinates matching
+  
+  x_coor_unique <- unique(x_coor[,c("country", "latitude",'longitude', '.year', 'data_type', 'is_ospar_monitoring', 'is_amap_monitoring', 'is_helcom_monitoring')])
+  
+  res <- data.frame()
+  # check <- data.frame()
+  
+  for(i in 1:nrow(x_coor_unique)) {
+    file <- x_coor_unique[i,]
+    data_type <- file$data_type
+    purpm <- "T"
+    year <- file$.year
+    max_year <- format(Sys.Date(), format = "%Y")
+    max_year <- as.numeric(max_year)
+    ospar <- file$is_ospar_monitoring
+    amap <- file$is_amap_monitoring
+    
+    #For Rob to check: if purpose is other it will take into account the data type
+    if(purpose != "HELCOM"){
+      
+      if(file$data_type == "AUX"){
+        stations_subset1 <- stations_subset[grep(pattern = 'EF|CF', stations_subset$station_datatype),]
+      }else{
+        stations_subset1 <- stations_subset[grep(data_type, stations_subset$station_datatype),]}
+    }
+    if(purpose == "HELCOM"){
+      stations_subset1 <- stations_subset
+    }
+    stations_subset1$station_activeuntildate <- as.numeric(stations_subset1$station_activeuntildate)
+    stations_subset1$station_activeuntildate[is.na(stations_subset1$station_activeuntildate)] <- max_year 
+    stations_subset2 <- stations_subset1 %>% filter(station_activefromdate <= year & station_activeuntildate >= year)
+    
+    #For Rob to check: should this be excluded for HELCOM?
+    stations_subset3 <- stations_subset2[grep(purpm, stations_subset2$station_purpm),]
+    
+    stations_subset4 <- stations_subset3 %>% filter(file$country == stations_subset3$station_country)
+    
+    if(purpose %in% c("OSPAR", "AMAP")){
+      
+      stations_subset5 <- stations_subset4 %>% filter(case_when(((ospar==TRUE) & (amap = TRUE)) ~ grepl('OSPAR|AMAP', station_programgovernance ),
+                                                                ospar==TRUE ~ grepl('OSPAR', station_programgovernance),
+                                                                amap==TRUE ~ grepl('AMAP', station_programgovernance)))
+    }else{stations_subset5 <- stations_subset4}
+    
+    sd <- st_as_sf(
+      stations_subset5,
+      wkt = "station_geometry",
+      crs = st_crs(4326)
+      # 4326 is the EPSG code for the datum/projection used (https://epsg.io/4326). 
+      # It needs to be specified so that the spatial functions know what coordinate system should be used when calculating distance/area etc. 
+      # The 4326 is the WGS84 system used by most GPS systems        
+    )
+    
+    dpoint <- st_point(c(file$longitude,file$latitude))
+    dpoint_sfc <- st_sfc(dpoint)
+    dpoint_sfc_4326 <- st_set_crs(dpoint_sfc, 4326)
+    
+    sd1 <- sd[dpoint_sfc_4326, op = st_intersects]
+    
+    if(nrow(sd1)> 1){
+      part <- data.frame()
+      for(i in 1:nrow(sd1)) {
+        sd2 <- sd1[i,]
+        sdpoint <- st_point(c(sd2$station_longitude,sd2$station_latitude))
+        # make a simple feature collection sfc of sdpoint
+        sdpoint_sfc <- st_sfc(sdpoint)
+        # make a version of sdpoint_sfc using crs= 4326
+        sdpoint_sfc_4326 <- st_set_crs(sdpoint_sfc,4326)
+        sd2 <- sd2 %>% mutate(dist = st_distance(dpoint_sfc_4326, sdpoint_sfc_4326))
+        part <- rbind(part, sd2)
+      }
+      part <- as.data.frame(part)
+      
+      
+      #CHECK this variable 31!!
+      part <- part[,-31]
+      sd1 <- part %>% filter(dist == min(dist))
+      # if both distances are the same, we keep the station with the highest code, should be the newest one
+      sd1 <- sd1 %>% filter(station_code == max(station_code)) 
+      result <- file %>% mutate(station_code = sd1$station_code)
+      res <- rbind(res, result)
+    }
+    
+    if(nrow(sd1)==1){
+      result <- file %>% mutate(station_code = sd1$station_code)
+      res <- rbind(res, result)
+    }
+    if(nrow(sd1)< 1){
+      result <- file %>% mutate(station_code = NA)
+      res <- rbind(res, result)
+    }
+    
+  }
+  
+  res_unique<- unique(res)
+  
+  x_coor_matched <- left_join(x_coor,res_unique)
+  # Remove created variables
+  x_coor_matched <- x_coor_matched %>% select(-data_type)
+  x_coor_matched <- x_coor_matched %>% select(-.year)
+  
+  
+  ## Start of loop for name-matching
+  
+  x4_unique <- unique(x4[,c("country", '.year', 'station_name', 'data_type', 'is_ospar_monitoring', 'is_amap_monitoring', 'is_helcom_monitoring')])
+  
+  res <- data.frame()
+  
+  for(i in 1:nrow(x4_unique)) {
+    file <- x4_unique[i,]
+    data_type <- file$data_type
+    purpm <- "T"
+    year <- file$.year
+    max_year <- format(Sys.Date(), format = "%Y")
+    max_year <- as.numeric(max_year)
+    ospar <- file$is_ospar_monitoring
+    amap <- file$is_amap_monitoring
+    stations_subset1 <- stations_subset %>% filter(station_name == file$station_name)
+    #For Rob to check: if purpose is other it will take into account the data type
+    if(purpose != "HELCOM"){
+      
+      if(file$data_type == "AUX"){
+        stations_subset1 <- stations_subset1[grep(pattern = 'EF|CF', stations_subset1$station_datatype),]
+      }else{
+        stations_subset1 <- stations_subset1[grep(data_type, stations_subset1$station_datatype),]}
+    }
+    if(purpose == "HELCOM"){
+      stations_subset1 <- stations_subset1
+    }
+    stations_subset1$station_activeuntildate <- as.numeric(stations_subset1$station_activeuntildate)
+    stations_subset1$station_activeuntildate[is.na(stations_subset1$station_activeuntildate)] <- max_year 
+    stations_subset2 <- stations_subset1 %>% filter(station_activefromdate <= year & station_activeuntildate >= year)
+    #should this be excluded for HELCOM?
+    stations_subset3 <- stations_subset2[grep(purpm, stations_subset2$station_purpm),]
+    
+    stations_subset4 <- stations_subset3 %>% filter(file$country == stations_subset3$station_country)
+    
+    if(purpose %in% c("OSPAR", "AMAP")){
+      
+      stations_subset5 <- stations_subset4 %>% filter(case_when(((ospar==TRUE) & (amap = TRUE)) ~ grepl('OSPAR|AMAP', station_programgovernance ),
+                                                                ospar==TRUE ~ grepl('OSPAR', station_programgovernance),
+                                                                amap==TRUE ~ grepl('AMAP', station_programgovernance)))
+    }else{stations_subset5 <- stations_subset4}
+    
+    if(nrow(stations_subset5)< 1){
+      result <- file %>% mutate(station_code = NA)
+      res <- rbind(res, result)
+    }
+    
+    if(nrow(stations_subset5)==1){
+      result <- file %>% mutate(station_code = stations_subset5$station_code)
+      res <- rbind(res, result)
+    }
+  }
+  
+  res_unique<- unique(res)
+  
+  x4_matched <- left_join(x4,res_unique)
+  x4_matched <- x4_matched %>% select(-data_type)
+  x4_matched <- x4_matched %>% select(-.year)
+  
+  # full_match equals data file plus a station_code variable
+  full_match <- rbind(x_coor_matched, x4_matched)
+  full_match <- full_match %>% rename(statn= station_name)
+  
+  # Merging steps to get all final variables
+  # Ugly but works
+  stations_temp <- stations_subset %>% select(station_code, station_name)
+  full_match <- left_join(full_match, stations_temp)
+  
+  full_match <- full_match %>% rename(sd_name_match = station_name)
+  
+  stations_temp <- stations_subset %>% select(station_code, station_name, station_replacedby)
+  stations_temp2 <- stations_temp %>% filter(station_code %in% station_replacedby)
+  stations_temp2 <- stations_temp2 %>% rename(sd_code_replaced = station_code)
+  stations_temp2 <- stations_temp2 %>% rename(sd_name_replaced = station_name)
+  stations_temp <- stations_temp %>% rename(sd_code_replaced = station_replacedby)
+  stations_temp <- left_join(stations_temp, stations_temp2)
+  stations_temp <- stations_temp%>% select(station_code, sd_code_replaced,sd_name_replaced)
+  
+  full_match <- left_join(full_match, stations_temp)
+  full_match <- mutate(full_match,sd_code_final = ifelse(!is.na(sd_code_replaced), sd_code_replaced ,station_code))
+  full_match <- mutate(full_match,sd_name_final = ifelse(!is.na(sd_name_replaced), sd_name_replaced ,sd_name_match))
+  
+  
+  if(purpose == "OSPAR"){
+    #if the final code has station_asmtmimeparent then that should be the final code and name
+    stations_temp <- stations_subset %>% select(station_code, station_name, station_asmtmimeparent)
+    stations_temp2 <- stations_temp %>% filter(station_code %in% station_asmtmimeparent)
+    stations_temp2$station_asmtmimeparent <- stations_temp2$station_code
+    stations_temp2 <- stations_temp2[, -1]
+    stations_temp2 <- stations_temp2 %>% rename(asmtmimeparent_name = station_name)
+    stations_temp <- left_join(stations_temp, stations_temp2)
+    stations_temp <- stations_temp %>% rename(sd_code_final = station_code)
+    stations_temp <- stations_temp %>% rename(sd_name_final = station_name)
+    full_match <- left_join(full_match, stations_temp)
+    full_match <- mutate(full_match,sd_code_final = ifelse(!is.na(station_asmtmimeparent), station_asmtmimeparent ,sd_code_final))
+    full_match <- mutate(full_match,sd_name_final = ifelse(!is.na(asmtmimeparent_name), asmtmimeparent_name ,sd_name_final))
+    full_match <- full_match %>% select(-asmtmimeparent_name, -station_asmtmimeparent)
+  }
+  
+  full_match <- full_match %>% rename(sd_code_match = station_code)
+  full_match
+  
+}
+
+# Only for testing purposes: 
+
+# check_biota <- ctsm_merge_stations(biota, stations, "biota", "HELCOM", method = NULL)
+# check_sediment <- ctsm_merge_stations(sediment, stations, "sediment", "AMAP", method = NULL)
+# check_water <- ctsm_merge_stations(water, stations, "water", "OSPAR", method = NULL)
+
+
+
+
 ctsm_read_QA <- function(file, path, purpose) {
   
   # import functions
@@ -961,6 +1481,9 @@ ctsm_read_QA <- function(file, path, purpose) {
   
   crm
 }
+
+
+# tidy data ----
 
 #' Tidy the data
 #' 

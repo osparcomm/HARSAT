@@ -560,10 +560,22 @@ ctsm_read_determinand <- function(
 
 # extractor functions
 
-#' Get the determinands
-#' 
-#' Gets the determinands to be assessed from the determinand reference table
-#' @param info
+#' Get the determinands to be assessed
+#'
+#' Gets the determinands to be assessed from the determinand reference table.
+#'
+#' @param info A list with at least the following two components:
+#' * `compartment` One of `"biota"`, `"sediment"` or `"water"`
+#' * `determinand` A data frame holding the determinand reference table
+#'
+#' @details The determinands are taken from the column `biota_assess`,
+#'   `sediment_assess` or `water_assess` in the determinand reference table
+#'   (where the compartment is given by `info$compartment`). `TRUE` values are
+#'   determinands that are to be assessed.
+#'
+#' @returns A character string containing the determinands to be assessed. The
+#'   function will fail with an error message if there are no such determinands.
+#'
 #' @export
 ctsm_get_determinands <- function(info) {
   
