@@ -94,7 +94,13 @@
     <loc>http://osparcomm.github.io/HARSAT/reference/plot_assessment.html</loc>
   </url>
   <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/read_contaminants.html</loc>
+  </url>
+  <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/read_data.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/read_stations.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/run_assessment.html</loc>
