@@ -146,6 +146,9 @@ read_data <- function(
   }
 
   if (data_format == "ICES") {
+    
+    data <- get_ICES_stations(data, stations, info$compartment, info$purpose)
+    
     data <- dplyr::rename(data, year = "myear")
   }
     
@@ -1061,9 +1064,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
 # if purpose "other" then requires argument "method", which can have values "coordinates" or "name" 
 
 # library(dplyr)
-# library(tidyr)
 # library(sf)
-# library(data.table)
 
 # Only for testing purposes:
 # stations1<- fread("station.txt", header = T)
@@ -1071,7 +1072,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
 # sediment <- fread("sediment.txt", header = T)
 # water <- fread("water.txt", header = T)
 
-merge_stations <- function(data,stations,compartment, purpose, method = NA){
+get_ICES_stations <- function(data, stations, compartment, purpose, method = NA){
   
   # Checking input conditions
   # check compartment
@@ -1084,29 +1085,23 @@ merge_stations <- function(data,stations,compartment, purpose, method = NA){
   }
   
   # check purpose
-  if (!purpose %in% c("OSPAR", "AMAP", "HELCOM", "other")) {
-    message("Please specify compartment:",
+  if (!purpose %in% c("OSPAR", "AMAP", "HELCOM", "custom")) {
+    message("Please specify purpose:",
             "\n\t\tOSPAR",
             "\n\t\tAMAP",
             "\n\t\tHELCOM",
-            "\n\t\tother")
+            "\n\t\tcustom")
     return(FALSE)
   }
   
-  # check purpose <> other and method specified
-  if (!purpose %in% c("other",'') & !method %in% c(NA)) {
-    message("Method is only specified when purpose is 'other'")
+  # check purpose <> custom and method specified
+  if (!purpose %in% "custom" & !is.na(method)) {
+    message("Method is only specified when purpose is 'custom'")
     return(FALSE)
   }
   
-  # check purpose = other and method not specified
-  if (purpose %in% c("other",'') & method %in% c(NA)) {
-    message("Method must be specified when purpose is 'other'")
-    return(FALSE)
-  }
-  
-  # check method
-  if (!method %in% c("coordinates", "name")) {
+  # check method when purpose = custom
+  if (purpose %in% "custom" & !method %in% c("coordinates", "name")) {
     message("Please specify method:",
             "\n\t\tcoordinates",
             "\n\t\tname")
@@ -1118,30 +1113,36 @@ merge_stations <- function(data,stations,compartment, purpose, method = NA){
   # names(biota)
   data$.year <- substr(data$date, 0, 4)
   data$.year <- as.numeric(data$.year)
-  x <- data %>% rename(station_name = statn)
-  stations <- stations %>% filter(station_deprecated == "FALSE")
+  x <- dplyr::rename(data, station_name = "statn")
+  stations <- dplyr::filter(stations, .data$station_deprecated == "FALSE")
   
   
-  if(purpose == "OSPAR"){
-    stations_subset <- stations %>%filter(is_ospar_area == TRUE)
+  if (purpose == "OSPAR") {
+    stations_subset <- dplyr::filter(stations, .data$is_ospar_area)
   }
   
-  if(purpose == "AMAP"){
-    stations_subset <- stations %>%filter(is_amap_area == TRUE)
+  if (purpose == "AMAP") {
+    stations_subset <- dplyr::filter(stations, .datais_amap_area)
   }
   
-  if(purpose == "HELCOM"){
-    stations_subset <- stations %>%filter(is_helcom_area == TRUE)
+  if (purpose == "HELCOM") {
+    stations_subset <- dplyr::filter(stations, .data$is_helcom_area)
   }
   
-  if(purpose == "other"){
+  if (purpose == "custom") {
     stations_subset <- stations 
   }
   
   #Make sure in the stations file only year is in the validity dates variables
-  stations_subset$station_activefromdate <- substr(stations_subset$station_activefromdate, 0, 4)
-  stations_subset$station_activeuntildate <- substr(stations_subset$station_activeuntildate, 0, 4)
+  #Make this numeric
   
+  stations_subset <- dplyr::mutate(
+    stations_subset, 
+    station_activefromdate = substr(.data$station_activefromdate, 0, 4),
+    station_activefromdate = as.numeric(.data$station_activefromdate),
+    station_activeuntildate = substr(.data$station_activeuntildate, 0, 4),
+    station_activeuntildate = as.numeric(.data$station_activeuntildate)
+  )
   
   
   # for all purposes we create the data_type variable (we ignore it later in the loop if its Helcom)
@@ -1151,32 +1152,44 @@ merge_stations <- function(data,stations,compartment, purpose, method = NA){
   
   if(compartment == "biota"){
     
-    x <- x %>% mutate(
-      data_type = ifelse(pargroup %like% c("^OC-"),"CF",
-                         ifelse(pargroup %like% c("^O-"),"CF",
-                                ifelse(pargroup %in% c("I-MET", "I-RNC"),"CF",    
-                                       ifelse(pargroup %in% c("B-MBA", "B-TOX", "B-END"), "EF",
-                                              ifelse(pargroup %in% c("B-GRS", "B-HST"), "DF","AUX"))))))
-    
-    if(purpose != "other"){
+    x <- dplyr::mutate(
+      x, 
+      data_type = dplyr::case_when(
+        startsWith(.data$pargroup, "OC-")                ~ "CF", 
+        startsWith(.data$pargroup, "O-")                 ~ "CF", 
+        .data$pargroup %in% c("I-MET", "I-RNC")          ~ "CF", 
+        .data$pargroup %in% c("B-MBA", "B-TOX", "B-END") ~ "EF", 
+        .data$pargroup %in% c("B-GRS", "B-HST")          ~ "DF", 
+        TRUE                                             ~ "AUX"
+      )
+    )
+
+    if (purpose != "custom") {
+      
       countries <- c("Denmark", "Ireland", "Norway", "Sweden", "United Kingdom", "Portugal", "France")
-      x1 <- x %>% filter(country %in% countries)
-      x2 <- x %>% filter(country == "Spain"& .year > 2004)
-      x3 <- x %>% filter(country == "Netherlands"& .year > 2006)
-      
-      
-      x4 <- rbind(x1, x2, x3)
+      x1 <- dplyr::mutate(
+        x, 
+        .id = .data$country %in% countries |  
+          (.data$country == "Spain" & .year > 2004) |
+          (.data$country == "The Netherlands" & .year > 2006)
+      )
+        
+      x4 <- dplyr::filter(x1, .id)
+      x4 <- dplyr::select(x4, -.id)
       
       #these ones have to be matched by coordinates
-      x_coor <- setdiff(x, x4)
+      x_coor <- dplyr::filter(x1, !.id)
+      x_coor <- dplyr::select(x_coor, -.id)
     }
-    else{
-      if(method=="name"){
-        x4 <-x
-        x_coor <- x4[FALSE,]
+    else {
+      if (method == "name") {
+        x4 <- x
+        x_coor <- x4[FALSE, ]
       }
-      else{x_coor <-x
-      x4 <- x_coor[FALSE,]}
+      else {
+        x_coor <-x
+        x4 <- x_coor[FALSE,]
+      }
     }
   }
   
@@ -1187,7 +1200,7 @@ merge_stations <- function(data,stations,compartment, purpose, method = NA){
       x1 <- x %>% filter(country %in% countries)
       x2 <- x %>% filter(country == "Spain"& .year > 2004)
       x3 <- x %>% filter(country == "France"& .year > 2008)
-      x5 <- x %>% filter(country == "Netherlands"& .year > 2006)
+      x5 <- x %>% filter(country == "The Netherlands"& .year > 2006)
       
       # biota3 <- biota %>% filter(ï..country == "France"& myear > 2008)
       
@@ -1212,9 +1225,8 @@ merge_stations <- function(data,stations,compartment, purpose, method = NA){
       countries <- c("Denmark", "Ireland", "Norway", "Sweden", "United Kingdom", "Portugal")
       x1 <- x %>% filter(country %in% countries)
       x2 <- x %>% filter(country == "Spain"& .year > 2004)
-      x3 <- x %>% filter(country == "Netherlands"& .year > 2006)
-      
-      
+      x3 <- x %>% filter(country == "The Netherlands"& .year > 2006)
+
       x4 <- rbind(x1, x2, x3)
       
       #these ones have to be matched by coordinates
@@ -1234,109 +1246,145 @@ merge_stations <- function(data,stations,compartment, purpose, method = NA){
   
   ## Start of loop for coordinates matching
   
-  x_coor_unique <- unique(x_coor[,c("country", "latitude",'longitude', '.year', 'data_type', 'is_ospar_monitoring', 'is_amap_monitoring', 'is_helcom_monitoring')])
-  
+  id <- c(
+    "country", "latitude",'longitude', '.year', 'data_type', 'is_ospar_monitoring', 
+    'is_amap_monitoring', 'is_helcom_monitoring'
+  ) 
+  x_coor_unique <- unique(x_coor[id])
+
   res <- data.frame()
   # check <- data.frame()
   
   for(i in 1:nrow(x_coor_unique)) {
+    
     file <- x_coor_unique[i,]
     data_type <- file$data_type
     purpm <- "T"
     year <- file$.year
-    max_year <- format(Sys.Date(), format = "%Y")
-    max_year <- as.numeric(max_year)
+    # max_year <- format(Sys.Date(), format = "%Y")
+    # max_year <- as.numeric(max_year)
     ospar <- file$is_ospar_monitoring
     amap <- file$is_amap_monitoring
     
     #For Rob to check: if purpose is other it will take into account the data type
-    if(purpose != "HELCOM"){
+    if (purpose != "HELCOM") {
       
       if(file$data_type == "AUX"){
         stations_subset1 <- stations_subset[grep(pattern = 'EF|CF', stations_subset$station_datatype),]
       }else{
         stations_subset1 <- stations_subset[grep(data_type, stations_subset$station_datatype),]}
     }
-    if(purpose == "HELCOM"){
+    if (purpose == "HELCOM") {
       stations_subset1 <- stations_subset
     }
-    stations_subset1$station_activeuntildate <- as.numeric(stations_subset1$station_activeuntildate)
-    stations_subset1$station_activeuntildate[is.na(stations_subset1$station_activeuntildate)] <- max_year 
-    stations_subset2 <- stations_subset1 %>% filter(station_activefromdate <= year & station_activeuntildate >= year)
+    
+    # stations_subset1$station_activeuntildate[is.na(stations_subset1$station_activeuntildate)] <- max_year 
+    stations_subset2 <- dplyr::filter(
+      stations_subset1, 
+      .data$station_activefromdate <= year, 
+      is.na(.data$station_activeuntildate) | .data$station_activeuntildate >= year
+    )
     
     #For Rob to check: should this be excluded for HELCOM?
     stations_subset3 <- stations_subset2[grep(purpm, stations_subset2$station_purpm),]
     
-    stations_subset4 <- stations_subset3 %>% filter(file$country == stations_subset3$station_country)
+    stations_subset4 <- dplyr::filter(
+      stations_subset3, 
+      .data$station_country == file$country
+    )
     
     if(purpose %in% c("OSPAR", "AMAP")){
       
-      stations_subset5 <- stations_subset4 %>% filter(case_when(((ospar==TRUE) & (amap = TRUE)) ~ grepl('OSPAR|AMAP', station_programgovernance ),
-                                                                ospar==TRUE ~ grepl('OSPAR', station_programgovernance),
-                                                                amap==TRUE ~ grepl('AMAP', station_programgovernance)))
-    }else{stations_subset5 <- stations_subset4}
-    
-    sd <- st_as_sf(
+      stations_subset5 <- dplyr::filter(
+        stations_subset4, 
+        dplyr::case_when(
+          ospar & amap ~ grepl('OSPAR|AMAP', station_programgovernance),
+          ospar        ~ grepl('OSPAR', station_programgovernance),
+          amap         ~ grepl('AMAP', station_programgovernance)
+        )
+      )
+    } else {
+      stations_subset5 <- stations_subset4
+    }
+
+    sd <- sf::st_as_sf(
       stations_subset5,
       wkt = "station_geometry",
-      crs = st_crs(4326)
+      crs = sf::st_crs(4326)
       # 4326 is the EPSG code for the datum/projection used (https://epsg.io/4326). 
       # It needs to be specified so that the spatial functions know what coordinate system should be used when calculating distance/area etc. 
       # The 4326 is the WGS84 system used by most GPS systems        
     )
     
-    dpoint <- st_point(c(file$longitude,file$latitude))
-    dpoint_sfc <- st_sfc(dpoint)
-    dpoint_sfc_4326 <- st_set_crs(dpoint_sfc, 4326)
+    dpoint <- sf::st_point(c(file$longitude,file$latitude))
+    dpoint_sfc <- sf::st_sfc(dpoint)
+    dpoint_sfc_4326 <- sf::st_set_crs(dpoint_sfc, 4326)
     
-    sd1 <- sd[dpoint_sfc_4326, op = st_intersects]
+    sd1 <- sd[dpoint_sfc_4326, op = sf::st_intersects]
     
     if(nrow(sd1)> 1){
+      
       part <- data.frame()
       for(i in 1:nrow(sd1)) {
         sd2 <- sd1[i,]
-        sdpoint <- st_point(c(sd2$station_longitude,sd2$station_latitude))
+        sdpoint <- sf::st_point(c(sd2$station_longitude,sd2$station_latitude))
         # make a simple feature collection sfc of sdpoint
-        sdpoint_sfc <- st_sfc(sdpoint)
+        sdpoint_sfc <- sf::st_sfc(sdpoint)
         # make a version of sdpoint_sfc using crs= 4326
-        sdpoint_sfc_4326 <- st_set_crs(sdpoint_sfc,4326)
-        sd2 <- sd2 %>% mutate(dist = st_distance(dpoint_sfc_4326, sdpoint_sfc_4326))
+        sdpoint_sfc_4326 <- sf::st_set_crs(sdpoint_sfc,4326)
+        sd2 <- dplyr::mutate(
+          sd2, 
+          dist = sf::st_distance(dpoint_sfc_4326, sdpoint_sfc_4326)
+        )
         part <- rbind(part, sd2)
       }
       part <- as.data.frame(part)
       
-      
       #CHECK this variable 31!!
       part <- part[,-31]
-      sd1 <- part %>% filter(dist == min(dist))
+      sd1 <- dplyr::filter(part, .data$dist == min(.data$dist))
       # if both distances are the same, we keep the station with the highest code, should be the newest one
-      sd1 <- sd1 %>% filter(station_code == max(station_code)) 
-      result <- file %>% mutate(station_code = sd1$station_code)
+      sd1 <- dplyr::filter(sd1, .data$station_code == max(.data$station_code)) 
+      result <- dplyr::mutate(file, station_code = sd1$station_code)
       res <- rbind(res, result)
-    }
+      
+    } else if(nrow(sd1)==1) {
+
+      result <- dplyr::mutate(file, station_code = sd1$station_code)
+      res <- rbind(res, result)
     
-    if(nrow(sd1)==1){
-      result <- file %>% mutate(station_code = sd1$station_code)
+    } else {
+    
+      result <- dplyr::mutate(file,  station_code = NA)
       res <- rbind(res, result)
-    }
-    if(nrow(sd1)< 1){
-      result <- file %>% mutate(station_code = NA)
-      res <- rbind(res, result)
+
     }
     
   }
+
+
+  # all unique 
+  # res_unique<- unique(res)
   
-  res_unique<- unique(res)
-  
-  x_coor_matched <- left_join(x_coor,res_unique)
+  x_coor_matched <- dplyr::left_join(
+    x_coor, 
+    res, 
+    by = c(
+      "country", "latitude", "longitude", ".year", "data_type", 
+      "is_amap_monitoring", "is_helcom_monitoring", "is_ospar_monitoring"
+    )
+  )
   # Remove created variables
-  x_coor_matched <- x_coor_matched %>% select(-data_type)
-  x_coor_matched <- x_coor_matched %>% select(-.year)
-  
+  x_coor_matched <- dplyr::select(x_coor_matched, -data_type, -.year)
+
   
   ## Start of loop for name-matching
   
-  x4_unique <- unique(x4[,c("country", '.year', 'station_name', 'data_type', 'is_ospar_monitoring', 'is_amap_monitoring', 'is_helcom_monitoring')])
+  id <- c(
+    "country", '.year', 'station_name', 'data_type', 'is_ospar_monitoring', 
+    'is_amap_monitoring', 'is_helcom_monitoring'
+  )
+  x4_unique <- unique(x4[id])
   
   res <- data.frame()
   
@@ -1345,11 +1393,12 @@ merge_stations <- function(data,stations,compartment, purpose, method = NA){
     data_type <- file$data_type
     purpm <- "T"
     year <- file$.year
-    max_year <- format(Sys.Date(), format = "%Y")
-    max_year <- as.numeric(max_year)
     ospar <- file$is_ospar_monitoring
     amap <- file$is_amap_monitoring
-    stations_subset1 <- stations_subset %>% filter(station_name == file$station_name)
+    stations_subset1 <- dplyr::filter(
+      stations_subset, 
+      .data$station_name == file$station_name
+    )
     #For Rob to check: if purpose is other it will take into account the data type
     if(purpose != "HELCOM"){
       
@@ -1361,79 +1410,117 @@ merge_stations <- function(data,stations,compartment, purpose, method = NA){
     if(purpose == "HELCOM"){
       stations_subset1 <- stations_subset1
     }
-    stations_subset1$station_activeuntildate <- as.numeric(stations_subset1$station_activeuntildate)
-    stations_subset1$station_activeuntildate[is.na(stations_subset1$station_activeuntildate)] <- max_year 
-    stations_subset2 <- stations_subset1 %>% filter(station_activefromdate <= year & station_activeuntildate >= year)
+
+    # stations_subset1$station_activeuntildate[is.na(stations_subset1$station_activeuntildate)] <- max_year 
+    stations_subset2 <- dplyr::filter(
+      stations_subset1, 
+      .data$station_activefromdate <= year, 
+      is.na(.data$station_activeuntildate) | .data$station_activeuntildate >= year
+    )
+    
     #should this be excluded for HELCOM?
     stations_subset3 <- stations_subset2[grep(purpm, stations_subset2$station_purpm),]
     
-    stations_subset4 <- stations_subset3 %>% filter(file$country == stations_subset3$station_country)
-    
+    stations_subset4 <- dplyr::filter(
+      stations_subset3, 
+      .data$station_country == file$country
+    )
+
     if(purpose %in% c("OSPAR", "AMAP")){
       
-      stations_subset5 <- stations_subset4 %>% filter(case_when(((ospar==TRUE) & (amap = TRUE)) ~ grepl('OSPAR|AMAP', station_programgovernance ),
-                                                                ospar==TRUE ~ grepl('OSPAR', station_programgovernance),
-                                                                amap==TRUE ~ grepl('AMAP', station_programgovernance)))
-    }else{stations_subset5 <- stations_subset4}
+      stations_subset5 <- dplyr::filter(
+        stations_subset4, 
+        dplyr::case_when(
+          ospar & amap ~ grepl('OSPAR|AMAP', station_programgovernance),
+          ospar        ~ grepl('OSPAR', station_programgovernance),
+          amap         ~ grepl('AMAP', station_programgovernance)
+        )
+      )
+    } else {
+      stations_subset5 <- stations_subset4
+    }
     
-    if(nrow(stations_subset5)< 1){
-      result <- file %>% mutate(station_code = NA)
+    if(nrow(stations_subset5) == 0L){
+      result <- dplyr::mutate(file, station_code = NA)
       res <- rbind(res, result)
     }
     
-    if(nrow(stations_subset5)==1){
-      result <- file %>% mutate(station_code = stations_subset5$station_code)
+    if(nrow(stations_subset5) == 1L){
+      result <- dplyr::mutate(file, station_code = stations_subset5$station_code)
       res <- rbind(res, result)
+    }
+    
+    if (nrow(stations_subset5) > 1L) {
+      browser()
     }
   }
   
-  res_unique<- unique(res)
+  # res_unique<- unique(res)
   
-  x4_matched <- left_join(x4,res_unique)
-  x4_matched <- x4_matched %>% select(-data_type)
-  x4_matched <- x4_matched %>% select(-.year)
+  x4_matched <- dplyr::left_join(
+    x4, 
+    res, 
+    by = c(
+      "country", "station_name", ".year", "data_type", "is_amap_monitoring", 
+      "is_helcom_monitoring", "is_ospar_monitoring"
+    )
+  )
+  
+  x4_matched <- dplyr::select(x4_matched, -data_type, -.year)
   
   # full_match equals data file plus a station_code variable
   full_match <- rbind(x_coor_matched, x4_matched)
-  full_match <- full_match %>% rename(statn= station_name)
+  full_match <- dplyr::rename(full_match, statn = "station_name")
   
   # Merging steps to get all final variables
   # Ugly but works
-  stations_temp <- stations_subset %>% select(station_code, station_name)
-  full_match <- left_join(full_match, stations_temp)
+  stations_temp <- dplyr::select(stations_subset, station_code, station_name)
+  full_match <- dplyr::left_join(full_match, stations_temp, by = "station_code")
   
-  full_match <- full_match %>% rename(sd_name_match = station_name)
+  full_match <- dplyr::rename(full_match, sd_name_match = "station_name")
   
-  stations_temp <- stations_subset %>% select(station_code, station_name, station_replacedby)
-  stations_temp2 <- stations_temp %>% filter(station_code %in% station_replacedby)
-  stations_temp2 <- stations_temp2 %>% rename(sd_code_replaced = station_code)
-  stations_temp2 <- stations_temp2 %>% rename(sd_name_replaced = station_name)
-  stations_temp <- stations_temp %>% rename(sd_code_replaced = station_replacedby)
-  stations_temp <- left_join(stations_temp, stations_temp2)
-  stations_temp <- stations_temp%>% select(station_code, sd_code_replaced,sd_name_replaced)
+  stations_temp <- dplyr::select(stations_subset, station_code, station_name, station_replacedby)
+  stations_temp2 <- dplyr::filter(stations_temp, .data$station_code %in% .data$station_replacedby)
+  stations_temp2 <- dplyr::rename(
+    stations_temp2, 
+    sd_code_replaced = "station_code", 
+    sd_name_replaced = "station_name"
+  )
+  stations_temp <- dplyr::rename(stations_temp, sd_code_replaced = "station_replacedby")
+  stations_temp <- dplyr::left_join(stations_temp, stations_temp2, by = "sd_code_replaced")
+  stations_temp <- dplyr::select(stations_temp, station_code, sd_code_replaced, sd_name_replaced)
   
-  full_match <- left_join(full_match, stations_temp)
-  full_match <- mutate(full_match,sd_code_final = ifelse(!is.na(sd_code_replaced), sd_code_replaced ,station_code))
-  full_match <- mutate(full_match,sd_name_final = ifelse(!is.na(sd_name_replaced), sd_name_replaced ,sd_name_match))
+  full_match <- dplyr::left_join(full_match, stations_temp, by = "station_code")
+  full_match <- dplyr::mutate(
+    full_match,
+    sd_code_final = ifelse(!is.na(.data$sd_code_replaced), .data$sd_code_replaced, .data$station_code),
+    sd_name_final = ifelse(!is.na(.data$sd_name_replaced), .data$sd_name_replaced, .data$sd_name_match)
+  )
   
   
   if(purpose == "OSPAR"){
     #if the final code has station_asmtmimeparent then that should be the final code and name
-    stations_temp <- stations_subset %>% select(station_code, station_name, station_asmtmimeparent)
-    stations_temp2 <- stations_temp %>% filter(station_code %in% station_asmtmimeparent)
+    stations_temp <- dplyr::select(stations_subset, station_code, station_name, station_asmtmimeparent)
+    stations_temp2 <- dplyr::filter(stations_temp, .data$station_code %in% .data$station_asmtmimeparent)
     stations_temp2$station_asmtmimeparent <- stations_temp2$station_code
     stations_temp2 <- stations_temp2[, -1]
-    stations_temp2 <- stations_temp2 %>% rename(asmtmimeparent_name = station_name)
-    stations_temp <- left_join(stations_temp, stations_temp2)
-    stations_temp <- stations_temp %>% rename(sd_code_final = station_code)
-    stations_temp <- stations_temp %>% rename(sd_name_final = station_name)
-    full_match <- left_join(full_match, stations_temp)
-    full_match <- mutate(full_match,sd_code_final = ifelse(!is.na(station_asmtmimeparent), station_asmtmimeparent ,sd_code_final))
-    full_match <- mutate(full_match,sd_name_final = ifelse(!is.na(asmtmimeparent_name), asmtmimeparent_name ,sd_name_final))
-    full_match <- full_match %>% select(-asmtmimeparent_name, -station_asmtmimeparent)
+    stations_temp2 <- dplyr::rename(stations_temp2, asmtmimeparent_name = "station_name")
+    stations_temp <- dplyr::left_join(stations_temp, stations_temp2, by = "station_asmtmimeparent")
+    stations_temp <- dplyr::rename(
+      stations_temp, 
+      sd_code_final = "station_code",
+      sd_name_final = "station_name"
+    )
+    full_match <- dplyr::left_join(full_match, stations_temp, by = c("sd_code_final", "sd_name_final"))
+    full_match <- dplyr::mutate(
+      full_match,
+      sd_code_final = ifelse(!is.na(.data$station_asmtmimeparent), .data$station_asmtmimeparent, .data$sd_code_final),
+      sd_name_final = ifelse(!is.na(.data$asmtmimeparent_name), .data$asmtmimeparent_name, .data$sd_name_final)
+    )
+    full_match <- dplyr::select(full_match, -asmtmimeparent_name, -station_asmtmimeparent)
   }
   
-  full_match <- full_match %>% rename(sd_code_match = station_code)
+  full_match <- dplyr::rename(full_match, sd_code_match = "station_code")
   full_match
   
 }
