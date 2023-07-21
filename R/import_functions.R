@@ -598,7 +598,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
   cat("\nReading contaminant and biological effects data from:\n '", 
       infile, "'\n", sep = "")
 
-  
+
   if (info$data_format == "ICES") {
 
     var_id <- c(
@@ -689,9 +689,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
 
   }  
   
-  return(data)
-  
-  
+
   if (info$data_format == "ICES_old") {  
 
     data <- read.csv(
@@ -1586,12 +1584,10 @@ ctsm_tidy_data <- function(ctsm_obj) {
   
   library(tidyverse)
   
-  
   info <- ctsm_obj$info
   data <- ctsm_obj$data
   stations <- ctsm_obj$stations
-  
-  
+
   # set up oddity directory and back up any previous oddity files
   
   ctsm_initialise_oddities(info$oddity_dir, info$compartment)
@@ -1830,7 +1826,7 @@ ctsm_tidy_contaminants <- function(data, info) {
   
   cat("\nCleaning contaminant and biological effects data\n")
 
-  
+
   # check for compatibility between data, max_year, and reporting_window
   
   if (any(data$year > info$max_year)) { 

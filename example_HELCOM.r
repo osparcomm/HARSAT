@@ -42,7 +42,7 @@ biota_data <- read_data(
 
 ## sediment ----
 
-sediment_data <- ctsm_read_data(
+sediment_data <- read_data(
   compartment = "sediment",
   purpose = "HELCOM",
   contaminants = file.path("example_HELCOM_new_format", "sediment_data.csv"),
@@ -58,7 +58,7 @@ sediment_data <- ctsm_read_data(
 
 ## water ----
 
-water_data <- ctsm_read_data(
+water_data <- read_data(
   compartment = "water", 
   purpose = "HELCOM",                               
   contaminants = file.path("example_HELCOM_new_format", "water_data.csv"), 
