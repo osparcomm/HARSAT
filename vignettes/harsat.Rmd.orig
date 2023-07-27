@@ -54,7 +54,7 @@ library(harsat)
 How you organize your files is up to you. We will start from the current working directory.
 We'll detect that using R's `here` package, and write it into a variable `working.directory`. 
 
-```r
+```{r}
 library(here)
 working.directory <- here()
 ```
@@ -66,18 +66,19 @@ The first step is to read in the data that we've got.
 We will go through some of these arguments.
 
 ```{r getting-started-read}
-biota_data <- ctsm_read_data(
-  compartment = "biota",
-  purpose = "OSPAR",
-  contaminants = "test_data.csv",
-  stations = "station_dictionary.csv",
+biota_data <- read_data(
+  compartment = "biota", 
+  purpose = "OSPAR",                               
+  contaminants = "test_data.csv", 
+  stations = "station_dictionary.csv", 
   QA = "quality_assurance.csv",
-  data_path = file.path(working.directory, "data", "example_simple_OSPAR"),
+  data_dir = file.path(working.directory, "data", "example_simple_OSPAR"),
+  data_format = "ICES_old",
   info_files = list(
-    determinand = "determinand_simple_OSPAR.csv",
+    determinand = "determinand_simple_OSPAR.csv", 
     thresholds = "thresholds_biota_simple_OSPAR.csv"
   ),
-  info_path = file.path(working.directory, "information"),
+  info_dir = file.path(working.directory, "information"), 
   extraction = "2022/01/11",
   max_year = 2020L
 )
@@ -160,7 +161,7 @@ You can see that it tells you which time series we're actually assessing as it p
 This gives you an idea of how how many cups of tea you can drink before it's all finished.
 
 ```{r getting-started-assessment}
-biota_assessment <- ctsm_assessment(
+biota_assessment <- run_assessment(
   biota_timeSeries,
   AC = c("BAC", "EAC", "EQS", "HQS")
 )
@@ -171,7 +172,7 @@ There are various little warnings: these ones are nothing to worry about.
 We can then check that everything is converged.
 
 ```{r getting-started-convergence}
-ctsm_check_convergence(biota_assessment$assessment)
+check_convergence(biota_assessment$assessment)
 ```
 
 ## Reporting
@@ -224,7 +225,7 @@ by statistical results, such as p values, and summary values such as the number 
 when it starts and finishes. And towards the end, we've got comparisons against various different threshold values.
 
 ```{r getting-started-summary-2}
-ctsm_summary_table(
+write_summary_table(
   biota_assessment, 
   determinandGroups = webGroups,
   classColour = classColour,

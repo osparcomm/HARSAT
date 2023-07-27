@@ -22,14 +22,6 @@ knitr::opts_chunk$set(echo = TRUE, comment = NA)
 options(width = 104)
 
 library("tidyverse", quietly = TRUE)
-
-DT_options <- list(
-  initComplete = htmlwidgets::JS(
-    "function(settings, json) {",
-    paste0("$(this.api().table().container()).css({'font-size': '", "10pt", "'});"),
-    "}")
-) 
-
 ```
 
 

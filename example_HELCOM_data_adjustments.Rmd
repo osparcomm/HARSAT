@@ -24,13 +24,6 @@ options(width = 104)
 library("tidyverse", quietly = TRUE)
 library("lattice")
 
-DT_options <- list(
-  initComplete = htmlwidgets::JS(
-    "function(settings, json) {",
-    paste0("$(this.api().table().container()).css({'font-size': '", "10pt", "'});"),
-    "}")
-) 
-
 # biota_data <- readRDS(file.path("Rdata", "biota data.rds"))
 # sediment_data <- readRDS(file.path("Rdata", "sediment data.rds"))
 # water_data <- readRDS(file.path("Rdata", "water data.rds"))
@@ -106,7 +99,6 @@ wk %>%
   select(country, year, station_name, sample, determinand, filtered, replicate, value) %>% 
   arrange(country, year, sample, determinand, replicate) %>%
   as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
 
 wk_rep <- wk$replicate
 
@@ -188,8 +180,8 @@ wk1 <- wk %>%
   group_by(station_name) %>% 
   summarise(type = wk_fun(filtered), .groups = "drop_last")
 
-as.data.frame(wk1) %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+as.data.frame(wk1)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 <br>
@@ -231,7 +223,7 @@ water_data$data %>%
     limit_quantification, uncertainty, unit_uncertainty
   ) %>% 
   as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 
 water_data$data <- mutate(
   water_data$data, 
@@ -836,7 +828,7 @@ sediment_data$QA %>%
   arrange(method_extraction, alabo) %>% 
   select(method_extraction, alabo, determinand) %>%
   as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 <br>
@@ -993,7 +985,7 @@ wk %>%
   select(country, year, station_name, sub.sample, determinand, matrix, replicate, value) %>% 
   arrange(sub.sample, determinand, replicate) %>%
   as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 
 wk_rep <- wk$replicate
 
@@ -1064,7 +1056,7 @@ wk %>%
          replicate, value, uncertainty, unit_uncertainty) %>% 
   arrange(year, sub.sample, determinand, replicate) %>%
   as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 
 wk_rep <- wk$replicate
 
@@ -1208,7 +1200,7 @@ get_relevant_biota() %>%
   filter(n() >= 2) %>% 
   ungroup() %>% 
   as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 
 ```
 
@@ -1288,7 +1280,7 @@ get_relevant_biota() %>%
   select(country, year, determinand, value, censoring, limit_detection, limit_quantification) %>% 
   arrange(country, year, determinand) %>% 
   as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 
 biota_data$data <- mutate(
   biota_data$data, 
