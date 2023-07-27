@@ -9,19 +9,11 @@ vignette: >
 
 ## Data adjustments: water
 
-We'll use the `DT` package for some of these adjustments, and 
-`lattice` to plot some of the data so we can see it as we go.
+We'll use the `lattice` function to plot some of the data so we can see it as we go.
 
-```{r helcom-data-adjust-datatables}
+```{r helcom-data-adjust-tables}
 library(tidyverse)
 library(lattice)
-
-DT_options <- list(
-  initComplete = htmlwidgets::JS(
-    "function(settings, json) {",
-    paste0("$(this.api().table().container()).css({'font-size': '", "10pt", "'});"),
-    "}")
-) 
 ```
 
 ### Data summary
@@ -72,8 +64,8 @@ wk <- water_data$data %>%
 wk %>% 
   select(country, year, station_name, sample, determinand, filtered, replicate, value) %>% 
   arrange(country, year, sample, determinand, replicate) %>%
-  as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  as.data.frame() %>%
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 ```{r helcom-data-adjust-water_dup2}
@@ -149,8 +141,8 @@ wk1 <- wk %>%
   group_by(station_name) %>% 
   summarise(type = wk_fun(filtered), .groups = "drop_last")
 
-as.data.frame(wk1) %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+as.data.frame(wk1) %>%
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 There are three stations where there is a mixture. Here are the full records of 
@@ -188,8 +180,8 @@ water_data$data %>%
     country, year, determinand, value, censoring, limit_detection, 
     limit_quantification, uncertainty, unit_uncertainty
   ) %>% 
-  as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  as.data.frame() %>%
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 ```{r helcom-data-adjust-water_zero2}
@@ -744,8 +736,11 @@ wk_data <- filter(
 wk_data %>% 
   group_by(station_name) %>%
   summarise(n_sample = length(unique(sample)), n_CORG = sum(determinand %in% "CORG"), .groups = "drop") %>%
-  as.data.frame()
+  as.data.frame() %>%
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
+```
 
+```{r helcom-data-adjust-sed_SweCORG4}
 wk_CORG <- filter(wk_data, determinand %in% "CORG")
 
 # identify samples in wk_data with no CORG
@@ -801,7 +796,7 @@ sediment_data$QA %>%
   arrange(method_extraction, alabo) %>%
   select(method_extraction, alabo, determinand) %>%
   as.data.frame() %>%
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 Fortunately, most of these are for organics, for which method_extraction 
@@ -960,7 +955,7 @@ wk %>%
   select(country, year, station_name, sub.sample, determinand, matrix, replicate, value) %>%
   arrange(sub.sample, determinand, replicate) %>%
   as.data.frame() %>%
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 ```{r helcom-data-adjust-bio_dup1a}
@@ -1041,8 +1036,8 @@ wk %>%
   select(year, station_name, sub.sample, determinand, matrix, 
          replicate, value, uncertainty, unit_uncertainty) %>% 
   arrange(year, sub.sample, determinand, replicate) %>%
-  as.data.frame() %>% 
-  DT::datatable(options = DT_options, rownames = FALSE)
+  as.data.frame() %>%
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 ```{r helcom-data-adjust-bio_dup3a}
@@ -1145,7 +1140,8 @@ wk <- relevant_biota %>%
   group_by(sub.sample, matrix, determinand) %>%
   filter(n() >= 2) %>%
   ungroup() %>%
-  as.data.frame()
+  as.data.frame() %>%
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 
 wk %>%
   with(table(determinand, alabo))
@@ -1190,7 +1186,7 @@ get_relevant_biota() %>%
   filter(n() >= 2) %>%
   ungroup() %>%
   as.data.frame() %>%
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 ### Poland PCB 2014 data
@@ -1271,7 +1267,7 @@ get_relevant_biota() %>%
   select(country, year, determinand, value, censoring, limit_detection, limit_quantification) %>%
   arrange(country, year, determinand) %>%
   as.data.frame() %>%
-  DT::datatable(options = DT_options, rownames = FALSE)
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 ```
 
 ```{r helcom-data-adjust-bio_censoring1a}
@@ -1365,7 +1361,8 @@ wk %>%
   ungroup() %>%
   select(station_name, year, matrix, value) %>%
   arrange(station_name, year, matrix) %>%
-  as.data.frame()
+  as.data.frame() %>%
+  knitr::kable(format = "html", table.attr = "class=\'datatable\'")
 
 biota_data$data <- biota_data$data %>%
   mutate(

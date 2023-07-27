@@ -107,7 +107,7 @@ biota_assessment <- ctsm_assessment(
 
 ## check convergence ----
 
-(wk_check <- ctsm_check_convergence(biota_assessment$assessment))
+(wk_check <- check_convergence(biota_assessment$assessment))
 
 # this time series has missing standard errors   
 # "3371 HG Mytilus edulis SB Not_applicable"                       
@@ -125,7 +125,7 @@ biota_assessment <- ctsm_update_assessment(
 biota_web <- biota_assessment
 biota_web$info$AC <- c("BAC", "EQS.OSPAR")
 
-ctsm_summary_table(
+summary_table(
   biota_web,
   determinandGroups = list(levels = "Metals", labels = "Metals"),
   classColour = list(

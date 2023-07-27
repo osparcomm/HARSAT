@@ -12,7 +12,7 @@ data.
 
 
 
-First, load the `harsat` the library
+First, load the `harsat` library
 
 
 ```r
@@ -35,14 +35,14 @@ Mercury data with supporting variables and station dictionary
 
 
 ```r
-biota_data <- ctsm_read_data(
+biota_data <- read_data(
   compartment = "biota",
   purpose = "AMAP",
   contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv",
   stations = "AMAP_external_new_stations_only.csv",
-  data_path = file.path(working.directory, "data", "example_external_data"),
+  data_dir = file.path(working.directory, "data", "example_external_data"),
   data_format = "external",
-  info_path = file.path(working.directory, "information"),
+  info_dir = file.path(working.directory, "information"),
   control = list(region_id = "AMAP_region")
 )
 #> Reading station dictionary from:
@@ -102,7 +102,10 @@ Main runs
 
 
 ```r
-biota_assessment <- ctsm_assessment(biota_timeSeries)
+biota_assessment <- run_assessment(
+  biota_timeSeries, 
+  AC = c("NRC", "LRC", "MRC", "HRC")
+)
 #> 
 #> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg
 #> Loading required package: Matrix
@@ -215,7 +218,7 @@ biota_assessment <- ctsm_assessment(biota_timeSeries)
 Use the code below if it takes a long time to run
 
 ```
-biota_assessment <- ctsm_assessment(
+biota_assessment <- run_assessment(
   biota_timeSeries,
   AC = c("NRC", "LRC", "MRC", "HRC")
   parallel = TRUE
@@ -226,8 +229,8 @@ biota_assessment <- ctsm_assessment(
 
 
 ```r
-(wk_check <- ctsm_check_convergence(biota_assessment$assessment))
-#> character(0)
+check_assessment(biota_assessment)
+#> All assessment models have converged
 ```
 
 # Summary files
@@ -242,7 +245,7 @@ if (!dir.exists(summary.dir)) {
   dir.create(summary.dir, recursive = TRUE)
 } 
 
-ctsm_summary_table(
+write_summary_table(
   biota_assessment,
   output_dir = summary.dir,
     classColour = list(
@@ -275,7 +278,7 @@ if (!dir.exists(graphics.dir)) {
   dir.create(graphics.dir, recursive = TRUE)
 } 
 
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = species %in% "Phoca hispida",
   output_dir = graphics.dir, 
@@ -286,7 +289,7 @@ ctsm_plot_assessment(
 
 
 ```r
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = matrix %in% "LI",
   output_dir = graphics.dir, 
@@ -297,7 +300,7 @@ ctsm_plot_assessment(
 
 
 ```r
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment,
   subset = station_code %in% "A1",
   output_dir = graphics.dir, 
@@ -308,7 +311,7 @@ ctsm_plot_assessment(
 
 
 ```r
-ctsm_plot_assessment(
+plot_assessment(
   biota_assessment, 
   subset = series == "A1 HG Phoca hispida LI adult",
   output_dir = graphics.dir, 
