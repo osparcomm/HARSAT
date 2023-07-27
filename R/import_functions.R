@@ -1636,9 +1636,7 @@ ctsm_read_QA <- function(file, path, purpose) {
 ctsm_tidy_data <- function(ctsm_obj) {
   
   # import_functions.R
-  
-  library(tidyverse)
-  
+    
   info <- ctsm_obj$info
   data <- ctsm_obj$data
   stations <- ctsm_obj$stations
@@ -2113,10 +2111,6 @@ ctsm_create_timeSeries <- function(
   get_basis = get_basis_default,
   normalise = FALSE, 
   normalise.control = list()) {
-
-  # import_functions.R
-  
-  library(tidyverse)
 
   # arguments
   
