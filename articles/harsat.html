@@ -141,18 +141,19 @@ package, and write it into a variable
 <p>The first step is to read in the data that we’ve got. We will go
 through some of these arguments.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_read_data</span><span class="op">(</span></span>
-<span>  compartment <span class="op">=</span> <span class="st">"biota"</span>,</span>
-<span>  purpose <span class="op">=</span> <span class="st">"OSPAR"</span>,</span>
-<span>  contaminants <span class="op">=</span> <span class="st">"test_data.csv"</span>,</span>
-<span>  stations <span class="op">=</span> <span class="st">"station_dictionary.csv"</span>,</span>
+<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
+<span>  compartment <span class="op">=</span> <span class="st">"biota"</span>, </span>
+<span>  purpose <span class="op">=</span> <span class="st">"OSPAR"</span>,                               </span>
+<span>  contaminants <span class="op">=</span> <span class="st">"test_data.csv"</span>, </span>
+<span>  stations <span class="op">=</span> <span class="st">"station_dictionary.csv"</span>, </span>
 <span>  QA <span class="op">=</span> <span class="st">"quality_assurance.csv"</span>,</span>
-<span>  data_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"data"</span>, <span class="st">"example_simple_OSPAR"</span><span class="op">)</span>,</span>
+<span>  data_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"data"</span>, <span class="st">"example_simple_OSPAR"</span><span class="op">)</span>,</span>
+<span>  data_format <span class="op">=</span> <span class="st">"ICES_old"</span>,</span>
 <span>  info_files <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    determinand <span class="op">=</span> <span class="st">"determinand_simple_OSPAR.csv"</span>,</span>
+<span>    determinand <span class="op">=</span> <span class="st">"determinand_simple_OSPAR.csv"</span>, </span>
 <span>    thresholds <span class="op">=</span> <span class="st">"thresholds_biota_simple_OSPAR.csv"</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  info_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span><span class="op">)</span>,</span>
+<span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span><span class="op">)</span>, </span>
 <span>  extraction <span class="op">=</span> <span class="st">"2022/01/11"</span>,</span>
 <span>  max_year <span class="op">=</span> <span class="fl">2020L</span></span>
 <span><span class="op">)</span></span>
@@ -286,7 +287,7 @@ this will just run. You can see that it tells you which time series
 we’re actually assessing as it progresses. This gives you an idea of how
 how many cups of tea you can drink before it’s all finished.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu">ctsm_assessment</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_assessment.html">run_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_timeSeries</span>,</span>
 <span>  AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span>, <span class="st">"EAC"</span>, <span class="st">"EQS"</span>, <span class="st">"HQS"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -375,8 +376,8 @@ how many cups of tea you can drink before it’s all finished.</p>
 about.</p>
 <p>We can then check that everything is converged.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ctsm_check_convergence</span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
-<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">check_convergence</span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in check_convergence(biota_assessment$assessment): could not find function "check_convergence"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reporting">Reporting<a class="anchor" aria-label="anchor" href="#reporting"></a>
@@ -426,7 +427,7 @@ values such as the number of years in the data set, when it starts and
 finishes. And towards the end, we’ve got comparisons against various
 different threshold values.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ctsm_summary_table</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>, </span>
 <span>  determinandGroups <span class="op">=</span> <span class="va">webGroups</span>,</span>
 <span>  classColour <span class="op">=</span> <span class="va">classColour</span>,</span>
