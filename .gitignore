@@ -10,3 +10,4 @@ RData/
 /doc/
 /Meta/
 docs
+.Rbuildignore

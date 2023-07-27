@@ -25,14 +25,17 @@ biota_data <- read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
   contaminants = "ICES_DOME_XHAT_biota_data_2023071211435199.txt",
+  # contaminants = "ICES_DOME_XHAT_sediment_data_2023071218201042.txt",
+  # contaminants = "ICES_DOME_XHAT_water_data_2023071218223355.txt",
   stations = "ICES_DOME_XHAT_station_data_2023071211380640.txt", 
   data_dir = file.path("data", "example_OSPAR"),
   info_files = list(
-    determinand = "determinand_simple_OSPAR.csv", 
+    determinand = "determinand_simple_OSPAR.csv",
     thresholds = "thresholds_biota_simple_OSPAR.csv"
   ),
   info_dir = "information"
 )  
+
 
 
 # Prepare data for next stage ----
