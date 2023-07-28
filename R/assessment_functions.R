@@ -182,7 +182,6 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
       cluster_id, 
       {
         library("lme4")
-        library("tidyverse")
       }
     )  
 

@@ -126,7 +126,10 @@ info_TEQ <- c(
 
 ## Data adjustments: water
 
-We'll use the `lattice` function to plot some of the data so we can see it as we go.
+We'll use the `lattice` package
+to plot some of the data so we can see it as we go. Tables 
+will be made dynamic using progressive enhancement through
+the external JavaScript package [DataTables](https://datatables.net).
 
 
 ```r
