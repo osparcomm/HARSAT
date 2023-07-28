@@ -107,7 +107,7 @@ biota_assessment <- ctsm_assessment(
 
 ## check convergence ----
 
-(wk_check <- check_convergence(biota_assessment$assessment))
+(wk_check <- check_convergence_lmm(biota_assessment$assessment))
 
 # this time series has missing standard errors   
 # "3371 HG Mytilus edulis SB Not_applicable"                       

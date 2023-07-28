@@ -281,7 +281,7 @@ sediment_assessment <- run_assessment(
 
 ### check convergence ----
 
-check_convergence(sediment_assessment)
+check_convergence_lmm(sediment_assessment)
 
 
 
@@ -381,7 +381,7 @@ water_assessment <- run_assessment(
 
 ### check convergence ----
 
-check_convergence(water_assessment)
+check_convergence_lmm(water_assessment)
 
 
 # refit a couple of time series where the fixed effects are on their bounds
@@ -389,7 +389,7 @@ check_convergence(water_assessment)
 # "5190 CD Yes" - fixed effects on bounds
 # "5192 CD Yes" - fixed effects on bounds
 
-wk_id <- check_convergence(water_assessment, save_result = TRUE)
+wk_id <- check_convergence_lmm(water_assessment, save_result = TRUE)
 
 water_assessment <- update_assessment(
   water_assessment, 
@@ -400,7 +400,7 @@ water_assessment <- update_assessment(
 
 # check that refitted timeseries have converged
 
-check_convergence(water_assessment)
+check_convergence_lmm(water_assessment)
 
 
 
