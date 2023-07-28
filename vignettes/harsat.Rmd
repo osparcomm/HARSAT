@@ -296,8 +296,8 @@ We can then check that everything is converged.
 
 
 ```r
-check_convergence(biota_assessment$assessment)
-#> Error in check_convergence(biota_assessment$assessment): could not find function "check_convergence"
+check_convergence_lmm(biota_assessment$assessment)
+#> [1] 0
 ```
 
 ## Reporting

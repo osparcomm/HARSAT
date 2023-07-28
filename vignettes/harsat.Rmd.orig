@@ -172,7 +172,7 @@ There are various little warnings: these ones are nothing to worry about.
 We can then check that everything is converged.
 
 ```{r getting-started-convergence}
-check_convergence(biota_assessment$assessment)
+check_convergence_lmm(biota_assessment$assessment)
 ```
 
 ## Reporting
