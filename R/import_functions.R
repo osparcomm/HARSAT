@@ -146,7 +146,7 @@ read_data <- function(
 
   if (data_format == "ICES") {
     
-    data <- add_stations(data, stations, info$compartment, info$purpose)
+    data <- add_stations(data, stations, info)
     
     data <- dplyr::rename(data, year = "myear")
     
@@ -1068,94 +1068,92 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #' @param data A data frame with the contaminant data from an ICES extraction
 #' @param stations A data frame with the ICES station dictionary
 #' @param compartment A string: `"biota"`, `"sediment"` or `"water"`
+#' @param info A HARSAT information list which must contain the elements
+#'   `purpose` and `compartment`
 #' @param control A list which allows user control of the matching process:
-#' * area: a string (either "OSPAR", "HELCOM", "AMAP") restricts the stations to
-#'   those in the corresponding convention area; NULL matches to all stations in
-#'   the station dictionary
+#' * method: a string specifying whether the stations are matched by `"name"`,
+#'   `"coordinates"`, or `"both"`. When `"both"`, the default if `info$purpose`
+#'   is one of `"OSPAR"`, `"HELCOM"` or `"AMAP"`, the measurements are matched
+#'   by name or coordinates according to rules specified by OSPAR, HELCOM or
+#'   AMAP data assessors (see details).
+#' * area: a vector of strings containing one or more of `"OSPAR"`, `"HELCOM"`
+#'   and `"AMAP"`; this restricts the stations to those in the corresponding
+#'   convention area(s); NULL matches to all stations in the station dictionary
 #' * datatype: a logical specifying whether the stations should be restricted
-#'   to those with an appropriate datatype. If `TRUE`, a contaminant
-#'   measurement in biota (for example) will only be matched to stations with
-#'   station_datatype containing the string `"CF"`. Similarly, a biological
+#'   to those with an appropriate datatype. If `TRUE`, a contaminant measurement
+#'   in biota (for example) will only be matched to stations with
+#'   `station_datatype` containing the string `"CF"`. Similarly, a biological
 #'   effect measurement in biota will only be matched to stations with
-#'   station_datatype containing the string `"EF"`
-#' * purpm_temporal: A logical with `TRUE` indicating that stations should be
-#'   restricted to those with station_purpm containing the string `"T"`
-#' * programgovernance: A string    
+#'   `station_datatype` containing the string `"EF"`
+#' * temporal: a logical with `TRUE` indicating that stations should be
+#'   restricted to those with `station_purpm` containing the string `"T"`
+#' * governance: a vector of strings containing one or more of `"OSPAR"`,
+#'   `"HELCOM"` and `"AMAP"`; this restricts the stations to those with an
+#'   appropriate `station_programgovernance`. For example, if `governance ==
+#'   "OSPAR"`, then only contaminant measurements with `is_ospar_monitoring ==
+#'   "TRUE"` will be matched to a station, and only to stations with
+#'   `station_programgovernance` containing the string `"OSPAR"`. If
+#'   `governance` contains multiple values, then the matching is more
+#'   complicated. For example, if `governance == c("OSPAR", "AMAP")`, then
+#'   measurements with `is_ospar_monitoring == TRUE` and `is_amap_monitoring ==
+#'   TRUE` are matched to stations with `station_programgovernance` containing
+#'   either `"OSPAR"` or `"AMAP"` or both. Measurements with
+#'   `is_ospar_monitoring == TRUE` and `is_amap_monitoring == FALSE` are only
+#'   matched to stations with `station_programgovernance` containing `"OSPAR"`,
+#'   and so on.
+#' * check_coordinates: a logical with `TRUE` indicating that, when
+#'   stations are matched by name, the sample coordinates must also be within 
+#'   the station geometry. No implemented yet, so defaults ot `FALSE`.
 #'
 #' @returns A data frame containing the contaminant data augmented by variables
 #'   containing the station code and the station name
 #' 
-add_stations <- function(data, stations, compartment, purpose, method = NA){
+add_stations <- function(data, stations, info, control){
 
   cat("\nMatching data with station dictionary\n", sep = "")
 
-  
-  # Checking input conditions
-  # check compartment
-  if (!compartment %in% c("biota", "sediment", "water")) {
-    message("Please specify compartment:",
-            "\n\t\tbiota",
-            "\n\t\tsediment",
-            "\n\t\twater")
-    return(FALSE)
-  }
-  
-  # check purpose
-  if (!purpose %in% c("OSPAR", "AMAP", "HELCOM", "custom")) {
-    message("Please specify purpose:",
-            "\n\t\tOSPAR",
-            "\n\t\tAMAP",
-            "\n\t\tHELCOM",
-            "\n\t\tcustom")
-    return(FALSE)
-  }
-  
-  # check purpose <> custom and method specified
-  if (!purpose %in% "custom" & !is.na(method)) {
-    message("Method is only specified when purpose is 'custom'")
-    return(FALSE)
-  }
-  
-  # check method when purpose = custom
-  if (purpose %in% "custom" & !method %in% c("coordinates", "name")) {
-    message("Please specify method:",
-            "\n\t\tcoordinates",
-            "\n\t\tname")
-    return(FALSE)
-  }
-  
-  
   control <- list()
-  
-  control$area <- switch(
-    purpose,
-    OSPAR = "OSPAR",
-    HELCOM = "HELCOM",
-    AMAP = NULL, 
-    custom = NULL
-  )
-  
+
   control$method <- switch(
-    purpose, 
+    info$purpose, 
     custom = "name", 
     "both"
   )
+
+  control$area <- switch(
+    info$purpose,
+    OSPAR = "OSPAR",
+    HELCOM = "HELCOM",
+    NULL 
+  )
   
   control$datatype <- switch(
-    purpose, 
+    info$purpose, 
     OSPAR = TRUE, 
     FALSE
   )
 
-  control$purpm_temporal <- switch(
-    purpose, 
+  control$temporal <- switch(
+    info$purpose, 
     OSPAR = TRUE,
     FALSE
   )
-    
   
-  #Transform .year to the year in date, some small inconsistencies, plus minus a year
-  # names(biota)
+  control$governance <- switch(
+    info$purpose, 
+    OSPAR = c("OSPAR", "AMAP"), 
+    NULL
+  )
+    
+  control$check_convergence <- FALSE
+  
+  
+  # get ordering variable, so output is in the original order
+  
+  data <- dplyr::mutate(data, .order = 1:nrow(data))
+  
+  
+  # transform .year to the year in date, some small inconsistencies, plus minus a year
   data$.year <- substr(data$date, 0, 4)
   data$.year <- as.numeric(data$.year)
   x <- dplyr::rename(data, station_name = "statn")
@@ -1165,14 +1163,15 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
   # restrict stations to convention area
   
   if (!is.null(control$area)) {
-    cat(" - restricting to stations in the", control$area, "area\n")
-    id <- switch(
-      control$area, 
-      OSPAR = "is_ospar_area", 
-      HELCOM = "is_helcom_area", 
-      AMAP = "is_amap_area"
+    cat(
+      " - restricting to stations in these convention areas:", 
+      paste(control$area, collapse = ", "), 
+      "\n"
     )
-    stations <- dplyr::filter(stations, .data[[id]])
+    id <- match(control$area, c("OSPAR", "HELCOM", "AMAP"))
+    id <- c("is_ospar_area", "is_helcom_area", "is_amap_area")[id]
+    ok <- apply(stations[id], 1, any)
+    stations <- stations[ok, ]
   } else {
     cat(" - no restriction of stations to a convention area\n")
   }
@@ -1183,7 +1182,7 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
   
   if (control$datatype) {
     id <- switch(
-      compartment, 
+      info$compartment, 
       biota = c("CF", "EF"), 
       sediment = c("CS", "ES"),
       water = c("CW", "EW")
@@ -1198,7 +1197,7 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
 
   # restrict stations by purpose of monitoring
   
-  if (control$purpm_temporal) {
+  if (control$temporal) {
     cat(" - restricting to stations marked for temporal monitoring\n")
     stations <- dplyr::filter(stations, grepl("T", .data$station_purpm))
   } else {
@@ -1206,9 +1205,22 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
   }
   
   
+  # messages about other restrictions 
   
-  #Make sure in the stations file only year is in the validity dates variables
-  #Make this numeric
+  if (!is.null(control$governance)) {
+    cat(
+      " - restricting to stations with program governance:", 
+      paste(control$governance, collapse = ", "), 
+      "\n"
+    )
+    stations <- dplyr::filter(stations, grepl("T", .data$station_purpm))
+  } else {
+    cat(" - no restriction of stations by program governance\n")
+  }
+  
+
+  # ensure in the stations file only year is in the validity dates variables
+  # make this numeric
   
   stations <- dplyr::mutate(
     stations, 
@@ -1221,7 +1233,7 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
   
   # create the datatype variable for matching (if required) 
 
-  wk <- switch(compartment, biota = "F", sediment = "S", water = "W")
+  wk <- switch(info$compartment, biota = "F", sediment = "S", water = "W")
 
   x <- dplyr::mutate(
     x, 
@@ -1267,7 +1279,7 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
     # these countries match by name for some compartments / years
         
     x <- switch(
-      compartment,
+      info$compartment,
       biota = dplyr::mutate(
         x, 
         .id = .id | 
@@ -1304,6 +1316,8 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
 
   ## Start of loop for coordinates matching
   
+  cat(" - matching", nrow(x_coor), "records by coordinates\n")
+  
   id <- c(
     "country", "latitude",'longitude', '.year', 'datatype', 'is_ospar_monitoring', 
     'is_amap_monitoring', 'is_helcom_monitoring'
@@ -1316,17 +1330,17 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
   for(i in 1:nrow(x_coor_unique)) {
     
     file <- x_coor_unique[i,]
-    year <- file$.year
-    ospar <- file$is_ospar_monitoring
-    amap <- file$is_amap_monitoring
 
-    if (year == 2009 & file$country == "Germany" & file$latitude == "54.258" & 
-        file$longitude == 7.435833 & file$datatype == "AUX") browser()
-    
     # restrict stations to appropriate country and years 
     
-    stations_subset <- stations
-    
+    stations_subset <- dplyr::filter(
+      stations, 
+      .data$station_country == file$country, 
+      .data$station_activefromdate <= file$.year, 
+      is.na(.data$station_activeuntildate) | 
+        .data$station_activeuntildate >= file$.year
+    )
+      
     # ensure match to contaminants or effects datatype 
  
     if (control$datatype && file$datatype != "AUX") {
@@ -1335,34 +1349,33 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
         grepl(file$datatype, .data$station_datatype)
       )
     }
+
+    # match by program governance
+          
+    if (!is.null(control$governance)) {
+
+      id <- match(control$governance, c("OSPAR", "HELCOM", "AMAP"))
+      id <- c("is_ospar_monitoring", "is_helcom_monitoring", "is_amap_monitoring")[id]
       
-    stations_subset2 <- dplyr::filter(
-      stations_subset, 
-      .data$station_activefromdate <= year, 
-      is.na(.data$station_activeuntildate) | .data$station_activeuntildate >= year
-    )
-    
-    stations_subset4 <- dplyr::filter(
-      stations_subset2, 
-      .data$station_country == file$country
-    )
-    
-    if(purpose %in% c("OSPAR", "AMAP")){
+      # identify which conventions the measurement is marked for
       
-      stations_subset5 <- dplyr::filter(
-        stations_subset4, 
-        dplyr::case_when(
-          ospar & amap ~ grepl('OSPAR|AMAP', station_programgovernance),
-          ospar        ~ grepl('OSPAR', station_programgovernance),
-          amap         ~ grepl('AMAP', station_programgovernance)
+      file_gov <- sapply(file[id], all)
+
+      if (!any(file_gov)) {
+        stations_subset <- stations_subset[FALSE, ]
+      } else {
+        station_gov <- control$governance[file_gov]
+        station_gov <- paste(station_gov, collapse = "|")
+        stations_subset <- dplyr::filter(
+          stations_subset,
+          grepl(station_gov, .data$station_programgovernance)
         )
-      )
-    } else {
-      stations_subset5 <- stations_subset4
-    }
+      }
+      
+    } 
 
     sd <- sf::st_as_sf(
-      stations_subset5,
+      stations_subset,
       wkt = "station_geometry",
       crs = sf::st_crs(4326)
       # 4326 is the EPSG code for the datum/projection used (https://epsg.io/4326). 
@@ -1395,13 +1408,12 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
       }
       part <- as.data.frame(part)
       
-      #CHECK this variable 31!!
       part <- dplyr::select(part, - station_geometry)
 
-      # getting code deprecated warning, but can't see issue - this is to try
-      # and trap it
-      if (ncol(part) == 1) stop()
-      sd1 <- dplyr::filter(part, .data$dist == min(.data$dist))
+      # generated a warning if the minimum is calculated within filter 
+      # statement - this is to see if the warning disappears
+      min_dist <- min(part$dist)
+      sd1 <- dplyr::filter(part, .data$dist == min_dist)
       # if both distances are the same, keep the station with the highest code, 
       # should be the newest one
       sd1 <- dplyr::filter(sd1, .data$station_code == max(.data$station_code)) 
@@ -1439,23 +1451,30 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
 
   
   ## Start of loop for name-matching
-  
+
+  cat(" - matching", nrow(x_name), "records by station name\n")
+
   id <- c(
     "country", '.year', 'station_name', 'datatype', 'is_ospar_monitoring', 
     'is_amap_monitoring', 'is_helcom_monitoring'
   )
-  x4_unique <- unique(x_name[id])
+  x_name_unique <- unique(x_name[id])
   
   res <- data.frame()
   
-  for(i in 1:nrow(x4_unique)) {
-    file <- x4_unique[i,]
-    year <- file$.year
-    ospar <- file$is_ospar_monitoring
-    amap <- file$is_amap_monitoring
+  for(i in 1:nrow(x_name_unique)) {
+    file <- x_name_unique[i,]
 
-    stations_subset <- stations
+    # restrict stations to appropriate country and years 
     
+    stations_subset <- dplyr::filter(
+      stations, 
+      .data$station_country == file$country, 
+      .data$station_activefromdate <= file$.year, 
+      is.na(.data$station_activeuntildate) | 
+        .data$station_activeuntildate >= file$.year
+    )
+
     # restrict stations to station_name match
 
     stations_subset <- dplyr::filter(
@@ -1472,50 +1491,51 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
       )
     }
     
-    stations_subset2 <- dplyr::filter(
-      stations_subset, 
-      .data$station_activefromdate <= year, 
-      is.na(.data$station_activeuntildate) | .data$station_activeuntildate >= year
-    )
+    # match by program governance
     
-
-    stations_subset4 <- dplyr::filter(
-      stations_subset2, 
-      .data$station_country == file$country
-    )
-
-    if(purpose %in% c("OSPAR", "AMAP")){
+    if (!is.null(control$governance)) {
       
-      stations_subset5 <- dplyr::filter(
-        stations_subset4, 
-        dplyr::case_when(
-          ospar & amap ~ grepl('OSPAR|AMAP', station_programgovernance),
-          ospar        ~ grepl('OSPAR', station_programgovernance),
-          amap         ~ grepl('AMAP', station_programgovernance)
+      id <- match(control$governance, c("OSPAR", "HELCOM", "AMAP"))
+      id <- c("is_ospar_monitoring", "is_helcom_monitoring", "is_amap_monitoring")[id]
+      
+      # identify which conventions the measurement is marked for
+      
+      file_gov <- sapply(file[id], all)
+      
+      if (!any(file_gov)) {
+        stations_subset <- stations_subset[FALSE, ]
+      } else {
+        station_gov <- control$governance[file_gov]
+        station_gov <- paste(station_gov, collapse = "|")
+        stations_subset <- dplyr::filter(
+          stations_subset,
+          grepl(station_gov, .data$station_programgovernance)
         )
-      )
-    } else {
-      stations_subset5 <- stations_subset4
-    }
+      }
+      
+    } 
     
-    if(nrow(stations_subset5) == 0L){
+    if(nrow(stations_subset) == 0L){
       result <- dplyr::mutate(file, station_code = NA)
       res <- rbind(res, result)
     }
     
-    if(nrow(stations_subset5) == 1L){
-      result <- dplyr::mutate(file, station_code = stations_subset5$station_code)
+    if(nrow(stations_subset) == 1L){
+      result <- dplyr::mutate(file, station_code = stations_subset$station_code)
       res <- rbind(res, result)
     }
     
-    if (nrow(stations_subset5) > 1L) {
-      browser()
+    if (nrow(stations_subset) > 1L) {
+      stop(
+        "Multiple station matches when joining by name - contact HARSAT development team", 
+        call. = FALSE
+      )
     }
   }
   
   # res_unique<- unique(res)
   
-  x4_matched <- dplyr::left_join(
+  x_name_matched <- dplyr::left_join(
     x_name, 
     res, 
     by = c(
@@ -1524,10 +1544,10 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
     )
   )
   
-  x4_matched <- dplyr::select(x4_matched, -datatype, -.year)
+  x_name_matched <- dplyr::select(x_name_matched, -datatype, -.year)
   
   # full_match equals data file plus a station_code variable
-  full_match <- rbind(x_coor_matched, x4_matched)
+  full_match <- rbind(x_coor_matched, x_name_matched)
   full_match <- dplyr::rename(full_match, statn = "station_name")
   
   # Merging steps to get all final variables
@@ -1556,7 +1576,7 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
   )
   
   
-  if (purpose == "OSPAR") {
+  if (info$purpose == "OSPAR") {
     
     #if the final code has station_asmtmimeparent then that should be the final code and name
     stations_temp <- dplyr::select(stations, station_code, station_name, station_asmtmimeparent)
@@ -1580,6 +1600,18 @@ add_stations <- function(data, stations, compartment, purpose, method = NA){
   }
   
   full_match <- dplyr::rename(full_match, sd_code_match = "station_code")
+  
+  cat(
+    " -", sum(!is.na(full_match$sd_code_final)), "of", nrow(full_match), 
+    "records have been matched to a station\n"
+  )
+  
+  
+  # reorder
+  
+  full_match <- dplyr::arrange(full_match, .order)
+  full_match <- dplyr::select(full_match, -.order)
+
   full_match
   
 }
