@@ -145,8 +145,18 @@ read_data <- function(
   }
 
   if (data_format == "ICES") {
+
+    cntrl <- list(
+      method = switch(purpose, custom = "name", "both"), 
+      area = switch(purpose, OSPAR = "OSPAR", HELCOM = "HELCOM", NULL),
+      datatype = switch(purpose, OSPAR = TRUE, FALSE), 
+      temporal = switch(purpose, OSPAR = TRUE, FALSE), 
+      governance = switch(purpose, OSPAR = c("OSPAR", "AMAP"), NULL),
+      group = switch(purpose, OSPAR = TRUE, FALSE), 
+      check_convergecne = FALSE
+    )
     
-    data <- add_stations(data, stations, info)
+    data <- add_stations(data, stations, info, cntrl)
     
     data <- dplyr::rename(data, year = "myear")
     
@@ -1061,9 +1071,9 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #' Add stations to contaminant data from an ICES extraction
 #'
 #' Adds the station name and station code to the contaminant data from an ICES
-#' extraction. This is achieved by either matching the station names submitted
-#' with the data to the station dictionary, or by matching the sample
-#' coordinates to the station dictionary, or a combination of both.
+#' extraction. This is done by either matching the station names submitted with
+#' the data to the station dictionary, or by matching the sample coordinates to
+#' the station dictionary, or a combination of both.
 #'
 #' @param data A data frame with the contaminant data from an ICES extraction
 #' @param stations A data frame with the ICES station dictionary
@@ -1073,9 +1083,10 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #' @param control A list which allows user control of the matching process:
 #' * method: a string specifying whether the stations are matched by `"name"`,
 #'   `"coordinates"`, or `"both"`. When `"both"`, the default if `info$purpose`
-#'   is one of `"OSPAR"`, `"HELCOM"` or `"AMAP"`, the measurements are matched
-#'   by name or coordinates according to rules specified by OSPAR, HELCOM or
-#'   AMAP data assessors (see details).
+#'   is one of `"OSPAR"`, `"HELCOM"` or `"AMAP"`, the stations are matched by
+#'   name or coordinates according to rules specified by OSPAR, HELCOM or AMAP
+#'   data providers (see details). If `info$purpose` is `"custom"`, `method` is
+#'   restricted to either `"name"` or `"coordinates"`
 #' * area: a vector of strings containing one or more of `"OSPAR"`, `"HELCOM"`
 #'   and `"AMAP"`; this restricts the stations to those in the corresponding
 #'   convention area(s); NULL matches to all stations in the station dictionary
@@ -1101,9 +1112,50 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #'   `is_ospar_monitoring == TRUE` and `is_amap_monitoring == FALSE` are only
 #'   matched to stations with `station_programgovernance` containing `"OSPAR"`,
 #'   and so on.
+#' * grouping: a logical with `TRUE` indicating that stations will be grouped
+#'   into meta-stations as specified by `station_asmtmimeparent` in the station
+#'   dictionary. Defaults to `FALSE` apart from when `info$purpose == "OSPAR"`.
 #' * check_coordinates: a logical with `TRUE` indicating that, when
-#'   stations are matched by name, the sample coordinates must also be within 
+#'   stations are matched by name, the sample coordinates must also be within
 #'   the station geometry. No implemented yet, so defaults ot `FALSE`.
+#'
+#' @details When `control$method` == "both"`, the rules for deciding whether
+#'   stations are matched by name or by coordinates have been specified by
+#'   OSPAR, HELCOM and AMAP data providers. It is currently the same for all
+#'   conventions, but varies between compartments. Specifically, records are
+#'   matched by name for the following countries
+#'
+#'   Biota:
+#'  * Denmark
+#'  * France
+#'  * Ireland
+#'  * Norway
+#'  * Portugal
+#'  * Spain (2005 onwards)
+#'  * Sweden
+#'  * The Netherlands (2007 onwards)
+#'  * United Kingdom
+#'
+#'   Sediment:
+#'  * Denmark
+#'  * France (2009 onwards)
+#'  * Ireland
+#'  * Norway
+#'  * Portugal
+#'  * Spain (2005 onwards)
+#'  * Sweden
+#'  * The Netherlands (2007 onwards)
+#'  * United Kingdom
+#'
+#'   Water:
+#'  * Denmark
+#'  * Ireland
+#'  * Norway
+#'  * Portugal
+#'  * Spain (2005 onwards)
+#'  * Sweden
+#'  * The Netherlands (2007 onwards)
+#'  * United Kingdom
 #'
 #' @returns A data frame containing the contaminant data augmented by variables
 #'   containing the station code and the station name
@@ -1112,40 +1164,6 @@ add_stations <- function(data, stations, info, control){
 
   cat("\nMatching data with station dictionary\n", sep = "")
 
-  control <- list()
-
-  control$method <- switch(
-    info$purpose, 
-    custom = "name", 
-    "both"
-  )
-
-  control$area <- switch(
-    info$purpose,
-    OSPAR = "OSPAR",
-    HELCOM = "HELCOM",
-    NULL 
-  )
-  
-  control$datatype <- switch(
-    info$purpose, 
-    OSPAR = TRUE, 
-    FALSE
-  )
-
-  control$temporal <- switch(
-    info$purpose, 
-    OSPAR = TRUE,
-    FALSE
-  )
-  
-  control$governance <- switch(
-    info$purpose, 
-    OSPAR = c("OSPAR", "AMAP"), 
-    NULL
-  )
-    
-  control$check_convergence <- FALSE
   
   
   # get ordering variable, so output is in the original order
@@ -1412,6 +1430,7 @@ add_stations <- function(data, stations, info, control){
 
       # generated a warning if the minimum is calculated within filter 
       # statement - this is to see if the warning disappears
+      if (ncol(part) == 1L) browser()
       min_dist <- min(part$dist)
       sd1 <- dplyr::filter(part, .data$dist == min_dist)
       # if both distances are the same, keep the station with the highest code, 
@@ -1550,59 +1569,177 @@ add_stations <- function(data, stations, info, control){
   full_match <- rbind(x_coor_matched, x_name_matched)
   full_match <- dplyr::rename(full_match, statn = "station_name")
   
-  # Merging steps to get all final variables
-  # Ugly but works
-  stations_temp <- dplyr::select(stations, station_code, station_name)
-  full_match <- dplyr::left_join(full_match, stations_temp, by = "station_code")
   
-  full_match <- dplyr::rename(full_match, sd_name_match = "station_name")
+  # get station_name associated with station_code
+  # rename as sd_code_match and sd_name_match
   
-  stations_temp <- dplyr::select(stations, station_code, station_name, station_replacedby)
-  stations_temp2 <- dplyr::filter(stations_temp, .data$station_code %in% .data$station_replacedby)
-  stations_temp2 <- dplyr::rename(
-    stations_temp2, 
-    sd_code_replaced = "station_code", 
+  full_match <- dplyr::left_join(
+    full_match, 
+    stations[c("station_code", "station_name")],
+    by = "station_code"
+  )
+  
+  full_match <- dplyr::rename(
+    full_match,
+    sd_code_match = "station_code",
+    sd_name_match = "station_name"
+  )
+  
+  
+  # get 'current' station choice 
+  
+  full_match$sd_code_current <- full_match$sd_code_match
+  full_match$sd_name_current <- full_match$sd_name_match
+
+  
+  # update current stations with any replacements
+  
+  full_match <- dplyr::left_join(
+    full_match,
+    stations[c("station_code", "station_replacedby")],
+    by = c("sd_code_current" = "station_code")
+  )  
+  
+  # get station_name associated with station_replacedby
+  # important: this will be missing if station_replacedby is no longer in
+  # the station dictionary because e.g. it has the wrong data type
+
+  full_match <- dplyr::left_join(
+    full_match,
+    stations[c("station_code", "station_name")],
+    by = c("station_replacedby" = "station_code")
+  )  
+
+  # rename as station_code_replaced and station_name_replaced
+
+  full_match <- dplyr::rename(
+    full_match,
+    sd_code_replaced = "station_replacedby",
     sd_name_replaced = "station_name"
   )
-  stations_temp <- dplyr::rename(stations_temp, sd_code_replaced = "station_replacedby")
-  stations_temp <- dplyr::left_join(stations_temp, stations_temp2, by = "sd_code_replaced")
-  stations_temp <- dplyr::select(stations_temp, station_code, sd_code_replaced, sd_name_replaced)
   
-  full_match <- dplyr::left_join(full_match, stations_temp, by = "station_code")
+  # remove replaced codes that are no longer in the station dictionary
+  # update 'current' station code
+  
   full_match <- dplyr::mutate(
     full_match,
-    sd_code_final = ifelse(!is.na(.data$sd_code_replaced), .data$sd_code_replaced, .data$station_code),
-    sd_name_final = ifelse(!is.na(.data$sd_name_replaced), .data$sd_name_replaced, .data$sd_name_match)
+    .replaced = !is.na(.data$sd_name_replaced),
+    sd_code_replaced = ifelse(
+      .replaced, 
+      .data$sd_code_replaced,
+      NA_character_
+    ),
+    sd_code_current = ifelse(
+      .replaced, 
+      .data$sd_code_replaced, 
+      .data$sd_code_current
+    ),
+    sd_name_current = ifelse(
+      .replaced, 
+      .data$sd_name_replaced, 
+      .data$sd_name_current
+    ),
+    .replaced = NULL
   )
   
+  # check no double replacements required
   
-  if (info$purpose == "OSPAR") {
-    
-    #if the final code has station_asmtmimeparent then that should be the final code and name
-    stations_temp <- dplyr::select(stations, station_code, station_name, station_asmtmimeparent)
-    stations_temp2 <- dplyr::filter(stations_temp, .data$station_code %in% .data$station_asmtmimeparent)
-    stations_temp2$station_asmtmimeparent <- stations_temp2$station_code
-    stations_temp2 <- stations_temp2[, -1]
-    stations_temp2 <- dplyr::rename(stations_temp2, asmtmimeparent_name = "station_name")
-    stations_temp <- dplyr::left_join(stations_temp, stations_temp2, by = "station_asmtmimeparent")
-    stations_temp <- dplyr::rename(
-      stations_temp, 
-      sd_code_final = "station_code",
-      sd_name_final = "station_name"
+  check <- dplyr::left_join(
+    full_match[c("sd_code_replaced")], 
+    stations[c("station_code", "station_replacedby")],
+    by = c("sd_code_replaced" = "station_code")
+  )
+  
+  if (!all(is.na(check$station_replacedby))) {
+    stop(
+      "two levels of station replacement required - contact HARSAT development team", 
+      call. = FALSE
     )
-    full_match <- dplyr::left_join(full_match, stations_temp, by = c("sd_code_final", "sd_name_final"))
+  }
+
+  
+  if (control$group) {
+
+    cat(" - grouping stations using station_asmtmimegovernance\n")
+    
+    full_match <- dplyr::left_join(
+      full_match,
+      stations[c("station_code", "station_asmtmimeparent")],
+      by = c("sd_code_current" = "station_code")
+    )  
+    
+    # get station_name associated with station_asmtmimeparent
+    # important: this will be missing if station_asmtmimeparent is no longer in
+    # the station dictionary because e.g. it has the wrong data type
+
+    full_match <- dplyr::left_join(
+      full_match,
+      stations[c("station_code", "station_name")],
+      by = c("station_asmtmimeparent" = "station_code")
+    )  
+    
+    # rename as station_code_grouped and station_name_grouped
+
+    full_match <- dplyr::rename(
+      full_match,
+      sd_code_grouped = "station_asmtmimeparent",
+      sd_name_grouped = "station_name"
+    )
+    
+    # remove grouped codes that are no longer in the station dictionary
+    # update 'current' station code
+
     full_match <- dplyr::mutate(
       full_match,
-      sd_code_final = ifelse(!is.na(.data$station_asmtmimeparent), .data$station_asmtmimeparent, .data$sd_code_final),
-      sd_name_final = ifelse(!is.na(.data$asmtmimeparent_name), .data$asmtmimeparent_name, .data$sd_name_final)
+      .grouped = !is.na(.data$sd_name_grouped),
+      sd_code_grouped = ifelse(
+        .grouped, 
+        .data$sd_code_grouped,
+        NA_character_
+      ),
+      sd_code_current = ifelse(
+        .grouped, 
+        .data$sd_code_grouped, 
+        .data$sd_code_current
+      ),
+      sd_name_current = ifelse(
+        .grouped, 
+        .data$sd_name_grouped, 
+        .data$sd_name_current
+      ),
+      .grouped = NULL
     )
-    full_match <- dplyr::select(full_match, -asmtmimeparent_name, -station_asmtmimeparent)
+    
+    # check no double groupings required
+    
+    check <- dplyr::left_join(
+      full_match[c("sd_code_grouped")], 
+      stations[c("station_code", "station_asmtmimeparent")],
+      by = c("sd_code_grouped" = "station_code")
+    )
+    
+    if (!all(is.na(check$station_asmtmimeparent))) {
+      stop(
+        "two levels of station grouping required - contact HARSAT development team", 
+        call. = FALSE
+      )
+    }
+
   }
   
-  full_match <- dplyr::rename(full_match, sd_code_match = "station_code")
+
+  # rename current stations as station_code and station_name
   
+  full_match <- dplyr::relocate(
+    full_match,
+    station_code = "sd_code_current",
+    station_name = "sd_name_current",
+    .after = last_col()
+  )
+
+
   cat(
-    " -", sum(!is.na(full_match$sd_code_final)), "of", nrow(full_match), 
+    " -", sum(!is.na(full_match$station_code)), "of", nrow(full_match), 
     "records have been matched to a station\n"
   )
   
