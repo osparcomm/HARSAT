@@ -91,8 +91,7 @@ allows the user to set various control parameters.</p>
 
 <dt>purpose</dt>
 <dd><p>A string specifying whether to use the default set up for
-<code>"OSPAR"</code>, <code>"HELCOM"</code>, or <code>"AMAP"</code> or whether to do a customised setup
-<code>"custom"</code></p></dd>
+<code>"OSPAR"</code>, <code>"HELCOM"</code>, or <code>"AMAP"</code> or to use a customised setup <code>"custom"</code></p></dd>
 
 
 <dt>contaminants</dt>
@@ -152,14 +151,17 @@ will be created if it does not already exist.</p></dd>
 
 
 <dt>control</dt>
-<dd></dd>
+<dd><p>A list of control parameters that override the default values
+used to run the assessment. These include the reporting window; the way in
+which data are matched to stations following an ICES extraction;
+information about reporting regions, and so on. See Details.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list containing the following components:</p><ul><li><p><code>call</code></p></li>
+<p>A list with the following components:</p><ul><li><p><code>call</code></p></li>
 <li><p><code>info</code></p></li>
 <li><p><code>data</code></p></li>
 <li><p><code>stations</code></p></li>
