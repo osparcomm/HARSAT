@@ -24,8 +24,7 @@ read_data(
 \item{compartment}{A string: \code{"biota"}, \code{"sediment"} or \code{"water"}}
 
 \item{purpose}{A string specifying whether to use the default set up for
-\code{"OSPAR"}, \code{"HELCOM"}, or \code{"AMAP"} or whether to do a customised setup
-\code{"custom"}}
+\code{"OSPAR"}, \code{"HELCOM"}, or \code{"AMAP"} or to use a customised setup \code{"custom"}}
 
 \item{contaminants}{A file reference for the contaminant data}
 
@@ -63,10 +62,13 @@ monitoring year in the contaminant data file.}
 (sometimes supplied using 'file.path'). This directory (and subdirectories)
 will be created if it does not already exist.}
 
-\item{control}{}
+\item{control}{A list of control parameters that override the default values
+used to run the assessment. These include the reporting window; the way in
+which data are matched to stations following an ICES extraction;
+information about reporting regions, and so on. See Details.}
 }
 \value{
-A list containing the following components:
+A list with the following components:
 \itemize{
 \item \code{call}
 \item \code{info}

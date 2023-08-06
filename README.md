@@ -13,6 +13,9 @@ Requirements:
 Additional R packages to those which come with the standard RStudio installation. They have to be installed, either using the RStudio GUI or by the command install.packages e.g. `install.packages("lme4")`:
 
 *	tidyverse version 2.0.0
+* dplyr
+* stringr
+* tibble
 * sf
 *	lme4
 * mgcv

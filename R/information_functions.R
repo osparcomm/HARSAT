@@ -1194,7 +1194,7 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
   
   out <- out %>%
     rownames_to_column() %>%
-    mutate(
+    dplyr::mutate(
       species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
       species_subgroup = ctsm_get_info(species_rt, .data$species, "species_subgroup")
     )
@@ -1214,10 +1214,10 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
   
   if (any(id)) {
     
-    out[id, ] <- mutate(
+    out[id, ] <- dplyr::mutate(
       out[id, ],
       
-      BAC = case_when(
+      BAC = dplyr::case_when(
         .data$species_group %in% "Fish"                            ~ NA_real_,
         .data$species_subgroup %in% "Oyster"                             ~ NA_real_,
         .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
@@ -1235,7 +1235,7 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
         TRUE                                                       ~ .data$BAC
       ),
       
-      EQS = case_when(
+      EQS = dplyr::case_when(
         .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
           ctsm_convert_basis(64000, "W", .data$basis, .data$drywt, .data$lipidwt),
         .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
@@ -1260,7 +1260,7 @@ get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high 
   # adjust HQS (MPC) for fish muscle
   # BACs in fish only apply to high lipid tissue
   
-  out <- mutate(
+  out <- dplyr::mutate(
     out,
     
     HQS = if_else(
@@ -1304,7 +1304,7 @@ get.AC.biota.Chlorobiphenyls.OSPAR <- function(data, AC, AC_data, species_rt, li
   
   out <- out %>%
     rownames_to_column() %>%
-    mutate(
+    dplyr::mutate(
       species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
       species_subgroup = ctsm_get_info(species_rt, .data$species, "species_subgroup")
     )
@@ -1312,7 +1312,7 @@ get.AC.biota.Chlorobiphenyls.OSPAR <- function(data, AC, AC_data, species_rt, li
   # BACs in fish only apply to high lipid tissue
   # add in MPC (HQS) of 200 ww for fish liver
   
-  out <- mutate(
+  out <- dplyr::mutate(
     out,
     
     BAC = if_else(
@@ -1357,7 +1357,7 @@ get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, li
   
   out <- out %>%
     rownames_to_column() %>%
-    mutate(
+    dplyr::mutate(
       species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
       species = as.character(species)
     )
@@ -1366,7 +1366,7 @@ get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, li
   # BAC in fish only apply to high lipid tissue
   # EAC for birds fro HCB and HCH
   
-  out <- mutate(
+  out <- dplyr::mutate(
     out,
     
     BAC = if_else(
@@ -1397,7 +1397,7 @@ get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, li
   
   if (any(id)) {
     
-    out[id, ] <- mutate(
+    out[id, ] <- dplyr::mutate(
       out[id, ],
       .lipid_mu = info.species[.data$species, "MU_lipidwt"],
       .dry_mu = info.species[.data$species, "MU_drywt"],
@@ -1415,7 +1415,7 @@ get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, li
   
   if (any(id)) {
     
-    out[id, ] <- mutate(
+    out[id, ] <- dplyr::mutate(
       out[id, ],
       .lipid_mu = info.species[.data$species, "MU_lipidwt"],
       .dry_mu = info.species[.data$species, "MU_drywt"],
@@ -1448,12 +1448,12 @@ get.AC.biota.Organofluorines.OSPAR <- function(data, AC, AC_data, species_rt) {
   
   out <- out %>%
     rownames_to_column() %>%
-    mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
+    dplyr::mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
   
   
   # fish liver - multiply by 5
   
-  out <- mutate(
+  out <- dplyr::mutate(
     out,
     .id <- .data$species_group %in% "Fish" & .data$matrix %in% "LI" &
       .data$determinand %in% "PFOS",
@@ -1483,7 +1483,7 @@ get.AC.biota.PBDEs.OSPAR <- function(data, AC, AC_data, species_rt) {
   
   out <- out %>%
     rownames_to_column() %>%
-    mutate(
+    dplyr::mutate(
       species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
       species = as.character(species)
     )
@@ -1495,7 +1495,7 @@ get.AC.biota.PBDEs.OSPAR <- function(data, AC, AC_data, species_rt) {
   
   if (any(id)) {
     
-    out[id, ] <- mutate(
+    out[id, ] <- dplyr::mutate(
       out[id, ],
       .lipid_mu = info.species[.data$species, "MU_lipidwt"],
       .dry_mu = info.species[.data$species, "MU_drywt"],
@@ -1528,12 +1528,12 @@ get.AC.biota.Dioxins.OSPAR <- function(data, AC, AC_data, species_rt) {
   
   out <- out %>%
     rownames_to_column() %>%
-    mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
+    dplyr::mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
   
   
   # add in HQS of 0.02 ww for fish liver
   
-  out <- mutate(
+  out <- dplyr::mutate(
     out,
     HQS = if_else(
       .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
@@ -2309,7 +2309,7 @@ get_basis_biota_OSPAR <- function(data, info) {
   
   out <- data[c("species", "matrix", "determinand", "group")]
   
-  out <- mutate(
+  out <- dplyr::mutate(
     out,
     across(everything(), as.character),
     species_group = ctsm_get_info(info$species, .data$species, "species_group")
@@ -2320,7 +2320,7 @@ get_basis_biota_OSPAR <- function(data, info) {
   
   lipid_info <- ctsm_get_species_cfs(info$species, "lipidwt")
   
-  out <- left_join(out, lipid_info, by = c("species", "matrix"))
+  out <- dplyr::left_join(out, lipid_info, by = c("species", "matrix"))
   
   # default basis W
   # bivalves and gastropods - D
@@ -2342,10 +2342,10 @@ get_basis_biota_OSPAR <- function(data, info) {
   
   lw_group <- c("PBDEs", "Organobromines", "Chlorobiphenyls", "Dioxins", "Organochlorines")
   
-  out <- mutate(
+  out <- dplyr::mutate(
     out,
     .lw = .data$group %in% lw_group & !(.data$determinand %in% c("MCCP", "SCCP")),
-    new_basis = case_when(
+    new_basis = dplyr::case_when(
       .data$group %in% c("Imposex", "Effects", "Metabolites")            ~ NA_character_,
       .data$species_group %in% c("Bivalve", "Gastropod")               ~ "D",
       .data$species_group %in% c("Fish", "Crustacean") & 
@@ -2602,7 +2602,7 @@ get_station_code <- function(station_name, country, stations) {
   stations <- stations[c("station_name", "country", "station_code")]
   stations <- mutate(stations, across(.fns = as.character)) 
   
-  out <- left_join(out, stations, by = c("station_name", "country"))
+  out <- dplyr::left_join(out, stations, by = c("station_name", "country"))
   
   stopifnot(!is.na(out), n == nrow(out))
   
