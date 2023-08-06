@@ -29,7 +29,7 @@ biota_data <- read_data(
   data_dir = file.path("data", "example_external_data"), 
   data_format = "external",
   info_dir = "information",
-  control = list(region_id = "AMAP_region")
+  control = list(region = list(id = "AMAP_region"))
 )  
 
 

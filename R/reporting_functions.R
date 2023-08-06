@@ -513,7 +513,7 @@ write_summary_table <- function(
   # not needed here as this is primarily an OHAT requirement - have raised
   # an issue to tidy this up
   
-  timeSeries <- rownames_to_column(timeSeries, ".series")
+  timeSeries <- tibble::rownames_to_column(timeSeries, ".series")
   
   timeSeries$detGroup <- ctsm_get_info(
     info$determinand, 
@@ -548,7 +548,7 @@ write_summary_table <- function(
     by = "station_code"
   )
   
-  timeSeries <- column_to_rownames(timeSeries, ".series")
+  timeSeries <- tibble::column_to_rownames(timeSeries, ".series")
   
 
   ## get summary from assessment 
@@ -575,7 +575,7 @@ write_summary_table <- function(
   
   wk <- c(
     "series", 
-    info$region_id,  
+    info$region$id,  
     "country", "CMA", 
     "station_code", "station_name", "station_longname", 
     "station_latitude", "station_longitude", "station_type", "waterbody_type", 
@@ -587,7 +587,7 @@ write_summary_table <- function(
   summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
 
   sortID <- intersect(
-    c(info$region_id, "country", "CMA", "station_name", 
+    c(info$region$id, "country", "CMA", "station_name", 
       "species", "detGroup", "determinand", "matrix"), 
     names(summary)
   )
@@ -716,9 +716,9 @@ write_summary_table <- function(
   
   # rename region variables if required
   
-  if (!identical(info$region_id, info$region_names)) {
-    pos <- match(info$region_id, names(summary))
-    names(summary)[pos] <- info$region_names
+  if (!identical(info$region$id, info$region$names)) {
+    pos <- match(info$region$id, names(summary))
+    names(summary)[pos] <- info$region$names
   }
   
 

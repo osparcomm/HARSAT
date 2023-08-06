@@ -37,13 +37,24 @@
 #' @param oddity_dir The directory where the 'oddities' will be written
 #'   (sometimes supplied using 'file.path'). This directory (and subdirectories)
 #'   will be created if it does not already exist.
-#' @param control
+#' @param control A list of control parameters that override the default values
+#'   used to run the assessment. These include the reporting window; the way in
+#'   which data are matched to stations following an ICES extraction;
+#'   information about reporting regions, and so on. See Details.
 #'
 #' @returns A list with the following components:
 #' * `call`
 #' * `info`
 #' * `data`
 #' * `stations`
+#'
+#' @section Control parameters
+#'
+#'   Many aspects of the assessment process can be controlled through the
+#'   parameters stored in `info$control`. This is a list populated with default
+#'   values which can then be overwritten, if required, using the `control`
+#'   argument.
+#'
 #'
 #' @export
 read_data <- function(
@@ -118,15 +129,21 @@ read_data <- function(
     oddity_dir = oddity_dir
   )
   
-  control_default <- ctsm_control_default(purpose, compartment)
+  cntrl <- control_default(purpose, compartment)
   
-  control <- ctsm_control_modify(control_default, control)
-  
-  if (any(names(control) %in% names(info))) {
-    warning("possible conflict between function arguments and control")
+  cntrl <- control_modify(cntrl, control)
+
+  if (any(names(cntrl) %in% names(info))) {
+    id <- names(cntrl)
+    id <- id[id %in% names(info)]
+    warning(
+      "\n conflict between function arguments and control elements ", 
+      "- results may be unexpected:\n ",
+      paste(id, collapse = ", "), "\n",
+      call. = FALSE, immediate. = TRUE)
   }
   
-  info <- append(info, control)
+  info <- append(info, cntrl)
   
   
   # read in reference tables
@@ -146,17 +163,7 @@ read_data <- function(
 
   if (data_format == "ICES") {
 
-    cntrl <- list(
-      method = switch(purpose, custom = "name", "both"), 
-      area = switch(purpose, OSPAR = "OSPAR", HELCOM = "HELCOM", NULL),
-      datatype = switch(purpose, OSPAR = TRUE, FALSE), 
-      temporal = switch(purpose, OSPAR = TRUE, FALSE), 
-      governance = switch(purpose, OSPAR = c("OSPAR", "AMAP"), NULL),
-      group = switch(purpose, OSPAR = TRUE, FALSE), 
-      check_convergecne = FALSE
-    )
-    
-    data <- add_stations(data, stations, info, cntrl)
+    data <- add_stations(data, stations, info)
     
     data <- dplyr::rename(data, year = "myear")
     
@@ -196,7 +203,7 @@ read_data <- function(
 }
 
 
-ctsm_control_default <- function(purpose, compartment) {
+control_default <- function(purpose, compartment) {
   
   # import functions
   # sets up default values that control the assessment
@@ -204,26 +211,28 @@ ctsm_control_default <- function(purpose, compartment) {
   # reporting_window is set to 6 to match the MSFD reporting cycle
   # series with no data in the most recent_window are excluded
   
-  # region_id are the names or the relevant regions in the ICES extraction
-  # region_names are the names that will be used for reporting 
+  # region$id are the names or the relevant regions in the data
+  # region$names are the names that will be used for reporting 
   
-  # all_in_region is a logical that determines whether all data (and stations)
-  # must be in a region
+  # region$all is a logical that determines whether all data (and stations)
+  # must have an associated region
 
   # bivalve_spawning_season is a character vector of months when contaminant
   # data for bivalves and gastropds will be deleted because they are in the 
   # spawning season
   
-  region_id <- switch(
+  region <- list()
+  
+  region$id <- switch(
     purpose, 
     OSPAR = c("OSPAR_region", "OSPAR_subregion"),
     HELCOM = c("HELCOM_subbasin", "HELCOM_L3", "HELCOM_L4"),
     NULL
   )
+
+  region$names <- region$id
   
-  region_names <- region_id
-  
-  all_in_region <- !is.null(region_id)
+  region$all <- !is.null(region$id)
     
   bivalve_spawning_season <- switch(
     compartment, 
@@ -235,38 +244,87 @@ ctsm_control_default <- function(purpose, compartment) {
     ), 
     NULL
   )
-  
+
+  add_stations <- switch(
+    purpose, 
+    OSPAR = list(
+      method = "both",
+      area = "OSPAR",
+      datatype = TRUE,
+      temporal = TRUE,
+      governance_type = "both",
+      governance_id = c("OSPAR", "AMAP"),
+      group = TRUE,
+      check_coordinates = FALSE
+    ),
+    HELCOM = list(
+      method = "both",
+      area = "HELCOM",
+      datatype = FALSE,
+      temporal = FALSE,
+      governance_type = "none",
+      governance_id = NULL,
+      group = FALSE,
+      check_coordinates = FALSE
+    ),
+    AMAP = list(
+      method = "both",
+      area = NULL,
+      datatype = FALSE,
+      temporal = FALSE,
+      governance_type = "none",
+      governance_id = NULL,
+      group = FALSE,
+      check_coordinates = FALSE
+    ),
+    custom = list(
+      method = "name",
+      area = NULL,
+      datatype = FALSE,
+      temporal = FALSE,
+      governance_type = "none",
+      governance_id = NULL,
+      group = FALSE,
+      check_coordinates = FALSE
+    )
+  )
+    
+
   list(
     reporting_window = 6L, 
-    region_id = region_id,
-    region_names = region_names,
-    all_in_region = all_in_region, 
+    region = region,
+    add_stations = add_stations,
     bivalve_spawning_season = bivalve_spawning_season
   )
 }
 
 
-ctsm_control_modify <- function(control_default, control) {
+control_modify <- function(control_default, control) {
 
   # import functions
   # updates default control structure with user specification and does basic 
   # error checking
   
-  # initialise region_names if region_id has been modified (and region_names is
-  # not specified)
+  # region: initialise names if id has been modified and names is not specified
   
-  if ("region_id" %in% names(control) & !("region_names" %in% names(control))) {
-    control <- append(control, list(region_names = control$region_id))
+  if ("region" %in% names(control)) {
+    wk <- control$region
+    if ("id" %in% names(wk) && !("names" %in% names(wk))) {
+      control$region <- append(wk, list(names = wk$id))
+    }
   }
+
   
   control <- modifyList(control_default, control, keep.null = TRUE)
 
-  if (length(control$region_id) != length(control$region_names)) {
+  if (length(control$region$id) != length(control$region$names)) {
     stop(
-      "error in control argument: length of region_id and region_names must be ",
-      "identical"
+      "error in control argument: length of region$id and region$names must be ",
+      "identical", 
+      call. = FALSE
     )
   }
+
   
   if (!is.null(control$bivalve_spawning_season)) {
     months <- c(
@@ -275,7 +333,8 @@ ctsm_control_modify <- function(control_default, control) {
     )
     if (!all(control$bivalve_spawning_season %in% months)) {
       stop(
-        "error in control argument: invalid months in bivalve_spawning_season"
+        "error in control argument: invalid months in bivalve_spawning_season", 
+        call. = FALSE
       )
     }
   }
@@ -377,7 +436,7 @@ read_info <- function(info, path, info_files) {
   }  
       
   if (!is.null(files$region_values)) {
-    info$region_values <- ctsm_read_regions(
+    info$region$values <- ctsm_read_regions(
       files$region_values, path, info$purpose
     )
   } 
@@ -446,7 +505,7 @@ read_stations <- function(file, data_dir = ".", info) {
     # code and parent code could be kept as integers, but safer to leave as 
     # characters until have decided how we are going to merge with non-ICES data
     
-    id <- c(info$region_id, "station_code", "parent_code")
+    id <- c(info$region$id, "station_code", "parent_code")
   
     stations <- dplyr::mutate(
       stations, 
@@ -529,15 +588,15 @@ read_stations <- function(file, data_dir = ".", info) {
       waterbody_type = "character"
     )
     
-    if (!is.null(info$region_id)) {
-      extra <- rep("character", length(info$region_id))
-      names(extra) <- info$region_id
+    if (!is.null(info$region$id)) {
+      extra <- rep("character", length(info$region$id))
+      names(extra) <- info$region$id
       var_id <- c(var_id, extra)
     }
     
     required <- c(
       "country", "station_name", "station_code", "station_latitude", 
-      "station_longitude", info$region_id
+      "station_longitude", info$region$id
     )
     
     
@@ -934,8 +993,8 @@ read_contaminants <- function(file, data_dir = ".", info) {
 
   if (info$data_format %in% c("ICES_new", "ICES_old")) {
     
-    pos <- names(data) %in% info$region_id
-    if (sum(pos) != length(info$region_id)) {
+    pos <- names(data) %in% info$region$id
+    if (sum(pos) != length(info$region$id)) {
       stop("not all regional identifiers are in the data extraction")
     }
   
@@ -1048,7 +1107,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
   if (info$data_format %in% "ICES_old") {
 
     id <- c(
-      info$region_id, "censoring", "sample", "sub.sample", "sd_code", "station_code", 
+      info$region$id, "censoring", "sample", "sub.sample", "sd_code", "station_code", 
       "sd_name", "station_name"
     )
     
@@ -1079,14 +1138,22 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #' @param stations A data frame with the ICES station dictionary
 #' @param compartment A string: `"biota"`, `"sediment"` or `"water"`
 #' @param info A HARSAT information list which must contain the elements
-#'   `purpose` and `compartment`
-#' @param control A list which allows user control of the matching process:
+#'   `purpose`, `compartment`, and `add_stations`. The latter is a list of
+#'   control parameters supplied through `control_default` or `control_modify`
+#'   which control how the station matching is achieved. See details.
+#'
+#' @details `info$add_stations` is a list of control parameters that modify the
+#'   station matching process:
 #' * method: a string specifying whether the stations are matched by `"name"`,
-#'   `"coordinates"`, or `"both"`. When `"both"`, the default if `info$purpose`
-#'   is one of `"OSPAR"`, `"HELCOM"` or `"AMAP"`, the stations are matched by
-#'   name or coordinates according to rules specified by OSPAR, HELCOM or AMAP
-#'   data providers (see details). If `info$purpose` is `"custom"`, `method` is
-#'   restricted to either `"name"` or `"coordinates"`
+#'   `"coordinates"`, or `"both"`. If `info$purpose` is `"custom"`, `method` is
+#'   restricted to either `"name"` (the default) or `"coordinates"`. If
+#'   `info$purpose` is `"OSPAR"`, `"HELCOM"` or `"AMAP"`, then method is set to
+#'   `"both"` by default and stations are matched by name or coordinates
+#'   according to rules specified by OSPAR, HELCOM or AMAP data providers.
+#'   Specifically, stations are matched by name for Denmark, France (biota and
+#'   water - all years; sediment 2009 onwards), Ireland, Norway, Portugal, Spain
+#'   (2005 onwards), Sweden, The Netherlands (2007 onwards), United Kingdom. All
+#'   other stations are matched by coordinates.
 #' * area: a vector of strings containing one or more of `"OSPAR"`, `"HELCOM"`
 #'   and `"AMAP"`; this restricts the stations to those in the corresponding
 #'   convention area(s); NULL matches to all stations in the station dictionary
@@ -1098,20 +1165,30 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #'   `station_datatype` containing the string `"EF"`
 #' * temporal: a logical with `TRUE` indicating that stations should be
 #'   restricted to those with `station_purpm` containing the string `"T"`
-#' * governance: a vector of strings containing one or more of `"OSPAR"`,
-#'   `"HELCOM"` and `"AMAP"`; this restricts the stations to those with an
-#'   appropriate `station_programgovernance`. For example, if `governance ==
-#'   "OSPAR"`, then only contaminant measurements with `is_ospar_monitoring ==
-#'   "TRUE"` will be matched to a station, and only to stations with
-#'   `station_programgovernance` containing the string `"OSPAR"`. If
-#'   `governance` contains multiple values, then the matching is more
-#'   complicated. For example, if `governance == c("OSPAR", "AMAP")`, then
-#'   measurements with `is_ospar_monitoring == TRUE` and `is_amap_monitoring ==
-#'   TRUE` are matched to stations with `station_programgovernance` containing
-#'   either `"OSPAR"` or `"AMAP"` or both. Measurements with
-#'   `is_ospar_monitoring == TRUE` and `is_amap_monitoring == FALSE` are only
-#'   matched to stations with `station_programgovernance` containing `"OSPAR"`,
-#'   and so on.
+#' * governance_type: a string: `"none"`, `"data"`, `"stations"` or `"both"`.
+#'   `"none"` means data and station governance are both ignored. `"data"` means
+#'   that matching will be restricted by data governance but not station
+#'   governance; for example if `governance_id == c("OSPAR", "AMAP")`, then data
+#'   will only be matched to a station if one of `is_ospar_monitoring` and
+#'   `is_amap_monitoring` is `TRUE`, with all stations considered regardless of
+#'   station governance. `"stations"` mean that matching will be restricted by
+#'   station governance but not by data governance; for example if
+#'   `governance_id == c("OSPAR", "AMAP")`, then the stations will be restricted
+#'   to those where `station_programgovernance` contains either `"OSPAR"` or
+#'   `"AMAP"`, with all data considered regardless of data governance. `both`
+#'   uses both data and station governance. If `governance_id` contains a single
+#'   value, then the matching is strict. However, if `governance_id` contains
+#'   multiple values, then the matching is more complicated. For example, if
+#'   `governance_id == c("OSPAR", "AMAP")`, then measurements with
+#'   `is_ospar_monitoring == TRUE` and `"is_amap_monitoring == FALSE"` are
+#'   matched to stations where `station_programgovernance` contains `"OSPAR";
+#'   measurements with `is_ospar_monitoring == FALSE` and `is_amap_monitoring ==
+#'   TRUE` are matched with stations where `station_programgovernance` contains
+#'   `"AMAP"`; but measurements where `is_ospar_monitoring == TRUE` and
+#'   `is_amap_monitoring == TRUE` are matched to stations where
+#'   `station_programgovernance` contains either `"OSPAR"` or `"AMAP"`.
+#' * governance_id: a vector of strings containing one or more of `"OSPAR"`,
+#'   `"HELCOM"` and `"AMAP"`.
 #' * grouping: a logical with `TRUE` indicating that stations will be grouped
 #'   into meta-stations as specified by `station_asmtmimeparent` in the station
 #'   dictionary. Defaults to `FALSE` apart from when `info$purpose == "OSPAR"`.
@@ -1119,51 +1196,15 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #'   stations are matched by name, the sample coordinates must also be within
 #'   the station geometry. No implemented yet, so defaults ot `FALSE`.
 #'
-#' @details When `control$method` == "both"`, the rules for deciding whether
-#'   stations are matched by name or by coordinates have been specified by
-#'   OSPAR, HELCOM and AMAP data providers. It is currently the same for all
-#'   conventions, but varies between compartments. Specifically, records are
-#'   matched by name for the following countries
-#'
-#'   Biota:
-#'  * Denmark
-#'  * France
-#'  * Ireland
-#'  * Norway
-#'  * Portugal
-#'  * Spain (2005 onwards)
-#'  * Sweden
-#'  * The Netherlands (2007 onwards)
-#'  * United Kingdom
-#'
-#'   Sediment:
-#'  * Denmark
-#'  * France (2009 onwards)
-#'  * Ireland
-#'  * Norway
-#'  * Portugal
-#'  * Spain (2005 onwards)
-#'  * Sweden
-#'  * The Netherlands (2007 onwards)
-#'  * United Kingdom
-#'
-#'   Water:
-#'  * Denmark
-#'  * Ireland
-#'  * Norway
-#'  * Portugal
-#'  * Spain (2005 onwards)
-#'  * Sweden
-#'  * The Netherlands (2007 onwards)
-#'  * United Kingdom
-#'
 #' @returns A data frame containing the contaminant data augmented by variables
 #'   containing the station code and the station name
 #' 
-add_stations <- function(data, stations, info, control){
+add_stations <- function(data, stations, info){
 
   cat("\nMatching data with station dictionary\n", sep = "")
 
+  
+  control <- info$add_stations
   
   
   # get ordering variable, so output is in the original order
@@ -1171,7 +1212,8 @@ add_stations <- function(data, stations, info, control){
   data <- dplyr::mutate(data, .order = 1:nrow(data))
   
   
-  # transform .year to the year in date, some small inconsistencies, plus minus a year
+  # transform .year to the year in date; not the same as monitoring year 
+  
   data$.year <- substr(data$date, 0, 4)
   data$.year <- as.numeric(data$.year)
   x <- dplyr::rename(data, station_name = "statn")
@@ -1224,11 +1266,22 @@ add_stations <- function(data, stations, info, control){
   
   
   # messages about other restrictions 
+
+  if (control$governance_type %in% c("data", "both")) {
+    cat(
+      " - restricting to data with program governance:", 
+      paste(control$governance_id, collapse = ", "), 
+      "\n"
+    )
+    stations <- dplyr::filter(stations, grepl("T", .data$station_purpm))
+  } else {
+    cat(" - no restriction of data by program governance\n")
+  }
   
-  if (!is.null(control$governance)) {
+  if (control$governance_type %in% c("stations", "both")) {
     cat(
       " - restricting to stations with program governance:", 
-      paste(control$governance, collapse = ", "), 
+      paste(control$governance_id, collapse = ", "), 
       "\n"
     )
     stations <- dplyr::filter(stations, grepl("T", .data$station_purpm))
@@ -1315,6 +1368,7 @@ add_stations <- function(data, stations, info, control){
       water = dplyr::mutate(
         x, 
         .id = .id |  
+          (.data$country == "France") |
           (.data$country == "Spain" & .data$.year > 2004) |
           (.data$country == "The Netherlands" & .data$.year > 2006)
       ),
@@ -1369,20 +1423,24 @@ add_stations <- function(data, stations, info, control){
     }
 
     # match by program governance
+    # have already (partially) restricted by station governance
           
-    if (!is.null(control$governance)) {
+    if (control$governance_type %in% c("data", "both")) {
 
-      id <- match(control$governance, c("OSPAR", "HELCOM", "AMAP"))
+      id <- match(control$governance_id, c("OSPAR", "HELCOM", "AMAP"))
       id <- c("is_ospar_monitoring", "is_helcom_monitoring", "is_amap_monitoring")[id]
       
       # identify which conventions the measurement is marked for
       
       file_gov <- sapply(file[id], all)
 
+      # if type == "data", only need to update stations subset if the measurement
+      # does not satisfy the data governance requirement (might be easier to return)
+      
       if (!any(file_gov)) {
         stations_subset <- stations_subset[FALSE, ]
-      } else {
-        station_gov <- control$governance[file_gov]
+      } else if (control$governance_type == "both") {
+        station_gov <- control$governance_id[file_gov]
         station_gov <- paste(station_gov, collapse = "|")
         stations_subset <- dplyr::filter(
           stations_subset,
@@ -1430,7 +1488,6 @@ add_stations <- function(data, stations, info, control){
 
       # generated a warning if the minimum is calculated within filter 
       # statement - this is to see if the warning disappears
-      if (ncol(part) == 1L) browser()
       min_dist <- min(part$dist)
       sd1 <- dplyr::filter(part, .data$dist == min_dist)
       # if both distances are the same, keep the station with the highest code, 
@@ -1511,29 +1568,32 @@ add_stations <- function(data, stations, info, control){
     }
     
     # match by program governance
+    # have already (partially) restricted by station governance
     
-    if (!is.null(control$governance)) {
+    if (control$governance_type %in% c("data", "both")) {
       
-      id <- match(control$governance, c("OSPAR", "HELCOM", "AMAP"))
+      id <- match(control$governance_id, c("OSPAR", "HELCOM", "AMAP"))
       id <- c("is_ospar_monitoring", "is_helcom_monitoring", "is_amap_monitoring")[id]
       
       # identify which conventions the measurement is marked for
       
       file_gov <- sapply(file[id], all)
       
+      # if type == "data", only need to update stations subset if the measurement
+      # does not satisfy the data governance requirement (might be easier to return)
+      
       if (!any(file_gov)) {
         stations_subset <- stations_subset[FALSE, ]
-      } else {
-        station_gov <- control$governance[file_gov]
+      } else if (control$governance_type == "both") {
+        station_gov <- control$governance_id[file_gov]
         station_gov <- paste(station_gov, collapse = "|")
         stations_subset <- dplyr::filter(
           stations_subset,
           grepl(station_gov, .data$station_programgovernance)
         )
       }
+    }
       
-    } 
-    
     if(nrow(stations_subset) == 0L){
       result <- dplyr::mutate(file, station_code = NA)
       res <- rbind(res, result)
@@ -1864,7 +1924,10 @@ ctsm_tidy_stations <- function(stations, info) {
   
   # ensure country is consistent
   
-  stations <- dplyr::mutate(stations, country = str_to_title(.data$country))
+  stations <- dplyr::mutate(
+    stations, 
+    country = stringr::str_to_title(.data$country)
+  )
   
   
  # replace backward slash with forward slash in station (long) name
@@ -1896,7 +1959,7 @@ ctsm_tidy_stations <- function(stations, info) {
     
     stations <- dplyr::arrange(stations, .data$station_id, .data$startYear, .data$endYear)
 
-    stations <- dplyr::arrange(stations, desc(row_number()))
+    stations <- dplyr::arrange(stations, desc(dplyr::row_number()))
     
     stations <- ctsm_check(
       stations, 
@@ -1914,7 +1977,7 @@ ctsm_tidy_stations <- function(stations, info) {
   
   
   col_id <- c(
-    info$region_id, "country", "station_name", "station_code", "station_longname", 
+    info$region$id, "country", "station_name", "station_code", "station_longname", 
     "station_latitude", "station_longitude", "station_type", "waterbody_type"
   )
   
@@ -1924,7 +1987,7 @@ ctsm_tidy_stations <- function(stations, info) {
   
   # order data
   
-  col_id <- c(info$region_id, "country", "station_name")
+  col_id <- c(info$region$id, "country", "station_name")
   
   stations <- dplyr::arrange(stations, dplyr::across(all_of(col_id))) 
   
@@ -1970,11 +2033,11 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
   # check all regions are within the appropriate OSPAR_region 
   # can sometimes go wrong due to local shape file errors
   
-  if (all(c("OSPAR_region", "OSPAR_subregion") %in% info$region_id)) {
+  if (all(c("OSPAR_region", "OSPAR_subregion") %in% info$region$id)) {
     
     ok <- local({
       id1 <- stations$OSPAR_region
-      id2 <- info$region_values[stations$OSPAR_subregion, "OSPAR_region"]
+      id2 <- info$region$values[stations$OSPAR_subregion, "OSPAR_region"]
       !is.na(id2) & id1 == id2
     })
     
@@ -2431,20 +2494,20 @@ ctsm_create_timeSeries <- function(
   
   # drop data corresponding to stations outside the region (mainly OSPAR or HELCOM requirement)
   
-  if (info$all_in_region) {
+  if (info$region$all) {
     
-    data <- left_join(
+    data <- dplyr::left_join(
       data, 
-      station_dictionary[c("station_code", info$region_id)],
+      station_dictionary[c("station_code", info$region$id)],
       by = "station_code"
     )
     
     if (any(is.na(data[info$region.id]))) {
       cat("   Dropping stations with missing region information in station dictionary\n")
-      data <- tidyr::drop_na(data, all_of(info$region_id))
+      data <- tidyr::drop_na(data, all_of(info$region$id))
     }
     
-    data <- data[setdiff(names(data), info$region_id)]
+    data <- data[setdiff(names(data), info$region$id)]
   }
 
 
@@ -2954,7 +3017,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   
   # id <- setdiff(names(timeSeries), c("basis", "unit"))
   
-  timeSeries <- column_to_rownames(timeSeries, "seriesID")
+  timeSeries <- tibble::column_to_rownames(timeSeries, "seriesID")
 
   
   # change timeSeries output columns to fit the levels of the xml requirements
@@ -3441,7 +3504,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
     
     # check all bases are the same 
 
-    stopifnot(n_distinct(x$basis) == 1)
+    stopifnot(dplyr::n_distinct(x$basis) == 1)
     
     if (!all(drop %in% x$determinand)) return(NULL)
 
@@ -3450,7 +3513,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
     # ideally use unit in info$determinand, but makes it more awkward because
     # have to pass in compartment
     
-    if (n_distinct(x$unit) > 1) {
+    if (dplyr::n_distinct(x$unit) > 1) {
 
       # get modal value of unit
       
@@ -3481,7 +3544,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
     
     if ("" %in% x$censoring)
       out$censoring <- ""
-    else if (n_distinct(x$censoring) == 1) 
+    else if (dplyr::n_distinct(x$censoring) == 1) 
       out$censoring <- unique(x$censoring) 
     else 
       out$censoring <- "<"
@@ -3575,7 +3638,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
     
     if (!all(drop %in% x$determinand)) return(NULL)
 
-    stopifnot(n_distinct(x$basis) == 1)
+    stopifnot(dplyr::n_distinct(x$basis) == 1)
     
     
     # convert to ug/kg and then to TEQ
@@ -3612,7 +3675,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
     
     if ("" %in% x$censoring)
       out$censoring <- ""
-    else if (n_distinct(x$censoring) == 1) 
+    else if (dplyr::n_distinct(x$censoring) == 1) 
       out$censoring <- unique(x$censoring) 
     else 
       out$censoring <- "<"
