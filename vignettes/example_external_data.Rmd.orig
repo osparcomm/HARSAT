@@ -59,12 +59,12 @@ biota_data <- ctsm_tidy_data(biota_data)
 
 # Construct timeseries
 
-Uses OSPAR basis choice for mercury
+Uses the basis most often reported for each timeseries
 
 ```{r external-timeseries}
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeSeries <- create_timeseries(
   biota_data,
-  get_basis = get_basis_biota_OSPAR
+  get_basis = get_basis_most_common
 )
 ```
 

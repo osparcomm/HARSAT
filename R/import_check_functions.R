@@ -69,7 +69,7 @@ ctsm_check_variable <- function(data, var_id, info) {
   id <- data$action %in% c("error", "warning")
   if (any(id)) {
     message(
-      "   Unexpected or missing values for '", var_id, "': see ", outfile_name
+      "  Unexpected or missing values for '", var_id, "': see ", outfile_name
     )
     oddities <- data[id, c("action", data_names)]
     readr::write_excel_csv(oddities, outfile, na = "")

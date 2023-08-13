@@ -577,8 +577,8 @@ ctsm_read_determinand <- function(
 #'   function will fail with an error message if there are no such determinands.
 #'
 #' @export
-ctsm_get_determinands <- function(info) {
-  
+get_determinands <- function(info) {
+
   # information_functions.R
   
   assess_id <- paste0(info$compartment, "_assess")
