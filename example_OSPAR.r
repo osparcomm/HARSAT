@@ -22,11 +22,11 @@ devtools::load_all()
 # - the station dictionary
 
 biota_data <- read_data(
-  compartment = "sediment", 
+  compartment = "water", 
   purpose = "OSPAR",                               
   # contaminants = "ICES_DOME_XHAT_biota_data_2023071211435199.txt",
-  contaminants = "ICES_DOME_XHAT_sediment_data_2023071218201042.txt",
-  # contaminants = "ICES_DOME_XHAT_water_data_2023071218223355.txt",
+  # contaminants = "ICES_DOME_XHAT_sediment_data_2023071218201042.txt",
+  contaminants = "ICES_DOME_XHAT_water_data_2023071218223355.txt",
   stations = "ICES_DOME_XHAT_station_data_2023071211380640.txt", 
   data_dir = file.path("data", "example_OSPAR"),
   # info_files = list(

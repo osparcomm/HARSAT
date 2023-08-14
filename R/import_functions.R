@@ -165,7 +165,7 @@ read_data <- function(
 
     data <- add_stations(data, stations, info)
     
-    data <- dplyr::rename(data, year = "myear")
+    data <- add_filter(data, info)
     
     return(data)
   }
@@ -1018,7 +1018,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
     data <- dplyr::rename(
       data,
       submitted.station = statn, 
-      sd_name = sd_code_name,
+      sd_name = sd_name_match,
       sd_code = sd_code_match,
       station_name = sd_name_final,
       station_code = sd_code_final,
@@ -1813,6 +1813,73 @@ add_stations <- function(data, stations, info){
   
 }
 
+
+
+add_filter <- function(data, info) {
+  
+  # common to all compartments
+  
+  data <- dplyr::rename(
+    data, 
+    station_submitted = "statn", 
+    year = "myear",
+    sample_latitude = "latitude",
+    sample_longitude = "longitude",
+    depth_upper = "dephu", 
+    depth_lower = "dephl",
+    determinand = "param", 
+    matrix = "matrx", 
+    unit = "munit",
+    limit_detection = "detli",
+    limit_quantification = "lmqnt",
+    uncertainty = "uncrt",
+    unit_uncertainty = "metcu", 
+    censoring = "qflag",
+    method_analysis = "metoa",
+    method_extraction = "metcx",
+    method_pretreatment = "metpt",
+    replicate = "tblparamid", 
+    sample = "tblsampleid", 
+    upload = "tbluploadid"
+  )
+
+  
+  # biota specific
+  
+  if (info$compartment == "biota") {
+    data <- dplyr::rename(
+      data, 
+      sub.sample = "tblbioid", 
+      sex = "sexco",
+      n_individual = "noinp"
+    )    
+  }
+  
+  
+  # apply ICES filters
+  
+  # exclude suspect values in all compartments 
+  
+  data <- dplyr::mutate(
+    data, 
+    keep = !grepl("S", .data$vflag)
+  )
+  
+  
+  # water: retain samples where the upper depth <= 5.5m
+  
+  if (info$compartment == "water") {
+    data = dplyr::mutate(
+      data, 
+      .ok = !is.na(.data$depth_upper) & .data$depth_upper <= 5.5,
+      keep = keep & .ok,
+      .ok = NULL
+    )
+  }
+  
+  
+  data
+}
 
 
 
