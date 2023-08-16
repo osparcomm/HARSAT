@@ -165,7 +165,7 @@ info_TEQ["CDFO"] <- 0.0003
 biota_data$data$country <- NULL
 
 
-biota_timeSeries <- create_timeseries(
+biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
@@ -236,7 +236,7 @@ biota_timeSeries$data$country <- NULL
 
 ## sediment ----
 
-sediment_timeSeries <- create_timeseries(
+sediment_timeSeries <- ctsm_create_timeSeries(
   sediment_data,
   determinands.control = list(
     SBDE6 = list(
@@ -257,7 +257,7 @@ sediment_timeSeries <- create_timeseries(
 
 ## water ----
 
-water_timeSeries <- create_timeseries(
+water_timeSeries <- ctsm_create_timeSeries(
   water_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
