@@ -3867,7 +3867,7 @@ HELCOM assessment)</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
 <span>    <span class="va">data_type</span> <span class="op">==</span> <span class="st">"CS"</span>,</span>
 <span>    <span class="va">determinand</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="fu">ctsm_get_determinands</span><span class="op">(</span><span class="st">"sediment"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="../reference/ctsm_get_determinands.html">ctsm_get_determinands</a></span><span class="op">(</span><span class="st">"sediment"</span><span class="op">)</span>,</span>
 <span>      <span class="st">"BDE28"</span>, <span class="st">"BDE47"</span>, <span class="st">"BDE99"</span>, <span class="st">"BD100"</span>, <span class="st">"BD153"</span>, <span class="st">"BD154"</span>, <span class="st">"HBCDA"</span>, <span class="st">"HBCDB"</span>, <span class="st">"HBCDG"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"~"</span>, <span class="va">method_extraction</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -92989,7 +92989,7 @@ human health QS</p>
 <span></span>
 <span><span class="va">biota_data</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">country</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span></span>
-<span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    PFOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N-PFOS"</span>, <span class="st">"BR-PFOS"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
@@ -93113,7 +93113,7 @@ human health QS</p>
 <h3 id="sediment-1">Sediment<a class="anchor" aria-label="anchor" href="#sediment-1"></a>
 </h3>
 <div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sediment_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">sediment_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">sediment_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    SBDE6 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -93166,7 +93166,7 @@ human health QS</p>
 <h3 id="water">Water<a class="anchor" aria-label="anchor" href="#water"></a>
 </h3>
 <div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">water_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">water_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
 <span>  <span class="va">water_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    PFOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N-PFOS"</span>, <span class="st">"BR-PFOS"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span>
