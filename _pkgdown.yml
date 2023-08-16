@@ -7,7 +7,9 @@ navbar:
    articles:
     text: Articles
     menu:
-    - text: "File formats"
+    - text: "Data file management"
+    - text: File locations
+      href: articles/file-management.html
     - text: External file format
       href: articles/external-file-format.html
     - text: -------

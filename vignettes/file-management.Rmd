@@ -1,0 +1,150 @@
+---
+title: "File management"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{File management}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Overview
+
+The R package `harsat` is designed to make it easy for you to work 
+with your own files. `harsat` uses the following different kinds of
+file:
+
+- **Data files**. These are stored in a data directory anywhere
+  on your file system. Your actual data will be in these files.
+  They will typically be CSV files.
+
+- **Analysis files**. These drive your actual analysis. Three 
+  files are particulary important: species files, determinand 
+  files, and threshold files. You will normally keep these in
+  a configuration directory somewhere within your file system.
+  These will typically also be CSV files, but they will be 
+  smaller and won't change anywhere near as often as the data files.
+
+Note that if you are downloading, for example, a zip file containing
+everything you need for a HELCOM or OSPAR run, it will likely include
+*both* data files and analysis files, typically in different directories.
+
+- **Configuration files**. There are several additional configuration
+  files, which define, for example, methods of extraction and analysis,
+  georgraphic regions, and so on. These **may** be overridden by 
+  keeping a modified copy in the same analysis directory above, or, 
+  the `harsat` package may provide default files which are good enough
+  for common cases. Again, these will typically be CSV files, but they
+  will be stored in the `harsat` package's installed directory, which 
+  will likely be somewhere more obscure in your file system. You should
+  be able to find it by checking the result of the R `.libPaths()`
+  function, which returns R's list of library directories. One of these
+  will contain a `harsat` directory with the installed files within it.
+
+If you need to assemble a reliable set of files for analysis, so that
+you can distribute them, you should include both a data directory and
+an analysis directory -- and if you are being careful to support full
+reproducibility, you probably want to make sure that all configuration
+files needed are part of this distribution. 
+
+This is necessary because updates to the R `harsat` package *may*
+change the contents of the default configuration files. Your own
+data files and analysis files, and any copied or modified configuration
+files you have dropped into your analysis file directory, will not
+be affected. 
+
+## Typical workflow
+
+Let's imagine you want to run an analysis with `harsat`, and have 
+already installed the R package (as described in the 
+[Getting started page](harsat.html)).
+
+Now you need some data. Let's imagine you want to use OSPAR data,
+but the same basic pattern works no matter which you want to use.
+So you can navigate to our [Datasets](datasets.html) page, and look for 
+an approprate zip file to download for OSPAR. 
+
+If you download and unzip this file (you can unzip it anywhere you like,
+but let's pretend we're using Windows and we unzip it at: `C:\Users\stuart\OSPAR 2022`)
+you'll see that your disk contains files as follows:
+
+```
++ C:\Users\stuart\OSPAR 2022
+  |
+  + data
+  | |
+  | + test_data.csv
+  | + station_dictionary.csv
+  | + quality_assurance.csv
+  |
+  + information
+    |
+    + determinand.csv
+    + regions.csv
+    + species.csv
+    + thresholds_biota.csv
+    + thresholds_sediment.csv
+    + thresholds_water.csv
+```
+
+This means that your directories are as follows:
+
+- **Data directory**: `C:\Users\stuart\OSPAR 2022\data`
+- **Analysis directory**: `C:\Users\stuart\OSPAR 2022\information`
+
+Obviously, you can put these directories anywhere you like on your file
+system. You can even put them on a removable disk if you like, or a 
+network shared drive.
+
+So, now let's see how you might use these to run an analysis.
+
+## Reading your data files
+
+Virtually all the work you need to do involves the call to `harsat`'s
+`read_data()` function. 
+
+Your call will typically look like this:
+
+```r
+biota_data <- read_data(
+  compartment = "biota", 
+  purpose = "OSPAR",                               
+  contaminants = "test_data.csv", 
+  stations = "station_dictionary.csv", 
+  QA = "quality_assurance.csv",
+  data_dir = 'C:/Users/stuart/OSPAR 2022/data',             ## Note: forward slashes!
+  data_format = "ICES_old",
+  info_files = list(
+    determinand = "determinand.csv", 
+    thresholds = "thresholds_biota.csv"
+  ),
+  info_path = c('C:/Users/stuart/OSPAR 2022/information'),  ## Again: forward slashes!
+  extraction = "2022/01/11",
+  max_year = 2020L  
+)
+```
+
+There are a few important things to see here:
+
+1. We use forward slashes with Windows, not backward slashes. Windows can 
+   get a bit grumpy if we use backward slashes, so generally it is much
+   the best to simply replace all the `\` characters with `/` and you 
+   should be good. 
+
+2. The `info_path` parameter is strictly a *vector*, not a single string. 
+   `harsat` will actually search through every directory in this vector,
+   looking for files like `determinand.csv`. If the file is found in your 
+   local analysis directory, it gets read and used. If not, we may try
+   any other directories in this vector. If we get to the end and we've
+   still not found a particular file (especially for common standard ones
+   like `matrix.csv` which translates common codes) then `harsat`'s built-in
+   directory of **configuration files** gets used as a last resort. If a
+   file is really essential and we still can't find it, then `harsat` will
+   immediately throw an error so you can intervene.
+
+When `harsat` does all this, it will log the file it actually used, *and also*
+log a "thumbprint" of the file contents -- typically something like 
+a string of hexadecimal digits. This will be the same whereever the file
+comes from, so long as the contents of the file are the same. If you move a
+file into a different directory but don't edit it, the same thumbprint will
+show. So, the thumbprints are a vital tool in tracking reproducibility, as 
+they change when the contents of the data changes.
