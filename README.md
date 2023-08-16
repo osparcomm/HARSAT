@@ -14,6 +14,7 @@ Additional R packages to those which come with the standard RStudio installation
 
 *	tidyverse version 2.0.0
 * dplyr
+* lubridate
 * stringr
 * tibble
 * sf
