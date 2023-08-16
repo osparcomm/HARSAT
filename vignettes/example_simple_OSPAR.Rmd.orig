@@ -67,13 +67,12 @@ biota_data <- ctsm_tidy_data(biota_data)
 
 ## Construct timeseries
 
-Identifies groups of data that form a coherent timeseries.
+Identifies groups of data that form coherent timeseries.
 Also does a lot of data cleaning and processing (creates oddities folder).
 
 ```{r ospar-create-timeseries}
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeSeries <- create_timeseries(
   biota_data,
-  determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"), 
   determinands.control = list(
     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
@@ -82,20 +81,12 @@ biota_timeSeries <- ctsm_create_timeSeries(
 )
 ```
 
-Identical (apart from call) to: 
+The determinands to be assessed are typically identified in the determinand reference table. However, they can also be specified (or overriden) using the determinands argument, as below: 
 
 ```{r eval=FALSE}
-ctsm_create_timeSeries(
+create_timeseries(
   biota_data,
-  determinands = ctsm_get_determinands("biota"),
-  determinands.control = list(
-    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
-    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  )
-)
-
-ctsm_create_timeSeries(
-  biota_data,
+  determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"), 
   determinands.control = list(
     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")

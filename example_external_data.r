@@ -45,7 +45,7 @@ biota_data <- ctsm_tidy_data(biota_data)
 
 # uses OSPAR basis choice for mercury
 
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeSeries <- create_timeseries(
   biota_data,
   get_basis = get_basis_biota_OSPAR
 )

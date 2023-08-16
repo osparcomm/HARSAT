@@ -1489,7 +1489,8 @@ add_stations <- function(data, stations, info){
       # generated a warning if the minimum is calculated within filter 
       # statement - this is to see if the warning disappears
       min_dist <- min(part$dist)
-      sd1 <- dplyr::filter(part, .data$dist == min_dist)
+      # sd1 <- dplyr::filter(part, .data$dist == min_dist)
+      sd1 <- part[part$dist == min_dist, ]
       # if both distances are the same, keep the station with the highest code, 
       # should be the newest one
       sd1 <- dplyr::filter(sd1, .data$station_code == max(.data$station_code)) 
@@ -1872,7 +1873,7 @@ ctsm_tidy_data <- function(ctsm_obj) {
 
   # set up oddity directory and back up any previous oddity files
   
-  ctsm_initialise_oddities(info$oddity_dir, info$compartment)
+  initialise_oddities(info$oddity_dir, info$compartment)
   
   
   # tidy station dictionary and contaminant data
@@ -2333,9 +2334,9 @@ ctsm_link_QA <- function(QA, data, compartment) {
 #' Cleans the data and turns it into time series structures ready for assessment
 #' 
 #' @export
-ctsm_create_timeSeries <- function(
+create_timeseries <- function(
   ctsm.obj, 
-  determinands = ctsm_get_determinands(ctsm.obj$info), 
+  determinands = get_determinands(ctsm.obj$info), 
   determinands.control = NULL, 
   oddity_path = "oddities", 
   return_early = FALSE, 
@@ -2363,7 +2364,15 @@ ctsm_create_timeSeries <- function(
     )
   }
 
-    
+  wk <- get_determinands(ctsm.obj$info)
+  if (length(wk) >= 1L && !identical(sort(determinands), sort(wk))) {
+    message(
+      "\nDeterminands supplied to create_timeseries replace those specified in the\n", 
+      "  determinand reference table")
+  }
+  
+  
+
   # normalisation can either be a logical (TRUE uses default normalisation function)
   # or a function
   
@@ -2393,7 +2402,7 @@ ctsm_create_timeSeries <- function(
   # lots of data cleansing - first ensure oddity directory exists and back up
   # any previous oddity files
 
-  oddity_path <- ctsm_initialise_oddities(info$oddity_dir, info$compartment)
+  oddity_path <- initialise_oddities(info$oddity_dir, info$compartment)
 
 
   # checks station dictionary:
@@ -3160,7 +3169,7 @@ ctsm_get_digestion <- function(data, info) {
 }
 
 
-ctsm_initialise_oddities <- function(path, compartment) {
+initialise_oddities <- function(path, compartment) {
 
   # location: import_functions.R
   # purpose: sets up oddity folder and backs up previous runs 
@@ -3182,7 +3191,7 @@ ctsm_initialise_oddities <- function(path, compartment) {
   if (!dir.exists(backup)) dir.create(backup) 
       
   cat("\nOddities will be written to '", output, "' with previous oddities ", 
-      "backed up to\n '", backup, "'\n", sep = "")
+      "backed up to\n  '", backup, "'\n", sep = "")
   
   old.files <- dir(output, full.names = TRUE)
   file.copy(from = old.files, to = backup, overwrite = TRUE)
