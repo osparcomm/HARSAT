@@ -150,7 +150,7 @@ will need to point to a directory containing a copy.</p>
 <p>Identifies groups of data that form a coherent timeseries. Also does
 a lot of data cleaning and processing (creates oddities folder).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD"</span>, <span class="st">"CB153"</span>, <span class="st">"HBCD"</span>,<span class="st">"HBCDA"</span>, <span class="st">"HBCDG"</span>, <span class="st">"PYR1OH"</span><span class="op">)</span>, </span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -185,16 +185,16 @@ a lot of data cleaning and processing (creates oddities folder).</p>
 <span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2015 and 2020</span></span></code></pre></div>
 <p>Identical (apart from call) to:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
-<span>  determinands <span class="op">=</span> <span class="fu"><a href="../reference/ctsm_get_determinands.html">ctsm_get_determinands</a></span><span class="op">(</span><span class="st">"biota"</span><span class="op">)</span>,</span>
+<span>  determinands <span class="op">=</span> <span class="fu">ctsm_get_determinands</span><span class="op">(</span><span class="st">"biota"</span><span class="op">)</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    HBCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HBCDA"</span>, <span class="st">"HBCDB"</span>, <span class="st">"HBCDG"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
 <span>    <span class="st">"LIPIDWT%"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EXLIP%"</span>, <span class="st">"FATWT%"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"bespoke"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
+<span><span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    HBCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HBCDA"</span>, <span class="st">"HBCDB"</span>, <span class="st">"HBCDG"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
