@@ -54,7 +54,7 @@ biota_data <- ctsm_tidy_data(biota_data)
 # identifies groups of data that form a coherent timeseries
 # also does a lot of data cleaning and processing (creates oddities folder)
 
-biota_timeSeries <- create_timeseries(
+biota_timeSeries <- ctsm_create_timeSeries(
   biota_data,
   determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"), 
   determinands.control = list(
