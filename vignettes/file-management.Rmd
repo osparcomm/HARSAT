@@ -14,42 +14,41 @@ with your own files. `harsat` uses the following different kinds of
 file:
 
 - **Data files**. These are stored in a data directory anywhere
-  on your file system. Your actual data will be in these files.
-  They will typically be CSV files.
-
+  on your file system. Your actual data (contaminant measurments and 
+  station dictionary) will be in these files.  They will be TAB files
+  if they were downloaded from the ICES webservice (i.e. in ICES format) 
+  or CSV files if you have put them together yourself (in the simpler 
+  external format).
+  
 - **Analysis files**. These drive your actual analysis. Three 
-  files are particulary important: species files, determinand 
-  files, and threshold files. You will normally keep these in
-  a configuration directory somewhere within your file system.
-  These will typically also be CSV files, but they will be 
-  smaller and won't change anywhere near as often as the data files.
-
-Note that if you are downloading, for example, a zip file containing
-everything you need for a HELCOM or OSPAR run, it will likely include
-*both* data files and analysis files, typically in different directories.
+  files are particulary important: the determinand file, the species 
+  file (if doing a biota assessment) and the threshold file. You will 
+  normally keep these in an analysis directory somewhere in your file system.
+  These will be CSV files, but they will be smaller and won't change 
+  anywhere near as often as the data files. 
 
 - **Configuration files**. There are several additional configuration
-  files, which define, for example, methods of extraction and analysis,
-  georgraphic regions, and so on. These **may** be overridden by 
-  keeping a modified copy in the same analysis directory above, or, 
-  the `harsat` package may provide default files which are good enough
-  for common cases. Again, these will typically be CSV files, but they
-  will be stored in the `harsat` package's installed directory, which 
-  will likely be somewhere more obscure in your file system. You should
-  be able to find it by checking the result of the R `.libPaths()`
-  function, which returns R's list of library directories. One of these
-  will contain a `harsat` directory with the installed files within it.
+  files which provide information about, for example, chemical methods
+  or pivot values for sediment normalisation. The `harsat` package 
+  provides default versions of these files which will be fine for most 
+  assessments. However, you **may** override the defaults by putting  
+  modified copies of the files in the analysis directory described above.
+  The configuration files are also CSV files. 
 
-If you need to assemble a reliable set of files for analysis, so that
-you can distribute them, you should include both a data directory and
-an analysis directory -- and if you are being careful to support full
-reproducibility, you probably want to make sure that all configuration
-files needed are part of this distribution. 
+The [Datasets](datasets.html) page provides zip files of:  
 
-This is necessary because updates to the R `harsat` package *may*
+- data and assessment files for each vignette
+- analysis files for recent OSPAR, HELCOM and AMAP assessments
+- the default additional configuration files
+
+If you need to assemble a reliable set of files for an assessment, you 
+should have both a data directory and an analysis directory.  To 
+support full reproducibility, it would be good practice to also put a 
+copy of the all the configuration files (whether modified or not) in the 
+analysis directory. This is because updates to the R `harsat` package *may*
 change the contents of the default configuration files. Your own
 data files and analysis files, and any copied or modified configuration
-files you have dropped into your analysis file directory, will not
+files you have put into your analysis directory, will not
 be affected. 
 
 ## Typical workflow
@@ -58,17 +57,18 @@ Let's imagine you want to run an analysis with `harsat`, and have
 already installed the R package (as described in the 
 [Getting started page](harsat.html)).
 
-Now you need some data. Let's imagine you want to use OSPAR data,
-but the same basic pattern works no matter which you want to use.
+Now you need some data. Typically you would get this from the ICES 
+webservice, or put together your own data files using the simpler external format.  
+But for now let's imagine you want to try out the OSPAR vignette.
 So you can navigate to our [Datasets](datasets.html) page, and look for 
-an approprate zip file to download for OSPAR. 
+an approprate zip file to download for the OSPAR vignette. 
 
 If you download and unzip this file (you can unzip it anywhere you like,
-but let's pretend we're using Windows and we unzip it at: `C:\Users\stuart\OSPAR 2022`)
+but let's pretend we're using Windows and we unzip it at: `C:\Users\stuart\OSPAR_vignette`)
 you'll see that your disk contains files as follows:
 
 ```
-+ C:\Users\stuart\OSPAR 2022
++ C:\Users\stuart\OSPAR_vignette
   |
   + data
   | |
@@ -76,33 +76,31 @@ you'll see that your disk contains files as follows:
   | + station_dictionary.csv
   | + quality_assurance.csv
   |
-  + information
+  + analysis 
     |
     + determinand.csv
-    + regions.csv
     + species.csv
     + thresholds_biota.csv
-    + thresholds_sediment.csv
-    + thresholds_water.csv
 ```
 
 This means that your directories are as follows:
 
-- **Data directory**: `C:\Users\stuart\OSPAR 2022\data`
-- **Analysis directory**: `C:\Users\stuart\OSPAR 2022\information`
+- **Data directory**: `C:\Users\stuart\OSPAR_vignette\data`
+- **Analysis directory**: `C:\Users\stuart\OSPAR_vignette\analysis`
 
 Obviously, you can put these directories anywhere you like on your file
 system. You can even put them on a removable disk if you like, or a 
-network shared drive.
+network shared drive. You can also call your directories something else. 
+For example, you might call them `data_vignette` and `analysis_vignette`
+to distinguish them from other assessments.
 
 So, now let's see how you might use these to run an analysis.
 
 ## Reading your data files
 
 Virtually all the work you need to do involves the call to `harsat`'s
-`read_data()` function. 
-
-Your call will typically look like this:
+`read_data()` function. Let's suppose your R working directory (or R Project) is 
+`C:\Users\stuart\OSPAR_vignette\`.  Your call will then typically look like this:
 
 ```r
 biota_data <- read_data(
@@ -110,25 +108,46 @@ biota_data <- read_data(
   purpose = "OSPAR",                               
   contaminants = "test_data.csv", 
   stations = "station_dictionary.csv", 
-  QA = "quality_assurance.csv",
-  data_dir = 'C:/Users/stuart/OSPAR 2022/data',             ## Note: forward slashes!
-  data_format = "ICES_old",
-  info_files = list(
-    determinand = "determinand.csv", 
-    thresholds = "thresholds_biota.csv"
-  ),
-  info_path = c('C:/Users/stuart/OSPAR 2022/information'),  ## Again: forward slashes!
-  extraction = "2022/01/11",
-  max_year = 2020L  
+  data_format = "ICES",
 )
 ```
 
-There are a few important things to see here:
+By default, the function looks for your data and analysis files in the directories
+called `data` and `assessment` that are nested inside your working directory.  If you 
+have called them something else, then you can use the `data_dir` and `analysis_dir` 
+arguments.  For example: 
 
-1. We use forward slashes with Windows, not backward slashes. Windows can 
-   get a bit grumpy if we use backward slashes, so generally it is much
-   the best to simply replace all the `\` characters with `/` and you 
-   should be good. 
+```r
+biota_data <- read_data(
+  compartment = "biota", 
+  purpose = "OSPAR",                               
+  contaminants = "test_data.csv", 
+  stations = "station_dictionary.csv",
+  data_dir = "data_vignette",
+  data_format = "ICES",
+  analysis_dir = "analysis_vignette"
+)
+```
+
+You can also specify absolute path names
+
+```r
+biota_data <- read_data(
+  compartment = "biota", 
+  purpose = "OSPAR",                               
+  contaminants = "test_data.csv", 
+  stations = "station_dictionary.csv",
+  data_dir = file.path("C:", "Users", "stuart", "OSPAR_vignette", "data"),
+  data_format = "ICES",
+  analysis_dir = file.path("C:", "Users", "stuart", "somewhere_else", "assessment"),
+)
+```
+
+There are a few important things to see here: 
+
+## Would like to encourage file.path which is platform independent ##
+
+## Think we should drop this - see comments ##
 
 2. The `info_path` parameter is strictly a *vector*, not a single string. 
    `harsat` will actually search through every directory in this vector,
