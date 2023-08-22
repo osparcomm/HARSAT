@@ -145,11 +145,10 @@ biota_data <- read_data(
 
 There are a few important things to see here: 
 
-## Would like to encourage file.path which is platform independent ##
+1. Note the use of `file.path()` here to make portable pathnames. Of course,
+   each user can use whatever filename pattern works best for them. 
 
-## Think we should drop this - see comments ##
-
-2. The `info_path` parameter is strictly a *vector*, not a single string. 
+2. The `info_path` parameter can be a *vector* as well as a single string. 
    `harsat` will actually search through every directory in this vector,
    looking for files like `determinand.csv`. If the file is found in your 
    local analysis directory, it gets read and used. If not, we may try
