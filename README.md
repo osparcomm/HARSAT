@@ -2,7 +2,7 @@
 # harsat
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) ![build](https://github.com/osparcomm/harsat/actions/workflows/build.yml/badge.svg?branch=main)
 <!-- badges: end -->
 
 Requirements:
