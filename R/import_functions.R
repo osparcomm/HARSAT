@@ -166,8 +166,8 @@ read_data <- function(
     data <- add_stations(data, stations, info)
     
     data <- add_filter(data, info)
-    
-    return(data)
+
+    data <- dplyr::filter(data, .data$keep)
   }
     
 
@@ -1476,20 +1476,17 @@ add_stations <- function(data, stations, info){
         sdpoint_sfc <- sf::st_sfc(sdpoint)
         # make a version of sdpoint_sfc using crs= 4326
         sdpoint_sfc_4326 <- sf::st_set_crs(sdpoint_sfc,4326)
-        sd2 <- dplyr::mutate(
-          sd2, 
-          dist = sf::st_distance(dpoint_sfc_4326, sdpoint_sfc_4326)
-        )
+        # calculate distance and turn to scalar
+        sd_dist <- sf::st_distance(dpoint_sfc_4326, sdpoint_sfc_4326)
+        attributes(sd_dist) <- NULL
+        sd2$dist <- sd_dist
         part <- rbind(part, sd2)
       }
       part <- as.data.frame(part)
       
       part <- dplyr::select(part, - station_geometry)
 
-      # generated a warning if the minimum is calculated within filter 
-      # statement - this is to see if the warning disappears
-      min_dist <- min(part$dist)
-      sd1 <- dplyr::filter(part, .data$dist == min_dist)
+      sd1 <- dplyr::filter(part, .data$dist == min(.data$dist))
       # if both distances are the same, keep the station with the highest code, 
       # should be the newest one
       sd1 <- dplyr::filter(sd1, .data$station_code == max(.data$station_code)) 
@@ -1866,17 +1863,39 @@ add_filter <- function(data, info) {
   )
   
   
-  # water: retain samples where the upper depth <= 5.5m
+  # water: 
+  # retain samples where the upper depth <= 5.5m
+  # remove samples where matrix == "SPM"
+  # remove samples where there is no filtration information
+  # create filtration column
   
   if (info$compartment == "water") {
+
     data = dplyr::mutate(
       data, 
       .ok = !is.na(.data$depth_upper) & .data$depth_upper <= 5.5,
-      keep = keep & .ok,
+      .ok = .ok & .data$matrix == "WT", 
+      .ok = .ok & !is.na(.data$method_pretreatment),
+      keep = .data$keep & .ok,
       .ok = NULL
     )
+    
+    wk <- strsplit(data$method_pretreatment, "~|-")
+    data$filtration <- sapply(
+      wk, 
+      function(x) {
+        if (length(x) == 1L && is.na(x)) {
+          NA_character_
+        } else if (any(c("NF", "NONE") %in% x)) {
+          "unfiltered" 
+        } else {
+          "filtered"
+        }
+      }
+    )
+    
   }
-  
+
   
   data
 }
@@ -1943,7 +1962,34 @@ ctsm_tidy_data <- function(ctsm_obj) {
   
   
   # tidy station dictionary and contaminant data
+
+  # drop data with no station_code and stations that are not in the data
   
+  if (info$data_format %in% c("ICES", "external")) {
+    
+    ok <- !is.na(data$station_code)
+    if (!all(ok)) {
+      cat(
+        "\nDropping", 
+        sum(!ok), 
+        "records from data that have no valid station code\n" 
+      )
+      data <- data[ok, ]
+    }
+    
+    ok <- stations$station_code %in% data$station_code
+    if (!all(ok)) {
+      cat(
+        "\nDropping", 
+        sum(!ok), 
+        "stations that are not associated with any data\n" 
+      )
+      stations <- stations[ok, ]
+    }
+    
+  }
+  
+
   stations <- ctsm_tidy_stations(stations, info)
 
   data <- ctsm_tidy_contaminants(data, info)
@@ -2040,6 +2086,7 @@ ctsm_tidy_stations <- function(stations, info) {
     stations$station_id <- NULL
   }    
   
+
   # select useful columns
   
   

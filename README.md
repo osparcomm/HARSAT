@@ -17,6 +17,7 @@ Additional R packages to those which come with the standard RStudio installation
 * lubridate
 * stringr
 * tibble
+* tidyr
 * sf
 *	lme4
 * mgcv
@@ -24,6 +25,8 @@ Additional R packages to those which come with the standard RStudio installation
 *	numDeriv
 *	optimx
 *	pbapply
+* parallel
+* flexsurv
 
 The following R packages need to be installed to run the HELCOM example:
 

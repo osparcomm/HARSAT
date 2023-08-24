@@ -1371,9 +1371,6 @@ assess_survival <- function(
 
   # assess survival data, often expressed as interval data 
   
-  library("flexsurv")
-
-
   # check valid determinands 
   
   if (! determinand %in% c("LP", "NRR", "SURVT")) {
@@ -1508,7 +1505,7 @@ assess_survival <- function(
 
     # mean model
     
-    fits$mean <- flexsurvreg(
+    fits$mean <- flexsurv::flexsurvreg(
       Surv(time, time2, type = "interval2") ~ 1,
       dist = surv_dist, 
       data = data
