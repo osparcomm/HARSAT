@@ -29,7 +29,6 @@ The following R packages need to be installed to run the HELCOM example:
 
 *	rmarkdown
 *	htmlwidgets
-*	DT
 
 File -> New Project in RStudio to create a new project. File -> New Project -> Version Control -> GIT -> https://github.com/osparcomm/HARSAT to clone from repository.
 
