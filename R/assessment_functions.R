@@ -151,8 +151,6 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
   
   # assess each time series in turn
   
-  library("dplyr")
-  
   info <- ctsm.ob$info
 
   timeSeries <- ctsm.ob$timeSeries[series_id, ]
@@ -1932,8 +1930,6 @@ assess_beta <- function(
   
   # percentage data that are not based on counts (e.g. comet assay) 
   
-  library("mgcv")
-  
   # check valid determinands 
   
   if (! determinand %in% "%DNATAIL") {
@@ -2005,7 +2001,7 @@ assess_beta <- function(
     
     # mean model
     
-    fits$mean <- gam(
+    fits$mean <- mgcv::gam(
       response ~ 1 + s(year_fac, bs = "re"), 
       weights = weight, 
       data = data, 
@@ -2332,8 +2328,6 @@ assess_negativebinomial <- function(
   # over-dispersed count data (perhaps very low over-dispersed values from a 
   # binomial distribution, such an MNC) 
   
-  library("mgcv")
-  
   # check valid determinands 
   
   if (! determinand %in% "MNC") {
@@ -2394,7 +2388,7 @@ assess_negativebinomial <- function(
     
     # mean model
     
-    fits$mean <- gam(
+    fits$mean <- mgcv::gam(
       response ~ 1 + s(year_fac, bs = "re"), 
       weights = weight, 
       data = data, 
