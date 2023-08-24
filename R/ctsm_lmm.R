@@ -3,11 +3,6 @@
 ctsm.lmm.fit <- function(
   data, dfSmooth, varComp.start, fixed_bound = 5, random_bound = 3, controlLmmFit = NULL, ...) {
 
-  library(lme4)
-  library(mgcv)
-  library(numDeriv)
-  library(optimx)
-
   # get total number of years
 
   nYear <- length(unique(data$year))  
@@ -37,7 +32,7 @@ ctsm.lmm.fit <- function(
       if (dfSmooth == 1) as.formula(response ~ yearwk) else
         as.formula(paste0("response ~ s(yearwk, k = ", dfSmooth + 1, ")"))
 
-  dummyGam <- gam(dummyFormula, data = data[!dup, ])
+  dummyGam <- mgcv::gam(dummyFormula, data = data[!dup, ])
   
   X <- as.data.frame(predict(dummyGam, type = "lpmatrix", newdata = data))
   names(X) <- if (dfSmooth == 0) "intercept" else
@@ -71,13 +66,21 @@ ctsm.lmm.fit <- function(
     lmerFormula <- as.formula(
       paste("response ~ 0 +", paste(names(X), collapse = "+"), "+ (1 | year)"))
     
-    lmerFit <- lmer(lmerFormula, data = lmerData, control = lmerControl(
-      optimizer = "optimx", optCtrl = list(method = "L-BFGS-B", starttests = FALSE, kkt = FALSE)
-    ))
+    lmerFit <- lme4::lmer(
+      lmerFormula, 
+      data = lmerData, 
+      control = lme4::lmerControl(
+        optimizer = "optimx", 
+        optCtrl = list(method = "L-BFGS-B", starttests = FALSE, kkt = FALSE)
+      )
+    )
 
     parInfo <- list(
       fixef = as.data.frame(summary(lmerFit)$coefficients)[1:2],
-      varComp = data.frame(start = as.data.frame(VarCorr(lmerFit))$sdcor))
+      varComp = data.frame(
+        start = as.data.frame(nlme::VarCorr(lmerFit))$sdcor
+      )
+    )
     
     parInfo <- within(parInfo, {
       names(fixef) <- c("start", "se")
@@ -150,7 +153,7 @@ ctsm.lmm.fit <- function(
 
   # do optimisation, but calculate hessian in a second step conditional on estimated variance 
   #   components - appears more likely to give a sensible answer!
-  # unction hessian from numDeriv is far superior to the hessian from optim
+  # function hessian from numDeriv is far superior to the hessian from optim
   
   idFixed <- with(out, 1:pFixed)
   idRandom <- with(out, pFixed + (1:pRandom))
@@ -249,7 +252,7 @@ ctsm.lmm.hess <- function(ctsm.ob, hess.d = 0.001, hess.r = 6, ...) {
   # d controls initial value of delta, r controls accuracy
   # lack of convergence can often be solved by increasing r, but at expense of speed
   
-  ctsm.ob$hessian <- hessian(
+  ctsm.ob$hessian <- numDeriv::hessian(
     func = function(par, varComp, data, X) {
       beta <- par
       mu <- c(X %*% beta)
@@ -297,8 +300,6 @@ ctsm.lmm.dcalc <- function(x, censoring, mean, sd, log = FALSE) {
 
 negTwiceLogLik <- function(data, mu, varComp) {
 
-  library(mvtnorm)
-
   sdSample <- if ("sdSample" %in% names(varComp)) varComp["sdSample"] else 0
   sdYear <- varComp["sdYear"]
   
@@ -326,7 +327,7 @@ negTwiceLogLik <- function(data, mu, varComp) {
       # can use dmvnorm with impunity
         
       sigma <- (sdYear ** 2) * matrix(1, n, n) + (data$sdIndep ** 2) * diag(n)
-      dmvnorm(data$response, data$mu, sigma = sigma, log = TRUE)
+      mvtnorm::dmvnorm(data$response, data$mu, sigma = sigma, log = TRUE)
 
     } else {
         

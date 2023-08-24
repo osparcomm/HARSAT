@@ -355,22 +355,19 @@ read_info <- function(info, path, info_files) {
   if (info$purpose == "OSPAR") {
     files <- list(
       determinand = "determinand_OSPAR_2022.csv", 
-      species = "species_OSPAR_2022.csv",
-      region_values = "regions_OSPAR.csv", 
+      species = "species_OSPAR_2022.csv", 
       thresholds = paste0("thresholds_", info$compartment, "_OSPAR_2022.csv")
     )
   } else if (info$purpose == "HELCOM") {
     files <- list(
       determinand = "determinand_HELCOM_2023.csv", 
       species = "species_HELCOM_2023.csv",
-      region_values = NULL,
       thresholds = paste0("thresholds_", info$compartment, "_HELCOM_2023.csv")
     )
   } else if (info$purpose == "AMAP") {
     files <- list(
       determinand = "determinand_AMAP_2022.csv", 
       species = "species_AMAP_2022.csv",
-      region_values = NULL,
       thresholds = if (info$compartment == "biota") {
         "thresholds_biota_AMAP.csv"}
       else {
@@ -381,7 +378,6 @@ read_info <- function(info, path, info_files) {
     files <- list(
       determinand = "determinand_default.csv", 
       species = "species_default.csv",
-      region_values = NULL, 
       thresholds = NULL
     )
   }
@@ -435,12 +431,6 @@ read_info <- function(info, path, info_files) {
     info$pivot_values <- ctsm_read_pivot_values(files$pivot_values, path)
   }  
       
-  if (!is.null(files$region_values)) {
-    info$region$values <- ctsm_read_regions(
-      files$region_values, path, info$purpose
-    )
-  } 
-  
   if (!is.null(files$thresholds)) {
     info$thresholds <- ctsm_read_thresholds(
       files$thresholds, path, info$compartment
@@ -2142,27 +2132,6 @@ ctsm_tidy_stations_OSPAR <- function(stations, info) {
     file_name = "stations_outside_area",
     info = info
   )
-  
-  
-  # check all regions are within the appropriate OSPAR_region 
-  # can sometimes go wrong due to local shape file errors
-  
-  if (all(c("OSPAR_region", "OSPAR_subregion") %in% info$region$id)) {
-    
-    ok <- local({
-      id1 <- stations$OSPAR_region
-      id2 <- info$region$values[stations$OSPAR_subregion, "OSPAR_region"]
-      !is.na(id2) & id1 == id2
-    })
-    
-    ctsm_check(
-      stations, !ok, action = "warning", 
-      message = "OSPAR subregion in wrong OSPAR region", 
-      file_name = "region_information_incorrect", 
-      info = info
-    )
-    
-  }    
   
   
   stations

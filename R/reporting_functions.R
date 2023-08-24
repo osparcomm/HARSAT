@@ -383,8 +383,6 @@ write_summary_table <- function(
 
   # reporting_functions.R
   
-  library(dplyr)
-  
   assessment <- assessment_obj$assessment
   timeSeries <- assessment_obj$timeSeries
   info <- assessment_obj$info
@@ -542,7 +540,7 @@ write_summary_table <- function(
   
   # merge stations with timeSeries
   
-  timeSeries <- left_join(
+  timeSeries <- dplyr::left_join(
     timeSeries, 
     assessment_obj$stations,
     by = "station_code"
@@ -596,26 +594,26 @@ write_summary_table <- function(
   
   # rename variables
   
-  summary <- rename(
+  summary <- dplyr::rename(
     summary, 
-    determinand_group = detGroup, 
-    n_year_all = nyall,
-    n_year_fit = nyfit,
-    n_year_positive = nypos,
-    first_year_all = firstYearAll,
-    first_year_fit = firstYearFit,
-    last_year = lastyear,
-    p_linear_trend = pltrend,
-    linear_trend = ltrend,
-    p_recent_trend = prtrend,
-    recent_trend = rtrend,
-    detectable_trend = dtrend,
-    mean_last_year = meanLY,
-    climit_last_year = clLY
+    determinand_group = "detGroup", 
+    n_year_all = "nyall",
+    n_year_fit = "nyfit",
+    n_year_positive = "nypos",
+    first_year_all = "firstYearAll",
+    first_year_fit = "firstYearFit",
+    last_year = "lastyear",
+    p_linear_trend = "pltrend",
+    linear_trend = "ltrend",
+    p_recent_trend = "prtrend",
+    recent_trend = "rtrend",
+    detectable_trend = "dtrend",
+    mean_last_year = "meanLY",
+    climit_last_year = "clLY"
   )
   
   if ("class" %in% names(summary)) {
-    summary <- rename(summary, imposex_class = class)
+    summary <- dplyr::rename(summary, imposex_class = "class")
   }
   
   names(summary) <- gsub("diff$", "_diff", names(summary))
