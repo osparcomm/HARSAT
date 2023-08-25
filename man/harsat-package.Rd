@@ -25,6 +25,7 @@ Authors:
   \item Rob Fryer \email{rob.fryer@gov.scot}
   \item Leszek Kaliciak \email{leszek@ambiesense.com}
   \item Scottish Government \email{marinescotland@gov.scot} [funder]
+  \item International Council for the Exploration of the Sea (ICES) \email{info@ices.dk} [copyright holder]
 }
 
 Other contributors:
@@ -32,7 +33,6 @@ Other contributors:
   \item Helsinki Commission (HELCOM) \email{secretariat@helcom.fi} [copyright holder, funder, contributor]
   \item Arctic Monitoring and Assessment Programme (AMAP) \email{amap@amap.no} [copyright holder, funder, contributor]
   \item OSPAR Commission (OSPAR) \email{secretariat@ospar.org} [copyright holder, funder, contributor]
-  \item International Council for the Exploration of the Sea (ICES) \email{info@ices.dk} [copyright holder, contributor]
 }
 
 }
