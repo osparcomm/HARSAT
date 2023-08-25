@@ -42,7 +42,7 @@ biota_data <- read_data(
 
 # gets correct variable and streamlines some of the data files
 
-biota_data <- ctsm_tidy_data(biota_data)
+biota_data <- tidy_data(biota_data)
 
 
 # Construct timeseries ----
@@ -50,14 +50,14 @@ biota_data <- ctsm_tidy_data(biota_data)
 # identifies groups of data that form a coherent timeseries
 # also does a lot of data cleaning and processing (creates oddities folder)
 
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeseries <- create_timeseries(
   biota_data,
   determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"), 
   determinands.control = list(
-    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
-    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  ), 
-  get_basis = get_basis_biota_OSPAR
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum")
+    #"LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+  ) 
+  # get_basis = get_basis_biota_OSPAR
 )
 
 # identical (apart from call) to: 
@@ -85,9 +85,16 @@ biota_timeSeries <- ctsm_create_timeSeries(
 # do the statistical analysis
 
 biota_assessment <- run_assessment(
-  biota_timeSeries, 
+  biota_timeseries, 
   AC = c("BAC", "EAC", "EQS", "HQS")
 )
+
+biota_assessment <- run_assessment(
+  biota_timeseries, 
+  AC = "EQS", 
+  parallel = TRUE
+)
+
 
 
 # can supply own function for calculating AC - in the example below it
@@ -137,8 +144,14 @@ write_summary_table(
   biota_assessment, 
   determinandGroups = webGroups,
   classColour = classColour,
-  collapse_AC = list(EAC = c("EAC", "EQS")),
-  output_dir = file.path("output", "example_simple_OSPAR"), 
+  collapse_AC = list(EQS = c("EAC", "EQS")),
+  output_dir = file.path("output", "example_OSPAR"), 
 )
 
+write_summary_table(
+  biota_assessment, 
+  determinandGroups = webGroups,
+  classColour = classColour,
+  output_dir = file.path("output", "example_OSPAR"), 
+)
 

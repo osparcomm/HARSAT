@@ -53,7 +53,10 @@ biota_data <- read_data(
   ),
   info_dir = file.path(working.directory, "information"), 
   extraction = "2022/01/11",
-  max_year = 2020L  
+  max_year = 2020L,
+  control = list(
+    region = list(id = c("OSPAR_region", "OSPAR_subregion"))
+  )
 )
 ```
 
@@ -62,7 +65,7 @@ biota_data <- read_data(
 Gets correct variable and streamlines some of the data files
 
 ```{r ospar-tidy-data}
-biota_data <- ctsm_tidy_data(biota_data)
+biota_data <- tidy_data(biota_data)
 ```
 
 ## Construct timeseries
@@ -71,7 +74,7 @@ Identifies groups of data that form a coherent timeseries.
 Also does a lot of data cleaning and processing (creates oddities folder).
 
 ```{r ospar-create-timeseries}
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeseries <- create_timeseries(
   biota_data,
   determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"), 
   determinands.control = list(
@@ -85,7 +88,7 @@ biota_timeSeries <- ctsm_create_timeSeries(
 Identical (apart from call) to: 
 
 ```{r eval=FALSE}
-ctsm_create_timeSeries(
+create_timeseries(
   biota_data,
   determinands = ctsm_get_determinands("biota"),
   determinands.control = list(
@@ -94,7 +97,7 @@ ctsm_create_timeSeries(
   )
 )
 
-ctsm_create_timeSeries(
+create_timeseries(
   biota_data,
   determinands.control = list(
     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
@@ -109,7 +112,7 @@ Do the statistical analysis
 
 ```{r ospar-assessment}
 biota_assessment <- run_assessment(
-  biota_timeSeries, 
+  biota_timeseries, 
   AC = c("BAC", "EAC", "EQS", "HQS")
 )
 ```

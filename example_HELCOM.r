@@ -35,7 +35,10 @@ biota_data <- read_data(
   data_format = "ICES_old",
   info_dir = "information",
   extraction = "2022/10/06",
-  max_year = 2021L
+  max_year = 2021L,
+  control = list(
+    region = list(id = c("HELCOM_subbasin", "HELCOM_L3", "HELCOM_L4"))
+  )
 )  
 
 
@@ -87,6 +90,13 @@ info_TEQ <- c(
 
 
 rmarkdown::render(
+  file.path("man", "fragments", "example_HELCOM_data_adjustments.Rmd"), 
+  output_file = "HELCOM_imposex_preparation.html",
+  output_dir = file.path("output", "example_HELCOM") 
+)
+
+
+rmarkdown::render(
   "example_HELCOM_data_adjustments.Rmd", 
   output_file = "HELCOM_adjustments.html",
   output_dir = file.path("output", "example_HELCOM") 
@@ -98,9 +108,21 @@ rmarkdown::render(
 
 # gets correct variable and streamlines some of the data files
 
-biota_data <- ctsm_tidy_data(biota_data)
-sediment_data <- ctsm_tidy_data(sediment_data)
-water_data <- ctsm_tidy_data(water_data)
+biota_data <- tidy_data(biota_data)
+sediment_data <- tidy_data(sediment_data)
+
+
+water_data$data <- dplyr::mutate(
+  water_data$data,
+  filtration = if_else(grepl("NF", method_pretreatment), "No", "Yes")
+)
+
+water_data$data <- dplyr::filter(
+  water_data$data, 
+  matrix == "WT"
+)
+
+water_data <- tidy_data(water_data)
 
 
 
@@ -165,7 +187,7 @@ info_TEQ["CDFO"] <- 0.0003
 biota_data$data$country <- NULL
 
 
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeseries <- create_timeseries(
   biota_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
@@ -194,8 +216,8 @@ biota_timeSeries <- ctsm_create_timeSeries(
 
 # resolve Finnish perch changes
 
-biota_timeSeries$data <- mutate(
-  biota_timeSeries$data, 
+biota_timeseries$data <- mutate(
+  biota_timeseries$data, 
   matrix = if_else(
     year <= 2013 & matrix == "MU&EP", 
     "MU", 
@@ -205,15 +227,15 @@ biota_timeSeries$data <- mutate(
 
 # resolve Polish metoa changes
 
-biota_timeSeries$data <- left_join(
-  biota_timeSeries$data, 
+biota_timeseries$data <- left_join(
+  biota_timeseries$data, 
   biota_data$stations[c("station_code", "country")],
   by = "station_code"
 )
 
 
-biota_timeSeries$data <- mutate(
-  biota_timeSeries$data, 
+biota_timeseries$data <- mutate(
+  biota_timeseries$data, 
   method_analysis = if_else(
     country == "Poland" &  
       determinand %in% "PYR1OH" &
@@ -230,13 +252,13 @@ biota_timeSeries$data <- mutate(
   ), 
 )  
 
-biota_timeSeries$data$country <- NULL
+biota_timeseries$data$country <- NULL
 
 
 
 ## sediment ----
 
-sediment_timeSeries <- ctsm_create_timeSeries(
+sediment_timeseries <- create_timeseries(
   sediment_data,
   determinands.control = list(
     SBDE6 = list(
@@ -257,7 +279,7 @@ sediment_timeSeries <- ctsm_create_timeSeries(
 
 ## water ----
 
-water_timeSeries <- ctsm_create_timeSeries(
+water_timeseries <- create_timeseries(
   water_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
@@ -273,7 +295,7 @@ water_timeSeries <- ctsm_create_timeSeries(
 ### main runs ----
 
 sediment_assessment <- run_assessment(
-  sediment_timeSeries, 
+  sediment_timeseries, 
   AC = "EQS",
   parallel = TRUE
 )
@@ -281,7 +303,7 @@ sediment_assessment <- run_assessment(
 
 ### check convergence ----
 
-check_convergence_lmm(sediment_assessment)
+check_assessment(sediment_assessment)
 
 
 
@@ -373,7 +395,7 @@ check_assessment(biota_assessment)
 ### main runs ----
 
 water_assessment <- run_assessment(
-  water_timeSeries, 
+  water_timeseries, 
   AC = "EQS", 
   parallel = TRUE
 )
@@ -381,7 +403,7 @@ water_assessment <- run_assessment(
 
 ### check convergence ----
 
-check_convergence_lmm(water_assessment)
+check_assessment(water_assessment)
 
 
 # refit a couple of time series where the fixed effects are on their bounds
@@ -389,7 +411,7 @@ check_convergence_lmm(water_assessment)
 # "5190 CD Yes" - fixed effects on bounds
 # "5192 CD Yes" - fixed effects on bounds
 
-wk_id <- check_convergence_lmm(water_assessment, save_result = TRUE)
+wk_id <- check_assessment(water_assessment, save_result = TRUE)
 
 water_assessment <- update_assessment(
   water_assessment, 
@@ -400,7 +422,7 @@ water_assessment <- update_assessment(
 
 # check that refitted timeseries have converged
 
-check_convergence_lmm(water_assessment)
+check_assessment(water_assessment)
 
 
 

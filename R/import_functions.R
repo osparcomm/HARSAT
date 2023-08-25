@@ -43,9 +43,16 @@
 #'   information about reporting regions, and so on. See Details.
 #'
 #' @returns A list with the following components:
-#' * `call`
-#' * `info`
-#' * `data`
+#' * `call` The function call.
+#' * `info` A list containing the reference tables and the control parameters.
+#' * `data` A data frame containing the contaminant (and effects) data. This is
+#'   (virtually) identical to the input data file. However, some extra empty
+#'   columns have probably been added and, for `ICES` data, some columns have
+#'   been renamed. For `ICES` data, there is also an extra column `.keep`, a
+#'   logical indicating whether each record would have been retained under the
+#'   previous ICES extraction protocol. For example, `.keep` will be `FALSE` if
+#'   the vflag entry is `"S"` or suspect. Records for which `.keep` is `FALSE`
+#'   are deleted later in `tidy_data`. 
 #' * `stations`
 #'
 #' @section Control parameters
@@ -156,7 +163,7 @@ read_data <- function(
   stations <- read_stations(stations, data_dir, info)
 
   data <- read_contaminants(contaminants, data_dir, info)
-  
+
   if (data_format == "ICES_old") {
     QA <- ctsm_read_QA(QA, data_dir, purpose)
   }
@@ -165,7 +172,9 @@ read_data <- function(
 
     data <- add_stations(data, stations, info)
     
-    data <- add_filter(data, info)
+    stations <- finalise_stations(stations, info)
+    
+    data <- finalise_data(data, info)
 
     data <- dplyr::filter(data, .data$keep)
   }
@@ -225,12 +234,17 @@ control_default <- function(purpose, compartment) {
   
   region$id <- switch(
     purpose, 
+    OSPAR = c("ospar_region", "ospar_subregion"),
+    HELCOM = c("helcom_subbasin", "helcom_l3", "helcom_l4"),
+    NULL
+  )
+
+  region$names <- switch(
+    purpose, 
     OSPAR = c("OSPAR_region", "OSPAR_subregion"),
     HELCOM = c("HELCOM_subbasin", "HELCOM_L3", "HELCOM_L4"),
     NULL
   )
-
-  region$names <- region$id
   
   region$all <- !is.null(region$id)
     
@@ -490,7 +504,16 @@ read_stations <- function(file, data_dir = ".", info) {
     if (info$purpose %in% c("OSPAR", "AMAP")) {
       stations <- dplyr::rename(stations, offshore = OSPAR_shore)
     }  
-  
+
+    if (info$data_format %in% "ICES_new") {
+      stations <- dplyr::rename(
+        stations, 
+        helcom_subbasin = HELCOM_subbasin,
+        helcom_l3 = HELCOM_L3,
+        helcom_l4 = HELCOM_L4
+      )
+    }
+      
     # turn following variables into a character
     # code and parent code could be kept as integers, but safer to leave as 
     # characters until have decided how we are going to merge with non-ICES data
@@ -547,20 +570,6 @@ read_stations <- function(file, data_dir = ".", info) {
       strip.white = TRUE, 
       colClasses = var_id
     )
-    
-    # rename columns to suit!
-    
-    # stations <- dplyr::rename(
-    #   stations, 
-    #   startYear = "station_activefromdate",
-    #   endYear = "station_activeuntildate",
-    #   parent_code = AsmtMimeParent,
-    #   replacedBy = ReplacedBy,
-    #   programGovernance = ProgramGovernance,
-    #   dataType = DataType,
-    #   station_type = MSTAT,
-    #   waterbody_type = WLTYP
-    # )
     
   }    
   
@@ -747,8 +756,12 @@ read_contaminants <- function(file, data_dir = ".", info) {
       colClasses = var_id
     )
 
-    return(data)
     
+    # add in extra required variable
+    
+    data$subseries <- NA_character_
+    
+    return(data)
   }  
   
 
@@ -788,7 +801,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
       "alabo" = "character",               
       "statn" = "character",
       "sd_code_match" = "character",
-      "sd_code_name" = "character", 
+      "sd_name_match" = "character", 
       "sd_code_replaced" = "character", 
       "sd_name_replaced" = "character", 
       "sd_code_final" = "character",
@@ -969,17 +982,6 @@ read_contaminants <- function(file, data_dir = ".", info) {
 
 
   # check regional identifiers are in the extraction 
-
-  if (info$data_format == "ICES_new" & info$purpose == "HELCOM") {
-
-    data <- dplyr::rename(
-      data,
-      HELCOM_subbasin = helcom_subbasin,
-      HELCOM_L3 = helcom_l3,
-      HELCOM_L4 = helcom_l4,
-    )
-
-  }
 
   if (info$data_format %in% c("ICES_new", "ICES_old")) {
     
@@ -1802,7 +1804,7 @@ add_stations <- function(data, stations, info){
 
 
 
-add_filter <- function(data, info) {
+finalise_data <- function(data, info) {
   
   # common to all compartments
   
@@ -1886,9 +1888,24 @@ add_filter <- function(data, info) {
     
   }
 
-  
   data
 }
+
+
+finalise_stations <- function(stations, info) {
+
+  # rename columns that will be passed down into later funcions
+  
+  stations <- dplyr::rename(
+    stations,
+    country = "station_country",
+    station_type = "station_mstat",
+    waterbody_type = "station_wltyp"
+  )
+
+  stations
+}
+  
 
 
 
@@ -1938,7 +1955,7 @@ ctsm_read_QA <- function(file, path, purpose) {
 #'
 #' @param ctsm_obj 
 #' @export
-ctsm_tidy_data <- function(ctsm_obj) {
+tidy_data <- function(ctsm_obj) {
   
   # import_functions.R
     
@@ -1948,7 +1965,7 @@ ctsm_tidy_data <- function(ctsm_obj) {
 
   # set up oddity directory and back up any previous oddity files
   
-  ctsm_initialise_oddities(info$oddity_dir, info$compartment)
+  initialise_oddities(info$oddity_dir, info$compartment)
   
   
   # tidy station dictionary and contaminant data
@@ -1980,9 +1997,9 @@ ctsm_tidy_data <- function(ctsm_obj) {
   }
   
 
-  stations <- ctsm_tidy_stations(stations, info)
+  stations <- tidy_stations(stations, info)
 
-  data <- ctsm_tidy_contaminants(data, info)
+  data <- tidy_contaminants(data, info)
 
   if (info$data_format == "ICES_old") {
     
@@ -2011,7 +2028,7 @@ ctsm_tidy_data <- function(ctsm_obj) {
 }
 
 
-ctsm_tidy_stations <- function(stations, info) {
+tidy_stations <- function(stations, info) {
   
   cat("\nCleaning station dictionary\n")
   
@@ -2033,11 +2050,11 @@ ctsm_tidy_stations <- function(stations, info) {
   )
   
   
- # replace backward slash with forward slash in station (long) name
+ # replace backward slash with _ in station (long) name
 
   stations <- dplyr::mutate(
     stations, 
-    station_longname = gsub("\\", "/", .data$station_longname, fixed = TRUE)
+    station_longname = gsub("\\", "_", .data$station_longname, fixed = TRUE)
   )
     
 
@@ -2085,7 +2102,7 @@ ctsm_tidy_stations <- function(stations, info) {
     "station_latitude", "station_longitude", "station_type", "waterbody_type"
   )
   
-  
+
   stations <- stations[col_id]
   
   
@@ -2142,8 +2159,11 @@ ctsm_tidy_stations_HELCOM <- function(stations, info) {
   
   # restrict to stations that have a HELCOM region
   
-  stations <- tidyr::drop_na(stations, "HELCOM_subbasin")
-  
+  if (info$data_format == "ICES_old") {
+    stations <- tidyr::drop_na(stations, "HELCOM_subbasin")
+  } else if (info$data_format == "ICES_new") {
+    stations <- tidyr::drop_na(stations, "helcom_subbasin")
+  }
   
   stations
 }
@@ -2190,7 +2210,7 @@ ctsm_tidy_stations_AMAP <- function(stations, info) {
 }
 
 
-ctsm_tidy_contaminants <- function(data, info) {
+tidy_contaminants <- function(data, info) {
   
   cat("\nCleaning contaminant and biological effects data\n")
 
@@ -2223,7 +2243,7 @@ ctsm_tidy_contaminants <- function(data, info) {
       "no data in the period ", min(info$recent_years), " to ", 
       max(info$recent_years), " inclusive; nothing to assess!\n",
       "Consider changing the max_year argument or the reporting_window control\n", 
-      "option in ctsm_read_data.",
+      "option in read_data.",
       call. = FALSE
     )
     
@@ -2278,15 +2298,6 @@ ctsm_tidy_contaminants <- function(data, info) {
   }
   
       
-  # drop data with no stations  
-  
-  ok <- !is.na(data$station_name)
-  if (!all(ok)) {
-    cat("   Dropping data with no stations\n")  
-    data <- data[ok, ]
-  }
-  
-  
   # ICES biota data: sample is the species identifier (within a haul say) and 
   # sub.sample is what we usually think of as the sample 
   # swap over and delete sub.sample
@@ -2305,7 +2316,7 @@ ctsm_tidy_contaminants <- function(data, info) {
     "station_code", "sample_latitude", "sample_longitude", 
     "year", "date", "time", "depth", 
     "species", "sex", "n_individual", "subseries", "sample", "replicate", 
-    "determinand", "pargroup", "matrix", "basis", "filtered", 
+    "determinand", "pargroup", "matrix", "basis", "filtration", 
     "method_analysis", "method_extraction", "method_pretreatment",
     "unit", "value", "censoring", "limit_detection", "limit_quantification", 
     "uncertainty", "unit_uncertainty", "alabo", "qalink"
@@ -2416,7 +2427,7 @@ ctsm_link_QA <- function(QA, data, compartment) {
 #' Cleans the data and turns it into time series structures ready for assessment
 #' 
 #' @export
-ctsm_create_timeSeries <- function(
+create_timeseries <- function(
   ctsm.obj, 
   determinands = ctsm_get_determinands(ctsm.obj$info), 
   determinands.control = NULL, 
@@ -2476,7 +2487,7 @@ ctsm_create_timeSeries <- function(
   # lots of data cleansing - first ensure oddity directory exists and back up
   # any previous oddity files
 
-  oddity_path <- ctsm_initialise_oddities(info$oddity_dir, info$compartment)
+  oddity_path <- initialise_oddities(info$oddity_dir, info$compartment)
 
 
   # checks station dictionary:
@@ -2499,7 +2510,10 @@ ctsm_create_timeSeries <- function(
   
   cat("\nCleaning data\n")
   
-  id <- c("station_code", "date", "filtered", "species", "sample", "matrix", "determinand")
+  id <- c(
+    "station_code", "date", "filtration", "species", "sample", "matrix", 
+    "determinand"
+  )
   id <- intersect(id, names(data))
   ord <- do.call("order", data[id])
   data <- data[ord, ]
@@ -2885,21 +2899,24 @@ ctsm_create_timeSeries <- function(
   }
     
 
-  # remove concentrations where cv of uncertainty > 100%
-  # tidy up missing data for uncertainties and censoring
+  # remove concentrations where:
+  #   uncertainty is missing
+  #   uncertainty cv is > 100%
+  # ensure uncertainty and censoring are missing when concentration is missing
   
-  data <- within(data, {
-    concentration[uncertainty > concentration] <- NA
-    uncertainty[is.na(concentration)] <- NA
-    censoring[is.na(concentration)] <- NA
-  })
-    
+  ok <- !is.na(data$concentration) & !is.na(data$uncertainty)
+  ok <- ok & (data$uncertainty <= data$concentration)
+  
+  data$concentration[!ok] <- NA_real_
+  data$uncertainty[!ok] <- NA_real_
+  data$censoring[!ok] <- NA_character_
+  
 
   # drop groups of data at stations with no data in recent years
 
   cat("   Dropping groups of compounds / stations with no data between", 
       min(info$recent_years), "and", max(info$recent_years), "\n")
-  id_names <- intersect(c("station_code", "filtered", "species", "group"), names(data))
+  id_names <- intersect(c("station_code", "filtration", "species", "group"), names(data))
   id <- do.call("paste", data[id_names])
   ok <- id %in% id[is.recent(data$year) & !is.na(data$concentration)]
   data <- data[ok, ]
@@ -2995,7 +3012,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   # order data 
 
   id = c(
-    "station_code", "species", "filtered", "year", "sex", "sample", "group", 
+    "station_code", "species", "filtration", "year", "sex", "sample", "group", 
     "determinand"
   )
   
@@ -3005,7 +3022,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   # select variables of interest
 
   id <- c(
-    "station_code", "sample_latitude", "sample_longitude", "filtered", 
+    "station_code", "sample_latitude", "sample_longitude", "filtration", 
     "species", "sex", "depth",
     "year", "date", "time", "sample",   
     "matrix", "subseries", "group", "determinand", "basis", "unit", "value", 
@@ -3042,7 +3059,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   }
   
   if (info$compartment %in% "water") {
-    id <- c(id, "filtered", "subseries") 
+    id <- c(id, "filtration", "subseries") 
   }
   
   timeSeries <- data[id]
@@ -3243,7 +3260,7 @@ ctsm_get_digestion <- function(data, info) {
 }
 
 
-ctsm_initialise_oddities <- function(path, compartment) {
+initialise_oddities <- function(path, compartment) {
 
   # location: import_functions.R
   # purpose: sets up oddity folder and backs up previous runs 
@@ -3557,7 +3574,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
   if (!any(data$determinand %in% drop)) 
     return(data)
 
-
+  
   # identify samples with drop and not keep, which are the ones that will be summed
   # if keep already exists, then don't need to do anything
   # don't delete drop data because might want to assess them individually
@@ -3569,7 +3586,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
   
   sum_ID <- ID %in% setdiff(ID[dropID], ID[keepID])
 
-  if (length(sum_ID) == 0)
+  if (sum(sum_ID) == 0L)
     return(data)
   
   

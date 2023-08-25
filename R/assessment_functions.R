@@ -176,13 +176,6 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
     export_objects <- parallel_objects(is_imposex)
     parallel::clusterExport(cluster_id, export_objects)
 
-    parallel::clusterEvalQ(
-      cluster_id, 
-      {
-        library("lme4")
-      }
-    )  
-
   } else {
     cluster_id <- NULL
   }
