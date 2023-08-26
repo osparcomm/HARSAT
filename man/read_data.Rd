@@ -73,13 +73,12 @@ A list with the following components:
 \item \code{call} The function call.
 \item \code{info} A list containing the reference tables and the control parameters.
 \item \code{data} A data frame containing the contaminant (and effects) data. This is
-(virtually) identical to the input data file. However, some extra empty
-columns have probably been added and, for \code{ICES} data, some columns have
-been renamed. For \code{ICES} data, there is also an extra column \code{.keep}, a
-logical indicating whether each record would have been retained under the
-previous ICES extraction protocol. For example, \code{.keep} will be \code{FALSE} if
-the vflag entry is \code{"S"} or suspect. Records for which \code{.keep} is \code{FALSE}
-are deleted later in \code{tidy_data}.
+(virtually) identical to the input data file apart from some extra empty
+columns which have been added and, for \code{ICES} data, some columns which have
+been renamed. For \code{ICES} data, there is also an extra column \code{retain}. This
+is a logical indicating whether each record would have been retained under
+the previous ICES extraction protocol. For example, \code{retain} will be
+\code{FALSE} if the vflag entry is \code{"S"} or suspect. Records for which \code{retain == FALSE} are deleted later in \code{tidy_data}.
 \item \code{stations}
 }
 }
