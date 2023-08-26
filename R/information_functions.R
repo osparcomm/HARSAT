@@ -735,14 +735,14 @@ ctsm_read_thresholds <- function(
 
   if (compartment == "water") {
     
-    if (any(is.na(data$filtered))) {
+    if (any(is.na(data$filtration))) {
       stop(
-        "'filtered' must be supplied in threshold reference table", 
+        "'filtration' must be supplied in threshold reference table", 
         call. = FALSE
       )
     }
     
-    wk <- strsplit(data$filtered, "~")
+    wk <- strsplit(data$filtration, "~")
     n <- sapply(wk, length)
     data <- data[rep(1:nrow(data), times = n), ]
     data$filtered <- unlist(wk)
@@ -1083,7 +1083,7 @@ get_AC$water <- function(data, AC, rt, export_all = FALSE) {
   }
   
   
-  var_id <- c("determinand", "filtered")
+  var_id <- c("determinand", "filtration")
   
   ok <- var_id %in% names(data)
   
@@ -1101,7 +1101,7 @@ get_AC$water <- function(data, AC, rt, export_all = FALSE) {
   data <- dplyr::left_join(
     data, 
     rt$thresholds, 
-    by = c("determinand", "filtered"),
+    by = c("determinand", "filtration"),
     relationship = "many-to-one"
   )
   

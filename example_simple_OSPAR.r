@@ -38,7 +38,10 @@ biota_data <- read_data(
   ),
   info_dir = "information", 
   extraction = "2022/01/11",
-  max_year = 2020L
+  max_year = 2020L, 
+  control = list(
+    region = list(id = c("OSPAR_region", "OSPAR_subregion"))
+  )
 )  
 
 
@@ -46,7 +49,7 @@ biota_data <- read_data(
 
 # gets correct variable and streamlines some of the data files
 
-biota_data <- ctsm_tidy_data(biota_data)
+biota_data <- tidy_data(biota_data)
 
 
 # Construct timeseries ----
@@ -54,7 +57,7 @@ biota_data <- ctsm_tidy_data(biota_data)
 # identifies groups of data that form a coherent timeseries
 # also does a lot of data cleaning and processing (creates oddities folder)
 
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeseries <- create_timeseries(
   biota_data,
   determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"), 
   determinands.control = list(
@@ -89,7 +92,7 @@ biota_timeSeries <- ctsm_create_timeSeries(
 # do the statistical analysis
 
 biota_assessment <- run_assessment(
-  biota_timeSeries, 
+  biota_timeseries, 
   AC = c("BAC", "EAC", "EQS", "HQS")
 )
 

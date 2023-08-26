@@ -37,17 +37,18 @@ biota_data <- read_data(
 
 # get correct variables and streamline the data files
 
-biota_data <- ctsm_tidy_data(biota_data)
+biota_data <- tidy_data(biota_data)
 
 
 
 # Construct timeseries ----
 
-# uses OSPAR basis choice for mercury
+# for each time series, use the basis which has been most reported in 
+# the data
 
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeseries <- create_timeseries(
   biota_data,
-  get_basis = get_basis_biota_OSPAR
+  get_basis = get_basis_most_common
 )
 
 
@@ -56,7 +57,7 @@ biota_timeSeries <- ctsm_create_timeSeries(
 ## main runs ----
 
 biota_assessment <- run_assessment(
-  biota_timeSeries, 
+  biota_timeseries, 
   AC = c("NRC", "LRC", "MRC", "HRC")
 )
 

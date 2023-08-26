@@ -45,7 +45,10 @@ biota_data <- read_data(
   data_format = "ICES_old",
   info_dir = file.path(working.directory, "information"),
   extraction = "2022/10/06",
-  max_year = 2021L
+  max_year = 2021L,
+  control = list(
+    region = list(id = c("HELCOM_subbasin", "HELCOM_L3", "HELCOM_L4"))
+  )
 )
 ```
 
@@ -103,9 +106,13 @@ info_TEQ <- c(
 This gets the correct variable and streamlines some of the data files.
 
 ```{r helcom-set-variables}
-biota_data <- ctsm_tidy_data(biota_data)
-sediment_data <- ctsm_tidy_data(sediment_data)
-water_data <- ctsm_tidy_data(water_data)
+biota_data <- tidy_data(biota_data)
+sediment_data <- tidy_data(sediment_data)
+
+# temporary fix
+water_data$data <- dplyr::rename(water_data$data, filtration = "filtered")
+
+water_data <- tidy_data(water_data)
 ```
 
 ## Construct timeseries
@@ -171,7 +178,7 @@ info_TEQ["CDFO"] <- 0.0003
 
 biota_data$data$country <- NULL
 
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeSeries <- create_timeseries(
   biota_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
@@ -244,7 +251,7 @@ biota_timeSeries$data$country <- NULL
 ## Sediment
 
 ```{r helcom-time-series6}
-sediment_timeSeries <- ctsm_create_timeSeries(
+sediment_timeseries <- create_timeseries(
   sediment_data,
   determinands.control = list(
     SBDE6 = list(
@@ -265,7 +272,7 @@ sediment_timeSeries <- ctsm_create_timeSeries(
 ## Water
 
 ```{r helcom-time-series7}
-water_timeSeries <- ctsm_create_timeSeries(
+water_timeseries <- ctsm_create_timeseries(
   water_data,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
@@ -281,7 +288,7 @@ Main runs
 
 ```{r helcom-run1}
 sediment_assessment <- run_assessment(
-  sediment_timeSeries,
+  sediment_timeseries,
   AC = "EQS",
   parallel = TRUE
 )
