@@ -27,13 +27,14 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <h6 class="dropdown-header" data-toc-skip>File formats</h6>
+    <h6 class="dropdown-header" data-toc-skip>Data file management</h6>
+    <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="../articles/example_simple_ospar.html">Simple OSPAR</a>
-    <a class="dropdown-item" href="../articles/example_helcom.html">HELCOM</a>
+    <a class="dropdown-item" href="../articles/example_simple_OSPAR.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -65,7 +66,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_timeseries</span><span class="op">(</span></span>
 <span>  <span class="va">ctsm.obj</span>,</span>
-<span>  determinands <span class="op">=</span> <span class="fu"><a href="get_determinands.html">get_determinands</a></span><span class="op">(</span><span class="va">ctsm.obj</span><span class="op">$</span><span class="va">info</span><span class="op">)</span>,</span>
+<span>  determinands <span class="op">=</span> <span class="fu"><a href="ctsm_get_determinands.html">ctsm_get_determinands</a></span><span class="op">(</span><span class="va">ctsm.obj</span><span class="op">$</span><span class="va">info</span><span class="op">)</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  oddity_path <span class="op">=</span> <span class="st">"oddities"</span>,</span>
 <span>  return_early <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -81,7 +82,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Rob Fryer, Leszek Kaliciak, Scottish Government, AmbieSense Ltd, Helsinki Commission (HELCOM), Arctic Monitoring and Assessment Programme (AMAP), OSPAR Commission (OSPAR).</p>
+  <p></p><p>Developed by Rob Fryer, Leszek Kaliciak, Scottish Government, AmbieSense Ltd, Helsinki Commission (HELCOM), Arctic Monitoring and Assessment Programme (AMAP), OSPAR Commission (OSPAR), International Council for the Exploration of the Sea (ICES).</p>
 </div>
 
 <div class="pkgdown-footer-right">

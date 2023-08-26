@@ -162,9 +162,16 @@ information about reporting regions, and so on. See Details.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list with the following components:</p><ul><li><p><code>call</code></p></li>
-<li><p><code>info</code></p></li>
-<li><p><code>data</code></p></li>
+<p>A list with the following components:</p><ul><li><p><code>call</code> The function call.</p></li>
+<li><p><code>info</code> A list containing the reference tables and the control parameters.</p></li>
+<li><p><code>data</code> A data frame containing the contaminant (and effects) data. This is
+(virtually) identical to the input data file. However, some extra empty
+columns have probably been added and, for <code>ICES</code> data, some columns have
+been renamed. For <code>ICES</code> data, there is also an extra column <code>.keep</code>, a
+logical indicating whether each record would have been retained under the
+previous ICES extraction protocol. For example, <code>.keep</code> will be <code>FALSE</code> if
+the vflag entry is <code>"S"</code> or suspect. Records for which <code>.keep</code> is <code>FALSE</code>
+are deleted later in <code>tidy_data</code>.</p></li>
 <li><p><code>stations</code></p></li>
 </ul></div>
 

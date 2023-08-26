@@ -92895,7 +92895,7 @@ being sampled at this station in any year other than 2009.</p>
 <p>This gets the correct variable and streamlines some of the data
 files.</p>
 <div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_tidy_data.html">ctsm_tidy_data</a></span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
@@ -92907,7 +92907,7 @@ files.</p>
 <span><span class="co">#&gt;    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv</span></span>
 <span><span class="co">#&gt;    Dropping data with no stations</span></span>
 <span><span class="co">#&gt;    Conflicting QA information - first one selected: see conflicting_QA.csv</span></span>
-<span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_tidy_data.html">ctsm_tidy_data</a></span><span class="op">(</span><span class="va">sediment_data</span><span class="op">)</span></span>
+<span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">sediment_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/sediment' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/sediment_backup'</span></span>
@@ -92918,7 +92918,7 @@ files.</p>
 <span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span>
 <span><span class="co">#&gt;    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv</span></span>
 <span><span class="co">#&gt;    Dropping data with no stations</span></span>
-<span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_tidy_data.html">ctsm_tidy_data</a></span><span class="op">(</span><span class="va">water_data</span><span class="op">)</span></span>
+<span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">water_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/water' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/water_backup'</span></span>
@@ -92990,7 +92990,7 @@ human health QS</p>
 <span></span>
 <span><span class="va">biota_data</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">country</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span></span>
-<span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
+<span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    PFOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N-PFOS"</span>, <span class="st">"BR-PFOS"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
@@ -93114,7 +93114,7 @@ human health QS</p>
 <h3 id="sediment-1">Sediment<a class="anchor" aria-label="anchor" href="#sediment-1"></a>
 </h3>
 <div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sediment_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">sediment_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
 <span>  <span class="va">sediment_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    SBDE6 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -93167,7 +93167,7 @@ human health QS</p>
 <h3 id="water">Water<a class="anchor" aria-label="anchor" href="#water"></a>
 </h3>
 <div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">water_timeSeries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctsm_create_timeSeries.html">ctsm_create_timeSeries</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">water_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
 <span>  <span class="va">water_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    PFOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N-PFOS"</span>, <span class="st">"BR-PFOS"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span>

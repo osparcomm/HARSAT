@@ -49,6 +49,9 @@
     <loc>http://osparcomm.github.io/HARSAT/reference/convert_units.html</loc>
   </url>
   <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/create_timeseries.html</loc>
+  </url>
+  <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/cstm.VDS.environment.html</loc>
   </url>
   <url>
@@ -70,16 +73,10 @@
     <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_TBT_convert.html</loc>
   </url>
   <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_create_timeSeries.html</loc>
-  </url>
-  <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_determinands.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_info.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_tidy_data.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/get_AC.html</loc>
@@ -110,6 +107,9 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/run_assessment.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/tidy_data.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/update_assessment.html</loc>
