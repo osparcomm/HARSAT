@@ -46,13 +46,13 @@
 #' * `call` The function call.
 #' * `info` A list containing the reference tables and the control parameters.
 #' * `data` A data frame containing the contaminant (and effects) data. This is
-#'   (virtually) identical to the input data file. However, some extra empty
-#'   columns have probably been added and, for `ICES` data, some columns have
-#'   been renamed. For `ICES` data, there is also an extra column `.keep`, a
-#'   logical indicating whether each record would have been retained under the
-#'   previous ICES extraction protocol. For example, `.keep` will be `FALSE` if
-#'   the vflag entry is `"S"` or suspect. Records for which `.keep` is `FALSE`
-#'   are deleted later in `tidy_data`. 
+#'   (virtually) identical to the input data file apart from some extra empty
+#'   columns which have been added and, for `ICES` data, some columns which have
+#'   been renamed. For `ICES` data, there is also an extra column `retain`. This
+#'   is a logical indicating whether each record would have been retained under
+#'   the previous ICES extraction protocol. For example, `retain` will be
+#'   `FALSE` if the vflag entry is `"S"` or suspect. Records for which `retain
+#'   == FALSE` are deleted later in `tidy_data`.
 #' * `stations`
 #'
 #' @section Control parameters
@@ -176,7 +176,7 @@ read_data <- function(
     
     data <- finalise_data(data, info)
 
-    data <- dplyr::filter(data, .data$keep)
+    # data <- dplyr::filter(data, .data$retain)
   }
     
 
@@ -651,6 +651,9 @@ read_stations <- function(file, data_dir = ".", info) {
 
 #' Reads contaminant data 
 #'
+#' A quick way of reading the contaminant data without having to do any 
+#' station matching (if using `data_format == "ICES`)
+#'
 #' @param file A file reference for the contaminant data.
 #' @param data_dir A path to the directory holding the contaminant data.
 #'   Defaults to the working directory.
@@ -658,13 +661,15 @@ read_stations <- function(file, data_dir = ".", info) {
 #' * compartment: `"biota"`, `"sediment"` or `"water"`
 #' * data_format: `"ICES"` or `"external"`
 #' @returns A data frame containing the contaminant data.
+#' 
+#' @export
 read_contaminants <- function(file, data_dir = ".", info) {
   
   # import functions
   # read in contaminant (and biological effects) data
   
   infile <- file.path(data_dir, file)
-  cat("\nReading contaminant and biological effects data from:\n '", 
+  cat("\nReading contaminant and effects data from:\n '", 
       infile, "'\n", sep = "")
 
 
@@ -1382,240 +1387,256 @@ add_stations <- function(data, stations, info){
   
   cat(" - matching", nrow(x_coor), "records by coordinates\n")
   
-  id <- c(
-    "country", "latitude",'longitude', '.year', 'datatype', 'is_ospar_monitoring', 
-    'is_amap_monitoring', 'is_helcom_monitoring'
-  ) 
-  x_coor_unique <- unique(x_coor[id])
-
-  res <- data.frame()
-  # check <- data.frame()
+  if (nrow(x_coor) > 0L) {
   
-  for(i in 1:nrow(x_coor_unique)) {
+    id <- c(
+      "country", "latitude",'longitude', '.year', 'datatype', 'is_ospar_monitoring', 
+      'is_amap_monitoring', 'is_helcom_monitoring'
+    ) 
+    x_coor_unique <- unique(x_coor[id])
     
-    file <- x_coor_unique[i,]
-
-    # restrict stations to appropriate country and years 
+    res <- data.frame()
+    # check <- data.frame()
     
-    stations_subset <- dplyr::filter(
-      stations, 
-      .data$station_country == file$country, 
-      .data$station_activefromdate <= file$.year, 
-      is.na(.data$station_activeuntildate) | 
-        .data$station_activeuntildate >= file$.year
-    )
+    for(i in 1:nrow(x_coor_unique)) {
       
-    # ensure match to contaminants or effects datatype 
- 
-    if (control$datatype && file$datatype != "AUX") {
+      file <- x_coor_unique[i,]
+      
+      # restrict stations to appropriate country and years 
+      
       stations_subset <- dplyr::filter(
-        stations_subset, 
-        grepl(file$datatype, .data$station_datatype)
+        stations, 
+        .data$station_country == file$country, 
+        .data$station_activefromdate <= file$.year, 
+        is.na(.data$station_activeuntildate) | 
+          .data$station_activeuntildate >= file$.year
       )
-    }
-
-    # match by program governance
-    # have already (partially) restricted by station governance
-          
-    if (control$governance_type %in% c("data", "both")) {
-
-      id <- match(control$governance_id, c("OSPAR", "HELCOM", "AMAP"))
-      id <- c("is_ospar_monitoring", "is_helcom_monitoring", "is_amap_monitoring")[id]
       
-      # identify which conventions the measurement is marked for
+      # ensure match to contaminants or effects datatype 
       
-      file_gov <- sapply(file[id], all)
-
-      # if type == "data", only need to update stations subset if the measurement
-      # does not satisfy the data governance requirement (might be easier to return)
-      
-      if (!any(file_gov)) {
-        stations_subset <- stations_subset[FALSE, ]
-      } else if (control$governance_type == "both") {
-        station_gov <- control$governance_id[file_gov]
-        station_gov <- paste(station_gov, collapse = "|")
+      if (control$datatype && file$datatype != "AUX") {
         stations_subset <- dplyr::filter(
-          stations_subset,
-          grepl(station_gov, .data$station_programgovernance)
+          stations_subset, 
+          grepl(file$datatype, .data$station_datatype)
         )
       }
       
-    } 
-
-    sd <- sf::st_as_sf(
-      stations_subset,
-      wkt = "station_geometry",
-      crs = sf::st_crs(4326)
-      # 4326 is the EPSG code for the datum/projection used (https://epsg.io/4326). 
-      # It needs to be specified so that the spatial functions know what 
-      # coordinate system should be used when calculating distance/area etc. 
-      # The 4326 is the WGS84 system used by most GPS systems        
-    )
-    
-    dpoint <- sf::st_point(c(file$longitude,file$latitude))
-    dpoint_sfc <- sf::st_sfc(dpoint)
-    dpoint_sfc_4326 <- sf::st_set_crs(dpoint_sfc, 4326)
-    
-    sd1 <- sd[dpoint_sfc_4326, op = sf::st_intersects]
-    
-    if(nrow(sd1)> 1){
+      # match by program governance
+      # have already (partially) restricted by station governance
       
-      part <- data.frame()
-      for(i in 1:nrow(sd1)) {
-        sd2 <- sd1[i,]
-        sdpoint <- sf::st_point(c(sd2$station_longitude,sd2$station_latitude))
-        # make a simple feature collection sfc of sdpoint
-        sdpoint_sfc <- sf::st_sfc(sdpoint)
-        # make a version of sdpoint_sfc using crs= 4326
-        sdpoint_sfc_4326 <- sf::st_set_crs(sdpoint_sfc,4326)
-        # calculate distance and turn to scalar
-        sd_dist <- sf::st_distance(dpoint_sfc_4326, sdpoint_sfc_4326)
-        attributes(sd_dist) <- NULL
-        sd2$dist <- sd_dist
-        part <- rbind(part, sd2)
+      if (control$governance_type %in% c("data", "both")) {
+        
+        id <- match(control$governance_id, c("OSPAR", "HELCOM", "AMAP"))
+        id <- c("is_ospar_monitoring", "is_helcom_monitoring", "is_amap_monitoring")[id]
+        
+        # identify which conventions the measurement is marked for
+        
+        file_gov <- sapply(file[id], all)
+        
+        # if type == "data", only need to update stations subset if the measurement
+        # does not satisfy the data governance requirement (might be easier to return)
+        
+        if (!any(file_gov)) {
+          stations_subset <- stations_subset[FALSE, ]
+        } else if (control$governance_type == "both") {
+          station_gov <- control$governance_id[file_gov]
+          station_gov <- paste(station_gov, collapse = "|")
+          stations_subset <- dplyr::filter(
+            stations_subset,
+            grepl(station_gov, .data$station_programgovernance)
+          )
+        }
+        
+      } 
+      
+      sd <- sf::st_as_sf(
+        stations_subset,
+        wkt = "station_geometry",
+        crs = sf::st_crs(4326)
+        # 4326 is the EPSG code for the datum/projection used (https://epsg.io/4326). 
+        # It needs to be specified so that the spatial functions know what 
+        # coordinate system should be used when calculating distance/area etc. 
+        # The 4326 is the WGS84 system used by most GPS systems        
+      )
+      
+      dpoint <- sf::st_point(c(file$longitude,file$latitude))
+      dpoint_sfc <- sf::st_sfc(dpoint)
+      dpoint_sfc_4326 <- sf::st_set_crs(dpoint_sfc, 4326)
+      
+      sd1 <- sd[dpoint_sfc_4326, op = sf::st_intersects]
+      
+      if(nrow(sd1)> 1){
+        
+        part <- data.frame()
+        for(i in 1:nrow(sd1)) {
+          sd2 <- sd1[i,]
+          sdpoint <- sf::st_point(c(sd2$station_longitude,sd2$station_latitude))
+          # make a simple feature collection sfc of sdpoint
+          sdpoint_sfc <- sf::st_sfc(sdpoint)
+          # make a version of sdpoint_sfc using crs= 4326
+          sdpoint_sfc_4326 <- sf::st_set_crs(sdpoint_sfc,4326)
+          # calculate distance and turn to scalar
+          sd_dist <- sf::st_distance(dpoint_sfc_4326, sdpoint_sfc_4326)
+          attributes(sd_dist) <- NULL
+          sd2$dist <- sd_dist
+          part <- rbind(part, sd2)
+        }
+        part <- as.data.frame(part)
+        
+        part <- dplyr::select(part, - station_geometry)
+        
+        sd1 <- dplyr::filter(part, .data$dist == min(.data$dist))
+        # if both distances are the same, keep the station with the highest code, 
+        # should be the newest one
+        sd1 <- dplyr::filter(sd1, .data$station_code == max(.data$station_code)) 
+        result <- dplyr::mutate(file, station_code = sd1$station_code)
+        res <- rbind(res, result)
+        
+      } else if(nrow(sd1)==1) {
+        
+        result <- dplyr::mutate(file, station_code = sd1$station_code)
+        res <- rbind(res, result)
+        
+      } else {
+        
+        result <- dplyr::mutate(file,  station_code = NA)
+        res <- rbind(res, result)
+        
       }
-      part <- as.data.frame(part)
       
-      part <- dplyr::select(part, - station_geometry)
-
-      sd1 <- dplyr::filter(part, .data$dist == min(.data$dist))
-      # if both distances are the same, keep the station with the highest code, 
-      # should be the newest one
-      sd1 <- dplyr::filter(sd1, .data$station_code == max(.data$station_code)) 
-      result <- dplyr::mutate(file, station_code = sd1$station_code)
-      res <- rbind(res, result)
-      
-    } else if(nrow(sd1)==1) {
-
-      result <- dplyr::mutate(file, station_code = sd1$station_code)
-      res <- rbind(res, result)
-    
-    } else {
-    
-      result <- dplyr::mutate(file,  station_code = NA)
-      res <- rbind(res, result)
-
     }
     
-  }
-
-
-  # all unique 
-  # res_unique<- unique(res)
-  
-  x_coor_matched <- dplyr::left_join(
-    x_coor, 
-    res, 
-    by = c(
-      "country", "latitude", "longitude", ".year", "datatype", 
-      "is_amap_monitoring", "is_helcom_monitoring", "is_ospar_monitoring"
+    
+    # all unique 
+    # res_unique<- unique(res)
+    
+    x_coor_matched <- dplyr::left_join(
+      x_coor, 
+      res, 
+      by = c(
+        "country", "latitude", "longitude", ".year", "datatype", 
+        "is_amap_monitoring", "is_helcom_monitoring", "is_ospar_monitoring"
+      )
     )
-  )
-  # Remove created variables
-  x_coor_matched <- dplyr::select(x_coor_matched, -datatype, -.year)
-
-  
+    # Remove created variables
+    x_coor_matched <- dplyr::select(x_coor_matched, -datatype, -.year)
+    
+  }
+        
   ## Start of loop for name-matching
-
+  
   cat(" - matching", nrow(x_name), "records by station name\n")
 
-  id <- c(
-    "country", '.year', 'station_name', 'datatype', 'is_ospar_monitoring', 
-    'is_amap_monitoring', 'is_helcom_monitoring'
-  )
-  x_name_unique <- unique(x_name[id])
+  if (nrow(x_name) > 0L) {
   
-  res <- data.frame()
-  
-  for(i in 1:nrow(x_name_unique)) {
-    file <- x_name_unique[i,]
-
-    # restrict stations to appropriate country and years 
-    
-    stations_subset <- dplyr::filter(
-      stations, 
-      .data$station_country == file$country, 
-      .data$station_activefromdate <= file$.year, 
-      is.na(.data$station_activeuntildate) | 
-        .data$station_activeuntildate >= file$.year
+    id <- c(
+      "country", '.year', 'station_name', 'datatype', 'is_ospar_monitoring', 
+      'is_amap_monitoring', 'is_helcom_monitoring'
     )
-
-    # restrict stations to station_name match
-
-    stations_subset <- dplyr::filter(
-      stations_subset, 
-      .data$station_name == file$station_name
-    )
-
-    # ensure match to contaminants or effects datatype 
+    x_name_unique <- unique(x_name[id])
     
-    if (control$datatype && file$datatype != "AUX") {
+    res <- data.frame()
+    
+    for(i in 1:nrow(x_name_unique)) {
+      file <- x_name_unique[i,]
+      
+      # restrict stations to appropriate country and years 
+      
+      stations_subset <- dplyr::filter(
+        stations, 
+        .data$station_country == file$country, 
+        .data$station_activefromdate <= file$.year, 
+        is.na(.data$station_activeuntildate) | 
+          .data$station_activeuntildate >= file$.year
+      )
+      
+      # restrict stations to station_name match
+      
       stations_subset <- dplyr::filter(
         stations_subset, 
-        grepl(file$datatype, .data$station_datatype)
+        .data$station_name == file$station_name
       )
-    }
-    
-    # match by program governance
-    # have already (partially) restricted by station governance
-    
-    if (control$governance_type %in% c("data", "both")) {
       
-      id <- match(control$governance_id, c("OSPAR", "HELCOM", "AMAP"))
-      id <- c("is_ospar_monitoring", "is_helcom_monitoring", "is_amap_monitoring")[id]
+      # ensure match to contaminants or effects datatype 
       
-      # identify which conventions the measurement is marked for
-      
-      file_gov <- sapply(file[id], all)
-      
-      # if type == "data", only need to update stations subset if the measurement
-      # does not satisfy the data governance requirement (might be easier to return)
-      
-      if (!any(file_gov)) {
-        stations_subset <- stations_subset[FALSE, ]
-      } else if (control$governance_type == "both") {
-        station_gov <- control$governance_id[file_gov]
-        station_gov <- paste(station_gov, collapse = "|")
+      if (control$datatype && file$datatype != "AUX") {
         stations_subset <- dplyr::filter(
-          stations_subset,
-          grepl(station_gov, .data$station_programgovernance)
+          stations_subset, 
+          grepl(file$datatype, .data$station_datatype)
+        )
+      }
+      
+      # match by program governance
+      # have already (partially) restricted by station governance
+      
+      if (control$governance_type %in% c("data", "both")) {
+        
+        id <- match(control$governance_id, c("OSPAR", "HELCOM", "AMAP"))
+        id <- c("is_ospar_monitoring", "is_helcom_monitoring", "is_amap_monitoring")[id]
+        
+        # identify which conventions the measurement is marked for
+        
+        file_gov <- sapply(file[id], all)
+        
+        # if type == "data", only need to update stations subset if the measurement
+        # does not satisfy the data governance requirement (might be easier to return)
+        
+        if (!any(file_gov)) {
+          stations_subset <- stations_subset[FALSE, ]
+        } else if (control$governance_type == "both") {
+          station_gov <- control$governance_id[file_gov]
+          station_gov <- paste(station_gov, collapse = "|")
+          stations_subset <- dplyr::filter(
+            stations_subset,
+            grepl(station_gov, .data$station_programgovernance)
+          )
+        }
+      }
+      
+      if(nrow(stations_subset) == 0L){
+        result <- dplyr::mutate(file, station_code = NA)
+        res <- rbind(res, result)
+      }
+      
+      if(nrow(stations_subset) == 1L){
+        result <- dplyr::mutate(file, station_code = stations_subset$station_code)
+        res <- rbind(res, result)
+      }
+      
+      if (nrow(stations_subset) > 1L) {
+        stop(
+          "Multiple station matches when joining by name - contact HARSAT development team", 
+          call. = FALSE
         )
       }
     }
-      
-    if(nrow(stations_subset) == 0L){
-      result <- dplyr::mutate(file, station_code = NA)
-      res <- rbind(res, result)
-    }
     
-    if(nrow(stations_subset) == 1L){
-      result <- dplyr::mutate(file, station_code = stations_subset$station_code)
-      res <- rbind(res, result)
-    }
+    # res_unique<- unique(res)
     
-    if (nrow(stations_subset) > 1L) {
-      stop(
-        "Multiple station matches when joining by name - contact HARSAT development team", 
-        call. = FALSE
+    x_name_matched <- dplyr::left_join(
+      x_name, 
+      res, 
+      by = c(
+        "country", "station_name", ".year", "datatype", "is_amap_monitoring", 
+        "is_helcom_monitoring", "is_ospar_monitoring"
       )
-    }
-  }
-  
-  # res_unique<- unique(res)
-  
-  x_name_matched <- dplyr::left_join(
-    x_name, 
-    res, 
-    by = c(
-      "country", "station_name", ".year", "datatype", "is_amap_monitoring", 
-      "is_helcom_monitoring", "is_ospar_monitoring"
     )
-  )
-  
-  x_name_matched <- dplyr::select(x_name_matched, -datatype, -.year)
+    
+    x_name_matched <- dplyr::select(x_name_matched, -datatype, -.year)
+    
+  }
+    
   
   # full_match equals data file plus a station_code variable
-  full_match <- rbind(x_coor_matched, x_name_matched)
+  
+  if (nrow(x_coor) == 0L) {
+    full_match <- x_name_matched
+  } else if (nrow(x_name) == 0L) {
+    full_match <- x_coor_matched
+  } else {
+    full_match <- rbind(x_coor_matched, x_name_matched)
+  }
+  
   full_match <- dplyr::rename(full_match, statn = "station_name")
   
   
@@ -1639,7 +1660,7 @@ add_stations <- function(data, stations, info){
   
   full_match$sd_code_current <- full_match$sd_code_match
   full_match$sd_name_current <- full_match$sd_name_match
-
+  
   
   # update current stations with any replacements
   
@@ -1652,15 +1673,15 @@ add_stations <- function(data, stations, info){
   # get station_name associated with station_replacedby
   # important: this will be missing if station_replacedby is no longer in
   # the station dictionary because e.g. it has the wrong data type
-
+  
   full_match <- dplyr::left_join(
     full_match,
     stations[c("station_code", "station_name")],
     by = c("station_replacedby" = "station_code")
   )  
-
+  
   # rename as station_code_replaced and station_name_replaced
-
+  
   full_match <- dplyr::rename(
     full_match,
     sd_code_replaced = "station_replacedby",
@@ -1807,7 +1828,7 @@ add_stations <- function(data, stations, info){
 finalise_data <- function(data, info) {
   
   # common to all compartments
-  
+
   data <- dplyr::rename(
     data, 
     station_submitted = "statn", 
@@ -1851,25 +1872,46 @@ finalise_data <- function(data, info) {
   
   data <- dplyr::mutate(
     data, 
-    keep = !grepl("S", .data$vflag)
+    retain = !grepl("S", .data$vflag)
   )
   
+
+  # sediment:
+  # exclude samples where the upper depth > 0
+  # exclude samples where the matrix is not one of:
+  #   SED20, SED62, SED63, SED90, SED100, SED500, SED1000, SED2000, SEDTOT
   
+  if (info$compartment == "sediment") {
+    
+    ok_matrix <- paste0(
+      "SED", 
+      c("20", "62", "63", "90", "100", "500", "1000", "2000", "TOT")
+    )
+
+    data = dplyr::mutate(
+      data, 
+      retain = .data$retain & !is.na(.data$depth_upper) & 
+        dplyr::near(.data$depth_upper, 0),
+      retain = .data$retain & .data$matrix %in% ok_matrix 
+    )
+    
+  }
+
+    
   # water: 
-  # retain samples where the upper depth <= 5.5m
-  # remove samples where matrix == "SPM"
-  # remove samples where there is no filtration information
+  # exclude samples where the upper depth > 5.5m
+  # exclude samples where matrix == "SPM"
+  # exclude samples where there is no filtration information
   # create filtration column
   
   if (info$compartment == "water") {
 
     data = dplyr::mutate(
       data, 
-      .ok = !is.na(.data$depth_upper) & .data$depth_upper <= 5.5,
-      .ok = .ok & .data$matrix == "WT", 
-      .ok = .ok & !is.na(.data$method_pretreatment),
-      keep = .data$keep & .ok,
-      .ok = NULL
+      retain = .data$retain & !is.na(.data$depth_upper) & 
+        .data$depth_upper <= 5.5,
+      retain = .data$retain & .data$matrix == "WT", 
+      retain = .data$retain & !is.na(.data$method_pretreatment)
     )
     
     wk <- strsplit(data$method_pretreatment, "~|-")
@@ -1885,7 +1927,9 @@ finalise_data <- function(data, info) {
         }
       }
     )
-    
+
+    data <- dplyr::relocate(data, "filtration", .after = "matrix")
+        
   }
 
   data
@@ -3022,10 +3066,11 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   # select variables of interest
 
   id <- c(
-    "station_code", "sample_latitude", "sample_longitude", "filtration", 
+    "station_code", "sample_latitude", "sample_longitude",  
     "species", "sex", "depth",
     "year", "date", "time", "sample",   
-    "matrix", "subseries", "group", "determinand", "basis", "unit", "value", 
+    "matrix", "filtration", "subseries", "group", "determinand", "basis", 
+    "unit", "value", 
     "method_analysis", "n_individual", 
     "concOriginal", "censoringOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "censoring",  

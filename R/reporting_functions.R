@@ -577,7 +577,7 @@ write_summary_table <- function(
     "country", "CMA", 
     "station_code", "station_name", "station_longname", 
     "station_latitude", "station_longitude", "station_type", "waterbody_type", 
-    "determinand", "detGroup", "species", "filtered",
+    "determinand", "detGroup", "species", "filtration",
     "submedia", "matrix", "basis", "unit", "sex", "method_analysis", "subseries", 
     "shape", "colour"
   ) 
