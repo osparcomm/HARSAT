@@ -29,10 +29,10 @@ biota_data <- read_data(
   # contaminants = "ICES_DOME_XHAT_water_data_2023071218223355.txt",
   stations = "ICES_DOME_XHAT_station_data_2023071211380640.txt", 
   data_dir = file.path("data", "example_OSPAR"),
-  # info_files = list(
+  #info_files = list(
   #   determinand = "determinand_simple_OSPAR.csv",
-  #   thresholds = "thresholds_biota_simple_OSPAR.csv"
-  # ),
+  # thresholds = "thresholds_biota_simple_OSPAR.csv"
+  #),
   info_dir = "information", 
   control = list(add_stations = list(method = "name"))
 )  
