@@ -37,6 +37,7 @@ Imports:
   mvtnorm, 
   dplyr,
   lubridate,
+  readr,
   stringr,
   tibble,
   tidyr,
