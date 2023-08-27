@@ -5,8 +5,10 @@
 
 #' Read HARSAT data
 #'
-#' Reads in contaminant data, station dictionary and reference table. Also
-#' allows the user to set various control parameters.
+#' Reads in contaminant and effects data, the station dictionary and various
+#' reference tables. For data from the ICES webservice, it matches data to
+#' stations in the station dictionary.  It also allows the user to set control
+#' parameters that dictate the assessment process.
 #'
 #' @param compartment A string: `"biota"`, `"sediment"` or `"water"`
 #' @param purpose A string specifying whether to use the default set up for
@@ -45,14 +47,22 @@
 #' @returns A list with the following components:
 #' * `call` The function call.
 #' * `info` A list containing the reference tables and the control parameters.
-#' * `data` A data frame containing the contaminant (and effects) data. This is
-#'   (virtually) identical to the input data file apart from some extra empty
-#'   columns which have been added and, for `ICES` data, some columns which have
-#'   been renamed. For `ICES` data, there is also an extra column `retain`. This
-#'   is a logical indicating whether each record would have been retained under
-#'   the previous ICES extraction protocol. For example, `retain` will be
-#'   `FALSE` if the vflag entry is `"S"` or suspect. Records for which `retain
-#'   == FALSE` are deleted later in `tidy_data`.
+#' * `data` A data frame containing the contaminant (and effects) data. For
+#'   `external` data, this is identical to the input data file apart from some
+#'   extra empty columns which have been added. For `ICES` data, some existing
+#'   columns have been renamed (otherwise they are untouched) and some
+#'   additional columns have been constructed. The key ones of these are:
+#'   - `station_code` the code of the station in the station dictionary that
+#'   best matches the data
+#'   - `station_name` the name of the station
+#'   - `species` (biota) the species based on `worms_accepted_name` where
+#'   available and `speci_name` otherwise
+#'   - `filtration` (water) whether the sample was `filtered` or `unfiltered`
+#'   based on `method_pretreatment`
+#'   - `retain` a logical indicating whether each record would have been
+#'   retained under the previous ICES extraction protocol. For example, `retain`
+#'   will be `FALSE` if the vflag entry is `"S"` or suspect. Records for which
+#'   `retain == FALSE` are deleted later in `tidy_data`
 #' * `stations`
 #'
 #' @section Control parameters
@@ -176,7 +186,6 @@ read_data <- function(
     
     data <- finalise_data(data, info)
 
-    # data <- dplyr::filter(data, .data$retain)
   }
     
 
@@ -1874,7 +1883,26 @@ finalise_data <- function(data, info) {
     data, 
     retain = !grepl("S", .data$vflag)
   )
+
   
+  # biota:
+  # create species column; use worms_accepted_name if it exists, and speci_name
+  #   otherwise
+  # exclude records with missing species
+  
+  if (info$compartment == "biota") {
+    
+    data = dplyr::mutate(
+      data,
+      species = .data$worms_accepted_name,
+      species = ifelse(is.na(.data$species), .data$speci_name, .data$species),
+      retain = retain & !is.na(species)
+    )
+
+    data <- dplyr::relocate(data, "species", .after = "worms_accepted_name")
+
+  }
+    
 
   # sediment:
   # exclude samples where the upper depth > 0
@@ -1892,9 +1920,9 @@ finalise_data <- function(data, info) {
       data, 
       retain = .data$retain & !is.na(.data$depth_upper) & 
         dplyr::near(.data$depth_upper, 0),
-      retain = .data$retain & .data$matrix %in% ok_matrix 
+      retain = .data$retain & .data$matrix %in% ok_matrix, 
     )
-    
+
   }
 
     
@@ -2014,6 +2042,37 @@ tidy_data <- function(ctsm_obj) {
   
   # tidy station dictionary and contaminant data
 
+  
+  # drop data that are suspect or do not meet requirements 
+
+  if (info$data_format %in% "ICES") {
+    
+    ok <- data$retain
+    if (!all(ok)) {
+      cat(
+        "\nDropping", 
+        sum(!ok), 
+        "records from data flagged for deletion. Possible reasons are:\n", 
+        "- vflag = suspect\n", 
+        switch(
+          info$compartment, 
+          biota = "- species missing\n",
+          sediment = paste(
+            "- upper depth > 0m\n", 
+            "- unusual matrix\n"
+          ),
+          water = paste(
+            "- upper depth >5.5m\n", 
+            "- filtration missing\n"
+          )
+        )
+      )
+      data <- data[ok, ]
+    }
+
+  }    
+    
+
   # drop data with no station_code and stations that are not in the data
   
   if (info$data_format %in% c("ICES", "external")) {
@@ -2040,7 +2099,7 @@ tidy_data <- function(ctsm_obj) {
     
   }
   
-
+  
   stations <- tidy_stations(stations, info)
 
   data <- tidy_contaminants(data, info)

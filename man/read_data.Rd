@@ -72,17 +72,30 @@ A list with the following components:
 \itemize{
 \item \code{call} The function call.
 \item \code{info} A list containing the reference tables and the control parameters.
-\item \code{data} A data frame containing the contaminant (and effects) data. This is
-(virtually) identical to the input data file apart from some extra empty
-columns which have been added and, for \code{ICES} data, some columns which have
-been renamed. For \code{ICES} data, there is also an extra column \code{retain}. This
-is a logical indicating whether each record would have been retained under
-the previous ICES extraction protocol. For example, \code{retain} will be
-\code{FALSE} if the vflag entry is \code{"S"} or suspect. Records for which \code{retain == FALSE} are deleted later in \code{tidy_data}.
+\item \code{data} A data frame containing the contaminant (and effects) data. For
+\code{external} data, this is identical to the input data file apart from some
+extra empty columns which have been added. For \code{ICES} data, some existing
+columns have been renamed (otherwise they are untouched) and some
+additional columns have been constructed. The key ones of these are:
+\itemize{
+\item \code{station_code} the code of the station in the station dictionary that
+best matches the data
+\item \code{station_name} the name of the station
+\item \code{species} (biota) the species based on \code{worms_accepted_name} where
+available and \code{speci_name} otherwise
+\item \code{filtration} (water) whether the sample was \code{filtered} or \code{unfiltered}
+based on \code{method_pretreatment}
+\item \code{retain} a logical indicating whether each record would have been
+retained under the previous ICES extraction protocol. For example, \code{retain}
+will be \code{FALSE} if the vflag entry is \code{"S"} or suspect. Records for which
+\code{retain == FALSE} are deleted later in \code{tidy_data}
+}
 \item \code{stations}
 }
 }
 \description{
-Reads in contaminant data, station dictionary and reference table. Also
-allows the user to set various control parameters.
+Reads in contaminant and effects data, the station dictionary and various
+reference tables. For data from the ICES webservice, it matches data to
+stations in the station dictionary.  It also allows the user to set control
+parameters that dictate the assessment process.
 }
