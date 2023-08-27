@@ -754,6 +754,105 @@ ctsm_read_thresholds <- function(
 }
 
 
+
+#' Add OSPAR_subregion to simplified sediment threshold reference table
+#'
+#' This is a utility function to expand a simplified OSPAR sediment threshold
+#' table (which is much easier for the user to edit) into the form required by 
+#' `harsat` 
+#'
+#' @param input_file 
+#' @param output_file
+#' @param export
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+workup_OSPAR_sediment_thresholds <- function(
+    input_file, output_file, export = TRUE) {
+  
+  data <- read.csv(input_file, na.strings = "", strip.white = TRUE)
+  
+ 
+  # get current ordering of determinands
+  
+  det_order <- unique(data$determinand)
+  
+   
+  # add in subregions where there are blank cells
+  
+  id <- c(
+    "Barents Sea", "Celtic Sea", "Channel", "East of Iceland", 
+    "Greenland-Scotland ridge", "Irish and Scottish West Coast",
+    "Irish Sea", "Northern Bay of Biscay", "Northern North Sea",
+    "Norwegian Sea", "Norwegian Trench", "Skagerrak and Kattegat", 
+    "Southern North Sea", "West of Iceland", "Wider Atlantic"
+  )
+
+  id <- paste(id, collapse = "~")
+  
+  data <- dplyr::mutate(
+    data, 
+    ospar_subregion = tidyr::replace_na(.data$ospar_subregion, id)
+  )
+  
+  
+  # expand table by subregion
+  
+  wk <- strsplit(data$ospar_subregion, "~")
+  n <- sapply(wk, length)
+  data <- data[rep(1:nrow(data), times = n), ]
+  data$ospar_subregion <- unlist(wk)
+  
+  
+  # order data frame - use original ordering of determinand which 
+  # is usually be determinand group
+  
+  data <- dplyr::mutate(
+    data, 
+    .determinand = factor(.data$determinand, levels = det_order)
+  )  
+  
+  data <- dplyr::arrange(
+    data, 
+    dplyr::across(all_of(c(".determinand", "normaliser", "ospar_subregion")))
+  )
+  
+  data$.determinand <- NULL
+  
+  # add in basis variables
+  
+  stopifnot(all(data$basis %in% "D"))
+  
+  data$basis <- NULL
+  
+  TV <- setdiff(names(data), c("determinand", "normaliser", "ospar_subregion"))
+  
+  data <- dplyr::mutate(
+    data, 
+    dplyr::across(
+      all_of(TV), 
+      ~ ifelse(is.na(.x), NA_character_, "D"), 
+      .names = "{.col}_basis"
+    )
+  )
+  
+  data <- dplyr::relocate(data, ends_with("basis"), .before = TV[1])
+  
+  row.names(data) <- NULL
+
+  if (!export) {
+    return(data)
+  }
+  
+  readr::write_excel_csv(data, output_file, na = "")
+  
+  invisible()
+}
+
+
+
 # gets Assessment Criteria
 # determinand is a vector of length n
 # info can be either a data frame or a list of appropriate supporting variables
