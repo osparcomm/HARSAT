@@ -2063,7 +2063,8 @@ tidy_data <- function(ctsm_obj) {
           ),
           water = paste(
             "- upper depth >5.5m\n", 
-            "- filtration missing\n"
+            "- filtration missing\n",
+            "- matrix = 'SPM'\n"
           )
         )
       )

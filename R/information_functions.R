@@ -745,7 +745,7 @@ ctsm_read_thresholds <- function(
     wk <- strsplit(data$filtration, "~")
     n <- sapply(wk, length)
     data <- data[rep(1:nrow(data), times = n), ]
-    data$filtered <- unlist(wk)
+    data$filtration <- unlist(wk)
   }
   
   rownames(data) <- NULL
