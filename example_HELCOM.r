@@ -1,29 +1,192 @@
-# Intro ----
+# Introduction ----
 
-# Essentially this replicates the HELCOM 2022 assessment
-# The biota data file has been trimmed to manage its size, and the 'initial' 
-# data, unique to HELCOM, has not been implemented
+# This vignette shows how to do an assessment (mostly) following the approach 
+# taken in HELCOM HOLAS3. 
+
+# The data were extracted from the ICES data base using the XHAT facilities on
+# the [ICES webservice](https://dome.ices.dk/api/swagger/index.html). The data
+# were extracted on 28 August 2023 and were filtered using is_helcom_area = TRUE
+# anad maxYear = 2020. The data were subsequently reduced in size to make them
+# more manageable for this example.
+
+# There are two exceptions to the HOLAS3 approach. First, imposex data are not
+# assessed here - these have an additional level of complexity that will be
+# explained in a subsequent vignette (not written yet). Second, the method for
+# dealing with 'initial' data, unique to HELCOM, has not been implemented (this
+# is not yet available in harsat).
+
+# We'll begin with contaminants in water which are the simplest data to assess.
+# We'll then move on to sediment and biota which have more features to consider.
 
 
-# Setup ----
-
-## functions and reference tables ----
-
-# Sources functions (folder R) and reference tables (folder information)
-# Only those functions needed for this example are sourced here
-# The functions and reference tables folders are assumed to be in the current
-# R project folder
-
-# Test comment
+# Water assessment
 
 rm(list = objects())
 
 devtools::load_all()
 
 
-# Read data and make adjustments ----
+# First, we use read_data to read in the contaminant data, the station
+# dictionary, and two important reference tables: the determinand and thresholds
+# reference tables. There are several things to note about the function call:
+# * purpose = "HELCOM" means that the assessment configuration is set to
+# mirror that of the HOLAS3 assessment; you can change the assessment
+# configuration in many ways using the control argument, but that is not
+# explained here
+# * data_dir identifies the directory storing the contaminant data (water.txt)
+# and station dictionary (stations.txt); using file.path prevents any
+# difficulties using forward or backward slashes when writing file paths
+# * info_dir identifies the directory storing the reference tables. These must
+# be named determinand.csv and thresholds_water.csv. The determinand table
+# identifies which determinands are going to be assessed. If there are no
+# thresholds, then there doesn't need to be a file called thresholds_water.csv.
+# * you don't have to specify the extraction date, but it can help to keep track 
+# of things
 
-## biota ----
+# As well as reading in the contaminant data and station dictionary, the
+# function allocates each record in the contaminant data to a station in the
+# station dictionary. The process for doing this is quite complicated (and it
+# can take a few minutes to run) and we don't go into details year.
+
+# Finally, a message is printed out saying that the argument max_year is set to
+# 2020. (This is as it should be since we set maxYear to be 2020 in the data
+# extraction.) But an important consequence is that a contaminant time series
+# will only be assessed if it has some data in the period 2015 to 2020 (i.e. in
+# the last six monitoring years).
+
+water_data <- read_data(
+  compartment = "water", 
+  purpose = "HELCOM",                               
+  contaminants = "water.txt", 
+  stations = "stations.txt", 
+  data_dir = file.path("data", "example_HELCOM"),
+  info_dir = "information", 
+  extraction = "2023/08/23"
+)  
+
+
+# We next simplify the data so that they are in the correct format for running
+# the assessment. This also involves deleting some data that do not meet the
+# conditions for the assessment.
+
+# Notice that a message appears talking about 'oddities'. Both tidy_data and
+# create_timeseries (the next function call) do a lot of checking of the data
+# and strange values are written to the oddities folder for you to have a look
+# at (in the hope that, if there are errors, they will get corrected and
+# resubmitted to the ICES database). It turns out there are no strange value at
+# this stage, but there are in the step that follows.
+
+water_data <- tidy_data(water_data)
+
+
+# We now do some more data cleaning and then group the data into time series.
+# Each time series consists of measurements of a single determinand at a single
+# monitoring station. 
+
+# The determinands.control is an important argument to consider when running an
+# assessment. Here, PFOS is one of the determinands to be assessed. However,
+# PFOS can also be submitted as N-PFOS and BR-PFOS, its linear and branched
+# components. The argument below tells the code to sum records of N-PFOS and
+# BR-PFOS from the same sample and relabel them as PFOS. There are more
+# complicated examples of the use of determinands.control in the sediment and
+# biota examples below
+
+water_timeseries <- create_timeseries(
+  water_data,
+  determinands.control = list(
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
+  )
+)
+
+
+# If you want to see a list of all the time series, then you can run code along
+# the following lines:
+
+head(water_timeseries$timeSeries)
+
+# or, if you want more detail about each station, you can do something a bit
+# more fancy:
+
+dplyr::left_join(
+  water_timeseries$timeSeries, 
+  water_timeseries$stations[c("station_code", "station_name", "country")], 
+  by = "station_code") |> 
+  dplyr::relocate(c("station_name", "country"), .after = "station_code") |>
+  head()
+
+
+# At last it is time to run the assessment. You need to specify which thresholds
+# to use, otherwise the code will ignore with any of them. For water there is
+# only the EQS, but you still need to specify it. Look at the thresholds
+# reference table to see what is available if you are unsure. Note that AC
+# stands for Assessment Criteria which is what thresholds are often called. The
+# parallel argument tells the code to use parallel processing. This usually
+# speeds things up considerably. The assessment took about 5 minutes to run on
+# my machine.
+
+water_assessment <- run_assessment(
+  water_timeseries, 
+  AC = "EQS", 
+  parallel = TRUE
+)
+
+# We now need to check whether there were any convergence issues
+
+check_assessment(water_assessment)
+
+
+# It turns out a couple of time series didn't converge. Lack of convergence
+# often occurs because there are errors in the data (e.g. reported in incorrect
+# units) or because there are large outliers, so the best thing to do is first
+# check your data. However, convergence can also be difficult if there are a lot
+# of less-than measurements in the time series. Describing how to tweak the
+# control arguments to get convergence is beyond the scope of this vignette
+# (need to write another vignette to discuss this), so for now we just sort the
+# particular issue for these two time series. 
+
+wk_id <- check_assessment(water_assessment, save_result = TRUE)
+
+water_assessment <- update_assessment(
+  water_assessment, 
+  series %in% wk_id$not_converged, 
+  fixed_bound = 20
+)
+
+# Let's check that the refitted time series have converged.
+
+check_assessment(water_assessment)
+
+# Work on the model fitting code is ongoing to reduce the number of affected
+# time series and to improve the error messaging.
+
+# It is time to look at the results! The vignette for external data shows how
+# you can plot the data for each time series along with the model fitted to the
+# data. The code below prints out a csv file giving summary information about
+# the assessment of each time series. This includes:
+# - meta data about the station
+# - the number of years of data 
+# - estimates and p-values associated any temporal trends in the data
+# - comparisons of the fitted value in the last monitoring year with the EQS 
+
+write_summary_table(
+  water_assessment,
+  determinandGroups = list(
+    levels = c("Metals", "Organotins", "Organofluorines"), 
+    labels = c("Metals", "Organotins", "Organofluorines")
+  ),
+  classColour = list(
+    below = c("EQS" = "green"), 
+    above = c("EQS" = "red"), 
+    none = "black"
+  ),
+  collapse_AC = list(EAC = "EQS"),
+  output_dir = file.path("output", "example_HELCOM")
+)
+
+
+
+# STOP HERE!!!
+
 
 biota_data <- read_data(
   compartment = "biota", 
@@ -57,21 +220,6 @@ sediment_data <- read_data(
   max_year = 2021L
 )
 
-
-
-## water ----
-
-water_data <- read_data(
-  compartment = "water", 
-  purpose = "HELCOM",                               
-  contaminants = file.path("example_HELCOM_new_format", "water_data.csv"), 
-  stations = file.path("example_HELCOM", "station_dictionary.csv"), 
-  data_dir = "data",
-  data_format = "ICES_new",
-  info_dir = "information", 
-  extraction = "2022/10/06",
-  max_year = 2021L
-)  
 
 
 
@@ -111,18 +259,6 @@ rmarkdown::render(
 biota_data <- tidy_data(biota_data)
 sediment_data <- tidy_data(sediment_data)
 
-
-water_data$data <- dplyr::mutate(
-  water_data$data,
-  filtration = if_else(grepl("NF", method_pretreatment), "No", "Yes")
-)
-
-water_data$data <- dplyr::filter(
-  water_data$data, 
-  matrix == "WT"
-)
-
-water_data <- tidy_data(water_data)
 
 
 
@@ -277,14 +413,6 @@ sediment_timeseries <- create_timeseries(
 
 
 
-## water ----
-
-water_timeseries <- create_timeseries(
-  water_data,
-  determinands.control = list(
-    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
-  )
-)
 
 
 
@@ -394,36 +522,6 @@ check_assessment(biota_assessment)
 
 ### main runs ----
 
-water_assessment <- run_assessment(
-  water_timeseries, 
-  AC = "EQS", 
-  parallel = TRUE
-)
-
-
-### check convergence ----
-
-check_assessment(water_assessment)
-
-
-# refit a couple of time series where the fixed effects are on their bounds
-
-# "5190 CD Yes" - fixed effects on bounds
-# "5192 CD Yes" - fixed effects on bounds
-
-wk_id <- check_assessment(water_assessment, save_result = TRUE)
-
-water_assessment <- update_assessment(
-  water_assessment, 
-  series %in% wk_id$not_converged, 
-  fixed_bound = 20
-)
-
-
-# check that refitted timeseries have converged
-
-check_assessment(water_assessment)
-
 
 
 
@@ -471,16 +569,3 @@ write_summary_table(
   collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
 )
-
-write_summary_table(
-  water_assessment,
-  determinandGroups = webGroups,
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
-  ),
-  collapse_AC = list(EAC = "EQS"),
-  output_dir = file.path("output", "example_HELCOM")
-)
-
