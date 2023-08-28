@@ -769,7 +769,7 @@ ctsm_read_thresholds <- function(
 #' @export
 #'
 #' @examples
-workup_OSPAR_sediment_thresholds <- function(
+convert_reftable <- function(
     input_file, output_file, export = TRUE) {
   
   data <- read.csv(input_file, na.strings = "", strip.white = TRUE)
