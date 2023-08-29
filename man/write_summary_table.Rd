@@ -45,7 +45,7 @@ each time series
 \item the fitted values in the last monitoring year with associated upper
 one-sided 95\% confidence limits
 \item the trend assessments (p-values and trend estimates)
-\item the status assessments (if there any thresholds
+\item the status assessments (if there any thresholds)
 \item (optionally) a symbology summarising the trend (shape) and status (colour)
 of each time series
 }
