@@ -1,0 +1,140 @@
+---
+title: "Reference table file formats"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reference table file formats}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+These are the column headers for CSV-formatted reference table files.
+`harsat` uses three different reference tables: 
+
+1. A species file
+2. A determinands file
+3. A thresholds file 
+
+All these files should be in your information files directory.
+
+## Species file format
+
+The species file will be `species.csv` in your information files directory.
+
+| column name   | type      | mandatory | comments              |
+| ------------- | --------- | :-------: | --------------------- |
+| `reference_species` | character | yes | Reference species name |
+| `submitted_species` | character | yes | Submitted species name |
+| `common_name` | character | yes | Common name for the species |
+| `species_group` | character | yes | Species group, should be one of: `Bird`, `Bivalve`, `Crustacean`, `Echinoderm`, `Fish`, `Gastropod`, `Macrophyte`, `Mammal`, `Other` |
+| `species_subgroup` | character | yes | Mostly unused, but a few values are significant: `Oyster`, `Mussel` -- when not available use the `species_group` value |
+| `assess` | boolean | yes | Whether or not to include this species in the assessment, should be either `TRUE` or `FALSE` |
+| `MU_drywt` | numeric | no | Muscle dry weight |
+| `LI_drywt` | numeric | no | Liver dry weight |
+| `SB_drywt` | numeric | no | Soft body dry weight |
+| `TM_drywt` | numeric | no | Tail muscle dry weight |
+| `EH_drywt` | numeric | no | Egg homogenate dry weight |
+| `HA_drywt` | numeric | no | Hair/fur dry weight |
+| `FE_drywt` | numeric | no | Feathers dry weight |
+| `BL_drywt` | numeric | no | Blood dry weight |
+| `MU_lipidwt` | numeric | no | Muscle lipid weight |
+| `LI_lipidwt` | numeric | no | Liver lipid weight |
+| `SB_lipidwt` | numeric | no | Soft body lipid weight |
+| `TM_lipidwt` | numeric | no | Tail muscle lipid weight |
+| `EH_lipidwt` | numeric | no | Egg homogenate lipid weight |
+| `HA_lipidwt` | numeric | no | Hair/fur lipid weight |
+| `FE_lipidwt` | numeric | no | Feathers lipid weight |
+| `BL_lipidwt` | numeric | no | Blood lipid weight |
+
+## Determinands file format
+
+The determinands file will be `determinands.csv` in your information files directory.
+
+| column name   | type      | mandatory | comments              |
+| ------------- | --------- | :-------: | --------------------- |
+| `determinand` | character | yes | Determinant code -- this is a key to the thresholds file records |
+| `common_name` | character | no | Common name for the determinant, e.g., `Aluminium`, `Glyphosate` |
+| `pargroup` | character | yes | ICES parameter group reference code, e.g. `I-MET`, `O-PAH`, `OC-CB`, `OC-DD`, etc. (see: https://vocab.ices.dk/?ref=78) |
+| `biota_group` | character | no | Grouping for the sediment determinant: one of `Metals`, `PAH_parent`, `PAH_alkylated`, `Chlorobiphenyls`, `PBDEs`, `Organobromines`, `Organotins`, `Organochlorines`, `Organofluorines`, `Pesticides`, `Dioxins`, `Effects`, `Auxiliary`, `Metabolites`, or `Imposex` |
+| `sediment_group` | character | no | Grouping for the sediment determinant: one of `Metals`, `PAH_parent`, `PAH_alkylated`, `Chlorobiphenyls`, `PBDEs`, `Organobromines`, `Organotins`, `Organochlorines`, `Organofluorines`, `Pesticides`, `Dioxins`, `Effects`, or `Auxiliary` |
+| `water_group` | character | no | Grouping for the water determinant: one of `Metals`, `PAH_parent`, `PAH_alkylated`, `Chlorobiphenyls`, `PBDEs`, `Organobromines`, `Organotins`, `Organochlorines`, `Organofluorines`, or `Pesticides` |
+| `biota_assess` | boolean | no | should be either `TRUE` or `FALSE` |
+| `sediment_assess` | boolean | no | should be either `TRUE` or `FALSE` |
+| `water_assess` | boolean | no | should be either `TRUE` or `FALSE` |
+| `biota_unit` | character | no | Units for the biota data, e.g. `ug/kg` |
+| `sediment_unit` | character | no | Units for the sediment data, e.g., `mg/kg` |
+| `water_unit` | character | no | Units for the water data, e.g., `ug/l` |
+| `biota_auxiliary` | character | no | Not currently used by `harsat` |
+| `sediment_auxiliary` | character | no | Not currently used by `harsat` |
+| `water_auxiliary` | character | no | Not currently used by `harsat` |
+| `biota_sd_constant` | character | no | Not currently used by `harsat` |
+| `biota_sd_variable` | character | no | Not currently used by `harsat` |
+| `sediment_sd_constant` | character | no | Not currently used by `harsat` |
+| `sediment_sd_variable` | character | no | Not currently used by `harsat` |
+| `water_sd_constant` | character | no | Not currently used by `harsat` |
+| `water_sd_variable` | character | no | Not currently used by `harsat` |
+| `distribution` | character | no | A distribution type, almost always `lognormal` |
+| `good_status` | character | no | Almost always `low` |
+
+## Thresholds file format
+
+The thresholds files (there are usually several, one for each compartment) might vary
+considerably between the compartments. However, the principle is the same: they 
+set values for some given determinand. In the case of biota, that's linked to a
+particular species or species group. In the case of sediment, it is linked, typically,
+to a region. Water is the simplest, so let's look at that first:
+
+### Water thresholds files
+
+A water thresholds file will be `thresholds_water.csv` in your information files directory.
+
+| column name   | type      | mandatory | comments              |
+| ------------- | --------- | :-------: | --------------------- |
+| `determinand` | character | yes | The determinand code, which must key to the determinands file |
+| `filtration` | character | yes | A string, either `filtered` or `unfiltered` |
+| `EQS_basis` | character | yes | The EQS threshold basis: `D` or `W` |
+| `EQS` | numeric | yes | The EQS threshold value |
+
+### Sediment thresholds files
+
+A sediment thresholds file will be `thresholds_sediment.csv` in your information files directory.
+
+| column name   | type      | mandatory | comments              |
+| ------------- | --------- | :-------: | --------------------- |
+| `determinand` | character | yes | The determinand code, which must key to the determinands file |
+| `normaliser` | character | no | The normalizer, either `AL` or `CORG` |
+| `ospar_subregion` | character | no | Optionally, the OSPAR subregion name |
+| `basis` | character | no |  |
+| `BAC_basis` | character | no | The threshold basis for BAC, either `D` or `W` |
+| `ERL_basis` | character | no | The threshold basis for ERL, either `D` or `W` |
+| `EAC_basis` | character | no | The threshold basis for EAC, either `D` or `W` |
+| `EQS_basis` | character | no | The threshold basis for EQS, either `D` or `W` |
+| `FEQG_basis` | character | no | The threshold basis for FEQG, either `D` or `W` |
+| `BAC` | character | no | The BAC threshold value |
+| `ERL` | character | no | The ERL threshold value |
+| `EAC` | character | no | The EAC threshold value |
+| `EQS` | character | no | The EQS threshold value |
+| `FEQG` | character | no | The FEQG threshold value |
+
+### Biota thresholds files
+
+A biota thresholds file will be `thresholds_biota.csv` in your information files directory.
+
+| column name   | type      | mandatory | comments              |
+| ------------- | --------- | :-------: | --------------------- |
+| `determinand` | character | yes | The determinand code, which must key to the determinands file |
+| `species_group` | character | no | The species group, a key to the `species.csv` file |
+| `species_subgroup` | character | no | The species subgroup, a key to the `species.csv` file |
+| `species` | character | no | The species, a key to the `species.csv` file (and specifically the `reference_species` column) |
+| `matrix` | character | yes | A selection expression: a tilde `~` separated set of determinand combinations, which may be a single determinand or a combination joined by ampersands |
+| `BAC_basis` | character | no | The threshold basis for BAC, either `D` or `W` |
+| `MPC_basis` | character | no | The threshold basis for MPC, either `D` or `W` |
+| `EQS_basis` | character | no | The threshold basis for EQS, either `D` or `W` |
+| `EAC_basis` | character | no | The threshold basis for EAC, either `D` or `W` |
+| `BAC` | character | no | The BAC threshold value |
+| `MPC` | character | no | The MPC threshold value |
+| `EQS` | character | no | The EQS threshold value |
+| `EAC` | character | no | The EAC threshold value |
+
+Note that while none of the `species_group`, `species_subgroup`, and `species` are themselves
+mandatory, in each row, there needs to be enough to match to the species lists. They cannot 
+all be unspecified. 
