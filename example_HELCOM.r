@@ -19,7 +19,7 @@
 # We'll then move on to sediment and biota which have more features to consider.
 
 
-# Water assessment
+# Water assessment ----
 
 rm(list = objects())
 
@@ -102,17 +102,7 @@ water_timeseries <- create_timeseries(
 # If you want to see a list of all the time series, then you can run code along
 # the following lines:
 
-head(water_timeseries$timeSeries)
-
-# or, if you want more detail about each station, you can do something a bit
-# more fancy:
-
-dplyr::left_join(
-  water_timeseries$timeSeries, 
-  water_timeseries$stations[c("station_code", "station_name", "country")], 
-  by = "station_code") |> 
-  dplyr::relocate(c("station_name", "country"), .after = "station_code") |>
-  head()
+get_timeseries(water_timeseries) |> head(10) 
 
 
 # At last it is time to run the assessment. You need to specify which thresholds
@@ -122,7 +112,7 @@ dplyr::left_join(
 # stands for Assessment Criteria which is what thresholds are often called. The
 # parallel argument tells the code to use parallel processing. This usually
 # speeds things up considerably. The assessment took about 5 minutes to run on
-# my machine.
+# my laptop.
 
 water_assessment <- run_assessment(
   water_timeseries, 
@@ -159,14 +149,22 @@ check_assessment(water_assessment)
 # Work on the model fitting code is ongoing to reduce the number of affected
 # time series and to improve the error messaging.
 
+
 # It is time to look at the results! The vignette for external data shows how
 # you can plot the data for each time series along with the model fitted to the
 # data. The code below prints out a csv file giving summary information about
 # the assessment of each time series. This includes:
-# - meta data about the station
-# - the number of years of data 
-# - estimates and p-values associated any temporal trends in the data
-# - comparisons of the fitted value in the last monitoring year with the EQS 
+# - meta-data such as the monitoring location and number of years of data for
+# each time series
+# - the fitted values in the last monitoring year with associated upper
+# one-sided 95% confidence limits
+# - the trend assessments (p-values and trend estimates)
+# - the status assessments (if there any thresholds)
+# - (optionally) a symbology summarising the trend (shape) and status (colour)
+# of each time series
+
+# This function is being actively developed and the function arguments are 
+# likely to evolve, so we'll leave their explanation for the next release.
 
 write_summary_table(
   water_assessment,
@@ -184,6 +182,94 @@ write_summary_table(
 )
 
 
+# Sediment assessment ----
+
+# The sediment assessment is very similar, but has a few extra features related
+# to normalisation (to account for differences in grain size) which are describe
+# below
+
+sediment_data <- read_data(
+  compartment = "sediment", 
+  purpose = "HELCOM",                               
+  contaminants = "sediment.txt", 
+  stations = "stations.txt", 
+  data_dir = file.path("data", "example_HELCOM"),
+  info_dir = "information", 
+  extraction = "2023/08/23"
+)  
+
+sediment_data <- tidy_data(sediment_data)
+
+
+# The create_timeseries call for sediment differs from the call for water in two
+# ways. First, determinands.control identifies two groups of determinands that
+# need to be summed. Second, the arguments normalise and normalise.control
+# specify how the normalisation for grain size should be carried out. There are
+# default functions for normalisation that will work in many cases. However, the
+# process for HELCOM is more complicated (because unlike other metals, copper is
+# normalised to organic carbon) so a customised function
+# normalise_sediment_HELCOM is provided. The argument normalise.control
+# specifies that metals (apart from copper) will be normalised to 5% aluminium
+# and copper and organics will be normalised to 5% organic carbon. The normalise
+# functions need a bit of work, so expect them to change.
+
+sediment_timeseries <- create_timeseries(
+  sediment_data,
+  determinands.control = list(
+    SBDE6 = list(
+      det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
+      action = "sum"
+    ),
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum")
+  ),
+  normalise = normalise_sediment_HELCOM,
+  normalise.control = list(
+    metals = list(method = "pivot", normaliser = "AL", value = 5), 
+    copper = list(method = "hybrid", normaliser = "CORG", value = 5),
+    organics = list(method = "simple", normaliser = "CORG", value = 5) 
+  )
+)
+
+
+# Now run the assessment. Again there is only one threshold, the EQS.  This only
+# takes about a minute to run on my laptop.
+
+sediment_assessment <- run_assessment(
+  sediment_timeseries, 
+  AC = "EQS",
+  parallel = TRUE
+)
+
+# Everything has converged tis time.
+
+check_assessment(sediment_assessment)
+
+
+# Finally, we can plot individual time series assessments (see vignett for
+# external data) or print out the summary table
+
+write_summary_table(
+  sediment_assessment,
+  determinandGroups = webGroups <- list(
+    levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines"),  
+    labels = c(
+      "Metals", "Organotins", "Polycyclic aromatic hydrocarbons",  
+      "Organobromines", "Organobromines" 
+    )
+  ),
+  classColour = list(
+    below = c("EQS" = "green"), 
+    above = c("EQS" = "red"), 
+    none = "black"
+  ),
+  collapse_AC = list(EAC = "EQS"),
+  output_dir = file.path("output", "example_HELCOM")
+)
+
+
+
+
+# Biota assessment ----
 
 # STOP HERE!!!
 
@@ -206,21 +292,6 @@ biota_data <- read_data(
 
 
 
-## sediment ----
-
-sediment_data <- read_data(
-  compartment = "sediment",
-  purpose = "HELCOM",
-  contaminants = file.path("example_HELCOM_new_format", "sediment_data.csv"),
-  stations = file.path("example_HELCOM", "station_dictionary.csv"),
-  data_dir = "data",
-  data_format = "ICES_new",
-  info_dir = "information",
-  extraction = "2022/10/06",
-  max_year = 2021L
-)
-
-
 
 
 ## adjustments ----
@@ -237,18 +308,6 @@ info_TEQ <- c(
 )
 
 
-rmarkdown::render(
-  file.path("man", "fragments", "example_HELCOM_data_adjustments.Rmd"), 
-  output_file = "HELCOM_imposex_preparation.html",
-  output_dir = file.path("output", "example_HELCOM") 
-)
-
-
-rmarkdown::render(
-  "example_HELCOM_data_adjustments.Rmd", 
-  output_file = "HELCOM_adjustments.html",
-  output_dir = file.path("output", "example_HELCOM") 
-)
 
 
 
@@ -257,8 +316,6 @@ rmarkdown::render(
 # gets correct variable and streamlines some of the data files
 
 biota_data <- tidy_data(biota_data)
-sediment_data <- tidy_data(sediment_data)
-
 
 
 
@@ -392,47 +449,6 @@ biota_timeseries$data$country <- NULL
 
 
 
-## sediment ----
-
-sediment_timeseries <- create_timeseries(
-  sediment_data,
-  determinands.control = list(
-    SBDE6 = list(
-      det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
-      action = "sum"
-    ),
-    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum")
-  ),
-  normalise = ctsm_normalise_sediment_HELCOM,
-  normalise.control = list(
-    metals = list(method = "pivot", normaliser = "AL"), 
-    copper = list(method = "hybrid", normaliser = "CORG", value = 5),
-    organics = list(method = "simple", normaliser = "CORG", value = 5) 
-  )
-)
-
-
-
-
-
-
-# Assessment ----
-
-## sediment ----
-
-### main runs ----
-
-sediment_assessment <- run_assessment(
-  sediment_timeseries, 
-  AC = "EQS",
-  parallel = TRUE
-)
-
-
-### check convergence ----
-
-check_assessment(sediment_assessment)
-
 
 
 ## biota ----
@@ -558,14 +574,3 @@ write_summary_table(
   output_dir = file.path("output", "example_HELCOM")
 )
 
-write_summary_table(
-  sediment_assessment,
-  determinandGroups = webGroups,
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
-  ),
-  collapse_AC = list(EAC = "EQS"),
-  output_dir = file.path("output", "example_HELCOM")
-)

@@ -3037,6 +3037,44 @@ create_timeseries <- function(
 }
 
 
+
+#' Extracts timeSeries
+#'
+#' Gets the timeSeries component of a `harsat` object, optionally having added
+#' extra information about each station
+#'
+#' @param harsat_obj A `harsat` object following a call to create_timeseries.
+#'
+#' @return A data.frame containing the timeSeries component with (optionally)
+#'   extra information about each station.
+#' @export
+get_timeseries <- function(harsat_obj, add = TRUE) {
+  
+  if (!all(c("timeSeries", "stations") %in% names(harsat_obj))) {
+    stop("the time series have not yet been created")
+  }
+  
+  if (!add) {
+    return(harsat_obj$timeSeries)
+  }
+  
+  out <- dplyr::left_join(
+    harsat_obj$timeSeries, 
+    harsat_obj$stations[c("station_code", "station_name", "country")], 
+    by = "station_code") 
+  
+  out <- dplyr::relocate(
+    out, 
+    c("station_name", "country"), 
+    .after = "station_code"
+  ) 
+  
+  out
+}
+
+
+
+
 # default routine to check (and clean) data attributes when creating timeSeries
 
 ctsm_check <- function(
@@ -4721,7 +4759,7 @@ ctsm_normalise_sediment <- function(data, station_dictionary, info, control) {
 }
 
 #' @export
-ctsm_normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
+normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
   
