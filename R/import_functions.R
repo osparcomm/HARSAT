@@ -372,6 +372,41 @@ control_modify <- function(control_default, control) {
 }
 
 
+#' Find the path for an information file
+#' 
+#' Locates a requested information file, searching the
+#' information file path. If the requested file cannot be found and
+#' `required` is not false, stops with an error.
+#' 
+#' @param name A string: the name of the file, e.g., `thresholds_biota.csv`
+#' @param path A vector of strings, directories to search. The information directory
+#'   for the package is automatically searched if we haven't found the 
+#'   file anywhere else
+#' @returns A string, the absolute path for the file, or `NULL` if the file 
+#'   cannot be found anywhere.
+locate_information_file <- function(name, path) {
+
+  # No point doing this intelligently. The goal is to find the file with
+  # least steps.
+  for(directory in path) {
+    search <- normalizePath(file.path(directory, name), mustWork = FALSE)
+    if(file.exists(search)) {
+      print(paste("found in path", name, search, path))
+      return(search)
+    }
+  }
+
+  # If we fail to find it, fall back to system.file, which isn't clearly documented
+  # but suggests it will return the full path.
+  search <- file.path('information', name)
+  search <- system.file(search, package = "harsat", mustWork = FALSE)
+  if(file.exists(search)) {
+    print(paste("found in package", name, search, path))
+    return(search)
+  }
+    print(paste("missing", name, path))
+  return(NULL)
+}
 
 read_info <- function(info, path, info_files) {
   
@@ -380,41 +415,52 @@ read_info <- function(info, path, info_files) {
   #  by info_control
   
   # default reference tables
-  
-  if (info$purpose == "OSPAR") {
-    files <- list(
-      determinand = "determinand_OSPAR_2022.csv", 
-      species = "species_OSPAR_2022.csv", 
-      thresholds = paste0("thresholds_", info$compartment, "_OSPAR_2022.csv")
-    )
-  } else if (info$purpose == "HELCOM") {
-    files <- list(
-      determinand = "determinand_HELCOM_2023.csv", 
-      species = "species_HELCOM_2023.csv",
-      thresholds = paste0("thresholds_", info$compartment, "_HELCOM_2023.csv")
-    )
-  } else if (info$purpose == "AMAP") {
-    files <- list(
-      determinand = "determinand_AMAP_2022.csv", 
-      species = "species_AMAP_2022.csv",
-      thresholds = if (info$compartment == "biota") {
-        "thresholds_biota_AMAP.csv"}
-      else {
-        NULL
-      }
-    )
-  } else {
-    files <- list(
-      determinand = "determinand_default.csv", 
-      species = "species_default.csv",
-      thresholds = NULL
-    )
+
+  ## If the path is a string, make it a vector path
+  if(is.character(path)) {
+    path <- c(path)
   }
 
-  files$method_extraction <- "method_extraction.csv"
-  files$pivot_values <- "pivot_values.csv"
-  files$matrix <- "matrix.csv"
-  files$imposex <- "imposex.csv"
+  files <- list(
+    determinand = locate_information_file("determinand.csv", path),
+    species = locate_information_file("species.csv", path),
+    thresholds = locate_information_file(paste0("thresholds_", info$compartment, ".csv"), path)
+  )
+  
+  # if (info$purpose == "OSPAR") {
+  #   files <- list(
+  #     determinand = "determinand_OSPAR_2022.csv", 
+  #     species = "species_OSPAR_2022.csv", 
+  #     thresholds = paste0("thresholds_", info$compartment, "_OSPAR_2022.csv")
+  #   )
+  # } else if (info$purpose == "HELCOM") {
+  #   files <- list(
+  #     determinand = "determinand_HELCOM_2023.csv", 
+  #     species = "species_HELCOM_2023.csv",
+  #     thresholds = paste0("thresholds_", info$compartment, "_HELCOM_2023.csv")
+  #   )
+  # } else if (info$purpose == "AMAP") {
+  #   files <- list(
+  #     determinand = "determinand_AMAP_2022.csv", 
+  #     species = "species_AMAP_2022.csv",
+  #     thresholds = if (info$compartment == "biota") {
+  #       "thresholds_biota_AMAP.csv"}
+  #     else {
+  #       NULL
+  #     }
+  #   )
+  # } else {
+  #   files <- list(
+  #     determinand = "determinand_default.csv", 
+  #     species = "species_default.csv",
+  #     thresholds = NULL
+  #   )
+  # }
+
+  files$method_extraction <- locate_information_file("method_extraction.csv", path)
+  files$pivot_values <- locate_information_file("pivot_values.csv", path)
+  files$matrix <- locate_information_file("matrix.csv", path)
+  files$imposex <- locate_information_file("imposex.csv", path)
   
   # modify with user supplied files
   
@@ -443,26 +489,26 @@ read_info <- function(info, path, info_files) {
   
 
   info$determinand <- ctsm_read_determinand(
-    files$determinand, path, info$compartment
+    files$determinand, info$compartment
   )
   
-  info$matrix <- ctsm_read_matrix(files$matrix, path)
+  info$matrix <- ctsm_read_matrix(files$matrix)
   
   if (info$compartment == "biota") {
-    info$species <- ctsm_read_species(files$species, path)
-    info$imposex <- ctsm_read_imposex(files$imposex, path)
+    info$species <- ctsm_read_species(files$species)
+    info$imposex <- ctsm_read_imposex(files$imposex)
   }
 
   if (info$compartment == "sediment") {
     info$method_extraction <- ctsm_read_method_extraction(
-      files$method_extraction, path
+      files$method_extraction
     ) 
-    info$pivot_values <- ctsm_read_pivot_values(files$pivot_values, path)
+    info$pivot_values <- ctsm_read_pivot_values(files$pivot_values)
   }  
       
   if (!is.null(files$thresholds)) {
     info$thresholds <- ctsm_read_thresholds(
-      files$thresholds, path, info$compartment
+      files$thresholds, info$compartment
     )
   }
   

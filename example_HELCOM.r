@@ -1,5 +1,7 @@
 # Introduction ----
 
+library(dplyr)
+
 # This vignette shows how to do an assessment (mostly) following the approach 
 # taken in HELCOM HOLAS3. 
 
@@ -60,7 +62,7 @@ water_data <- read_data(
   contaminants = "water.txt", 
   stations = "stations.txt", 
   data_dir = file.path("data", "example_HELCOM"),
-  info_dir = "information", 
+  info_dir = "./information/HELCOM_2023", 
   extraction = "2023/08/23"
 )  
 
@@ -176,7 +178,7 @@ sediment_data <- read_data(
   contaminants = "sediment.txt", 
   stations = "stations.txt", 
   data_dir = file.path("data", "example_HELCOM"),
-  info_dir = "information", 
+  info_dir = "./information/HELCOM_2023", 
   extraction = "2023/08/23"
 )  
 
@@ -267,7 +269,7 @@ biota_data <- read_data(
   contaminants = "biota.txt", 
   stations = "stations.txt", 
   data_dir = file.path("data", "example_HELCOM"),
-  info_dir = "information", 
+  info_dir = "./information/HELCOM_2023", 
   extraction = "2023/08/23"
 )
 
