@@ -22,28 +22,24 @@ The species file will be `species.csv` in your information files directory.
 
 | column name   | type      | mandatory | comments              |
 | ------------- | --------- | :-------: | --------------------- |
-| `reference_species` | character | yes | Reference species name |
-| `submitted_species` | character | yes | Submitted species name |
-| `common_name` | character | yes | Common name for the species |
+| `reference_species` | character | yes | Reference species name (usually its Latin name) |
+| `submitted_species` | character | yes | Submitted species name: sometimes the same species can have several Latin names, but these are all mapped to the Reference species name |
+| `common_name` | character | yes | Common name for the species: you can call them whatever you want |
 | `species_group` | character | yes | Species group, should be one of: `Bird`, `Bivalve`, `Crustacean`, `Echinoderm`, `Fish`, `Gastropod`, `Macrophyte`, `Mammal`, `Other` |
-| `species_subgroup` | character | yes | Mostly unused, but a few values are significant: `Oyster`, `Mussel` -- when not available use the `species_group` value |
+| `species_subgroup` | character | yes | This is a convenience column used for matching species to thresholds. For example, OSPAR sometimes has different thresholds for mussels and oysters, so these form convenient subgroups. You can call things what you want, provided they match any reference to the species_subgroup column in the thresholds file. If you don't need this facility, just use the `species_group` value |
 | `assess` | boolean | yes | Whether or not to include this species in the assessment, should be either `TRUE` or `FALSE` |
-| `MU_drywt` | numeric | no | Muscle dry weight |
-| `LI_drywt` | numeric | no | Liver dry weight |
-| `SB_drywt` | numeric | no | Soft body dry weight |
-| `TM_drywt` | numeric | no | Tail muscle dry weight |
-| `EH_drywt` | numeric | no | Egg homogenate dry weight |
-| `HA_drywt` | numeric | no | Hair/fur dry weight |
-| `FE_drywt` | numeric | no | Feathers dry weight |
-| `BL_drywt` | numeric | no | Blood dry weight |
-| `MU_lipidwt` | numeric | no | Muscle lipid weight |
-| `LI_lipidwt` | numeric | no | Liver lipid weight |
-| `SB_lipidwt` | numeric | no | Soft body lipid weight |
-| `TM_lipidwt` | numeric | no | Tail muscle lipid weight |
-| `EH_lipidwt` | numeric | no | Egg homogenate lipid weight |
-| `HA_lipidwt` | numeric | no | Hair/fur lipid weight |
-| `FE_lipidwt` | numeric | no | Feathers lipid weight |
-| `BL_lipidwt` | numeric | no | Blood lipid weight |
+| `MU_drywt` | numeric | no | Muscle dry weight (%). A typical value for the species. This is only needed if you want to convert thresholds from one basis to another. Leave cells blank if you do not have a suitable value. |
+| `LI_drywt` | numeric | no | Liver dry weight (%)|
+| `SB_drywt` | numeric | no | Soft body dry weight (%)|
+| `EH_drywt` | numeric | no | Egg homogenate dry weight (%) |
+| `MU_lipidwt` | numeric | no | Muscle lipid weight (%) |
+| `LI_lipidwt` | numeric | no | Liver lipid weight (%)|
+| `SB_lipidwt` | numeric | no | Soft body lipid weight (%) |
+| `EH_lipidwt` | numeric | no | Egg homogenate lipid weight (%) |
+
+You can have as many dry and lipid weight columns as you have tissue types.  For example, if you have blood (BL) data, then you can have columns BL_drywt and BL_lipidwt.  (Remember there is a difference between BL (blood) and ER (erythrocytes - red blood cells in vertebrates).
+
+
 
 ## Determinands file format
 
@@ -51,29 +47,29 @@ The determinands file will be `determinands.csv` in your information files direc
 
 | column name   | type      | mandatory | comments              |
 | ------------- | --------- | :-------: | --------------------- |
-| `determinand` | character | yes | Determinant code -- this is a key to the thresholds file records |
-| `common_name` | character | no | Common name for the determinant, e.g., `Aluminium`, `Glyphosate` |
+| `determinand` | character | yes | Determinant code -- this is a key to the thresholds file records and will usually be the ICES PARAM code |
+| `common_name` | character | yes | Common name for the determinant, e.g., `Aluminium`, `Glyphosate`. You can leave this blank, in which case the determinand code is used.  |
 | `pargroup` | character | yes | ICES parameter group reference code, e.g. `I-MET`, `O-PAH`, `OC-CB`, `OC-DD`, etc. (see: https://vocab.ices.dk/?ref=78) |
-| `biota_group` | character | no | Grouping for the sediment determinant: one of `Metals`, `PAH_parent`, `PAH_alkylated`, `Chlorobiphenyls`, `PBDEs`, `Organobromines`, `Organotins`, `Organochlorines`, `Organofluorines`, `Pesticides`, `Dioxins`, `Effects`, `Auxiliary`, `Metabolites`, or `Imposex` |
-| `sediment_group` | character | no | Grouping for the sediment determinant: one of `Metals`, `PAH_parent`, `PAH_alkylated`, `Chlorobiphenyls`, `PBDEs`, `Organobromines`, `Organotins`, `Organochlorines`, `Organofluorines`, `Pesticides`, `Dioxins`, `Effects`, or `Auxiliary` |
-| `water_group` | character | no | Grouping for the water determinant: one of `Metals`, `PAH_parent`, `PAH_alkylated`, `Chlorobiphenyls`, `PBDEs`, `Organobromines`, `Organotins`, `Organochlorines`, `Organofluorines`, or `Pesticides` |
-| `biota_assess` | boolean | no | should be either `TRUE` or `FALSE` |
-| `sediment_assess` | boolean | no | should be either `TRUE` or `FALSE` |
-| `water_assess` | boolean | no | should be either `TRUE` or `FALSE` |
-| `biota_unit` | character | no | Units for the biota data, e.g. `ug/kg` |
-| `sediment_unit` | character | no | Units for the sediment data, e.g., `mg/kg` |
-| `water_unit` | character | no | Units for the water data, e.g., `ug/l` |
-| `biota_auxiliary` | character | no | Not currently used by `harsat` |
-| `sediment_auxiliary` | character | no | Not currently used by `harsat` |
-| `water_auxiliary` | character | no | Not currently used by `harsat` |
-| `biota_sd_constant` | character | no | Not currently used by `harsat` |
-| `biota_sd_variable` | character | no | Not currently used by `harsat` |
-| `sediment_sd_constant` | character | no | Not currently used by `harsat` |
-| `sediment_sd_variable` | character | no | Not currently used by `harsat` |
-| `water_sd_constant` | character | no | Not currently used by `harsat` |
-| `water_sd_variable` | character | no | Not currently used by `harsat` |
-| `distribution` | character | no | A distribution type, almost always `lognormal` |
-| `good_status` | character | no | Almost always `low` |
+| `biota_group` | character | yes (biota assessment) | Grouping for a biota assessment (under development): currently one of `Metals`, `PAH_parent`, `PAH_alkylated`, `Chlorobiphenyls`, `PBDEs`, `Organobromines`, `Organotins`, `Organochlorines`, `Organofluorines`, `Pesticides`, `Dioxins`, `Effects`, `Auxiliary`, `Metabolites`, or `Imposex` |
+| `sediment_group` | character | yes (sediment assessment) | Grouping for a sediment assessment. See biota_group for allowable values. Note that normalisers, such as AL or CORG, should be classed as `Auxiliary` |
+| `water_group` | character | yes (water assessment) | Grouping for a water assessment. See biota_group for allowable values |
+| `biota_assess` | boolean | yes (biota assessment) | Whether the determinand is to be assessed: should be either `TRUE` or `FALSE`. For the time being, 'Auxiliary' determinands must be set to 'FALSE' |
+| `sediment_assess` | boolean | yes (sedimenet assessment) | Whether the determinand is to be assessed. See biota_assess for more details |
+| `water_assess` | boolean | yes (water assessment) | Whether the determinand is to be assessed. See biota_assess for more details |
+| `biota_unit` | character | yes (biota assessment) | The unit that all measurements will be converted to in a biota assessment; e.g. `ug/kg` |
+| `sediment_unit` | character | yes (sediment assessment) | The unit that all measurements will be converted to in a sediment assessment; e.g. `mg/kg` |
+| `water_unit` | character | yes (water assessment)| The unit that all measurements will be converted to in a water assessment, e.g. `ug/l` |
+| `biota_auxiliary` | character | yes (biota assessment) | Identifies all the auxiliary measurements that should be associated with the determinand. These should be separated by a `~`. For example, for chemical contaminants, this might be 'DRYWT%~LIPIDWT%~LNMEA'. The list gets more interesting for effects measurements. |
+| `sediment_auxiliary` | character | yes (sediment assessment) | Identifies all the auxiliary measurements that should be associated with the determinand. These should be separated by a `~`. For example, for metal contaminants, this might be 'AL~LI~CORG' |
+| `water_auxiliary` | character | yes (water assessment) | Identifies all the auxiliary measurements that should be associated with the determinand. These should be separated by a `~`. Not currently used much for water assessments |
+| `biota_sd_constant` | character | no | If supplied, this allows the imputation of measurement uncertainty for determinands in a biota assessment. 'sd_constant' is the constant error with units given by 'biota_unit' |
+| `biota_sd_variable` | character | no | If supplied, this allows the imputation of measurement uncertainty for determinands in a biota assessment. 'sd_constant' is the proportional error expressed as a percentage (%) |
+| `sediment_sd_constant` | character | no | See 'biota_sd_constant' |
+| `sediment_sd_variable` | character | no | See 'biota_sd_variable' |
+| `water_sd_constant` | character | no | See 'biota_sd_constant' |
+| `water_sd_variable` | character | no | See 'biota_sd_variable' |
+| `distribution` | character | yes | A distribution type; for chemical contaminants, this should be set to `lognormal`. Only required for determinands where at least one of 'biota_assess', 'sediment_assess' or 'water_assess' are 'TRUE' |
+| `good_status` | character | yes | Whether 'high' or 'low' values of the determinand indicates a healthy environment. Only required for determinands where at least one of 'biota_assess', 'sediment_assess' or 'water_assess' are 'TRUE' |
 
 ## Thresholds file format
 
