@@ -111,7 +111,7 @@ get_timeseries(water_timeseries) |> head(10)
 # reference table to see what is available if you are unsure. Note that AC
 # stands for Assessment Criteria which is what thresholds are often called. The
 # parallel argument tells the code to use parallel processing. This usually
-# speeds things up considerably. The assessment took about 5 minutes to run on
+# speeds things up considerably. The assessment took about 1.5 minutes to run on
 # my laptop.
 
 water_assessment <- run_assessment(
@@ -120,34 +120,16 @@ water_assessment <- run_assessment(
   parallel = TRUE
 )
 
-# We now need to check whether there were any convergence issues
+# We now need to check whether there were any convergence issues. Lack of
+# convergence often occurs because there are errors in the data (e.g. reported
+# in incorrect units) or because there are large outliers, so the best thing to
+# do is first check your data. However, convergence can also be difficult if
+# there are a lot of less-than measurements in the time series. Describing how
+# to tweak the control arguments to get convergence is beyond the scope of this
+# vignette (need to write another vignette to discuss this). Fortunately, there
+# were no convergence issues here.
 
 check_assessment(water_assessment)
-
-
-# It turns out a couple of time series didn't converge. Lack of convergence
-# often occurs because there are errors in the data (e.g. reported in incorrect
-# units) or because there are large outliers, so the best thing to do is first
-# check your data. However, convergence can also be difficult if there are a lot
-# of less-than measurements in the time series. Describing how to tweak the
-# control arguments to get convergence is beyond the scope of this vignette
-# (need to write another vignette to discuss this), so for now we just sort the
-# particular issue for these two time series. 
-
-wk_id <- check_assessment(water_assessment, save_result = TRUE)
-
-water_assessment <- update_assessment(
-  water_assessment, 
-  series %in% wk_id$not_converged, 
-  fixed_bound = 20
-)
-
-# Let's check that the refitted time series have converged.
-
-check_assessment(water_assessment)
-
-# Work on the model fitting code is ongoing to reduce the number of affected
-# time series and to improve the error messaging.
 
 
 # It is time to look at the results! The vignette for external data shows how
