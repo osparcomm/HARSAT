@@ -20,8 +20,8 @@
 #'   supplied using 'file.path'). Defaults to "."; i.e. the working directory.
 #' @param data_format A string specifying whether the data were extracted from
 #'   the ICES webservice ("ICES" - the default) or are in the simplified format
-#'   designed for other data sources ("external"). The values "ICES_old" and
-#'   "ICES_new" are deprecated.
+#'   designed for other data sources ("external"). The value "ICES_old" is 
+#'   deprecated.
 #' @param info_files A list of files specifying reference tables which override
 #'   the defaults. See examples.
 #' @param info_dir The directory where the reference tables can be found
@@ -81,7 +81,7 @@ read_data <- function(
   stations, 
   QA, 
   data_dir = ".", 
-  data_format = c("ICES", "external", "ICES_old", "ICES_new"),
+  data_format = c("ICES", "external", "ICES_old"),
   info_files = list(),
   info_dir = ".",
   extraction = NULL, 
@@ -487,7 +487,7 @@ read_stations <- function(file, data_dir = ".", info) {
   cat("Reading station dictionary from:\n '", infile, "'\n", sep = "")
 
   
-  if (info$data_format %in% c("ICES_old", "ICES_new")) {
+  if (info$data_format == "ICES_old") {
     
     stations <- read.csv(
       infile, na.strings = c("", "NULL"), strip.white = TRUE
@@ -520,15 +520,6 @@ read_stations <- function(file, data_dir = ".", info) {
       stations <- dplyr::rename(stations, offshore = OSPAR_shore)
     }  
 
-    if (info$data_format %in% "ICES_new") {
-      stations <- dplyr::rename(
-        stations, 
-        helcom_subbasin = HELCOM_subbasin,
-        helcom_l3 = HELCOM_L3,
-        helcom_l4 = HELCOM_L4
-      )
-    }
-      
     # turn following variables into a character
     # code and parent code could be kept as integers, but safer to leave as 
     # characters until have decided how we are going to merge with non-ICES data
@@ -803,74 +794,8 @@ read_contaminants <- function(file, data_dir = ".", info) {
     
   } 
   
-  if (info$data_format == "ICES_new") {
 
-    var_id <- c(
-      "country" = "character",
-      "mprog" = "character", 
-      "helcom_subbasin" = "character",     
-      "helcom_l3" = "character",
-      "helcom_l4" = "character",
-      "ices_ecoregion" = "character",
-      "ospar_region" = "character", 
-      "ospar_subregion" = "character", 
-      "is_amap_monitoring" = "logical",
-      "is_helcom_monitoring" = "logical", 
-      "is_medpol_monitoring" = "logical", 
-      "is_ospar_monitoring" = "logical",  
-      "is_amap_area" = "logical", 
-      "is_helcom_area" = "logical",
-      "is_ospar_area"= "logical",
-      "rlabo" = "character",
-      "slabo" = "character",
-      "alabo" = "character",               
-      "statn" = "character",
-      "sd_code_match" = "character",
-      "sd_name_match" = "character", 
-      "sd_code_replaced" = "character", 
-      "sd_name_replaced" = "character", 
-      "sd_code_final" = "character",
-      "sd_name_final" = "character", 
-      "myear" = "integer",
-      "date" = "Date",                
-      "latitude" = "numeric",
-      "longitude" = "numeric",
-      "dephu" = "numeric",               
-      "dephl" = "numeric",
-      "purpm" = "character",
-      "finfl" = "character",               
-      "param" = "character",
-      "pargroup" = "character",
-      "matrx" = "character",              
-      "basis" = "character",
-      "value" = "numeric",
-      "munit" = "character",              
-      "detli" = "numeric",
-      "lmqnt" = "numeric",
-      "uncrt" = "numeric",              
-      "metcu" = "character",
-      "qflag" = "character",
-      "vflag" = "character",              
-      "metoa" = "character",
-      "metcx" = "character",
-      "metpt" = "character",
-      "metst" = "character",
-      "metps" = "character",
-      "metfp" = "character",               
-      "smtyp" = "character",
-      "smpno" = "character",
-      "subno" = "character",              
-      "dcflgs" = "character",
-      "tblAnalysisid" = "integer",
-      "tblparamid" = "integer",          
-      "tblsampleid" = "character",
-      "tblspotid" = "integer",
-      "tbluploadid" = "integer"         
-    )
-    
-    required <- names(var_id)
-    
-  } else if (info$data_format == "external") {
+  if (info$data_format == "external") {
 
     var_id <- c(
       "country" = "character",
@@ -923,7 +848,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
   }
   
 
-  if (info$data_format %in% c("ICES_new", "external")) {  
+  if (info$data_format == "external") {  
 
     # check required variables are present in data
     
@@ -959,7 +884,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
 
   # create missing (non-required) variables 
   
-  if (info$data_format %in% "external") {
+  if (info$data_format == "external") {
   
     # numeric (non-integer) variables
       
@@ -998,7 +923,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
       stop("coding error - seek help from HARSAT team")
     }
       
-  } else if (info$data_format %in% c("ICES_new", "ICES_old")) {
+  } else if (info$data_format == "ICES_old") {
     
     data$subseries <- NA_character_
     
@@ -1008,7 +933,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
 
   # check regional identifiers are in the extraction 
 
-  if (info$data_format %in% c("ICES_new", "ICES_old")) {
+  if (info$data_format == "ICES_old") {
     
     pos <- names(data) %in% info$region$id
     if (sum(pos) != length(info$region$id)) {
@@ -1030,21 +955,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
   # to streamline, could make sample = tblbioid (biota) or tblsampleid (sediment)
 
   
-  if (info$data_format == "ICES_new") {
-    
-    data <- dplyr::rename(
-      data,
-      submitted.station = statn, 
-      sd_name = sd_name_match,
-      sd_code = sd_code_match,
-      station_name = sd_name_final,
-      station_code = sd_code_final,
-      method_analysis = metoa,
-      method_extraction = metcx,
-      method_pretreatment = metpt
-    )
-    
-  } else if (info$data_format == "ICES_old" && info$purpose %in% c("OSPAR", "AMAP")) {
+  if (info$data_format == "ICES_old" && info$purpose %in% c("OSPAR", "AMAP")) {
     
     data <- dplyr::rename(
       data,
@@ -1073,7 +984,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
   
   # variables common across purpose and compartments
   
-  if(info$data_format %in% c("ICES_old", "ICES_new")) {
+  if(info$data_format == "ICES_old") {
 
     data <- dplyr::rename(
       data,
@@ -2149,7 +2060,7 @@ tidy_stations <- function(stations, info) {
   
   # purpose-specific changes for ICES data
   
-  if (info$data_format %in% c("ICES_old", "ICES_new")) {
+  if (info$data_format == "ICES_old") {
     stations <- do.call(
       paste("ctsm_tidy_stations", info$purpose, sep = "_"),
       list(stations = stations, info = info)
@@ -2173,7 +2084,7 @@ tidy_stations <- function(stations, info) {
   )
     
 
-  if (info$data_format %in% c("ICES_old", "ICES_new")) {
+  if (info$data_format == "ICES_old") {
       
     # remove stations that have been replaced
     
@@ -2276,9 +2187,7 @@ ctsm_tidy_stations_HELCOM <- function(stations, info) {
   
   if (info$data_format == "ICES_old") {
     stations <- tidyr::drop_na(stations, "HELCOM_subbasin")
-  } else if (info$data_format == "ICES_new") {
-    stations <- tidyr::drop_na(stations, "helcom_subbasin")
-  }
+  } 
   
   stations
 }
@@ -2365,7 +2274,7 @@ tidy_contaminants <- function(data, info) {
   }
   
 
-  if (info$data_format %in% c("ICES_old", "ICES_new")) {
+  if (info$data_format == "ICES_old") {
     
     # check whether submitted station has matched to station correctly for 
     # those countries where extraction is by station
@@ -2417,7 +2326,7 @@ tidy_contaminants <- function(data, info) {
   # sub.sample is what we usually think of as the sample 
   # swap over and delete sub.sample
 
-  if (info$data_format %in% c("ICES_old", "ICES_new") && info$compartment == "biota") {
+  if (info$data_format == "ICES_old" && info$compartment == "biota") {
     data$sample <- data$sub.sample
     data$sub.sample <- NULL
   }
