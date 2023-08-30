@@ -239,6 +239,9 @@ control_default <- function(purpose, compartment) {
   # data for bivalves and gastropds will be deleted because they are in the 
   # spawning season
   
+  # use_stage is a logical which determines whether, for biota, stage is used
+  # to populate subseries
+  
   region <- list()
   
   region$id <- switch(
@@ -267,6 +270,8 @@ control_default <- function(purpose, compartment) {
     ), 
     NULL
   )
+  
+  use_stage <- FALSE
 
   add_stations <- switch(
     purpose, 
@@ -317,7 +322,8 @@ control_default <- function(purpose, compartment) {
     reporting_window = 6L, 
     region = region,
     add_stations = add_stations,
-    bivalve_spawning_season = bivalve_spawning_season
+    bivalve_spawning_season = bivalve_spawning_season,
+    use_stage = use_stage
   )
 }
 
@@ -752,6 +758,7 @@ read_contaminants <- function(file, data_dir = ".", info) {
         aphiaid_accepted = "integer",
         worms_accepted_name = "character",
         sexco = "character",
+        stage = "character",
         noinp = "integer",
         bulkid = "character",
         tblbioid = "character",
@@ -773,7 +780,11 @@ read_contaminants <- function(file, data_dir = ".", info) {
     
     # add in extra required variable
     
-    data$subseries <- NA_character_
+    if (info$compartment == "biota" && info$use_stage) {
+      data$subseries <- data$stage
+    } else {
+      data$subseries <- NA_character_
+    }
     
     return(data)
   }  

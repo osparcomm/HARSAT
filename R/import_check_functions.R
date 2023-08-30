@@ -32,7 +32,7 @@ ctsm_check_variable <- function(data, var_id, info) {
   data$new <- data[[var_id]]
 
   if (is.factor(data$new)) {
-    data$new <- as.charcter(data$new)
+    data$new <- as.character(data$new)
   }
     
 
