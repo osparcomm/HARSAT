@@ -1302,6 +1302,13 @@ add_stations <- function(data, stations, info){
       ),
     )
     
+    # and Germany currently only matches by name for HELCOM biota
+    
+    if (info$compartment == "biota" && info$purpose == "HELCOM") {
+      x <- dplyr::mutate(x, .id = .id | (.data$country %in% "Germany"))
+    }
+    
+    
     # split into two groups
       
     x_name <- dplyr::filter(x, .id)
