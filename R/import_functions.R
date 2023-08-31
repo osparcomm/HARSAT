@@ -4999,7 +4999,7 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
 }
 
 #' @export
-ctsm_normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
+normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises fish concentrations in contaminants other than metals or 
   # organofluorines to 5% lipid
