@@ -227,7 +227,7 @@ sediment_assessment <- run_assessment(
 check_assessment(sediment_assessment)
 
 
-# Finally, we can plot individual time series assessments (see vignett for
+# Finally, we can plot individual time series assessments (see vignette for
 # external data) or print out the summary table
 
 write_summary_table(
@@ -253,32 +253,31 @@ write_summary_table(
 
 # Biota assessment ----
 
-# STOP HERE!!!
+# The main difference in the biota assessment is the inclusion of effects data.
+# This example has some PAH metabolite time series, but all imposex data have
+# been excluded to keep things relatively simple. Imposex assessments have an
+# additional modelling stage and this will be described in another vignette (not
+# yet available). 
 
+# The first two stages are just as before
 
 biota_data <- read_data(
   compartment = "biota", 
   purpose = "HELCOM",                               
-  contaminants = "biota_data.csv", 
-  stations = "station_dictionary.csv", 
-  QA = "quality_assurance.csv",
+  contaminants = "biota.txt", 
+  stations = "stations.txt", 
   data_dir = file.path("data", "example_HELCOM"),
-  data_format = "ICES_old",
-  info_dir = "information",
-  extraction = "2022/10/06",
-  max_year = 2021L,
-  control = list(
-    region = list(id = c("HELCOM_subbasin", "HELCOM_L3", "HELCOM_L4"))
-  )
-)  
+  info_dir = "information", 
+  extraction = "2023/08/23"
+)
+
+biota_data <- tidy_data(biota_data)
 
 
-
-
-
-## adjustments ----
-
-# correct known errors in the data
+# The construction of the time series has a few more features. However, first we
+# need to provide the individual TEQs to allow the construction of the WHO TEQ
+# for dioxins, furans and planar PCBS (labelled TEQDFP). these are the values
+# for the human health QS. This stage won't be necessary in later releases.
 
 info_TEQ <- c(
   "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
@@ -286,81 +285,26 @@ info_TEQ <- c(
   "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
   "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
   "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+  "CDF9X" = 0.1, "CDFO" = 0.0003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
 )
 
+# The determinands.control argument does rather more here. There are four summed
+# variables: PFOS, SBDE6, HBCD and SCB6. There is also one variable CB138+163
+# which needs to be relabeled as (replaced by) CB138. For the purposes of the
+# assessment, the contribution of CB163 is regarded as small, and CB138+163 is
+# taken to be a good proxy for CB138. Note that the replacements must be done
+# before the six PCBs are summed to give SCB6 in order for them to be included
+# in the sum.
 
+# There are also two 'bespoke' actions in determinands.control. These are
+# customised functions that do more complicated (non-standard things). One of
+# them computes the TEQDFP. The other deals with the three different ways in
+# which lipid weight measurements can be submitted.
 
-
-
-# Prepare data for next stage ----
-
-# gets correct variable and streamlines some of the data files
-
-biota_data <- tidy_data(biota_data)
-
-
-
-# Construct timeseries ----
-
-## biota ----
-
-# ad-hoc change to merge MU and MU&EP data for organics for Finnish perch
-# only need to do this for years up to and including 2013 when there are 
-# no MU&EP measurements, so no risk of mixing up MU and MU&EP data.
-
-biota_data$data <- left_join(
-  biota_data$data, 
-  biota_data$stations[c("station_code", "country")],
-  by = "station_code"
-)
-  
-biota_data$data <- mutate(
-  biota_data$data,
-  .id = country == "Finland" & 
-    species == "Perca fluviatilis" &  
-    year <= 2013 & 
-    !(determinand %in% c("CD", "HG", "PB", "PFOS")),
-  matrix = if_else(
-    .id & !(determinand %in% c("DRYWT%", "FATWT%")), 
-    "MU&EP", 
-    matrix
-  ) 
-)
-
-wk <- biota_data$data %>% 
-  filter(.id & determinand %in% c("DRYWT%", "FATWT%")) %>% 
-  mutate(
-    replicate = max(biota_data$data$replicate) + 1:n(),
-    matrix = "MU&EP",
-    .id = NULL
-  )
-
-biota_data$data <- mutate(biota_data$data, .id = NULL)
-
-biota_data$data <- bind_rows(biota_data$data, wk)
-
-
-# ad-hoc change to merge methods of analysis for Poland for PYR10H
-
-biota_data$data <- mutate(
-  biota_data$data, 
-  method_analysis = if_else(
-    alabo %in% "IMWP" & 
-      determinand %in% "PYR1OH" &
-      year %in% 2020:2021,
-    "HPLC-FD", 
-    method_analysis
-  )
-)  
-
-
-# ad_hoc change to info_TEQ to make it appropriate for human health QS
-
-info_TEQ["CDFO"] <- 0.0003
-
-biota_data$data$country <- NULL
-
+# Finally, normalise_biota_HELCOM is a customised function that determines which
+# measurements are normalised to 5% lipid in a HELCOM assessment. Again, the 
+# normalisation functions are under active development and might well change 
+# before the first release.
 
 biota_timeseries <- create_timeseries(
   biota_data,
@@ -377,11 +321,9 @@ biota_timeseries <- create_timeseries(
       action = "sum"
     ),
     TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
-    VDS = list(det = "VDSI", action = "bespoke"), 
-    INTS = list(det = "INTSI", action = "bespoke"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   ),
-  normalise = ctsm_normalise_biota_HELCOM,
+  normalise = normalise_biota_HELCOM,
   normalise.control = list(
     lipid = list(method = "simple", value = 5), 
     other = list(method = "none") 
@@ -389,164 +331,32 @@ biota_timeseries <- create_timeseries(
 )
 
 
-# resolve Finnish perch changes
-
-biota_timeseries$data <- mutate(
-  biota_timeseries$data, 
-  matrix = if_else(
-    year <= 2013 & matrix == "MU&EP", 
-    "MU", 
-    matrix
-  )
-)
-
-# resolve Polish metoa changes
-
-biota_timeseries$data <- left_join(
-  biota_timeseries$data, 
-  biota_data$stations[c("station_code", "country")],
-  by = "station_code"
-)
-
-
-biota_timeseries$data <- mutate(
-  biota_timeseries$data, 
-  method_analysis = if_else(
-    country == "Poland" &  
-      determinand %in% "PYR1OH" &
-      year %in% 2020,
-    "HPLC-ESI-MS-MS", 
-    method_analysis
-  ), 
-  method_analysis = if_else(
-    country == "Poland" &  
-      determinand %in% "PYR1OH" &
-      year %in% 2021,
-    "GC-MS-MS", 
-    method_analysis
-  ), 
-)  
-
-biota_timeseries$data$country <- NULL
-
-
-
-
-
-## biota ----
-
-### main runs ----
-
-# preliminary analysis required for imposex assessment 
-# takes a long time to run!!!!!
-# I need to turn this into a function
-
-rmarkdown::render(
-  file.path("man", "fragments", "example_HELCOM_imposex_preparation.Rmd"), 
-  output_file = "HELCOM_imposex_preparation.html",
-  output_dir = file.path("output", "example_HELCOM") 
-)
-
-
-# source("example_HELCOM_imposex_preparation.R")
-
-
-# can sometimes be useful to split up the assessment because of size limitations
-# not really needed here, but done to illustrate
-
-wk_determinands <- ctsm_get_determinands(biota_timeSeries$info)
-wk_group <- ctsm_get_info(
-  biota_timeSeries$info$determinand, wk_determinands, "biota_group"
-)
+# The asssessment took about 3.5 minutes on my laptop
 
 biota_assessment <- run_assessment(
-  biota_timeSeries, 
-  AC = c("BAC", "EAC", "EQS", "MPC"), 
-  subset = determinand %in% wk_determinands[wk_group == "Metals"],
+  biota_timeseries, 
+  AC = c("BAC", "EAC", "EQS", "MPC"),
   parallel = TRUE
 )
-
-wk_organics <- c(
-  "PAH_parent", "PBDEs", "Organobromines", "Organofluorines", 
-  "Chlorobiphenyls", "Dioxins"
-)  
-
-biota_assessment <- update_assessment(
-  biota_assessment, 
-  subset = determinand %in% wk_determinands[wk_group %in% wk_organics], 
-  parallel = TRUE
-)
-
-biota_assessment <- update_assessment(
-  biota_assessment, 
-  subset = determinand %in% wk_determinands[wk_group %in% "Metabolites"]
-)
-
-biota_assessment <- update_assessment(
-  biota_assessment, 
-  subset = determinand %in% wk_determinands[wk_group %in% "Imposex"]
-)
-
-
-### check convergence ----
 
 check_assessment(biota_assessment)
 
 
-# two time series need to be refitted
-
-# "2109 PB Perca fluviatilis MU" - fixed bounds
-biota_assessment <- update_assessment( 
-  biota_assessment, 
-  series == "2109 PB Perca fluviatilis MU", 
-  fixed_bound = 20
-)
-
-# "2299 PYR1OH Limanda limanda BI HPLC-FD" - standard errors
-biota_assessment <- update_assessment( 
-  biota_assessment, 
-  series == "2299 PYR1OH Limanda limanda BI HPLC-FD", 
-  hess.d = 0.0001, hess.r = 8
-)
-
-
-# check it has worked
-
-check_assessment(biota_assessment)
-
-
-
-## water ----
-
-### main runs ----
-
-
-
-
-# Summary files ----
-
-webGroups <- list(
-  levels = c(
-    "Metals", "Organotins", 
-    "PAH_parent", "Metabolites", 
-    "PBDEs", "Organobromines", 
-    "Organofluorines", 
-    "Chlorobiphenyls", "Dioxins", 
-    "Imposex" 
-  ),  
-  labels = c(
-    "Metals", "Organotins", 
-    "PAH parent compounds", "PAH metabolites", 
-    "Polybrominated diphenyl ethers", "Organobromines (other)", 
-    "Organofluorines", 
-    "Polychlorinated biphenyls", "Dioxins", 
-    "Imposex"
-  )
-)
+# And that's it :)
 
 write_summary_table(
   biota_assessment,
-  determinandGroups = webGroups,
+  determinandGroups = list(
+    levels = c(
+      "Metals", "PAH_parent", "Metabolites", "PBDEs", "Organobromines", 
+      "Organofluorines", "Chlorobiphenyls", "Dioxins"
+    ),  
+    labels = c(
+      "Metals", "PAH compounds and metabolites", "PAH compounds and metabolites",
+      "Organobromines", "Organobromines", "Organofluorines", 
+      "PCBs and dioxins", "PCBs and dioxins"
+    )
+  ),
   classColour = list(
     below = c("BAC" = "green", "EAC" = "green", "EQS" = "green", "MPC" = "green"),
     above = c("BAC" = "red", "EAC" = "red", "EQS" = "red", "MPC" = "red"),
