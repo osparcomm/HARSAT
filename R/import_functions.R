@@ -2796,7 +2796,7 @@ create_timeseries <- function(
   # remove 'extra' data from time series which have a subseries classification 
   # for some but not all records
 
-  data <- ctsm_check_subseries(data)
+  data <- check_subseries(data, info)
     
 
   # set rownames to NULL(ie. back to auto numeric)
@@ -4026,7 +4026,7 @@ ctsm_check_censoring <- function(data, info, print_code_warnings) {
 }
 
 
-ctsm_check_subseries <- function(data, info) {
+check_subseries <- function(data, info) {
 
   # import_functions.R
   
