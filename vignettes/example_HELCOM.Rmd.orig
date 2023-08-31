@@ -197,7 +197,7 @@ biota_timeSeries <- create_timeseries(
     INTS = list(det = "INTSI", action = "bespoke"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   ),
-  normalise = ctsm_normalise_biota_HELCOM,
+  normalise = normalise_biota_HELCOM,
   normalise.control = list(
     lipid = list(method = "simple", value = 5), 
     other = list(method = "none") 
