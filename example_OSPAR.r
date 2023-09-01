@@ -33,7 +33,7 @@ biota_data <- read_data(
   #   determinand = "determinand_simple_OSPAR.csv",
   # thresholds = "thresholds_biota_simple_OSPAR.csv"
   #),
-  info_dir = "information", 
+  info_dir = "./information/OSPAR_2022", 
   control = list(add_stations = list(method = "name"))
 )  
 
@@ -109,7 +109,7 @@ biota_assessment <- run_assessment(
 # my_get_AC <- get_AC$biota
 # 
 # biota_assessment <- ctsm_assessment(
-#   biota_timeSeries, 
+#   biota_timeseries, 
 #   AC = c("BAC", "EAC", "EQS", "HQS"), 
 #   get_AC_fn = my_get_AC
 # )

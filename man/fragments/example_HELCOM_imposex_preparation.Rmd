@@ -23,9 +23,9 @@ Get the data
 
 ```{r helcom-imposex-get-data}
 wk_data <- mutate(
-  biota_timeSeries$data,
+  biota_timeseries$data,
   .imposex = ctsm_get_info(
-    biota_timeSeries$info$determinand, 
+    biota_timeseries$info$determinand, 
     .data$determinand, 
     "group", 
     "biota", 
@@ -42,7 +42,7 @@ wk_data <- wk_data[c(
 
 wk_data <- left_join(
   wk_data, 
-  biota_timeSeries$stations[c("station_code", "country", "HELCOM_subbasin")],
+  biota_timeseries$stations[c("station_code", "country", "HELCOM_subbasin")],
   by = "station_code"
 )
 ```

@@ -149,7 +149,7 @@ ctsm_check_reference_table <- function(x, ref_table, info_type = "") {
 # Species information ----
 
 #' @export
-ctsm_read_species <- function(file, path = "information") {
+ctsm_read_species <- function(file) {
 
   var_id <- c(
     "reference_species" = "character",
@@ -166,7 +166,7 @@ ctsm_read_species <- function(file, path = "information") {
   # check required variables are present in data
   
   data <- read.csv(
-    file.path(path, file), 
+    file, 
     strip.white = TRUE, 
     nrows = 1
   )
@@ -200,7 +200,7 @@ ctsm_read_species <- function(file, path = "information") {
       
   
   data <- read.csv(
-    file.path(path, file), 
+    file, 
     na.strings = c("", "NULL"),
     strip.white = TRUE,
     colClasses = var_id[ok]
@@ -394,7 +394,6 @@ ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
 #' @export
 ctsm_read_determinand <- function(
   file, 
-  path = "information", 
   compartment = c("biota", "sediment", "water"), 
   simplify = TRUE) {
   
@@ -462,7 +461,7 @@ ctsm_read_determinand <- function(
   # variables are not
   
   data <- read.csv(
-    file.path(path, file), 
+    file,
     strip.white = TRUE, 
     nrows = 1
   )
@@ -499,7 +498,7 @@ ctsm_read_determinand <- function(
   ok <- names(var_id) %in% names(data)
   
   data <- read.csv(
-    file.path(path, file), 
+    file, 
     na.strings = c("", "NULL"),
     strip.white = TRUE,
     colClasses = var_id[ok]
@@ -693,12 +692,12 @@ ctsm_get_auxiliary <- function(determinands, info) {
 
 #' @export
 ctsm_read_thresholds <- function(
-    file, path = "information", compartment = c("biota", "sediment", "water"))  {
+    file, compartment = c("biota", "sediment", "water"))  {
   
   compartment = match.arg(compartment)
   
   data <- read.csv(
-    file.path(path, file), 
+    file, 
     na.strings = "",
     strip.white = TRUE
   )
@@ -2476,9 +2475,9 @@ get_basis_biota_OSPAR <- function(data, info) {
 
 # Matrix ----
 
-ctsm_read_matrix <- function(file, path = "information") {
+ctsm_read_matrix <- function(file) {
   read.csv(
-    file.path(path, "matrix.csv"), 
+    file, 
     row.names = "matrix", 
     strip.white = TRUE
   )
@@ -2487,7 +2486,7 @@ ctsm_read_matrix <- function(file, path = "information") {
 
 # Regions ----
 
-ctsm_read_regions <- function(file, path = "information", purpose) {
+ctsm_read_regions <- function(file, purpose) {
 
   if (purpose != "OSPAR") {
     stop(
@@ -2498,7 +2497,7 @@ ctsm_read_regions <- function(file, path = "information", purpose) {
   }
   
   read.csv(
-    file.path(path, file), 
+    file, 
     row.names = "OSPAR_subregion", 
     strip.white = TRUE
   )
@@ -2508,9 +2507,9 @@ ctsm_read_regions <- function(file, path = "information", purpose) {
 
 # Method of extraction and pivot values ----
 
-ctsm_read_method_extraction <- function(file, path = "information") {
+ctsm_read_method_extraction <- function(file) {
   read.csv(
-    file.path(path, file), 
+    file, 
     row.names = "METCX",  
     na.strings = "",
     strip.white = TRUE
@@ -2518,9 +2517,9 @@ ctsm_read_method_extraction <- function(file, path = "information") {
 }
 
 
-ctsm_read_pivot_values <- function(file, path = "information") {
+ctsm_read_pivot_values <- function(file) {
   read.csv(
-    file.path(path, file), 
+    file, 
     na.strings = "",
     strip.white = TRUE
   )
@@ -2530,9 +2529,9 @@ ctsm_read_pivot_values <- function(file, path = "information") {
 
 # Imposex ----
 
-ctsm_read_imposex <- function(file, path = "information") {
+ctsm_read_imposex <- function(file) {
   read.csv(
-    file.path(path, file), 
+    file, 
     na.strings = "",
     strip.white = TRUE
   )

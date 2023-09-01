@@ -76,7 +76,7 @@ plot_assessment <- function(
 
   timeSeries <- rownames_to_column(timeSeries, "series")
     
-  timeSeries <- left_join(
+  timeSeries <- dplyr::left_join(
     timeSeries, 
     assessment_obj$stations, 
     by = "station_code"
