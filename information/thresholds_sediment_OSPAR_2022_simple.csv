@@ -1,89 +1,89 @@
-determinand,normaliser,ospar_subregion,basis,BAC,ERL,EAC,EQS,FEQG
-AS,AL,,D,25,,,,
-CD,AL,,D,0.31,1.2,,,
-CR,AL,,D,,81,,,
-CU,AL,,D,27,34,,,
-HG,AL,,D,0.07,0.15,,,
-NI,AL,,D,36,,,,
-PB,AL,,D,38,47,,,
-ZN,AL,,D,122,150,,,
-NAP,CORG,,D,8,160,,,
-PA,CORG,,D,32,240,,,
-ANT,CORG,,D,5,85,,,
-DBT,CORG,,D,,190,,,
-FLU,CORG,,D,39,600,,,
-PYR,CORG,,D,24,665,,,
-BAA,CORG,,D,16,261,,,
-CHR,CORG,,D,20,384,,,
-CHRTR,CORG,,D,20,384,,,
-BAP,CORG,,D,30,430,,,
-BGHIP,CORG,,D,80,,,,
-ICDP,CORG,,D,103,,,,
-CB28,CORG,,D,0.22,,1.7,,
-CB52,CORG,,D,0.12,,2.7,,
-CB101,CORG,,D,0.14,,3,,
-CB118,CORG,,D,0.17,,0.6,,
-CB138,CORG,,D,0.15,,7.9,,
-CB153,CORG,,D,0.19,,40,,
-CB180,CORG,,D,0.1,,12,,
-HCB,CORG,,D,0.16,,,,
-DDEPP,CORG,,D,0.09,,,,
-DIELD,CORG,,D,0.19,,,,
-HCHA,CORG,,D,,,,,
-HCHG,CORG,,D,0.13,,,,
-BDE28,CORG,,D,0.05,,,,110
-BDE47,CORG,,D,0.05,,,,97.5
-BDE66,CORG,,D,0.05,,,,97.5
-BDE85,CORG,,D,0.05,,,,1
-BDE99,CORG,,D,0.05,,,,1
-BD100,CORG,,D,0.05,,,,1
-BD153,CORG,,D,0.05,,,,1100
-BD154,CORG,,D,0.05,,,,1100
-BD183,CORG,,D,0.05,,,,14000
-BD209,CORG,,D,0.05,,,,47.5
-SBDE6,CORG,,D,,,,,
-HBCD,CORG,,D,,,,,
-TBSN+,CORG,,D,,,,0.8,
-AS,NONE,Gulf of Cadiz~Iberian Coast,D,,,,,
-CD,NONE,Gulf of Cadiz~Iberian Coast,D,0.129,1.2,,,
-CR,NONE,Gulf of Cadiz~Iberian Coast,D,,81,,,
-CU,NONE,Gulf of Cadiz~Iberian Coast,D,,34,,,
-HG,NONE,Gulf of Cadiz~Iberian Coast,D,0.091,0.15,,,
-NI,NONE,Gulf of Cadiz~Iberian Coast,D,,,,,
-PB,NONE,Gulf of Cadiz~Iberian Coast,D,22.4,47,,,
-ZN,NONE,Gulf of Cadiz~Iberian Coast,D,,150,,,
-NAP,NONE,Gulf of Cadiz~Iberian Coast,D,,160,,,
-PA,NONE,Gulf of Cadiz~Iberian Coast,D,7.3,240,,,
-ANT,NONE,Gulf of Cadiz~Iberian Coast,D,1.8,85,,,
-DBT,NONE,Gulf of Cadiz~Iberian Coast,D,,190,,,
-FLU,NONE,Gulf of Cadiz~Iberian Coast,D,14.4,600,,,
-PYR,NONE,Gulf of Cadiz~Iberian Coast,D,11.3,665,,,
-BAA,NONE,Gulf of Cadiz~Iberian Coast,D,7.1,261,,,
-CHR,NONE,Gulf of Cadiz~Iberian Coast,D,8,384,,,
-CHRTR,NONE,Gulf of Cadiz~Iberian Coast,D,8,384,,,
-BAP,NONE,Gulf of Cadiz~Iberian Coast,D,8.2,430,,,
-BGHIP,NONE,Gulf of Cadiz~Iberian Coast,D,6.9,,,,
-ICDP,NONE,Gulf of Cadiz~Iberian Coast,D,8.3,,,,
-CB28,NONE,Gulf of Cadiz~Iberian Coast,D,,,1.7,,
-CB52,NONE,Gulf of Cadiz~Iberian Coast,D,,,2.7,,
-CB101,NONE,Gulf of Cadiz~Iberian Coast,D,,,3,,
-CB118,NONE,Gulf of Cadiz~Iberian Coast,D,,,0.6,,
-CB138,NONE,Gulf of Cadiz~Iberian Coast,D,,,7.9,,
-CB153,NONE,Gulf of Cadiz~Iberian Coast,D,,,40,,
-CB180,NONE,Gulf of Cadiz~Iberian Coast,D,,,12,,
-HCB,NONE,Gulf of Cadiz~Iberian Coast,D,,,,,
-DDEPP,NONE,Gulf of Cadiz~Iberian Coast,D,,,,,
-DIELD,NONE,Gulf of Cadiz~Iberian Coast,D,,,,,
-HCHA,NONE,Gulf of Cadiz~Iberian Coast,D,,,,,
-HCHG,NONE,Gulf of Cadiz~Iberian Coast,D,,,,,
-BDE28,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,110
-BDE47,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,97.5
-BDE66,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,97.5
-BDE85,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1
-BDE99,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1
-BD100,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1
-BD153,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1100
-BD154,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1100
-BD183,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,14000
-BD209,NONE,Gulf of Cadiz~Iberian Coast,D,0.05,,,,47.5
-TBSN+,NONE,Gulf of Cadiz~Iberian Coast,D,,,,0.8,
+determinand,ospar_subregion,basis,BAC,ERL,EAC,EQS,FEQG
+AS,,D,25,,,,
+CD,,D,0.31,1.2,,,
+CR,,D,,81,,,
+CU,,D,27,34,,,
+HG,,D,0.07,0.15,,,
+NI,,D,36,,,,
+PB,,D,38,47,,,
+ZN,,D,122,150,,,
+NAP,,D,8,160,,,
+PA,,D,32,240,,,
+ANT,,D,5,85,,,
+DBT,,D,,190,,,
+FLU,,D,39,600,,,
+PYR,,D,24,665,,,
+BAA,,D,16,261,,,
+CHR,,D,20,384,,,
+CHRTR,,D,20,384,,,
+BAP,,D,30,430,,,
+BGHIP,,D,80,,,,
+ICDP,,D,103,,,,
+CB28,,D,0.22,,1.7,,
+CB52,,D,0.12,,2.7,,
+CB101,,D,0.14,,3,,
+CB118,,D,0.17,,0.6,,
+CB138,,D,0.15,,7.9,,
+CB153,,D,0.19,,40,,
+CB180,,D,0.1,,12,,
+HCB,,D,0.16,,,,
+DDEPP,,D,0.09,,,,
+DIELD,,D,0.19,,,,
+HCHA,,D,,,,,
+HCHG,,D,0.13,,,,
+BDE28,,D,0.05,,,,110
+BDE47,,D,0.05,,,,97.5
+BDE66,,D,0.05,,,,97.5
+BDE85,,D,0.05,,,,1
+BDE99,,D,0.05,,,,1
+BD100,,D,0.05,,,,1
+BD153,,D,0.05,,,,1100
+BD154,,D,0.05,,,,1100
+BD183,,D,0.05,,,,14000
+BD209,,D,0.05,,,,47.5
+SBDE6,,D,,,,,
+HBCD,,D,,,,,
+TBSN+,,D,,,,0.8,
+AS,Gulf of Cadiz~Iberian Coast,D,,,,,
+CD,Gulf of Cadiz~Iberian Coast,D,0.129,1.2,,,
+CR,Gulf of Cadiz~Iberian Coast,D,,81,,,
+CU,Gulf of Cadiz~Iberian Coast,D,,34,,,
+HG,Gulf of Cadiz~Iberian Coast,D,0.091,0.15,,,
+NI,Gulf of Cadiz~Iberian Coast,D,,,,,
+PB,Gulf of Cadiz~Iberian Coast,D,22.4,47,,,
+ZN,Gulf of Cadiz~Iberian Coast,D,,150,,,
+NAP,Gulf of Cadiz~Iberian Coast,D,,160,,,
+PA,Gulf of Cadiz~Iberian Coast,D,7.3,240,,,
+ANT,Gulf of Cadiz~Iberian Coast,D,1.8,85,,,
+DBT,Gulf of Cadiz~Iberian Coast,D,,190,,,
+FLU,Gulf of Cadiz~Iberian Coast,D,14.4,600,,,
+PYR,Gulf of Cadiz~Iberian Coast,D,11.3,665,,,
+BAA,Gulf of Cadiz~Iberian Coast,D,7.1,261,,,
+CHR,Gulf of Cadiz~Iberian Coast,D,8,384,,,
+CHRTR,Gulf of Cadiz~Iberian Coast,D,8,384,,,
+BAP,Gulf of Cadiz~Iberian Coast,D,8.2,430,,,
+BGHIP,Gulf of Cadiz~Iberian Coast,D,6.9,,,,
+ICDP,Gulf of Cadiz~Iberian Coast,D,8.3,,,,
+CB28,Gulf of Cadiz~Iberian Coast,D,,,1.7,,
+CB52,Gulf of Cadiz~Iberian Coast,D,,,2.7,,
+CB101,Gulf of Cadiz~Iberian Coast,D,,,3,,
+CB118,Gulf of Cadiz~Iberian Coast,D,,,0.6,,
+CB138,Gulf of Cadiz~Iberian Coast,D,,,7.9,,
+CB153,Gulf of Cadiz~Iberian Coast,D,,,40,,
+CB180,Gulf of Cadiz~Iberian Coast,D,,,12,,
+HCB,Gulf of Cadiz~Iberian Coast,D,,,,,
+DDEPP,Gulf of Cadiz~Iberian Coast,D,,,,,
+DIELD,Gulf of Cadiz~Iberian Coast,D,,,,,
+HCHA,Gulf of Cadiz~Iberian Coast,D,,,,,
+HCHG,Gulf of Cadiz~Iberian Coast,D,,,,,
+BDE28,Gulf of Cadiz~Iberian Coast,D,0.05,,,,110
+BDE47,Gulf of Cadiz~Iberian Coast,D,0.05,,,,97.5
+BDE66,Gulf of Cadiz~Iberian Coast,D,0.05,,,,97.5
+BDE85,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1
+BDE99,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1
+BD100,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1
+BD153,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1100
+BD154,Gulf of Cadiz~Iberian Coast,D,0.05,,,,1100
+BD183,Gulf of Cadiz~Iberian Coast,D,0.05,,,,14000
+BD209,Gulf of Cadiz~Iberian Coast,D,0.05,,,,47.5
+TBSN+,Gulf of Cadiz~Iberian Coast,D,,,,0.8,
