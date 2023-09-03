@@ -11,7 +11,7 @@ These are the column headers for CSV-formatted reference table files.
 `harsat` uses three different reference tables: 
 
 1. A species file
-2. A determinands file
+2. A determinand file
 3. A thresholds file 
 
 All these files should be in your information files directory.
@@ -41,9 +41,9 @@ You can have as many dry and lipid weight columns as you have tissue types.  For
 
 
 
-## Determinands file format
+## Determinand file format
 
-The determinands file will be `determinands.csv` in your information files directory.
+The determinand file will be `determinand.csv` in your information files directory.
 
 | column name   | type      | mandatory | comments              |
 | ------------- | --------- | :-------: | --------------------- |
@@ -81,35 +81,38 @@ to a region. Water is the simplest, so let's look at that first:
 
 ### Water thresholds files
 
-A water thresholds file will be `thresholds_water.csv` in your information files directory.
+A water thresholds file will be `thresholds_water.csv` in your information files directory. For illustration, suppose we have just one threshold, the EQS. The thresholds file will then have the following four columns:
 
 | column name   | type      | mandatory | comments              |
 | ------------- | --------- | :-------: | --------------------- |
-| `determinand` | character | yes | The determinand code, which must key to the determinands file |
-| `filtration` | character | yes | A string, either `filtered` or `unfiltered` |
-| `EQS_basis` | character | yes | The EQS threshold basis: `D` or `W` |
-| `EQS` | numeric | yes | The EQS threshold value |
+| `determinand` | character | yes | The determinand code, which must key to the determinand file |
+| `filtration` | character | yes | A string, either `filtered` or `unfiltered`. Missing values not allowed. |
+| `EQS_basis` | character | no | The basis on which the EQS is expressed: for water this will always be `W`. The basis must always be given if there is an EQS value in the next column. |
+| `EQS` | numeric | no | The value of the EQS. The units must key to the water_units column in the determinand file |
+
+If there is another threshold, for example, the BAC, then add two columns called `BAC_basis` and `BAC`. You can have as many thresholds as you want. 
+
+If, for a particular determinand, the same (set of) threshold value(s) is to be applied to both `filtered` and `unfiltered` time series, then set `filtration` to `filtered~unfiltered`.
+
+
 
 ### Sediment thresholds files
 
-A sediment thresholds file will be `thresholds_sediment.csv` in your information files directory.
+A sediment thresholds file will be `thresholds_sediment.csv` in your information files directory. For illustratoin, suppose we have two thresholds, the BAC and EAC. The thresholds file will then have the following five columns:
 
 | column name   | type      | mandatory | comments              |
 | ------------- | --------- | :-------: | --------------------- |
 | `determinand` | character | yes | The determinand code, which must key to the determinands file |
-| `normaliser` | character | no | The normalizer, either `AL` or `CORG` |
-| `ospar_subregion` | character | no | Optionally, the OSPAR subregion name |
-| `basis` | character | no |  |
-| `BAC_basis` | character | no | The threshold basis for BAC, either `D` or `W` |
-| `ERL_basis` | character | no | The threshold basis for ERL, either `D` or `W` |
-| `EAC_basis` | character | no | The threshold basis for EAC, either `D` or `W` |
-| `EQS_basis` | character | no | The threshold basis for EQS, either `D` or `W` |
-| `FEQG_basis` | character | no | The threshold basis for FEQG, either `D` or `W` |
-| `BAC` | character | no | The BAC threshold value |
-| `ERL` | character | no | The ERL threshold value |
-| `EAC` | character | no | The EAC threshold value |
-| `EQS` | character | no | The EQS threshold value |
-| `FEQG` | character | no | The FEQG threshold value |
+| `BAC_basis` | character | no | The basis on which the BAC is expressed: for sediment this will typically be `D`, but it could also be `W`. This must always be provided if there is a BAC value. |
+| `EAC_basis` | character | no | The basis on which the EAC is expressed. See above. |
+| `BAC` | character | no | The value of the BAC. The units much key to the sediment_units column in the determinand file. The units are also assumed to be normalised for grain size in the same way as the data are normalised (in create_timeseries).  |
+| `EAC` | character | no | The value of the EAC. See above. |
+
+Again, you can have as many thresholds as you want. For example, OSPAR assessments typically use the ERL, EQS and FEQG in addition to the BAC and EAC.
+
+You can also have extra columns which match columns in the station dictionary. Typically, these will be used to apply different threshold values to different regions. For example, the OSPAR thresholds file has a column `ospar_subregion`, which allows one set of threshold values to be applied in the Iberian Coast and Gulf of Cadiz and another set in the rest of the OSPAR area. 
+
+
 
 ### Biota thresholds files
 

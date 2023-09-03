@@ -1,7 +1,5 @@
 # Introduction ----
 
-library(dplyr)
-
 # This vignette shows how to do an assessment (mostly) following the approach 
 # taken in HELCOM HOLAS3. 
 
@@ -224,7 +222,7 @@ sediment_assessment <- run_assessment(
   parallel = TRUE
 )
 
-# Everything has converged tis time.
+# Everything has converged this time.
 
 check_assessment(sediment_assessment)
 
