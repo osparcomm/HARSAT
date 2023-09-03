@@ -81,7 +81,7 @@ read_data <- function(
   stations, 
   QA, 
   data_dir = ".", 
-  data_format = c("ICES", "external", "ICES_old"),
+  data_format = c("ICES", "external"),
   info_files = list(),
   info_dir = ".",
   extraction = NULL, 
@@ -174,10 +174,6 @@ read_data <- function(
 
   data <- read_contaminants(contaminants, data_dir, info)
 
-  if (data_format == "ICES_old") {
-    QA <- ctsm_read_QA(QA, data_dir, purpose)
-  }
-
   if (data_format == "ICES") {
 
     data <- add_stations(data, stations, info)
@@ -214,8 +210,6 @@ read_data <- function(
     data = data, 
     stations = stations
   )
-  
-  if (data_format == "ICES_old") out$QA <- QA
   
   out
 }
@@ -533,53 +527,6 @@ read_stations <- function(file, data_dir = ".", info) {
   cat("Reading station dictionary from:\n '", infile, "'\n", sep = "")
 
   
-  if (info$data_format == "ICES_old") {
-    
-    stations <- read.csv(
-      infile, na.strings = c("", "NULL"), strip.white = TRUE
-    )
-    
-    # rename columns to suit!
-    
-    names(stations) <- gsub("Station_", "", names(stations), fixed = TRUE)
-    
-    stations <- dplyr::rename(
-      stations, 
-      station_code = Code,
-      country_ISO = Country,
-      country = Country_CNTRY,
-      station_name = Name,
-      station_longname = LongName,
-      station_latitude = Latitude,
-      station_longitude = Longitude,
-      startYear = ActiveFromDate,
-      endYear = ActiveUntilDate,
-      parent_code = AsmtMimeParent,
-      replacedBy = ReplacedBy,
-      programGovernance = ProgramGovernance,
-      dataType = DataType,
-      station_type = MSTAT,
-      waterbody_type = WLTYP
-    )
-    
-    if (info$purpose %in% c("OSPAR", "AMAP")) {
-      stations <- dplyr::rename(stations, offshore = OSPAR_shore)
-    }  
-
-    # turn following variables into a character
-    # code and parent code could be kept as integers, but safer to leave as 
-    # characters until have decided how we are going to merge with non-ICES data
-    
-    id <- c(info$region$id, "station_code", "parent_code")
-  
-    stations <- dplyr::mutate(
-      stations, 
-      dplyr::across(any_of(id), as.character)
-    )
-
-  }    
-        
-
   if (info$data_format == "ICES") {
 
     var_id <- c(
@@ -827,20 +774,6 @@ read_contaminants <- function(file, data_dir = ".", info) {
   }  
   
 
-  if (info$data_format == "ICES_old") {  
-
-    data <- read.csv(
-      infile, na.strings = c("", "NULL"), strip.white = TRUE
-    )
-      
-    #data <- read.table(
-    #  infile, strip.white = TRUE, sep = "\t", header = TRUE, quote = "\"" , 
-    #  na.strings = c("", "NULL"), fileEncoding = "UTF-8-BOM", comment.char = ""  
-    #)
-    
-  } 
-  
-
   if (info$data_format == "external") {
 
     var_id <- c(
@@ -969,27 +902,24 @@ read_contaminants <- function(file, data_dir = ".", info) {
       stop("coding error - seek help from HARSAT team")
     }
       
-  } else if (info$data_format == "ICES_old") {
-    
-    data$subseries <- NA_character_
-    
   }  
   
 
 
   # check regional identifiers are in the extraction 
 
-  if (info$data_format == "ICES_old") {
-    
-    pos <- names(data) %in% info$region$id
-    if (sum(pos) != length(info$region$id)) {
-      stop("not all regional identifiers are in the data extraction")
-    }
+  # if (info$data_format == "ICES_old") {
+  #   
+  #   pos <- names(data) %in% info$region$id
+  #   if (sum(pos) != length(info$region$id)) {
+  #     stop("not all regional identifiers are in the data extraction")
+  #   }
+  # 
+  #   names(data)[!pos] <- tolower(names(data)[!pos])     # just in case!
+  #   
+  # } else 
   
-    names(data)[!pos] <- tolower(names(data)[!pos])     # just in case!
-    
-  } else if (info$data_format == "external") {
-    
+  if (info$data_format == "external") {
     names(data) <- tolower(names(data))  
   }
   
@@ -1001,74 +931,9 @@ read_contaminants <- function(file, data_dir = ".", info) {
   # to streamline, could make sample = tblbioid (biota) or tblsampleid (sediment)
 
   
-  if (info$data_format == "ICES_old" && info$purpose %in% c("OSPAR", "AMAP")) {
-    
-    data <- dplyr::rename(
-      data,
-      offshore = ospar_shore,
-      submitted.station = stationname, 
-      sd_name = sd_stationname,
-      sd_code = sd_stationcode,
-      station_name = sd_asmt_stationname,
-      station_code = sd_asmt_stationcode,
-    )
-    
-  } else if (info$data_format == "ICES_old" && info$purpose %in% "HELCOM") {
-    
-    data <- dplyr::rename(
-      data,
-      submitted.station = statn, 
-      sd_name = sd_stationname,
-      sd_code = sd_stationcode,
-      station_name = sd_replacedby_stationname,
-      station_code = sd_replacedby_stationcode,
-      method_analysis = metoa
-    )
-
-  } 
-  
-  
   # variables common across purpose and compartments
   
-  if(info$data_format == "ICES_old") {
 
-    data <- dplyr::rename(
-      data,
-      year = myear, 
-      sample_latitude = latitude,
-      sample_longitude = longitude,
-      determinand = param, 
-      matrix = matrx, 
-      unit = munit,
-      censoring = qflag,
-      qalink = tblanalysisid,
-      uncertainty = uncrt,
-      unit_uncertainty = metcu, 
-      replicate = tblparamid, 
-      sample = tblsampleid, 
-      limit_detection = detli,
-      limit_quantification = lmqnt,
-      upload = tbluploadid
-    )
-    
-    # compartment specific variables
-    
-    var_id <- c("tblbioid", "sexco", "dephu", "noinp")
-    replacement <- c("sub.sample", "sex", "depth", "n_individual")
-    
-    pos <- match(var_id, names(data), nomatch = 0)
-    
-    if (any(pos > 0)) {
-      ok <- pos > 0
-      pos <- pos[ok]
-      replacement <- replacement[ok]
-      names(data)[pos] <- replacement
-    }
-    
-  }
-  
-
-  
   # ensure further consistency
   
   data <- dplyr::mutate(
@@ -1078,20 +943,6 @@ read_contaminants <- function(file, data_dir = ".", info) {
   )
   
   
-  if (info$data_format %in% "ICES_old") {
-
-    id <- c(
-      info$region$id, "censoring", "sample", "sub.sample", "sd_code", "station_code", 
-      "sd_name", "station_name"
-    )
-    
-    data <- dplyr::mutate(
-      data, 
-      dplyr::across(any_of(id), as.character)
-    )
-  
-  }
-      
   data
 }
 
@@ -2122,28 +1973,9 @@ tidy_data <- function(ctsm_obj) {
 
   data <- tidy_contaminants(data, info)
 
-  if (info$data_format == "ICES_old") {
-    
-    QA <- ctsm_obj$QA
-    
-    wk <- ctsm_tidy_QA(QA, data, info)
-    
-    data <- wk$data
-    QA <- wk$QA
-    
-    id <- c("method_analysis", "method_extraction") 
-    data[id] <- QA[as.character(data$qaID), id]
-    
-    data$qaID <- NULL
-    data$qalink <- NULL
 
-  } 
-
-  
   ctsm_obj$stations <- stations
   ctsm_obj$data <- data
-  
-  if (info$data_format %in% "ICES_old") ctsm_obj$QA <- NULL
   
   ctsm_obj
 }
@@ -2152,16 +1984,6 @@ tidy_data <- function(ctsm_obj) {
 tidy_stations <- function(stations, info) {
   
   cat("\nCleaning station dictionary\n")
-  
-  # purpose-specific changes for ICES data
-  
-  if (info$data_format == "ICES_old") {
-    stations <- do.call(
-      paste("ctsm_tidy_stations", info$purpose, sep = "_"),
-      list(stations = stations, info = info)
-    )
-  }
-  
   
   # ensure country is consistent
   
@@ -2179,41 +2001,6 @@ tidy_stations <- function(stations, info) {
   )
     
 
-  if (info$data_format == "ICES_old") {
-      
-    # remove stations that have been replaced
-    
-    stations <- dplyr::filter(stations, is.na(.data$replacedBy))
-    
-
-    # check whether any remaining duplicated stations 
-    # if present, select most recent of these
-    # crude method to sort by station, startYear and endYear (since NAs are sorted last)
-    # and then reverse the ordering of the whole data frame so it works with ctsm_check
-    
-    stations <- tidyr::unite(
-      stations, 
-      "station_id", 
-      all_of(c("country", "station_name")), 
-      remove = FALSE
-    )
-    
-    stations <- dplyr::arrange(stations, .data$station_id, .data$startYear, .data$endYear)
-
-    stations <- dplyr::arrange(stations, desc(dplyr::row_number()))
-    
-    stations <- ctsm_check(
-      stations, 
-      station_id, 
-      action = "delete.dups",
-      message = "Duplicate stations - first one selected",
-      file_name = "duplicate_stations", 
-      info = info
-    )
-    
-    stations$station_id <- NULL
-  }    
-  
 
   # select useful columns
   
@@ -2237,96 +2024,8 @@ tidy_stations <- function(stations, info) {
 }
 
 
-ctsm_tidy_stations_OSPAR <- function(stations, info) {
-  
-  # restrict to OSPAR stations used for temporal monitoring 
-  # also includes grouped stations: Assessment Grouping for OSPAR MIME
-  
-  stations <- dplyr::filter(
-    stations, 
-    grepl("OSPAR", .data$programGovernance) & grepl("T", .data$PURPM)
-  )
-  
-  
-  # and stations that are used for contaminants or biological effects
-  
-  stations <- dplyr::filter(
-    stations, 
-    switch(
-      info$compartment, 
-      biota = grepl("CF|EF", .data$dataType), 
-      sediment = grepl("CS", .data$dataType), 
-      water = grepl("CW", .data$dataType)
-    )
-  )
-
-  # delete stations outside the OSPAR region
-  
-  ctsm_check(
-    stations, 
-    is.na(OSPAR_region) | is.na(OSPAR_subregion), 
-    action = "delete", 
-    message = "Stations outside OSPAR region", 
-    file_name = "stations_outside_area",
-    info = info
-  )
-  
-  
-  stations
-}
 
 
-ctsm_tidy_stations_HELCOM <- function(stations, info) {
-  
-  # restrict to stations that have a HELCOM region
-  
-  if (info$data_format == "ICES_old") {
-    stations <- tidyr::drop_na(stations, "HELCOM_subbasin")
-  } 
-  
-  stations
-}
-
-
-ctsm_tidy_stations_AMAP <- function(stations, info) {
-  
-  # restrict to AMAP stations used for temporal monitoring 
-  # also includes grouped stations: Assessment Grouping for OSPAR MIME
-  
-  stations <- dplyr::filter(
-    stations,
-    grepl("AMAP", .data$programGovernance) & grepl("T", .data$PURPM)
-  )
-  
-  # and stations that are used for contaminants or biological effects
-  
-  stations <- dplyr::filter(
-    stations,
-    switch(
-      info$compartment,
-      biota = grepl("CF|EF", .data$dataType),
-      sediment = grepl("CS", .data$dataType),
-      water = grepl("CW", .data$dataType)
-    )
-  )
-  
-  # assume missing OSPAR region information corresponds to AMAP stations in 'region 0'
-  
-  # add in regional information for East AMAP area
-  
-  stations <- dplyr::mutate(
-    stations, 
-    across(c("OSPAR_region", "OSPAR_subregion"), as.character)
-  )
-  
-  stations <- within(stations, {
-    OSPAR_region[is.na(OSPAR_region)] <- "0"
-    OSPAR_subregion[OSPAR_region %in% "0"] <- "East AMAP area"
-  })
-  
-  
-  stations
-}
 
 
 tidy_contaminants <- function(data, info) {
@@ -2369,46 +2068,7 @@ tidy_contaminants <- function(data, info) {
   }
   
 
-  if (info$data_format == "ICES_old") {
-    
-    # check whether submitted station has matched to station correctly for 
-    # those countries where extraction is by station
-    
-    if (info$purpose %in% c("OSPAR", "AMAP")) {
-      
-      # Denmark, France, Ireland, Norway, Spain (2005 onwards), Sweden, UK
-      # need to update this list
-      
-      odd <- 
-        data$country %in% c(
-          "Denmark", "France", "Ireland", "Norway", "Sweden", "United Kingdom"
-        ) | 
-        (data$country %in% "Spain" & data$year > 2005)
-      
-      # have to use sd_name because station_name also incorporates 
-      # replacements and groupings
-      
-      odd <- odd & !is.na(data$submitted.station) & is.na(data$sd_name)
-      
-    } else if (info$purpose %in% "HELCOM") {
-      
-      odd <- data$country %in% c("Denmark", "Sweden") 
-      
-      odd <- odd & !is.na(data$submitted.station) & is.na(data$station_name)
-      
-    }    
-    
-    ctsm_check(
-      data, 
-      odd, 
-      action = "warning", 
-      message = "Submitted.station unrecognised by dictionary", 
-      file_name = "stations_unrecognised",
-      info = info
-    )
-  }    
 
-  
   # add required variables 'replicate' and 'pargroup' (not present in external data)
   
   if (info$data_format == "external") {
@@ -2417,15 +2077,6 @@ tidy_contaminants <- function(data, info) {
   }
   
       
-  # ICES biota data: sample is the species identifier (within a haul say) and 
-  # sub.sample is what we usually think of as the sample 
-  # swap over and delete sub.sample
-
-  if (info$data_format == "ICES_old" && info$compartment == "biota") {
-    data$sample <- data$sub.sample
-    data$sub.sample <- NULL
-  }
-  
   data$sample <- as.character(data$sample)
 
   
@@ -2449,96 +2100,6 @@ tidy_contaminants <- function(data, info) {
 
 
 
-ctsm_tidy_QA <- function(QA, data, info) {
-  
-  # filter QA by data_type 
-  
-  id <- switch(info$compartment, biota = "CF", sediment = "CS", water = "CW")
-  
-  QA <- dplyr::filter(QA, .data$data_type %in% id)
-  
-  
-  # retain useful variables  
-  
-  QA <- QA[c("alabo", "year", "determinand", "method_extraction", "method_analysis", "qalink")]
-  
-  
-  # relabel organotins (which have been relabelled in adjustment file)
-  
-  QA <- ctsm_TBT_convert(QA, action = "relabel")
-  
-  
-  # drop crm data with no useful information
-  
-  QA <- dplyr::filter(QA, !(is.na(.data$method_extraction) & is.na(.data$method_analysis)))
-  
-  
-  # retain unique information
-  
-  QA <- unique(QA)
-  
-  
-  # qalink and determinand should be unique combinations 
-  
-  QA <- dplyr::arrange(
-    QA, 
-    dplyr::across(c("qalink", "determinand", "method_extraction", "method_analysis"))
-  )
-  
-  QA <- ctsm_check(
-    QA, 
-    paste(qalink, determinand), 
-    action = "delete.dups",
-    message = "Conflicting QA information - first one selected",
-    file_name = "conflicting_QA", 
-    info = info
-  )
-  
-  ctsm_link_QA(QA, data, info$compartment)
-}
-
-
-ctsm_link_QA <- function(QA, data, compartment) {
-  
-  # create unique qaID to link data and QA files 
-  # should be able to use qalink and determinand, but alabo and year give
-  # useful extra information
-  
-  var_id <- c("determinand", "qalink", "alabo", "year")
-  
-  data <- tidyr::unite(
-    data, 
-    "qaID", 
-    all_of(var_id), 
-    remove = FALSE
-  )
-  
-  QA <- tidyr::unite(
-    QA, 
-    "qaID", 
-    all_of(var_id), 
-    remove = FALSE
-  )
-  
-  
-  # restrict QA to those values found in data
-  
-  QA <- dplyr::filter(QA, .data$qaID %in% data$qaID)
-  
-  
-  # get digestion method based on method_extraction - only needed for sediment
-  
-  # if (compartment == "sediment") {
-  #   QA <- ctsm.link.QA.digestion(QA, compartment)
-  # }
-  
-  
-  # tidy up
-  
-  QA <- tibble::column_to_rownames(QA, "qaID")
-  
-  list(QA = QA, data = data)
-}
 
 
 #' Create a time series
