@@ -48,11 +48,11 @@ The example scripts currently use subfolders within the data and output folders
 - data
   - example_external_data
   - example_HELCOM
-  - example_simple_OSPAR
+  - example_OSPAR
 - output
   - example_external_data
   - example_HELCOM
-  - example_simple_OSPAR
+  - example_OSPAR
 
 but the data and the output can go anywhere.
 

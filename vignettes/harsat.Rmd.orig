@@ -73,21 +73,14 @@ The first step is to read in the data that we've got.
 We will go through some of these arguments.
 
 ```{r getting-started-read}
-biota_data <- read_data(
-  compartment = "biota", 
-  purpose = "OSPAR",                               
-  contaminants = "test_data.csv", 
-  stations = "station_dictionary.csv", 
-  QA = "quality_assurance.csv",
-  data_dir = file.path(working.directory, "data", "example_simple_OSPAR"),
-  data_format = "ICES_old",
-  info_files = list(
-    determinand = "determinand_simple_OSPAR.csv", 
-    thresholds = "thresholds_biota_simple_OSPAR.csv"
-  ),
-  info_dir = file.path(working.directory, "information"), 
-  extraction = "2022/01/11",
-  max_year = 2020L
+water_data <- read_data(
+  compartment = "water",
+  purpose = "OSPAR",
+  contaminants = "water.txt",
+  stations = "stations.txt",
+  data_dir = file.path(working.directory, "data", "example_OSPAR"),
+  info_dir = file.path(working.directory, "information", "OSPAR_2022"),
+  extraction = "2023/08/23"
 )
 ```
 
@@ -102,8 +95,7 @@ The main arguments here are as follows:
 * `contaminants` is a data file which has all the chemical measurements in it.
 * `stations` is the station file which is directly related to the station dictionary 
   that we get out at from ICES.
-* `QA` is a quality assurance file -- this is *deprecated* and will disappear.
-* `info_files` are reference tables -- we come back to that.
+* `info_dir` is your directory for reference tables -- we will come back to that.
 
 This reads in the three data sets, but does no more than that at this stage.
 
@@ -129,31 +121,33 @@ Warnings are supported by output files which allow you to come in and have a loo
 see which values are affected, so you can go and check them out in more detail.
 
 ```{r getting-started-tidy}
-biota_data <- ctsm_tidy_data(biota_data)
+water_data <- tidy_data(water_data)
 ```
 
 To this point, we've still not done anything with the datasets.
 
-## Create time series
+## Create a time series
 
 Now we can group the data into time series. This means identifying which data points 
 belong to the same time series, and then set it up as a structure which then allows us 
 to do the assessments.
 
 There are various different ways in which we can specify which determinants we actually 
-want to assess. In this case, the `determinands` parameter specifies cadmium, CP153, CB153, HBCD, HBCDA,
-HBCDG, and some biological metabolites. There are various other arguments which allow you to control 
+want to assess. In this case, the `determinands` parameter specifies CHR, BBKF, PFOS, CB138, HCEPX, and HCH. 
+There are various other arguments which allow you to control 
 just how the data are manipulated.
 
 ```{r getting-started-time-series}
-biota_timeSeries <- ctsm_create_timeSeries(
-  biota_data,
-  determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"),
+water_timeseries <- create_timeseries(
+  water_data,
   determinands.control = list(
-    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
-    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  ),
-  get_basis = get_basis_biota_OSPAR
+    CHR = list(det = "CHRTR", action = "replace"),
+    BBKF = list(det = c("BBF", "BKF", "BBJF", "BBJKF"), action = "bespoke"),
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
+    CB138 = list(det = c("CB138+163"), action = "replace"),
+    HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"), 
+    HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum")
+  )
 )
 ```
 
@@ -168,9 +162,10 @@ You can see that it tells you which time series we're actually assessing as it p
 This gives you an idea of how how many cups of tea you can drink before it's all finished.
 
 ```{r getting-started-assessment}
-biota_assessment <- run_assessment(
-  biota_timeSeries,
-  AC = c("BAC", "EAC", "EQS", "HQS")
+water_assessment <- run_assessment(
+  water_timeseries, 
+  AC = "EQS", 
+  parallel = TRUE
 )
 ```
 
@@ -179,7 +174,7 @@ There are various little warnings: these ones are nothing to worry about.
 We can then check that everything is converged.
 
 ```{r getting-started-convergence}
-check_convergence_lmm(biota_assessment$assessment)
+check_assessment(water_assessment)
 ```
 
 ## Reporting
@@ -197,33 +192,6 @@ if (!dir.exists(summary.dir)) {
 }
 ```
 
-Next, we set up a few variables to manage the display.
-
-```{r getting-started-summary-1}
-webGroups <- list(
-  levels = c("Metals", "Metabolites", "Organobromines", "Chlorobiphenyls"),  
-  labels = c(
-    "Metals", "PAH metabolites", "Organobromines",  "Polychlorinated biphenyls"
-  )
-)
-
-classColour <- list(
-  below = c(
-    "BAC" = "blue", 
-    "EAC" = "green", 
-    "EQS" = "green",
-    "HQS" = "green"
-  ),
-  above = c(
-    "BAC" = "orange", 
-    "EAC" = "red", 
-    "EQS" = "red",
-    "HQS" = "red"
-  ), 
-  none = "black"
-)
-```
-
 And then we can generate the summary proper.
 The summary file which will be very familiar to those who have been involved in the OSPAR and the HELCOM
 assessments. The summary files have information about each time series, 
@@ -233,11 +201,24 @@ when it starts and finishes. And towards the end, we've got comparisons against 
 
 ```{r getting-started-summary-2}
 write_summary_table(
-  biota_assessment, 
-  determinandGroups = webGroups,
-  classColour = classColour,
-  collapse_AC = list(EAC = c("EAC", "EQS")),
-  output_dir = summary.dir 
+  water_assessment,
+  determinandGroups = list(
+    levels = c(
+      "Metals", "Organotins", "PAH_parent",  "Organofluorines", 
+      "Chlorobiphenyls", "Organochlorines", "Pesticides"
+    ),  
+    labels = c(
+      "Metals", "Organotins", "PAH parent compounds", "Organofluorines", 
+      "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
+    )
+  ),
+  classColour = list(
+    below = c("EQS" = "green"), 
+    above = c("EQS" = "red"), 
+    none = "black"
+  ),
+  collapse_AC = list(EAC = "EQS"),
+  output_dir = summary.dir
 )
 ```
 

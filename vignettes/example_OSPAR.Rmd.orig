@@ -1,0 +1,120 @@
+---
+title: "HELCOM"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{HELCOM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Intro
+
+Commentary to be added
+
+But before we get to any of that, we need to set up the environment.
+First, load the `harsat` library (let's assume that you have already installed
+it, as covered in the [Getting Started](/harsat.html) guide).
+
+```{r}
+library(harsat)
+```
+
+And load the R package `here`, because we use the working directory to find
+the data files. If you use your own data files, you will need to point to
+a directory containing a copy.
+
+```{r}
+library(here)
+working.directory <- here()
+```
+
+```{r ospar-water-data}
+water_data <- read_data(
+  compartment = "water",
+  purpose = "OSPAR",
+  contaminants = "water.txt",
+  stations = "stations.txt",
+  data_dir = file.path(working.directory, "data", "example_OSPAR"),
+  info_dir = file.path(working.directory, "information", "OSPAR_2022"),
+  extraction = "2023/08/23"
+)
+
+water_data <- tidy_data(water_data)
+```
+
+```{r ospar-water-timeseries}
+water_timeseries <- create_timeseries(
+  water_data,
+  determinands.control = list(
+    CHR = list(det = "CHRTR", action = "replace"),
+    BBKF = list(det = c("BBF", "BKF", "BBJF", "BBJKF"), action = "bespoke"),
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
+    CB138 = list(det = c("CB138+163"), action = "replace"),
+    HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"), 
+    HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum")
+  )
+)
+```
+
+```{r ospar-water-assessment}
+water_assessment <- run_assessment(
+  water_timeseries, 
+  AC = "EQS", 
+  parallel = TRUE
+)
+
+check_assessment(water_assessment)
+```
+
+```{r ospar-summary-directory}
+summary.dir <- file.path(working.directory, "output", "example_OSPAR")
+if (!dir.exists(summary.dir)) {
+  dir.create(summary.dir, recursive = TRUE)
+}
+```
+
+```{r ospar-water-summary}
+write_summary_table(
+  water_assessment,
+  determinandGroups = list(
+    levels = c(
+      "Metals", "Organotins", "PAH_parent",  "Organofluorines", 
+      "Chlorobiphenyls", "Organochlorines", "Pesticides"
+    ),  
+    labels = c(
+      "Metals", "Organotins", "PAH parent compounds", "Organofluorines", 
+      "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
+    )
+  ),
+  classColour = list(
+    below = c("EQS" = "green"), 
+    above = c("EQS" = "red"), 
+    none = "black"
+  ),
+  collapse_AC = list(EAC = "EQS"),
+  output_dir = summary.dir
+)
+```
+
+Now, let's take a look at that in the `water_summary.csv` file:
+
+```{r ospar-water-summary-render,echo=FALSE}
+summary.data <- read.csv(file.path(summary.dir, "water_summary.csv"))
+knitr::kable(summary.data, format = "html", table.attr = "class=\'datatable\'")
+```
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+$('.datatable').dataTable();
+</script>
+
