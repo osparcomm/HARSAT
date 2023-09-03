@@ -7,9 +7,14 @@
 convert_reftable(input_file, output_file, export = TRUE)
 }
 \arguments{
-\item{input_file}{}
+\item{input_file}{the input reference file}
 
-\item{export}{}
+\item{output_file}{the expanded reference file}
+
+\item{export}{a boolean flag, if \code{FALSE}, the data is returned rather than being written to \code{output_file}}
+}
+\value{
+if \code{export} is \code{FALSE} (the default), returns the expanded data
 }
 \description{
 This is a utility function to expand a simplified OSPAR sediment threshold

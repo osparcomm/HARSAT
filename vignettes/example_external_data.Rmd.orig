@@ -44,8 +44,8 @@ biota_data <- read_data(
   stations = "AMAP_external_new_stations_only.csv",
   data_dir = file.path(working.directory, "data", "example_external_data"),
   data_format = "external",
-  info_dir = file.path(working.directory, "information"),
-  control = list(region_id = "AMAP_region")
+  info_dir = file.path(working.directory, "information", "AMAP_2022"),
+  control = list(region = list(id = "AMAP_region"))
 )
 ```
 
@@ -81,7 +81,7 @@ biota_assessment <- run_assessment(
 
 Use the code below if it takes a long time to run
 
-```
+```r
 biota_assessment <- run_assessment(
   biota_timeseries,
   AC = c("NRC", "LRC", "MRC", "HRC")

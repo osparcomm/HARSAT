@@ -760,11 +760,11 @@ ctsm_read_thresholds <- function(
 #' table (which is much easier for the user to edit) into the form required by 
 #' `harsat` 
 #'
-#' @param input_file 
-#' @param output_file
-#' @param export
+#' @param input_file the input reference file
+#' @param output_file the expanded reference file
+#' @param export a boolean flag, if `FALSE`, the data is returned rather than being written to `output_file`
 #'
-#' @return 
+#' @return if `export` is `FALSE` (the default), returns the expanded data
 #' @export
 #'
 #' @examples

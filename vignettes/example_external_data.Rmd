@@ -26,6 +26,7 @@ a directory containing a copy.
 
 ```r
 library(here)
+#> here() starts at /Users/stuart/git/HARSAT
 working.directory <- here()
 ```
 
@@ -42,13 +43,20 @@ biota_data <- read_data(
   stations = "AMAP_external_new_stations_only.csv",
   data_dir = file.path(working.directory, "data", "example_external_data"),
   data_format = "external",
-  info_dir = file.path(working.directory, "information"),
-  control = list(region_id = "AMAP_region")
+  info_dir = file.path(working.directory, "information", "AMAP_2022"),
+  control = list(region = list(id = "AMAP_region"))
 )
+#> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/AMAP_2022/determinand.csv /Users/stuart/git/HARSAT/information/AMAP_2022"
+#> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/AMAP_2022/species.csv /Users/stuart/git/HARSAT/information/AMAP_2022"
+#> [1] "found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/AMAP_2022/thresholds_biota.csv /Users/stuart/git/HARSAT/information/AMAP_2022"
+#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/information/method_extraction.csv /Users/stuart/git/HARSAT/information/AMAP_2022"
+#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/information/pivot_values.csv /Users/stuart/git/HARSAT/information/AMAP_2022"
+#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/information/matrix.csv /Users/stuart/git/HARSAT/information/AMAP_2022"
+#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/information/imposex.csv /Users/stuart/git/HARSAT/information/AMAP_2022"
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_external_data/AMAP_external_new_stations_only.csv'
 #> 
-#> Reading contaminant and biological effects data from:
+#> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_external_data/AMAP_external_data_new_data_only_CAN_MarineMammals.csv'
 #> 
 #> Argument max_year taken to be the maximum year in the data: 2017
@@ -60,10 +68,12 @@ Get correct variables and streamline the data files
 
 
 ```r
-biota_data <- ctsm_tidy_data(biota_data)
+biota_data <- tidy_data(biota_data)
 #> 
 #> Oddities will be written to 'oddities/biota' with previous oddities backed up to
 #>  'oddities/biota_backup'
+#> 
+#> Dropping 42 stations that are not associated with any data
 #> 
 #> Cleaning station dictionary
 #> 
@@ -72,13 +82,13 @@ biota_data <- ctsm_tidy_data(biota_data)
 
 # Construct timeseries
 
-Uses OSPAR basis choice for mercury
+For each timeseries, use the basis which is reported most often in the data
 
 
 ```r
-biota_timeSeries <- ctsm_create_timeSeries(
+biota_timeseries <- create_timeseries(
   biota_data,
-  get_basis = get_basis_biota_OSPAR
+  get_basis = get_basis_most_common
 )
 #> 
 #> Oddities will be written to 'oddities/biota' with previous oddities backed up to
@@ -91,8 +101,6 @@ biota_timeSeries <- ctsm_create_timeSeries(
 #> 
 #> Creating time series data
 #>    Converting data to appropriate basis for statistical analysis
-#>    Losing 25 out of 4629 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
 #>    Dropping groups of compounds / stations with no data between 2012 and 2017
 ```
 
@@ -103,32 +111,11 @@ Main runs
 
 ```r
 biota_assessment <- run_assessment(
-  biota_timeSeries, 
+  biota_timeseries, 
   AC = c("NRC", "LRC", "MRC", "HRC")
 )
 #> 
 #> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg
-#> Loading required package: Matrix
-#> 
-#> Attaching package: 'Matrix'
-#> The following objects are masked from 'package:tidyr':
-#> 
-#>     expand, pack, unpack
-#> Loading required package: nlme
-#> 
-#> Attaching package: 'nlme'
-#> The following object is masked from 'package:lme4':
-#> 
-#>     lmList
-#> The following object is masked from 'package:dplyr':
-#> 
-#>     collapse
-#> This is mgcv 1.8-42. For overview type 'help("mgcv-package")'.
-#> 
-#> Attaching package: 'optimx'
-#> The following object is masked from 'package:nlme':
-#> 
-#>     coef<-
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> 
@@ -162,13 +149,37 @@ biota_assessment <- run_assessment(
 #> 
 #> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix MU; subseries small; basis W; unit ug/kg 
 #> 
-#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis W; unit ug/kg
+#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis D; unit ug/kg
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#> 
+#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis D; unit ug/kg
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#> 
+#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis D; unit ug/kg
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis W; unit ug/kg
 #> boundary (singular) fit: see help('isSingular')
 #> 
 #> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg 
@@ -179,11 +190,37 @@ biota_assessment <- run_assessment(
 #> 
 #> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg 
 #> 
-#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis W; unit ug/kg 
+#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis D; unit ug/kg
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis W; unit ug/kg 
+#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis D; unit ug/kg
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
 #> 
-#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis W; unit ug/kg 
+#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis D; unit ug/kg
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Losing 1 out of 1 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
 #> 
 #> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg 
 #> 
@@ -217,9 +254,9 @@ biota_assessment <- run_assessment(
 
 Use the code below if it takes a long time to run
 
-```
+```r
 biota_assessment <- run_assessment(
-  biota_timeSeries,
+  biota_timeseries,
   AC = c("NRC", "LRC", "MRC", "HRC")
   parallel = TRUE
 )
@@ -285,6 +322,7 @@ plot_assessment(
   file_type = "data",
   file_format = "png"
 )
+#> Error in FUN(X[[i]], ...): object 'seriesID' not found
 ```
 
 
@@ -296,6 +334,7 @@ plot_assessment(
   file_type = "index",
   file_format = "pdf"
 )
+#> Error in FUN(X[[i]], ...): object 'seriesID' not found
 ```
 
 
@@ -307,6 +346,7 @@ plot_assessment(
   file_type = "data",
   file_format = "pdf"
 )
+#> Error in FUN(X[[i]], ...): object 'seriesID' not found
 ```
 
 
@@ -317,4 +357,5 @@ plot_assessment(
   output_dir = graphics.dir, 
   file_format = "pdf"
 )
+#> Error in FUN(X[[i]], ...): object 'seriesID' not found
 ```

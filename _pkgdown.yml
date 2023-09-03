@@ -18,8 +18,8 @@ navbar:
     - text: "Examples"
     - text: External data
       href: articles/example_external_data.html
-    - text: Simple OSPAR
-      href: articles/example_simple_OSPAR.html
+    - text: OSPAR
+      href: articles/simple_OSPAR.html
     - text: HELCOM
       href: articles/example_HELCOM.html
 

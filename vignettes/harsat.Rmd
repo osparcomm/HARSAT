@@ -60,6 +60,7 @@ We'll detect that using R's `here` package, and write it into a variable `workin
 
 ```r
 library(here)
+#> here() starts at /Users/stuart/git/HARSAT
 working.directory <- here()
 ```
 
@@ -71,29 +72,40 @@ We will go through some of these arguments.
 
 
 ```r
-biota_data <- read_data(
-  compartment = "biota", 
-  purpose = "OSPAR",                               
-  contaminants = "test_data.csv", 
-  stations = "station_dictionary.csv", 
-  QA = "quality_assurance.csv",
-  data_dir = file.path(working.directory, "data", "example_simple_OSPAR"),
-  data_format = "ICES_old",
-  info_files = list(
-    determinand = "determinand_simple_OSPAR.csv", 
-    thresholds = "thresholds_biota_simple_OSPAR.csv"
-  ),
-  info_dir = file.path(working.directory, "information"), 
-  extraction = "2022/01/11",
-  max_year = 2020L
+water_data <- read_data(
+  compartment = "water",
+  purpose = "OSPAR",
+  contaminants = "water.txt",
+  stations = "stations.txt",
+  data_dir = file.path(working.directory, "data", "example_OSPAR"),
+  info_dir = file.path(working.directory, "information", "OSPAR_2022"),
+  extraction = "2023/08/23"
 )
+#> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/information/method_extraction.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/station_dictionary.csv'
+#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
 #> 
-#> Reading contaminant and biological effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/test_data.csv'
+#> Reading contaminant and effects data from:
+#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'
 #> 
-#> Reading QA data from '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/quality_assurance.csv'
+#> Matching data with station dictionary
+#>  - restricting to stations in these convention areas: OSPAR 
+#>  - restricting to station with data types CW or EW 
+#>  - restricting to stations marked for temporal monitoring
+#>  - restricting to data with program governance: OSPAR, AMAP 
+#>  - restricting to stations with program governance: OSPAR, AMAP 
+#>  - matching 2036 records by coordinates
+#>  - matching 1631 records by station name
+#>  - grouping stations using station_asmtmimegovernance
+#>  - 3567 of 3667 records have been matched to a station
+#> 
+#> Argument max_year taken to be the maximum year in the data: 2022
 ```
 
 The main arguments here are as follows:
@@ -107,8 +119,7 @@ The main arguments here are as follows:
 * `contaminants` is a data file which has all the chemical measurements in it.
 * `stations` is the station file which is directly related to the station dictionary 
   that we get out at from ICES.
-* `QA` is a quality assurance file -- this is *deprecated* and will disappear.
-* `info_files` are reference tables -- we come back to that.
+* `info_dir` is your directory for reference tables -- we will come back to that.
 
 This reads in the three data sets, but does no more than that at this stage.
 
@@ -135,67 +146,70 @@ see which values are affected, so you can go and check them out in more detail.
 
 
 ```r
-biota_data <- ctsm_tidy_data(biota_data)
+water_data <- tidy_data(water_data)
 #> 
-#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
-#>  'oddities/biota_backup'
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
+#> 
+#> Dropping 175 records from data flagged for deletion. Possible reasons are:
+#>  - vflag = suspect
+#>  - upper depth >5.5m
+#>  - filtration missing
+#>  - matrix = 'SPM'
+#> 
+#> Dropping 91 records from data that have no valid station code
+#> 
+#> Dropping 13649 stations that are not associated with any data
 #> 
 #> Cleaning station dictionary
-#>    Duplicate stations - first one selected: see duplicate_stations.csv
 #> 
 #> Cleaning contaminant and biological effects data
-#>    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv
-#>    Dropping data with no stations
 ```
 
 To this point, we've still not done anything with the datasets.
 
-## Create time series
+## Create a time series
 
 Now we can group the data into time series. This means identifying which data points 
 belong to the same time series, and then set it up as a structure which then allows us 
 to do the assessments.
 
 There are various different ways in which we can specify which determinants we actually 
-want to assess. In this case, the `determinands` parameter specifies cadmium, CP153, CB153, HBCD, HBCDA,
-HBCDG, and some biological metabolites. There are various other arguments which allow you to control 
+want to assess. In this case, the `determinands` parameter specifies CHR, BBKF, PFOS, CB138, HCEPX, and HCH. 
+There are various other arguments which allow you to control 
 just how the data are manipulated.
 
 
 ```r
-biota_timeSeries <- ctsm_create_timeSeries(
-  biota_data,
-  determinands = c("CD", "CB153", "HBCD","HBCDA", "HBCDG", "PYR1OH"),
+water_timeseries <- create_timeseries(
+  water_data,
   determinands.control = list(
-    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
-    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  ),
-  get_basis = get_basis_biota_OSPAR
+    CHR = list(det = "CHRTR", action = "replace"),
+    BBKF = list(det = c("BBF", "BKF", "BBJF", "BBJKF"), action = "bespoke"),
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
+    CB138 = list(det = c("CB138+163"), action = "replace"),
+    HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"), 
+    HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum")
+  )
 )
 #> 
-#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
-#>  'oddities/biota_backup'
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
 #> 
 #> Cleaning data
-#>    Dropping stations with no data between 2015 and 2020 
-#>    Dropping samples with only auxiliary variables
-#>    Unexpected or missing values for 'matrix': see matrix_queries.csv
+#>    Dropping stations with no data between 2017 and 2022
 #>    Unexpected or missing values for 'basis': see basis_queries.csv
-#>    Bile metabolite units changed from 'ng/g' to 'ng/ml' and from 'ug/kg' to 'ug/l'
 #>    Replicate measurements, only first retained: see replicate_measurements.csv
+#>    Non-positive detection limits: see non_positive_det_limits.csv
 #>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
+#>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
 #>    Detection limit higher than data: see detection_limit_high.csv
-#>    Data submitted as HBCDA, HBCDB, HBCDG summed to give HBCD
-#>    Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT% 
+#>    Data submitted as HCHA, HCHB, HCHG summed to give HCH
+#>      137 of 137 samples lost due to incomplete submissions
 #> 
 #> Creating time series data
 #>    Converting data to appropriate basis for statistical analysis
-#>    Losing 32 out of 392 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Dropping bivalve and gastropod contaminant data collected during the
-#>     spawning season, which is taken to be the following months:
-#>     April, May, June, July 
-#>    Dropping groups of compounds / stations with no data between 2015 and 2020
+#>    Dropping groups of compounds / stations with no data between 2017 and 2022
 ```
 
 ## Assessment
@@ -210,91 +224,12 @@ This gives you an idea of how how many cups of tea you can drink before it's all
 
 
 ```r
-biota_assessment <- run_assessment(
-  biota_timeSeries,
-  AC = c("BAC", "EAC", "EQS", "HQS")
+water_assessment <- run_assessment(
+  water_timeseries, 
+  AC = "EQS", 
+  parallel = TRUE
 )
-#> 
-#> assessing series:  station_code 11461; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 11461; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 12156; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 12164; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 12164; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1235; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1235; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 1235; determinand HBCD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1235; determinand HBCDA; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1235; determinand HBCDG; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 13059; determinand CB153; species Spisula solida; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 13059; determinand CD; species Spisula solida; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 1345; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1345; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 1345; determinand HBCD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1345; determinand HBCDA; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1345; determinand HBCDG; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand HBCD; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand HBCDA; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1381; determinand HBCDG; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1388; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 1388; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 2717; determinand PYR1OH; species Limanda limanda; matrix BI; method_analysis HPLC-FD; unit ng/ml 
-#> 
-#> assessing series:  station_code 3282; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3282; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3433; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3433; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3441; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 3441; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code 7132; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg 
-#> 
-#> assessing series:  station_code 7132; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg
+#> Setting up clusters: be patient, it can take a while!
 ```
 
 There are various little warnings: these ones are nothing to worry about.
@@ -303,8 +238,8 @@ We can then check that everything is converged.
 
 
 ```r
-check_convergence_lmm(biota_assessment$assessment)
-#> [1] 0
+check_assessment(water_assessment)
+#> All assessment models have converged
 ```
 
 ## Reporting
@@ -323,34 +258,6 @@ if (!dir.exists(summary.dir)) {
 }
 ```
 
-Next, we set up a few variables to manage the display.
-
-
-```r
-webGroups <- list(
-  levels = c("Metals", "Metabolites", "Organobromines", "Chlorobiphenyls"),  
-  labels = c(
-    "Metals", "PAH metabolites", "Organobromines",  "Polychlorinated biphenyls"
-  )
-)
-
-classColour <- list(
-  below = c(
-    "BAC" = "blue", 
-    "EAC" = "green", 
-    "EQS" = "green",
-    "HQS" = "green"
-  ),
-  above = c(
-    "BAC" = "orange", 
-    "EAC" = "red", 
-    "EQS" = "red",
-    "HQS" = "red"
-  ), 
-  none = "black"
-)
-```
-
 And then we can generate the summary proper.
 The summary file which will be very familiar to those who have been involved in the OSPAR and the HELCOM
 assessments. The summary files have information about each time series, 
@@ -361,11 +268,24 @@ when it starts and finishes. And towards the end, we've got comparisons against 
 
 ```r
 write_summary_table(
-  biota_assessment, 
-  determinandGroups = webGroups,
-  classColour = classColour,
-  collapse_AC = list(EAC = c("EAC", "EQS")),
-  output_dir = summary.dir 
+  water_assessment,
+  determinandGroups = list(
+    levels = c(
+      "Metals", "Organotins", "PAH_parent",  "Organofluorines", 
+      "Chlorobiphenyls", "Organochlorines", "Pesticides"
+    ),  
+    labels = c(
+      "Metals", "Organotins", "PAH parent compounds", "Organofluorines", 
+      "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
+    )
+  ),
+  classColour = list(
+    below = c("EQS" = "green"), 
+    above = c("EQS" = "red"), 
+    none = "black"
+  ),
+  collapse_AC = list(EAC = "EQS"),
+  output_dir = summary.dir
 )
 ```
 
