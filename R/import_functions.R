@@ -1274,6 +1274,48 @@ add_stations <- function(data, stations, info){
     station_activeuntildate = substr(.data$station_activeuntildate, 0, 4),
     station_activeuntildate = as.numeric(.data$station_activeuntildate)
   )
+
+  
+  # deal with degenerate case where station_longituderange or 
+  # station_latituderange equals zero (so polygon collapses to a line)
+
+  ok <- stations$station_longituderange > 0 & stations$station_latituderange > 0
+  if (!all(ok)) {
+
+    stations <- split(stations, ok)
+
+    stations[["FALSE"]] <- dplyr::mutate(
+      stations[["FALSE"]], 
+      station_longituderange = pmax(.data$station_longituderange, 0.000001),
+      station_latituderange = pmax(.data$station_latituderange, 0.000001)
+    )
+     
+    stations[["FALSE"]]$station_geometry <- mapply(
+      FUN = function(longitude, latitude, longituderange, latituderange) {
+        point <- c(longitude, latitude)
+        
+        range <- c(longituderange, latituderange)
+        mult <- c(1, 1, -1, 1, -1, -1, 1, -1, 1, 1)
+        
+        polygon <- rep(point, 5) + rep(range, 5) * mult
+        polygon <- matrix(polygon, ncol = 2, byrow = TRUE)
+      
+        geom <- sf::st_geometrycollection(
+          c(sf::st_point(point), sf::st_polygon(list(outer = polygon)))
+        )  
+      
+        sf::st_as_text(geom)
+      },
+      longitude = stations[["FALSE"]]$station_longitude,
+      latitude = stations[["FALSE"]]$station_latitude,
+      longituderange = stations[["FALSE"]]$station_longituderange,
+      latituderange = stations[["FALSE"]]$station_latituderange,
+      USE.NAMES = FALSE
+    )
+      
+    stations <- unsplit(stations, ok)      
+
+  }
   
   
   # create the datatype variable for matching (if required) 
