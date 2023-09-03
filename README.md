@@ -67,6 +67,13 @@ You can install the development version of harsat from [GitHub](https://github.c
 devtools::install_github("osparcomm/HARSAT")
 ```
 
+The stable version is similar:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("osparcomm/HARSAT@main")
+```
+
 ## Example
 
 This is a basic example which shows you how to solve a common problem:

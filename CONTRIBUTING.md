@@ -19,11 +19,20 @@ Our aim is to make the `harsat` code work as an R package. It is not
 going to be distributed on CRAN for the near future at least. Instead,
 it can be installed directly from Github. 
 
-To install the latest development version, use the `remotes` package:
+To install the latest **development** version, use the `remotes` package:
 
 ```
 library(remotes)
 remotes::install_github("osparcomm/harsat", auth_token = 'XXXX')
+```
+
+Installing the latest stable version is similar, but is less likely to
+change or break. The web documentation reflects the stable version, not
+the development version.
+
+```
+library(remotes)
+remotes::install_github("osparcomm/harsat@main", auth_token = 'XXXX')
 ```
 
 This should install all the `harsat` code with all its dependencies.
