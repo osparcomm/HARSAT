@@ -11,7 +11,7 @@ read_data(
   stations,
   QA,
   data_dir = ".",
-  data_format = c("ICES", "external", "ICES_old"),
+  data_format = c("ICES", "external"),
   info_files = list(),
   info_dir = ".",
   extraction = NULL,
