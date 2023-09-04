@@ -34,11 +34,17 @@ plot_assessment <- function(
     file_format = c("png", "pdf")) {
   
   # graphics_functions.R
+
+  if (!"package:lattice" %in% search()) {
+    library("lattice")
+    on.exit(detach("package:lattice"))
+  }
   
-  
-  library("lattice")
-  library("grid")
-  
+  if (!"package:grid" %in% search()) {
+    library("grid")
+    on.exit(detach("package:grid"), add = TRUE)
+  }
+
   
   # check file_type, file_format and output_dir are valid
   
@@ -74,7 +80,7 @@ plot_assessment <- function(
   # - add in additional useful variables 
   # - subset if necessary
 
-  timeSeries <- rownames_to_column(timeSeries, "series")
+  timeSeries <- tibble::rownames_to_column(timeSeries, "series")
     
   timeSeries <- dplyr::left_join(
     timeSeries, 
@@ -106,7 +112,7 @@ plot_assessment <- function(
     row.names(timeSeries) <- NULL
   }
 
-  timeSeries <- column_to_rownames(timeSeries, "series")
+  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
   
   series_id <- row.names(timeSeries)
 
@@ -115,7 +121,7 @@ plot_assessment <- function(
   
   lapply(series_id, function(id) {
     
-    data <- filter(assessment_obj$data, seriesID == id)
+    data <- dplyr::filter(assessment_obj$data, seriesID == id)
     
     assessment <- assessment_obj$assessment[[id]]
 
@@ -671,9 +677,6 @@ plot.data <- function(
 
 
 plot.setup <- function(newPage) {
-
-  library("lattice")
-  library("grid")
 
   if (newPage) grid.newpage()
 
@@ -1687,9 +1690,6 @@ plot.ratio.pred <- function(
 
 
 plot.ratio <- function(data, info, ...) {
-  
-  library("lattice")
-  library("grid")
   
   # get working data 
   # sediment - use non-normalised concentrations
