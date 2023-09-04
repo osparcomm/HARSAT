@@ -61,3 +61,99 @@ write_summary_table(
   collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_OSPAR")
 )
+
+
+
+sediment_data <- read_data(
+  compartment = "sediment", 
+  purpose = "OSPAR",                               
+  contaminants = "sediment.txt", 
+  stations = "stations.txt", 
+  data_dir = file.path("data", "example_OSPAR"),
+  info_dir = file.path("information", "OSPAR_2022"), 
+  extraction = "2023/08/23"
+)  
+
+sediment_data <- tidy_data(sediment_data)
+
+
+info_TEQ <- c(
+  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
+  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
+  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
+  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+)
+
+
+sediment_timeseries <- create_timeseries(
+  sediment_data,
+  determinands.control = list(
+    CHR = list(det = "CHRTR", action = "replace"),
+    BBKF = list(det = c("BBF", "BKF", "BBJF", "BBJKF"), action = "bespoke"),
+    NAPC1 = list(det = c("NAP1M", "NAP2M"), action = "sum"),
+    BD154 = list(det = "PBB153+BD154", action = "replace"),
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
+    CB138 = list(det = c("CB138+163"), action = "replace"),
+    CB156 = list(det = c("CB156+172"), action = "replace"),
+    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum")
+  ),
+  normalise = normalise_sediment_OSPAR,
+  normalise.control = list(
+    metals = list(method = "pivot", normaliser = "AL"), 
+    organics = list(method = "simple", normaliser = "CORG", value = 2.5),
+    exclude = expression(ospar_subregion %in% c("Iberian Coast", "Gulf of Cadiz"))
+  )
+)
+
+
+sediment_assessment <- run_assessment(
+  sediment_timeseries, 
+  AC = c("BAC", "EAC", "EQS", "ERL", "FEQG"),
+  parallel = TRUE
+)
+
+# 02 00s
+
+check_assessment(water_assessment)
+
+
+write_summary_table(
+  sediment_assessment,
+  determinandGroups = list(
+    levels = c(
+      "Metals", "Organotins", "PAH_parent", "PAH_alkylated",  
+      "PBDEs", "Organobromines", "Chlorobiphenyls", "Dioxins", 
+      "Organochlorines"
+    ),
+    labels = c(
+      "Metals", "Organotins", "PAH parent compounds", "PAH alkylated compounds", 
+      "Polybrominated diphenyl ethers", "Organobromines (other)", 
+      "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)"
+    )
+  ),
+  classColour = list(
+    below = c(
+      "BAC" = "blue", 
+      "ERL" = "green", 
+      "EAC" = "green", 
+      "EQS" = "green", 
+      "FEQG" = "green"
+    ),
+    above = c(
+      "BAC" = "orange", 
+      "ERL" = "red", 
+      "EAC" = "red", 
+      "EQS" = "red", 
+      "FEQG" = "red"
+    ),
+    none = "black"
+  ),
+  collapse_AC = list(BAC = "BAC", EAC = c("EAC", "ERL", "EQS", "FEQG")),
+  output_dir = file.path("output", "example_OSPAR")
+)
+
+
+

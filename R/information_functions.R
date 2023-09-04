@@ -1120,8 +1120,14 @@ get_AC$sediment <- function(data, AC, rt, export_all = FALSE) {
   }
   
   
-  var_id <- "determinand"
+  # merge by variables that are in both the data (which includes station 
+  # information) and the AC table
   
+  # determinand must be present
+  
+  var_id <- intersect(names(data), names(rt$thresholds))
+  var_id <- union("determinand", var_id)
+
   ok <- var_id %in% names(data)
   
   if (!all(ok)) {
@@ -1138,7 +1144,7 @@ get_AC$sediment <- function(data, AC, rt, export_all = FALSE) {
   data <- dplyr::left_join(
     data, 
     rt$thresholds, 
-    by = "determinand", 
+    by = var_id, 
     relationship = "many-to-one"
   )
   

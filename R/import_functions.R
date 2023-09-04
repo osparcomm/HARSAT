@@ -3408,7 +3408,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
 
 
 determinand.link.TEQDFP <- function(data, keep, drop, ...) {
-  
+
   stopifnot(length(keep) == 1, length(drop) > 1)
   
   if (!any(data$determinand %in% drop)) 
@@ -3426,7 +3426,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
   
   sum_ID <- ID %in% setdiff(ID[dropID], ID[keepID])
   
-  if (length(sum_ID) == 0)
+  if (sum(sum_ID) == 0)
     return(data)
   
   dropTxt <- paste(drop, collapse = ", ")
@@ -3519,7 +3519,9 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
   # see how many samples have been lost due to incomplete submissions
   
   nTotal <- length(unique(ID))
-  nLost <- length(unique(ID)) - nrow(summed_data)
+  nSummed <- if (is.null(summed_data)) 0 else nrow(summed_data)
+  nLost <- nTotal - nSummed
+  
   if (nLost > 0) 
     message("     ", nLost, " of ", nTotal, " samples lost due to incomplete submissions")
 
@@ -4017,7 +4019,7 @@ ctsm_convert_to_target_basis <- function(data, info, get_basis) {
 
 
 #' @export
-ctsm_normalise_sediment <- function(data, station_dictionary, info, control) {
+normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
   
@@ -4163,12 +4165,12 @@ ctsm_normalise_sediment <- function(data, station_dictionary, info, control) {
         Cdigestion <- data$digestion
         Ndigestion <- getNdata("digestion")
         
-        if ("PNL" %in% Cdigestion) {
-          warning(
-            "ad-hoc fix to deal with new NL method - must resolve for next assessment", 
-            call. = FALSE
-          )
-        }
+        # if ("PNL" %in% Cdigestion) {
+        #   warning(
+        #     "ad-hoc fix to deal with new NL method - must resolve for next assessment", 
+        #     call. = FALSE
+        #   )
+        # }
         
         
         notOK <- !is.na(data[[normaliser]]) & is.na(Ndigestion)

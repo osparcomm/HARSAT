@@ -159,8 +159,9 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
   data <- droplevels(data)
 
   stations <- tibble::column_to_rownames(ctsm.ob$stations, "station_code")
-  stations <- stations[timeSeries$station_code, ]
+  stations <- stations[unique(timeSeries$station_code), ]
 
+  
   
   # set up parallel processing information 
   
@@ -209,9 +210,10 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
     
     if (all(is.na(x$concentration))) return()
     
-    if ("country" %in% names(stations)) {
-      seriesInfo$country <- stations[seriesInfo$station_code, "country"]
-    }
+
+    # add station information to seriesInfo
+    
+    seriesInfo <- c(seriesInfo, stations[seriesInfo$station_code, ])
 
 
     # construct annual index
