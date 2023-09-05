@@ -510,7 +510,7 @@ get.index.biota.Effects <- function(data, determinand, info) {
   # default for everything other than %DNATAIL and MNC: median (log) concentration
   
   if (!determinand %in% c("%DNATAIL", "MNC")) {
-    out <- get.index.default(data, determinand)
+    out <- get.index.default(data, determinand, info)
     return(out)
   }
   
