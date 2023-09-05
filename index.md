@@ -1,18 +1,14 @@
 
 # harsat
 
-<!-- badges: start -->
-[![lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) ![development build](https://github.com/osparcomm/harsat/actions/workflows/build.yml/badge.svg?branch=develop) ![stable build](https://github.com/osparcomm/harsat/actions/workflows/build.yml/badge.svg?branch=main)
-<!-- badges: end -->
-
 ## Requirements
 
--	R programming language (version 4.2.1)
+- R programming language (version 4.2.1)
 - Additional R packages to those which come with the standard R installation -- they will be installed automatically, but you may need permissions or tools to do that
 
 ## Installation
 
-For full installation details, see the [Getting Started](https://osparcomm.github.io/HARSAT/articles/harsat.html) guide.
+For full installation details, see the [Getting Started](./articles/harsat.html) guide.
 We strongly recommend installing `harsat` from GitHub, as this ensures that all dependencies are up-to-date, properly 
 downloaded and installed.
 
@@ -20,7 +16,7 @@ The short version is as follows:
 
 > The `XXXX` is a Github personal access token. You only need this optional parameter while
 > the `harsat` package is private because it is still under development. 
-> The [Getting Started](https://osparcomm.github.io/HARSAT/articles/harsat.html) guide
+> The [Getting Started](./articles/harsat.html) guide
 > has more information on how to create a personal access token. 
 
 ``` r
@@ -42,15 +38,15 @@ OSPAR (a subset of OSPAR 2022), and HELCOM (based on HELCOM 2023). These zip fil
 contain two directories: a data directory and an information directory. You can
 unzip these anywhere you like on your system.
 
-* <a href="https://osparcomm.github.io/HARSAT/ospar.zip" download>Download the OSPAR archive</a>
-* <a href="https://osparcomm.github.io/HARSAT/helcom.zip" download>Download the HELCOM archive</a>
+* <a href="./ospar.zip" download>Download the OSPAR archive</a>
+* <a href="./helcom.zip" download>Download the HELCOM archive</a>
 
 Let's say you have unzipped these to a file on your system, such as `C:\Users\test\ospar`. So, 
 the data is now in `C:\Users\test\ospar\data`, and the reference files are in `C:\Users\test\ospar\information`,
 although can rename and move these anywhere you like. 
 
 To read the data, you will then do something like this (we're using water in OSPAR as an example here -- 
-for the complete example, have a look at [the full OSPAR example](https://osparcomm.github.io/HARSAT/articles/example_OSPAR.html)):
+for the complete example, have a look at [the full OSPAR example](./articles/example_OSPAR.html)):
 
 ```r
 water_data <- read_data(
@@ -64,15 +60,15 @@ water_data <- read_data(
 )
 ```
 
-And follow the rest of the process as shown in the [Getting Started guide](https://osparcomm.github.io/HARSAT/articles/harsat.html) or the
-[OSPAR example](https://osparcomm.github.io/HARSAT/articles/example_OSPAR.html).
+And follow the rest of the process as shown in the [Getting Started guide](./articles/harsat.html) or the
+[OSPAR example](./articles/example_OSPAR.html).
 
 You can, of course, start to edit the files in these directories as you choose. Note that there are
 some specific naming conventions for the files in the reference file directory especially. 
-Find out more in [the documentation page for file management](https://osparcomm.github.io/HARSAT/articles/file-management.html).
+Find out more in [the documentation page for file management](./articles/file-management.html).
 
 ## More information
 
-For more information, take a look at the [Getting Started guide](https://osparcomm.github.io/HARSAT/articles/harsat.html).
+For more information, take a look at the [Getting Started guide](./articles/harsat.html).
 
-We welcome any other contributions you can make. Check out the [Contributor's guide](https://osparcomm.github.io/HARSAT/CONTRIBUTING.html) for more.
+We welcome any other contributions you can make. Check out the [Contributor's guide](./CONTRIBUTING.html) for more.

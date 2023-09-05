@@ -1,8 +1,8 @@
 ---
-title: "HELCOM"
+title: "HELCOM example usage"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{HELCOM}
+  %\VignetteIndexEntry{HELCOM example usage}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
