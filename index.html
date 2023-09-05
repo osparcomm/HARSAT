@@ -36,7 +36,7 @@
     
     <a class="navbar-brand me-2" href="index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0.1000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.1000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,11 +56,12 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Data file management</h6>
     <a class="dropdown-item" href="articles/file-management.html">File locations</a>
+    <a class="dropdown-item" href="articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="articles/external-file-format.html">External file format</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="articles/example_simple_OSPAR.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="articles/simple_OSPAR.html">OSPAR</a>
     <a class="dropdown-item" href="articles/example_HELCOM.html">HELCOM</a>
   </div>
 </li>
@@ -131,14 +132,14 @@
 <ul>
 <li>example_external_data</li>
 <li>example_HELCOM</li>
-<li>example_simple_OSPAR</li>
+<li>example_OSPAR</li>
 </ul>
 </li>
 <li>output
 <ul>
 <li>example_external_data</li>
 <li>example_HELCOM</li>
-<li>example_simple_OSPAR</li>
+<li>example_OSPAR</li>
 </ul>
 </li>
 </ul>
@@ -151,12 +152,16 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT"</span><span class="op">)</span></span></code></pre></div>
+<p>The stable version is similar:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT@main"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>This is a basic example which shows you how to solve a common problem:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/osparcomm/HARSAT" class="external-link">harsat</a></span><span class="op">)</span></span>
 <span><span class="co">## basic example code</span></span></code></pre></div>
 <p>The following figures are a bit out of date:</p>
@@ -217,7 +222,7 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="lifecycle: experimental"></a></li>
 </ul>
 </div>
 

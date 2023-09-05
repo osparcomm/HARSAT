@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0.1000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.1000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,11 +29,12 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Data file management</h6>
     <a class="dropdown-item" href="articles/file-management.html">File locations</a>
+    <a class="dropdown-item" href="articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="articles/external-file-format.html">External file format</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="articles/example_simple_OSPAR.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="articles/simple_OSPAR.html">OSPAR</a>
     <a class="dropdown-item" href="articles/example_HELCOM.html">HELCOM</a>
   </div>
 </li>
@@ -71,9 +72,12 @@
 <div class="section level2">
 <h2 id="packaging">Packaging<a class="anchor" aria-label="anchor" href="#packaging"></a></h2>
 <p>Our aim is to make the <code>harsat</code> code work as an R package. It is not going to be distributed on CRAN for the near future at least. Instead, it can be installed directly from Github.</p>
-<p>To install the latest development version, use the <code>remotes</code> package:</p>
+<p>To install the latest <strong>development</strong> version, use the <code>remotes</code> package:</p>
 <pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/harsat"</span>, auth_token <span class="op">=</span> <span class="st">'XXXX'</span><span class="op">)</span></span></code></pre>
+<p>Installing the latest stable version is similar, but is less likely to change or break. The web documentation reflects the stable version, not the development version.</p>
+<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/harsat@main"</span>, auth_token <span class="op">=</span> <span class="st">'XXXX'</span><span class="op">)</span></span></code></pre>
 <p>This should install all the <code>harsat</code> code with all its dependencies.</p>
 <blockquote>
 <p>Note: during development the repository is marked as private on GitHub, so you will need a GitHub Personal Access Token (or PAT) to access it. Put it in the call above as the ‘XXXX’ string.</p>
@@ -111,15 +115,15 @@
 <p>The documentation is not entirely built automatically. This is intentional, as, for example, running some of the tools (e.g., <code>roxygen2</code>) can change key package files in a breaking way. Also, some of the vignettes are pre-rendered, so they do not take a long time to install for users.</p>
 <p>To update the documentation, use the following steps in R. This does change the namespacing, so API changes can cause the vignette builds to break. If so, create an issue.</p>
 <p><strong>Step 1. Run roxygen2</strong></p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
 <span><span class="fu">roxygen2</span><span class="fu">::</span><span class="fu">roxygenize</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Step 2. Precompile the vignettes</strong></p>
 <p>And then from bash:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> <span class="at">--quiet</span> <span class="at">--vanilla</span> <span class="op">&lt;</span> vignettes/precompile.R</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> <span class="at">--quiet</span> <span class="at">--vanilla</span> <span class="op">&lt;</span> vignettes/precompile.R</span></code></pre></div>
 <p><strong>Step 3. Build and check the code</strong></p>
 <p>Back to R:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>

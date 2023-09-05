@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0.1000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.1000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,12 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Data file management</h6>
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
+    <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="../articles/example_simple_OSPAR.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="../articles/simple_OSPAR.html">OSPAR</a>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
   </div>
 </li>
@@ -87,13 +88,9 @@
 
     
     
-<div class="section level2">
-<h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
-</h2>
 <p>For now, we will assume that you are familiar with running basic R
 scripts and so on. We will focus on what the structure of a typical what
 the code looks like in a typical analysis.</p>
-</div>
 <div class="section level2">
 <h2 id="installing-harsat-from-github">Installing <code>harsat</code> from GitHub<a class="anchor" aria-label="anchor" href="#installing-harsat-from-github"></a>
 </h2>
@@ -101,6 +98,10 @@ the code looks like in a typical analysis.</p>
 <code>remotes</code> package:</p>
 <pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/harsat"</span>, auth_token <span class="op">=</span> <span class="st">'XXXX'</span><span class="op">)</span> </span></code></pre>
+<p>The stable version is similar:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT@main"</span><span class="op">)</span></span></code></pre></div>
 <blockquote>
 <p>Note: during development the repository is marked as private on
 GitHub, so you will need a Personal Access Token (or PAT) to access it.
@@ -122,7 +123,7 @@ future.</p>
 <h2 id="loading-the-code">Loading the code<a class="anchor" aria-label="anchor" href="#loading-the-code"></a>
 </h2>
 <p>Now, within R, you can load the library in the usual way</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/osparcomm/HARSAT" class="external-link">harsat</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -132,7 +133,7 @@ future.</p>
 current working directory. We’ll detect that using R’s <code>here</code>
 package, and write it into a variable
 <code>working.directory</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span>
 <span><span class="va">working.directory</span> <span class="op">&lt;-</span> <span class="fu">here</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -141,30 +142,41 @@ package, and write it into a variable
 </h2>
 <p>The first step is to read in the data that we’ve got. We will go
 through some of these arguments.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
-<span>  compartment <span class="op">=</span> <span class="st">"biota"</span>, </span>
-<span>  purpose <span class="op">=</span> <span class="st">"OSPAR"</span>,                               </span>
-<span>  contaminants <span class="op">=</span> <span class="st">"test_data.csv"</span>, </span>
-<span>  stations <span class="op">=</span> <span class="st">"station_dictionary.csv"</span>, </span>
-<span>  QA <span class="op">=</span> <span class="st">"quality_assurance.csv"</span>,</span>
-<span>  data_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"data"</span>, <span class="st">"example_simple_OSPAR"</span><span class="op">)</span>,</span>
-<span>  data_format <span class="op">=</span> <span class="st">"ICES_old"</span>,</span>
-<span>  info_files <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    determinand <span class="op">=</span> <span class="st">"determinand_simple_OSPAR.csv"</span>, </span>
-<span>    thresholds <span class="op">=</span> <span class="st">"thresholds_biota_simple_OSPAR.csv"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span><span class="op">)</span>, </span>
-<span>  extraction <span class="op">=</span> <span class="st">"2022/01/11"</span>,</span>
-<span>  max_year <span class="op">=</span> <span class="fl">2020L</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
+<span>  compartment <span class="op">=</span> <span class="st">"water"</span>,</span>
+<span>  purpose <span class="op">=</span> <span class="st">"OSPAR"</span>,</span>
+<span>  contaminants <span class="op">=</span> <span class="st">"water.txt"</span>,</span>
+<span>  stations <span class="op">=</span> <span class="st">"stations.txt"</span>,</span>
+<span>  data_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"data"</span>, <span class="st">"example_OSPAR"</span><span class="op">)</span>,</span>
+<span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span>, <span class="st">"OSPAR_2022"</span><span class="op">)</span>,</span>
+<span>  extraction <span class="op">=</span> <span class="st">"2023/08/23"</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/information/method_extraction.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in package matrix.csv /Users/stuart/git/HARSAT/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in package imposex.csv /Users/stuart/git/HARSAT/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/station_dictionary.csv'</span></span>
+<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Reading contaminant and biological effects data from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/test_data.csv'</span></span>
+<span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
+<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Reading QA data from '/Users/stuart/git/HARSAT/data/example_simple_OSPAR/quality_assurance.csv'</span></span></code></pre></div>
+<span><span class="co">#&gt; Matching data with station dictionary</span></span>
+<span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
+<span><span class="co">#&gt;  - restricting to station with data types CW or EW </span></span>
+<span><span class="co">#&gt;  - restricting to stations marked for temporal monitoring</span></span>
+<span><span class="co">#&gt;  - restricting to data with program governance: OSPAR, AMAP </span></span>
+<span><span class="co">#&gt;  - restricting to stations with program governance: OSPAR, AMAP </span></span>
+<span><span class="co">#&gt;  - matching 2768 records by coordinates</span></span>
+<span><span class="co">#&gt;  - matching 1583 records by station name</span></span>
+<span><span class="co">#&gt;  - grouping stations using station_asmtmimegovernance</span></span>
+<span><span class="co">#&gt;  - 4251 of 4351 records have been matched to a station</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Argument max_year taken to be the maximum year in the data: 2022</span></span></code></pre></div>
 <p>The main arguments here are as follows:</p>
 <ul>
 <li>
@@ -185,11 +197,8 @@ measurements in it.</li>
 <code>stations</code> is the station file which is directly related
 to the station dictionary that we get out at from ICES.</li>
 <li>
-<code>QA</code> is a quality assurance file – this is
-<em>deprecated</em> and will disappear.</li>
-<li>
-<code>info_files</code> are reference tables – we come back to
-that.</li>
+<code>info_dir</code> is your directory for reference tables – we
+will come back to that.</li>
 </ul>
 <p>This reads in the three data sets, but does no more than that at this
 stage.</p>
@@ -216,66 +225,74 @@ unrecognized by the station dictionary. Sometimes that’s fine and
 sometimes that’s not. Warnings are supported by output files which allow
 you to come in and have a look and see which values are affected, so you
 can go and check them out in more detail.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">water_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
-<span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
+<span><span class="co">#&gt; Oddities will be written to 'oddities/water' with previous oddities backed up to</span></span>
+<span><span class="co">#&gt;  'oddities/water_backup'</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Dropping 411 records from data flagged for deletion. Possible reasons are:</span></span>
+<span><span class="co">#&gt;  - vflag = suspect</span></span>
+<span><span class="co">#&gt;  - upper depth &gt;5.5m</span></span>
+<span><span class="co">#&gt;  - filtration missing</span></span>
+<span><span class="co">#&gt;  - matrix = 'SPM'</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Dropping 94 records from data that have no valid station code</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Dropping 13633 stations that are not associated with any data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cleaning station dictionary</span></span>
-<span><span class="co">#&gt;    Duplicate stations - first one selected: see duplicate_stations.csv</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span>
-<span><span class="co">#&gt;    Submitted.station unrecognised by dictionary: see stations_unrecognised.csv</span></span>
-<span><span class="co">#&gt;    Dropping data with no stations</span></span></code></pre></div>
+<span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span></code></pre></div>
 <p>To this point, we’ve still not done anything with the datasets.</p>
 </div>
 <div class="section level2">
-<h2 id="create-time-series">Create time series<a class="anchor" aria-label="anchor" href="#create-time-series"></a>
+<h2 id="create-a-time-series">Create a time series<a class="anchor" aria-label="anchor" href="#create-a-time-series"></a>
 </h2>
 <p>Now we can group the data into time series. This means identifying
 which data points belong to the same time series, and then set it up as
 a structure which then allows us to do the assessments.</p>
 <p>There are various different ways in which we can specify which
 determinants we actually want to assess. In this case, the
-<code>determinands</code> parameter specifies cadmium, CP153, CB153,
-HBCD, HBCDA, HBCDG, and some biological metabolites. There are various
-other arguments which allow you to control just how the data are
-manipulated.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
-<span>  <span class="va">biota_data</span>,</span>
-<span>  determinands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD"</span>, <span class="st">"CB153"</span>, <span class="st">"HBCD"</span>,<span class="st">"HBCDA"</span>, <span class="st">"HBCDG"</span>, <span class="st">"PYR1OH"</span><span class="op">)</span>,</span>
+<code>determinands</code> parameter specifies CHR, BBKF, PFOS, CB138,
+HCEPX, and HCH. There are various other arguments which allow you to
+control just how the data are manipulated.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">water_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
+<span>  <span class="va">water_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    HBCD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HBCDA"</span>, <span class="st">"HBCDB"</span>, <span class="st">"HBCDG"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
-<span>    <span class="st">"LIPIDWT%"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EXLIP%"</span>, <span class="st">"FATWT%"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"bespoke"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  get_basis <span class="op">=</span> <span class="va">get_basis_biota_OSPAR</span></span>
+<span>    CHR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="st">"CHRTR"</span>, action <span class="op">=</span> <span class="st">"replace"</span><span class="op">)</span>,</span>
+<span>    BBKF <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BBF"</span>, <span class="st">"BKF"</span>, <span class="st">"BBJF"</span>, <span class="st">"BBJKF"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"bespoke"</span><span class="op">)</span>,</span>
+<span>    PFOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N-PFOS"</span>, <span class="st">"BR-PFOS"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
+<span>    CB138 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CB138+163"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"replace"</span><span class="op">)</span>,</span>
+<span>    HCEPX <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HCEPC"</span>, <span class="st">"HCEPT"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>, </span>
+<span>    HCH <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HCHA"</span>, <span class="st">"HCHB"</span>, <span class="st">"HCHG"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
-<span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
+<span><span class="co">#&gt; Oddities will be written to 'oddities/water' with previous oddities backed up to</span></span>
+<span><span class="co">#&gt;  'oddities/water_backup'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cleaning data</span></span>
-<span><span class="co">#&gt;    Dropping stations with no data between 2015 and 2020 </span></span>
-<span><span class="co">#&gt;    Dropping samples with only auxiliary variables</span></span>
-<span><span class="co">#&gt;    Unexpected or missing values for 'matrix': see matrix_queries.csv</span></span>
+<span><span class="co">#&gt;    Dropping stations with no data between 2017 and 2022</span></span>
 <span><span class="co">#&gt;    Unexpected or missing values for 'basis': see basis_queries.csv</span></span>
-<span><span class="co">#&gt;    Bile metabolite units changed from 'ng/g' to 'ng/ml' and from 'ug/kg' to 'ug/l'</span></span>
 <span><span class="co">#&gt;    Replicate measurements, only first retained: see replicate_measurements.csv</span></span>
+<span><span class="co">#&gt;    Non-positive detection limits: see non_positive_det_limits.csv</span></span>
 <span><span class="co">#&gt;    Limit of quantification less than limit of detection: see limits_inconsistent.csv</span></span>
+<span><span class="co">#&gt;    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv</span></span>
 <span><span class="co">#&gt;    Detection limit higher than data: see detection_limit_high.csv</span></span>
-<span><span class="co">#&gt;    Data submitted as HBCDA, HBCDB, HBCDG summed to give HBCD</span></span>
-<span><span class="co">#&gt;    Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT% </span></span>
+<span><span class="co">#&gt;    Data submitted as CHRTR relabelled as CHR </span></span>
+<span><span class="co">#&gt;    Data submitted as BBF, BKF summed to give BBKF</span></span>
+<span><span class="co">#&gt;      1 of 71 samples lost due to incomplete submissions</span></span>
+<span><span class="co">#&gt;    Data submitted as BBJF, BKF summed to give BBJKF</span></span>
+<span><span class="co">#&gt;      99 of 99 samples lost due to incomplete submissions</span></span>
+<span><span class="co">#&gt;    Data submitted as HCEPC, HCEPT summed to give HCEPX</span></span>
+<span><span class="co">#&gt;    Data submitted as HCHA, HCHB, HCHG summed to give HCH</span></span>
+<span><span class="co">#&gt;      190 of 234 samples lost due to incomplete submissions</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Creating time series data</span></span>
 <span><span class="co">#&gt;    Converting data to appropriate basis for statistical analysis</span></span>
-<span><span class="co">#&gt;    Losing 32 out of 392 records in basis conversion due to missing, censored</span></span>
-<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
-<span><span class="co">#&gt;    Dropping bivalve and gastropod contaminant data collected during the</span></span>
-<span><span class="co">#&gt;     spawning season, which is taken to be the following months:</span></span>
-<span><span class="co">#&gt;     April, May, June, July </span></span>
-<span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2015 and 2020</span></span></code></pre></div>
+<span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2017 and 2022</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="assessment">Assessment<a class="anchor" aria-label="anchor" href="#assessment"></a>
@@ -287,98 +304,19 @@ assessment and there are other options which we can put in here. But
 this will just run. You can see that it tells you which time series
 we’re actually assessing as it progresses. This gives you an idea of how
 how many cups of tea you can drink before it’s all finished.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_assessment.html">run_assessment</a></span><span class="op">(</span></span>
-<span>  <span class="va">biota_timeSeries</span>,</span>
-<span>  AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span>, <span class="st">"EAC"</span>, <span class="st">"EQS"</span>, <span class="st">"HQS"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">water_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_assessment.html">run_assessment</a></span><span class="op">(</span></span>
+<span>  <span class="va">water_timeseries</span>, </span>
+<span>  AC <span class="op">=</span> <span class="st">"EQS"</span>, </span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 11461; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 11461; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 12156; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 12164; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 12164; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1235; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1235; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1235; determinand HBCD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1235; determinand HBCDA; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1235; determinand HBCDG; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 13059; determinand CB153; species Spisula solida; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 13059; determinand CD; species Spisula solida; matrix SB; basis D; unit ug/kg</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1345; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1345; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1345; determinand HBCD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1345; determinand HBCDA; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1345; determinand HBCDG; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1381; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1381; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1381; determinand HBCD; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1381; determinand HBCDA; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1381; determinand HBCDG; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1388; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 1388; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 2717; determinand PYR1OH; species Limanda limanda; matrix BI; method_analysis HPLC-FD; unit ng/ml </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 3282; determinand CB153; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 3282; determinand CD; species Crassostrea gigas; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 3433; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 3433; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 3441; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 3441; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 7132; determinand CB153; species Mytilus edulis; matrix SB; basis D; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code 7132; determinand CD; species Mytilus edulis; matrix SB; basis D; unit ug/kg</span></span></code></pre></div>
+<span><span class="co">#&gt; Setting up clusters: be patient, it can take a while!</span></span></code></pre></div>
 <p>There are various little warnings: these ones are nothing to worry
 about.</p>
 <p>We can then check that everything is converged.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_convergence_lmm.html">check_convergence_lmm</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">$</span><span class="va">assessment</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">water_assessment</span><span class="op">)</span></span>
+<span><span class="co">#&gt; All assessment models have converged</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reporting">Reporting<a class="anchor" aria-label="anchor" href="#reporting"></a>
@@ -389,36 +327,12 @@ there’s nothing there, so let’s make a new directory,
 <code>./output/tutorial</code>, and put the full path into
 <code>summary.dir</code>, so we can tell <code>harsat</code> where to
 write to.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">summary.dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"output"</span>, <span class="st">"tutorial"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">summary.dir</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">summary.dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>Next, we set up a few variables to manage the display.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">webGroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Metals"</span>, <span class="st">"Metabolites"</span>, <span class="st">"Organobromines"</span>, <span class="st">"Chlorobiphenyls"</span><span class="op">)</span>,  </span>
-<span>  labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"Metals"</span>, <span class="st">"PAH metabolites"</span>, <span class="st">"Organobromines"</span>,  <span class="st">"Polychlorinated biphenyls"</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">classColour</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"blue"</span>, </span>
-<span>    <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
-<span>    <span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span>,</span>
-<span>    <span class="st">"HQS"</span> <span class="op">=</span> <span class="st">"green"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"orange"</span>, </span>
-<span>    <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
-<span>    <span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>    <span class="st">"HQS"</span> <span class="op">=</span> <span class="st">"red"</span></span>
-<span>  <span class="op">)</span>, </span>
-<span>  none <span class="op">=</span> <span class="st">"black"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
 <p>And then we can generate the summary proper. The summary file which
 will be very familiar to those who have been involved in the OSPAR and
 the HELCOM assessments. The summary files have information about each
@@ -429,11 +343,24 @@ finishes. And towards the end, we’ve got comparisons against various
 different threshold values.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
-<span>  <span class="va">biota_assessment</span>, </span>
-<span>  determinandGroups <span class="op">=</span> <span class="va">webGroups</span>,</span>
-<span>  classColour <span class="op">=</span> <span class="va">classColour</span>,</span>
-<span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAC"</span>, <span class="st">"EQS"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span> </span>
+<span>  <span class="va">water_assessment</span>,</span>
+<span>  determinandGroups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Metals"</span>, <span class="st">"Organotins"</span>, <span class="st">"PAH_parent"</span>,  <span class="st">"Organofluorines"</span>, </span>
+<span>      <span class="st">"Chlorobiphenyls"</span>, <span class="st">"Organochlorines"</span>, <span class="st">"Pesticides"</span></span>
+<span>    <span class="op">)</span>,  </span>
+<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Metals"</span>, <span class="st">"Organotins"</span>, <span class="st">"PAH parent compounds"</span>, <span class="st">"Organofluorines"</span>, </span>
+<span>      <span class="st">"Polychlorinated biphenyls"</span>, <span class="st">"Organochlorines (other)"</span>, <span class="st">"Pesticides"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  classColour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
+<span>    above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
+<span>    none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

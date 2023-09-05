@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0.1000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.1000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,12 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Data file management</h6>
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
+    <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="../articles/example_simple_OSPAR.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="../articles/simple_OSPAR.html">OSPAR</a>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
   </div>
 </li>
@@ -110,13 +111,20 @@ will need to point to a directory containing a copy.</p>
 <span>  stations <span class="op">=</span> <span class="st">"AMAP_external_new_stations_only.csv"</span>,</span>
 <span>  data_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"data"</span>, <span class="st">"example_external_data"</span><span class="op">)</span>,</span>
 <span>  data_format <span class="op">=</span> <span class="st">"external"</span>,</span>
-<span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span><span class="op">)</span>,</span>
-<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>region_id <span class="op">=</span> <span class="st">"AMAP_region"</span><span class="op">)</span></span>
+<span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span>, <span class="st">"AMAP_2022"</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>region <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"AMAP_region"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/AMAP_2022/determinand.csv /Users/stuart/git/HARSAT/information/AMAP_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in path species.csv /Users/stuart/git/HARSAT/information/AMAP_2022/species.csv /Users/stuart/git/HARSAT/information/AMAP_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/AMAP_2022/thresholds_biota.csv /Users/stuart/git/HARSAT/information/AMAP_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/information/method_extraction.csv /Users/stuart/git/HARSAT/information/AMAP_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/information/pivot_values.csv /Users/stuart/git/HARSAT/information/AMAP_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in package matrix.csv /Users/stuart/git/HARSAT/information/matrix.csv /Users/stuart/git/HARSAT/information/AMAP_2022"</span></span>
+<span><span class="co">#&gt; [1] "found in package imposex.csv /Users/stuart/git/HARSAT/information/imposex.csv /Users/stuart/git/HARSAT/information/AMAP_2022"</span></span>
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
 <span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_external_data/AMAP_external_new_stations_only.csv'</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Reading contaminant and biological effects data from:</span></span>
+<span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
 <span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_external_data/AMAP_external_data_new_data_only_CAN_MarineMammals.csv'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Argument max_year taken to be the maximum year in the data: 2017</span></span></code></pre></div>
@@ -126,10 +134,12 @@ will need to point to a directory containing a copy.</p>
 </h2>
 <p>Get correct variables and streamline the data files</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu">ctsm_tidy_data</span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
 <span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Dropping 42 stations that are not associated with any data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cleaning station dictionary</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -138,11 +148,12 @@ will need to point to a directory containing a copy.</p>
 <div class="section level2">
 <h2 id="construct-timeseries">Construct timeseries<a class="anchor" aria-label="anchor" href="#construct-timeseries"></a>
 </h2>
-<p>Uses OSPAR basis choice for mercury</p>
+<p>For each timeseries, use the basis which is reported most often in
+the data</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_timeSeries</span> <span class="op">&lt;-</span> <span class="fu">ctsm_create_timeSeries</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">biota_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
-<span>  get_basis <span class="op">=</span> <span class="va">get_basis_biota_OSPAR</span></span>
+<span>  get_basis <span class="op">=</span> <span class="va">get_basis_most_common</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
@@ -155,8 +166,6 @@ will need to point to a directory containing a copy.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Creating time series data</span></span>
 <span><span class="co">#&gt;    Converting data to appropriate basis for statistical analysis</span></span>
-<span><span class="co">#&gt;    Losing 25 out of 4629 records in basis conversion due to missing, censored</span></span>
-<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
 <span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2012 and 2017</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -165,32 +174,11 @@ will need to point to a directory containing a copy.</p>
 <p>Main runs</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_assessment.html">run_assessment</a></span><span class="op">(</span></span>
-<span>  <span class="va">biota_timeSeries</span>, </span>
+<span>  <span class="va">biota_timeseries</span>, </span>
 <span>  AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NRC"</span>, <span class="st">"LRC"</span>, <span class="st">"MRC"</span>, <span class="st">"HRC"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg</span></span>
-<span><span class="co">#&gt; Loading required package: Matrix</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'Matrix'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:tidyr':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     expand, pack, unpack</span></span>
-<span><span class="co">#&gt; Loading required package: nlme</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'nlme'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:lme4':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     lmList</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:dplyr':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     collapse</span></span>
-<span><span class="co">#&gt; This is mgcv 1.8-42. For overview type 'help("mgcv-package")'.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'optimx'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:nlme':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     coef&lt;-</span></span>
 <span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
 <span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -224,13 +212,37 @@ will need to point to a directory containing a copy.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix MU; subseries small; basis W; unit ug/kg </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis W; unit ug/kg</span></span>
+<span><span class="co">#&gt; assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis D; unit ug/kg</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis D; unit ug/kg</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis D; unit ug/kg</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
 <span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
 <span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis W; unit ug/kg </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis W; unit ug/kg</span></span>
 <span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg </span></span>
@@ -241,11 +253,37 @@ will need to point to a directory containing a copy.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis W; unit ug/kg </span></span>
+<span><span class="co">#&gt; assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis D; unit ug/kg</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
+<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis W; unit ug/kg </span></span>
+<span><span class="co">#&gt; assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis D; unit ug/kg</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis W; unit ug/kg </span></span>
+<span><span class="co">#&gt; assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis D; unit ug/kg</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
+<span><span class="co">#&gt;    Losing 1 out of 1 records in basis conversion due to missing, censored</span></span>
+<span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -276,11 +314,11 @@ will need to point to a directory containing a copy.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix MU; subseries small; basis W; unit ug/kg</span></span></code></pre></div>
 <p>Use the code below if it takes a long time to run</p>
-<pre><code>biota_assessment &lt;- run_assessment(
-  biota_timeSeries,
-  AC = c("NRC", "LRC", "MRC", "HRC")
-  parallel = TRUE
-)</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>biota_assessment <span class="ot">&lt;-</span> <span class="fu">run_assessment</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  biota_timeseries,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">AC =</span> <span class="fu">c</span>(<span class="st">"NRC"</span>, <span class="st">"LRC"</span>, <span class="st">"MRC"</span>, <span class="st">"HRC"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <div class="section level3">
 <h3 id="check-convergence">Check convergence<a class="anchor" aria-label="anchor" href="#check-convergence"></a>
 </h3>

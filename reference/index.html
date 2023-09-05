@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0.1000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.1000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,11 +29,12 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Data file management</h6>
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
+    <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="../articles/example_simple_OSPAR.html">Simple OSPAR</a>
+    <a class="dropdown-item" href="../articles/simple_OSPAR.html">OSPAR</a>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
   </div>
 </li>
@@ -57,6 +58,52 @@
     </div>
 
     <div class="section level2">
+      <h2 id="primary-functions">Primary functions<a class="anchor" aria-label="anchor" href="#primary-functions"></a></h2>
+      
+      <p class="section-desc"></p><p>These are the functions you’re likely to need for any assessment. For most standard assessments, these will be all you need.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="read_data.html">read_data()</a></code> 
+        </dt>
+        <dd>Read HARSAT data</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tidy_data.html">tidy_data()</a></code> 
+        </dt>
+        <dd>Tidy the data</dd>
+      </dl><dl><dt>
+          
+          <code><a href="create_timeseries.html">create_timeseries()</a></code> 
+        </dt>
+        <dd>Create a time series</dd>
+      </dl><dl><dt>
+          
+          <code><a href="run_assessment.html">run_assessment()</a></code> 
+        </dt>
+        <dd>Assess timeseries for trends and status</dd>
+      </dl><dl><dt>
+          
+          <code><a href="check_assessment.html">check_assessment()</a></code> 
+        </dt>
+        <dd>Check whether the assessments have converged</dd>
+      </dl><dl><dt>
+          
+          <code><a href="write_summary_table.html">write_summary_table()</a></code> 
+        </dt>
+        <dd>Write assessment summary to a csv file</dd>
+      </dl><dl><dt>
+          
+          <code><a href="plot_assessment.html">plot_assessment()</a></code> 
+        </dt>
+        <dd>Graphical summaries of an assessment</dd>
+      </dl></div><div class="section level2">
       <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
       
       
@@ -82,6 +129,11 @@
           <code><a href="check_convergence_lmm.html">check_convergence_lmm()</a></code> 
         </dt>
         <dd>Checks convergence of an assessment model</dd>
+      </dl><dl><dt>
+          
+          <code><a href="convert_reftable.html">convert_reftable()</a></code> 
+        </dt>
+        <dd>Add OSPAR_subregion to simplified sediment threshold reference table</dd>
       </dl><dl><dt>
           
           <code><a href="convert_units.html">convert_units()</a></code> 
@@ -154,6 +206,21 @@
         <dd>Get station code from station name</dd>
       </dl><dl><dt>
           
+          <code><a href="get_timeseries.html">get_timeseries()</a></code> 
+        </dt>
+        <dd>Extracts timeSeries</dd>
+      </dl><dl><dt>
+          
+          <code><a href="harsat-package.html">harsat</a></code> <code><a href="harsat-package.html">harsat-package</a></code> 
+        </dt>
+        <dd>harsat: Harmonized Regional Seas Assessment Tool</dd>
+      </dl><dl><dt>
+          
+          <code><a href="locate_information_file.html">locate_information_file()</a></code> 
+        </dt>
+        <dd>Find the path for an information file</dd>
+      </dl><dl><dt>
+          
           <code><a href="plot_assessment.html">plot_assessment()</a></code> 
         </dt>
         <dd>Graphical summaries of an assessment</dd>
@@ -189,16 +256,12 @@
         <dd>Update timeseries assessments</dd>
       </dl><dl><dt>
           
-          <code><a href="workup_OSPAR_sediment_thresholds.html">workup_OSPAR_sediment_thresholds()</a></code> 
-        </dt>
-        <dd>Add OSPAR_subregion to simplified sediment threshold reference table</dd>
-      </dl><dl><dt>
-          
           <code><a href="write_summary_table.html">write_summary_table()</a></code> 
         </dt>
         <dd>Write assessment summary to a csv file</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

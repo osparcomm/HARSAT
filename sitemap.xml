@@ -13,10 +13,10 @@
     <loc>http://osparcomm.github.io/HARSAT/articles/example_HELCOM.html</loc>
   </url>
   <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/example_external_data.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/articles/example_OSPAR.html</loc>
   </url>
   <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/example_simple_OSPAR.html</loc>
+    <loc>http://osparcomm.github.io/HARSAT/articles/example_external_data.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/articles/external-file-format.html</loc>
@@ -29,6 +29,9 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/articles/reference-file-formats.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/authors.html</loc>
@@ -44,6 +47,9 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/check_convergence_lmm.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/convert_reftable.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/convert_units.html</loc>
@@ -88,10 +94,16 @@
     <loc>http://osparcomm.github.io/HARSAT/reference/get_station_code.html</loc>
   </url>
   <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/get_timeseries.html</loc>
+  </url>
+  <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/harsat-package.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/locate_information_file.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/plot_assessment.html</loc>
@@ -113,9 +125,6 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/update_assessment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/workup_OSPAR_sediment_thresholds.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/write_summary_table.html</loc>
