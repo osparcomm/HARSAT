@@ -14,8 +14,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Getting started
-
 For now, we will assume that you are familiar with running basic R scripts
 and so on. We will focus on what the structure of a typical what the code 
 looks like in a typical analysis.
