@@ -31,6 +31,7 @@ But before we get to any of that, we need to set up the environment.
 First, load the `harsat` library (let's assume that you have already installed
 it, as covered in the [Getting Started](/harsat.html) guide).
 
+
 ```r
 library(harsat)
 ```
@@ -42,7 +43,6 @@ a directory containing a copy.
 
 ```r
 library(here)
-#> here() starts at /Users/stuart/git/HARSAT
 working.directory <- here()
 ```
 

@@ -26,7 +26,6 @@ a directory containing a copy.
 
 ```r
 library(here)
-#> here() starts at /Users/stuart/git/HARSAT
 working.directory <- here()
 ```
 
@@ -322,7 +321,6 @@ plot_assessment(
   file_type = "data",
   file_format = "png"
 )
-#> Error in FUN(X[[i]], ...): object 'seriesID' not found
 ```
 
 
@@ -334,7 +332,6 @@ plot_assessment(
   file_type = "index",
   file_format = "pdf"
 )
-#> Error in FUN(X[[i]], ...): object 'seriesID' not found
 ```
 
 
@@ -346,7 +343,6 @@ plot_assessment(
   file_type = "data",
   file_format = "pdf"
 )
-#> Error in FUN(X[[i]], ...): object 'seriesID' not found
 ```
 
 
@@ -357,5 +353,4 @@ plot_assessment(
   output_dir = graphics.dir, 
   file_format = "pdf"
 )
-#> Error in FUN(X[[i]], ...): object 'seriesID' not found
 ```
