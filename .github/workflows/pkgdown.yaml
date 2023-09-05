@@ -41,6 +41,10 @@ jobs:
           echo "TEMP_DIR=$(mktemp -d)" >> $GITHUB_ENV
           echo "WORK_DIR=$(pwd)" >> $GITHUB_ENV
 
+      - name: Build site
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        shell: Rscript {0}
+
       ## Note that by using renames and recursive copies, dates are preserved, so
       ## the zip files will be identical. This minimizes the changes to gh-pages.
       ## At least, that's the general idea. 
@@ -57,10 +61,6 @@ jobs:
           zip -r $WORK_DIR/docs/ospar.zip ospar
           cd $WORK_DIR
         continue-on-error: true
-
-      - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
-        shell: Rscript {0}
 
       ## Deploys everything in the docs/ folder to gh-pages. This means
       ## additional files can be deployed here.
