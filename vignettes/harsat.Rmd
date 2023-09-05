@@ -60,7 +60,6 @@ We'll detect that using R's `here` package, and write it into a variable `workin
 
 ```r
 library(here)
-#> here() starts at /Users/stuart/git/HARSAT
 working.directory <- here()
 ```
 
@@ -100,10 +99,10 @@ water_data <- read_data(
 #>  - restricting to stations marked for temporal monitoring
 #>  - restricting to data with program governance: OSPAR, AMAP 
 #>  - restricting to stations with program governance: OSPAR, AMAP 
-#>  - matching 2036 records by coordinates
-#>  - matching 1631 records by station name
+#>  - matching 2768 records by coordinates
+#>  - matching 1583 records by station name
 #>  - grouping stations using station_asmtmimegovernance
-#>  - 3567 of 3667 records have been matched to a station
+#>  - 4251 of 4351 records have been matched to a station
 #> 
 #> Argument max_year taken to be the maximum year in the data: 2022
 ```
@@ -151,15 +150,15 @@ water_data <- tidy_data(water_data)
 #> Oddities will be written to 'oddities/water' with previous oddities backed up to
 #>  'oddities/water_backup'
 #> 
-#> Dropping 175 records from data flagged for deletion. Possible reasons are:
+#> Dropping 411 records from data flagged for deletion. Possible reasons are:
 #>  - vflag = suspect
 #>  - upper depth >5.5m
 #>  - filtration missing
 #>  - matrix = 'SPM'
 #> 
-#> Dropping 91 records from data that have no valid station code
+#> Dropping 94 records from data that have no valid station code
 #> 
-#> Dropping 13649 stations that are not associated with any data
+#> Dropping 13633 stations that are not associated with any data
 #> 
 #> Cleaning station dictionary
 #> 
@@ -204,8 +203,14 @@ water_timeseries <- create_timeseries(
 #>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
 #>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
 #>    Detection limit higher than data: see detection_limit_high.csv
+#>    Data submitted as CHRTR relabelled as CHR 
+#>    Data submitted as BBF, BKF summed to give BBKF
+#>      1 of 71 samples lost due to incomplete submissions
+#>    Data submitted as BBJF, BKF summed to give BBJKF
+#>      99 of 99 samples lost due to incomplete submissions
+#>    Data submitted as HCEPC, HCEPT summed to give HCEPX
 #>    Data submitted as HCHA, HCHB, HCHG summed to give HCH
-#>      137 of 137 samples lost due to incomplete submissions
+#>      190 of 234 samples lost due to incomplete submissions
 #> 
 #> Creating time series data
 #>    Converting data to appropriate basis for statistical analysis
