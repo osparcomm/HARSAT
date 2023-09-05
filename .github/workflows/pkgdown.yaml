@@ -36,11 +36,6 @@ jobs:
           needs: |
             website
 
-      - name: Create a working directory for archive creation
-        run: |
-          echo "TEMP_DIR=$(mktemp -d)" >> $GITHUB_ENV
-          echo "WORK_DIR=$(pwd)" >> $GITHUB_ENV
-
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
@@ -50,6 +45,11 @@ jobs:
       ## At least, that's the general idea. 
       ##
       ## It may seem complex, but it's pretty quick.
+      - name: Create a working directory for archive creation
+        run: |
+          echo "TEMP_DIR=$(mktemp -d)" >> $GITHUB_ENV
+          echo "WORK_DIR=$(pwd)" >> $GITHUB_ENV
+
       - name: Build data and configuration archive for OSPAR 2022
         run: |
           mkdir -p $TEMP_DIR/ospar
@@ -59,6 +59,18 @@ jobs:
           mv $TEMP_DIR/ospar/OSPAR_2022 $TEMP_DIR/ospar/information
           cd $TEMP_DIR
           zip -r $WORK_DIR/docs/ospar.zip ospar
+          cd $WORK_DIR
+        continue-on-error: true
+
+      - name: Build data and configuration archive for HELCOM 2023
+        run: |
+          mkdir -p $TEMP_DIR/helcom
+          cp -R data/example_HELCOM $TEMP_DIR/helcom/
+          mv $TEMP_DIR/helcom/example_HELCOM $TEMP_DIR/helcom/data
+          cp -R information/HELCOM_2023 $TEMP_DIR/helcom/
+          mv $TEMP_DIR/helcom/HELCOM_2023 $TEMP_DIR/helcom/information
+          cd $TEMP_DIR
+          zip -r $WORK_DIR/docs/helcom.zip helcom
           cd $WORK_DIR
         continue-on-error: true
 
