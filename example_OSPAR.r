@@ -202,11 +202,11 @@ biota_timeseries <- create_timeseries(
 )
 
 
-biota_assessment <- run_assessment(
-  biota_timeseries, 
-  AC = c("BAC", "EAC", "EQS", "HQS"),
-  parallel = TRUE
-)
+# biota_assessment <- run_assessment(
+#   biota_timeseries, 
+#   AC = c("BAC", "EAC", "EQS", "HQS"),
+#   parallel = TRUE
+# )
 
 
 wk_metals <- 
