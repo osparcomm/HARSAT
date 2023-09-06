@@ -1,6 +1,6 @@
 Package: harsat
 Title: Harmonized Regional Seas Assessment Tool
-Version: 0.1.0
+Version: 0.1.0.1001
 Authors@R: c(
     person(given = "Rob", family = "Fryer", email = "rob.fryer@gov.scot", role = c("aut")),
     person(given = "Leszek", family = "Kaliciak", email = "leszek@ambiesense.com", role = c("aut")),
