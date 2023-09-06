@@ -36,28 +36,6 @@ jobs:
           needs: |
             website
 
-      - name: Create a working directory for archive creation
-        run: |
-          echo "TEMP_DIR=$(mktemp -d)" >> $GITHUB_ENV
-          echo "WORK_DIR=$(pwd)" >> $GITHUB_ENV
-
-      ## Note that by using renames and recursive copies, dates are preserved, so
-      ## the zip files will be identical. This minimizes the changes to gh-pages.
-      ## At least, that's the general idea. 
-      ##
-      ## It may seem complex, but it's pretty quick.
-      - name: Build data and configuration archive for OSPAR 2022
-        run: |
-          mkdir -p $TEMP_DIR/ospar
-          cp -R data/example_OSPAR $TEMP_DIR/ospar/
-          mv $TEMP_DIR/ospar/example_OSPAR $TEMP_DIR/ospar/data
-          cp -R information/OSPAR_2022 $TEMP_DIR/ospar/
-          mv $TEMP_DIR/ospar/OSPAR_2022 $TEMP_DIR/ospar/information
-          cd $TEMP_DIR
-          zip -r $WORK_DIR/docs/ospar.zip ospar
-          cd $WORK_DIR
-        continue-on-error: true
-
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
