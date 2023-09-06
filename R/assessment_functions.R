@@ -104,14 +104,25 @@ update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...) {
   
   # location: assessment_functions.R
   
-  # updates an assessment
+  # error trapping
   
-  
-  # check that ctsm_ob is a valid assessment object
+  # ctsm_ob must be a valid assessment object
   
   if (!"assessment" %in% names(ctsm_ob) || 
       !identical(names(ctsm_ob$assessment), row.names(ctsm_ob$timeSeries))) {
-    stop("ctsm_ob is not a valid assessment object")
+    stop(
+      "'ctsm_ob' is not a valid harsat assessment object as it is not the ",
+      "result of a call\n  to run_assessment.")
+  }
+  
+  # AC cannot be passed as an argument, as it already specified in 
+  # run_assessment (easily copied over by mistake)
+  
+  if ("AC" %in% names(match.call())) {
+    stop(
+      "'AC' cannot be an argument of update_assessment as the thresholds were ",
+      "specified in\n  an earlier call to run_assessment and cannot be changed."
+    )
   }
   
 
