@@ -19,7 +19,7 @@ navbar:
     - text: External data
       href: articles/example_external_data.html
     - text: OSPAR
-      href: articles/simple_OSPAR.html
+      href: articles/example_OSPAR.html
     - text: HELCOM
       href: articles/example_HELCOM.html
 

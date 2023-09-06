@@ -1,8 +1,8 @@
 ---
-title: "HELCOM"
+title: "OSPAR example usage"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{HELCOM}
+  %\VignetteIndexEntry{OSPAR example usage}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

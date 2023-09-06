@@ -89,9 +89,16 @@ flow.
 3. A web site is built using `pkgdown` -- this happens automatically when pull
    requests are merged to main. This documents the code *as is* -- it does not 
    run `roxygen2` -- if you need to do that, you should do it manually.
-4. When we merge pull requests, the web documentation is used to update our
-   GitHub Pages site: https://osparcomm.github.io/HARSAT/
+4. When we push to `main`, the web documentation is used to update our
+   GitHub Pages site: https://osparcomm.github.io/HARSAT/ -- this should happen
+   automatically if you use a `git flow` style release process.
 
+Note that the `pkgdown` action -- stored in Github under `.github/workflows/pkgdown.yaml`
+also creates zip files for some of the more common data and configuration setups. 
+These are then copied for deployment through Github Pages, so they can be downloaded
+directly from the web pages. The actions which drive this zipping require a little
+care, although they will continue to work fine if you simply change files in the 
+data and reference file directories.
 
 ### Documentation build process
 
