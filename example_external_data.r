@@ -28,7 +28,7 @@ biota_data <- read_data(
   stations = "AMAP_external_new_stations_only.csv", 
   data_dir = file.path("data", "example_external_data"), 
   data_format = "external",
-  info_dir = "information",
+  info_dir = file.path("information", "AMAP_2022"),
   control = list(region = list(id = "AMAP_region"))
 )  
 

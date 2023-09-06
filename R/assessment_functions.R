@@ -104,14 +104,25 @@ update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...) {
   
   # location: assessment_functions.R
   
-  # updates an assessment
+  # error trapping
   
-  
-  # check that ctsm_ob is a valid assessment object
+  # ctsm_ob must be a valid assessment object
   
   if (!"assessment" %in% names(ctsm_ob) || 
       !identical(names(ctsm_ob$assessment), row.names(ctsm_ob$timeSeries))) {
-    stop("ctsm_ob is not a valid assessment object")
+    stop(
+      "'ctsm_ob' is not a valid harsat assessment object as it is not the ",
+      "result of a call\n  to run_assessment.")
+  }
+  
+  # AC cannot be passed as an argument, as it already specified in 
+  # run_assessment (easily copied over by mistake)
+  
+  if ("AC" %in% names(match.call())) {
+    stop(
+      "'AC' cannot be an argument of update_assessment as the thresholds were ",
+      "specified in\n  an earlier call to run_assessment and cannot be changed."
+    )
   }
   
 
@@ -159,8 +170,9 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
   data <- droplevels(data)
 
   stations <- tibble::column_to_rownames(ctsm.ob$stations, "station_code")
-  stations <- stations[timeSeries$station_code, ]
+  stations <- stations[unique(timeSeries$station_code), ]
 
+  
   
   # set up parallel processing information 
   
@@ -209,9 +221,10 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
     
     if (all(is.na(x$concentration))) return()
     
-    if ("country" %in% names(stations)) {
-      seriesInfo$country <- stations[seriesInfo$station_code, "country"]
-    }
+
+    # add station information to seriesInfo
+    
+    seriesInfo <- c(seriesInfo, stations[seriesInfo$station_code, ])
 
 
     # construct annual index
@@ -508,7 +521,7 @@ get.index.biota.Effects <- function(data, determinand, info) {
   # default for everything other than %DNATAIL and MNC: median (log) concentration
   
   if (!determinand %in% c("%DNATAIL", "MNC")) {
-    out <- get.index.default(data, determinand)
+    out <- get.index.default(data, determinand, info)
     return(out)
   }
   

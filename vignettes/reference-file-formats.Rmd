@@ -1,0 +1,147 @@
+---
+title: "Reference table file formats"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reference table file formats}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+These are the column headers for CSV-formatted reference table files.
+`harsat` uses three different reference tables: 
+
+1. A species file
+2. A determinand file
+3. A threshold file 
+
+All these files should be in your information files directory.  
+
+Do not use any forward or backward slashes in the reference files.
+
+The order of the columns does not matter, as long as they are named consistently with the specification below.
+
+## Species file format
+
+The species file will be `species.csv` in your information files directory.
+
+| column name   | type      | mandatory | NA allowed | comments              |
+| ------------- | --------- | :-------: | :--------: | --------------------- |
+| `reference_species` | character | yes | no | Reference species name (usually its Latin name) |
+| `submitted_species` | character | yes | no | Submitted species name: sometimes the same species can have several Latin names, but these are all mapped to the `reference_species` name |
+| `common_name` | character | yes | no | Common name for the species: you can call them whatever you want |
+| `species_group` | character | yes | no | Species group, should be one of: `Bird`, `Bivalve`, `Crustacean`, `Echinoderm`, `Fish`, `Gastropod`, `Macrophyte`, `Mammal`, `Other` |
+| `species_subgroup` | character | yes | no | This is a convenience column used for matching species to thresholds. For example, OSPAR sometimes has different thresholds for mussels and oysters, so these form convenient subgroups. You can call things what you want, provided they match any reference to the species_subgroup column in the threshold file. If you don't need this facility, use the `species_group` value |
+| `assess` | boolean | yes | no | Whether or not to include this species in the assessment, should be either `TRUE` or `FALSE` |
+| `MU_drywt` | numeric | no | yes | Muscle dry weight (%). A typical value for the species. This is only needed if you want to convert thresholds from one basis to another. Leave cells blank if you do not have a suitable value. |
+| `LI_drywt` | numeric | no | yes | Liver dry weight (%).  See above. |
+| `SB_drywt` | numeric | no | yes | Soft body dry weight (%) |
+| `EH_drywt` | numeric | no | yes | Egg homogenate dry weight (%) |
+| `MU_lipidwt` | numeric | no | yes | Muscle lipid weight (%) |
+| `LI_lipidwt` | numeric | no | yes | Liver lipid weight (%)|
+| `SB_lipidwt` | numeric | no | yes | Soft body lipid weight (%) |
+| `EH_lipidwt` | numeric | no | yes | Egg homogenate lipid weight (%) |
+
+You can have as many dry and lipid weight columns as you have tissue types.  For example, if you have blood (BL) data, then you can have columns `BL_drywt` and `BL_lipidwt`.  (Remember there is a difference between BL (blood) and ER (erythrocytes - red blood cells in vertebrates). You can also omit all these columns if you don't need to convert thresholds from basis to another.
+
+
+
+## Determinand file format
+
+The determinand file will be `determinand.csv` in your information files directory.
+
+| column name   | type      | mandatory | NA allowed | comments              |
+| ------------- | --------- | :-------: | :--------: | --------------------- |
+| `determinand` | character | yes | no | Determinand code -- this is a key to the thresholds file records and will usually be the ICES PARAM code |
+| `common_name` | character | yes | yes | Common name for the determinand, e.g., `Aluminium`, `Glyphosate`. You can call them whatever you want. If missing, the determinand code is used.  |
+| `pargroup` | character | yes | no | ICES parameter group reference code, e.g. `I-MET`, `O-PAH`, `OC-CB`, `OC-DD`, etc. (see: https://vocab.ices.dk/?ref=78) |
+| `biota_group` | character | yes* | yes | Grouping for a biota assessment (under development): currently one of `Metals`, `PAH_parent`, `PAH_alkylated`, `Chlorobiphenyls`, `PBDEs`, `Organobromines`, `Organotins`, `Organochlorines`, `Organofluorines`, `Pesticides`, `Dioxins`, `Effects`, `Auxiliary`, `Metabolites`, or `Imposex`. Missing values are only allowed for determinands that will not be used (in any way). |
+| `sediment_group` | character | yes* | yes | Grouping for a sediment assessment. See biota_group for allowable values and additional comments. Note that normalisers, such as AL or CORG, should be classed as `Auxiliary` |
+| `water_group` | character | yes*  | yes | Grouping for a water assessment. See biota_group for allowable values and additional comments. |
+| `biota_assess` | boolean | yes* | no | Whether the determinand is to be assessed: should be either `TRUE` or `FALSE`. For the time being, `Auxiliary` determinands must be set to 'FALSE' |
+| `sediment_assess` | boolean | yes* | no | Whether the determinand is to be assessed. See biota_assess for more details |
+| `water_assess` | boolean | yes* | no | Whether the determinand is to be assessed. See biota_assess for more details |
+| `biota_unit` | character | yes* | yes | The unit that all measurements will be converted to in a biota assessment; e.g. `ug/kg`. Missing values are only allowed for determinands that will not be used. |
+| `sediment_unit` | character | yes* | yes | The unit that all measurements will be converted to in a sediment assessment; e.g. `mg/kg`. Missing values are only allowed for determinands that will not be used. |
+| `water_unit` | character | yes* | yes | The unit that all measurements will be converted to in a water assessment, e.g. `ug/l`. Missing values are only allowed for determinands that will not be used. |
+| `biota_auxiliary` | character | yes* | yes | Identifies all the auxiliary measurements that should be associated with the determinand. These should be separated by a `~`. For example, for chemical contaminants, this might be 'DRYWT%~LIPIDWT%~LNMEA'. The list gets more interesting for effects measurements. |
+| `sediment_auxiliary` | character | yes* | yes | Identifies all the auxiliary measurements that should be associated with the determinand. These should be separated by a `~`. For example, for metal contaminants, this might be 'AL~LI~CORG' |
+| `water_auxiliary` | character | yes" | yes | Identifies all the auxiliary measurements that should be associated with the determinand. These should be separated by a `~`. Not currently used much for water assessments |
+| `biota_sd_constant` | character | no | yes | If supplied, this allows the imputation of measurement uncertainty for determinands in a biota assessment when they are missing from the data file. `sd_constant` is the constant error with units given by `biota_unit` |
+| `biota_sd_variable` | character | no | yes | If supplied, this allows the imputation of measurement uncertainty for determinands in a biota assessment when they are missing from the data file. `sd_constant` is the proportional error expressed as a percentage (%) |
+| `sediment_sd_constant` | character | no | yes | See `biota_sd_constant` |
+| `sediment_sd_variable` | character | no | yes | See `biota_sd_variable` |
+| `water_sd_constant` | character | no | yes | See `biota_sd_constant` |
+| `water_sd_variable` | character | no | yes | See `biota_sd_variable` |
+| `distribution` | character | yes | yes | A distribution type; for chemical contaminants, this should be set to `lognormal`. Only required for determinands where at least one of `biota_assess`, `sediment_assess` or `water_assess` are `TRUE` |
+| `good_status` | character | yes | Whether `high` or `low` values of the determinand indicates a healthy environment. Only required for determinands where at least one of `biota_assess`, `sediment_assess` or `water_assess` are `TRUE` |
+
+A yes* in the mandatory column means that e.g. `biota_group`, `biota_assess` etc. are mandatory for a biota assessment, but can be omitted if there is only going to be a sediment and water assessment.
+
+
+## Threshold file format
+
+The threshold files are compartment-specific and will be called `threshold_biota.csv`, 
+`threshold_sediment.csv` and `threshold_water.csv`. The format of each differs somewhat, but the 
+principle is the same: they provide the threshold values for each determinand. For biota, the 
+threshold values are linked to a particular `species_group`, `species_subgroup` or `reference_species` 
+(see the species file format) and to other supporting variables such as `matrix` (tissue type). 
+For sediment, the threshold values can (optionally) be linked to one of the regional variables in the 
+stations file. For water, the threshold values ar linked to `filtration`. The water file is the simplest, so we 
+describe that first.
+
+### Water threshold files
+
+The water threshold file will be `thresholds_water.csv` in your information files directory. For illustration, suppose there is just one threshold, the EQS. The thresholds file will then have the following four columns:
+
+| column name   | type      | mandatory | NA allowed | comments              |
+| ------------- | --------- | :-------: | :--------: | --------------------- |
+| `determinand` | character | yes | no | The determinand code, which must key to the determinand file |
+| `filtration` | character | yes | no | A string, either `filtered` or `unfiltered`. |
+| `EQS_basis` | character | yes | yes | The basis on which the EQS is expressed: for water this will always be `W`. The basis must always be given if there is an EQS value in the next column. |
+| `EQS` | numeric | yes | yes | The value of the EQS. The units must key to the `water_units` column in the determinand file |
+
+If there is another threshold, for example, the BAC, then add two columns called `BAC_basis` and `BAC`. You can have as many thresholds as you want. 
+
+If, for a particular determinand, the same (set of) threshold value(s) is to be applied to both `filtered` and `unfiltered` time series, then set `filtration` to `filtered~unfiltered`.
+
+
+
+### Sediment threshold files
+
+The sediment threshold file will be `thresholds_sediment.csv` in your information files directory. For illustration, suppose there are two thresholds, the BAC and EAC. The threshold file will then have the following five columns:
+
+| column name   | type      | mandatory | NA allowed | comments              |
+| ------------- | --------- | :-------: | :--------: | --------------------- |
+| `determinand` | character | yes | no | The determinand code, which must key to the determinands file |
+| `BAC_basis` | character | yes | yes | The basis on which the BAC is expressed: for sediment this will always be `D`. This must always be provided if there is a BAC value. |
+| `EAC_basis` | character | yes | yes | The basis on which the EAC is expressed. See above. |
+| `BAC` | numeric | yes | yes | The value of the BAC. The units much key to the `sediment_units` column in the determinand file. The units are also assumed to be normalised for grain size in the same way as the data are normalised (in create_timeseries).  |
+| `EAC` | numeric | yes | yes | The value of the EAC. See above. |
+
+Again, you can have as many thresholds as you want. For example, OSPAR assessments typically use the ERL, EQS and FEQG in addition to the BAC and EAC.
+
+You can also have extra columns that match columns in the station dictionary. Typically, these will be used to apply different threshold values to different regions. For example, the OSPAR threshold file has a column `ospar_subregion`, which allows one set of threshold values to be applied in the Iberian Coast and Gulf of Cadiz and another set to be applied in the rest of the OSPAR area. 
+
+
+
+### Biota threshold files
+
+The biota threshold file will be `thresholds_biota.csv` in your information files directory. Again, suppose there are two thresholds, the BAC and EAC. The threshold file will then have the following eleven columns:
+
+| column name   | type      | mandatory | NA allowed | comments              |
+| ------------- | --------- | :-------: | :--------: | --------------------- |
+| `determinand` | character | yes | no | The determinand code, which must key to the determinands file |
+| `species_group` | character | yes | The species group, a key to the `species.csv` file |
+| `species_subgroup` | character | yes | The species subgroup, a key to the `species.csv` file |
+| `species` | character | yes | yes | The species, a key to the `species.csv` file (and specifically the `reference_species` column) |
+| `matrix` | character | yes | no | The tissue type (ICES code); for example `EH`, `MU`, `SB`. If the threshold can be applied to multiple tissues then provide all the relevant tissues separated by a tilde. For example, `LI~MU~SB`. |
+| `method_analysis` | character | yes | yes | The method of analysis (ICES code). Only provide values for PAH metabolites, otherwise leave blank. |
+| `sex` | character | yes | yes | The sex (ICES code). Only provide for EROD, otherwise leave blank. |  
+| `BAC_basis` | character | yes | yes | The basis on which the BAC is expressed. For contaminants, this will either be `W`, `D` or `L` and must be provided if there is a BAC value. Leave blank for effects. |
+| `EAC_basis` | character | yes | yes | The basis on which the EAC is expressed. See above. |
+| `BAC` | numeric | yes | yes | The value of the BAC. The units must key to the `biota_units` column in the determinand file. |
+| `EAC` | numeric | yes | yes | The value of the EAC. See above. |
+
+The columns `species_group`, `species_subgroup`, and `species` are used to provide flexibility in matching thresholds to species. 
+For some determinands, a threshold is applied to all species in a species group, in which case the `species_group` column should be populated. For other determinands, threshold values might differ between species subgroups (e.g. between mussels and oysters), in which ase the `species_subgroup` column should be populated. Use the `species` column if the threshold value is species-specific. At least one of `species_group`, `species_subgroup` and `species` must always be provided.
+

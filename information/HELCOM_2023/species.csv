@@ -1,0 +1,72 @@
+reference_species,submitted_species,common_name,species_group,species_subgroup,assess
+Abramis brama,Abramis brama,Common bream,Fish,Fish,TRUE
+Anguilla anguilla,Anguilla anguilla,European eel,Fish,Fish,TRUE
+Brosme brosme,Brosme brosme,Cusk,Fish,Fish,TRUE
+Chimaera monstrosa,Chimaera monstrosa,Rabbit fish,Fish,Fish,TRUE
+Clupea harengus,Clupea harengus,Herring,Fish,Fish,TRUE
+Callionymus lyra,Callionymus lyra,Dragonet,Fish,Fish,TRUE
+Esox lucius,Esox lucius,Northern pike,Fish,Fish,TRUE
+Gadus morhua,Gadus morhua,Cod,Fish,Fish,TRUE
+Lepidorhombus whiffiagonis,Lepidorhombus whiffiagonis,Megrim,Fish,Fish,TRUE
+Lepidorhombus boscii,Lepidorhombus boscii,Four spotted megrim,Fish,Fish,TRUE
+Limanda limanda,Limanda limanda,Common dab,Fish,Fish,TRUE
+Lota lota,Lota lota,Burbot,Fish,Fish,TRUE
+Melanogrammus aeglefinus,Melanogrammus aeglefinus,Haddock,Fish,Fish,TRUE
+Merlangius merlangus,Merlangius merlangus,Whiting,Fish,Fish,TRUE
+Merluccius merluccius,Merluccius merluccius,Hake,Fish,Fish,TRUE
+Molva molva,Molva molva,Common ling,Fish,Fish,TRUE
+Mullus barbatus,Mullus barbatus,Red mullet,Fish,Fish,TRUE
+Myoxocephalus scorpius,Myoxocephalus scorpius,Shorthorn sculpin,Fish,Fish,TRUE
+Neogobius melanostomus,Neogobius melanostomus,Round goby,Fish,Fish,TRUE
+Perca fluviatilis,Perca fluviatilis,European perch,Fish,Fish,TRUE
+Platichthys flesus,Platichthys flesus,Flounder,Fish,Fish,TRUE
+Pleuronectes platessa,Pleuronectes platessa,Plaice,Fish,Fish,TRUE
+Salvelinus alpinus,Salvelinus alpinus,Arctic char,Fish,Fish,TRUE
+Salvelinus namaycush,Salvelinus namaycush,Lake trout,Fish,Fish,TRUE
+Salmo trutta,Salmo trutta,Brown trout,Fish,Fish,TRUE
+Scomber scombrus,Scomber scombrus,Atlantic mackerel,Fish,Fish,TRUE
+Sprattus sprattus,Sprattus sprattus,European sprat,Fish,Fish,TRUE
+Trigla lucerna,Trigla lucerna,Tub gurnard,Fish,Fish,TRUE
+Zoarces viviparus,Zoarces viviparus,Eelpout,Fish,Fish,TRUE
+Callista chione,Callista chione,Smooth clam,Bivalve,Clam,TRUE
+Cerastoderma edule,Cerastoderma edule,Common cockle,Bivalve,Clam,TRUE
+Chamelea gallina,Chamelea gallina,Striped venus clam,Bivalve,Clam,TRUE
+Donax trunculus,Donax trunculus,Wedge clam,Bivalve,Clam,TRUE
+Ensis,Ensis,Razor clam,Bivalve,Clam,FALSE
+Ensis ensis,Ensis ensis,Sword razor,Bivalve,Clam,TRUE
+Glycymeris glycymeris,Glycymeris glycymeris,Dog cockle,Bivalve,Clam,TRUE
+Limecola balthica,Limecola balthica,Baltic clam,Bivalve,Clam,TRUE
+Macoma balthica,Macoma balthica,Baltic clam,Bivalve,Clam,TRUE
+Mya arenaria,Mya arenaria,Softshell clam,Bivalve,Clam,TRUE
+Ruditapes decussatus,Ruditapes decussatus,Grooved carpet shell,Bivalve,Clam,TRUE
+Ruditapes philippinarum,Ruditapes philippinarum,Manila clam,Bivalve,Clam,TRUE
+Solen marginatus,Solen marginatus,Grooved razor shell,Bivalve,Clam,TRUE
+Spisula solida,Spisula solida,Surf clam,Bivalve,Clam,TRUE
+Spisula solidissima,Spisula solidissima,Atlantic surf clam,Bivalve,Clam,TRUE
+Venerupis corrugata,Venerupis corrugata,Pullet carpet shell,Bivalve,Clam,TRUE
+Ruditapes philippinarum,Venerupis philippinarum,Manila clam,Bivalve,Clam,TRUE
+Venerupis corrugata,Venerupis senegalensis,Pullet carpet shell,Bivalve,Clam,TRUE
+Venus verrucosa,Venus verrucosa,Warty Venus,Bivalve,Clam,TRUE
+Dreissena polymorpha,Dreissena polymorpha,Zebra mussel,Bivalve,Mussel,TRUE
+Mytilus edulis,Mytilus edulis,Blue mussel,Bivalve,Mussel,TRUE
+Mytilus galloprovincialis,Mytilus galloprovincialis,Mediteranean mussel,Bivalve,Mussel,TRUE
+Mytilus trossulus,Mytilus trossulus,Bay mussel,Bivalve,Mussel,TRUE
+Crassostrea gigas,Crassostrea gigas,Pacific oyster,Bivalve,Oyster,TRUE
+Ostrea edulis,Ostrea edulis,Native oyster,Bivalve,Oyster,TRUE
+Aequipecten opercularis,Aequipecten opercularis,Queen scallop,Bivalve,Scallop,TRUE
+Pecten maximus,Pecten maximus,King scallop,Bivalve,Scallop,TRUE
+Crangon crangon,Crangon crangon,Common shrimp,Crustacean,Crustacean,TRUE
+Buccinum undatum,Buccinum undatum,Common whelk,Gastropod,Gastropod,TRUE
+Crepidula fornicata,Crepidula fornicata,Common slipper shell,Gastropod,Gastropod,TRUE
+Tritia nitida (reticulata),Hinia reticulata,Dog whelk (nitida or reticulata),Gastropod,Gastropod,TRUE
+Littorina littorea,Littorina littorea,Common periwinkle,Gastropod,Gastropod,TRUE
+Tritia nitida (reticulata),Nassarius reticulatus,Dog whelk (nitida or reticulata),Gastropod,Gastropod,TRUE
+Tritia nitida (reticulata),Nassarius nitidus,Dog whelk (nitida or reticulata),Gastropod,Gastropod,TRUE
+Neptunea antiqua,Neptunea antiqua,Red whelk,Gastropod,Gastropod,TRUE
+Nucella lapillus,Nucella lapillus,Dog whelk,Gastropod,Gastropod,TRUE
+Ocenebra erinaceus,Ocenebra erinaceus,Sting winkle,Gastropod,Gastropod,TRUE
+Patella,Patella,Limpet,Gastropod,Gastropod,FALSE
+Peringia ulvae,Peringia ulvae,Laver spire shell,Gastropod,Gastropod,TRUE
+Tritia nitida (reticulata),Tritia nitida,Dog whelk (nitida or reticulata),Gastropod,Gastropod,TRUE
+Tritia nitida (reticulata),Tritia nitida (reticulata),Dog whelk (nitida or reticulata),Gastropod,Gastropod,TRUE
+Tritia nitida (reticulata),Tritia reticulata,Dog whelk (nitida or reticulata),Gastropod,Gastropod,TRUE

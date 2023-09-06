@@ -19,11 +19,20 @@ Our aim is to make the `harsat` code work as an R package. It is not
 going to be distributed on CRAN for the near future at least. Instead,
 it can be installed directly from Github. 
 
-To install the latest development version, use the `remotes` package:
+To install the latest **development** version, use the `remotes` package:
 
 ```
 library(remotes)
 remotes::install_github("osparcomm/harsat", auth_token = 'XXXX')
+```
+
+Installing the latest stable version is similar, but is less likely to
+change or break. The web documentation reflects the stable version, not
+the development version.
+
+```
+library(remotes)
+remotes::install_github("osparcomm/harsat@main", auth_token = 'XXXX')
 ```
 
 This should install all the `harsat` code with all its dependencies.
@@ -80,9 +89,16 @@ flow.
 3. A web site is built using `pkgdown` -- this happens automatically when pull
    requests are merged to main. This documents the code *as is* -- it does not 
    run `roxygen2` -- if you need to do that, you should do it manually.
-4. When we merge pull requests, the web documentation is used to update our
-   GitHub Pages site: https://osparcomm.github.io/HARSAT/
+4. When we push to `main`, the web documentation is used to update our
+   GitHub Pages site: https://osparcomm.github.io/HARSAT/ -- this should happen
+   automatically if you use a `git flow` style release process.
 
+Note that the `pkgdown` action -- stored in Github under `.github/workflows/pkgdown.yaml`
+also creates zip files for some of the more common data and configuration setups. 
+These are then copied for deployment through Github Pages, so they can be downloaded
+directly from the web pages. The actions which drive this zipping require a little
+care, although they will continue to work fine if you simply change files in the 
+data and reference file directories.
 
 ### Documentation build process
 

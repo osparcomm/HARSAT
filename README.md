@@ -2,114 +2,77 @@
 # harsat
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) ![development build](https://github.com/osparcomm/harsat/actions/workflows/build.yml/badge.svg?branch=develop) ![stable build](https://github.com/osparcomm/harsat/actions/workflows/build.yml/badge.svg?branch=main)
 <!-- badges: end -->
 
-Requirements:
+## Requirements
 
--	R programming language version 4.2.1
--	RStudio Integrated Development Environment version 2022.07.1 Build 554
-
-Additional R packages to those which come with the standard RStudio installation. They have to be installed, either using the RStudio GUI or by the command install.packages e.g. `install.packages("lme4")`:
-
-*	tidyverse version 2.0.0
-* dplyr
-* lubridate
-* readr
-* stringr
-* tibble
-* tidyr
-* sf
-*	lme4
-* mgcv
-*	mvtnorm
-*	numDeriv
-*	optimx
-*	pbapply
-* parallel
-* flexsurv
-
-The following R packages need to be installed to run the HELCOM example:
-
-*	rmarkdown
-*	htmlwidgets
-
-File -> New Project in RStudio to create a new project. File -> New Project -> Version Control -> GIT -> https://github.com/osparcomm/HARSAT to clone from repository.
-
-All example datasets can be run with the same basic directory structure. The following directories should be manually created:
-
-- data
-- R
-- information
-- output
-
-The example scripts currently use subfolders within the data and output folders
-
-- data
-  - example_external_data
-  - example_HELCOM
-  - example_simple_OSPAR
-- output
-  - example_external_data
-  - example_HELCOM
-  - example_simple_OSPAR
-
-but the data and the output can go anywhere.
-
-Running the code will create a directory called `oddities` where data that might not comply with reporting requirements are posted (with warnings or errors).
+-	R programming language (version 4.2.1)
+- Additional R packages to those which come with the standard R installation -- they will be installed automatically, but you may need permissions or tools to do that
 
 ## Installation
 
-You can install the development version of harsat from [GitHub](https://github.com/) with:
+For full installation details, see the [Getting Started](https://osparcomm.github.io/HARSAT/articles/harsat.html) guide.
+We strongly recommend installing `harsat` from GitHub, as this ensures that all dependencies are up-to-date, properly 
+downloaded and installed.
+
+The short version is as follows:
+
+> The `XXXX` is a Github personal access token. You only need this optional parameter while
+> the `harsat` package is private because it is still under development. 
+> The [Getting Started](https://osparcomm.github.io/HARSAT/articles/harsat.html) guide
+> has more information on how to create a personal access token. 
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("osparcomm/HARSAT")
+library(remotes)
+remotes::install_github("osparcomm/HARSAT", auth_token = 'XXXX')
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
+The stable version is similar:
 
 ``` r
-library(harsat)
-## basic example code
+library(remotes)
+remotes::install_github("osparcomm/HARSAT@main", auth_token = 'XXXX')
 ```
 
-The following figures are a bit out of date:
+## Example usage
 
-![Alt text](man/figures/fig1.jpg "Required Project File Structure for OSPAR dataset.")
-<br/>
-Figure 1. Required Project File Structure for OSPAR dataset.
+We have prepared zip files containing all the other files you need, for both
+OSPAR (a subset of OSPAR 2022), and HELCOM (based on HELCOM 2023). These zip files
+contain two directories: a data directory and an information directory. You can
+unzip these anywhere you like on your system.
 
-![Alt text](man/figures/fig2.jpg "Required Project File Structure for HELCOM dataset.")
-<br/>
-Figure 2. Required Project File Structure for HELCOM dataset.
+* <a href="https://osparcomm.github.io/HARSAT/ospar.zip" download>Download the OSPAR archive</a>
+* <a href="https://osparcomm.github.io/HARSAT/helcom.zip" download>Download the HELCOM archive</a>
 
+Let's say you have unzipped these to a file on your system, such as `C:\Users\test\ospar`. So, 
+the data is now in `C:\Users\test\ospar\data`, and the reference files are in `C:\Users\test\ospar\information`,
+although can rename and move these anywhere you like. 
 
-All R functions from the GitHub code repository should be moved to R, and csv files with the reference tables should go to ‘information’. 
-It is recommended that the R files with examples, and the data and output directories should be in the same (project) directory e.g.
-HARSAT\data
-HARSAT\output
-HARSAT\OSPAR 2022.r
-although one can adjust that with the path argument to ctsm_read_data and ctsm.summary.table.
-The ‘functions’ and ‘information’ directories can be anywhere (although it is recommended that they got to the same directory), with the function_path variable (at the top of OSPAR 2022.r) pointing to the former.
-Data required for OSPAR:
- 
-![Alt text](man/figures/fig3.jpg "OSPAR data.")
-<br/>
-Figure 3. OSPAR data.
+To read the data, you will then do something like this (we're using water in OSPAR as an example here -- 
+for the complete example, have a look at [the full OSPAR example](https://osparcomm.github.io/HARSAT/articles/example_OSPAR.html)):
 
-Data required for HELCOM:
- 
-![Alt text](man/figures/fig4.jpg "HELCOM data.") 
-<br/>
-Figure 4. HELCOM data.
+```r
+water_data <- read_data(
+  compartment = "water", 
+  purpose = "OSPAR",                               
+  contaminants = "water.txt", 
+  stations = "stations.txt", 
+  data_dir = file.path("C:", "users", "test", "ospar", "data"),         ## i.e., C:\Users\test\ospar\data
+  info_dir = file.path("C:", "users", "test", "ospar", "information"),  ## i.e., C:\Users\test\ospar\information
+  extraction = "2023/08/23"
+)
+```
 
-HELCOM dataset requires additional R files to work, and different reference tables for ‘assessment criteria biota.csv’ and ‘assessment criteria sediment.csv’.
-HELCOM also requires different information functions from the repository with a different version that has HELCOM specific functions (‘information functions v2_68.r’).
+And follow the rest of the process as shown in the [Getting Started guide](https://osparcomm.github.io/HARSAT/articles/harsat.html) or the
+[OSPAR example](https://osparcomm.github.io/HARSAT/articles/example_OSPAR.html).
 
-![Alt text](man/figures/fig5.jpg "Additional R files required for HELCOM dataset.") 
-<br/>
-Figure 5. Additional R files required for HELCOM dataset.
+You can, of course, start to edit the files in these directories as you choose. Note that there are
+some specific naming conventions for the files in the reference file directory especially. 
+Find out more in [the documentation page for file management](https://osparcomm.github.io/HARSAT/articles/file-management.html).
 
+## More information
+
+For more information, take a look at the [Getting Started guide](https://osparcomm.github.io/HARSAT/articles/harsat.html).
+
+We welcome any other contributions you can make. Check out the [Contributor's guide](https://osparcomm.github.io/HARSAT/CONTRIBUTING.html) for more.

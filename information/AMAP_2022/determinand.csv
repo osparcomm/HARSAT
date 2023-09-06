@@ -1,0 +1,11 @@
+﻿determinand,common_name,pargroup,biota_group,biota_assess,biota_unit,biota_auxiliary,biota_sd_constant,biota_sd_variable,distribution,good_status
+HG,Mercury,I-MET,Metals,TRUE,ug/kg,LNMEA~LIPIDWT%~DRYWT%,0.541,0.087966,lognormal,low
+LNMEA,mean length,B-BIO,Auxiliary,FALSE,cm,,,,,
+DRYWT%,dry weight,B-BIO,Auxiliary,FALSE,%,,,,,
+EXLIP%,extractable lipid,B-BIO,Auxiliary,FALSE,%,,,,,
+LIPIDWT%,lipid weight,B-BIO,Auxiliary,FALSE,%,,,,,
+FATWT%,fat weight,B-BIO,Auxiliary,FALSE,%,,,,,
+AGMEA,mean age,B-BIO,Auxiliary,FALSE,y,,,,,
+C13D,delta C13 (isotope ratio 13C:12C),I-RNC,Auxiliary,FALSE,ppt,,,,,
+N15D,delta N15 (isotope ratio 15N:14N),I-RNC,Auxiliary,FALSE,ppt,,,,,
+WTMEA,mean weight,B-BIO,Auxiliary,FALSE,g,,,,,

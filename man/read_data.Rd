@@ -11,7 +11,7 @@ read_data(
   stations,
   QA,
   data_dir = ".",
-  data_format = c("ICES", "external", "ICES_old", "ICES_new"),
+  data_format = c("ICES", "external"),
   info_files = list(),
   info_dir = ".",
   extraction = NULL,
@@ -37,8 +37,8 @@ supplied using 'file.path'). Defaults to "."; i.e. the working directory.}
 
 \item{data_format}{A string specifying whether the data were extracted from
 the ICES webservice ("ICES" - the default) or are in the simplified format
-designed for other data sources ("external"). The values "ICES_old" and
-"ICES_new" are deprecated.}
+designed for other data sources ("external"). The value "ICES_old" is
+deprecated.}
 
 \item{info_files}{A list of files specifying reference tables which override
 the defaults. See examples.}

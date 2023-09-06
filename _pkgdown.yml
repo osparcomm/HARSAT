@@ -10,13 +10,32 @@ navbar:
     - text: "Data file management"
     - text: File locations
       href: articles/file-management.html
+    - text: Reference file formats
+      href: articles/reference-file-formats.html
     - text: External file format
       href: articles/external-file-format.html
     - text: -------
     - text: "Examples"
     - text: External data
       href: articles/example_external_data.html
-    - text: Simple OSPAR
-      href: articles/example_simple_OSPAR.html
+    - text: OSPAR
+      href: articles/example_OSPAR.html
     - text: HELCOM
       href: articles/example_HELCOM.html
+
+reference:
+- title: Primary functions
+  desc: |
+    These are the functions you're likely to need for any assessment. For
+    most standard assessments, these will be all you need.
+- contents:
+  - read_data
+  - tidy_data
+  - create_timeseries
+  - run_assessment
+  - check_assessment
+  - write_summary_table
+  - plot_assessment
+- title: All functions
+- contents:
+  - starts_with("", internal = TRUE)

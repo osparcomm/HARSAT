@@ -337,6 +337,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 
 
 
+
 # summary table ----
 
 #' Write assessment summary to a csv file
@@ -351,7 +352,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' * the fitted values in the last monitoring year with associated upper
 #' one-sided 95% confidence limits
 #' * the trend assessments (p-values and trend estimates)
-#' * the status assessments (if there any thresholds
+#' * the status assessments (if there any thresholds)
 #' * (optionally) a symbology summarising the trend (shape) and status (colour)
 #' of each time series
 #'

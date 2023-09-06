@@ -1,0 +1,18 @@
+﻿determinand,species_group,species_subgroup,species,matrix,method_analysis,sex,BAC_basis,EAC_basis,EQS_basis,HQS_basis,BAC,EAC,EQS,HQS
+CD,Fish,,,LI~MU,,,W,,,W,26,,,1000
+CD,,Mussel,,SB,,,D,,,W,960,,,1000
+CD,,Oyster,,SB,,,D,,,W,3000,,,1000
+CD,,Clam,,SB,,,,,,W,,,,1000
+CD,,Scallop,,SB,,,,,,W,,,,1000
+CD,,Crustacean,,TM,,,,,,W,,,,500
+CB153,Fish,,,LI_MU,,,W,L,,,0.1,1585,,
+CB153,Bivalve,,,SB,,,D,L,,,0.6,1585,,
+HBCD,Fish,,,LI_MU,,,,,L,,,,3340,
+HBCD,Bivalve,,,SB,,,,,L,,,,3340,
+HBCD,Crustacean,,,TM,,,,,L,,,,3340,
+HBCD,Gastropod,,,SB,,,,,L,,,,3340,
+PYR1OH,,,Limanda limanda,BI,HPLC-FD,,,,,,16,,,
+PYR1OH,,,Gadus morhua,BI,HPLC-FD,,,,,,21,,,
+PYR1OH,,,Gadus morhua,BI,GC-MS,,,,,,,483,,
+PYR1OH,,,Platichthys flesus,BI,HPLC-FD,,,,,,16,,,
+PYR1OH,,,Melanogrammus aeglefinus,BI,HPLC-FD,,,,,,13,,,
