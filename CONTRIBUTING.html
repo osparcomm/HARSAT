@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.1000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="articles/example_external_data.html">External data</a>
-    <a class="dropdown-item" href="articles/simple_OSPAR.html">OSPAR</a>
+    <a class="dropdown-item" href="articles/example_OSPAR.html">OSPAR</a>
     <a class="dropdown-item" href="articles/example_HELCOM.html">HELCOM</a>
   </div>
 </li>
@@ -108,9 +108,9 @@
 <code>roxygen2</code> is used for source-code documentation. We particularly welcome pull requests to improve this documentation.</li>
 <li>We have several vignettes in the <code>vignettes</code> directory. Some actually run <code>harsat</code> code (the ones matching <code>*.Rmd.orig</code>) and are therefore <em>precompiled</em>, because they can take 15-20 minutes to run. That turns <code>*.Rmd.orig</code> into corresponding <code>*.Rmd</code> files. Then, the normal documentation building for vignettes on installation will deploy these files, along with the basic <code>*.Rmd</code> vignettes that do not run <code>harsat</code> code.</li>
 <li>A web site is built using <code>pkgdown</code> – this happens automatically when pull requests are merged to main. This documents the code <em>as is</em> – it does not run <code>roxygen2</code> – if you need to do that, you should do it manually.</li>
-<li>When we merge pull requests, the web documentation is used to update our GitHub Pages site: <a href="https://osparcomm.github.io/HARSAT/" class="external-link uri">https://osparcomm.github.io/HARSAT/</a>
-</li>
-</ol><div class="section level3">
+<li>When we push to <code>main</code>, the web documentation is used to update our GitHub Pages site: <a href="https://osparcomm.github.io/HARSAT/" class="external-link uri">https://osparcomm.github.io/HARSAT/</a> – this should happen automatically if you use a <code>git flow</code> style release process.</li>
+</ol><p>Note that the <code>pkgdown</code> action – stored in Github under <code>.github/workflows/pkgdown.yaml</code> also creates zip files for some of the more common data and configuration setups. These are then copied for deployment through Github Pages, so they can be downloaded directly from the web pages. The actions which drive this zipping require a little care, although they will continue to work fine if you simply change files in the data and reference file directories.</p>
+<div class="section level3">
 <h3 id="documentation-build-process">Documentation build process<a class="anchor" aria-label="anchor" href="#documentation-build-process"></a></h3>
 <p>The documentation is not entirely built automatically. This is intentional, as, for example, running some of the tools (e.g., <code>roxygen2</code>) can change key package files in a breaking way. Also, some of the vignettes are pre-rendered, so they do not take a long time to install for users.</p>
 <p>To update the documentation, use the following steps in R. This does change the namespacing, so API changes can cause the vignette builds to break. If so, create an issue.</p>
