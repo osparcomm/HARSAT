@@ -16,12 +16,12 @@ navbar:
       href: articles/external-file-format.html
     - text: -------
     - text: "Examples"
-    - text: External data
-      href: articles/example_external_data.html
+    - text: HELCOM (read first)
+      href: articles/example_HELCOM.html
     - text: OSPAR
       href: articles/example_OSPAR.html
-    - text: HELCOM
-      href: articles/example_HELCOM.html
+    - text: AMAP external data
+      href: articles/example_external_data.html
 
 reference:
 - title: Primary functions
@@ -33,6 +33,7 @@ reference:
   - tidy_data
   - create_timeseries
   - run_assessment
+  - update_assessment
   - check_assessment
   - write_summary_table
   - plot_assessment
