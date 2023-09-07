@@ -34,16 +34,16 @@ source(file.path(function_path, "information_functions.R"))
 # quality assurance (methods) file
 
 biota_data <- ctsm_read_data(
-  compartment = "biota", 
-  purpose = "OSPAR",                               
-  contaminants = "mercury_data.csv", 
-  stations = "station_dictionary.csv", 
+  compartment = "biota",
+  purpose = "OSPAR",
+  contaminants = "mercury_data.csv",
+  stations = "station_dictionary.csv",
   QA = "quality_assurance.csv",
   data_path = file.path("data", "example_external_data"),
   info_files = list(determinand = "determinand_external_data.csv"),
   info_path = "information",
   extraction = "2022/01/11",
-  max_year = 2020L)  
+  max_year = 2020L)
 
 # saveRDS(biota_data, file.path("RData", "biota data.rds"))
 
