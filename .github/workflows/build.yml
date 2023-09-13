@@ -49,5 +49,5 @@ jobs:
         with:
           name: package-distribution
           path: |
-            harsat_*.tar.gz
+            check/harsat_*.tar.gz
 
