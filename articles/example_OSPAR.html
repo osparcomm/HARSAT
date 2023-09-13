@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,9 +50,9 @@
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
-    <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
+    <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM (read first)</a>
     <a class="dropdown-item" href="../articles/example_OSPAR.html">OSPAR</a>
-    <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
+    <a class="dropdown-item" href="../articles/example_external_data.html">AMAP external data</a>
   </div>
 </li>
       </ul>
@@ -89,21 +89,41 @@
     
     
 <div class="section level2">
-<h2 id="intro">Intro<a class="anchor" aria-label="anchor" href="#intro"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>But before we get to any of that, we need to set up the environment.
-First, load the <code>harsat</code> library (let’s assume that you have
-already installed it, as covered in the <a href="/harsat.html">Getting
-Started</a> guide).</p>
+<p>This vignette shows how to do an assessment following the approach
+used by<br>
+OSPAR in their 2022 assessment for the 2023 Qaulity Status Report. The
+example assumes familiarity with the HELCOM vignette and mostly
+describes features that differ from the HELCOM approach.</p>
+<p>The data were extracted from the ICES data base using the XHAT
+facilities on the <a href="https://dome.ices.dk/api/swagger/index.html" class="external-link">ICES webservice</a>.
+The data were extracted on 28 August 2023 and were filtered using
+is_ospar_area = TRUE. The data were subsequently reduced in size to make
+them more manageable for this example. <strong>The data have not been
+scrutinised by data assessors so their use, and the results below, must
+be treated as illustrative only; in particular, they should not be used
+for any formal reporting</strong>.</p>
+<p>First, we need to set up the environment by loading the
+<code>harsat</code> library (assuming you have already installed it, as
+covered in the <a href="/harsat.html">Getting Started</a> guide).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/osparcomm/HARSAT" class="external-link">harsat</a></span><span class="op">)</span></span></code></pre></div>
-<p>And load the R package <code>here</code>, because we use the working
-directory to find the data files. If you use your own data files, you
-will need to point to a directory containing a copy.</p>
+<p>And loading the R package <code>here</code>, because we use the
+working directory to find the data files. If you use your own data
+files, you will need to point to a directory containing a copy.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; here() starts at /Users/stuart/git/HARSAT</span></span>
 <span><span class="va">working.directory</span> <span class="op">&lt;-</span> <span class="fu">here</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="water-assessment">Water assessment<a class="anchor" aria-label="anchor" href="#water-assessment"></a>
+</h2>
+<p>The OSPAR water assessment is very similar to the HOLAS assessment.
+The main difference is that more determinands are assessed which means
+that <code>determinands.control</code> needs to do more work in
+<code>create_timeseries</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"water"</span>,</span>
@@ -230,8 +250,7 @@ will need to point to a directory containing a copy.</p>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Now, let’s take a look at that in the <code>water_summary.csv</code>
-file:</p>
+<p>Now let’s look at the <code>water_summary.csv</code> file:</p>
 <table class="table datatable">
 <thead><tr>
 <th style="text-align:left;">
@@ -15056,8 +15075,11 @@ NA
 </table>
 </div>
 <div class="section level2">
-<h2 id="sediment">Sediment<a class="anchor" aria-label="anchor" href="#sediment"></a>
+<h2 id="sediment-assessment">Sediment assessment<a class="anchor" aria-label="anchor" href="#sediment-assessment"></a>
 </h2>
+<p>The main differences in the sediment assessment relate to the
+normalisation procedure in <code>create_timeseries</code> and the use of
+multiple thresholds in <code>run_assessment</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"sediment"</span>, </span>
@@ -15110,6 +15132,9 @@ NA
 <span><span class="co">#&gt; Cleaning station dictionary</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span></code></pre></div>
+<p>The TEQs for the WHO TEQ for dioxins, furans and planar PCBs
+(labelled TEQDFP) are the values for the secondary poisoning QS. This
+stage won’t be necessary in later releases.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">info_TEQ</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"CB77"</span> <span class="op">=</span> <span class="fl">0.0001</span>, <span class="st">"CB81"</span> <span class="op">=</span> <span class="fl">0.0003</span>, <span class="st">"CB105"</span> <span class="op">=</span> <span class="fl">0.00003</span>, <span class="st">"CB118"</span> <span class="op">=</span> <span class="fl">0.00003</span>, </span>
@@ -15118,9 +15143,17 @@ NA
 <span>  <span class="st">"CDD9X"</span> <span class="op">=</span> <span class="fl">0.1</span>, <span class="st">"CDDO"</span> <span class="op">=</span> <span class="fl">0.0003</span>, <span class="st">"CDF2N"</span> <span class="op">=</span> <span class="fl">0.3</span>, <span class="st">"CDF2T"</span> <span class="op">=</span> <span class="fl">0.1</span>, <span class="st">"CDF4X"</span> <span class="op">=</span> <span class="fl">0.1</span>, </span>
 <span>  <span class="st">"CDF6P"</span> <span class="op">=</span> <span class="fl">0.01</span>, <span class="st">"CDF6X"</span> <span class="op">=</span> <span class="fl">0.1</span>, <span class="st">"CDF9P"</span> <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  <span class="st">"CDF9X"</span> <span class="op">=</span> <span class="fl">0.1</span>, <span class="st">"CDFO"</span> <span class="op">=</span> <span class="fl">0.00003</span>, <span class="st">"CDFP2"</span> <span class="op">=</span> <span class="fl">0.03</span>, <span class="st">"CDFX1"</span> <span class="op">=</span> <span class="fl">0.1</span>, <span class="st">"TCDD"</span> <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">sediment_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>A customised function <code>normalise_sediment_OSPAR</code> has been
+written to implement the OSPAR normalisation procedure. This is
+necessary because the pivot values used for normalising metals are
+region-specific. That aside, the procedure is straightforward: all
+metals are normalised to 5% aluminium and all organics are normalised to
+2.5% organic carbon, unless the samples were taken in the Iberian Coast
+or Gulf of Cadiz OSPAR subregions, in which case the concentrations are
+not normalised.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sediment_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">sediment_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    CHR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="st">"CHRTR"</span>, action <span class="op">=</span> <span class="st">"replace"</span><span class="op">)</span>,</span>
@@ -15135,7 +15168,7 @@ NA
 <span>  <span class="op">)</span>,</span>
 <span>  normalise <span class="op">=</span> <span class="va">normalise_sediment_OSPAR</span>,</span>
 <span>  normalise.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    metals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"pivot"</span>, normaliser <span class="op">=</span> <span class="st">"AL"</span><span class="op">)</span>, </span>
+<span>    metals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"pivot"</span>, normaliser <span class="op">=</span> <span class="st">"AL"</span>, value <span class="op">=</span> <span class="fl">5.0</span><span class="op">)</span>, </span>
 <span>    organics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"simple"</span>, normaliser <span class="op">=</span> <span class="st">"CORG"</span>, value <span class="op">=</span> <span class="fl">2.5</span><span class="op">)</span>,</span>
 <span>    exclude <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">ospar_subregion</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Iberian Coast"</span>, <span class="st">"Gulf of Cadiz"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
@@ -15174,7 +15207,10 @@ NA
 <span><span class="co">#&gt;    Normalising organics to 2.5% CORG</span></span>
 <span><span class="co">#&gt;    Removing sediment data where normaliser is a less than</span></span>
 <span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2016 and 2021</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<p>Five thresholds are applied. The Background Assessment Concentrations
+(BACs) differ between ospar_subregions. To see how that is implemented,
+look at the <code>thresholds_sediment.csv</code> file.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sediment_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_assessment.html">run_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">sediment_timeseries</span>, </span>
 <span>  AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span>, <span class="st">"EAC"</span>, <span class="st">"EQS"</span>, <span class="st">"ERL"</span>, <span class="st">"FEQG"</span><span class="op">)</span>,</span>
@@ -15184,7 +15220,7 @@ NA
 <span></span>
 <span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">water_assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All assessment models have converged</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">sediment_assessment</span>,</span>
 <span>  determinandGroups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -15219,8 +15255,7 @@ NA
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>BAC <span class="op">=</span> <span class="st">"BAC"</span>, EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAC"</span>, <span class="st">"ERL"</span>, <span class="st">"EQS"</span>, <span class="st">"FEQG"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Now, let’s take a look at that in the
-<code>sediment_summary.csv</code> file:</p>
+<p>Now let’s look at the <code>sediment_summary.csv</code> file:</p>
 <table class="table datatable">
 <thead><tr>
 <th style="text-align:left;">
@@ -38498,9 +38533,17 @@ ERL
 </table>
 </div>
 <div class="section level2">
-<h2 id="biota">Biota<a class="anchor" aria-label="anchor" href="#biota"></a>
+<h2 id="biota-assessment">Biota assessment<a class="anchor" aria-label="anchor" href="#biota-assessment"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<p>The OSPAR biota assessment procedure differs in two ways from the
+HELCOM procedure. First, many more determinands are assessed, including
+a greater set of biological effects (although imposex measurements have
+been exluded from this example and will be the topic of a later
+vignette). Second, the basis of the assessment is far more complicated.
+The example below also shows how you can break up the modelling stage
+into several parts. This is sometimes necessary if you have a lot of
+timeseries and you hit memory limitations in R.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"biota"</span>,</span>
 <span>  purpose <span class="op">=</span> <span class="st">"OSPAR"</span>,</span>
@@ -38551,7 +38594,13 @@ ERL
 <span><span class="co">#&gt; Cleaning station dictionary</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>OSPAR typically assesses contaminant concentrations in shellfish on a
+dry weight basis, metal concentrations in fish on a wet weight basis,
+and most organic concentrations in fish on either a wet weight or lipid
+weight basis, depending on the typical lipid content of the fish and
+tissue. There are also rules for birds and mammals. This is dealt with
+using the customised function <code>get_basis_biota_OSPAR</code>.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -38637,7 +38686,20 @@ ERL
 <span><span class="co">#&gt;     spawning season, which is taken to be the following months:</span></span>
 <span><span class="co">#&gt;     April, May, June, July </span></span>
 <span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2017 and 2022</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>Here, we demonstrate how to split up the modelling stage of the
+assessment into several parts. The call to <code>run_assessment</code>
+only assesses the metal time series (as specified by the metals in
+<code>wk_metals</code>). The call to <code>update_assessment</code> then
+assesses all the remaining time series. In general, you can subset both
+<code>run_assessment</code> and <code>update_assessment</code> using any
+column in the time series component of <code>biota_timeseries</code>;
+this includes <code>determinadd</code>, <code>matrix</code>,
+<code>species</code> and, as a special case, <code>series</code>, if you
+want to just want to update one or two time series. The latter is
+particularly useful if you want to a series has not converged and you
+want to rerun that series with different optimise controls (subject of a
+separate vignette).</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wk_metals</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AG"</span>, <span class="st">"AS"</span>, <span class="st">"CD"</span>, <span class="st">"CO"</span>, <span class="st">"CR"</span>, <span class="st">"CU"</span>, <span class="st">"HG"</span>, <span class="st">"NI"</span>, <span class="st">"PB"</span>, <span class="st">"SE"</span>, <span class="st">"SN"</span>, <span class="st">"ZN"</span><span class="op">)</span></span>
 <span></span>
@@ -38648,16 +38710,17 @@ ERL
 <span>  parallel <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Setting up clusters: be patient, it can take a while!</span></span>
+<span></span>
 <span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_assessment.html">update_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>, </span>
 <span>  subset <span class="op">=</span> <span class="op">!</span><span class="va">determinand</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">wk_metals</span>,</span>
 <span>  parallel <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Setting up clusters: be patient, it can take a while!</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All assessment models have converged</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  determinandGroups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -38696,8 +38759,8 @@ ERL
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>BAC <span class="op">=</span> <span class="st">"BAC"</span>, EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAC"</span>, <span class="st">"EQS"</span><span class="op">)</span>, HQS <span class="op">=</span> <span class="st">"HQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>And finally, let’s take a look at that in the
-<code>biota_summary.csv</code> file:</p>
+<p>And finally, let’s take a look at the <code>biota_summary.csv</code>
+file:</p>
 <table class="table datatable">
 <thead><tr>
 <th style="text-align:left;">

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,9 +50,9 @@
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
-    <a class="dropdown-item" href="../articles/example_external_data.html">External data</a>
+    <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM (read first)</a>
     <a class="dropdown-item" href="../articles/example_OSPAR.html">OSPAR</a>
-    <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM</a>
+    <a class="dropdown-item" href="../articles/example_external_data.html">AMAP external data</a>
   </div>
 </li>
       </ul>
@@ -88,13 +88,20 @@
 
     
     
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>This vignette shows how to do an assessment (mostly) following the
 approach taken in HELCOM HOLAS3.</p>
 <p>The data were extracted from the ICES data base using the XHAT
 facilities on the <a href="https://dome.ices.dk/api/swagger/index.html" class="external-link">ICES webservice</a>.
 The data were extracted on 28 August 2023 and were filtered using
 is_helcom_area = TRUE anad maxYear = 2020. The data were subsequently
-reduced in size to make them more manageable for this example.</p>
+reduced in size to make them more manageable for this example.
+<strong>The data have not been scrutinised by data assessors so their
+use, and the results below, must be treated as illustrative only; in
+particular, they should not be used for any formal
+reporting</strong>.</p>
 <p>There are two exceptions to the HOLAS3 approach. First, imposex data
 are not assessed here - these have an additional level of complexity
 that will be explained in a subsequent vignette (not written yet).
@@ -115,20 +122,27 @@ will need to point to a directory containing a copy.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span>
 <span><span class="va">working.directory</span> <span class="op">&lt;-</span> <span class="fu">here</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="water-assessment">Water assessment<a class="anchor" aria-label="anchor" href="#water-assessment"></a>
+</h2>
 <p>First, we use <code>read_data</code> to read in the contaminant data,
 the station dictionary, and two important reference tables: the
-determinand and thresholds reference tables. There are several things to
-note about the function call: * purpose = “HELCOM” means that the
-assessment configuration is set to mirror that of the HOLAS3 assessment;
-you can change the assessment configuration in many ways using the
-control argument, but that is not explained here</p>
+determinand and threshold reference tables. There are several things to
+note about the function call:</p>
 <ul>
+<li>
+<code>purpose = "HELCOM"</code> means that the assessment
+configuration is set to mirror that of the HOLAS3 assessment. You can
+change the assessment configuration in many ways using the control
+argument, but that is not explained here.<br>
+</li>
 <li>
 <code>data_dir</code> identifies the directory storing the
 contaminant data (<code>water.txt</code>) and station dictionary
-(<code>stations.txt</code>); using <code>file.path</code> prevents any
+(<code>stations.txt</code>). Using <code>file.path</code> prevents any
 difficulties using forward or backward slashes when writing file
-paths</li>
+paths.</li>
 <li>
 <code>info_dir</code> identifies the directory storing the reference
 tables. These must be named <code>determinand.csv</code> and
@@ -137,14 +151,14 @@ which determinands are going to be assessed. If there are no thresholds,
 then there doesn’t need to be a file called
 <code>thresholds_water.csv</code>.</li>
 <li>you don’t have to specify the extraction date, but it can help to
-keep track of things</li>
+keep track of things.</li>
 </ul>
 <p>As well as reading in the contaminant data and station dictionary,
-the function allocates each record in the contaminant data to a station
-in the station dictionary. The process for doing this is quite
-complicated (and it can take a few minutes to run) and we don’t go into
-details here.</p>
-<p>Finally, a message is printed out saying that the argument
+the function matches each record in the contaminant data to a station in
+the station dictionary. The process for doing this is quite complicated
+(and it can take a few minutes to run) and we don’t go into details
+here.</p>
+<p>Finally, a message is printed saying that the argument
 <code>max_year</code> is set to 2020. (This is as it should be since we
 set <code>maxYear</code> to be 2020 in the data extraction.) But an
 important consequence is that a contaminant time series will only be
@@ -187,13 +201,13 @@ last six monitoring years).</p>
 <p>We next simplify the data so that they are in the correct format for
 running the assessment. This also involves deleting some data that do
 not meet the conditions for the assessment.</p>
-<p>Notice that a message appears talking about ‘oddities’. Both
-tidy_data and create_timeseries (the next function call) do a lot of
-checking of the data and strange values are written to the oddities
-folder for you to have a look at (in the hope that, if there are errors,
-they will get corrected and resubmitted to the ICES database). It turns
-out there are no strange value at this stage, but there are in the step
-that follows.</p>
+<p>Notice that a message appears about ‘oddities’. Both tidy_data and
+create_timeseries (the next function call) do a lot of checking of the
+data and strange values are written to the oddities folder for you to
+have a look at. This is in the hope that, if there are errors, they will
+get corrected and resubmitted to the ICES database. It turns out there
+are no strange value at this stage, but there are in the step that
+follows.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">water_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -215,14 +229,18 @@ that follows.</p>
 <span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span></code></pre></div>
 <p>We now do some more data cleaning and then group the data into time
 series. Each time series consists of measurements of a single
-determinand at a single monitoring station.</p>
-<p>The determinands.control is an important argument to consider when
-running an assessment. Here, PFOS is one of the determinands to be
-assessed. However, PFOS can also be submitted as N-PFOS and BR-PFOS, its
-linear and branched components. The argument below tells the code to sum
-records of N-PFOS and BR-PFOS from the same sample and relabel them as
-PFOS. There are more complicated examples of the use of
-determinands.control in the sediment and biota examples below</p>
+determinand at a single monitoring station. Measurements in filtered and
+unfiltered samples are split into different time series.</p>
+<p>The <code>determinands.control</code> argument in important to know
+about since it allows related determinands to be processed in various
+ways. Here, it is just used for PFOS and its linear and branched
+components N-PFOS and BR-PFOS. PFOS measurements can be sumbitted as
+PFOS (the sum of the two components) or as N-PFOS and BR-PFOs (the
+individual components). The <code>determinands.control</code> argument
+below tells the code to sum records of N-PFOS and BR-PFOS from the same
+sample and relabel them as PFOS. There are more complicated examples of
+the use of <code>determinands.control</code> in the sediment and biota
+examples below.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">water_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">water_data</span>,</span>
@@ -273,9 +291,9 @@ code along the following lines:</p>
 <span><span class="co">#&gt; 9  ug/l</span></span>
 <span><span class="co">#&gt; 10 ug/l</span></span></code></pre></div>
 <p>At last it is time to run the assessment. You need to specify which
-thresholds to use, otherwise the code will ignore with any of them. For
+thresholds to use, otherwise the code will not use any of them. For
 water there is only the EQS, but you still need to specify it. Look at
-the thresholds reference table to see what is available if you are
+the threshold reference table to see what is available if you are
 unsure. Note that AC stands for Assessment Criteria which is what
 thresholds are often called. The parallel argument tells the code to use
 parallel processing. This usually speeds things up considerably. The
@@ -288,20 +306,21 @@ assessment took about 1.5 minutes to run on my laptop.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Setting up clusters: be patient, it can take a while!</span></span></code></pre></div>
 <p>We now need to check whether there were any convergence issues. Lack
-of convergence often occurs because there are errors in the data
-(e.g. reported in incorrect units) or because there are large outliers,
-so the best thing to do is first check your data. However, convergence
-can also be difficult if there are a lot of less-than measurements in
-the time series. Describing how to tweak the control arguments to get
-convergence is beyond the scope of this vignette (need to write another
-vignette to discuss this). Fortunately, there were no convergence issues
-here.</p>
+of convergence only rarely occurs, but when it does it is typically
+because there are errors in the data (e.g. reported in incorrect units)
+or because there are outliers, so the best thing to do is first check
+your data. However, convergence can also be difficult if there are a lot
+of less-than measurements in the time series. Describing how to tweak
+the control arguments to get convergence is beyond the scope of this
+vignette (need to write another vignette to discuss this). Fortunately,
+there were no convergence issues here.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">water_assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All assessment models have converged</span></span></code></pre></div>
-<p>Finally, we can plot individual time series assessments (see vignette
-for external data) or print out the summary table. But first, we may
-need to create an output directory.</p>
+<p>It is time to look at the results! We can plot the data for each time
+series along with the fitted model (see vignette for external data) or
+print a table giving summary information about the assessment of each
+time series. But first, we may need to create an output directory.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">summary.dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"output"</span>, <span class="st">"example_HELCOM"</span><span class="op">)</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">summary.dir</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -310,6 +329,21 @@ need to create an output directory.</p>
 <p>Now that we have an output directory, we can write the summary table
 to that directory. Of course, you can choose any directory to write to
 here, so long as you are sure it exists.</p>
+<p>The code below prints out a CSV file giving summary information about
+the assessment of each time series. This includes:</p>
+<ul>
+<li>meta-data such as the monitoring location and number of years of
+data for each time series</li>
+<li>the fitted values in the last monitoring year with associated upper
+one-sided 95% confidence limits</li>
+<li>the trend assessments (p-values and trend estimates)</li>
+<li>the status assessments (if there any thresholds)</li>
+<li>(optionally) a symbology summarising the trend (shape) and status
+(colour) of each time series</li>
+</ul>
+<p>This function is being actively developed and the function arguments
+are likely to evolve, so we’ll leave their explanation for the next
+release.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">water_assessment</span>,</span>
@@ -325,30 +359,13 @@ here, so long as you are sure it exists.</p>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>It is time to look at the results! The vignette for external data
-shows how you can plot the data for each time series along with the
-model fitted to the data. The code below prints out a CSV file giving
-summary information about the assessment of each time series. This
-includes:</p>
-<ul>
-<li>meta-data such as the monitoring location and number of years of
-data for each time series</li>
-<li>the fitted values in the last monitoring year with associated upper
-one-sided 95% confidence limits</li>
-<li>the trend assessments (p-values and trend estimates)</li>
-<li>the status assessments (if there any thresholds)</li>
-<li>(optionally) a symbology summarising the trend (shape) and status
-(colour) of each time series</li>
-</ul>
-<p>This function is being actively developed and the function arguments
-are likely to evolve, so we’ll leave their explanation for the next
-release.</p>
+</div>
 <div class="section level2">
 <h2 id="sediment-assessment">Sediment assessment<a class="anchor" aria-label="anchor" href="#sediment-assessment"></a>
 </h2>
 <p>The sediment assessment is very similar, but has a few extra features
 related to normalisation (to account for differences in grain size)
-which are describe below</p>
+which are described below</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"sediment"</span>,</span>
@@ -401,19 +418,28 @@ which are describe below</p>
 <span><span class="co">#&gt; Cleaning station dictionary</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span></code></pre></div>
-<p>The <code>create_timeseries</code> call for sediment differs from the
-call for water in two ways. First, <code>determinands.control</code>
+<p>The sediment data are grouped into time series which consist of the
+measurements of single determinand in a single matrix (the fraction the
+sample has been sieved to; e.g. <code>SED63</code> or
+<code>SEDTOT</code>) at a single monitoring station.</p>
+<p>The <code>create_timeseries</code> call for sediment differs from
+that for water in two ways. First, <code>determinands.control</code>
 identifies two groups of determinands that need to be summed. Second,
 the arguments <code>normalise</code> and <code>normalise.control</code>
 specify how the normalisation for grain size should be carried out.
 There are default functions for normalisation that will work in many
 cases. However, the process for HELCOM is more complicated (because
-unlike other metals, copper is normalised to organic carbon) so a
-customised function <code>normalise_sediment_HELCOM</code> is provided.
-The argument <code>normalise.control</code> specifies that metals (apart
-from copper) will be normalised to 5% aluminium and copper and organics
-will be normalised to 5% organic carbon. The normalise functions need a
-bit of work, so expect them to change.</p>
+unlike other metals, copper is normalised to organic carbon rather than
+aluminium) so a customised function
+<code>normalise_sediment_HELCOM</code> is provided. The argument
+<code>normalise.control</code> specifies that metals (apart from copper)
+will be normalised to 5% aluminium and copper and organics will be
+normalised to 5% organic carbon. The normalise functions need a bit of
+work, so expect them to change.</p>
+<p>All contaminant time series in sediment are assessed on a dry weight
+basis. The few measurements submitted on a wet weight basis are
+converted to a dry weight basis using <code>DRYWT%</code> supporting
+information (also submitted with the data).</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sediment_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">sediment_data</span>,</span>
@@ -474,7 +500,7 @@ This only takes about a minute to run on my laptop.</p>
 <span>  parallel <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Setting up clusters: be patient, it can take a while!</span></span></code></pre></div>
-<p>Everything has converged this time.</p>
+<p>Everything has converged.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">sediment_assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All assessment models have converged</span></span></code></pre></div>
@@ -562,7 +588,7 @@ described in another vignette (not yet available).</p>
 <p>The construction of the time series has a few more features. However,
 first we need to provide the individual TEQs to allow the construction
 of the WHO TEQ for dioxins, furans and planar PCBS (labelled TEQDFP).
-these are the values for the human health QS. This stage won’t be
+These are the values for the human health QS. This stage won’t be
 necessary in later releases.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">info_TEQ</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -573,22 +599,33 @@ necessary in later releases.</p>
 <span>  <span class="st">"CDF6P"</span> <span class="op">=</span> <span class="fl">0.01</span>, <span class="st">"CDF6X"</span> <span class="op">=</span> <span class="fl">0.1</span>, <span class="st">"CDF9P"</span> <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  <span class="st">"CDF9X"</span> <span class="op">=</span> <span class="fl">0.1</span>, <span class="st">"CDFO"</span> <span class="op">=</span> <span class="fl">0.0003</span>, <span class="st">"CDFP2"</span> <span class="op">=</span> <span class="fl">0.03</span>, <span class="st">"CDFX1"</span> <span class="op">=</span> <span class="fl">0.1</span>, <span class="st">"TCDD"</span> <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>The biota data are grouped into time series which consist of the
+measurements of a single determinand in a single matrix (tissue type;
+e.g.  ‘EH’,
+<code>LI' or</code>SB<code>) in a single species at a single monitoring station. PAH metabolite data are further grouped by</code>method_analysis`.</p>
 <p>The <code>determinands.control</code> argument does rather more here.
 There are four summed variables: PFOS, SBDE6, HBCD and SCB6. There is
 also one variable CB138+163 which needs to be relabeled as (replaced by)
 CB138. For the purposes of the assessment, the contribution of CB163 is
-regarded as small, and CB138+163 is taken to be a good proxy for CB138.
-Note that the replacements must be done before the six PCBs are summed
-to give SCB6 in order for them to be included in the sum.</p>
+regarded as small. Similarly CB138+163 is taken to be a good proxy for
+CB138. Note that the replacements must be done before the six PCBs are
+summed to give SCB6 in order for them to be included in the sum.</p>
 <p>There are also two ‘bespoke’ actions in
 <code>determinands.control</code>. These are customised functions that
-do more complicated (non-standard things). One of them computes the
-TEQDFP. The other deals with the three different ways in which lipid
-weight measurements can be submitted.</p>
+do more complicated things. One of them computes the TEQDFP. The other
+deals with the three different ways in which lipid weight measurements
+can be submitted.</p>
 <p>Finally, <code>normalise_biota_HELCOM()</code> is a customised
 function that determines which measurements are normalised to 5% lipid
 in a HELCOM assessment. Again, the normalisation functions are under
-active development and might well change before the first release.</p>
+active development and might well change before the next release.</p>
+<p>One thing that is not obvious from the function call is the choice of
+basis. By default, contaminant time series in biota are assessed on a
+wet weight basis, with measurements submitted on a dry or lipid weight
+basis transformed to a wet weight basis using supporting
+<code>DRYWT%</code> and <code>LIPIDWT%</code> information. Look at the
+OSPAR or external data examples to see how the choice of basis can be
+changed.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
