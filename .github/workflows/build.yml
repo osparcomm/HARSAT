@@ -36,6 +36,12 @@ jobs:
           needs: |
             check
 
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual")'
+          error-on: '"error"'
+          check-dir: '"check"'
+
       ## If we're pushing, which must be to main, upload the package as an artefact
       - name: Archive production artifacts
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -45,8 +51,3 @@ jobs:
           path: |
             harsat_*.tar.gz
 
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          args: 'c("--no-manual")'
-          error-on: '"error"'
-          check-dir: '"check"'
