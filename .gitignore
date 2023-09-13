@@ -4,10 +4,11 @@
 .Ruserdata
 .build.timestamp
 HARSAT.RProj
+HARSAT.Rcheck
+harsat_*.tar.gz
 oddities/
 output/
 RData/
 /doc/
 /Meta/
 docs
-.Rbuildignore

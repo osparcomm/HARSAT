@@ -1,0 +1,12 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^doc$
+^Meta$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
+^vignettes/oddities
+^vignettes/.RData$
+^output
+^oddities

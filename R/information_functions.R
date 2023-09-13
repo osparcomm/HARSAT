@@ -404,19 +404,19 @@ ctsm_read_determinand <- function(
   # - simplify only keeps relevant variables  
   
   # argument validation
-  
+
   ok <- is.character(compartment) && length(compartment) %in% 1:3 &&
     all(compartment %in% c("biota", "sediment", "water"))
   if (!ok) {
     stop(
-      "\nInvalid argment 'compartment' in function ctsm_read_determinand.\n", 
+      "\nInvalid argment 'compartment' in function ctsm_read_determinand.\n",
       "Must be a character string with at least one of 'biota', 'sediment', ",
       "'water'.\n",
       call. = FALSE
     )
   }
 
-  
+
   # initialise key variables
   
   var_id <- c(
@@ -521,6 +521,34 @@ ctsm_read_determinand <- function(
     data[id] <- rep(NA_real_, nrow(data))
   }
 
+  
+  # retain relevant variables
+  
+  ok <- names(var_id) %in% c(required, optional)
+  id <- names(var_id)[ok]
+  data <- data[id]
+  
+  
+
+  # now do some more error checking
+  
+  # no missing values allowed in determinand, pargroup, and assess variables
+  
+  var_id <- c("determinand", "pargroup", paste0(compartment, "_assess")) 
+  
+  not_ok <- sapply(data[var_id], function(x) any(is.na(x)))
+  
+  if (any(not_ok)) {
+    var_id <- var_id[not_ok]
+    var_id <- sort(var_id)
+    stop(
+      "\nThe following variables have missing values which is not allowed.\n",
+      "Edit the determinand reference table to continue.\n",
+      "Variables: ", paste(var_id, collapse = ", "), 
+      call. = FALSE
+    )
+  }
+  
 
   # check all auxiliary variables are determinands in their own right
   
@@ -536,18 +564,66 @@ ctsm_read_determinand <- function(
     if(!all(ok)) {
       stop(
         '\nNot found in determinand information file: ', 
-        paste(auxiliary[!ok], collapse = ", ")
+        paste(auxiliary[!ok], collapse = ", "), 
+        call. = FALSE
       )
     }
   })
   
   
-  # retain relevant variables
+  # check no auxiliary variables are going to be assessed - this will be
+  # allowed in later releases
+
+  data[paste0(compartment, "_assess")] <- lapply(compartment, function(id) {
+    
+    group_id <- paste0(id, "_group")
+    assess_id <- paste0(id, "_assess")
+
+    not_ok <- data[[group_id]] %in% "Auxiliary" & data[[assess_id]]
+    
+    if(any(not_ok)) {
+      det_id <- data$determinand[not_ok]
+      det_id <- sort(det_id)
+      message(
+        "The following auxiliary variables have assess = TRUE which is ", 
+        "currently not allowed.\nThese values of assess will be set to FALSE.\n",
+        "Compartment: ", id, "\n",
+        "Variables: ", paste(det_id, collapse = ", ")
+      )
+
+      data[not_ok, assess_id] <- FALSE
+    }
+    
+    data[[assess_id]]
+  })
+
   
-  ok <- names(var_id) %in% c(required, optional)
-  id <- names(var_id)[ok]
-  data <- data[id]
+  # check every variable to be assessed has a corresponding group, unit, 
+  # distribution and good_status
   
+  lapply(compartment, function(id) {
+    
+    assess_id <- paste0(id, "_assess")
+    var_id <- c(paste0(id, c("_group", "_unit")), "distribution", "good_status")
+    
+    not_ok <- data[[assess_id]] & !complete.cases(data[var_id])
+    
+    if(any(not_ok)) {
+      det_id <- data$determinand[not_ok]
+      stop(
+        "\nThe following variables with assess = TRUE have missing supporting ", 
+        "information\nfor `", var_id[1], "', '", var_id[2], 
+        "', `distribution` or 'good_status'.\nEdit the determinand reference ",
+        "table to continue.\n",
+        "Compartment: ", id, "\n",
+        "Variables: ", paste(det_id, collapse = ", "), 
+        call. = FALSE
+      )
+    }
+    
+  })
+  
+
 
   # tidy up for output
   
