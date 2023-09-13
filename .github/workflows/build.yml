@@ -38,7 +38,7 @@ jobs:
 
       ## If we're pushing, which must be to main, upload the package as an artefact
       - name: Archive production artifacts
-        if: github.event_name != 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v3
         with:
           name: package-distribution
