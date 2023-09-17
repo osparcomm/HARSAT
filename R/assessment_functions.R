@@ -46,7 +46,7 @@ run_assessment <- function(
   ctsm_ob$info$AC <- AC
   
   ctsm_ob$info$get_AC_fn <- get_AC_fn
-  if (!is.null(AC) && is.null(ctsm_ob$info$get_AC)) {
+  if (!is.null(AC) && is.null(ctsm_ob$info$get_AC_fn)) {
     ctsm_ob$info$get_AC_fn <- get_AC[[ctsm_ob$info$compartment]]
   }
 
