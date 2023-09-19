@@ -344,7 +344,7 @@ values_range_check_species <- function(species_data, min_value, max_value) {
 
 # turn drywt or lipidwt data into a more usable dataframe
 
-ctsm_get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
+get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   
   # location: information_functions.R
   # purpose: gets typical species drywt / lipidwt conversion factors and converts 
@@ -942,12 +942,13 @@ get_AC <- vector("list", 3L)
 
 names(get_AC) <- c("biota", "sediment", "water")
 
-get_AC$biota <- function(data, AC, rt, export_cf = FALSE) {    
-    
-  ok <- c("thresholds", "determinand", "species") %in% names(rt)
+get_AC$biota <- function(data, AC, rt, export_all = FALSE) {    
+
+  rt_id <- c("thresholds", "determinand", "species")     
+  ok <- rt_id %in% names(rt)
   
   if (!all(ok)) {
-    id <- AC[!ok]
+    id <- rt_id[!ok]
     id <- sort(id)
     stop(
       "\nThe following reference tables are not provided.\n", 
@@ -1120,8 +1121,8 @@ get_AC$biota <- function(data, AC, rt, export_cf = FALSE) {
     
   rt$species <- tibble::column_to_rownames(rt$species, "species")
   
-  lipid_info <- ctsm_get_species_cfs(rt$species, "lipidwt")
-  drywt_info <- ctsm_get_species_cfs(rt$species, "drywt")
+  lipid_info <- get_species_cfs(rt$species, "lipidwt")
+  drywt_info <- get_species_cfs(rt$species, "drywt")
   
   data <- dplyr::left_join(
     data, 
@@ -1140,9 +1141,8 @@ get_AC$biota <- function(data, AC, rt, export_cf = FALSE) {
   
   # convert basis where necessary
     
-  out <- sapply(
+  data[AC] <- lapply(
     AC, 
-    simplify = FALSE, 
     FUN = function(i) {
       AC_basis <- paste(i, "basis", sep = "_")
       ctsm_convert_basis(
@@ -1155,25 +1155,29 @@ get_AC$biota <- function(data, AC, rt, export_cf = FALSE) {
       )
     }
   )
-  
-  out <- data.frame(out)
-  
-  if (export_cf) {
-    out <- dplyr::bind_cols(out, data[c("drywt", "lipidwt")])
+
+  row.names(data) <- NULL
+    
+  if (export_all) {
+    data <- dplyr::rename(
+      data,
+      species_drywt = "drywt",
+      species_lipidwt = "lipidwt"
+    )
+    return(data)
   }
-
-  rownames(out) <- NULL
-
-  out
+    
+  data[AC]
 }                           
 
 
 get_AC$sediment <- function(data, AC, rt, export_all = FALSE) {   
   
-  ok <- "thresholds" %in% names(rt)
+  rt_id <- "thresholds"
+  ok <- rt_id %in% names(rt)
   
   if (!all(ok)) {
-    id <- AC[!ok]
+    id <- rt_id[!ok]
     id <- sort(id)
     stop(
       "\nThe following reference tables are not provided.\n", 
@@ -1224,23 +1228,24 @@ get_AC$sediment <- function(data, AC, rt, export_all = FALSE) {
     relationship = "many-to-one"
   )
   
+  row.names(data) <- NULL
+  
   if (export_all) {
     return(data)
   } 
-  
-  row.names(data) <- NULL
-  
+
   data[AC]
 }                           
 
 
 
 get_AC$water <- function(data, AC, rt, export_all = FALSE) {   
-  
-  ok <- "thresholds" %in% names(rt)
+
+  rt_id <- "thresholds"  
+  ok <- rt_id %in% names(rt)
   
   if (!all(ok)) {
-    id <- AC[!ok]
+    id <- rt_id[!ok]
     id <- sort(id)
     stop(
       "\nThe following reference tables are not provided.\n", 
@@ -1284,13 +1289,13 @@ get_AC$water <- function(data, AC, rt, export_all = FALSE) {
     by = c("determinand", "filtration"),
     relationship = "many-to-one"
   )
-  
+
+  row.names(data) <- NULL
+
   if (export_all) {
     return(data)
   } 
-  
-  row.names(data) <- NULL
-  
+
   data[AC]
 }                           
 
@@ -2498,7 +2503,7 @@ get_basis_biota_OSPAR <- function(data, info) {
 
   # get typical lipid content by species and matrix 
   
-  lipid_info <- ctsm_get_species_cfs(info$species, "lipidwt")
+  lipid_info <- get_species_cfs(info$species, "lipidwt")
   
   out <- dplyr::left_join(out, lipid_info, by = c("species", "matrix"))
   
