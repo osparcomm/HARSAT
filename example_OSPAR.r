@@ -215,7 +215,7 @@ wk_metals <-
 biota_assessment <- run_assessment(
   biota_timeseries, 
   subset = determinand %in% wk_metals,
-  AC = c("BAC", "EAC", "EQS", "HQS"),
+  AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC"),
   parallel = TRUE
 )
 
@@ -224,12 +224,6 @@ biota_assessment <- update_assessment(
   subset = !determinand %in% wk_metals,
   parallel = TRUE
 )
-
-
-# 03m 06s
-
-# 01m 11s
-# 02m 07s
 
 
 check_assessment(biota_assessment)
@@ -257,20 +251,28 @@ write_summary_table(
   ),
   classColour = list(
     below = c(
-      "BAC" = "blue", 
+      "BAC" = "blue",
+      "NRC" = "blue",
       "EAC" = "green", 
-      "EQS" = "green", 
-      "HQS" = "green"
+      "LRC" = "green", 
+      "QSsp" = "green", 
+      "MPC" = "green"
     ),
     above = c(
       "BAC" = "orange", 
+      "NRC" = "orange", 
       "EAC" = "red", 
-      "EQS" = "red", 
-      "HQS" = "red"
+      "LRC" = "red", 
+      "QSsp" = "red", 
+      "MPC" = "red"
     ),
     none = "black"
   ),
-  collapse_AC = list(BAC = "BAC", EAC = c("EAC", "EQS"), HQS = "HQS"),
+  collapse_AC = list(
+    BAC = c("BAC", "NRC"),
+    EAC = c("EAC", "LRC", "QSsp"), 
+    HQS = "MPC"
+  ),
   output_dir = file.path("output", "example_OSPAR")
 )
 
