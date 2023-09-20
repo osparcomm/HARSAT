@@ -1005,6 +1005,20 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
     any_of(c("method_analysis", "sex"))
   )
   
+  
+  # add species_group and species_subgroup to data (otherwise these variables
+  # will have missing values when export_all = TRUE and there are no 
+  # corresponding thresholds; this would make customised functions building on
+  # get_AC more error prone)
+
+  rt$species <- tibble::rownames_to_column(rt$species, "species")
+
+  data <- dplyr::left_join(
+    data, 
+    rt$species[c("species", "species_group", "species_subgroup")],
+    by = "species"
+  )
+
 
   # AC_data: fill out empty species, species_group and species_subgroup fields 
   # by joining with species reference table
@@ -1015,9 +1029,6 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
     is.na(rt$thresholds$species_subgroup)
   )
 
-
-  rt$species <- tibble::rownames_to_column(rt$species, "species")
-  
   rt$thresholds <- by(
     rt$thresholds, 
     index, 
@@ -1089,7 +1100,9 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
   data <- lapply(
     names(data), 
     FUN = function(i) {
-      by_id <- c("determinand", "species", "matrix")
+      by_id <- c(
+        "determinand", "species", "species_group", "species_subgroup", "matrix"
+      )
       extra_id <- switch(
         i, 
         metabolites = "method_analysis", 
@@ -1115,8 +1128,7 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
   data <- dplyr::arrange(data, "order")
   data$order <- NULL
   
-  
-  
+
   # add in lipid and dry weight information for basis conversion
     
   rt$species <- tibble::column_to_rownames(rt$species, "species")
@@ -1164,6 +1176,13 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
       species_drywt = "drywt",
       species_lipidwt = "lipidwt"
     )
+    
+    data <- dplyr::relocate(
+      data,
+      starts_with("species_"),
+      .after = "species"
+    )
+    
     return(data)
   }
     
@@ -1303,6 +1322,52 @@ get_AC$water <- function(data, AC, rt, export_all = FALSE) {
 # Most of the following functions are deprecated - but need to get an OSPAR 
 # threshold rt sorted
 
+
+#' Gets OSPAR threshold values for biota
+#' 
+#' Extends default extractor function get_AC$biota for the few cases which can 
+#' not be handled in a straightforward manner. This mostly relates to thresholds
+#' which are only applied when the typical species / lipid contend is 'high' 
+#' (currently defined as >= 3%)  
+#'
+#' @param data 
+#' @param AC 
+#' @param rt 
+#' @param export_all 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
+  
+  data <- get_AC$biota(data, AC, rt, export_all = TRUE)
+  
+  lipid_high <- 3
+  
+  
+  # BAC for CD and PB in fish only applied when lipid content >= 3%
+  
+  if ("BAC" %in% names(data)) {
+  
+    data <- dplyr::mutate(
+      data,
+      BAC = dplyr::if_else(
+        .data$determinand %in% c("CD", "PB") & .data$species_group %in% "Fish" &
+          .data$species_lipidwt < lipid_high,
+        NA_real_,
+        .data$BAC
+      )
+    )
+  }
+  
+  if (export_all) {
+    return(data)
+  } 
+  
+  data[AC]
+}
+
 get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
   
   # check elements of info are of correct length
@@ -1366,114 +1431,6 @@ get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determi
 }
 
 
-get.AC.biota.Metals.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
-    
-  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-  
-  stopifnot(
-    length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EQS", "HQS") %in% names(AC)
-  )
-  
-  out <- bind_cols(out, data)
-  
-  out <- out %>%
-    rownames_to_column() %>%
-    dplyr::mutate(
-      species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-      species_subgroup = ctsm_get_info(species_rt, .data$species, "species_subgroup")
-    )
-  
-  
-  # mercury
-  # only BAC is for mussels
-  # no MPC (HQS) for fish liver
-  # mammal liver 16000 (BAC), 64000 (EAC) ww
-  # mammal hair 6100 (BAC), 24400 (EAC) dw
-  # bird egg homongenate 110 (BAC), 470 (EAC) ww
-  # bird liver 1400 (BAC) 7300 (EAC) ww
-  # bird feather 1580 (BAC) 7920 (EAC) dw
-  # bird blood 200 (BAC) 1000 (EAC) ww
-  
-  id <- out$determinand %in% "HG"
-  
-  if (any(id)) {
-    
-    out[id, ] <- dplyr::mutate(
-      out[id, ],
-      
-      BAC = dplyr::case_when(
-        .data$species_group %in% "Fish"                            ~ NA_real_,
-        .data$species_subgroup %in% "Oyster"                             ~ NA_real_,
-        .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-          ctsm_convert_basis(16000, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-          ctsm_convert_basis(6100, "D", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-          ctsm_convert_basis(110, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-          ctsm_convert_basis(1400, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-          ctsm_convert_basis(1580, "D", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-          ctsm_convert_basis(200, "W", .data$basis, .data$drywt, .data$lipidwt),
-        TRUE                                                       ~ .data$BAC
-      ),
-      
-      EQS = dplyr::case_when(
-        .data$species_group %in% "Mammal" & .data$matrix %in% "LI" ~
-          ctsm_convert_basis(64000, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Mammal" & .data$matrix %in% "HA" ~
-          ctsm_convert_basis(24400, "D", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Bird" & .data$matrix %in% "EH"   ~
-          ctsm_convert_basis(470, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Bird" & .data$matrix %in% "LI"   ~
-          ctsm_convert_basis(7300, "W", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Bird" & .data$matrix %in% "FE"   ~
-          ctsm_convert_basis(7920, "D", .data$basis, .data$drywt, .data$lipidwt),
-        .data$species_group %in% "Bird" & .data$matrix %in% "BL"   ~
-          ctsm_convert_basis(1000, "W", .data$basis, .data$drywt, .data$lipidwt),
-        TRUE                                                       ~ .data$EQS
-      ),
-      
-      HQS = if_else(.data$species_group %in% "Fish" & .data$matrix %in% "LI", NA_real_, .data$HQS)
-    )
-  }
-  
-  
-  # cadmium and lead
-  # adjust HQS (MPC) for fish muscle
-  # BACs in fish only apply to high lipid tissue
-  
-  out <- dplyr::mutate(
-    out,
-    
-    HQS = if_else(
-      .data$determinand %in% "CD" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
-      50,
-      .data$HQS
-    ),
-    
-    HQS = if_else(
-      .data$determinand %in% "PB" & .data$species_group %in% "Fish" & .data$matrix %in% "MU",
-      300,
-      .data$HQS
-    ),
-    
-    BAC = if_else(
-      .data$determinand %in% c("CD", "PB") & .data$species_group %in% "Fish" &
-        (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-      NA_real_,
-      .data$BAC
-    )
-  )
-  
-  out <- out %>%
-    column_to_rownames() %>%
-    select(all_of(AC))
-  
-  out
-}
 
 
 get.AC.biota.Chlorobiphenyls.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
