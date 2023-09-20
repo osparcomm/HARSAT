@@ -7,6 +7,8 @@ rm(list = objects())
 devtools::load_all()
 
 
+# Water ----
+
 water_data <- read_data(
   compartment = "water", 
   purpose = "OSPAR",                               
@@ -63,6 +65,7 @@ write_summary_table(
 )
 
 
+# Sediment ----
 
 sediment_data <- read_data(
   compartment = "sediment", 
@@ -157,6 +160,8 @@ write_summary_table(
 
 
 
+# Biota ----
+
 biota_data <- read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
@@ -168,6 +173,15 @@ biota_data <- read_data(
 )  
 
 biota_data <- tidy_data(biota_data)
+
+info_TEQ <- c(
+  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
+  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
+  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
+  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+)
 
 biota_timeseries <- create_timeseries(
   biota_data,
@@ -215,7 +229,8 @@ wk_metals <-
 biota_assessment <- run_assessment(
   biota_timeseries, 
   subset = determinand %in% wk_metals,
-  AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC"),
+  AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC", "QShh"),
+  get_AC_fn = get_AC_biota_OSPAR,
   parallel = TRUE
 )
 
@@ -256,7 +271,8 @@ write_summary_table(
       "EAC" = "green", 
       "LRC" = "green", 
       "QSsp" = "green", 
-      "MPC" = "green"
+      "MPC" = "green",
+      "QShh" = "green"
     ),
     above = c(
       "BAC" = "orange", 
@@ -264,14 +280,15 @@ write_summary_table(
       "EAC" = "red", 
       "LRC" = "red", 
       "QSsp" = "red", 
-      "MPC" = "red"
+      "MPC" = "red",
+      "QShh" = "green"
     ),
     none = "black"
   ),
   collapse_AC = list(
     BAC = c("BAC", "NRC"),
     EAC = c("EAC", "LRC", "QSsp"), 
-    HQS = "MPC"
+    HQS = c("MPC", "QShh")
   ),
   output_dir = file.path("output", "example_OSPAR")
 )

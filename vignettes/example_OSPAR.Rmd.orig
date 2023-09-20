@@ -333,6 +333,12 @@ one or two time series. The latter is particularly useful if a
 series has not converged and you want to rerun that series with different 
 optimisation controls (subject of a separate vignette).
 
+The application of thresholds is also more complicated and can not be handled by 
+the standard routines. For example, Background Assessment Concentrations for 
+cadmium and lead in fish are only applied to species / tissue combinations where 
+the lipid content is $>=$ 3%. This is dealt with by using the customised 
+function `r get_AC_biota_OSPAR`.
+
 
 ```{r ospar-biota-assessment}
 wk_metals <- 
@@ -342,6 +348,7 @@ biota_assessment <- run_assessment(
   biota_timeseries, 
   subset = determinand %in% wk_metals,
   AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC"),
+  get_AC_fn = get_AC_biota_OSPAR,
   parallel = TRUE
 )
 
@@ -384,7 +391,8 @@ write_summary_table(
       "EAC" = "green", 
       "LRC" = "green", 
       "QSsp" = "green", 
-      "MPC" = "green"
+      "MPC" = "green",
+      "QShh" = "green"
     ),
     above = c(
       "BAC" = "orange", 
@@ -392,14 +400,15 @@ write_summary_table(
       "EAC" = "red", 
       "LRC" = "red", 
       "QSsp" = "red", 
-      "MPC" = "red"
+      "MPC" = "red",
+      "QShh" = "red"
     ),
     none = "black"
   ),
   collapse_AC = list(
     BAC = c("BAC", "NRC"),
     EAC = c("EAC", "LRC", "QSsp"), 
-    HQS = "MPC"
+    HQS = c("MPC", "QShh")
   ),
   output_dir = summary.dir
 )
