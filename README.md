@@ -64,6 +64,14 @@ library(remotes)
 remotes::install_github("osparcomm/HARSAT", auth_token = 'XXXX')
 ```
 
+## Additional funding
+
+Additional resource that contributed to the development of HARSAT from: 
+[Baltic Data Flows project](https://balticdataflows.helcom.fi/),
+the [PreEMPT project](https://helcom.fi/helcom-at-work/projects/pre-empting-pollution-by-screening-for-possible-risks-preempt/),
+Nordic Council of Ministers (Harmonized Regional Seas Assessment Tool: NKE 2023-011) 
+and via the standing working process OSPAR has with ICES.
+
 ## Example usage
 
 We have prepared zip files containing all the other files you need, for both
