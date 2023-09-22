@@ -22,6 +22,6 @@ Defaults to the working directory.}
 A data frame containing the contaminant data.
 }
 \description{
-A quick way of reading the contaminant data without having to do any
-station matching (if using \verb{data_format == "ICES})
+A quick way of reading the contaminant data (which also avoids having to do
+any station matching if \verb{info$data_format == "ICES}).
 }
