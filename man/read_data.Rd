@@ -9,7 +9,6 @@ read_data(
   purpose = c("OSPAR", "HELCOM", "AMAP", "custom"),
   contaminants,
   stations,
-  QA,
   data_dir = ".",
   data_format = c("ICES", "external"),
   info_files = list(),
@@ -29,8 +28,6 @@ read_data(
 \item{contaminants}{A file reference for the contaminant data}
 
 \item{stations}{A file reference for the station data}
-
-\item{QA}{A file reference for the QA data}
 
 \item{data_dir}{The directory where the data files can be found (sometimes
 supplied using 'file.path'). Defaults to "."; i.e. the working directory.}
