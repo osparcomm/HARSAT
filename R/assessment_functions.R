@@ -186,7 +186,8 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
 
     is_imposex <- "Imposex" %in% data$group
     export_objects <- parallel_objects(is_imposex)
-    parallel::clusterExport(cluster_id, export_objects)
+    package_environment <- environment(sys.function(sys.nframe()))
+    parallel::clusterExport(cluster_id, export_objects, envir = package_environment)
 
   } else {
     cluster_id <- NULL
@@ -391,7 +392,7 @@ parallel_objects <- function(imposex = FALSE) {
   # assessment_functions.R
   # objects required for clusterExport
 
-  package.environment <- environment(sys.function())
+  package.environment <- environment(sys.function(sys.nframe()))
   
   out <- c(
     "negTwiceLogLik", 

@@ -337,7 +337,7 @@ The application of thresholds is also more complicated and can not be handled by
 the standard routines. For example, Background Assessment Concentrations for 
 cadmium and lead in fish are only applied to species / tissue combinations where 
 the lipid content is $>=$ 3%. This is dealt with by using the customised 
-function `r get_AC_biota_OSPAR`.
+function `get_AC_biota_OSPAR`.
 
 
 ```{r ospar-biota-assessment}

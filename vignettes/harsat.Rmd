@@ -13,18 +13,43 @@ For now, we will assume that you are familiar with running basic R scripts
 and so on. We will focus on what the structure of a typical what the code 
 looks like in a typical analysis.
 
-## Installing `harsat` from GitHub
+## Installing `harsat` from a bundled package
+
+If you have a downloaded copy of the bundled package, whch will be a file
+named something like `harsat_0.1.1.tar.gz` or `harsat_0.1.1.tar`, you 
+can install that directly, and R will still take care of making sure 
+you have all the right dependencies.
+
+### In RStudio
+
+From the `Packages` tab, choose `Install`, make sure you have selected
+to install from a Package Archive File, then press the `Browse...` button
+and locate your bundled package file. Then finally press the `Install` 
+button.
+
+### From the R command line
+
+Use a command:
+
+```r
+install.packages("~/Downloads/harsat_0.1.1.tar", repos = NULL)
+```
+
+Use the right file for the downloaded package file, press enter, and
+away you go.
+
+## Installing `harsat` directly from GitHub
 
 To install the latest development version, use the `remotes` package:
 
-```
+```r
 library(remotes)
 remotes::install_github("osparcomm/harsat", auth_token = 'XXXX') 
 ```
 
 The stable version is similar:
 
-``` r
+```r
 # install.packages("devtools")
 devtools::install_github("osparcomm/HARSAT@main")
 ```
@@ -35,6 +60,10 @@ devtools::install_github("osparcomm/HARSAT@main")
 > It'll be a short string, probably beginning with `ghp_`. Put the whole
 > string into the `auth_token` parameter, and that should install the 
 > `harsat` package directly.
+>
+> Please note: we strongly recommend using only "classic" personal access tokens, and avoiding
+> the newer "fine grained" type. When it comes to "scopes" (permissions)
+> you only need to select the `repo` permissions -- no others are needed.
 
 > Note: many of the functions currently have a `cstm` prefix. When the
 > code was originally developed, we thought of it as "contaminant time series modelling", 
@@ -81,10 +110,10 @@ water_data <- read_data(
 #> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> [1] "found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/information/method_extraction.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
 #> 

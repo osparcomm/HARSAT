@@ -95,10 +95,10 @@ water_data <- read_data(
 #> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_water.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
 #> 
@@ -331,10 +331,10 @@ sediment_data <- read_data(
 #> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in path thresholds_sediment.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_sediment.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
 #> 
@@ -517,10 +517,10 @@ biota_data <- read_data(
 #> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_biota.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
 #> 
