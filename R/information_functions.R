@@ -788,7 +788,7 @@ ctsm_read_thresholds <- function(
     
     if (any(is.na(data$matrix))) {
       stop(
-        "'matrix' must be supplied in threshold reference table", 
+        "Missing values not allowed in 'matrix' in threshold reference table", 
         call. = FALSE
       )
     }
@@ -1346,14 +1346,20 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
   lipid_high <- 3
   
   
-  # BAC for CD and PB in fish only applied when lipid content >= 3%
+  # BAC for CD, PB, PCBs, DDEPP, HCB in fish only applied when lipid content >= 3%
   
   if ("BAC" %in% names(data)) {
-  
+
+    det_id <- c(
+      "CD", "PB", 
+      "CB28", "CB52", "CB101", "CB105", "CB118", "CB138", "CB153", "CB156", "CB180",
+      "DDEPP", "HCB"
+    )
+      
     data <- dplyr::mutate(
       data,
       BAC = dplyr::if_else(
-        .data$determinand %in% c("CD", "PB") & .data$species_group %in% "Fish" &
+        .data$determinand %in% det_id & .data$species_group %in% "Fish" &
           .data$species_lipidwt < lipid_high,
         NA_real_,
         .data$BAC
@@ -1433,57 +1439,6 @@ get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determi
 
 
 
-get.AC.biota.Chlorobiphenyls.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
-    
-  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-  
-  stopifnot(
-    length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EAC", "HQS") %in% names(AC)
-  )
-  
-  out <- bind_cols(out, data)
-  
-  out <- out %>%
-    rownames_to_column() %>%
-    dplyr::mutate(
-      species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-      species_subgroup = ctsm_get_info(species_rt, .data$species, "species_subgroup")
-    )
-  
-  # BACs in fish only apply to high lipid tissue
-  # add in MPC (HQS) of 200 ww for fish liver
-  
-  out <- dplyr::mutate(
-    out,
-    
-    BAC = if_else(
-      .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-      NA_real_,
-      .data$BAC
-    ),
-    
-    HQS = if_else(
-      .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "SCB6",
-      ctsm_convert_basis(200, "W", .data$basis, .data$drywt, .data$lipidwt),
-      .data$HQS
-    ),
-    
-    EAC = if_else(
-      .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-        .data$matrix %in% "EH" & .data$determinand %in% "SCB7",
-      ctsm_convert_basis(6.7, "W", .data$basis, .data$drywt, .data$lipidwt),
-      .data$EAC
-    )
-  )
-  
-  
-  out <- out %>%
-    column_to_rownames() %>%
-    select(all_of(AC))
-  
-  out
-}
 
 
 get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
