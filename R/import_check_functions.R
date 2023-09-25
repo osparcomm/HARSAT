@@ -529,6 +529,13 @@ ctsm.check.unit.biota <- function(data, info) {
       ok <- unit %in% "ppt"
       action <- ifelse(ok, "none", "error")
     })
+  
+  id <- data$determinand %in% c("CS134", "CS137")
+  if (any(id))
+    data[id,] <- within(data[id,], {    
+      ok <- unit %in% "Bq/kg"
+      action <- ifelse(ok, "none", "error")
+    })
 
   id <- data$determinand %in% c("VDS", "IMPS", "INTS")
   if (any(id))

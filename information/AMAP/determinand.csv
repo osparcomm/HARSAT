@@ -95,7 +95,7 @@ BJF,benzo[j]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,,,FALSE,FALSE,FA
 BJKF,Benzo[j--k]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
 BKF,Benzo[k]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
 BLUBBERTHICKNESS,Blubber thickness,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,,AMAP,USER
-BPA,Bisphenol A,O-PHC,Phenols/chlorophenols,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,,,ICES,ICES
+BPA,Bisphenol A,O-PHC,Phenols/chlorophenols,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 BR-PFHXS,Perfluorohexanesulfonic acid - sum of all isomers with branched form,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
 BR-PFOS,Perfluorooctanyl sulphonic acid - sum of all isomers with branched form,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
 C13,Carbon isotope of mass 13,I-RNC,Auxiliary,,,FALSE,FALSE,FALSE,ppt/VPBD,,,,,,,,,,,,,,OSPAR,ICES
@@ -299,16 +299,16 @@ CO,Cobalt,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LI
 CORG,organic Carbon,O-MAJ,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,0.01,0.1,,,,,OSPAR/HELCOM,ICES
 CPHL,chlorophyll-a,O-MAJ,Major organic constituents,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
 CR,Chromium,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,3,0.145626,0.216667,0.08998,,,lognormal,low,OSPAR,ICES
-CS134,cesium-134,I-RNC,Radionuclide,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
-CS137,cesium-137,I-RNC,Radionuclide,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+CS134,cesium-134,I-RNC,Radionuclide,,,TRUE,FALSE,FALSE,Bq/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CS137,cesium-137,I-RNC,Radionuclide,,,TRUE,FALSE,FALSE,Bq/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 CTOT,total carbon,O-MAJ,Major organic constituents,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
 CU,Copper,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,2,0.076316,0.158333,0.090478,0.025167,0.072003,lognormal,low,OSPAR/HELCOM,ICES
-CYFOS,chlorpyrifos,O-OP,Organophosphorus pesticides,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
-CYFOSM,Chlorpyrifos-methyl,O-INS,Insecticides,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+CYFOS,chlorpyrifos,O-OP,Organophosphorus pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CYFOSM,Chlorpyrifos-methyl,O-INS,Insecticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 D4,Octamethylcyclotetrasiloxane,O-MAJ,Siloxane,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 D5,Decamethylcyclopentasiloxane,O-MAJ,Siloxane,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 D6,Dodecamethylcyclohexasiloxane,O-MAJ,Siloxane,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
-DAZPM,Diazepam,OP-GN,Pharmaceuticals,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+DAZPM,Diazepam,OP-GN,Pharmaceuticals,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 DBAHA,Dibenz[ah]anthracene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.045,0.230625,0.333333,0.253296,0.161117,0.1125,lognormal,low,OSPAR,ICES
 DBSN+,Dibutyl tin cation,O-MET,Organotins,Organotins,Organotins,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.3,0.2,0.116667,0.265426,,,lognormal,low,OSPAR,ICES
 DBT,Dibenzothiophene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.1,0.235417,0.166667,0.1,0.00011,0.192,lognormal,low,OSPAR,ICES
@@ -317,10 +317,10 @@ DBTC2,C2 Dibenzothiophene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,P
 DBTC3,C3 Dibenzothiophenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.485,0.107088,0.083333,0.091049,,,lognormal,low,OSPAR,ICES
 DCFOP,o--p'-Dicofol,O-GPT,Pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 DCFPP,p--p'-Dicofol,O-GPT,Pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
-DCV,dichlorvos,O-OP,Organophosphorus pesticides,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+DCV,dichlorvos,O-OP,Organophosphorus pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 DDEOP,DDE (o--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
 DDEPP,DDE (p--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.016667,0.180882,0.005,0.26,0,0.146,lognormal,low,OSPAR,ICES
-DDTEP,DDT (p--p') + DDE (p--p'),OC-DD,Organochlorines,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+DDTEP,DDT (p--p') + DDE (p--p'),OC-DD,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 DDTOP,DDT (o--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.006667,0.2625,0.006667,0.3,0,0.15,lognormal,low,OSPAR,ICES
 DDTPP,DDT (p--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.013333,0.25,0.005,0.26,0,0.077,lognormal,low,OSPAR,ICES
 DEPH,depth (of sampling),P-PHY,Physical measurements,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
@@ -331,8 +331,8 @@ DOC,dissolved organic carbon,O-MAJ,Major organic constituents,,,FALSE,FALSE,FALS
 DPSN+,Diphenyltin cation,O-MET,Organotins,Organotins,Organotins,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.3,0.2,0.116667,0.265426,,,lognormal,low,OSPAR,ICES
 DRYWT%,dry weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,,,AMAP,ICES
 END,endrin,OC-DN,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.017167,0.133862,,,0,0.15,lognormal,low,OSPAR,ICES
-ENDA,alpha-endosulfan,OC-CL,Organochlorines,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
-ENDB,beta-endosulfan,OC-CL,Organochlorines,,,TRUE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+ENDA,alpha-endosulfan,OC-CL,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+ENDB,beta-endosulfan,OC-CL,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 ENDN,Endosulphan,O-GPT,Pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 EROD,,B-MBA,Effects,,,FALSE,FALSE,FALSE,pmol/min/mg protein,,,LNMEA~LIPIDWT%~DRYWT%,,,0.5055,0.054412,,,,,lognormal,low,OSPAR,ICES
 EXLIP%,extractable lipid,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,,AMAP,ICES
