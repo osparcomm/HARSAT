@@ -388,10 +388,10 @@ locate_information_file <- function(name, path) {
     }
   }
 
-  # If we fail to find it, fall back to system.file, which isn't clearly documented
-  # but suggests it will return the full path.
-  search <- file.path('information', name)
-  search <- system.file(search, package = "harsat", mustWork = FALSE)
+  # If we fail to find it, fall back to system.file, which isn't clearly
+  # documented but suggests it will return the full path.
+  search_file <- file.path("information", name)
+  search <- system.file(search_file, package = "harsat", mustWork = FALSE)
   if(file.exists(search)) {
     print(paste("found in package", name, search, path))
     return(search)
