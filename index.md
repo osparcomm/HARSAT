@@ -69,6 +69,7 @@ unzip these anywhere you like on your system.
 
 * <a href="./ospar.zip" download>Download the OSPAR archive</a>
 * <a href="./helcom.zip" download>Download the HELCOM archive</a>
+* <a href="./external.zip" download>Download the external data (AMAP) archive</a>
 
 Let's say you have unzipped these to a file on your system, such as `C:\Users\test\ospar`. So, 
 the data is now in `C:\Users\test\ospar\data`, and the reference files are in `C:\Users\test\ospar\information`,
