@@ -347,7 +347,7 @@ wk_metals <-
 biota_assessment <- run_assessment(
   biota_timeseries, 
   subset = determinand %in% wk_metals,
-  AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC"),
+  AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC", "QShh"),
   get_AC_fn = get_AC_biota_OSPAR,
   parallel = TRUE
 )
