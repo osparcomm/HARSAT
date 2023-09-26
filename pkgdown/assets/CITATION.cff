@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+title: HARSAT - Harmonised Regional Seas Assessment Tool
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - name: Arctic Monitoring and Assessment Programme (AMAP)
+    email: amap@amap.no
+  - name: Helsinki Commission (HELCOM)
+    email: data@helcom.fi
+  - name: OSPAR Commission (OSPAR)
+    email: data@ospar.org
+  - name: International Council for the Exploration of the Sea
+      (ICES)
+    email: info@ices.dk
+  - name: AmbieSense Ltd
+    email: info@ambiesense.com
+identifiers:
+  - type: url
+    value: 'https://github.com/osparcomm/HARSAT'
+    description: HARSAT Code - Github
+  - type: url
+    value: 'https://osparcomm.github.io/HARSAT/'
+    description: HARSAT – User Documentation
+    repository-code: 'https://github.com/osparcomm/HARSAT'
+url: 'https://osparcomm.github.io/HARSAT/'
+abstract: >-
+  HARSAT is for the assessment of data
+  concerning contaminants (hazardous substances) and their
+  effects in the marine environment. The code includes tools
+  for pre-processing data, statistical trend analysis and
+  comparison with threshold values, and post-processing for
+  archiving and reporting.
+license: GPL-3.0-or-later

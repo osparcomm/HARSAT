@@ -1,18 +1,21 @@
 The Copyright to all software developed in the HARSAT project is Shared by 
 the following Parties:
 
-1. The Secretariat of the Arctic Monitoring and Assessment Programme (AMAP)
-2. The Secretariat of the Helsinki Commission (HELCOM)
-3. The Secretariat of the OSPAR Commission (OSPAR)
-4. The Secretariat for the International Council for the Exploration of the Sea (ICES)
-5. AmbieSense Ltd (AMB)
+* The Secretariat of the Arctic Monitoring and Assessment Programme (AMAP)
+* The Secretariat of the Helsinki Commission (HELCOM)
+* The Secretariat of the OSPAR Commission (OSPAR)
+* The Secretariat for the International Council for the Exploration of the Sea (ICES)
+* AmbieSense Ltd (AMB)
+ 
+HARSAT - Harmonised Regional Seas Assessment Tool code is subject to
+a GNU GPL >= 3.0 license. 
 
-The HARSAT project software will be released as open source, subject to a 
-GNU GPL >= 3.0 license for third parties to use. 
+HARSAT - Harmonised Regional Seas Assessment Tool – User Documentation is
+subject to a Creative Commons Attributional licence - CC-BY-4.0
 
-Additional documentation, as well as test datasets produced and made available 
-by the HARSAT project, is subject to a Creative Common licence (CC-BY-4.0), 
-unless otherwise covered by the rights of original information and/or data 
-originators.
-
-The HARSAT code is based on code originally developed by the Scottish Government.
+HARSAT – Example data provided under the "data" folder are subject to a 
+Creative Common Attributional licence - CC-BY-4.0; unless otherwise covered
+by the rights of original information and/or data originators.
+ 
+The HARSAT code is based on code originally developed by the Scottish Government
+as Contaminant Time Series Analysis (COTSA), for work under OSPAR.
