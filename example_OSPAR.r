@@ -120,7 +120,7 @@ sediment_assessment <- run_assessment(
 
 # 02 00s
 
-check_assessment(water_assessment)
+check_assessment(sediment_assessment)
 
 
 write_summary_table(
