@@ -2,9 +2,9 @@ Package: harsat
 Title: Harmonized Regional Seas Assessment Tool
 Version: 0.1.1.1002
 Authors@R: c(
-    person(given = "Arctic Monitoring and Assessment Programme (AMAP)", email = "amap@amap.no", role = c("cph", "fnd", "cre", "aut")),
-    person(given = "Helsinki Commission (HELCOM)", email = "secretariat@helcom.fi", role = c("cph", "fnd", "cre", "aut")),
-    person(given = "OSPAR Commission (OSPAR)", email = "secretariat@ospar.org", role = c("cph", "fnd", "cre", "aut")),
+    person(given = "Arctic Monitoring and Assessment Programme (AMAP)", email = "amap@amap.no", role = c("cph", "fnd", "aut")),
+    person(given = "Helsinki Commission (HELCOM)", email = "secretariat@helcom.fi", role = c("cph", "fnd", "aut")),
+    person(given = "OSPAR Commission (OSPAR)", email = "data@ospar.org", role = c("cph", "fnd", "cre", "aut")),
     person(given = "International Council for the Exploration of the Sea (ICES)", email = "info@ices.dk", role = c("cph", "aut")),
     person(given = "AmbieSense Ltd", email = "info@ambiesense.com", role = c("cph", "aut"))
   )
