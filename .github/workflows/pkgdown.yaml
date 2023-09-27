@@ -50,6 +50,18 @@ jobs:
           echo "TEMP_DIR=$(mktemp -d)" >> $GITHUB_ENV
           echo "WORK_DIR=$(pwd)" >> $GITHUB_ENV
 
+      - name: Build data and configuration archive for AMAP/external
+        run: |
+          mkdir -p $TEMP_DIR/external
+          cp -R data/example_external_data $TEMP_DIR/external/
+          mv $TEMP_DIR/external/example_external_data $TEMP_DIR/external/data
+          cp -R information/AMAP $TEMP_DIR/external/
+          mv $TEMP_DIR/external/AMAP $TEMP_DIR/external/information
+          cd $TEMP_DIR
+          zip -r $WORK_DIR/docs/external.zip external
+          cd $WORK_DIR
+        continue-on-error: true
+
       - name: Build data and configuration archive for OSPAR 2022
         run: |
           mkdir -p $TEMP_DIR/ospar

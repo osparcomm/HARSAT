@@ -15,7 +15,6 @@
 #'   `"OSPAR"`, `"HELCOM"`, or `"AMAP"` or to use a customised setup `"custom"`
 #' @param contaminants A file reference for the contaminant data
 #' @param stations A file reference for the station data
-#' @param QA A file reference for the QA data
 #' @param data_dir The directory where the data files can be found (sometimes
 #'   supplied using 'file.path'). Defaults to "."; i.e. the working directory.
 #' @param data_format A string specifying whether the data were extracted from
@@ -79,7 +78,6 @@ read_data <- function(
   purpose = c("OSPAR", "HELCOM", "AMAP", "custom"), 
   contaminants, 
   stations, 
-  QA, 
   data_dir = ".", 
   data_format = c("ICES", "external"),
   info_files = list(),
@@ -390,10 +388,10 @@ locate_information_file <- function(name, path) {
     }
   }
 
-  # If we fail to find it, fall back to system.file, which isn't clearly documented
-  # but suggests it will return the full path.
-  search <- file.path('information', name)
-  search <- system.file(search, package = "harsat", mustWork = FALSE)
+  # If we fail to find it, fall back to system.file, which isn't clearly
+  # documented but suggests it will return the full path.
+  search_file <- file.path("information", name)
+  search <- system.file(search_file, package = "harsat", mustWork = FALSE)
   if(file.exists(search)) {
     print(paste("found in package", name, search, path))
     return(search)
@@ -421,36 +419,6 @@ read_info <- function(info, path, info_files) {
     thresholds = locate_information_file(paste0("thresholds_", info$compartment, ".csv"), path)
   )
   
-  # if (info$purpose == "OSPAR") {
-  #   files <- list(
-  #     determinand = "determinand_OSPAR_2022.csv", 
-  #     species = "species_OSPAR_2022.csv", 
-  #     thresholds = paste0("thresholds_", info$compartment, "_OSPAR_2022.csv")
-  #   )
-  # } else if (info$purpose == "HELCOM") {
-  #   files <- list(
-  #     determinand = "determinand_HELCOM_2023.csv", 
-  #     species = "species_HELCOM_2023.csv",
-  #     thresholds = paste0("thresholds_", info$compartment, "_HELCOM_2023.csv")
-  #   )
-  # } else if (info$purpose == "AMAP") {
-  #   files <- list(
-  #     determinand = "determinand_AMAP_2022.csv", 
-  #     species = "species_AMAP_2022.csv",
-  #     thresholds = if (info$compartment == "biota") {
-  #       "thresholds_biota_AMAP.csv"}
-  #     else {
-  #       NULL
-  #     }
-  #   )
-  # } else {
-  #   files <- list(
-  #     determinand = "determinand_default.csv", 
-  #     species = "species_default.csv",
-  #     thresholds = NULL
-  #   )
-  # }
-
   files$method_extraction <- locate_information_file("method_extraction.csv", path)
   files$pivot_values <- locate_information_file("pivot_values.csv", path)
   files$matrix <- locate_information_file("matrix.csv", path)
@@ -650,8 +618,8 @@ read_stations <- function(file, data_dir = ".", info) {
 
 #' Reads contaminant data 
 #'
-#' A quick way of reading the contaminant data without having to do any 
-#' station matching (if using `data_format == "ICES`)
+#' A quick way of reading the contaminant data (which also avoids having to do 
+#' any station matching if `info$data_format == "ICES`).
 #'
 #' @param file A file reference for the contaminant data.
 #' @param data_dir A path to the directory holding the contaminant data.
@@ -946,11 +914,6 @@ read_contaminants <- function(file, data_dir = ".", info) {
   data
 }
 
-
-
-# Function to match stations in a file to the DOME station dictionary, 
-# Authors: Adriana Villamor, Hans Mose Jensen & Rob Fryer
-# July 2023
 
 #' Add stations to contaminant data from an ICES extraction
 #'

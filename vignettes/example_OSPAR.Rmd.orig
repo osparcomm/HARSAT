@@ -262,7 +262,10 @@ of biological effects (although imposex measurements have been exluded from
 this example and will be the topic of a later vignette). Second, the basis of 
 the assessment is far more complicated. The example below also shows how you 
 can break up the modelling stage into several parts. This is sometimes 
-necessary if you have a lot of timeseries and you hit memory limitations in R.  
+necessary if you have a lot of timeseries and you hit memory limitations in R. 
+
+Note that the threshold file is currently incomplete. This is being actively 
+worked on.
 
 ```{r ospar-biota-data}
 biota_data <- read_data(
@@ -324,11 +327,17 @@ several parts. The call to `run_assessment` only assesses the metal time series
 (as specified by the metals in `wk_metals`). The call to `update_assessment` 
 then assesses all the remaining time series. In general, you can subset both
 `run_assessment` and `update_assessment` using any column in the time series
-component of `biota_timeseries`; this includes `determinadd`, `matrix`, 
-`species` and, as a special case, `series`, if you want to just want to update
-one or two time series. The latter is particularly useful if you want to a 
+component of `biota_timeseries`; this includes `determinand`, `matrix`, 
+`species` and, as a special case, `series`, if you just want to update
+one or two time series. The latter is particularly useful if a 
 series has not converged and you want to rerun that series with different 
-optimise controls (subject of a separate vignette).
+optimisation controls (subject of a separate vignette).
+
+The application of thresholds is also more complicated and can not be handled by 
+the standard routines. For example, Background Assessment Concentrations for 
+cadmium and lead in fish are only applied to species / tissue combinations where 
+the lipid content is $>=$ 3%. This is dealt with by using the customised 
+function `get_AC_biota_OSPAR`.
 
 
 ```{r ospar-biota-assessment}
@@ -338,7 +347,8 @@ wk_metals <-
 biota_assessment <- run_assessment(
   biota_timeseries, 
   subset = determinand %in% wk_metals,
-  AC = c("BAC", "EAC", "EQS", "HQS"),
+  AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC", "QShh"),
+  get_AC_fn = get_AC_biota_OSPAR,
   parallel = TRUE
 )
 
@@ -376,25 +386,37 @@ write_summary_table(
   ),
   classColour = list(
     below = c(
-      "BAC" = "blue", 
+      "BAC" = "blue",
+      "NRC" = "blue",
       "EAC" = "green", 
-      "EQS" = "green", 
-      "HQS" = "green"
+      "LRC" = "green", 
+      "QSsp" = "green", 
+      "MPC" = "green",
+      "QShh" = "green"
     ),
     above = c(
       "BAC" = "orange", 
+      "NRC" = "orange", 
       "EAC" = "red", 
-      "EQS" = "red", 
-      "HQS" = "red"
+      "LRC" = "red", 
+      "QSsp" = "red", 
+      "MPC" = "red",
+      "QShh" = "red"
     ),
     none = "black"
   ),
-  collapse_AC = list(BAC = "BAC", EAC = c("EAC", "EQS"), HQS = "HQS"),
+  collapse_AC = list(
+    BAC = c("BAC", "NRC"),
+    EAC = c("EAC", "LRC", "QSsp"), 
+    HQS = c("MPC", "QShh")
+  ),
   output_dir = summary.dir
 )
 ```
 
-And finally, let's take a look at the `biota_summary.csv` file:
+And finally, let's take a look at the `biota_summary.csv` file. Note that the 
+symbology in the summary table is still under development and currently does
+separate environmental and health tresholds in the status assessment.
 
 ```{r ospar-biota-summary-render,echo=FALSE}
 summary.data <- read.csv(file.path(summary.dir, "biota_summary.csv"))

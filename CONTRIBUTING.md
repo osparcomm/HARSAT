@@ -1,47 +1,5 @@
 # Contributor's Guide
 
-This document will help you set up access to the main repository for
-the `harsat` code, and help you contribute to the code.
-
-## Summary
-
-* Main repository on Github: https://github.com/osparcomm/HARSAT
-* Repository is currently *private* -- for access permissions, contact 
-  [Chris Moulton](https://github.com/moultonc) or the OSPAR team, as they
-  are the ones who administer the repository on Github. You will need this access to 
-  both read the code and to contribute.
-* Web documentation on Github Pages: https://osparcomm.github.io/HARSAT/
-
-
-## Packaging
-
-Our aim is to make the `harsat` code work as an R package. It is not
-going to be distributed on CRAN for the near future at least. Instead,
-it can be installed directly from Github. 
-
-To install the latest **development** version, use the `remotes` package:
-
-```
-library(remotes)
-remotes::install_github("osparcomm/harsat", auth_token = 'XXXX')
-```
-
-Installing the latest stable version is similar, but is less likely to
-change or break. The web documentation reflects the stable version, not
-the development version.
-
-```
-library(remotes)
-remotes::install_github("osparcomm/harsat@main", auth_token = 'XXXX')
-```
-
-This should install all the `harsat` code with all its dependencies.
-
-> Note: during development the repository is marked as private on GitHub, so you
-> will need a GitHub Personal Access Token (or PAT) to access it. Put it in the
-> call above as the 'XXXX' string.
-
-
 ## Contributing
 
 ### Issues
@@ -66,12 +24,10 @@ them into the issue directly.
 ### Pull requests
 
 We welcome pull requests. The easiest way to do this is to fork the repository
-on Github, make the changes you want in your fork, push them to Github, and create 
-a pull request using its web interface. At that point it will show up on the
-main repository and we can collaborate with you to integrate it into the 
-code.
-
-Please note that we are particularly keen to improve the code quality. 
+on Github, make the changes you want in your fork, push them to Github, and create
+a pull request using its web interface. This will then be sent to the
+[CODEOWNERS](link to: CODEOWNERS) for review and the pull request
+approved/rejected as appropriate.
 
 
 ## Documentation
@@ -79,9 +35,8 @@ Please note that we are particularly keen to improve the code quality.
 All documentation is held within the Github repository. We use the following
 flow.
 
-1. `roxygen2` is used for source-code documentation. We particularly welcome
-   pull requests to improve this documentation. 
-2. We have several vignettes in the `vignettes` directory. Some actually run `harsat` code (the ones 
+1. `roxygen2` is used for source-code documentation. 
+2. We have several vignettes in the `vignettes` directory. Some run `harsat` code (the ones
    matching `*.Rmd.orig`) and are therefore *precompiled*, because they can take 15-20 minutes
    to run. That turns `*.Rmd.orig` into corresponding `*.Rmd` files. Then, the 
    normal documentation building for vignettes on installation will deploy these

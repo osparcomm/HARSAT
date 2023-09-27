@@ -22,7 +22,7 @@ ctsm.VDS.varlist <- paste("ctsm.VDS", c("p.calc", "loglik.calc", "index.opt", "c
 #' 
 #' @export 
 cstm.VDS.environment <- function() {
-  environment(sys.function())
+  environment(sys.function(sys.nframe()))
 }
 
 #' ctsm.VDS.p.calc

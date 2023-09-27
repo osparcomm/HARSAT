@@ -1,22 +1,17 @@
 Package: harsat
 Title: Harmonized Regional Seas Assessment Tool
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
-    person(given = "Rob", family = "Fryer", email = "rob.fryer@gov.scot", role = c("aut")),
-    person(given = "Leszek", family = "Kaliciak", email = "leszek@ambiesense.com", role = c("aut")),
-    person(given = "Scottish Government", email = "marinescotland@gov.scot", role = c("fnd", "aut")),
-    person(given = "AmbieSense Ltd", email = "info@ambiesense.com", role = c("cph", "cre", "aut")),
-    person(given = "Helsinki Commission (HELCOM)", email = "secretariat@helcom.fi", role = c("cph", "fnd", "ctb")),
-    person(given = "Arctic Monitoring and Assessment Programme (AMAP)", email = "amap@amap.no", role = c("cph", "fnd", "ctb")),
-    person(given = "OSPAR Commission (OSPAR)", email = "secretariat@ospar.org", role = c("cph", "fnd", "ctb")),
-    person(given = "International Council for the Exploration of the Sea (ICES)", email = "info@ices.dk", role = c("cph", "aut"))
+    person(given = "Arctic Monitoring and Assessment Programme (AMAP)", email = "amap@amap.no", role = c("cph", "fnd", "aut")),
+    person(given = "Helsinki Commission (HELCOM)", email = "secretariat@helcom.fi", role = c("cph", "fnd", "aut")),
+    person(given = "OSPAR Commission (OSPAR)", email = "data@ospar.org", role = c("cph", "fnd", "cre", "aut")),
+    person(given = "International Council for the Exploration of the Sea (ICES)", email = "info@ices.dk", role = c("cph", "aut")),
+    person(given = "AmbieSense Ltd", email = "info@ambiesense.com", role = c("cph", "aut"))
   )
-Description: Assessment of concentrations of hazardous substances and their
-  biological effects in the marine environment. The code supports periodic
-  international assessments by OSPAR, HELCOM and AMAP and also assessments
-  by individual users. Includes tools for pre-processing data, statistical
-  trend analysis and comparison with threshold values, and post-processing
-  for archiving and reporting.
+Description: Tools for the assessment of data concerning contaminants (hazardous
+  substances) and their effects in the marine environment. The code includes
+  tools for pre-processing data, statistical trend analysis and comparison with
+  threshold values, and post-processing for archiving and reporting.
 License: file LICENSE
 Encoding: UTF-8
 URL: https://github.com/osparcomm/HARSAT, https://osparcomm.github.io/HARSAT/
@@ -43,7 +38,7 @@ Imports:
   tidyr,
   sf
 Suggests: 
-    knitr,
-    rmarkdown,
-    testthat (>= 3.0.0)
+  knitr,
+  rmarkdown,
+  testthat (>= 3.0.0)
 Config/testthat/edition: 3

@@ -46,7 +46,7 @@ run_assessment <- function(
   ctsm_ob$info$AC <- AC
   
   ctsm_ob$info$get_AC_fn <- get_AC_fn
-  if (!is.null(AC) && is.null(ctsm_ob$info$get_AC)) {
+  if (!is.null(AC) && is.null(ctsm_ob$info$get_AC_fn)) {
     ctsm_ob$info$get_AC_fn <- get_AC[[ctsm_ob$info$compartment]]
   }
 
@@ -186,7 +186,8 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
 
     is_imposex <- "Imposex" %in% data$group
     export_objects <- parallel_objects(is_imposex)
-    parallel::clusterExport(cluster_id, export_objects)
+    package_environment <- environment(sys.function(sys.nframe()))
+    parallel::clusterExport(cluster_id, export_objects, envir = package_environment)
 
   } else {
     cluster_id <- NULL
@@ -251,9 +252,8 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
     
     row.names(x) <- NULL
 
-    annualIndex <- get.index(determinand, x, info)
+    annualIndex <- get_index(determinand, x, info)
     
-
     # get assessment concentrations - need to extract some key variables first 
     # could streamline in future
     
@@ -392,7 +392,7 @@ parallel_objects <- function(imposex = FALSE) {
   # assessment_functions.R
   # objects required for clusterExport
 
-  package.environment <- environment(sys.function())
+  package.environment <- environment(sys.function(sys.nframe()))
   
   out <- c(
     "negTwiceLogLik", 
@@ -419,89 +419,64 @@ parallel_objects <- function(imposex = FALSE) {
 
 # Annual indices ----
 
-get.index <- function(determinand, data, info) {
-  
-  group <- ctsm_get_info(
-    info$determinand, 
-    determinand, 
-    "group", 
-    info$compartment, 
-    sep = "_"
-  )
-  
-  function_id <- paste("get.index", info$compartment, group, sep = ".")
-  
-  do.call(function_id, list(data = data, determinand = determinand, info = info), envir = sys.frame()) 
-}
+# get.index <- function(determinand, data, info) {
+#   
+#   group <- ctsm_get_info(
+#     info$determinand, 
+#     determinand, 
+#     "group", 
+#     info$compartment, 
+#     sep = "_"
+#   )
+#   
+#   function_id <- paste("get.index", info$compartment, group, sep = ".")
+#   
+#   do.call(function_id, list(data = data, determinand = determinand, info = info), envir = sys.frame()) 
+# }
 
 
-get.index.default <- function(data, determinand, info) {
+# get.index.default <- function(data, determinand, info) {
+# 
+#   data <- data[!is.na(data$concentration), ]
+#   
+#   # median (log) concentrations with flag to denote if less thans used in their 
+#   # construction
+#   
+#   distribution <- ctsm_get_info(info$determinand, determinand, "distribution")
+#   
+#   data$response <- switch(
+#     distribution, 
+#     lognormal = log(data$concentration), 
+#     data$concentration
+#   )
+#   
+#   index <- tapply(data$response, data$year, median, na.rm = TRUE)
+#   
+#   censoring <- by(data, data$year, function(x) {
+#     x <- x[order(x$concentration),]
+#     n <- nrow(x)
+#     n0 <- ceiling(n / 2)
+#     any(x$censoring[n0:n] %in% c("<", "D", "Q"))
+#   })
+#   censoring <- sapply(censoring, function(i) i)	
+#   
+#   data <- data.frame(year = as.numeric(names(index)), index, censoring, row.names = NULL)
+#   
+#   data <- within(data, censoring <- factor(ifelse(censoring, "<", "")))
+#   
+#   data
+# }
 
-  data <- data[!is.na(data$concentration), ]
-  
-  # median (log) concentrations with flag to denote if less thans used in their 
-  # construction
+
+
+get_index <- function(determinand, data, info) {
   
   distribution <- ctsm_get_info(info$determinand, determinand, "distribution")
-  
-  data$response <- switch(
-    distribution, 
-    lognormal = log(data$concentration), 
-    data$concentration
-  )
-  
-  index <- tapply(data$response, data$year, median, na.rm = TRUE)
-  
-  censoring <- by(data, data$year, function(x) {
-    x <- x[order(x$concentration),]
-    n <- nrow(x)
-    n0 <- ceiling(n / 2)
-    any(x$censoring[n0:n] %in% c("<", "D", "Q"))
-  })
-  censoring <- sapply(censoring, function(i) i)	
-  
-  data <- data.frame(year = as.numeric(names(index)), index, censoring, row.names = NULL)
-  
-  data <- within(data, censoring <- factor(ifelse(censoring, "<", "")))
-  
-  data
-}
 
-get.index.sediment.Metals <- get.index.default
-get.index.sediment.PAH_parent <- get.index.default
-get.index.sediment.PAH_alkylated <- get.index.default
-get.index.sediment.Chlorobiphenyls <- get.index.default
-get.index.sediment.PBDEs <- get.index.default
-get.index.sediment.Organobromines <- get.index.default
-get.index.sediment.Organotins <- get.index.default
-get.index.sediment.Organochlorines <- get.index.default
-get.index.sediment.Organofluorines <- get.index.default
-get.index.sediment.Dioxins <- get.index.default
-
-get.index.biota.Metals <- get.index.default
-get.index.biota.PAH_parent <- get.index.default
-get.index.biota.PAH_alkylated <- get.index.default
-get.index.biota.Chlorobiphenyls <- get.index.default
-get.index.biota.PBDEs <- get.index.default
-get.index.biota.Organobromines <- get.index.default
-get.index.biota.Organotins <- get.index.default
-get.index.biota.Organochlorines <- get.index.default
-get.index.biota.Organofluorines <- get.index.default
-get.index.biota.Dioxins <- get.index.default
-get.index.biota.Metabolites <- get.index.default
-
-get.index.biota.Effects <- function(data, determinand, info) {
-
-  # median value apart from MNC and %DNATAIL where we get a weighted average
-  # based on the number of cells
-
-  # have put in a trap for censoring values for anything that is not lognormally distributed
-  # or that has good.status = high
-  
-  distribution <- ctsm_get_info(info$determinand, determinand, "distribution")
-  
   good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
   
+  
+  # crude trap for unexpected censoring values
   
   censoring_trap <- FALSE
   
@@ -514,20 +489,81 @@ get.index.biota.Effects <- function(data, determinand, info) {
   } 
   
   if (censoring_trap) {
-    stop("surprising censorings: need to investigate")
+    warning(
+      "unexpected censoring values found for determinand ", 
+      determinand, "\n",
+      "results might be compromised\n", 
+      "please consult harsat development team", 
+      call. = FALSE
+    )
   }
   
   
-  # default for everything other than %DNATAIL and MNC: median (log) concentration
+  if (distribution %in% "lognormal") {
+    get_index_median(data, log = TRUE)
+  } else if (distribution %in% c("normal", "survival", "multinomial", "quasibinomial")) {
+    get_index_median(data, log = FALSE)
+  } else if (distribution %in% c("beta", "negativebinomial")) {
+    get_index_weighted_mean(data, determinand) 
+  } else {
+    stop(
+      "distribution ", distribution, " not recognised\n", 
+      "please consult harsat development team", 
+      call. = FALSE
+    )
+  }
+    
+}
+
+
+get_index_median <- function(data, log = TRUE) {
   
-  if (!determinand %in% c("%DNATAIL", "MNC")) {
-    out <- get.index.default(data, determinand, info)
-    return(out)
+  data <- data[!is.na(data$concentration), ]
+  
+  # median (log) concentrations with flag to denote if less thans used in their 
+  # construction
+  
+  data$response <- data$concentration
+  if (log) {
+    data$response <- log(data$response)
   }
   
+  index <- tapply(data$response, data$year, median, na.rm = TRUE)
   
-  # %DNATAIL and MNC: mean 'concentration' weighted by number of cells
+  censoring <- by(data, data$year, function(x) {
+    x <- x[order(x$concentration),]
+    n <- nrow(x)
+    n0 <- ceiling(n / 2)
+    any(x$censoring[n0:n] %in% c("<", "D", "Q"))
+  })
+  censoring <- sapply(censoring, function(i) i)	
+  censoring <- ifelse(censoring, "<", "")
+
+  data.frame(
+    year = as.numeric(names(index)), 
+    index, 
+    censoring, 
+    row.names = NULL
+  )
   
+}
+
+
+get_index_weighted_mean <- function(data, determinand) {
+  
+  # only currently used by MNC and %DNATAIL where we get a weighted average
+  # based on the number of cells
+
+  if (!determinand %in% c("MNC", "%DNATAIL")) {
+    stop(
+      "get_index_weighted_mean can not be used with determinand ", 
+      determinand, "\n", 
+      "currently only coded for MNC or %DNATAIL\n", 
+      "please contact harsat development team", 
+      call. = FALSE
+    )
+  }
+    
   data <- data[!is.na(data$concentration), ]
   
   nCell_id <- switch(
@@ -535,7 +571,7 @@ get.index.biota.Effects <- function(data, determinand, info) {
     MNC = "MNC-QC-NR",
     "%DNATAIL" = "CMT-QC-NR"
   )
-
+  
   out <- by(data, data$year, function(x) {
     names(x)[match(nCell_id, names(x))] <- "nCell"
     data.frame(
@@ -544,29 +580,18 @@ get.index.biota.Effects <- function(data, determinand, info) {
       nCell = with(x, sum(nCell))
     )
   })
-
+  
   out <- do.call("rbind", out)
   
-  out$censoring <- factor(rep("", nrow(out)), levels = c("", "<"))
+  out$censoring <- rep("", nrow(out))
   
   out <- out[c("year", "index", "censoring", "nCell")]
-    
+  
   out$row.names <- NULL
   
   return(out)
 }
 
-get.index.water.Metals <- get.index.default
-get.index.water.PAH_parent <- get.index.default
-get.index.water.PAH_alkylated <- get.index.default
-get.index.water.Chlorobiphenyls <- get.index.default
-get.index.water.PBDEs <- get.index.default
-get.index.water.Organobromines <- get.index.default
-get.index.water.Organotins <- get.index.default
-get.index.water.Organochlorines <- get.index.default
-get.index.water.Organofluorines <- get.index.default
-get.index.water.Dioxins <- get.index.default
-get.index.water.Pesticides <- get.index.default
 
 
 # Mixed model assessment functions ----
