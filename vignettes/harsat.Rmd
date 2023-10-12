@@ -16,7 +16,7 @@ looks like in a typical analysis.
 ## Installing `harsat` from a bundled package
 
 If you have a downloaded copy of the bundled package, whch will be a file
-named something like `harsat_0.1.1.tar.gz` or `harsat_0.1.1.tar`, you 
+named something like `harsat_0.1.2.tar.gz` or `harsat_0.1.2.tar`, you 
 can install that directly, and R will still take care of making sure 
 you have all the right dependencies.
 
@@ -32,7 +32,7 @@ button.
 Use a command:
 
 ```r
-install.packages("~/Downloads/harsat_0.1.1.tar", repos = NULL)
+install.packages("~/Downloads/harsat_0.1.2.tar", repos = NULL, type="source")
 ```
 
 Use the right file for the downloaded package file, press enter, and

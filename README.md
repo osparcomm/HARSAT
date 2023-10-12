@@ -19,7 +19,7 @@ as this ensures that all dependencies are up-to-date, properly downloaded and in
 ### In RStudio
 
 To do this, you will need a downloaded package bundle, typically a file 
-called something like `harsat_0.1.1.tar.gz`.
+called something like `harsat_0.1.2.tar.gz`.
 
 From the `Packages` tab, choose `Install`, make sure you have selected
 to install from a Package Archive File, then press the `Browse...` button
@@ -29,13 +29,15 @@ button.
 ### From the R command line
 
 To do this, you will need a downloaded package bundle, typically a file 
-called something like `harsat_0.1.1.tar.gz`.
+called something like `harsat_0.1.2.tar.gz`.
 
 In the R command line, use a command (passing the filename of wherever 
 you have downloaded the file to):
 
 ```r
-install.packages("~/Downloads/harsat_0.1.1.tar", repos = NULL)
+install.packages(remotes) -- if needed
+library(remotes)
+remotes::install_local("~/Downloads/harsat_0.1.2.tar")
 ```
 ### Directly from Github
 
