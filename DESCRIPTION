@@ -36,7 +36,9 @@ Imports:
   stringr,
   tibble,
   tidyr,
-  sf
+  sf,
+  digest,
+  readxl
 Suggests: 
   knitr,
   rmarkdown,

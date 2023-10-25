@@ -51,6 +51,52 @@ data files and analysis files, and any copied or modified configuration
 files you have put into your analysis directory, will not
 be affected. 
 
+## File encodings
+
+`harsat` currently expects all files to be encoded using UTF-8. Standard ASCII 
+files are also fine, as UTF-8 is a superset of ASCII. If you are using accented
+characters in another encoding, such as the common Latin-1 (also known as iso-8859-1)
+then we would ask you to convert them to UTF-8 first. If you are using Microsoft 
+Excel to prepare them, this simply means saving them as CSV files with UTF-8
+encoding. 
+
+> Note: the reason we do not allow people to choose a file encoding option for 
+> input files, is that `harsat` reads quite a few files, and it would be hard to specify
+> encodings for all of them
+> if they different file encodings. UTF-8 is very standard now, it is automatically
+> used for ICES data anyway, so it `harsat` will instead check for UTF-8, and if
+> your files aren't encoded as expected, it will warn you. 
+
+If you are using other tools, please check the documentation for those tools to
+make sure that they aren't converting files to Latin-1 behind your back. 
+
+To check the encoding of a file, use the `file` command, which is slightly different
+depending on your operating system.
+
+On a Mac:
+
+```
+$ file -I file.csv
+file.csv: text/csv; charset=utf-8
+```
+
+On Windows or Linux (on Windows, you may need [File for Windows](https://gnuwin32.sourceforge.net/packages/file.htm)):
+
+```
+$ file file.csv
+file.csv: text/csv; charset=utf-8
+```
+
+If the `charset` is not reported as `utf-8` (or `us-ascii`), you will need to convert it.
+The easiest way to do this is using `iconv`, which is built in on Macs, and 
+available as a [download on Windows](https://gnuwin32.sourceforge.net/packages/libiconv.htm).
+
+```
+iconv -f <old charset> -t utf-8 file.csv > file-utf8.csv
+```
+
+You can then use the converted version `file-utf8.csv` in your workflows. 
+
 ## Typical workflow
 
 Let's imagine you want to run an analysis with `harsat`, and have 

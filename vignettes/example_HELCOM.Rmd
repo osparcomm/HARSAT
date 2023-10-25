@@ -99,11 +99,16 @@ water_data <- read_data(
 #> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_water.csv': '599000609710f7a53450f16fef814d1c'
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt': 'ada1ffa58215843e8e4d5f4d74f5e21e'
 #> 
 #> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/water.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/water.txt': 'd229a93b6e1c8b37008d375365488db4'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: HELCOM 
@@ -335,11 +340,18 @@ sediment_data <- read_data(
 #> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/method_extraction.csv': 'b3c891f17b9b35774114edaa2f58b6cc'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/pivot_values.csv': '372ad2d2ef807cec64ce1a7bd1967158'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_sediment.csv': '52456c255f587a539177d5fa0fbb7cf1'
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt': 'ada1ffa58215843e8e4d5f4d74f5e21e'
 #> 
 #> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/sediment.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/sediment.txt': '0cd5fa2f4a07a2750a56a24b2fe887bf'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: HELCOM 
@@ -521,11 +533,18 @@ biota_data <- read_data(
 #> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
 #> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv': '895d4f259f2a1ee8d9c7ec52210f584c'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/imposex.csv': '7e42cb57944b9d79216ad25c12ccada5'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_biota.csv': '1798bfbfb15104c2cbf8ff00ccf13abd'
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt': 'ada1ffa58215843e8e4d5f4d74f5e21e'
 #> 
 #> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_HELCOM/biota.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/biota.txt': 'a986e6899ecd6c9fbc0bd7854b452c9a'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: HELCOM 

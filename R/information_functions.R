@@ -165,7 +165,8 @@ ctsm_read_species <- function(file) {
 
   # check required variables are present in data
   
-  data <- read.csv(
+  report_file_digest(file)
+  data <- safe_read_file(
     file, 
     strip.white = TRUE, 
     nrows = 1
@@ -198,8 +199,8 @@ ctsm_read_species <- function(file) {
     ok <- c(required, cf_id) %in% names(data)
   }
       
-  
-  data <- read.csv(
+  # note: don't report_file_digest() here, as we already did that once above
+  data <- safe_read_file(
     file, 
     na.strings = c("", "NULL"),
     strip.white = TRUE,
@@ -460,7 +461,8 @@ ctsm_read_determinand <- function(
   # check required variables are present in data and issue message if optional
   # variables are not
   
-  data <- read.csv(
+  report_file_digest(file)
+  data <- safe_read_file(
     file,
     strip.white = TRUE, 
     nrows = 1
@@ -497,7 +499,8 @@ ctsm_read_determinand <- function(
 
   ok <- names(var_id) %in% names(data)
   
-  data <- read.csv(
+  # note: don't report_file_digest() here, as we already did that once above
+  data <- safe_read_file(
     file, 
     na.strings = c("", "NULL"),
     strip.white = TRUE,
@@ -778,7 +781,8 @@ ctsm_read_thresholds <- function(
   
   compartment = match.arg(compartment)
   
-  data <- read.csv(
+  report_file_digest(file)
+  data <- safe_read_file(
     file, 
     na.strings = "",
     strip.white = TRUE
@@ -853,7 +857,8 @@ ctsm_read_thresholds <- function(
 convert_reftable <- function(
     input_file, output_file, export = TRUE) {
   
-  data <- read.csv(input_file, na.strings = "", strip.white = TRUE)
+  report_file_digest(input_file)
+  data <- safe_read_file(input_file, na.strings = "", strip.white = TRUE)
   
  
   # get current ordering of determinands
@@ -2404,7 +2409,8 @@ get_basis_biota_OSPAR <- function(data, info) {
 # Matrix ----
 
 ctsm_read_matrix <- function(file) {
-  read.csv(
+  report_file_digest(file)
+  safe_read_file(
     file, 
     row.names = "matrix", 
     strip.white = TRUE
@@ -2424,7 +2430,8 @@ ctsm_read_regions <- function(file, purpose) {
     )
   }
   
-  read.csv(
+  report_file_digest(file)
+  safe_read_file(
     file, 
     row.names = "OSPAR_subregion", 
     strip.white = TRUE
@@ -2436,7 +2443,8 @@ ctsm_read_regions <- function(file, purpose) {
 # Method of extraction and pivot values ----
 
 ctsm_read_method_extraction <- function(file) {
-  read.csv(
+  report_file_digest(file)
+  safe_read_file(
     file, 
     row.names = "METCX",  
     na.strings = "",
@@ -2446,7 +2454,8 @@ ctsm_read_method_extraction <- function(file) {
 
 
 ctsm_read_pivot_values <- function(file) {
-  read.csv(
+  report_file_digest(file)
+  safe_read_file(
     file, 
     na.strings = "",
     strip.white = TRUE
@@ -2458,7 +2467,8 @@ ctsm_read_pivot_values <- function(file) {
 # Imposex ----
 
 ctsm_read_imposex <- function(file) {
-  read.csv(
+  report_file_digest(file)
+  safe_read_file(
     file, 
     na.strings = "",
     strip.white = TRUE
@@ -2500,109 +2510,109 @@ get.info.imposex <- function(
 # chemical parameter descriptions
 
 
-get_RECO <- function(code, path = "information") {
-  
-  # check code argument and convert to upper case
-  
-  if(!is.character(code) | length(code) != 1L)
-    stop("code must be a length 1 character")
-  
-  code <- toupper(code)
-  
-  
-  # get list of available RECO files
-  
-  files <- list.files(path)
-  
-  ok <-substring(files, 1, 5) == "RECO_"
-  
-  if (!any(ok)) 
-    stop("no RECO files found")
-  
-  files <- files[ok]
-  
-  
-  # get relevant file
-  
-  file_codes <- strsplit(files, "_") 
-  file_codes <- sapply(file_codes, "[[", 2)
-  
-  ok <- file_codes %in% code
-
-  if (!any(ok)) 
-    stop("RECO file for this code not found")
-  
-  if (sum(ok) >= 2L)
-    stop("multiple REcO files found for this code")
-  
-  infile <- files[ok]
-  
-  infile <- file.path(path, infile)
-  
-
-  # read in file - need to do something different for PARAM
-  
-  if (!code %in% "PARAM") {
-    out <- readr::read_csv(
-      infile, 
-      col_types = cols(
-        tblCodeID = col_integer(),
-        Code = col_character(),
-        Description = col_character(),
-        tblCodeTypeID = col_integer(),
-        CodeType = col_character(),
-        Created = col_date(format = ""),
-        Modified = col_date(format = ""),
-        Deprecated = col_logical()
-      )
-    ) 
-    
-    out <- as.data.frame(out)
-    
-    names(out)[2] <- code
-    return(out)
-  }
-
-
-  # special case for PARAM required because there are columns in the Description column
-  
-  # read in each row as a single character string and split by commas
-  
-  data <- readr::read_delim(
-    infile, 
-    delim = "\n",
-    col_types = cols(
-      `tblCodeID,Code,Description,tblCodeTypeID,CodeType,Created,Modified,Deprecated` = col_character()
-    )
-  ) 
-  
-  data <- as.data.frame(data)
-  names(data) <- "X" 
-  
-  data <- strsplit(data$X, ",")
-  
-  out <- data.frame(
-    tblCodeID = sapply(data, function(x) {n <- length(x); x[1]}),
-    Code = sapply(data, function(x) {n <- length(x); x[2]}),
-    Description = sapply(data, function(x) {n <- length(x); paste(x[3:(n-5)], collapse = ",")}),
-    tblCodeTypeID = sapply(data, function(x) {n <- length(x); x[n-4]}),
-    CodeType = sapply(data, function(x) {n <- length(x); x[n-3]}),
-    Created = sapply(data, function(x) {n <- length(x); x[n-2]}),
-    Modified = sapply(data, function(x) {n <- length(x); x[n-1]}),
-    Deprecated = sapply(data, function(x) {n <- length(x); x[n]}),
-    stringsAsFactors = FALSE
-  )
-
-  out <- dplyr::mutate(
-    out, 
-    across(c("tblCodeID", "tblCodeTypeID"), as.integer),  
-    across(c("Created", "Modified"), as_date), 
-    across("Deprecated", as.logical)
-  )
-
-  names(out)[2] <- code
-  out
-}
+# get_RECO <- function(code, path = "information") {
+#  
+#   # check code argument and convert to upper case
+#  
+#   if(!is.character(code) | length(code) != 1L)
+#     stop("code must be a length 1 character")
+#  
+#   code <- toupper(code)
+#  
+#  
+#   # get list of available RECO files
+#  
+#   files <- list.files(path)
+#  
+#   ok <-substring(files, 1, 5) == "RECO_"
+#  
+#   if (!any(ok)) 
+#     stop("no RECO files found")
+#  
+#   files <- files[ok]
+#  
+#  
+#   # get relevant file
+#  
+#   file_codes <- strsplit(files, "_") 
+#   file_codes <- sapply(file_codes, "[[", 2)
+#  
+#   ok <- file_codes %in% code
+#
+#   if (!any(ok)) 
+#     stop("RECO file for this code not found")
+#  
+#   if (sum(ok) >= 2L)
+#     stop("multiple REcO files found for this code")
+#  
+#   infile <- files[ok]
+#  
+#   infile <- file.path(path, infile)
+#  
+#
+#   # read in file - need to do something different for PARAM
+#  
+#   if (!code %in% "PARAM") {
+#     out <- readr::read_csv(
+#       infile, 
+#       col_types = cols(
+#         tblCodeID = col_integer(),
+#         Code = col_character(),
+#         Description = col_character(),
+#         tblCodeTypeID = col_integer(),
+#         CodeType = col_character(),
+#         Created = col_date(format = ""),
+#         Modified = col_date(format = ""),
+#         Deprecated = col_logical()
+#       )
+#     ) 
+#    
+#     out <- as.data.frame(out)
+#    
+#     names(out)[2] <- code
+#     return(out)
+#   }
+#
+#
+#   # special case for PARAM required because there are columns in the Description column
+#  
+#   # read in each row as a single character string and split by commas
+#  
+#   data <- readr::read_delim(
+#     infile, 
+#     delim = "\n",
+#     col_types = cols(
+#       `tblCodeID,Code,Description,tblCodeTypeID,CodeType,Created,Modified,Deprecated` = col_character()
+#     )
+#   ) 
+#  
+#   data <- as.data.frame(data)
+#   names(data) <- "X" 
+#  
+#   data <- strsplit(data$X, ",")
+#  
+#   out <- data.frame(
+#     tblCodeID = sapply(data, function(x) {n <- length(x); x[1]}),
+#     Code = sapply(data, function(x) {n <- length(x); x[2]}),
+#     Description = sapply(data, function(x) {n <- length(x); paste(x[3:(n-5)], collapse = ",")}),
+#     tblCodeTypeID = sapply(data, function(x) {n <- length(x); x[n-4]}),
+#     CodeType = sapply(data, function(x) {n <- length(x); x[n-3]}),
+#     Created = sapply(data, function(x) {n <- length(x); x[n-2]}),
+#     Modified = sapply(data, function(x) {n <- length(x); x[n-1]}),
+#     Deprecated = sapply(data, function(x) {n <- length(x); x[n]}),
+#     stringsAsFactors = FALSE
+#   )
+#
+#   out <- dplyr::mutate(
+#     out, 
+#     across(c("tblCodeID", "tblCodeTypeID"), as.integer),  
+#     across(c("Created", "Modified"), as_date), 
+#     across("Deprecated", as.logical)
+#   )
+#
+#   names(out)[2] <- code
+#   out
+# }
 
 
 # Station utility functions ----
