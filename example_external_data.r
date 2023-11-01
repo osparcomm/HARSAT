@@ -22,15 +22,15 @@ devtools::load_all()
 # mercury data with supporting variables and station dictionary
 
 biota_data <- read_data(
-  compartment = "biota", 
+  compartment = "biota",
   purpose = "AMAP",
-  contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv", 
-  stations = "AMAP_external_new_stations_only.csv", 
-  data_dir = file.path("data", "example_external_data"), 
+  contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv",
+  stations = "AMAP_external_new_stations_only.csv",
+  data_dir = file.path("data", "example_external_data"),
   data_format = "external",
   info_dir = file.path("information", "AMAP"),
   control = list(region = list(id = "AMAP_region"))
-)  
+)
 
 
 # Prepare data for next stage ----
@@ -127,4 +127,3 @@ plot_assessment(
   output_dir = file.path("output", "graphics"), 
   file_format = "pdf"
 )
-

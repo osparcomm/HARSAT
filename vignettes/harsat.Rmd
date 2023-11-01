@@ -32,7 +32,9 @@ button.
 Use a command:
 
 ```r
-install.packages("~/Downloads/harsat_0.1.2.tar", repos = NULL, type="source")
+install.packages(remotes) -- if needed
+library(remotes)
+remotes::install_local("~/Downloads/harsat_0.1.2.tar")
 ```
 
 Use the right file for the downloaded package file, press enter, and
@@ -43,6 +45,7 @@ away you go.
 To install the latest development version, use the `remotes` package:
 
 ```r
+# install.packages(remotes) -- if needed
 library(remotes)
 remotes::install_github("osparcomm/harsat", auth_token = 'XXXX') 
 ```
