@@ -505,6 +505,12 @@ ctsm_read_determinand <- function(
   )
   
 
+  
+  # ensure determinand is in upper case 
+  
+  data$determinand <- toupper(data$determinand)
+  
+  
   # fill in common name if missing and create optional variables if missing
   
   data$common_name <- ifelse(

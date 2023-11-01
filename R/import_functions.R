@@ -737,7 +737,17 @@ read_contaminants <- function(file, data_dir = ".", info) {
     } else {
       data$subseries <- NA_character_
     }
+
     
+    # convert param (determinand) and munit (unit) to upper / lower case
+    
+    data <- dplyr::mutate(
+      data, 
+      param = toupper(.data$param),
+      munit = tolower(.data$munit)
+    )
+    
+        
     return(data)
   }  
   
