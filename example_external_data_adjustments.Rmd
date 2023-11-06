@@ -1096,8 +1096,7 @@ biota_data$data <- filter(
 
 Merge data file with external AMAP file used for AMAP mercury assessment. Note that some pre-processing of the AMAP data has already been done (elsewhere) to e.g. remove stations not in the OSPAR area. A different data set was used in the last AMAP assessment.
 
-```{r AMAP_4}
-
+```r
 # pre-processing to remove Region 0 data and weird groups 
 # this was done in 2021 assessment and the data files have just been copied across
 
@@ -1105,11 +1104,12 @@ Merge data file with external AMAP file used for AMAP mercury assessment. Note t
 
 # read in non-ICES data and stations 
 
-biota_data <- add_non_ICES_data(
-  biota_data, "AMAP_MIME_data.xlsx", "AMAP_MIME_stations.xlsx",
-  keep = "all", 
-  path = file.path("data", "example_external_data")
-)
+# Note: add_non_ICES_data is no longer supported
+# biota_data <- add_non_ICES_data(
+#   biota_data, "AMAP_MIME_data.xlsx", "AMAP_MIME_stations.xlsx",
+#   keep = "all", 
+#   path = file.path("data", "example_external_data")
+# )
 ```
 
 <br>

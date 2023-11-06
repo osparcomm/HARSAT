@@ -51,11 +51,18 @@ biota_data <- read_data(
 #> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/AMAP"
 #> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/AMAP"
 #> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/AMAP"
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/determinand.csv': '7e310c487109c531aa62cb9a217f879b'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/species.csv': 'a3d78e2147a3fc2867b82d1d16a3ae88'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/imposex.csv': '7e42cb57944b9d79216ad25c12ccada5'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/thresholds_biota.csv': '7208225201dcbb851427a4df70760106'
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_AMAP_STATIONS.csv'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_AMAP_STATIONS.csv': '4abf9ba9b2f033e296d4ddc3b99c16d7'
 #> 
 #> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv': 'dce2913be61985213ac903f69a783c9f'
 #> 
 #> Argument max_year taken to be the maximum year in the data: 2020
 ```

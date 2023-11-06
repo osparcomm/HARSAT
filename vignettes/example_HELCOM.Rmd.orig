@@ -23,7 +23,8 @@ only; in particular, they should not be used for any formal reporting**.
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  error = TRUE
 )
 ```
 

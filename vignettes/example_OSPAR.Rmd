@@ -69,11 +69,16 @@ water_data <- read_data(
 #> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv': '2b165f406bb440297435ea3f46eb3612'
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'
 #> 
 #> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt': '0ccaec75c5fd7e875c730467d58fdb26'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: OSPAR 
@@ -5394,11 +5399,18 @@ sediment_data <- read_data(
 #> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/method_extraction.csv': 'b3c891f17b9b35774114edaa2f58b6cc'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/pivot_values.csv': '372ad2d2ef807cec64ce1a7bd1967158'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_sediment.csv': 'dcf8d4a452f93ead01729866ca6b139c'
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'
 #> 
 #> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/sediment.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/sediment.txt': '26c2ab1c30d6b5cead9250df216efbc2'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: OSPAR 
@@ -13743,11 +13755,18 @@ biota_data <- read_data(
 #> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
 #> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv': 'e0678c65e9c433f04cfff5ec95659bb4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/imposex.csv': '7e42cb57944b9d79216ad25c12ccada5'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_biota.csv': 'f728e56db82dc936b4b384cc0471477a'
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'
 #> 
 #> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/biota.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/biota.txt': 'b00f0c9665ec57492b8f14f1323ff635'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: OSPAR 
