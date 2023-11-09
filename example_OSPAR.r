@@ -243,6 +243,15 @@ biota_assessment <- update_assessment(
 
 check_assessment(biota_assessment)
 
+biota_assessment <- update_assessment(
+  biota_assessment, 
+  subset = series == "5031 BBKF Mytilus edulis SB",
+  hess.d = 0.0001, hess.r = 8
+)
+
+check_assessment(biota_assessment)
+
+
 
 write_summary_table(
   biota_assessment,

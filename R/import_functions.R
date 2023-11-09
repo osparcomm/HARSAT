@@ -1769,20 +1769,26 @@ finalise_data <- function(data, info) {
     method_extraction = "metcx",
     method_pretreatment = "metpt",
     replicate = "tblparamid", 
-    sample = "tblsampleid", 
     upload = "tbluploadid"
   )
 
   
-  # biota specific
+  # compartment specific
   
-  if (info$compartment == "biota") {
+  if (info$compartment %in% c("sediment", "water")) {
+    
+    data <- dplyr::rename(data, sample = "tblsampleid")
+    
+  } else if (info$compartment == "biota") {
+    
     data <- dplyr::rename(
-      data, 
-      sub.sample = "tblbioid", 
+      data,
+      sample_cluster = "tblsampleid", 
+      sample = "tblbioid", 
       sex = "sexco",
       n_individual = "noinp"
     )    
+  
   }
   
   

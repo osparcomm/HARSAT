@@ -341,6 +341,15 @@ biota_assessment <- run_assessment(
 
 check_assessment(biota_assessment)
 
+biota_assessment <- update_assessment(
+  biota_assessment, 
+  subset = series == "2299 PYR1OH Limanda limanda BI HPLC-FD",
+  hess.d = 0.0001, hess.r = 8
+)
+
+check_assessment(biota_assessment)
+
+
 
 # And that's it :)
 
