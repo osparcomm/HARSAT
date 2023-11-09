@@ -1378,6 +1378,51 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
     )
   }
   
+
+  # QShh for HCB and HCHG for liver needs to be back-transformed to a wet weight 
+  # basis (using liver content) and then transformed to a lipid weight bais 
+  # (using muscle content); if lipid weight is high all done; if lipid weight is
+  # low, need to transform to a wet weight basis (using lipid content)
+  
+  if ("QShh" %in% names(data)) {
+    
+    det_id <- c("HCB", "HCHG")
+    
+    data <- dplyr::mutate(
+      data,
+      .id = .data$determinand %in% det_id & .data$species_group %in% "Fish" &
+        .data$matrix %in% "LI",
+      .AC = ctsm_convert_basis(
+        .data$QShh, 
+        .data$basis, 
+        "W",
+        lipidwt = .data$species_lipidwt,
+        exclude = !.id,
+        print_warning = FALSE
+      ),
+      .AC = ctsm_convert_basis(
+        .AC, 
+        "W", 
+        "L", 
+        lipidwt = biota_data$info$species[.data$species, "MU_lipidwt"],
+        exclude = !.id, 
+        print_warning = FALSE,
+      ),
+      .AC = ctsm_convert_basis(
+        .AC, 
+        "L", 
+        .data$basis, 
+        lipidwt = .data$species_lipidwt,
+        exclude = !.id, 
+        print_warning = FALSE
+      ),
+      QShh = dplyr::if_else(.id, .AC, .data$QShh), 
+      .id = NULL,
+      .AC = NULL
+    )
+  }
+  
+  
   if (export_all) {
     return(data)
   } 
@@ -1452,95 +1497,95 @@ get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determi
 
 
 
-get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
-  
-  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-  
-  stopifnot(
-    length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EAC", "EQS", "HQS") %in% names(AC)
-  )
-  
-  out <- bind_cols(out, data)
-  
-  out <- out %>%
-    rownames_to_column() %>%
-    dplyr::mutate(
-      species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-      species = as.character(species)
-    )
-  
-  
-  # BAC in fish only apply to high lipid tissue
-  # EAC for birds fro HCB and HCH
-  
-  out <- dplyr::mutate(
-    out,
-    
-    BAC = if_else(
-      .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
-      NA_real_,
-      .data$BAC
-    ),
-    
-    EAC = if_else(
-      .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-        .data$matrix %in% "EH" & .data$determinand %in% "HCB",
-      ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
-      .data$EAC
-    ),
-    
-    EAC = if_else(
-      .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
-        .data$matrix %in% "EH" & .data$determinand %in% "HCH",
-      ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
-      .data$EAC
-    )
-  )
-  
-  
-  # HCHG HQS in liver converted from muscle using muscle lipid content
-  
-  id <- out$determinand %in% "HCHG" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-  
-  if (any(id)) {
-    
-    out[id, ] <- dplyr::mutate(
-      out[id, ],
-      .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-      .dry_mu = info.species[.data$species, "MU_drywt"],
-      HQS = ctsm_convert_basis(61, "W", "L", .dry_mu, .lipid_mu),
-      HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-      .lipid_mu = NULL,
-      .dry_mu = NULL
-    )
-  }
-  
-  
-  # HCB HQS in liver converted from muscle using muscle lipid content
-  
-  id <- out$determinand %in% "HCB" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-  
-  if (any(id)) {
-    
-    out[id, ] <- dplyr::mutate(
-      out[id, ],
-      .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-      .dry_mu = info.species[.data$species, "MU_drywt"],
-      HQS = ctsm_convert_basis(10, "W", "L", .dry_mu, .lipid_mu),
-      HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-      .lipid_mu = NULL,
-      .dry_mu = NULL
-    )
-  }
-  
-  
-  out <- out %>%
-    column_to_rownames() %>%
-    select(all_of(AC))
-  
-  out
-}
+# get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
+#   
+#   out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+#   
+#   stopifnot(
+#     length(intersect(names(data), names(out))) == 0,
+#     ! c("BAC", "EAC", "EQS", "HQS") %in% names(AC)
+#   )
+#   
+#   out <- bind_cols(out, data)
+#   
+#   out <- out %>%
+#     rownames_to_column() %>%
+#     dplyr::mutate(
+#       species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+#       species = as.character(species)
+#     )
+#   
+#   
+#   # BAC in fish only apply to high lipid tissue
+#   # EAC for birds fro HCB and HCH
+#   
+#   out <- dplyr::mutate(
+#     out,
+#     
+#     BAC = if_else(
+#       .data$species_group %in% "Fish" & (is.na(.data$lipidwt) | .data$lipidwt < lipid_high),
+#       NA_real_,
+#       .data$BAC
+#     ),
+#     
+#     EAC = if_else(
+#       .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
+#         .data$matrix %in% "EH" & .data$determinand %in% "HCB",
+#       ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
+#       .data$EAC
+#     ),
+#     
+#     EAC = if_else(
+#       .data$species %in% c("Sterna hirundo", "Haematopus ostralegus") &
+#         .data$matrix %in% "EH" & .data$determinand %in% "HCH",
+#       ctsm_convert_basis(2.0, "W", .data$basis, .data$drywt, .data$lipidwt),
+#       .data$EAC
+#     )
+#   )
+#   
+#   
+#   # HCHG HQS in liver converted from muscle using muscle lipid content
+#   
+#   id <- out$determinand %in% "HCHG" & out$species_group %in% "Fish" & out$matrix %in% "LI"
+#   
+#   if (any(id)) {
+#     
+#     out[id, ] <- dplyr::mutate(
+#       out[id, ],
+#       .lipid_mu = info.species[.data$species, "MU_lipidwt"],
+#       .dry_mu = info.species[.data$species, "MU_drywt"],
+#       HQS = ctsm_convert_basis(61, "W", "L", .dry_mu, .lipid_mu),
+#       HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
+#       .lipid_mu = NULL,
+#       .dry_mu = NULL
+#     )
+#   }
+#   
+#   
+#   # HCB HQS in liver converted from muscle using muscle lipid content
+#   
+#   id <- out$determinand %in% "HCB" & out$species_group %in% "Fish" & out$matrix %in% "LI"
+#   
+#   if (any(id)) {
+#     
+#     out[id, ] <- dplyr::mutate(
+#       out[id, ],
+#       .lipid_mu = info.species[.data$species, "MU_lipidwt"],
+#       .dry_mu = info.species[.data$species, "MU_drywt"],
+#       HQS = ctsm_convert_basis(10, "W", "L", .dry_mu, .lipid_mu),
+#       HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
+#       .lipid_mu = NULL,
+#       .dry_mu = NULL
+#     )
+#   }
+#   
+#   
+#   out <- out %>%
+#     column_to_rownames() %>%
+#     select(all_of(AC))
+#   
+#   out
+# }
 
 
 get.AC.biota.Organofluorines.OSPAR <- function(data, AC, AC_data, species_rt) {
