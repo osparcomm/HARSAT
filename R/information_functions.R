@@ -1699,95 +1699,95 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
 # }
 
 
-get.AC.biota.Effects.OSPAR <- function(data, AC, AC_data, species_rt) {
-  
-  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-  rownames(out) <- rownames(data)
-  
-  with(data, {
-    
-    if ("EROD" %in% data$determinand) {
-      
-      stopifnot("matrix" %in% names(data))
-      
-      id <- determinand %in% "EROD" & matrix %in% "LIMIC"
-      if (any(id) & "BAC" %in% AC) {
-        out$BAC[id & species %in% "Limanda limanda"] <- 680
-        out$BAC[id & species %in% "Gadus morhua"] <- 145
-        out$BAC[id & species %in% "Pleuronectes platessa"] <- 255
-        out$BAC[id & species %in% "Lepidorhombus boscii"] <- 13
-        out$BAC[id & species %in% "Callionymus lyra"] <- 202
-      }
-      
-      if ("LIS9" %in% data$matrix) {
-        stopifnot("sex" %in% names(data))
-        
-        id <- determinand %in% "EROD" & matrix %in% "LIS9"
-        
-        if ("BAC" %in% AC) {
-          out$BAC[id & species %in% "Limanda limanda" & sex %in% "F"] <- 178
-          out$BAC[id & species %in% "Limanda limanda" & sex %in% "M"] <- 147
-          out$BAC[id & species %in% "Platichthys flesus" & sex %in% "M"] <- 24
-          out$BAC[id & species %in% "Pleuronectes platessa" & sex %in% "M"] <- 9.5
-          out$BAC[id & species %in% "Mullus barbatus" & sex %in% "M"] <- 208
-        }
-      }
-    }
-    
-    if ("SFG" %in% data$determinand) {
-      id <- ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
-        determinand %in% "SFG"
-      if ("BAC" %in% AC) out$BAC[id] <- 25
-      if ("EAC" %in% AC) out$EAC[id] <- 15
-    }
-    
-    if ("SURVT" %in% data$determinand) {
-      id <- ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
-        determinand %in% "SURVT"
-      if ("BAC" %in% AC) out$BAC[id] <- 10
-      if ("EAC" %in% AC) out$EAC[id] <- 5
-    }
-    
-    if ("NRR" %in% data$determinand) {
-      id <- determinand %in% "NRR"
-      if ("BAC" %in% AC) out$BAC[id] <- 120
-      if ("EAC" %in% AC) out$EAC[id] <- 50
-    }
-    
-    if ("LP" %in% data$determinand) {
-      id <- determinand %in% "LP"
-      if ("BAC" %in% AC) out$BAC[id] <- 20
-      if ("EAC" %in% AC) out$EAC[id] <- 10
-    }
-    
-    if ("MNC" %in% data$determinand) {
-      
-      if (any(ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
-              determinand %in% "MNC"))
-        stop("AC not coded for MNC in mussels")
-      
-      id <- determinand %in% "MNC"
-      if ("BAC" %in% AC) {
-        out$BAC[id & species %in% "Platichthys flesus"] <- 0.3
-        out$BAC[id & species %in% "Limanda limanda"] <- 0.5
-        out$BAC[id & species %in% "Zoarces viviparus"] <- 0.4
-        out$BAC[id & species %in% "Gadus morhua"] <- 0.4
-        out$BAC[id & species %in% "Mullus barbatus"] <- 0.3
-      }
-    }
-    
-    if ("%DNATAIL" %in% data$determinand) {
-      id <- determinand %in% "%DNATAIL"
-      if (any(id) & "BAC" %in% AC) {
-        out$BAC[id & species %in% "Mytilus edulis"] <- 10
-        out$BAC[id & species %in% "Gadus morhua"] <- 5
-        out$BAC[id & species %in% "Limanda limanda"] <- 5
-      }
-    }
-    
-    out
-  })
-}
+# get.AC.biota.Effects.OSPAR <- function(data, AC, AC_data, species_rt) {
+#   
+#   out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
+#   rownames(out) <- rownames(data)
+#   
+#   with(data, {
+#     
+#     if ("EROD" %in% data$determinand) {
+#       
+#       stopifnot("matrix" %in% names(data))
+#       
+#       id <- determinand %in% "EROD" & matrix %in% "LIMIC"
+#       if (any(id) & "BAC" %in% AC) {
+#         out$BAC[id & species %in% "Limanda limanda"] <- 680
+#         out$BAC[id & species %in% "Gadus morhua"] <- 145
+#         out$BAC[id & species %in% "Pleuronectes platessa"] <- 255
+#         out$BAC[id & species %in% "Lepidorhombus boscii"] <- 13
+#         out$BAC[id & species %in% "Callionymus lyra"] <- 202
+#       }
+#       
+#       if ("LIS9" %in% data$matrix) {
+#         stopifnot("sex" %in% names(data))
+#         
+#         id <- determinand %in% "EROD" & matrix %in% "LIS9"
+#         
+#         if ("BAC" %in% AC) {
+#           out$BAC[id & species %in% "Limanda limanda" & sex %in% "F"] <- 178
+#           out$BAC[id & species %in% "Limanda limanda" & sex %in% "M"] <- 147
+#           out$BAC[id & species %in% "Platichthys flesus" & sex %in% "M"] <- 24
+#           out$BAC[id & species %in% "Pleuronectes platessa" & sex %in% "M"] <- 9.5
+#           out$BAC[id & species %in% "Mullus barbatus" & sex %in% "M"] <- 208
+#         }
+#       }
+#     }
+#     
+#     if ("SFG" %in% data$determinand) {
+#       id <- ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
+#         determinand %in% "SFG"
+#       if ("BAC" %in% AC) out$BAC[id] <- 25
+#       if ("EAC" %in% AC) out$EAC[id] <- 15
+#     }
+#     
+#     if ("SURVT" %in% data$determinand) {
+#       id <- ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
+#         determinand %in% "SURVT"
+#       if ("BAC" %in% AC) out$BAC[id] <- 10
+#       if ("EAC" %in% AC) out$EAC[id] <- 5
+#     }
+#     
+#     if ("NRR" %in% data$determinand) {
+#       id <- determinand %in% "NRR"
+#       if ("BAC" %in% AC) out$BAC[id] <- 120
+#       if ("EAC" %in% AC) out$EAC[id] <- 50
+#     }
+#     
+#     if ("LP" %in% data$determinand) {
+#       id <- determinand %in% "LP"
+#       if ("BAC" %in% AC) out$BAC[id] <- 20
+#       if ("EAC" %in% AC) out$EAC[id] <- 10
+#     }
+#     
+#     if ("MNC" %in% data$determinand) {
+#       
+#       if (any(ctsm_get_info(species_rt, species, "species_subgroup") %in% "Mussel" &
+#               determinand %in% "MNC"))
+#         stop("AC not coded for MNC in mussels")
+#       
+#       id <- determinand %in% "MNC"
+#       if ("BAC" %in% AC) {
+#         out$BAC[id & species %in% "Platichthys flesus"] <- 0.3
+#         out$BAC[id & species %in% "Limanda limanda"] <- 0.5
+#         out$BAC[id & species %in% "Zoarces viviparus"] <- 0.4
+#         out$BAC[id & species %in% "Gadus morhua"] <- 0.4
+#         out$BAC[id & species %in% "Mullus barbatus"] <- 0.3
+#       }
+#     }
+#     
+#     if ("%DNATAIL" %in% data$determinand) {
+#       id <- determinand %in% "%DNATAIL"
+#       if (any(id) & "BAC" %in% AC) {
+#         out$BAC[id & species %in% "Mytilus edulis"] <- 10
+#         out$BAC[id & species %in% "Gadus morhua"] <- 5
+#         out$BAC[id & species %in% "Limanda limanda"] <- 5
+#       }
+#     }
+#     
+#     out
+#   })
+# }
 
 
 # get.AC.biota.Metabolites.OSPAR <- function(data, AC, AC_data, species_rt) {
