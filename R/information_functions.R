@@ -1366,7 +1366,7 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
       "CB28", "CB52", "CB101", "CB105", "CB118", "CB138", "CB153", "CB156", "CB180",
       "DDEPP", "HCB"
     )
-      
+
     data <- dplyr::mutate(
       data,
       BAC = dplyr::if_else(
@@ -1376,6 +1376,7 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
         .data$BAC
       )
     )
+      
   }
   
 
@@ -1404,7 +1405,7 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
         .AC, 
         "W", 
         "L", 
-        lipidwt = biota_data$info$species[.data$species, "MU_lipidwt"],
+        lipidwt = rt$species[.data$species, "MU_lipidwt"],
         exclude = !.id, 
         print_warning = FALSE,
       ),
@@ -1420,7 +1421,8 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
       .id = NULL,
       .AC = NULL
     )
-  }
+
+  }  
   
   
   if (export_all) {

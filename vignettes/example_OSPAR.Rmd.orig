@@ -348,7 +348,7 @@ wk_metals <-
 biota_assessment <- run_assessment(
   biota_timeseries, 
   subset = determinand %in% wk_metals,
-  AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC", "QShh"),
+  AC = c("BAC", "NRC", "EAC", "FEQG", "LRC", "QSsp", "MPC", "QShh"),
   get_AC_fn = get_AC_biota_OSPAR,
   parallel = TRUE
 )
@@ -390,6 +390,7 @@ write_summary_table(
       "BAC" = "blue",
       "NRC" = "blue",
       "EAC" = "green", 
+      "FEQG" = "green",
       "LRC" = "green", 
       "QSsp" = "green", 
       "MPC" = "green",
@@ -399,6 +400,7 @@ write_summary_table(
       "BAC" = "orange", 
       "NRC" = "orange", 
       "EAC" = "red", 
+      "FEQG" = "red",
       "LRC" = "red", 
       "QSsp" = "red", 
       "MPC" = "red",
