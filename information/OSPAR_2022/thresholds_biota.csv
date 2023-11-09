@@ -102,6 +102,11 @@ HBCD,Fish,,,LI~MU,,,,,,,L,,,,,,,3340,,
 HBCD,Bivalve,,,SB,,,,,,,L,,,,,,,3340,,
 HBCD,Crustacean,,,TM,,,,,,,L,,,,,,,3340,,
 HBCD,Gastropod,,,SB,,,,,,,L,,,,,,,3340,,
+TEQDFP,Fish,,,LI,,,,,,,L,,W,,,,,0.024,,0.02
+TEQDFP,Fish,,,MU,,,,,,,L,,W,,,,,0.024,,0.0065
+TEQDFP,Bivalve,,,SB,,,,,,,L,,W,,,,,0.024,,0.0065
+TEQDFP,Crustacean,,,TM,,,,,,,L,,W,,,,,0.024,,0.0065
+TEQDFP,Gastropod,,,SB,,,,,,,L,,W,,,,,0.024,,0.0065
 PYR1OH,,,Limanda limanda,BI,HPLC-FD,,,,,,,,,16,,,,,,
 PYR1OH,,,Gadus morhua,BI,HPLC-FD,,,,,,,,,21,,,,,,
 PYR1OH,,,Gadus morhua,BI,GC-MS,,,,,,,,,,,483,,,,
