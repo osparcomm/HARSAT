@@ -1842,36 +1842,30 @@ get.AC.biota.Metabolites.OSPAR <- function(data, AC, AC_data, species_rt) {
 }
 
 
-get.AC.biota.Imposex.OSPAR <- function(data, AC, AC_data, species_rt) {
-
-  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-  rownames(out) <- rownames(data)
-  
-  with(data, {
-    
-    if ("BAC" %in% AC)
-    {
-      out$BAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 0.3
-      out$BAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 0.3
-    }
-    
-    if ("EAC" %in% AC)
-    {
-      out$EAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 2.0
-      out$EAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 2.0
-      out$EAC[determinand %in% "VDS" & species %in% "Tritia nitida (reticulata)"] <- 0.3
-      out$EAC[determinand %in% "VDS" & species %in% "Buccinum undatum"] <- 0.3
-    }
-    
-    out
-  })
-}
-
-
-
-
-
-
+# get.AC.biota.Imposex.OSPAR <- function(data, AC, AC_data, species_rt) {
+# 
+#   out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
+#   rownames(out) <- rownames(data)
+#   
+#   with(data, {
+#     
+#     if ("BAC" %in% AC)
+#     {
+#       out$BAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 0.3
+#       out$BAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 0.3
+#     }
+#     
+#     if ("EAC" %in% AC)
+#     {
+#       out$EAC[determinand %in% "VDS" & species %in% "Nucella lapillus"] <- 2.0
+#       out$EAC[determinand %in% "VDS" & species %in% "Neptunea antiqua"] <- 2.0
+#       out$EAC[determinand %in% "VDS" & species %in% "Tritia nitida (reticulata)"] <- 0.3
+#       out$EAC[determinand %in% "VDS" & species %in% "Buccinum undatum"] <- 0.3
+#     }
+#     
+#     out
+#   })
+# }
 
 
 
