@@ -1790,56 +1790,56 @@ get.AC.biota.Effects.OSPAR <- function(data, AC, AC_data, species_rt) {
 }
 
 
-get.AC.biota.Metabolites.OSPAR <- function(data, AC, AC_data, species_rt) {
-    
-  out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
-  rownames(out) <- rownames(data)
-  
-  with(data, {
-    
-    stopifnot("method_analysis" %in% names(data))
-    
-    if ("BAC" %in% AC) {
-      id <- species %in% "Limanda limanda"
-      out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
-      out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
-      out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 0.15
-      
-      id <- species %in% "Gadus morhua"
-      out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 21
-      out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 2.7
-      out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.1
-      
-      id <- species %in% "Platichthys flesus"
-      out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
-      out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
-      out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.3
-      
-      id <- species %in% "Melanogrammus aeglefinus"
-      out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 13
-      out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 0.8
-      out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.9
-    }
-    
-    if ("EAC" %in% AC) {
-      id <- species %in% "Limanda limanda"
-      out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 22
-      
-      id <- species %in% "Gadus morhua"
-      out$EAC[id & determinand %in% "PYR1OH" & method_analysis %in% "GC-MS"] <- 483
-      out$EAC[id & determinand %in% "PA1OH" & method_analysis %in% "GC-MS"] <- 528
-      out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
-      
-      id <- species %in% "Platichthys flesus"
-      out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 29
-      
-      id <- species %in% "Melanogrammus aeglefinus"
-      out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
-    }
-    
-    out
-  })
-}
+# get.AC.biota.Metabolites.OSPAR <- function(data, AC, AC_data, species_rt) {
+#     
+#   out <- as.data.frame(do.call("cbind", sapply(AC, function(i) rep(NA, nrow(data)), simplify = FALSE)))
+#   rownames(out) <- rownames(data)
+#   
+#   with(data, {
+#     
+#     stopifnot("method_analysis" %in% names(data))
+#     
+#     if ("BAC" %in% AC) {
+#       id <- species %in% "Limanda limanda"
+#       out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
+#       out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
+#       out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 0.15
+#       
+#       id <- species %in% "Gadus morhua"
+#       out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 21
+#       out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 2.7
+#       out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.1
+#       
+#       id <- species %in% "Platichthys flesus"
+#       out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 16
+#       out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 3.7
+#       out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.3
+#       
+#       id <- species %in% "Melanogrammus aeglefinus"
+#       out$BAC[id & determinand %in% "PYR1OH" & method_analysis %in% "HPLC-FD"] <- 13
+#       out$BAC[id & determinand %in% "PA1OH" & method_analysis %in% "HPLC-FD"] <- 0.8
+#       out$BAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 1.9
+#     }
+#     
+#     if ("EAC" %in% AC) {
+#       id <- species %in% "Limanda limanda"
+#       out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 22
+#       
+#       id <- species %in% "Gadus morhua"
+#       out$EAC[id & determinand %in% "PYR1OH" & method_analysis %in% "GC-MS"] <- 483
+#       out$EAC[id & determinand %in% "PA1OH" & method_analysis %in% "GC-MS"] <- 528
+#       out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
+#       
+#       id <- species %in% "Platichthys flesus"
+#       out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 29
+#       
+#       id <- species %in% "Melanogrammus aeglefinus"
+#       out$EAC[id & determinand %in% "PYR1OHEQ" & method_analysis %in% "FLM-SS"] <- 35
+#     }
+#     
+#     out
+#   })
+# }
 
 
 # get.AC.biota.Imposex.OSPAR <- function(data, AC, AC_data, species_rt) {

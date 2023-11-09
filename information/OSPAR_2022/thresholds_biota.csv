@@ -160,11 +160,20 @@ PFOS,Fish,,,MU,,,,,,,,W,,W,,,,,,33,,9.1
 PFOS,Bivalve,,,SB,,,,,,,,W,,W,,,,,,33,,9.1
 PFOS,Crustacean,,,TM,,,,,,,,W,,W,,,,,,33,,9.1
 PFOS,Gastropod,,,SB,,,,,,,,W,,W,,,,,,33,,9.1
-PYR1OH,,,Limanda limanda,BI,HPLC-FD,,,,,,,,,,16,,,,,,,
+PA1OH,,,Gadus morhua,BI,HPLC-FD,,,,,,,,,,2.7,,,,,,,
+PA1OH,,,Gadus morhua,BI,GC-MS,,,,,,,,,,,,528,,,,,
+PA1OH,,,Limanda limanda,BI,HPLC-FD,,,,,,,,,,3.7,,,,,,,
+PA1OH,,,Melanogrammus aeglefinus,BI,HPLC-FD,,,,,,,,,,0.8,,,,,,,
+PA1OH,,,Platichthys flesus,BI,HPLC-FD,,,,,,,,,,3.7,,,,,,,
 PYR1OH,,,Gadus morhua,BI,HPLC-FD,,,,,,,,,,21,,,,,,,
 PYR1OH,,,Gadus morhua,BI,GC-MS,,,,,,,,,,,,483,,,,,
-PYR1OH,,,Platichthys flesus,BI,HPLC-FD,,,,,,,,,,16,,,,,,,
+PYR1OH,,,Limanda limanda,BI,HPLC-FD,,,,,,,,,,16,,,,,,,
 PYR1OH,,,Melanogrammus aeglefinus,BI,HPLC-FD,,,,,,,,,,13,,,,,,,
+PYR1OH,,,Platichthys flesus,BI,HPLC-FD,,,,,,,,,,16,,,,,,,
+PYR1OHEQ,,,Gadus morhua,BI,FLM-SS,,,,,,,,,,1.1,,35,,,,,
+PYR1OHEQ,,,Limanda limanda,BI,FLM-SS,,,,,,,,,,0.15,,22,,,,,
+PYR1OHEQ,,,Melanogrammus aeglefinus,BI,FLM-SS,,,,,,,,,,1.9,,35,,,,,
+PYR1OHEQ,,,Platichthys flesus,BI,FLM-SS,,,,,,,,,,1.3,,29,,,,,
 VDS,,,Buccinum undatum,SB,,,,,,,,,,,,,0.3,,,,,
 VDS,,,Neptunea antiqua,SB,,,,,,,,,,,0.3,,2,,,,,
 VDS,,,Nucella lapillus,SB,,,,,,,,,,,0.3,,2,,,,,
