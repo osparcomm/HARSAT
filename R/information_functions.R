@@ -1379,14 +1379,14 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
   }
   
 
-  # QShh for HCB and HCHG for liver needs to be back-transformed to a wet weight 
+  # QShh for HCB, HCHG, SBDE6 for liver needs to be back-transformed to a wet weight 
   # basis (using liver content) and then transformed to a lipid weight bais 
   # (using muscle content); if lipid weight is high all done; if lipid weight is
   # low, need to transform to a wet weight basis (using lipid content)
   
   if ("QShh" %in% names(data)) {
     
-    det_id <- c("HCB", "HCHG")
+    det_id <- c("HCB", "HCHG", "SBDE6")
     
     data <- dplyr::mutate(
       data,
@@ -1430,71 +1430,67 @@ get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
   data[AC]
 }
 
-get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
-  
-  # check elements of info are of correct length
-  
-  stopifnot(sapply(info, length) %in% c(1, length(determinand)))
-  
-  
-  # remove duplicate determinand information - need to fix this better
-  
-  info$determinand <- NULL
-  
-  
-  # turn info into a dataframe if necessary
-  
-  data <- cbind(determinand, as.data.frame(info))
-  
-  
-  # split by determinand groupings
-  
-  group <- ctsm_get_info(
-    determinand_rt, data$determinand, "group", compartment, sep = "_"
-  )
-  
-  data <- split(data, group, drop = TRUE)
-  
-  
-  # get assessment concentrations
-  
-  out <- lapply(names(data), function(i) {
-    args <- list(data = data[[i]], AC = AC, AC_data = thresholds)
-    if (compartment == "biota") args$species_rt <- species_rt
-    
-    if (compartment == "sediment") {
-      if (i == "Metals") {
-        fn = "get.AC.sediment.Metals"
-      } else {
-        fn = "get.AC.sediment.contaminant"
-      }
-    }
-    
-    if (compartment == "water") {
-      fn = "get.AC.water.contaminant"
-    }
-    
-    if (compartment == "biota") {
-      if (i %in% c(
-        "Metals", "Chlorobiphenyls", "Organochlorines", "Organofluorines", 
-        "PBDEs", "Dioxins", "Effects", "Metabolites", "Imposex")
-      ) {
-        fn = paste("get.AC.biota", i, "OSPAR", sep = ".")
-      } else {
-        fn = "get.AC.biota.contaminant"
-      }
-    }
-    
-    do.call(fn, args)
-    
-  }) 
-  
-  unsplit(out, group, drop = TRUE)
-}
-
-
-
-
+# get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determinand_rt, species_rt) {
+#   
+#   # check elements of info are of correct length
+#   
+#   stopifnot(sapply(info, length) %in% c(1, length(determinand)))
+#   
+#   
+#   # remove duplicate determinand information - need to fix this better
+#   
+#   info$determinand <- NULL
+#   
+#   
+#   # turn info into a dataframe if necessary
+#   
+#   data <- cbind(determinand, as.data.frame(info))
+#   
+#   
+#   # split by determinand groupings
+#   
+#   group <- ctsm_get_info(
+#     determinand_rt, data$determinand, "group", compartment, sep = "_"
+#   )
+#   
+#   data <- split(data, group, drop = TRUE)
+#   
+#   
+#   # get assessment concentrations
+#   
+#   out <- lapply(names(data), function(i) {
+#     args <- list(data = data[[i]], AC = AC, AC_data = thresholds)
+#     if (compartment == "biota") args$species_rt <- species_rt
+#     
+#     if (compartment == "sediment") {
+#       if (i == "Metals") {
+#         fn = "get.AC.sediment.Metals"
+#       } else {
+#         fn = "get.AC.sediment.contaminant"
+#       }
+#     }
+#     
+#     if (compartment == "water") {
+#       fn = "get.AC.water.contaminant"
+#     }
+#     
+#     if (compartment == "biota") {
+#       if (i %in% c(
+#         "Metals", "Chlorobiphenyls", "Organochlorines", "Organofluorines", 
+#         "PBDEs", "Dioxins", "Effects", "Metabolites", "Imposex")
+#       ) {
+#         fn = paste("get.AC.biota", i, "OSPAR", sep = ".")
+#       } else {
+#         fn = "get.AC.biota.contaminant"
+#       }
+#     }
+#     
+#     do.call(fn, args)
+#     
+#   }) 
+#   
+#   unsplit(out, group, drop = TRUE)
+# }
 
 
 # get.AC.biota.Organochlorines.OSPAR <- function(data, AC, AC_data, species_rt, lipid_high = 3) {
@@ -1588,119 +1584,119 @@ get.AC.OSPAR <- function(compartment, determinand, info, AC, thresholds, determi
 # }
 
 
-get.AC.biota.Organofluorines.OSPAR <- function(data, AC, AC_data, species_rt) {
-  
-  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-  
-  stopifnot(
-    length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EQS", "HQS") %in% names(AC)
-  )
-  
-  out <- bind_cols(out, data)
-  
-  out <- out %>%
-    rownames_to_column() %>%
-    dplyr::mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
-  
-  
-  # fish liver - multiply by 5
-  
-  out <- dplyr::mutate(
-    out,
-    .id <- .data$species_group %in% "Fish" & .data$matrix %in% "LI" &
-      .data$determinand %in% "PFOS",
-    EQS = .data$EQS * if_else(.id, 5, 1),
-    HQS = .data$HQS * if_else(.id, 5, 1),
-    .id = NULL
-  )
-  
-  out <- out %>%
-    column_to_rownames() %>%
-    select(all_of(AC))
-  
-  out
-}
+# get.AC.biota.Organofluorines.OSPAR <- function(data, AC, AC_data, species_rt) {
+#   
+#   out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+#   
+#   stopifnot(
+#     length(intersect(names(data), names(out))) == 0,
+#     ! c("BAC", "EQS", "HQS") %in% names(AC)
+#   )
+#   
+#   out <- bind_cols(out, data)
+#   
+#   out <- out %>%
+#     rownames_to_column() %>%
+#     dplyr::mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
+#   
+#   
+#   # fish liver - multiply by 5
+#   
+#   out <- dplyr::mutate(
+#     out,
+#     .id <- .data$species_group %in% "Fish" & .data$matrix %in% "LI" &
+#       .data$determinand %in% "PFOS",
+#     EQS = .data$EQS * if_else(.id, 5, 1),
+#     HQS = .data$HQS * if_else(.id, 5, 1),
+#     .id = NULL
+#   )
+#   
+#   out <- out %>%
+#     column_to_rownames() %>%
+#     select(all_of(AC))
+#   
+#   out
+# }
 
 
-get.AC.biota.PBDEs.OSPAR <- function(data, AC, AC_data, species_rt) {
-  
-  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-  
-  stopifnot(
-    length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "FEQG", "HQS") %in% names(AC)
-  )
-  
-  out <- bind_cols(out, data)
-  
-  out <- out %>%
-    rownames_to_column() %>%
-    dplyr::mutate(
-      species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
-      species = as.character(species)
-    )
-  
-  
-  # HQS in liver converted from muscle using muscle lipid content
-  
-  id <- out$determinand %in% "SBDE6" & out$species_group %in% "Fish" & out$matrix %in% "LI"
-  
-  if (any(id)) {
-    
-    out[id, ] <- dplyr::mutate(
-      out[id, ],
-      .lipid_mu = info.species[.data$species, "MU_lipidwt"],
-      .dry_mu = info.species[.data$species, "MU_drywt"],
-      HQS = ctsm_convert_basis(0.0085, "W", "L", .dry_mu, .lipid_mu),
-      HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
-      .lipid_mu = NULL,
-      .dry_mu = NULL
-    )
-  }
-  
-  
-  out <- out %>%
-    column_to_rownames() %>%
-    select(all_of(AC))
-  
-  out
-}
+# get.AC.biota.PBDEs.OSPAR <- function(data, AC, AC_data, species_rt) {
+#   
+#   out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+#   
+#   stopifnot(
+#     length(intersect(names(data), names(out))) == 0,
+#     ! c("BAC", "FEQG", "HQS") %in% names(AC)
+#   )
+#   
+#   out <- bind_cols(out, data)
+#   
+#   out <- out %>%
+#     rownames_to_column() %>%
+#     dplyr::mutate(
+#       species_group = ctsm_get_info(species_rt, .data$species, "species_group"),
+#       species = as.character(species)
+#     )
+#   
+#   
+#   # HQS in liver converted from muscle using muscle lipid content
+#   
+#   id <- out$determinand %in% "SBDE6" & out$species_group %in% "Fish" & out$matrix %in% "LI"
+#   
+#   if (any(id)) {
+#     
+#     out[id, ] <- dplyr::mutate(
+#       out[id, ],
+#       .lipid_mu = info.species[.data$species, "MU_lipidwt"],
+#       .dry_mu = info.species[.data$species, "MU_drywt"],
+#       HQS = ctsm_convert_basis(0.0085, "W", "L", .dry_mu, .lipid_mu),
+#       HQS = ctsm_convert_basis(.data$HQS, "L", .data$basis, .data$drywt, .data$lipidwt),
+#       .lipid_mu = NULL,
+#       .dry_mu = NULL
+#     )
+#   }
+#   
+#   
+#   out <- out %>%
+#     column_to_rownames() %>%
+#     select(all_of(AC))
+#   
+#   out
+# }
 
 
-get.AC.biota.Dioxins.OSPAR <- function(data, AC, AC_data, species_rt) {
-  
-  out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
-  
-  stopifnot(
-    length(intersect(names(data), names(out))) == 0,
-    ! c("BAC", "EQS", "HQS") %in% names(AC)
-  )
-  
-  out <- bind_cols(out, data)
-  
-  out <- out %>%
-    rownames_to_column() %>%
-    dplyr::mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
-  
-  
-  # add in HQS of 0.02 ww for fish liver
-  
-  out <- dplyr::mutate(
-    out,
-    HQS = if_else(
-      .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
-      ctsm_convert_basis(0.02, "W", .data$basis, .data$drywt, .data$lipidwt),
-      .data$HQS
-    )
-  )
-  
-  out <- out %>%
-    column_to_rownames() %>%
-    select(all_of(AC))
-  
-  out
-}
+# get.AC.biota.Dioxins.OSPAR <- function(data, AC, AC_data, species_rt) {
+#   
+#   out <- get.AC.biota.contaminant(data, AC, AC_data, species_rt, export_cf = TRUE)
+#   
+#   stopifnot(
+#     length(intersect(names(data), names(out))) == 0,
+#     ! c("BAC", "EQS", "HQS") %in% names(AC)
+#   )
+#   
+#   out <- bind_cols(out, data)
+#   
+#   out <- out %>%
+#     rownames_to_column() %>%
+#     dplyr::mutate(species_group = ctsm_get_info(species_rt, .data$species, "species_group"))
+#   
+#   
+#   # add in HQS of 0.02 ww for fish liver
+#   
+#   out <- dplyr::mutate(
+#     out,
+#     HQS = if_else(
+#       .data$species_group %in% "Fish" & .data$matrix %in% "LI" & .data$determinand %in% "TEQDFP",
+#       ctsm_convert_basis(0.02, "W", .data$basis, .data$drywt, .data$lipidwt),
+#       .data$HQS
+#     )
+#   )
+#   
+#   out <- out %>%
+#     column_to_rownames() %>%
+#     select(all_of(AC))
+#   
+#   out
+# }
 
 
 get.AC.biota.Effects.OSPAR <- function(data, AC, AC_data, species_rt) {
