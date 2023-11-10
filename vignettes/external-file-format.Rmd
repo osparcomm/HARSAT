@@ -27,7 +27,8 @@ These are the column headers for CSV-formatted external data files.
 | `subseries` | character |  | used to split up timeseries by e.g. sex or age<br>for example: `juvenile`, `adult_male`, `adult_female`<br>missing values indicate that all records in a timeseries will be considered together (no subdivision) |
 | `sample` | alphanumeric  | yes | links measurements made on the same individuals (biota), in the same sediment grab or in the same water sample<br>no missing values |
 | `determinand` | character | yes | must match values in determinand reference table<br>most will be in ICES reference codes for PARAM but can provide own values<br>no missing values |
-| `matrix` | character  | yes | see ICES reference codes for MATRX basis | character | yes (biota & sediment) | W, D or L<br>no missing values for chemical measurements in biota or sediment<br>not mandatory for water where basis is always taken to be W |
+| `matrix` | character  | yes | see ICES reference codes for MATRX |
+| `basis` | character | yes (biota & sediment) | `W`, `D` or `L`<br>no missing values for chemical measurements in biota or sediment<br>not mandatory for water where basis is always taken to be W |
 | `unit` | character | yes | see ICES reference codes for MUNIT<br>no missing values |
 | `value` | numeric | yes | no missing values |
 | `censoring` | character |  | typically `D`, `Q` or `<` indicating a value less than the limit of detection, less than the limit of quantification, or some other (non-specified) less than<br>a missing value indicates that the measurement is not a less-than (i.e. is uncensored)   |
