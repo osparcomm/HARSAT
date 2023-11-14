@@ -38,8 +38,7 @@ Imports:
   tidyr,
   sf,
   digest,
-  readxl,
-  here
+  readxl
 Suggests: 
   knitr,
   rmarkdown,
