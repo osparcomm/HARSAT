@@ -89,13 +89,6 @@ will be \code{FALSE} if the vflag entry is \code{"S"} or suspect. Records for wh
 }
 \item \code{stations}
 }
-\subsection{Control parameters}{
-
-Many aspects of the assessment process can be controlled through the
-parameters stored in \code{info$control}. This is a list populated with default
-values which can then be overwritten, if required, using the \code{control}
-argument.
-}
 }
 \description{
 Reads in contaminant and effects data, the station dictionary and various

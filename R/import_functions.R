@@ -65,12 +65,13 @@ library(readxl)
 #'   `retain == FALSE` are deleted later in `tidy_data`
 #' * `stations`
 #'
-#' ## Control parameters
+#' @section Control parameters
 #'
-#' Many aspects of the assessment process can be controlled through the
-#' parameters stored in `info$control`. This is a list populated with default
-#' values which can then be overwritten, if required, using the `control`
-#' argument.
+#'   Many aspects of the assessment process can be controlled through the
+#'   parameters stored in `info$control`. This is a list populated with default
+#'   values which can then be overwritten, if required, using the `control`
+#'   argument.
+#'
 #'
 #' @export
 read_data <- function(
@@ -189,8 +190,7 @@ read_data <- function(
     info$max_year <- max(data$year)
     cat(
       "\nArgument max_year taken to be the maximum year in the data:", 
-      info$max_year,
-      "\n"
+      info$max_year
     )
   }
 
@@ -427,7 +427,7 @@ locate_information_file <- function(name, path) {
   for(directory in path) {
     search <- normalizePath(file.path(directory, name), mustWork = FALSE)
     if(file.exists(search)) {
-      cat(paste("Found in path", name, search, "\n"))
+      print(paste("found in path", name, search, path))
       return(search)
     }
   }
@@ -437,10 +437,10 @@ locate_information_file <- function(name, path) {
   search_file <- file.path("information", name)
   search <- system.file(search_file, package = "harsat", mustWork = FALSE)
   if(file.exists(search)) {
-    cat(paste("Found in package", name, search, "\n"))
+    print(paste("found in package", name, search, path))
     return(search)
   }
-    warning(paste("Missing file in path:", name, path))
+    print(paste("missing", name, path))
   return(NULL)
 }
 
