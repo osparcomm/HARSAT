@@ -107,7 +107,7 @@ R CMD check --no-manual harsat_x.y.z+1.tar.gz
 git add DESCRIPTION
 git commit -m "Updated version to x.y.z+1
 git flow release finish x.y.z+1
-git checkout master
+git checkout main
 git push
 git push --tags
 git push upstream

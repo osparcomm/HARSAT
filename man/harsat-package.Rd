@@ -6,7 +6,7 @@
 \alias{harsat-package}
 \title{harsat: Harmonized Regional Seas Assessment Tool}
 \description{
-Assessment of concentrations of hazardous substances and their biological effects in the marine environment. The code supports periodic international assessments by OSPAR, HELCOM and AMAP and also assessments by individual users. Includes tools for pre-processing data, statistical trend analysis and comparison with threshold values, and post-processing for archiving and reporting.
+Tools for the assessment of data concerning contaminants (hazardous substances) and their effects in the marine environment. The code includes tools for pre-processing data, statistical trend analysis and comparison with threshold values, and post-processing for archiving and reporting.
 }
 \seealso{
 Useful links:
@@ -18,21 +18,14 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: AmbieSense Ltd \email{info@ambiesense.com} [copyright holder]
+\strong{Maintainer}: OSPAR Commission (OSPAR) \email{data@ospar.org} [copyright holder, funder]
 
 Authors:
 \itemize{
-  \item Rob Fryer \email{rob.fryer@gov.scot}
-  \item Leszek Kaliciak \email{leszek@ambiesense.com}
-  \item Scottish Government \email{marinescotland@gov.scot} [funder]
+  \item Arctic Monitoring and Assessment Programme (AMAP) \email{amap@amap.no} [copyright holder, funder]
+  \item Helsinki Commission (HELCOM) \email{secretariat@helcom.fi} [copyright holder, funder]
   \item International Council for the Exploration of the Sea (ICES) \email{info@ices.dk} [copyright holder]
-}
-
-Other contributors:
-\itemize{
-  \item Helsinki Commission (HELCOM) \email{secretariat@helcom.fi} [copyright holder, funder, contributor]
-  \item Arctic Monitoring and Assessment Programme (AMAP) \email{amap@amap.no} [copyright holder, funder, contributor]
-  \item OSPAR Commission (OSPAR) \email{secretariat@ospar.org} [copyright holder, funder, contributor]
+  \item AmbieSense Ltd \email{info@ambiesense.com} [copyright holder]
 }
 
 }

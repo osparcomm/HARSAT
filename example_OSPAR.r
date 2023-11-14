@@ -120,7 +120,7 @@ sediment_assessment <- run_assessment(
 
 # 02 00s
 
-check_assessment(water_assessment)
+check_assessment(sediment_assessment)
 
 
 write_summary_table(
@@ -229,7 +229,7 @@ wk_metals <-
 biota_assessment <- run_assessment(
   biota_timeseries, 
   subset = determinand %in% wk_metals,
-  AC = c("BAC", "NRC", "EAC", "LRC", "QSsp", "MPC", "QShh"),
+  AC = c("BAC", "NRC", "EAC", "FEQG", "LRC", "QSsp", "MPC", "QShh"),
   get_AC_fn = get_AC_biota_OSPAR,
   parallel = TRUE
 )
@@ -242,6 +242,15 @@ biota_assessment <- update_assessment(
 
 
 check_assessment(biota_assessment)
+
+biota_assessment <- update_assessment(
+  biota_assessment, 
+  subset = series == "5031 BBKF Mytilus edulis SB",
+  hess.d = 0.0001, hess.r = 8
+)
+
+check_assessment(biota_assessment)
+
 
 
 write_summary_table(
@@ -269,6 +278,7 @@ write_summary_table(
       "BAC" = "blue",
       "NRC" = "blue",
       "EAC" = "green", 
+      "FEQG" = "green",
       "LRC" = "green", 
       "QSsp" = "green", 
       "MPC" = "green",
@@ -278,6 +288,7 @@ write_summary_table(
       "BAC" = "orange", 
       "NRC" = "orange", 
       "EAC" = "red", 
+      "FEQG" = "red",
       "LRC" = "red", 
       "QSsp" = "red", 
       "MPC" = "red",
@@ -287,7 +298,7 @@ write_summary_table(
   ),
   collapse_AC = list(
     BAC = c("BAC", "NRC"),
-    EAC = c("EAC", "LRC", "QSsp"), 
+    EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
   ),
   output_dir = file.path("output", "example_OSPAR")

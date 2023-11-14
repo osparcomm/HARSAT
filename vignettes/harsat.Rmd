@@ -16,7 +16,7 @@ looks like in a typical analysis.
 ## Installing `harsat` from a bundled package
 
 If you have a downloaded copy of the bundled package, whch will be a file
-named something like `harsat_0.1.1.tar.gz` or `harsat_0.1.1.tar`, you 
+named something like `harsat_0.1.2.tar.gz` or `harsat_0.1.2.tar`, you 
 can install that directly, and R will still take care of making sure 
 you have all the right dependencies.
 
@@ -32,7 +32,9 @@ button.
 Use a command:
 
 ```r
-install.packages("~/Downloads/harsat_0.1.1.tar", repos = NULL)
+install.packages(remotes) -- if needed
+library(remotes)
+remotes::install_local("~/Downloads/harsat_0.1.2.tar")
 ```
 
 Use the right file for the downloaded package file, press enter, and
@@ -43,6 +45,7 @@ away you go.
 To install the latest development version, use the `remotes` package:
 
 ```r
+# install.packages(remotes) -- if needed
 library(remotes)
 remotes::install_github("osparcomm/harsat", auth_token = 'XXXX') 
 ```
@@ -107,18 +110,23 @@ water_data <- read_data(
   info_dir = file.path(working.directory, "information", "OSPAR_2022"),
   extraction = "2023/08/23"
 )
-#> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"
+#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv 
+#> Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv 
+#> Found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv 
+#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv': '2b165f406bb440297435ea3f46eb3612'
 #> Reading station dictionary from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'
 #> 
 #> Reading contaminant and effects data from:
 #>  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt': '0ccaec75c5fd7e875c730467d58fdb26'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: OSPAR 

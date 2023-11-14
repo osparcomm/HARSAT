@@ -23,7 +23,8 @@ only; in particular, they should not be used for any formal reporting**.
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  error = TRUE
 )
 ```
 
@@ -421,7 +422,7 @@ biota_timeseries <- create_timeseries(
 )
 ```
 
-The asssessment took about 3.5 minutes on my laptop
+The asssessment took about 4.3 minutes on my laptop
 
 ```{r helcom-biota-assessment}
 biota_assessment <- run_assessment(
@@ -429,9 +430,27 @@ biota_assessment <- run_assessment(
   AC = c("BAC", "EAC", "EQS", "MPC"),
   parallel = TRUE
 )
+```
+
+One time series has not converged. (The parameter estimates are fine, but the
+standard errors are implausibly tight - if you look at the data, you will see why
+the routines struggle with this time series.) The code below tweaks the 
+arguments of the numerical differencing routine that calculates the standard 
+errors. Dealing with non-converged timeseries is a topic for a future vignette.
+
+
+```{r helcom-biota-check-assessment}
+check_assessment(biota_assessment)
+
+biota_assessment <- update_assessment(
+  biota_assessment, 
+  subset = series == "2299 PYR1OH Limanda limanda BI HPLC-FD",
+  hess.d = 0.0001, hess.r = 8
+)
 
 check_assessment(biota_assessment)
 ```
+
 
 And that's it :)
 

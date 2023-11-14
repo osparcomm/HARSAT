@@ -1,5 +1,6 @@
 # main import and data processing functions ----
 
+library(readxl)
 
 # read data  ---- 
 
@@ -210,6 +211,49 @@ read_data <- function(
   )
   
   out
+}
+
+
+#' Reads an input file, given a particular encoding, and possibly additional hints
+#' 
+#' @param file the file name
+#' @param ... any additional parameters to `read.table`
+#' @return a tibble
+safe_read_file <- function(file, header=TRUE, sep=",", quote="\"", dec=".", fill=TRUE, comment.char="", strip.white=TRUE, ...) {
+
+  ## Handle Excel
+  extension <- toupper(tools::file_ext(file))
+  if (extension == 'XLS' || extension == 'XLSX') {
+    result <- readxl::read_excel(file, col_names = TRUE)
+    return(result)
+  }
+
+  ## Check the encoding, and warn if incompatible -- we allow both UTF-8 and ASCII, 
+  ## since UTF-8 is a superset of ASCII, and guess_encoding will only guess one of
+  ## them. This only warns, it does not stop a workflow.  
+  enc <- readr::guess_encoding(file)
+  encodings <- toupper(enc$encoding)
+  if (length(intersect(c("ASCII", "UTF-8"), encodings)) == 0) {
+    warning(
+      "file encoding isn't ASCII or UTF-8: ", 
+      file,
+      ", please use iconv or save this file as UTF-8"
+    )
+  }
+
+  table <- read.table(
+    file=file,
+    header=header,
+    sep=sep,
+    quote=quote,
+    dec=dec,
+    fill=fill,
+    comment.char=comment.char,
+    strip.white=strip.white,
+    fileEncoding='utf-8',
+    ...
+  )
+  table
 }
 
 
@@ -478,6 +522,15 @@ read_info <- function(info, path, info_files) {
 }
 
 
+#' Generates and logs a file digest
+#' 
+#' @param file the file name
+report_file_digest <- function(infile) {
+  md5 <- digest::digest(infile, algo='md5')
+  cat("MD5 digest for: '", infile, "': '", md5, "'\n", sep = "")
+}
+
+
 #' Reads station dictionary
 #'
 #' @param file A file reference for the station dictionary.
@@ -530,11 +583,13 @@ read_stations <- function(file, data_dir = ".", info) {
       station_deprecated = "logical"
     )
     
-    stations <- read.delim(
+    report_file_digest(infile)
+    stations <- safe_read_file(
       infile, 
       sep = "\t",
+      quote = "",
       na.strings = c("", "NULL"), 
-      strip.white = TRUE, 
+      strip.white = TRUE,
       colClasses = var_id
     )
     
@@ -568,7 +623,8 @@ read_stations <- function(file, data_dir = ".", info) {
     
     # check required variables are present in data
     
-    stations <- read.csv(infile, strip.white = TRUE, nrows = 1)
+    report_file_digest(infile)
+	stations <- safe_read_file(infile, strip.white = TRUE, nrows = 1)
     
     ok <- required %in% names(stations)
     
@@ -588,7 +644,7 @@ read_stations <- function(file, data_dir = ".", info) {
     
     ok <- names(var_id) %in% names(stations)
     
-    stations <- read.csv(
+    stations <- safe_read_file(
       infile, 
       na.strings = c("", "NULL"),
       strip.white = TRUE,
@@ -720,15 +776,16 @@ read_contaminants <- function(file, data_dir = ".", info) {
       var_id <- c(var_id, extra)
 
     }
-       
-    data <- read.delim(
+
+    report_file_digest(infile)
+    data <- safe_read_file(       
       infile, 
       sep = "\t",
+      # quote = "",             ## Quotes shouldn't be allowed, but disabling them breaks all reads
       na.strings = c("", "NULL"), 
       strip.white = TRUE,
       colClasses = var_id
     )
-
     
     # add in extra required variable
     
@@ -737,7 +794,17 @@ read_contaminants <- function(file, data_dir = ".", info) {
     } else {
       data$subseries <- NA_character_
     }
+
     
+    # convert param (determinand) and munit (unit) to upper / lower case
+    
+    data <- dplyr::mutate(
+      data, 
+      param = toupper(.data$param),
+      munit = tolower(.data$munit)
+    )
+    
+        
     return(data)
   }  
   
@@ -798,8 +865,9 @@ read_contaminants <- function(file, data_dir = ".", info) {
   if (info$data_format == "external") {  
 
     # check required variables are present in data
-    
-    data <- read.csv(infile, strip.white = TRUE, nrows = 1)
+
+    report_file_digest(infile)    
+    data <- safe_read_file(infile, strip.white = TRUE, nrows = 1)
   
     ok <- required %in% names(data)
     
@@ -819,13 +887,25 @@ read_contaminants <- function(file, data_dir = ".", info) {
     
     ok <- names(var_id) %in% names(data)
 
-    data <- read.csv(
+    data <- safe_read_file(
       infile, 
       na.strings = c("", "NULL"),
       strip.white = TRUE,
       colClasses = var_id[ok]
     )
     
+    # additional validations
+
+    # every valid `uncertainty` must have a valid `unit_uncertainty`
+    uncertainty_present <- which(complete.cases(data$uncertainty))
+    uncertainty_present_valid_units <- 
+      data$unit_uncertainty[uncertainty_present] %in% c("%", "U2", "SD")
+    if (! all(uncertainty_present_valid_units)) {
+      stop(
+        "Missing or invalid uncertainty units for specified uncertainty values. ",
+        "Please check that all uncertainty values have a valid unit: %, U2, or SD"
+      )
+    }
   }
   
 
@@ -1689,20 +1769,26 @@ finalise_data <- function(data, info) {
     method_extraction = "metcx",
     method_pretreatment = "metpt",
     replicate = "tblparamid", 
-    sample = "tblsampleid", 
     upload = "tbluploadid"
   )
 
   
-  # biota specific
+  # compartment specific
   
-  if (info$compartment == "biota") {
+  if (info$compartment %in% c("sediment", "water")) {
+    
+    data <- dplyr::rename(data, sample = "tblsampleid")
+    
+  } else if (info$compartment == "biota") {
+    
     data <- dplyr::rename(
-      data, 
-      sub.sample = "tblbioid", 
+      data,
+      sample_cluster = "tblsampleid", 
+      sample = "tblbioid", 
       sex = "sexco",
       n_individual = "noinp"
     )    
+  
   }
   
   
@@ -1822,7 +1908,8 @@ ctsm_read_QA <- function(file, path, purpose) {
   infile <- file.path(path, file)
   cat("\nReading QA data from '", infile, "'\n", sep = "")
   
-  crm <- read.csv(
+  report_file_digest(infile)
+  crm <- safe_read_file(
     infile, na.strings = c("", "NULL"), strip.white = TRUE
   )
 

@@ -5,10 +5,38 @@
 [![lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) ![development build](https://github.com/osparcomm/harsat/actions/workflows/build.yml/badge.svg?branch=develop) ![stable build](https://github.com/osparcomm/harsat/actions/workflows/build.yml/badge.svg?branch=main)
 <!-- badges: end -->
 
-## Requirements
+## What is HARSAT?
 
--	R programming language (version 4.2.1)
-- Additional R packages to those which come with the standard R installation -- they will be installed automatically, but you may need permissions or tools to do that
+HARSAT (Harmonised Regional Seas Assessment Tool), is a tool that is applied 
+by The Arctic Monitoring and Assessment Programme (AMAP), the Helsinki 
+Commission (HELCOM) and the OSPAR Commission (OSPAR) to support their 
+assessments of data concerning contaminants (hazardous substances) and 
+their effects in the marine environment. 
+
+HARSAT code includes tools for pre-processing data, statistical trend 
+analysis and comparison with threshold values, and post-processing for 
+archiving and reporting.
+
+HARSAT is developed in statistical computing language R. R is available 
+for most operating systems and can be downloaded from the R-project website. 
+
+Disclaimer: The HARSAT tool is made available under an Open Source licence. 
+While every attempt has been made to ensure that the HARSAT version(s) 
+developed and supported by AMAP/HELCOM/OSPAR are free of errors, any use 
+of the tool by third parties, and the quality of products of third party 
+use is the responsibility of the third party concerned.
+
+## System requirements
+
+-	R programming language (version 4.2.1 or later). Additional R packages 
+to those which come with the standard R installation may be 
+needed -- they will normally be installed automatically, but you may need 
+permissions or tools to do that
+
+- RStudio (version 2023.03.1 or later, recommended). The HARSAT developers recommend 
+running the HARSAT code using the RStudio integrated development 
+environment. Although R can be run independently of RStudio, some of the 
+examples presented are easier within RStudio. 
 
 ## Installation
 
@@ -19,7 +47,7 @@ as this ensures that all dependencies are up-to-date, properly downloaded and in
 ### In RStudio
 
 To do this, you will need a downloaded package bundle, typically a file 
-called something like `harsat_0.1.1.tar.gz`.
+called something like `harsat_0.1.2.tar.gz`.
 
 From the `Packages` tab, choose `Install`, make sure you have selected
 to install from a Package Archive File, then press the `Browse...` button
@@ -29,13 +57,15 @@ button.
 ### From the R command line
 
 To do this, you will need a downloaded package bundle, typically a file 
-called something like `harsat_0.1.1.tar.gz`.
+called something like `harsat_0.1.2.tar.gz`.
 
 In the R command line, use a command (passing the filename of wherever 
 you have downloaded the file to):
 
 ```r
-install.packages("~/Downloads/harsat_0.1.1.tar", repos = NULL)
+install.packages(remotes) -- if needed
+library(remotes)
+remotes::install_local("~/Downloads/harsat_0.1.2.tar")
 ```
 ### Directly from Github
 

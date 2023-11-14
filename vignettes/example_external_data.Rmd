@@ -38,28 +38,40 @@ Mercury data with supporting variables and station dictionary
 biota_data <- read_data(
   compartment = "biota",
   purpose = "AMAP",
-  contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv",
-  stations = "AMAP_external_new_stations_only.csv",
+  contaminants = "EXTERNAL_FO_PW_DATA.csv",   # NB, replace biota data filename above, as appropriate 
+  stations = "EXTERNAL_AMAP_STATIONS.csv",    # NB, replace station data filename above, as appropriate 
   data_dir = file.path(working.directory, "data", "example_external_data"),
   data_format = "external",
   info_dir = file.path(working.directory, "information", "AMAP"),
-  control = list(region = list(id = "AMAP_region"))
 )
-#> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/AMAP/determinand.csv /Users/stuart/git/HARSAT/information/AMAP"
-#> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/AMAP/species.csv /Users/stuart/git/HARSAT/information/AMAP"
-#> [1] "found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/AMAP/thresholds_biota.csv /Users/stuart/git/HARSAT/information/AMAP"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/AMAP"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/AMAP"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/AMAP"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/AMAP"
+#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/AMAP/determinand.csv 
+#> Found in path species.csv /Users/stuart/git/HARSAT/information/AMAP/species.csv 
+#> Found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/AMAP/thresholds_biota.csv 
+#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/determinand.csv': '7e310c487109c531aa62cb9a217f879b'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/species.csv': 'a3d78e2147a3fc2867b82d1d16a3ae88'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/imposex.csv': '7e42cb57944b9d79216ad25c12ccada5'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/thresholds_biota.csv': '7208225201dcbb851427a4df70760106'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_external_data/AMAP_external_new_stations_only.csv'
+#>  '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_AMAP_STATIONS.csv'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_AMAP_STATIONS.csv': '4abf9ba9b2f033e296d4ddc3b99c16d7'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_external_data/AMAP_external_data_new_data_only_CAN_MarineMammals.csv'
+#>  '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv'
+#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv': 'dce2913be61985213ac903f69a783c9f'
 #> 
-#> Argument max_year taken to be the maximum year in the data: 2017
+#> Argument max_year taken to be the maximum year in the data: 2020
 ```
+
+Note: in the above function, replace ‘control = list()’ with ‘control = list(use_stage = TRUE)’
+to include subseries in ICES format data runs; 
+for ‘external’ format runs, if the input data file includes a column named ‘subseries’, the
+data in this column will be used to define subseries, to exclude subseries runs this 
+column can be omitted or renamed e.g. to ‘nosubseries’ 
 
 # Prepare data for next stage
 
@@ -72,7 +84,7 @@ biota_data <- tidy_data(biota_data)
 #> Oddities will be written to 'oddities/biota' with previous oddities backed up to
 #>  'oddities/biota_backup'
 #> 
-#> Dropping 42 stations that are not associated with any data
+#> Dropping 54 stations that are not associated with any data
 #> 
 #> Cleaning station dictionary
 #> 
@@ -87,20 +99,26 @@ For each timeseries, use the basis which is reported most often in the data
 ```r
 biota_timeseries <- create_timeseries(
   biota_data,
-  get_basis = get_basis_most_common
+  determinands = ctsm_get_determinands(biota_data$info),
+  determinands.control = NULL,
+  oddity_path = "oddities",
+  return_early = FALSE,
+  print_code_warnings = FALSE,
+  get_basis = get_basis_most_common,
+  normalise = FALSE,
+  normalise.control = list()
 )
 #> 
 #> Oddities will be written to 'oddities/biota' with previous oddities backed up to
 #>  'oddities/biota_backup'
 #> 
 #> Cleaning data
-#>    Dropping stations with no data between 2012 and 2017
-#>    Unexpected or missing values for 'basis': see basis_queries.csv
-#>    Unexpected or missing values for 'value': see value_queries.csv
+#>    Dropping stations with no data between 2015 and 2020
+#>    Replicate measurements, only first retained: see replicate_measurements.csv
 #> 
 #> Creating time series data
 #>    Converting data to appropriate basis for statistical analysis
-#>    Dropping groups of compounds / stations with no data between 2012 and 2017
+#>    Dropping groups of compounds / stations with no data between 2015 and 2020
 ```
 
 # Assessment
@@ -110,145 +128,201 @@ Main runs
 
 ```r
 biota_assessment <- run_assessment(
-  biota_timeseries, 
-  AC = c("NRC", "LRC", "MRC", "HRC")
+  biota_timeseries,
+  subset = NULL,
+  AC = NULL,
+  get_AC_fn = NULL,
+  recent_trend = 20L,
+  parallel = FALSE
 )
 #> 
-#> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg
+#> assessing series:  station_code A902; determinand BD100; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand BD153; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand BD154; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix LI; subseries juvenile; basis W; unit ug/kg
+#> assessing series:  station_code A902; determinand BD183; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
 #> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix MU; subseries adult; basis W; unit ug/kg 
+#> assessing series:  station_code A902; determinand BDE28; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
 #> 
-#> assessing series:  station_code A1; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg
+#> assessing series:  station_code A902; determinand BDE47; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand BDE66; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand BDE85; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
 #> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A20; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A20; determinand HG; species Phoca hispida; matrix LI; subseries juvenile; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A20; determinand HG; species Phoca hispida; matrix MU; subseries adult; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A20; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix LI; subseries large; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix LI; subseries small; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix MU; subseries large; basis W; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
+#> assessing series:  station_code A902; determinand BDE99; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A3; determinand HG; species Delphinapterus leucas; matrix MU; subseries small; basis W; unit ug/kg 
+#> assessing series:  station_code A902; determinand CB101; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis D; unit ug/kg
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
+#> assessing series:  station_code A902; determinand CB105; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis D; unit ug/kg
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
+#> assessing series:  station_code A902; determinand CB118; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
 #> 
-#> assessing series:  station_code A3; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis D; unit ug/kg
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
+#> assessing series:  station_code A902; determinand CB128; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand CB138; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand CB153; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg 
+#> assessing series:  station_code A902; determinand CB156; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
 #> 
-#> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix LI; subseries juvenile; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix MU; subseries adult; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A6; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_female; basis D; unit ug/kg
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#> boundary (singular) fit: see help('isSingular')
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries adult_male; basis D; unit ug/kg
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#> 
-#> assessing series:  station_code A6; determinand HG; species Ursus maritimus; matrix LI; subseries juvenile; basis D; unit ug/kg
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#>    Losing 1 out of 1 records in basis conversion due to missing, censored
-#>    or zero drywt or lipidwt values.
-#> 
-#> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix LI; subseries adult; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix LI; subseries juvenile; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix MU; subseries adult; basis W; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code A8; determinand HG; species Phoca hispida; matrix MU; subseries juvenile; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix EP; subseries large; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix EP; subseries small; basis W; unit ug/kg
-#> boundary (singular) fit: see help('isSingular')
-#> 
-#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix KI; subseries large; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix KI; subseries small; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix LI; subseries large; basis W; unit ug/kg 
-#> 
-#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix LI; subseries small; basis W; unit ug/kg
+#> assessing series:  station_code A902; determinand CB170; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> boundary (singular) fit: see help('isSingular')
 #> 
-#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix MU; subseries large; basis W; unit ug/kg 
+#> assessing series:  station_code A902; determinand CB180; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
 #> 
-#> assessing series:  station_code A9; determinand HG; species Delphinapterus leucas; matrix MU; subseries small; basis W; unit ug/kg
+#> assessing series:  station_code A902; determinand CB183; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand CB187; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand CB28; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand CB52; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand CCDAN; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand CD; species Globicephala melas; matrix KI; subseries AD; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand CD; species Globicephala melas; matrix LI; subseries AD; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand CD; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand CNONC; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand DDEOP; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand DDEPP; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand DDTOP; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand DDTPP; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand HBCDA; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand HBCDB; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand HBCDG; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand HCHB; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand HG; species Globicephala melas; matrix LI; subseries AD; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand HG; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand HG; species Globicephala melas; matrix MU; subseries AD; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand HG; species Globicephala melas; matrix MU; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand OCDAN; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand PFDA; species Globicephala melas; matrix BB; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFDA; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand PFDOA; species Globicephala melas; matrix BB; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFDOA; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand PFDS; species Globicephala melas; matrix BB; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFHXS; species Globicephala melas; matrix BB; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFHXS; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand PFNA; species Globicephala melas; matrix BB; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFNA; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFOA; species Globicephala melas; matrix BB; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFOA; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFOS; species Globicephala melas; matrix BB; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand PFOS; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand SE; species Globicephala melas; matrix LI; subseries AD; basis W; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand SE; species Globicephala melas; matrix LI; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand SE; species Globicephala melas; matrix MU; subseries AD; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand SE; species Globicephala melas; matrix MU; subseries JV; basis W; unit ug/kg 
+#> 
+#> assessing series:  station_code A902; determinand TCDAN; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand TDEOP; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand TDEPP; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> 
+#> assessing series:  station_code A902; determinand TNONC; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
+#> boundary (singular) fit: see help('isSingular')
 ```
 
 Use the code below if it takes a long time to run
@@ -256,7 +330,10 @@ Use the code below if it takes a long time to run
 ```r
 biota_assessment <- run_assessment(
   biota_timeseries,
-  AC = c("NRC", "LRC", "MRC", "HRC")
+  subset = NULL,
+  AC = NULL,
+  get_AC_fn = NULL,
+  recent_trend = 20L,
   parallel = TRUE
 )
 ```
@@ -265,7 +342,7 @@ biota_assessment <- run_assessment(
 
 
 ```r
-check_assessment(biota_assessment)
+check_assessment(biota_assessment, save_result = FALSE)
 #> All assessment models have converged
 ```
 
@@ -283,12 +360,12 @@ if (!dir.exists(summary.dir)) {
 
 write_summary_table(
   biota_assessment,
+  output_file = "biota-FO-PW-test-output.csv",   # NB, file will be overwritten so change name as appropriate to retain results
   output_dir = summary.dir,
-    classColour = list(
-    below = c("NRC" = "blue", "LRC" = "green", "MRC" = "orange", "HRC" = "darkorange"),
-    above = c("NRC" = "red", "LRC" = "red", "MRC" = "red", "HRC" = "red"),
-    none = "black"
-  )
+  export = TRUE,
+  determinandGroups = NULL,
+  classColour = NULL,
+  collapse_AC = NULL
 )
 ```
 
@@ -297,7 +374,10 @@ write_summary_table(
 Plots assessment with either data (file_type = "data") or annual index 
 (file_type = "index") or both (default)
 
-Outputs can be png or pdf
+The plot function writes output to `output_dir` directory (must exist); with these
+settings all plots are output as .png formatted graphics; function can be omitted to 
+avoid graphical output; changing "png" to "pdf" in above statement will output graphics 
+in PDF (vector) format.
 
 Can subset assessment based on variables in either timeSeries or stations 
 components of object: commonly by determinand, matrix, species, station_code 
@@ -316,41 +396,13 @@ if (!dir.exists(graphics.dir)) {
 
 plot_assessment(
   biota_assessment,
-  subset = species %in% "Phoca hispida",
-  output_dir = graphics.dir, 
-  file_type = "data",
-  file_format = "png"
+  subset = NULL ,
+  output_dir = summary.dir,
+  file_type = c("data", "index"),
+  file_format = c("png" )
 )
 ```
 
+The above code will write a summary file for the run concerned. 
+Checksums for the four runs described in this example are as follows:
 
-```r
-plot_assessment(
-  biota_assessment,
-  subset = matrix %in% "LI",
-  output_dir = graphics.dir, 
-  file_type = "index",
-  file_format = "pdf"
-)
-```
-
-
-```r
-plot_assessment(
-  biota_assessment,
-  subset = station_code %in% "A1",
-  output_dir = graphics.dir, 
-  file_type = "data",
-  file_format = "pdf"
-)
-```
-
-
-```r
-plot_assessment(
-  biota_assessment, 
-  subset = series == "A1 HG Phoca hispida LI adult",
-  output_dir = graphics.dir, 
-  file_format = "pdf"
-)
-```

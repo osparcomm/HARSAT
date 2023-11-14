@@ -13,7 +13,8 @@ data.
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  error = TRUE
 )
 ```
 
@@ -36,24 +37,29 @@ working.directory <- here()
 
 Mercury data with supporting variables and station dictionary
 
-```{r external-biota}
+```{r amap-biota}
 biota_data <- read_data(
   compartment = "biota",
   purpose = "AMAP",
-  contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv",
-  stations = "AMAP_external_new_stations_only.csv",
+  contaminants = "EXTERNAL_FO_PW_DATA.csv",   # NB, replace biota data filename above, as appropriate 
+  stations = "EXTERNAL_AMAP_STATIONS.csv",    # NB, replace station data filename above, as appropriate 
   data_dir = file.path(working.directory, "data", "example_external_data"),
   data_format = "external",
   info_dir = file.path(working.directory, "information", "AMAP"),
-  control = list(region = list(id = "AMAP_region"))
 )
 ```
+
+Note: in the above function, replace ‘control = list()’ with ‘control = list(use_stage = TRUE)’
+to include subseries in ICES format data runs; 
+for ‘external’ format runs, if the input data file includes a column named ‘subseries’, the
+data in this column will be used to define subseries, to exclude subseries runs this 
+column can be omitted or renamed e.g. to ‘nosubseries’ 
 
 # Prepare data for next stage
 
 Get correct variables and streamline the data files
 
-```{r external-prepare}
+```{r amap-prepare}
 biota_data <- tidy_data(biota_data)
 ```
 
@@ -61,10 +67,17 @@ biota_data <- tidy_data(biota_data)
 
 For each timeseries, use the basis which is reported most often in the data
 
-```{r external-timeseries}
+```{r amap-timeseries}
 biota_timeseries <- create_timeseries(
   biota_data,
-  get_basis = get_basis_most_common
+  determinands = ctsm_get_determinands(biota_data$info),
+  determinands.control = NULL,
+  oddity_path = "oddities",
+  return_early = FALSE,
+  print_code_warnings = FALSE,
+  get_basis = get_basis_most_common,
+  normalise = FALSE,
+  normalise.control = list()
 )
 ```
 
@@ -72,10 +85,14 @@ biota_timeseries <- create_timeseries(
 
 Main runs
 
-```{r external-assessment}
+```{r amap-assessment}
 biota_assessment <- run_assessment(
-  biota_timeseries, 
-  AC = c("NRC", "LRC", "MRC", "HRC")
+  biota_timeseries,
+  subset = NULL,
+  AC = NULL,
+  get_AC_fn = NULL,
+  recent_trend = 20L,
+  parallel = FALSE
 )
 ```
 
@@ -84,22 +101,25 @@ Use the code below if it takes a long time to run
 ```r
 biota_assessment <- run_assessment(
   biota_timeseries,
-  AC = c("NRC", "LRC", "MRC", "HRC")
+  subset = NULL,
+  AC = NULL,
+  get_AC_fn = NULL,
+  recent_trend = 20L,
   parallel = TRUE
 )
 ```
 
 ## Check convergence
 
-```{r external-convergence}
-check_assessment(biota_assessment)
+```{r amap-convergence}
+check_assessment(biota_assessment, save_result = FALSE)
 ```
 
 # Summary files
 
 This writes the summary data to a file in `output/example_external_data`.
 
-```{r external-summary}
+```{r amap-summary}
 summary.dir <- file.path(working.directory, "output", "example_external_data")
 
 if (!dir.exists(summary.dir)) {
@@ -108,12 +128,12 @@ if (!dir.exists(summary.dir)) {
 
 write_summary_table(
   biota_assessment,
+  output_file = "biota-FO-PW-test-output.csv",   # NB, file will be overwritten so change name as appropriate to retain results
   output_dir = summary.dir,
-    classColour = list(
-    below = c("NRC" = "blue", "LRC" = "green", "MRC" = "orange", "HRC" = "darkorange"),
-    above = c("NRC" = "red", "LRC" = "red", "MRC" = "red", "HRC" = "red"),
-    none = "black"
-  )
+  export = TRUE,
+  determinandGroups = NULL,
+  classColour = NULL,
+  collapse_AC = NULL
 )
 ```
 
@@ -122,7 +142,10 @@ write_summary_table(
 Plots assessment with either data (file_type = "data") or annual index 
 (file_type = "index") or both (default)
 
-Outputs can be png or pdf
+The plot function writes output to `output_dir` directory (must exist); with these
+settings all plots are output as .png formatted graphics; function can be omitted to 
+avoid graphical output; changing "png" to "pdf" in above statement will output graphics 
+in PDF (vector) format.
 
 Can subset assessment based on variables in either timeSeries or stations 
 components of object: commonly by determinand, matrix, species, station_code 
@@ -131,7 +154,7 @@ if subset is NULL (default), all timeseries are plotted (can take some time)
 
 Graphics plots are written to files in `output/graphics`.
 
-```{r external-graphics1}
+```{r amap-graphics1}
 graphics.dir <- file.path(working.directory, "output", "graphics")
 
 if (!dir.exists(graphics.dir)) {
@@ -140,38 +163,13 @@ if (!dir.exists(graphics.dir)) {
 
 plot_assessment(
   biota_assessment,
-  subset = species %in% "Phoca hispida",
-  output_dir = graphics.dir, 
-  file_type = "data",
-  file_format = "png"
+  subset = NULL ,
+  output_dir = summary.dir,
+  file_type = c("data", "index"),
+  file_format = c("png" )
 )
 ```
 
-```{r external-graphics2}
-plot_assessment(
-  biota_assessment,
-  subset = matrix %in% "LI",
-  output_dir = graphics.dir, 
-  file_type = "index",
-  file_format = "pdf"
-)
-```
+The above code will write a summary file for the run concerned. 
+Checksums for the four runs described in this example are as follows:
 
-```{r external-graphics3}
-plot_assessment(
-  biota_assessment,
-  subset = station_code %in% "A1",
-  output_dir = graphics.dir, 
-  file_type = "data",
-  file_format = "pdf"
-)
-```
-
-```{r external-graphics4}
-plot_assessment(
-  biota_assessment, 
-  subset = series == "A1 HG Phoca hispida LI adult",
-  output_dir = graphics.dir, 
-  file_format = "pdf"
-)
-```

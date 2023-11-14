@@ -134,10 +134,11 @@ plot_assessment <- function(
     # get file name from id, and add country and station name 
     # for easier identification
     
-    output_id <- gsub(
-      series$station_code, 
+    output_id <- sub(
+      series$station_code,
       paste(series$station_code, series$country, series$station_name), 
-      id
+      id,
+      fixed=TRUE
     )
     
     
