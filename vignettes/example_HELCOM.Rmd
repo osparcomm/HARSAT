@@ -92,13 +92,13 @@ water_data <- read_data(
   info_dir = file.path(working.directory, "information", "HELCOM_2023"), 
   extraction = "2023/08/23"
 )
-#> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_water.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv 
+#> Found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv 
+#> Found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_water.csv 
+#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
 #> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
 #> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
 #> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_water.csv': '599000609710f7a53450f16fef814d1c'
@@ -333,13 +333,13 @@ sediment_data <- read_data(
   info_dir = file.path(working.directory, "information", "HELCOM_2023"),
   extraction = "2023/08/23"
 )
-#> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in path thresholds_sediment.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_sediment.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv 
+#> Found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv 
+#> Found in path thresholds_sediment.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_sediment.csv 
+#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
 #> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
 #> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
 #> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/method_extraction.csv': 'b3c891f17b9b35774114edaa2f58b6cc'
@@ -526,13 +526,13 @@ biota_data <- read_data(
   info_dir = file.path(working.directory, "information", "HELCOM_2023"), 
   extraction = "2023/08/23"
 )
-#> [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_biota.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
-#> [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/HELCOM_2023"
+#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv 
+#> Found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv 
+#> Found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_biota.csv 
+#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
 #> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
 #> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
 #> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv': '895d4f259f2a1ee8d9c7ec52210f584c'
@@ -668,28 +668,28 @@ biota_timeseries <- create_timeseries(
 #>    Large uncertainties: see large_uncertainties.csv
 #>    Data submitted as BDE28, BDE47, BDE99, BD100, BD153, BD154 summed to give 
 #> SBDE6
-#>      103 of 314 samples lost due to incomplete submissions
+#>      257 of 497 samples lost due to incomplete submissions
 #>    Data submitted as HBCDA, HBCDB, HBCDG summed to give HBCD
-#>      5 of 41 samples lost due to incomplete submissions
+#>      5 of 42 samples lost due to incomplete submissions
 #>    Data submitted as CB138+163 relabelled as CB138 
 #>    Data submitted as CB28, CB52, CB101, CB138, CB153, CB180 summed to give SCB6
-#>      16 of 521 samples lost due to incomplete submissions
+#>      22 of 925 samples lost due to incomplete submissions
 #>    Data submitted as 
 #> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1, TCDD 
 #> summed to give TEQDFP
-#>      508 of 530 samples lost due to incomplete submissions
+#>      907 of 945 samples lost due to incomplete submissions
 #>    Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT% 
 #> 
 #> Creating time series data
 #>    Converting data to appropriate basis for statistical analysis
-#>    Losing 23 out of 3030 records in basis conversion due to missing, censored
+#>    Losing 63 out of 5737 records in basis conversion due to missing, censored
 #>    or zero drywt or lipidwt values.
 #>    Normalising lipid to 5%
 #>    No normalisation for other
 #>    Dropping groups of compounds / stations with no data between 2015 and 2020
 ```
 
-The asssessment took about 3.5 minutes on my laptop
+The asssessment took about 4.3 minutes on my laptop
 
 
 ```r
@@ -699,10 +699,35 @@ biota_assessment <- run_assessment(
   parallel = TRUE
 )
 #> Setting up clusters: be patient, it can take a while!
+```
+
+One time series has not converged. (The parameter estimates are fine, but the
+standard errors are implausibly tight - if you look at the data, you will see why
+the routines struggle with this time series.) The code below tweaks the 
+arguments of the numerical differencing routine that calculates the standard 
+errors. Dealing with non-converged timeseries is a topic for a future vignette.
+
+
+
+```r
+check_assessment(biota_assessment)
+#> The following assessment models have not converged:
+#> 2299 PYR1OH Limanda limanda BI HPLC-FD
+#> 5844 CD Clupea harengus LI
+
+biota_assessment <- update_assessment(
+  biota_assessment, 
+  subset = series == "2299 PYR1OH Limanda limanda BI HPLC-FD",
+  hess.d = 0.0001, hess.r = 8
+)
+#> 
+#> assessing series:  station_code 2299; determinand PYR1OH; species Limanda limanda; matrix BI; method_analysis HPLC-FD; unit ng/ml
 
 check_assessment(biota_assessment)
-#> All assessment models have converged
+#> The following assessment models have not converged:
+#> 5844 CD Clupea harengus LI
 ```
+
 
 And that's it :)
 
