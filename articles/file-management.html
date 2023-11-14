@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1003</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -135,6 +135,46 @@ modified configuration files you have put into your analysis directory,
 will not be affected.</p>
 </div>
 <div class="section level2">
+<h2 id="file-encodings">File encodings<a class="anchor" aria-label="anchor" href="#file-encodings"></a>
+</h2>
+<p><code>harsat</code> currently expects all files to be encoded using
+UTF-8. Standard ASCII files are also fine, as UTF-8 is a superset of
+ASCII. If you are using accented characters in another encoding, such as
+the common Latin-1 (also known as iso-8859-1) then we would ask you to
+convert them to UTF-8 first. If you are using Microsoft Excel to prepare
+them, this simply means saving them as CSV files with UTF-8
+encoding.</p>
+<blockquote>
+<p>Note: the reason we do not allow people to choose a file encoding
+option for input files, is that <code>harsat</code> reads quite a few
+files, and it would be hard to specify encodings for all of them if they
+different file encodings. UTF-8 is very standard now, it is
+automatically used for ICES data anyway, so it <code>harsat</code> will
+instead check for UTF-8, and if your files aren’t encoded as expected,
+it will warn you.</p>
+</blockquote>
+<p>If you are using other tools, please check the documentation for
+those tools to make sure that they aren’t converting files to Latin-1
+behind your back.</p>
+<p>To check the encoding of a file, use the <code>file</code> command,
+which is slightly different depending on your operating system.</p>
+<p>On a Mac:</p>
+<pre><code>$ file -I file.csv
+file.csv: text/csv; charset=utf-8</code></pre>
+<p>On Windows or Linux (on Windows, you may need <a href="https://gnuwin32.sourceforge.net/packages/file.htm" class="external-link">File for
+Windows</a>):</p>
+<pre><code>$ file file.csv
+file.csv: text/csv; charset=utf-8</code></pre>
+<p>If the <code>charset</code> is not reported as <code>utf-8</code> (or
+<code>us-ascii</code>), you will need to convert it. The easiest way to
+do this is using <code>iconv</code>, which is built in on Macs, and
+available as a <a href="https://gnuwin32.sourceforge.net/packages/libiconv.htm" class="external-link">download
+on Windows</a>.</p>
+<pre><code>iconv -f &lt;old charset&gt; -t utf-8 file.csv &gt; file-utf8.csv</code></pre>
+<p>You can then use the converted version <code>file-utf8.csv</code> in
+your workflows.</p>
+</div>
+<div class="section level2">
 <h2 id="typical-workflow">Typical workflow<a class="anchor" aria-label="anchor" href="#typical-workflow"></a>
 </h2>
 <p>Let’s imagine you want to run an analysis with <code>harsat</code>,
@@ -189,7 +229,7 @@ assessments.</p>
 your R working directory (or R Project) is
 <code>C:\Users\stuart\OSPAR_vignette\</code>. Your call will then
 typically look like this:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"biota"</span>, </span>
 <span>  purpose <span class="op">=</span> <span class="st">"OSPAR"</span>,                               </span>
@@ -202,7 +242,7 @@ the directories called <code>data</code> and <code>assessment</code>
 that are nested inside your working directory. If you have called them
 something else, then you can use the <code>data_dir</code> and
 <code>analysis_dir</code> arguments. For example:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"biota"</span>, </span>
 <span>  purpose <span class="op">=</span> <span class="st">"OSPAR"</span>,                               </span>
@@ -213,7 +253,7 @@ something else, then you can use the <code>data_dir</code> and
 <span>  analysis_dir <span class="op">=</span> <span class="st">"analysis_vignette"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>You can also specify absolute path names</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"biota"</span>, </span>
 <span>  purpose <span class="op">=</span> <span class="st">"OSPAR"</span>,                               </span>

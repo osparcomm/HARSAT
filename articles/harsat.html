@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1003</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,8 +96,8 @@ the code looks like in a typical analysis.</p>
 <h2 id="installing-harsat-from-a-bundled-package">Installing <code>harsat</code> from a bundled package<a class="anchor" aria-label="anchor" href="#installing-harsat-from-a-bundled-package"></a>
 </h2>
 <p>If you have a downloaded copy of the bundled package, whch will be a
-file named something like <code>harsat_0.1.1.tar.gz</code> or
-<code>harsat_0.1.1.tar</code>, you can install that directly, and R will
+file named something like <code>harsat_0.1.2.tar.gz</code> or
+<code>harsat_0.1.2.tar</code>, you can install that directly, and R will
 still take care of making sure you have all the right dependencies.</p>
 <div class="section level3">
 <h3 id="in-rstudio">In RStudio<a class="anchor" aria-label="anchor" href="#in-rstudio"></a>
@@ -111,8 +111,9 @@ file. Then finally press the <code>Install</code> button.</p>
 <h3 id="from-the-r-command-line">From the R command line<a class="anchor" aria-label="anchor" href="#from-the-r-command-line"></a>
 </h3>
 <p>Use a command:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"~/Downloads/harsat_0.1.1.tar"</span>, repos <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(remotes) <span class="sc">--</span> <span class="cf">if</span> needed</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(remotes)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_local</span>(<span class="st">"~/Downloads/harsat_0.1.2.tar"</span>)</span></code></pre></div>
 <p>Use the right file for the downloaded package file, press enter, and
 away you go.</p>
 </div>
@@ -123,7 +124,8 @@ away you go.</p>
 <p>To install the latest development version, use the
 <code>remotes</code> package:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># install.packages(remotes) -- if needed</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/harsat"</span>, auth_token <span class="op">=</span> <span class="st">'XXXX'</span><span class="op">)</span> </span></code></pre></div>
 <p>The stable version is similar:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -183,18 +185,23 @@ through some of these arguments.</p>
 <span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span>, <span class="st">"OSPAR_2022"</span><span class="op">)</span>,</span>
 <span>  extraction <span class="op">=</span> <span class="st">"2023/08/23"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
-<span><span class="co">#&gt; [1] "found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
-<span><span class="co">#&gt; [1] "found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
-<span><span class="co">#&gt; [1] "found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
-<span><span class="co">#&gt; [1] "found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
-<span><span class="co">#&gt; [1] "found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
-<span><span class="co">#&gt; [1] "found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv /Users/stuart/git/HARSAT/information/OSPAR_2022"</span></span>
+<span><span class="co">#&gt; Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv </span></span>
+<span><span class="co">#&gt; Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv </span></span>
+<span><span class="co">#&gt; Found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv </span></span>
+<span><span class="co">#&gt; Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv </span></span>
+<span><span class="co">#&gt; Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv </span></span>
+<span><span class="co">#&gt; Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv </span></span>
+<span><span class="co">#&gt; Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv </span></span>
+<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'</span></span>
+<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'</span></span>
+<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv': '2b165f406bb440297435ea3f46eb3612'</span></span>
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
 <span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
 <span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt': '0ccaec75c5fd7e875c730467d58fdb26'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matching data with station dictionary</span></span>
 <span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
