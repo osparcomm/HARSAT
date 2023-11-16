@@ -38,13 +38,18 @@ it, as covered in the [Getting Started](/harsat.html) guide).
 library(harsat)
 ```
 
-And loading the R package `here`, because we use the working directory to find
+We set up our main directory to find
 the data files. If you use your own data files, you will need to point to
-a directory containing a copy.
+a directory containing a copy. We usually do this by putting our data files
+in a directory `data`, and information files in a directory `information`,
+but you can use any directory for these.
 
-```{r}
-library(here)
-working.directory <- here()
+```{r, echo=FALSE,results='asis'}
+library(rprojroot)
+working.directory <- is_r_package$find_file()
+cat("```r\n")
+cat("working.directory <- '", working.directory, "'\n", sep="");
+cat("```\n")
 ```
 
 # Water assessment

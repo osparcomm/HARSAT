@@ -52,12 +52,13 @@ jobs:
 
       - name: Build data and configuration archive for AMAP/external
         run: |
+          set +f
           mkdir -p $TEMP_DIR/external
           cp -R data/example_external_data $TEMP_DIR/external/
           mv $TEMP_DIR/external/example_external_data $TEMP_DIR/external/data
           cp -R information/AMAP $TEMP_DIR/external/
           mv $TEMP_DIR/external/AMAP $TEMP_DIR/external/information
-          mv $TEMP_DIR/external/information/README*.* $TEMP_DIR/external/
+          mv $TEMP_DIR/external/data/README*.* $TEMP_DIR/external/
           cd $TEMP_DIR
           zip -r $WORK_DIR/docs/external.zip external
           cd $WORK_DIR
@@ -65,12 +66,13 @@ jobs:
 
       - name: Build data and configuration archive for OSPAR 2022
         run: |
+          set +f
           mkdir -p $TEMP_DIR/ospar
           cp -R data/example_OSPAR $TEMP_DIR/ospar/
           mv $TEMP_DIR/ospar/example_OSPAR $TEMP_DIR/ospar/data
           cp -R information/OSPAR_2022 $TEMP_DIR/ospar/
           mv $TEMP_DIR/ospar/OSPAR_2022 $TEMP_DIR/ospar/information
-          mv $TEMP_DIR/ospar/information/README*.* $TEMP_DIR/ospar/
+          mv $TEMP_DIR/ospar/data/README*.* $TEMP_DIR/ospar/
           cd $TEMP_DIR
           zip -r $WORK_DIR/docs/ospar.zip ospar
           cd $WORK_DIR
@@ -78,12 +80,13 @@ jobs:
 
       - name: Build data and configuration archive for HELCOM 2023
         run: |
+          set +f
           mkdir -p $TEMP_DIR/helcom
           cp -R data/example_HELCOM $TEMP_DIR/helcom/
           mv $TEMP_DIR/helcom/example_HELCOM $TEMP_DIR/helcom/data
           cp -R information/HELCOM_2023 $TEMP_DIR/helcom/
           mv $TEMP_DIR/helcom/HELCOM_2023 $TEMP_DIR/helcom/information
-          mv $TEMP_DIR/helcom/information/README*.* $TEMP_DIR/helcom/
+          mv $TEMP_DIR/helcom/data/README*.* $TEMP_DIR/helcom/
           cd $TEMP_DIR
           zip -r $WORK_DIR/docs/helcom.zip helcom
           cd $WORK_DIR
