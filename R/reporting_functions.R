@@ -57,37 +57,48 @@ ctsm.projection <- function(latitude, longitude) {
 
 # support functions ----
 
+#' Subsets an assessment object
+#' 
+#' Selects specific time series and simplifies the data, stations and 
+#' assessment components to match
+#'  
+#' @param assessment_obj An assessment object resulting from a call to
+#'   run_assessment.
+#' @param subset A vector specifying the timeseries to be retained. An
+#'   expression will be evaluated in the timeSeries component of assessment_obj; 
+#'   use 'series' to identify individual timeseries.
+#'
+#' @returns
+#.
 #' @export
-ctsm_subset_assessment <- function(assessment_obj, subset) {
+subset_assessment <- function(assessment_obj, subset) {
   
   # reporting_functions.R
   # subsets an assessment object by filtering on the timeSeries component
   
   timeSeries <- assessment_obj$timeSeries
   
+  timeSeries <- tibble::rownames_to_column(timeSeries, "series")
   ok <- eval(substitute(subset), timeSeries, parent.frame())
   timeSeries <- timeSeries[ok, ]
+  series_id <- timeSeries$series
+  
+  row.names(timeSeries) <- NULL
+  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
   
   assessment_obj$timeSeries <- timeSeries
 
   
   # update other components to be consistent
   
-  id <- row.names(timeSeries)
+  assessment_obj$assessment <- assessment_obj$assessment[series_id]
   
-  assessment_obj$assessment <- assessment_obj$assessment[id]
-  
-  ok <- assessment_obj$data$seriesID %in% id
+  ok <- assessment_obj$data$seriesID %in% series_id
   assessment_obj$data <- assessment_obj$data[ok, ]
   
-  ok <- row.names(assessment_obj$stations) %in% timeSeries$station 
+  ok <- assessment_obj$stations$station_code %in% timeSeries$station_code 
   assessment_obj$stations <- assessment_obj$stations[ok, ]
-  
-  
-  # drop redundant factor levels
-  
-  id <- c("timeSeries", "data", "stations")
-  assessment_obj[id] <- lapply(assessment_obj[id], droplevels)
+  row.names(assessment_obj$stations) <- NULL
   
   assessment_obj
 }  

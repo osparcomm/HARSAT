@@ -8,5 +8,5 @@ get_station_code(station_name, country, stations)
 }
 \description{
 Gets the station code corresponding to the station name and country from the
-station dictionary. Only works for one country at a time
+station dictionary.
 }
