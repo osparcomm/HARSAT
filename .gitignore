@@ -4,7 +4,7 @@
 .Ruserdata
 .build.timestamp
 HARSAT.RProj
-HARSAT.Rcheck
+harsat.Rcheck
 harsat_*.tar.gz
 oddities/
 output/

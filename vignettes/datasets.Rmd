@@ -1,0 +1,29 @@
+---
+title: "Datasets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Datasets
+
+The `harsat` package provides three standard datasets to help you 
+get started. These aren't R data files, instead they are zip files
+that contain everything you need for the analyses.
+
+## HELCOM
+
+* [Download the data](../helcom.zip)
+* [Worked example](./example_HELCOM.html)
+
+## OSPAR
+
+* [Download the data](../ospar.zip)
+* [Worked example](./example_OSPAR.html)
+
+## AMAP (external)
+
+* [Download the data](../external.zip)
+* [Worked example](./example_external_data.html)
