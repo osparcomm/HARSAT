@@ -366,7 +366,8 @@ control_default <- function(purpose, compartment) {
     region = region,
     add_stations = add_stations,
     bivalve_spawning_season = bivalve_spawning_season,
-    use_stage = use_stage
+    use_stage = use_stage,
+    missing_species = 'error'
   )
 }
 

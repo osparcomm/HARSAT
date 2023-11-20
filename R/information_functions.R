@@ -133,7 +133,93 @@ ctsm_get_info <- function(
 }  
 
 
-ctsm_check_reference_table <- function(x, ref_table, info_type = "") {
+#' Validates data against the standard reference tables
+#' 
+#' This function checks inputs compatible with `ctsm_get_info` against
+#' reference tables, and operates in two different ways. If `warn` is
+#' `FALSE`, the default, on missing values it stops with an error, 
+#' much as `ctsm_get_info` does when `na_action` is not `ok`. 
+#' 
+#' However if `warn` is `TRUE`, it warns instead of stopping, and
+#' removes any rows that fail to match from the data, and returns a 
+#' possibly modified data frame with fewer rows. 
+#'
+#' @param ref_table A reference table
+#' @param input The input data frame -- complete, not simply a column
+#' @param selector A string, the name of the column in the input we are validating against `ref_table`
+#' @param info_type Behaves as in `ctsm_get_info`
+#' @param warn A boolean, if `FALSE` (the default) stops with an error on missing reference data,
+#'   otherwise (if `TRUE`) purges and returns mismatching records
+#' @return A possibly modified data frame, identical to `input` but omitting rows where they don't match
+#' @export
+ctsm_validate_reference <- function(
+  ref_table, 
+  input, 
+  selector,
+  info_type = NULL,
+  warn = FALSE) {
+  
+  if (is.null(info_type)) {
+    wk <- substitute(ref_table)
+    wk <- as.character(wk)
+    if (length(wk) == 3L && identical(wk[1:2], c("$", "info"))) {
+      info_type <- paste0(wk[3], " ")
+    } else {
+      info_type <- ""
+    }   
+  } else {
+    info_type <- paste0(info_type, " ")
+  }
+
+  # ensure input is character
+  input_selected <- input[[selector]]
+  
+  # check whether input is a combination of values - sometimes used when e.g. 
+  # there are two methods used in the extraction of a chemical 
+  split_input <- any(grepl("~", na.omit(input_selected)))
+  if (split_input) {
+    input2 <- strsplit(input_selected, "~", fixed = TRUE)
+  }
+
+  wk <- if(split_input) unlist(input2) else input_selected
+  check <- na.omit(wk)
+  check <- unique(check)
+  
+  ## The actual checks
+  ok <- check %in% row.names(ref_table)
+
+  ## Now, if we should, we can act to clean up the data
+  if (!all(ok)) {
+    id <- check[!ok]
+    id <- sort(id)
+    
+    # We should either (a) stop with an error, or (b) warn and then
+    # remove these entries from the data.
+    handler <- if (warn) warning else stop
+    handler(
+      '\nThe following values are not in the ', info_type, 'reference table.\n',
+      "Please add them to the reference table or edit your data to continue.\n",
+      paste(id, collapse = ", "), 
+      call. = FALSE
+    )
+
+    select <- ! input[[selector]] %in% id
+    input <- input[select,]
+  }
+  
+  return(input)
+}
+
+
+#' Checks the reference table
+#' 
+#' @param x what to check in the reference table
+#' @param ref_table the reference table to check
+#' @param info_type the name of the information type, for messaging
+#' @param warn boolean, if true, warns and returns missing ids; if false,
+#'   stops with an error
+#' @return a vector of missing identifiers
+ctsm_check_reference_table <- function(x, ref_table, info_type = "", warn = FALSE) {
 
   # information_functions.R
   # checks whether x is in the reference table
@@ -145,15 +231,20 @@ ctsm_check_reference_table <- function(x, ref_table, info_type = "") {
   if (!all(ok)) {
     id <- id[!ok]
     id <- sort(id)
-    stop(
+    handler <- if (warn) warning else stop
+    handler(
       '\nThe following values are not in the ', info_type, 'reference table.\n',
       "Please add them to the reference table or edit your data to continue.\n",
       paste(id, collapse = ", "), 
       call. = FALSE
     )
+
+    # if we pass stop (i.e., warn == TRUE), return a vector of missing identifiers
+    return(id)
   }
   
-  invisible()
+  # otherwise, all is good, return an empty vector
+  return(vector())
 }
 
 
