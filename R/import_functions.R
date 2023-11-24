@@ -2121,9 +2121,12 @@ tidy_contaminants <- function(data, info) {
 
   # add required variables 'replicate' and 'pargroup' (not present in external data)
   
+  # have removed 'pargroup' for now as it can result in a lot of unrecognised 
+  # determinands - 'pargroup' is added later in create_timeseries
+  
   if (info$data_format == "external") {
     data$replicate <- seq(from = 1, to = nrow(data), by = 1)
-    data$pargroup <- ctsm_get_info(info$determinand, data$determinand, "pargroup")
+    # data$pargroup <- ctsm_get_info(info$determinand, data$determinand, "pargroup")
   }
   
       
@@ -2227,6 +2230,8 @@ create_timeseries <- function(
   ctsm_check_stations(station_dictionary)
   
   
+  # determinand validation
+  
   # retains determinands of interest, including auxiliary determinands and those
   # required by determinands.control$variables 
   # checks all determinands of interest are recognised by info$determinand
@@ -2297,10 +2302,12 @@ create_timeseries <- function(
   data <- droplevels(data[ok, ])
   
 
+  # species validation
+  
   # drop species that aren't going to be assessed
   # do this after we drop station species combinations because legacy species
   # then don't need to be in the reference tables
-  
+
   if (info$compartment == "biota") {
   
     ok <- ctsm_get_info(info$species, data$species, "assess")
@@ -2339,7 +2346,8 @@ create_timeseries <- function(
 
 
   # add variables that are going to be useful throughout
-  # pargroup in ICES extraction, but can also be got from info$determinand
+  # pargroup is already in an ICES extraction, but might need to supply it
+  # for external data (from info$determinand)
   
   data$group <- ctsm_get_info(
     info$determinand, data$determinand, "group", info$compartment, sep = "_"
