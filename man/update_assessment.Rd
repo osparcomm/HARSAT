@@ -21,6 +21,6 @@ computation; default = FALSE.}
 details (which need to be written).}
 }
 \description{
-Refits models for particular timeseries, or does fits new models when an
+Refits models for particular timeseries, or fits new models when an
 assessment is being done in chunks.
 }

@@ -2657,7 +2657,7 @@ get.info.imposex <- function(
 #' Get station code from station name
 #'
 #' Gets the station code corresponding to the station name and country from the 
-#' station dictionary. Only works for one country at a time
+#' station dictionary. 
 #'
 #' @param station_name
 #' @param country
@@ -2665,19 +2665,62 @@ get.info.imposex <- function(
 #' @export
 get_station_code <- function(station_name, country, stations) {
     
-  stopifnot(length(country) == 1)
   n <- length(station_name)
   
+  if (!(length(country) %in% c(1L, n))) {
+    stop(
+      "'country' must either be a single character or the same length as 'station_name'"
+    )  
+  }
+  
   out <- data.frame(station_name = station_name, country = country) 
-  out <- mutate(out, across(.fns = as.character))
+
+  if (any(is.na(out))) {
+    stop("missing values not allowed in 'station_name' or 'country'")
+  }
     
-  
+  id <- c("station_name", "country")
+  out <- dplyr::mutate(out, across(all_of(id), as.character))
+    
+  id <- c("station_name", "country", "station_code")
   stations <- stations[c("station_name", "country", "station_code")]
-  stations <- mutate(stations, across(.fns = as.character)) 
+  stations <- dplyr::mutate(stations, across(all_of(id), as.character)) 
   
-  out <- dplyr::left_join(out, stations, by = c("station_name", "country"))
+  out <- dplyr::left_join(
+    out, 
+    stations, 
+    by = c("station_name", "country"), 
+    relationship = "many-to-many"
+  )
   
-  stopifnot(!is.na(out), n == nrow(out))
+  if (any(is.na(out$station_code))) {
+    out_error <- dplyr::filter(out, is.na(.data$station_code))
+    out_error <- paste(out_error$country, out_error$station_name)
+    warning(
+      "the following station_names are not recognised:\n", 
+      paste(out_error, collapse = "\n"), 
+      immediate. = TRUE
+    )
+  }
   
+  if (nrow(out) != n) {
+    out_error <- unique(out)
+    out_error <- tidyr::unite(
+      out_error, 
+      "id", 
+      all_of(c("country", "station_name")),
+      sep = " "
+    )
+    out_error <- dplyr::filter(
+      out_error, 
+      .data$id %in% .data$id[duplicated(.data$id)]
+    )
+    out_error <- paste(out_error$id, out_error$station_code)
+    stop(
+      "the following station_names match to multiple station_codes:\n", 
+      paste(out_error, collapse = "\n")
+    )
+  }
+    
   out$station_code
 }

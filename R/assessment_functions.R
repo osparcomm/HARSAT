@@ -87,7 +87,7 @@ run_assessment <- function(
 
 #' Update timeseries assessments
 #'
-#' Refits models for particular timeseries, or does fits new models when an
+#' Refits models for particular timeseries, or fits new models when an
 #' assessment is being done in chunks.
 #'
 #' @param ctsm_ob A HARSAT object resulting from a call to run_assessment
