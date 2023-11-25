@@ -2176,7 +2176,7 @@ tidy_contaminants <- function(data, info) {
     "station_code", "sample_latitude", "sample_longitude", 
     "year", "date", "time", "depth", 
     "species", "sex", "n_individual", "subseries", "sample", "replicate", 
-    "determinand", "pargroup", "matrix", "basis", "filtration", 
+    "determinand", "pargroup", "matrix", "basis", "filtration",  #### <---------- condition on external
     "method_analysis", "method_extraction", "method_pretreatment",
     "unit", "value", "censoring", "limit_detection", "limit_quantification", 
     "uncertainty", "unit_uncertainty", "alabo", "qalink"
