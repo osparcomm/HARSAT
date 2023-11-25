@@ -1,10 +1,35 @@
 
 # harsat
 
-## Requirements
+## What is HARSAT?
 
-- R programming language (version 4.2.1)
-- Additional R packages to those which come with the standard R installation -- they will be installed automatically, but you may need permissions or tools to do that
+HARSAT (Harmonised Regional Seas Assessment Tool), is a tool that is 
+applied by The Arctic Monitoring and Assessment Programme (AMAP), 
+the Helsinki Commission (HELCOM) and the OSPAR Commission (OSPAR) 
+to support their assessments of data concerning contaminants 
+(hazardous substances) and their effects in the marine environment. 
+
+HARSAT code includes tools for pre-processing data, statistical trend analysis 
+and comparison with threshold values, and post-processing for archiving and 
+reporting.
+
+HARSAT is developed in the statistical computing language R. R is available 
+for most operating systems and can be downloaded from the R-project website.
+
+Disclaimer: The HARSAT tool is made available under an Open Source licence. 
+While every attempt has been made to ensure that the HARSAT version(s) 
+developed and supported by AMAP/HELCOM/OSPAR are free of errors, any use 
+of the tool by third parties, and the quality of products of third party 
+use is the responsibility of the third party concerned.
+
+## System requirements
+
+- R programming language (version 4.2.1 or later). Additional R packages to 
+  those which come with the standard R installation
+  may be needed -- they will normally be installed automatically, but you may need permissions or tools to do this
+- R Studio (recommended; version 2023.03.1 or later). While not required, 
+  the HARSAT developers recommend running the HARSAT code using the RStudio 
+  integrated development environment.
 
 ## Installation
 
