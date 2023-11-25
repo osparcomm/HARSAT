@@ -216,7 +216,7 @@ check_assessment(water_assessment)
 
 ## Reporting
 
-We can then get a summary table of our results. We want a direcrory where
+We can then get a summary table of our results. We want a directory where
 we can put it. And `harsat` won't create a directory if there's nothing
 there, so let's make a new directory, `./output/tutorial`, and put the full
 path into `summary.dir`, so we can tell `harsat` where to write to.
