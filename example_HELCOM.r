@@ -274,20 +274,6 @@ biota_data <- read_data(
 biota_data <- tidy_data(biota_data)
 
 
-# The construction of the time series has a few more features. However, first we
-# need to provide the individual TEQs to allow the construction of the WHO TEQ
-# for dioxins, furans and planar PCBS (labelled TEQDFP). these are the values
-# for the human health QS. This stage won't be necessary in later releases.
-
-info_TEQ <- c(
-  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
-  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.0003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
-)
-
 # The determinands.control argument does rather more here. There are four summed
 # variables: PFOS, SBDE6, HBCD and SCB6. There is also one variable CB138+163
 # which needs to be relabeled as (replaced by) CB138. For the purposes of the
@@ -320,7 +306,11 @@ biota_timeseries <- create_timeseries(
       det = c("CB28", "CB52", "CB101", "CB138", "CB153", "CB180"), 
       action = "sum"
     ),
-    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_human_health), 
+      action = "bespoke", 
+      weights = info_TEF$DFP_human_health
+    ),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   ),
   normalise = normalise_biota_HELCOM,
