@@ -2486,10 +2486,12 @@ create_timeseries <- function(
       bespoke = get(paste("determinand.link", i, sep = "."), mode = "function")
     )
     
-    data <- do.call(
-      linkFunction, 
-      list(data = data, keep = i, drop = wk$det, info = info)
-    )
+    args = list(data = data, keep = i, drop = wk$det)
+    if ("weights" %in% names(wk)) {
+      args = c(args, list(weights = wk$weights))
+    }
+    
+    data <- do.call(linkFunction, args)
   }  
 
   # drop any remaining unwanted determinands (from sum and perhaps bespoke functions);
@@ -3253,7 +3255,7 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
   visitID <- with(data, paste(station_code, year))
   
   
-  # find visits when both indivuduals and stages reported and check consistent
+  # find visits when both individuals and stages reported and check consistent
   
   ok <- by(data, visitID, function(x) {
     with(x, {
@@ -3465,7 +3467,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
 
 
 
-determinand.link.TEQDFP <- function(data, keep, drop, ...) {
+determinand.link.TEQDFP <- function(data, keep, drop, weights) {
 
   stopifnot(length(keep) == 1, length(drop) > 1)
   
@@ -3499,18 +3501,6 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
   
   summed_data <- by(data[["TRUE"]], ID, function(x) {
     
-    # only some of the determinands are mandatory - otherwise we woudld lose everything 
-    # mandatory determinands contribute at least 1% to the total TEQ based on a quick look-see!
-    # the order below is based on % contribution
-
-    # mandatory <- c(
-    #   "CB126", "CDF2N", "CDD1N", "CDF2T", "TCDD", "CB169", "CB118", "CDFP2", "CDD6X", "CDF4X", 
-    #   "CDF6X")
-    # 
-    # if (!all(mandatory %in% x$determinand)) 
-    #   return(NULL)
-    
-
     # check all bases are the same 
     
     if (!all(drop %in% x$determinand)) return(NULL)
@@ -3524,7 +3514,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, ...) {
     
     x[id] <- lapply(x[id], convert_units, from = x$unit, to = "ug/kg")
     
-    TEQ <- info_TEQ[as.character(x$determinand)]
+    TEQ <- weights[as.character(x$determinand)]
     
     x[id] <- lapply(x[id], "*", TEQ)
     

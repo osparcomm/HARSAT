@@ -2539,6 +2539,40 @@ get.info.imposex <- function(
 
 
 
+# TEF values ----
+
+#' TEF values for selected groups of compounds
+#' 
+#' A list of named vectors which currently provide the TEFs for the WHO TEQ for 
+#' dioxins, furans and dioxin-like (planar) polychlorinated biphenyls.
+#' DFP_environmental and DFP_human_health provide the TEFs appropriate for 
+#' testing against the environmental and human health standards respectively.
+#' 
+#' Adding further TEFs will require more development to the relevant 
+#' determinand_link function 
+#' 
+#' @export 
+info_TEF <- list(
+  DFP_environmental = c(
+    "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
+    "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
+    "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+    "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
+    "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+    "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+  ), 
+  DFP_human_health = c(
+    "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
+    "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
+    "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+    "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
+    "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+    "CDF9X" = 0.1, "CDFO" = 0.0003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+  )
+)
+
+
+
 # ICES RECO codes ----
 
 # reads in data from csv files exported from ICES RECO

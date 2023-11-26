@@ -80,16 +80,6 @@ sediment_data <- read_data(
 sediment_data <- tidy_data(sediment_data)
 
 
-info_TEQ <- c(
-  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
-  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
-)
-
-
 sediment_timeseries <- create_timeseries(
   sediment_data,
   determinands.control = list(
@@ -100,7 +90,11 @@ sediment_timeseries <- create_timeseries(
     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
     CB138 = list(det = c("CB138+163"), action = "replace"),
     CB156 = list(det = c("CB156+172"), action = "replace"),
-    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_environmental), 
+      action = "bespoke", 
+      weights = info_TEF$DFP_environmental
+    ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum")
   ),
   normalise = normalise_sediment_OSPAR,
@@ -174,15 +168,6 @@ biota_data <- read_data(
 
 biota_data <- tidy_data(biota_data)
 
-info_TEQ <- c(
-  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
-  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
-)
-
 biota_timeseries <- create_timeseries(
   biota_data,
   determinands.control = list(
@@ -207,7 +192,11 @@ biota_timeseries <- create_timeseries(
       det = c("CB28", "CB52", "CB101", "CB118", "CB138", "CB153", "CB180"), 
       action = "sum"
     ),
-    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_environmental), 
+      action = "bespoke", 
+      weights = info_TEF$DFP_environmental
+    ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"),
     HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
