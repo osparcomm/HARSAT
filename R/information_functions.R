@@ -2029,8 +2029,20 @@ convert_units_workup <- function(units) {
 
 
 
-# Basis and matrix information and basis conversion ----
-
+#' Basis and matrix information and basis conversion
+#' 
+#' Converts concentrations between wet, dry and lipid bases
+#' 
+#' @param from the current basis
+#' @param to the target basis
+#' @param drywt assumed to be a percentage taking values in [0, 100]
+#' @param lipidwt assumed to be a percentage taking values in [0, 100];
+#'   assumed to be on a wet weight basis
+#' @param drywt_censoring
+#' @param lipidwt_censoring
+#' @param exclude a logical identifying records that do not need to be converted,
+#'   useful when the data contain biological effects measurements
+#' @param print_warning a boolean, gives the number of records lost during conversion
 #' @export
 ctsm_convert_basis <- function(
   conc, from, to, 
@@ -2041,23 +2053,7 @@ ctsm_convert_basis <- function(
   exclude = FALSE, 
   print_warning = TRUE) {
 
-  # source: information_functions.R
-  # dependencies: dplyr
-  
-  # converts concentrations between wet, dry and lipid bases
-
-  # from ~ current basis
-  # to ~ target basis
-
-  # drywt and lipidwt assumed to be percentages taking values in [0, 100]
-
   # lipidwt assumed to be on a wet weight basis - could generalise (issue raised)
-  
-  # exclude is a logical identifying records that do not need to be converted -
-  # useful when the data contain biological effects measurements
-  
-  # print_warning gives the number of records lost during conversion
-  
   
   # set up working data frame
   
@@ -2267,6 +2263,15 @@ ctsm_check_convert_basis <- function(data) {
 # biota_OSPAR is the current (2023) OSPAR biota configuration
 # biota_HELCOM is the current (2023) HELCOM biota configuration
 
+#' The default function for generating a basis
+#' 
+#' This default is very simplistic, but works in all cases for sediment and water
+#' most_common was used by AMAP in their mercury assessment and takes the most 
+#' common basis reported in each station, species (biota), matrix and  
+#' determinand_group combination
+#' 
+#' @param data the data
+#' @param info the information object
 #' @export
 get_basis_default <- function(data, info) {
   
@@ -2355,13 +2360,12 @@ get_basis_most_common <- function(data, info) {
 
 #' Gets the OSPAR biota target basis
 #' 
-#' @param data
-#' @param info
+#' @param data the data
+#' @param info the information object
 #' @export
 get_basis_biota_OSPAR <- function(data, info) {
   
   # note hard-wiring of lipid_high which should be passed as a control variable
-  
   
   if (info$compartment != "biota"){
     stop("Incorrect compartment specified")

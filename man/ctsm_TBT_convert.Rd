@@ -12,7 +12,17 @@ ctsm_TBT_convert(
   convert_var = c("value", "limit_detection", "limit_quantification", "uncertainty")
 )
 }
+\arguments{
+\item{data}{the data}
+
+\item{action}{one of \code{"relabel"}, \code{"convert"}, \code{"change_unit"} --
+note that \code{change_unit} moves units from tin units to conventional units}
+
+\item{from}{either \code{"tin"} or \code{"cation"}}
+
+\item{convert_var}{one of \code{"value"}, \code{"limit_detection"},
+\code{"limit_quantification"}, \code{"uncertainty"}}
+}
 \description{
 Convert tin concentrations to cation concentrations.
-Also \code{change_unit} moves units from tin units to conventional units
 }

@@ -2,6 +2,14 @@
 
 ctsm.Mercator <- function(x) atanh(sin(x * pi / 180))
 
+#' Calculates a polar projection
+#' 
+#' Calculates easting and northing in Lambert Azimuthal Equal 
+#' Area North Polar aspect projection
+#' 
+#' @param latitude the latitude
+#' @param longitude the longitude
+#' @return a list with projected `longitude` (easting) and `latitude` (northing) values
 #' @export
 ctsm.projection <- function(latitude, longitude) {
   # calculates easting and northing in Lambert Azimuthal Equal Area North Polar aspect projection

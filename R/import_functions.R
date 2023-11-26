@@ -2159,6 +2159,20 @@ tidy_contaminants <- function(data, info) {
 #' 
 #' Cleans the data and turns it into time series structures ready for assessment
 #' 
+#' @param ctsm.obj the CTSM object, as returned from `tidy_data`
+#' @param determinands the determinands to use, by default derived by
+#'   calling `ctsm_get_determinands`, which takes values from 
+#'   the determinand reference table
+#' @param determinands.control determinands control values, when needed
+#' @param oddity_path a directory to write the oddities to
+#' @param return_early
+#' @param print_code_warnings
+#' @param get_basis
+#' @param normalise boolean or function, if TRUE, uses a default normalization
+#' @param normalise.control
+#' 
+#' @return a completed timeseries object, which can be used for assessments
+#' 
 #' @export
 create_timeseries <- function(
   ctsm.obj, 
@@ -4066,6 +4080,12 @@ ctsm_convert_to_target_basis <- function(data, info, get_basis) {
 }
 
 
+#' Normalises sediment concentrations, OSPAR vwersion
+#' 
+#' @param data the data object
+#' @param station_dictionary the station dictionary
+#' @param info the information object
+#' @param control control values
 #' @export
 normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
   
@@ -4384,6 +4404,12 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
   data
 }
 
+#' Normalises sediment concentrations, HELCOM vwersion
+#' 
+#' @param data the data object
+#' @param station_dictionary the station dictionary
+#' @param info the information object
+#' @param control control values
 #' @export
 normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   
@@ -4704,6 +4730,12 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   data
 }
 
+#' Normalises biota concentrations, HELCOM vwersion
+#' 
+#' @param data the data object
+#' @param station_dictionary the station dictionary
+#' @param info the information object
+#' @param control control values
 #' @export
 normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
@@ -4973,7 +5005,14 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
 #' Convert tin concentrations
 #'
 #' Convert tin concentrations to cation concentrations.
-#' Also `change_unit` moves units from tin units to conventional units
+#' 
+#' @param data the data
+#' @param subset
+#' @param action one of `"relabel"`, `"convert"`, `"change_unit"` -- 
+#'   note that `change_unit` moves units from tin units to conventional units
+#' @param from either `"tin"` or `"cation"`
+#' @param convert_var one of `"value"`, `"limit_detection"`, 
+#'   `"limit_quantification"`, `"uncertainty"`
 #' @export 
 ctsm_TBT_convert <- function(
   data, subset, action, from = c("tin", "cation"), 
