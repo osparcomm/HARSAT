@@ -1,8 +1,8 @@
 library(rprojroot)
-working_directory <- is_r_package$find_file()
+working_directory <- is_testthat$find_file()
 
-data_dir = file.path(working_directory, "tests", "datasets", "external-1")
-info_dir = file.path(working_directory, "information", "AMAP")
+data_dir = file.path(working_directory, "..", "datasets", "external-1", "data")
+info_dir = file.path(working_directory, "..", "datasets", "external-1", "information")
 
 call_read_data <- function(compartment = "biota", data_format = "external", purpose = "AMAP",
                            contaminants = "EXTERNAL_FO_PW_DATA.csv") {
