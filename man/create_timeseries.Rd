@@ -16,6 +16,24 @@ create_timeseries(
   normalise.control = list()
 )
 }
+\arguments{
+\item{ctsm.obj}{the CTSM object, as returned from \code{tidy_data}}
+
+\item{determinands}{the determinands to use, by default derived by
+calling \code{ctsm_get_determinands}, which takes values from
+the determinand reference table}
+
+\item{determinands.control}{determinands control values, when needed}
+
+\item{oddity_path}{a directory to write the oddities to}
+
+\item{normalise}{boolean or function, if TRUE, uses a default normalization}
+
+\item{normalise.control}{}
+}
+\value{
+a completed timeseries object, which can be used for assessments
+}
 \description{
 Cleans the data and turns it into time series structures ready for assessment
 }

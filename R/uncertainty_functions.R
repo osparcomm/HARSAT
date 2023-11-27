@@ -281,6 +281,10 @@ ctsm_uncrt_plot_estimates <- function(uncrt_obj, old_estimates, group_id) {
 }
 
 
+#' Generates a relative uncertainty plot
+#' 
+#' @param uncrt_obj an uncertainty object
+#' @param det_id a list of determinand ids
 #' @export
 ctsm_uncrt_plot_data <- function(uncrt_obj, det_id) {
   
