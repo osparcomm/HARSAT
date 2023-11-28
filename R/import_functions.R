@@ -2642,10 +2642,15 @@ create_timeseries <- function(
   if (is.logical(normalise) && normalise) {
     data <- switch(
       info$compartment,
-      biota = 
-        ctsm_normalise_biota(data, station_dictionary, info, normalise.control),
-      sediment = 
-        ctsm_normalise_sediment(data, station_dictionary, info, normalise.control),
+      biota = stop("there is no default normalisation function for biota"),
+      ## TODO: implement normalise_biota
+      # biota = 
+      #   normalise_biota(data, station_dictionary, info, normalise.control),
+      sediment = stop("there is no default normalisation function for sediment"),
+      ## TODO: implement normalise_sediment
+      # sediment = 
+      #   normalise_sediment(data, station_dictionary, info, normalise.control),
+      ## TODO: implement normalise_water
       water = stop("there is no default normalisation function for water")
     )
   } else if (is.function(normalise)) {
