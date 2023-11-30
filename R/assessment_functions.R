@@ -158,6 +158,9 @@ update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...) {
 
 assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
 
+  # silence non-standard evaluation warnings
+  .data <- index <- NULL
+
   # location: assessment_functions.R
   
   # assess each time series in turn
@@ -600,6 +603,9 @@ assess_lmm <- function(
     data, annualIndex, AC, recent.years, determinand, max.year, 
     recent.trend = 20, distribution, good.status, choose_model, ...) {
 
+  # silence non-standard evaluation warnings
+  year <- NULL
+
   # choose_model forces exit with a particular model: 2 = linear, 3 = smooth on 2df etc, with an 
   # error if that model doesn't exist 
   # this should only be used with extreme care - it is provided for those very rare casese where a 
@@ -849,7 +855,7 @@ assess_lmm <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         fit, 
-        year = max(data$year), 
+        yearID = max(data$year), 
         refvalue = switch(distribution, lognormal = log(i), normal = i), 
         lower.tail = switch(good.status, low = TRUE, high = FALSE)
       )
@@ -1398,6 +1404,10 @@ assess_survival <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
 
+  # silence non-standard evaluation warnings
+  .data <- est <- lcl <- ucl <- p <- se <- NULL
+  info <- NULL
+
   # assess survival data, often expressed as interval data 
   
   # check valid determinands 
@@ -1468,7 +1478,7 @@ assess_survival <- function(
   
   data <- dplyr::mutate(
     data, 
-    time = if_else(.data$time == 0, .data$time2 / 10, .data$time)
+    time = dplyr::if_else(.data$time == 0, .data$time2 / 10, .data$time)
   )
   
   
@@ -1717,7 +1727,7 @@ assess_survival <- function(
     output$reference.values <- lapply(AC, function(i) {
       assess_survival_refvalue(
         output, 
-        year = max(data$year), 
+        year_id = max(data$year), 
         refvalue = i,
         good_status = good_status
       )
@@ -1879,6 +1889,9 @@ assess_survival <- function(
 
 assess_survival_contrast <- function(ctsm.ob, start, end) {
 
+  # silence non-standard evaluation warnings
+  fit <- NULL
+
   # based on ctsm.lmm.contrast - should be able to make it almost identical but
   # first need to get variance covariance matrix of fitted values
   
@@ -1959,6 +1972,9 @@ assess_beta <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
   
+  # silence non-standard evaluation warnings
+  info <- weight <- NULL
+
   # percentage data that are not based on counts (e.g. comet assay) 
   
   # check valid determinands 
@@ -2178,7 +2194,7 @@ assess_beta <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         output, 
-        year = max(data$year), 
+        yearID = max(data$year), 
         refvalue = qlogis(i / 100),
         lower.tail = switch(good_status, low = TRUE, high = FALSE)
       )
@@ -2356,6 +2372,9 @@ assess_negativebinomial <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
   
+  # silence non-standard evaluation warnings
+  info <- weight <- NULL
+
   # over-dispersed count data (perhaps very low over-dispersed values from a 
   # binomial distribution, such an MNC) 
   
@@ -2565,7 +2584,7 @@ assess_negativebinomial <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         output, 
-        year = max(data$year), 
+        yearID = max(data$year), 
         refvalue = qlogis(i / 100),
         lower.tail = switch(good_status, low = TRUE, high = FALSE)
       )

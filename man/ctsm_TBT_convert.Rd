@@ -15,6 +15,8 @@ ctsm_TBT_convert(
 \arguments{
 \item{data}{the data}
 
+\item{subset}{optional, a subset expression}
+
 \item{action}{one of \code{"relabel"}, \code{"convert"}, \code{"change_unit"} --
 note that \code{change_unit} moves units from tin units to conventional units}
 

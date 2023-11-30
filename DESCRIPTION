@@ -19,7 +19,7 @@ BugReports: https://github.com/osparcomm/HARSAT/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr, rmarkdown
-Depends: R (>= 4.2.1)
+Depends: R (>= 4.2.1.0)
 Imports:
   flexsurv,
   lme4,
@@ -31,6 +31,8 @@ Imports:
   MASS,
   mvtnorm, 
   dplyr,
+  magrittr,
+  lattice,
   lubridate,
   readr,
   stringr,
@@ -42,5 +44,6 @@ Imports:
 Suggests: 
   knitr,
   rmarkdown,
+  rprojroot,
   testthat (>= 3.0.0)
 Config/testthat/edition: 3

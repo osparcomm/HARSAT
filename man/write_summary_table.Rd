@@ -19,10 +19,10 @@ write_summary_table(
 run_assessment.}
 
 \item{output_file}{The name of the output csv file. If using NULL, the file
-will be called biota_summary.csv, sediment_summary.csv or water_summary.csv
+will be called \code{biota_summary.csv}, \code{sediment_summary.csv} or \code{water_summary.csv}
 as appropriate. By default the file will be written to the working
 directory. If a file name is provided, a path to the output file can also
-be provided (e.g. using \code{file.path}). The output_dir option can also be
+be provided (e.g. using \code{file.path}). The `output_dir`` option can also be
 used to specify the output file directory.}
 
 \item{output_dir}{The output directory for \code{output_file}. The default is the
@@ -30,11 +30,17 @@ working directory. Any file path provided in \code{output_file}, will be
 appended to \code{output_dir}. The resulting output directory must already
 exist.}
 
-\item{export}{Logical. TRUE (the default) writes the summary table to a csv
-file. FALSE returns the summary table as an R object (and does not write to
+\item{export}{Logical. \code{TRUE} (the default) writes the summary table to a csv
+file. \code{FALSE} returns the summary table as an R object (and does not write to
 a csv file).}
 
-\item{collapse_AC}{}
+\item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
+to label the determinands}
+
+\item{collapse_AC}{a names list of valid assessment criteria}
+}
+\value{
+a summary object, when \code{export} is \code{FALSE}
 }
 \description{
 Creates a data frame summarising the assessment of each time series and

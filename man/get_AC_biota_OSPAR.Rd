@@ -7,13 +7,18 @@
 get_AC_biota_OSPAR(data, AC, rt, export_all = FALSE)
 }
 \arguments{
-\item{data}{}
+\item{data}{the data}
 
-\item{AC}{}
+\item{AC}{a list of assessment criteria}
 
-\item{rt}{}
+\item{rt}{the reference tables}
 
-\item{export_all}{}
+\item{export_all}{logical, default \code{FALSE}, if \code{TRUE} returns all data,
+otherwise, just the assessment criteria}
+}
+\value{
+by default, the assessment criteria, if \code{export_all} is set \code{TRUE}
+returns all the data instead
 }
 \description{
 Extends default extractor function get_AC$biota for the few cases which can
