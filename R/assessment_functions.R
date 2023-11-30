@@ -1681,7 +1681,7 @@ assess_survival <- function(
       stop("need to update code")
     }
     
-    contrast.whole <- ctsm_assess_survival_contrast(
+    contrast.whole <- assess_survival_contrast(
       output, 
       start = min(data$year), 
       end = max(data$year)
@@ -1690,7 +1690,7 @@ assess_survival <- function(
     
     start.year <- max(max.year - recent.trend + 1, min(data$year))
     if (sum(unique(data$year) >= start.year - 0.5) >= 5) {
-      contrast.recent <- ctsm_assess_survival_contrast(
+      contrast.recent <- assess_survival_contrast(
         output, 
         start = start.year, 
         end = max(data$year)
@@ -1715,7 +1715,7 @@ assess_survival <- function(
   if (output$method %in% c("mean", "linear", "smooth")) {
 
     output$reference.values <- lapply(AC, function(i) {
-      ctsm_assess_survival_refvalue(
+      assess_survival_refvalue(
         output, 
         year = max(data$year), 
         refvalue = i,
