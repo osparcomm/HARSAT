@@ -113,9 +113,12 @@ imposex.family <- list(
     devi.calc <- function(i, mu, y) {
       mu <- mu[i]
       y <- y[i]
-      assign("y", y)
-      integrate(function(mu) {(y - mu) / imposex.family$variance(mu)}, lower = mu, upper = y)$value     
-        # double check
+      out <- integrate(
+        function(mu) {(y - mu) / imposex.family$variance(mu)}, 
+        lower = mu, 
+        upper = y
+      )
+      out$value
     }
     devi <- 2 * sapply(1:length(mu), devi.calc, mu = mu, y = y)
     #			sign(y - mu) * sqrt(abs(devi) * w)
