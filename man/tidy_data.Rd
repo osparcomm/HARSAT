@@ -7,10 +7,10 @@
 tidy_data(ctsm_obj)
 }
 \arguments{
-\item{ctsm_obj}{}
+\item{ctsm_obj}{the time series data, typically returned from \code{\link{read_data}}.}
 }
 \description{
 Reduces the size of the extraction by removing redundant variables.
-Any ad-hoc changes will usually be made between \code{read_data} and \code{simplify_data}.
-The output is in the correct format for \code{create_timeSeries}.
+Any ad-hoc changes will usually be made between \code{\link{read_data}} and \code{\link{tidy_data}}.
+The output is in the correct format for \code{\link{create_timeseries}}.
 }

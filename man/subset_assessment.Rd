@@ -14,6 +14,9 @@ run_assessment.}
 expression will be evaluated in the timeSeries component of assessment_obj;
 use 'series' to identify individual timeseries.}
 }
+\value{
+a new assessment object, after applying the subset
+}
 \description{
 Selects specific time series and simplifies the data, stations and
 assessment components to match

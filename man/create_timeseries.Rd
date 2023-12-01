@@ -27,9 +27,15 @@ the determinand reference table}
 
 \item{oddity_path}{a directory to write the oddities to}
 
+\item{return_early}{a boolean (default \code{FALSE}), if \code{TRUE}, returns early}
+
+\item{print_code_warnings}{a boolean (default \code{FALSE})}
+
+\item{get_basis}{a basis function, by default \code{\link{get_basis_default}}}
+
 \item{normalise}{boolean or function, if TRUE, uses a default normalization}
 
-\item{normalise.control}{}
+\item{normalise.control}{a list of control data for the normalization function}
 }
 \value{
 a completed timeseries object, which can be used for assessments

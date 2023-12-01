@@ -6,6 +6,13 @@
 \usage{
 get_station_code(station_name, country, stations)
 }
+\arguments{
+\item{station_name}{a station name}
+
+\item{country}{a country}
+
+\item{stations}{the station dictionary}
+}
 \description{
 Gets the station code corresponding to the station name and country from the
 station dictionary.

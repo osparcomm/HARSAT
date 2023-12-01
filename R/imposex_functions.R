@@ -2,6 +2,9 @@
 
 get.index.biota.Imposex <- function(data, determinand, info) {
 
+  # silence non-standard evaluation warnings
+  n_individual <- NULL
+
   data$nfemale <- round(data$n_individual * data[["%FEMALEPOP"]] / 100)
   if (any(is.na(data$nfemale)))
   {
@@ -81,7 +84,6 @@ imposex.variance <- list(
     devi.calc <- function(i, mu, y) {
       mu <- mu[i]
       y <- y[i]
-      assign("y", y, frame = 1)
       integrate(function(mu) (y - mu) / imposex.variance$variance(mu), mu, y)$integral
     }
     devi <- 2 * sapply(1:length(mu), devi.calc, mu = mu, y = y)
@@ -145,6 +147,9 @@ imposex.family <- list(
 assess_imposex <- function(
     data, annualIndex, AC, recent.years, determinand, species, 
     station_code, thetaID, max.year, info.imposex, recent.trend = 20) {
+
+  # silence non-standard evaluation warnings
+  concentration <- NULL
   
   # main assessment routine for imposex data (imposex functions)
   
@@ -292,32 +297,32 @@ imposex_class <- function(species, x) {
 
   switch(
     species, 
-    "Nucella lapillus" = case_when(
+    "Nucella lapillus" = dplyr::case_when(
       x < 0.3  ~ "A", 
       x < 2.0  ~ "B", 
       x < 4.0  ~ "C", 
       x <= 5.0 ~ "D",
       TRUE     ~ "E"
     ), 
-    "Tritia nitida / reticulata" = case_when(
+    "Tritia nitida / reticulata" = dplyr::case_when(
       x < 0.3  ~ "B",
       x < 2.0  ~ "C",
       x <= 3.5 ~ "D",
       TRUE     ~ "F"
     ), 
-    "Buccinum undatum" = case_when(
+    "Buccinum undatum" = dplyr::case_when(
       x < 0.3  ~ "B", 
       x < 2.0  ~ "C", 
       x <= 3.5 ~ "D",
       TRUE     ~ "F"
     ),
-    "Neptunea antiqua" = case_when(
+    "Neptunea antiqua" = dplyr::case_when(
       x < 0.3  ~ "A",
       x < 2.0  ~ "B",
       x <= 4   ~ "C",
       TRUE     ~ "F"
     ),
-    "Littorina littorea" = case_when(
+    "Littorina littorea" = dplyr::case_when(
       x < 0.3  ~ "C",
       x < 0.5  ~ "D",
       x <= 1.2 ~ "E", 
@@ -331,6 +336,9 @@ imposex_class <- function(species, x) {
 
 imposex.assess.index <- function(annualIndex, species, determinand, info.imposex) {
   
+  # silence non-standard evaluation warnings
+  se <- NULL
+
   year <- annualIndex$year
   value <- annualIndex$index
   weights <- annualIndex$nfemale

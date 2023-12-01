@@ -58,7 +58,7 @@ ctsm_check_variable <- function(data, var_id, info) {
     readr::write_excel_csv(oddities, outfile, na = "")
     stop(
       "Not all cases considered when checking '", var_id, "': see '", 
-      out_file_name, "'\n", 
+      outfile_name, "'\n", 
       "You might need to contact the HARSAT development team to fix this.", 
     )
   }
@@ -106,6 +106,9 @@ ctsm_is_contaminant <- function(pargroup, exclude = NULL) {
 
 ctsm.check.basis.sediment <- function(data, info) {
 
+  # silence non-standard evaluation warnings
+  basis <- NULL
+
   id <- ctsm_is_contaminant(data$pargroup) | 
     data$determinand %in% c("CORG", "LOIGN")
   if (any(id))
@@ -126,6 +129,9 @@ ctsm.check.basis.sediment <- function(data, info) {
 }
 
 ctsm.check.basis.biota <- function(data, info) {
+
+  # silence non-standard evaluation warnings
+  basis <- NULL
 
   id <- ctsm_is_contaminant(data$pargroup)
   if (any(id))
@@ -182,6 +188,9 @@ ctsm.check.basis.biota <- function(data, info) {
 
 ctsm.check.basis.water <- function(data, info) {
   
+  # silence non-standard evaluation warnings
+  basis <- NULL
+
   data <- within(data, {
     ok <- basis %in% "W"
     action <- ifelse(ok, "none", ifelse(basis %in% NA, "warning", "error"))
@@ -218,6 +227,9 @@ ctsm.check.matrix.sediment <- function(data, info) {
 
 ctsm.check.matrix.biota <- function(data, info) {
   
+  # silence non-standard evaluation warnings
+  species_group <- NULL
+
   id <- ctsm_is_contaminant(data$pargroup) | 
     data$determinand %in% c("DRYWT%", "EXLIP%", "FATWT%", "LIPIDWT%")
   if (any(id))
@@ -387,6 +399,9 @@ ctsm.check.matrix.water <- function(data, info) {
 
 ctsm.check.species_group.biota <- function(data, info) {  
   
+  # silence non-standard evaluation warnings
+  species_group <- NULL
+
   # check species_group appropriate for each determinand
   
   id <- ctsm_is_contaminant(data$pargroup, exclude = "O-PAH") | data$group %in% "Auxiliary"
@@ -435,6 +450,9 @@ ctsm.check.species_group.biota <- function(data, info) {
 }             
 
 ctsm.check.sex.biota <- function(data, info) {
+
+  # silence non-standard evaluation warnings
+  sex <- NULL
 
   # NB any changes should really be made at the sub-sample level
   
@@ -703,6 +721,9 @@ ctsm.check.method_analysis.water <- function(data, info) {
 
 ctsm.check.method_analysis.biota <- function(data, info) {
 
+  # silence non-standard evaluation warnings
+  method_analysis <- NULL
+
   id <- data$group != "Metabolites"
   if (any(id))
     data[id,] <- within(data[id,], {
@@ -728,6 +749,9 @@ ctsm.check.method_analysis.biota <- function(data, info) {
 
 
 ctsm.check.value.biota <- function(data, info) {
+
+  # silence non-standard evaluation warnings
+  value <- NULL
 
   is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  
     abs(x - round(x)) < tol
@@ -840,6 +864,9 @@ ctsm.check.value.biota <- function(data, info) {
 
 ctsm.check.value.sediment <- function(data, info) {
 
+  # silence non-standard evaluation warnings
+  value <- NULL
+
   id <- ctsm_is_contaminant(data$pargroup) & !data$determinand %in% c("AL", "LI")
   if (any(id))
     data[id,] <- within(data[id,], {
@@ -867,6 +894,9 @@ ctsm.check.value.sediment <- function(data, info) {
 
 ctsm.check.value.water <- function(data, info) {
   
+  # silence non-standard evaluation warnings
+  value <- NULL
+
   data <- within(data, {
     ok <- !is.na(value) & value > 0
     action <- ifelse(ok, "none", "error")
@@ -877,6 +907,9 @@ ctsm.check.value.water <- function(data, info) {
 
 
 ctsm.check.n_individual.biota <- function(data, info) {
+
+  # silence non-standard evaluation warnings
+  n_individual <- NULL
 
   id <- data$group != "Imposex"
   if (any(id))

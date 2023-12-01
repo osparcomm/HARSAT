@@ -76,7 +76,7 @@ ctsm.projection <- function(latitude, longitude) {
 #'   expression will be evaluated in the timeSeries component of assessment_obj; 
 #'   use 'series' to identify individual timeseries.
 #'
-#' @returns
+#' @returns a new assessment object, after applying the subset
 #.
 #' @export
 subset_assessment <- function(assessment_obj, subset) {
@@ -378,28 +378,32 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @param assessment_obj An assessment object resulting from a call to
 #'   run_assessment.
 #' @param output_file The name of the output csv file. If using NULL, the file
-#'   will be called biota_summary.csv, sediment_summary.csv or water_summary.csv
+#'   will be called `biota_summary.csv`, `sediment_summary.csv` or `water_summary.csv`
 #'   as appropriate. By default the file will be written to the working
 #'   directory. If a file name is provided, a path to the output file can also
-#'   be provided (e.g. using `file.path`). The output_dir option can also be
+#'   be provided (e.g. using `file.path`). The `output_dir`` option can also be
 #'   used to specify the output file directory.
 #' @param output_dir The output directory for `output_file`. The default is the
 #'   working directory. Any file path provided in `output_file`, will be
 #'   appended to `output_dir`. The resulting output directory must already
 #'   exist.
-#' @param export Logical. TRUE (the default) writes the summary table to a csv
-#'   file. FALSE returns the summary table as an R object (and does not write to
+#' @param export Logical. `TRUE` (the default) writes the summary table to a csv
+#'   file. `FALSE` returns the summary table as an R object (and does not write to
 #'   a csv file).
-#' @param determinandGroups
+#' @param determinandGroups optional, a list specifying `labels` and `levels`
+#'   to label the determinands
 #' @param classColour
-#' @param collapse_AC
+#' @param collapse_AC a names list of valid assessment criteria
 #'
-#' @returns
+#' @returns a summary object, when `export` is `FALSE`
 #'
 #' @export
 write_summary_table <- function(
   assessment_obj, output_file = NULL, output_dir = ".", export = TRUE, 
   determinandGroups = NULL, classColour = NULL, collapse_AC = NULL) {
+
+  # silence non-standard evaluation warnings
+  climit_last_year <- NULL
 
   # reporting_functions.R
   
@@ -725,7 +729,7 @@ write_summary_table <- function(
     
     summary <- dplyr::relocate(
       summary, 
-      tidyselect::all_of(id), 
+      dplyr::all_of(id), 
       .after = climit_last_year
     )
     
@@ -776,6 +780,9 @@ ctsm_collapse_AC <- function(x, type = c("real", "character")) {
 ctsm_OHAT_legends <- function(
   assessments, determinandGroups, regionalGroups = NULL, distanceGroups = NULL, path) {
 
+  # silence non-standard evaluation warnings
+  info <- NULL
+
   out <- sapply(names(assessments), simplify = FALSE, USE.NAMES = TRUE, FUN = function(media) {
 
     assessment.ob <- assessments[[media]]
@@ -813,10 +820,10 @@ ctsm_OHAT_legends <- function(
   })
   
   legends <- lapply(out, "[[", "legends") %>% 
-    bind_rows(.id = "Compartment")
+    dplyr::bind_rows(.id = "Compartment")
   
   help <- lapply(out, "[[", "help") %>% 
-    bind_rows(.id = "Compartment")
+    dplyr::bind_rows(.id = "Compartment")
   
   list(legends = legends, help = help)
 }  
@@ -870,7 +877,7 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
   )
 
   standard_shape <- standard_shape %>% 
-    bind_rows() %>% 
+    dplyr::bind_rows() %>% 
     as.data.frame()
   
   standard_shape <- list(low = standard_shape, high = standard_shape)
@@ -971,9 +978,9 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
       Tooltip = AC_explanation
     )
     
-    out <- mutate_if(out, is.factor, as.character)
+    out <- dplyr::mutate_if(out, is.factor, as.character)
     
-    out <- bind_rows(out, standard_shape[[statusID]])
+    out <- dplyr::bind_rows(out, standard_shape[[statusID]])
     
     out
   })
@@ -1029,7 +1036,7 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
       )
     )
     
-    out <- bind_rows(info_regional, info_distance, help_info)
+    out <- dplyr::bind_rows(info_regional, info_distance, help_info)
     
     out <- as.data.frame(out)
     
@@ -1038,8 +1045,8 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
     
   names(legend_info) <- names(help_info) <- row.names(legends)
   
-  legend_info <- bind_rows(legend_info, .id = "Determinand_code")
-  help_info <- bind_rows(help_info, .id = "Determinand_code")
+  legend_info <- dplyr::bind_rows(legend_info, .id = "Determinand_code")
+  help_info <- dplyr::bind_rows(help_info, .id = "Determinand_code")
   
   list(legends = legend_info, help = help_info)
 }

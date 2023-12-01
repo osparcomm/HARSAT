@@ -217,8 +217,15 @@ read_data <- function(
 #' Reads an input file, given a particular encoding, and possibly additional hints
 #' 
 #' @param file the file name
-#' @param ... any additional parameters to `read.table`
-#' @return a tibble
+#' @param header logical (default `TRUE`), whether or not a header line is expected
+#' @param sep character (defailt `,`), field separator character
+#' @param quote character (default `"`), field quote character
+#' @param dec character (default `.`), decimal character
+#' @param fill logical (default `TRUE`), if rows have unequal lengtg, additional blank fields are added
+#' @param comment.char character (default is empty), if not empty, a comment character
+#' @param strip.white local (default `TRUE`), strips leading and trailing white space from fields
+#' @param ... any additional parameters to [`utils::read.table`]
+#' @return a data frame
 safe_read_file <- function(file, header=TRUE, sep=",", quote="\"", dec=".", fill=TRUE, comment.char="", strip.white=TRUE, ...) {
 
   ## Handle Excel
@@ -241,7 +248,7 @@ safe_read_file <- function(file, header=TRUE, sep=",", quote="\"", dec=".", fill
     )
   }
 
-  table <- read.table(
+  table <- utils::read.table(
     file=file,
     header=header,
     sep=sep,
@@ -524,7 +531,13 @@ read_info <- function(info, path, info_files) {
 
 #' Generates and logs a file digest
 #' 
-#' @param file the file name
+#' @description
+#' Writes a line on the console containing the file name and its
+#' MD5 digest. This can be used to track changes in input files, for
+#' reproducibility reasons. MD5 is good enough for this as we aren't 
+#' after cryptograohic levels of security, and its cheaper to compute. 
+#' 
+#' @param infile the input file name
 report_file_digest <- function(infile) {
   md5 <- digest::digest(infile, algo='md5')
   cat("MD5 digest for: '", infile, "': '", md5, "'\n", sep = "")
@@ -687,6 +700,9 @@ read_stations <- function(file, data_dir = ".", info) {
 #' 
 #' @export
 read_contaminants <- function(file, data_dir = ".", info) {
+
+  # silence non-standard evaluation warnings
+  .data <- NULL
   
   # import functions
   # read in contaminant (and biological effects) data
@@ -1004,7 +1020,6 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #'
 #' @param data A data frame with the contaminant data from an ICES extraction
 #' @param stations A data frame with the ICES station dictionary
-#' @param compartment A string: `"biota"`, `"sediment"` or `"water"`
 #' @param info A HARSAT information list which must contain the elements
 #'   `purpose`, `compartment`, and `add_stations`. The latter is a list of
 #'   control parameters supplied through `control_default` or `control_modify`
@@ -1068,6 +1083,10 @@ read_contaminants <- function(file, data_dir = ".", info) {
 #'   containing the station code and the station name
 #' 
 add_stations <- function(data, stations, info){
+
+  # silence non-standard evaluation warnings
+  .data <- .id <- .year <- .replaced <- .grouped <- .order <- NULL
+  country <- station_geometry <- datatype <- NULL
 
   cat("\nMatching data with station dictionary\n", sep = "")
 
@@ -1724,7 +1743,7 @@ add_stations <- function(data, stations, info){
     full_match,
     station_code = "sd_code_current",
     station_name = "sd_name_current",
-    .after = last_col()
+    .after = dplyr::last_col()
   )
 
 
@@ -1747,6 +1766,10 @@ add_stations <- function(data, stations, info){
 
 finalise_data <- function(data, info) {
   
+  # silence non-standard evaluation warnings
+  .data <- NULL
+  retain <- species <- NULL
+
   # common to all compartments
 
   data <- dplyr::rename(
@@ -1900,6 +1923,11 @@ finalise_stations <- function(stations, info) {
 
 ctsm_read_QA <- function(file, path, purpose) {
   
+  # silence non-standard evaluation warnings
+  crmco <- crmmb <- crmmv <- NULL
+  myear <- munit <- metoa <- metcx <- NULL
+  dtype <- param <- tblanalysisid <- .data <- NULL
+
   # import functions
   # read in method data (and additional crm information)
 
@@ -1940,10 +1968,10 @@ ctsm_read_QA <- function(file, path, purpose) {
 #' Tidy the data
 #' 
 #' Reduces the size of the extraction by removing redundant variables.
-#' Any ad-hoc changes will usually be made between `read_data` and `simplify_data`.
-#' The output is in the correct format for `create_timeSeries`.
+#' Any ad-hoc changes will usually be made between [`read_data`] and [`tidy_data`].
+#' The output is in the correct format for [`create_timeseries`].
 #'
-#' @param ctsm_obj 
+#' @param ctsm_obj the time series data, typically returned from [`read_data`].
 #' @export
 tidy_data <- function(ctsm_obj) {
   
@@ -2032,6 +2060,9 @@ tidy_data <- function(ctsm_obj) {
 
 
 tidy_stations <- function(stations, info) {
+
+  # silence non-standard evaluation warnings
+  .data <- NULL
   
   cat("\nCleaning station dictionary\n")
   
@@ -2068,7 +2099,7 @@ tidy_stations <- function(stations, info) {
   
   col_id <- c(info$region$id, "country", "station_name")
   
-  stations <- dplyr::arrange(stations, dplyr::across(all_of(col_id))) 
+  stations <- dplyr::arrange(stations, dplyr::across(dplyr::all_of(col_id))) 
   
   stations
 }
@@ -2165,11 +2196,11 @@ tidy_contaminants <- function(data, info) {
 #'   the determinand reference table
 #' @param determinands.control determinands control values, when needed
 #' @param oddity_path a directory to write the oddities to
-#' @param return_early
-#' @param print_code_warnings
-#' @param get_basis
+#' @param return_early a boolean (default `FALSE`), if `TRUE`, returns early 
+#' @param print_code_warnings a boolean (default `FALSE`)
+#' @param get_basis a basis function, by default [`get_basis_default`]
 #' @param normalise boolean or function, if TRUE, uses a default normalization
-#' @param normalise.control
+#' @param normalise.control a list of control data for the normalization function
 #' 
 #' @return a completed timeseries object, which can be used for assessments
 #' 
@@ -2184,6 +2215,10 @@ create_timeseries <- function(
   get_basis = get_basis_default,
   normalise = FALSE, 
   normalise.control = list()) {
+
+  # silence non-standard evaluation warnings
+  .data <- .month <- .not_ok <- group <- value <- NULL
+  determinand <- uncertainty <- uncertainty_sd <- uncertainty_rel <- species_group <- NULL
 
   # arguments
   
@@ -2274,7 +2309,7 @@ create_timeseries <- function(
   var_id <- intersect(var_id, names(station_dictionary))
 
   data <- dplyr::left_join(data, station_dictionary[var_id], by = "station_code")
-  data <- dplyr::relocate(data, all_of(var_id))
+  data <- dplyr::relocate(data, dplyr::all_of(var_id))
 
 
   # check all stations are in station dictionary 
@@ -2352,7 +2387,7 @@ create_timeseries <- function(
     
     if (any(is.na(data[info$region.id]))) {
       cat("   Dropping stations with missing region information in station dictionary\n")
-      data <- tidyr::drop_na(data, all_of(info$region$id))
+      data <- tidyr::drop_na(data, dplyr::all_of(info$region$id))
     }
     
     data <- data[setdiff(names(data), info$region$id)]
@@ -2698,7 +2733,9 @@ create_timeseries <- function(
 #' Gets the timeSeries component of a `harsat` object, optionally having added
 #' extra information about each station
 #'
-#' @param harsat_obj A `harsat` object following a call to create_timeseries.
+#' @param harsat_obj A `harsat` object following a call to [`create_timeseries`]`.
+#' @param add logical (default `TRUE`), if `TRUE`, adds extra information 
+#'   about each station; if `FALSE`, simply returns the existing timeseries,
 #'
 #' @return A data.frame containing the timeSeries component with (optionally)
 #'   extra information about each station.
@@ -2801,6 +2838,9 @@ ctsm_check <- function(
 
 ctsm_import_value <- function(data, station_dictionary, info) {
   
+  # silence non-standard evaluation warnings
+  .data <- .group <- seriesID <- NULL
+
   # import_functions.R
   
   # identifies timeseries in the data and creates timeSeries metadata object
@@ -2813,7 +2853,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
     "determinand"
   )
   
-  data <- dplyr::arrange(data, dplyr::across(any_of(id)))
+  data <- dplyr::arrange(data, dplyr::across(dplyr::any_of(id)))
 
 
   # select variables of interest
@@ -2838,7 +2878,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
     
   id <- c(id, auxiliary_id)
 
-  data <- dplyr::select(data, any_of(id))
+  data <- dplyr::select(data, dplyr::any_of(id))
 
   row.names(data) <- NULL  
   data <- droplevels(data)
@@ -2892,7 +2932,7 @@ ctsm_import_value <- function(data, station_dictionary, info) {
   timeSeries <- tidyr::unite(
     timeSeries, 
     "seriesID", 
-    all_of(names(timeSeries)), 
+    dplyr::all_of(names(timeSeries)), 
     sep = " ", 
     remove = FALSE, 
     na.rm = TRUE
@@ -3605,6 +3645,9 @@ determinand.link.TEQDFP <- function(data, keep, drop, weights) {
 
 ctsm_check_censoring <- function(data, info, print_code_warnings) {
   
+  # silence non-standard evaluation warnings
+  value <- limit_detection <- limit_quantification <- NULL
+
   # location: import_functions.R
   # purpose: checks that censoring, limit_detection and limit_quantification are 
   #   consistent and makes sensible adjustments to censoring
@@ -3760,7 +3803,7 @@ check_subseries <- function(data, info) {
   data <- tidyr::unite(
     data, 
     ".series", 
-    any_of(c("station_code", "species", "determinand", "matrix")), 
+    dplyr::any_of(c("station_code", "species", "determinand", "matrix")), 
     remove = FALSE
   )
   
@@ -4094,6 +4137,9 @@ ctsm_convert_to_target_basis <- function(data, info, get_basis) {
 #' @export
 normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
   
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   # normalises sediment concentrations
   
   # method supplied by control
@@ -4417,6 +4463,12 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
 #' @param control control values
 #' @export
 normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
+
+  # silence non-standard evaluations 
+  .data <- NULL
+  CORG <- CORG.censoring <- CORG.uncertainty <- NULL
+  LOIGN <- LOIGN.censoring <- LOIGN.uncertainty <- NULL
+  .tmp <- .tmp.censoring <- .tmp.uncertainty <- NULL
   
   # normalises sediment concentrations
   
@@ -4744,6 +4796,9 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
 #' @export
 normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   # normalises fish concentrations in contaminants other than metals or 
   # organofluorines to 5% lipid
   # these concentrations are expressed on a wet weight basis
@@ -4891,6 +4946,9 @@ ctsm_normalise_calculate <- function(Cm, Nm, Nss, var_Cm, var_Nm, Cx, Nx, var_Cx
 
 ctsm_estimate_uncertainty <- function(data, response_id, info) {
 
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   # import_functions.R
   
   # estimating missing uncertainties
@@ -5012,7 +5070,7 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
 #' Convert tin concentrations to cation concentrations.
 #' 
 #' @param data the data
-#' @param subset
+#' @param subset optional, a subset expression
 #' @param action one of `"relabel"`, `"convert"`, `"change_unit"` -- 
 #'   note that `change_unit` moves units from tin units to conventional units
 #' @param from either `"tin"` or `"cation"`

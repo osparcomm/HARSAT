@@ -19,10 +19,24 @@ safe_read_file(
 \arguments{
 \item{file}{the file name}
 
-\item{...}{any additional parameters to \code{read.table}}
+\item{header}{logical (default \code{TRUE}), whether or not a header line is expected}
+
+\item{sep}{character (defailt \verb{,}), field separator character}
+
+\item{quote}{character (default \verb{"}), field quote character}
+
+\item{dec}{character (default \code{.}), decimal character}
+
+\item{fill}{logical (default \code{TRUE}), if rows have unequal lengtg, additional blank fields are added}
+
+\item{comment.char}{character (default is empty), if not empty, a comment character}
+
+\item{strip.white}{local (default \code{TRUE}), strips leading and trailing white space from fields}
+
+\item{...}{any additional parameters to \code{\link[utils:read.table]{utils::read.table}}}
 }
 \value{
-a tibble
+a data frame
 }
 \description{
 Reads an input file, given a particular encoding, and possibly additional hints

@@ -7,6 +7,8 @@
 ctsm.VDS.p.calc(theta, cumulate = FALSE)
 }
 \arguments{
+\item{theta}{vector of values}
+
 \item{cumulate}{a boolean, whether to use cumulative probabilities}
 }
 \description{

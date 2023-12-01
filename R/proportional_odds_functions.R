@@ -27,7 +27,7 @@ cstm.VDS.environment <- function() {
 
 #' ctsm.VDS.p.calc
 #' 
-#' @param theta
+#' @param theta vector of values
 #' @param cumulate a boolean, whether to use cumulative probabilities
 #' @export
 ctsm.VDS.p.calc <- function(theta, cumulate = FALSE) {
@@ -78,6 +78,9 @@ ctsm.VDS.loglik.calc <- function(
 #' @param calc.vcov
 #' @export
 ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
+
+  # silence non-standard evaluation warnings
+  est <- se <- NULL
 
   data <- droplevels(data)
   

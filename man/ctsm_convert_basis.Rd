@@ -17,14 +17,22 @@ ctsm_convert_basis(
 )
 }
 \arguments{
+\item{conc}{the concentration}
+
 \item{from}{the current basis}
 
 \item{to}{the target basis}
 
-\item{drywt}{assumed to be a percentage taking values in \link{0, 100}}
+\item{drywt}{assumed to be a percentage taking values in [0, 100]}
 
-\item{lipidwt}{assumed to be a percentage taking values in \link{0, 100};
+\item{lipidwt}{assumed to be a percentage taking values in [0, 100];
 assumed to be on a wet weight basis}
+
+\item{drywt_censoring}{required when \code{drywt} is present,
+character: must be '', '<', 'D', 'Q' or NA}
+
+\item{lipidwt_censoring}{required when \code{lipidwt} is present,
+character: must be '', '<', 'D', 'Q' or NA}
 
 \item{exclude}{a logical identifying records that do not need to be converted,
 useful when the data contain biological effects measurements}
