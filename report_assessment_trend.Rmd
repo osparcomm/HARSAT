@@ -1,0 +1,69 @@
+```{r trend_setup, include = FALSE}
+
+anova <- within(anova, {
+  df <- 1:nrow(anova)
+  deviance <- - twiceLogLik
+  logLik <- twiceLogLik / 2
+  Chisq <- c(NA, - diff(deviance))
+  Chidf <- c(NA, diff(df))
+  p <- pchisq(Chisq, Chidf, lower.tail = FALSE)
+  rm(twiceLogLik)
+})
+
+# AICc not yet used in some biological effects models
+
+id <- c("df", "AIC", "AICc", "logLik", "deviance", "Chisq", "Chidf", "p") 
+id_names <- c("Df", "AIC", "AICc", "Log lik", "Deviance", "Chisq", "Chi df", "Pr(>Chisq)")  
+
+if (!info$distribution %in% c("normal", "lognormal")) { 
+  pos <- match("AICc", id)
+  id <- id[-pos]
+  id_names <- id_names[-pos]
+}
+  
+anova <- anova[id]
+names(anova) <- id_names
+
+
+change_txt <- switch(
+  info$distribution, 
+  normal = "Change in concentration", 
+  survival = "Change in log time to event", 
+  lognormal = "Change in log concentration",
+  beta = "Change in logit response", 
+  "Change"
+)
+
+
+
+        
+contrasts <- assessment$contrasts 
+row.names(contrasts) <- c("overall", paste("last", info$recent.trend, "years"))[1:nrow(contrasts)]
+
+pred <- assessment$pred
+row.names(pred) <- pred$year
+
+contrasts$fit1 <- pred[as.character(contrasts$start),"fit"]
+contrasts$fit2 <- pred[as.character(contrasts$end),"fit"]
+
+contrasts <- within(contrasts, t <- estimate / se)
+           
+contrasts <- contrasts[c("start", "end", "fit1", "fit2", "estimate", "se", "t", "p")]
+           
+names(contrasts) <- c(
+  "Year start", "Year end", "Fit start", "Fit end", "Change", "Std error", "t", "Pr(>|t|)")
+```
+
+Analysis of variance
+
+```{r, echo = FALSE, comment = NA}
+anova
+```
+
+<br>
+
+`r change_txt`
+
+```{r, echo = FALSE, comment = NA}
+contrasts
+```

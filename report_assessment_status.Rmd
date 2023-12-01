@@ -1,0 +1,22 @@
+```{r status_setup, include = FALSE}
+
+p_txt <- switch(info$good.status, low = "Pr(>t)", high = "Pr(<t)")
+               
+is_lognormal <- info$distribution %in% "lognormal"
+diff_txt <- if (is_lognormal) "Log ratio" else "Difference"
+               
+rv <- within(assessment$reference.values, {
+  FittedConc <- if (is_lognormal) exp(fit) else fit
+  RefConc <- assessment$AC
+  tvalue <- difference / se
+})
+               
+rv <- rv[!is.na(rv$RefConc), c("FittedConc", "RefConc",  "difference", "se", "tvalue", "p")]
+               
+names(rv) <- c("Conc fitted", "Conc ref", diff_txt, "Std error", "t", p_txt)
+```
+
+```{r, echo = FALSE, comment = NA}
+rv
+```
+
