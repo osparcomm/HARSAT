@@ -65,6 +65,15 @@ write_summary_table(
 )
 
 
+report_assessment(
+  water_assessment, 
+  subset = determinand %in% "ZN",
+  output_dir = file.path("output", "reports")
+)
+
+
+
+
 # Sediment ----
 
 sediment_data <- read_data(
@@ -151,6 +160,14 @@ write_summary_table(
   collapse_AC = list(BAC = "BAC", EAC = c("EAC", "ERL", "EQS", "FEQG")),
   output_dir = file.path("output", "example_OSPAR")
 )
+
+
+report_assessment(
+  sediment_assessment, 
+  subset = series == "10744 BD153 SEDTOT",
+  output_dir = file.path("output", "reports")
+)
+
 
 
 
@@ -293,3 +310,9 @@ write_summary_table(
   output_dir = file.path("output", "example_OSPAR")
 )
 
+
+report_assessment(
+  biota_assessment, 
+  subset = determinand %in% "ZN",
+  output_dir = file.path("output", "reports")
+)

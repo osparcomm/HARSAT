@@ -772,6 +772,164 @@ ctsm_collapse_AC <- function(x, type = c("real", "character")) {
 }
 
 
+# html reports ----
+
+#' Reports the assessment of individual time series
+#'
+#' Generates a series of html reports with, for each time series, meta data, 
+#' plots of the data with the fitted assessment model, statistical summaries, 
+#' and a simple interpretation of the fitted model.
+#'
+#' @param assessment_obj An assessment object resulting from a call to
+#'   run_assessment
+#' @param subset An optional vector specifying which timeseries are to be
+#'   reported. An expression will be evaluated in the timeSeries component of
+#'   assessment_obj; use 'series' to identify individual timeseries.
+#' @param output_dir The output directory for the assessment plots (possibly
+#'   supplied using 'file.path'). The default is the working directory. The
+#'   output directory must already exist.
+#' @param max_report The maximum number of reports that will be generated.
+#'   Defaults to 100. Each report is about 1MB in size and takes a few seconds 
+#'   to run, so this prevents a ridiculous number of reports being created. 
+#'
+#' @returns A series of html files with, for each time series, meta data, 
+#'   plots of the data with the fitted assessment model, statistical summaries, 
+#'   and a simple interpretation of the fitted model.
+#'
+#'
+#' @export
+report_assessment <- function(
+    assessment_obj, 
+    subset = NULL, 
+    output_dir = ".",
+    max_report = 100L) {
+  
+  # reporting_functions.R
+  
+  if (!"package:lattice" %in% search()) {
+    library("lattice")
+    on.exit(detach("package:lattice"))
+  }
+  
+  if (!"package:grid" %in% search()) {
+    library("grid")
+    on.exit(detach("package:grid"), add = TRUE)
+  }
+  
+  
+  if (!dir.exists(output_dir)) {
+    stop(
+      "\nThe output directory '", output_dir, "' does not exist.\n", 
+      "Create it or check the information supplied to argument 'output_dir'",
+      " is correct.",
+      call. = FALSE
+    )
+  }
+  
+  
+  info <- assessment_obj$info
+  timeSeries <- assessment_obj$timeSeries 
+  
+  
+  # set up time series information:
+  # - merge with station information
+  # - add in additional useful variables 
+  # - subset if necessary
+  
+  timeSeries <- tibble::rownames_to_column(timeSeries, "series")
+  
+  timeSeries <- dplyr::left_join(
+    timeSeries, 
+    assessment_obj$stations, 
+    by = "station_code"
+  )
+  
+  timeSeries$group <- ctsm_get_info(
+    info$determinand, 
+    timeSeries$determinand, 
+    "group", 
+    info$compartment,
+    sep = "_"
+  )
+  
+  timeSeries$distribution <- ctsm_get_info(
+    info$determinand, 
+    timeSeries$determinand, 
+    "distribution"
+  )
+  
+  if (info$compartment == "water") {
+    timeSeries$matrix <- "WT"
+  }
+  
+  if (!is.null(substitute(subset))) {
+    ok <- eval(substitute(subset), timeSeries, parent.frame())
+    timeSeries <- timeSeries[ok, ]
+    row.names(timeSeries) <- NULL
+  }
+  
+  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
+  
+  series_id <- row.names(timeSeries)
+  
+
+  
+  
+  # ensure number of series does not exceed max_report
+  
+  n_series <- length(series_id)
+  
+  if (n_series > max_report) {
+    stop(
+      "\nYou have asked for ", n_series, " reports which exceeds the number ", 
+      "allowed.\n", 
+      "To continue increase the report limit with the 'max_report' argument.\n", 
+      "Be aware that each report will be larger than 1MB.",
+      call. = FALSE
+    )
+  }
+    
+
+  # report on each time series
+  
+  lapply(series_id, function(id) {
+
+    # get file name from id, and add country and station name 
+    # for easier identification
+    
+    series <- timeSeries[id, ]
+    
+    output_id <- sub(
+      series$station_code,
+      paste(series$station_code, series$country, series$station_name), 
+      id,
+      fixed=TRUE
+    )
+
+    # get rid of any slashes that might have crept in 
+    
+    output_id <- gsub(" / ", " ", output_id, fixed = TRUE)
+    output_id <- gsub("/", " ", output_id, fixed = TRUE)
+    
+    output_id <- gsub(" \ ", " ", output_id, fixed = TRUE)
+    output_id <- gsub("\\", " ", output_id, fixed = TRUE)
+    
+    
+    rmarkdown::render(
+      "report_assessment.Rmd", 
+      params = list(
+        compartment = info$compartment, 
+        series = id
+      ),
+      output_file = output_id, 
+      output_dir = output_dir
+    )
+  })
+    
+  invisible() 
+}  
+
+
 
 
 # OHAT ----
