@@ -108,14 +108,8 @@ plot_assessment <- function(
   if (info$compartment == "water") {
     timeSeries$matrix <- "WT"
   }
-  
-  if (!is.null(substitute(subset))) {
-    ok <- eval(substitute(subset), timeSeries, parent.frame())
-    timeSeries <- timeSeries[ok, ]
-    row.names(timeSeries) <- NULL
-  }
 
-  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
+  timeSeries <- apply_subset(timeSeries, subset, parent.frame())
   
   series_id <- row.names(timeSeries)
 
@@ -197,6 +191,45 @@ plot_assessment <- function(
 }  
 
 
+#' Apply subsetting to a time series
+#' @description 
+#' This is an internal function that applies a subsetting function to a timeseries.
+#' It is somewhat complex, due to way it is designed to be called. The subset is designed
+#' to be passed either as a value (`NULL` or  logical), as a expression, or as a variable
+#' holding an expression. When it is an expression, it is applied in the context of the
+#' timeseries data frame to generate a vector of booleans for subsetting. The complexity
+#' comes from the way this implements lazy evaluation, so we cannot evaluate the expression
+#' in the normal calling context.
+#' 
+#' The function also removes row names, and converts the series column to row names.
+#' 
+#' @param timeSeries a time series data frame
+#' @param subset (default `NULL`) either `NULL`, which selects all entries, or a logical,
+#'   which `TRUE` selects all entries and `FALSE` none of them, or an expression, which
+#'   will be evaluated in the context of the dataframe to generate a subsetting vector.
+#' @param env the calling environment for variable values.
+apply_subset <- function(timeSeries, subset, env = parent.frame()) {
+  subsetExpression <- substitute(subset, parent.frame())
+  subsetExpressionType <- typeof(subsetExpression)
+  if (subsetExpressionType == 'NULL') {
+    ## Do nothing
+  } else if (subsetExpressionType == 'logical') {
+    timeSeries <- timeSeries[subset, ]
+    row.names(timeSeries) <- NULL
+  } else if (subsetExpressionType == 'symbol' || subsetExpressionType == 'language') {
+    ok <- eval(subsetExpression, timeSeries, env)
+    if (is.null(ok)) {
+      ok <- TRUE
+    } else if (is.expression(ok)) {
+      ok <- eval(ok, timeSeries, env)
+    }
+    timeSeries <- timeSeries[ok, ]
+    row.names(timeSeries) <- NULL
+  }
+  
+  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
+  return(timeSeries)
+}
 
 
 ctsm.format <- function(x, y = x, nsig = 3) {
