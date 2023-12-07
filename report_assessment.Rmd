@@ -4,7 +4,7 @@ output:
     css: report_assessment.css
 
 params:
-  compartment: must_supply
+  assessment_object: must_supply
   series: must_supply
 ---
 
@@ -39,7 +39,7 @@ options(width = 110)
 
 #### get key structures ####
 
-assessment_object <- get(paste0(params$compartment, "_assessment"))
+assessment_object <- params$assessment_object
 
 determinands <- ctsm_get_determinands(assessment_object$info)
 
@@ -57,22 +57,22 @@ assessment_object$timeSeries <- dplyr::mutate(
     assessment_object$info$determinand, 
     determinand, 
     "group", 
-    compartment = params$compartment, 
+    compartment = assessment_object$info$compartment, 
     sep = "_"
   )
 )
 
 var_id <- c("station_code", "detGroup")
 
-if (params$compartment == "sediment") {
+if (assessment_object$info$compartment == "sediment") {
   var_id <- c(var_id, "matrix")
 }
 
-if (params$compartment == "water") {
+if (assessment_object$info$compartment == "water") {
   var_id <- c(var_id, "filtration")
 }
 
-if (params$compartment == "biota") {
+if (assessment_object$info$compartment == "biota") {
   var_id <- c(var_id, "species")
   group_id <- assessment_object$timeSeries[params$series, "detGroup"]
   if (!group_id  %in% c("Effects", "Imposex", "Metabolites"))
@@ -194,7 +194,7 @@ if (is.na(info$station_longname)) info$station_longname <- info$station_name
 
 info$matrix <- unique(as.character(data$matrix))
 
-if (params$compartment != "sediment" & length(info$matrix) > 1) 
+if (assessment_object$info$compartment != "sediment" & length(info$matrix) > 1) 
   cat("Error: multiple matrices - need to investigate")
 
 if (length(info$matrix > 1)) {
@@ -223,11 +223,28 @@ if (info$compartment == "biota")
 
 args.list <- list(units = info$unit, basis = info$basis, html = TRUE, compartment = info$compartment)
 
-is_normalised <- info$compartment == "sediment" & !info$ospar_subregion %in% c("Iberian Coast", "Gulf of Cadiz")
-if (is_normalised) {
-  extra.text <- paste("normalised to", switch(info$group, Metals = "5% aluminium", "2.5% organic carbon"))
+is_normalised <- FALSE
+
+if (info$compartment %in% "sediment" && info$purpose %in% "HELCOM") {
+  is_normalised <- TRUE
+  extra.text <- paste(
+    "normalised to", 
+    switch(
+      info$determinand, 
+      CD = "5% aluminium", 
+      PB = "5% aluminium", 
+      "5% organic carbon"
+    ) 
+  )
   args.list <- c(args.list, extra.text)
-}  
+}
+
+if (info$compartment %in% "sediment" && info$purpose %in% "OSPAR" &&
+    !info$ospar_subregion %in% c("Iberian Coast", "Gulf of Cadiz")) {
+  is_normalised <- TRUE
+  extra.text <- paste("normalised to", switch(info$group, Metals = "5% aluminium", "2.5% organic carbon")) 
+  args.list <- c(args.list, extra.text)
+}
 
 info$unit_text <- do.call(label.units, args.list)
 
