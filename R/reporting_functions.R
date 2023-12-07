@@ -918,7 +918,7 @@ report_assessment <- function(
     rmarkdown::render(
       "report_assessment.Rmd", 
       params = list(
-        compartment = info$compartment, 
+        assessment_object = assessment_obj, 
         series = id
       ),
       output_file = output_id, 
