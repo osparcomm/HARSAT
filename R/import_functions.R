@@ -910,18 +910,6 @@ read_contaminants <- function(file, data_dir = ".", info) {
       colClasses = var_id[ok]
     )
     
-    # additional validations
-
-    # every valid `uncertainty` must have a valid `unit_uncertainty`
-    uncertainty_present <- which(complete.cases(data$uncertainty))
-    uncertainty_present_valid_units <- 
-      data$unit_uncertainty[uncertainty_present] %in% c("%", "U2", "SD")
-    if (! all(uncertainty_present_valid_units)) {
-      stop(
-        "Missing or invalid uncertainty units for specified uncertainty values. ",
-        "Please check that all uncertainty values have a valid unit: %, U2, or SD"
-      )
-    }
   }
   
 
@@ -969,7 +957,24 @@ read_contaminants <- function(file, data_dir = ".", info) {
   }  
   
 
-
+  
+  # additional validations (for external data)
+  
+  if (info$data_format == "external") { 
+  
+    # every valid `uncertainty` must have a valid `unit_uncertainty`
+    uncertainty_present <- which(complete.cases(data$uncertainty))
+    uncertainty_present_valid_units <- 
+      data$unit_uncertainty[uncertainty_present] %in% c("%", "U2", "SD")
+    if (! all(uncertainty_present_valid_units)) {
+      stop(
+        "Missing or invalid uncertainty units for specified uncertainty values. ",
+        "Please check that all uncertainty values have a valid unit: %, U2, or SD"
+      )
+    }
+  }    
+  
+  
   # check regional identifiers are in the extraction 
 
   # if (info$data_format == "ICES_old") {
