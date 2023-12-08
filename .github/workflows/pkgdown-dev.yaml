@@ -20,11 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     # Only restrict concurrency for non-PR jobs
     concurrency:
-    group: pkgdown-dev-${{ github.event_name != 'pull_request' || github.run_id }}
+      group: pkgdown-dev-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
-    GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     permissions:
-    contents: write
+      contents: write
     steps:
     - uses: actions/checkout@v3
 
