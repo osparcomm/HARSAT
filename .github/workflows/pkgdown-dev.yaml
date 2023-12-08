@@ -16,7 +16,7 @@ on:
 name: pkgdown-dev
 
 jobs:
-  pkgdown:
+  pkgdown-dev:
     runs-on: ubuntu-latest
     # Only restrict concurrency for non-PR jobs
     concurrency:
