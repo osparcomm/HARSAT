@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,9 @@
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Resources</h6>
+    <a class="dropdown-item" href="../articles/datasets.html">Datasets</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM (read first)</a>
@@ -211,21 +214,30 @@ values</td>
 <td><code>matrix</code></td>
 <td>character</td>
 <td align="center">yes</td>
-<td>see ICES reference codes for MATRX basis</td>
+<td>see ICES reference codes for MATRX</td>
 </tr>
 <tr class="even">
+<td><code>basis</code></td>
+<td>character</td>
+<td align="center">yes (biota &amp; sediment)</td>
+<td>
+<code>W</code>, <code>D</code> or <code>L</code><br>no missing
+values for chemical measurements in biota or sediment<br>not mandatory
+for water where basis is always taken to be W</td>
+</tr>
+<tr class="odd">
 <td><code>unit</code></td>
 <td>character</td>
 <td align="center">yes</td>
 <td>see ICES reference codes for MUNIT<br>no missing values</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>value</code></td>
 <td>numeric</td>
 <td align="center">yes</td>
 <td>no missing values</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>censoring</code></td>
 <td>character</td>
 <td align="center"></td>
@@ -235,25 +247,25 @@ of quantification, or some other (non-specified) less than<br>a missing
 value indicates that the measurement is not a less-than (i.e. is
 uncensored)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>limit_detection</code></td>
 <td>numeric</td>
 <td align="center"></td>
 <td>same unit as value</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>limit_quantification</code></td>
 <td>numeric</td>
 <td align="center"></td>
 <td>same unit as value</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>uncertainty</code></td>
 <td>numeric</td>
 <td align="center"></td>
 <td>analytical uncertainty in the measurement<br>same unit as value</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>unit_uncertainty</code></td>
 <td>character</td>
 <td align="center"></td>
@@ -262,20 +274,20 @@ uncensored)</td>
 <code>uncertainty</code> is present, <code>unit_uncertainty</code> must
 also be present</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>method_pretreatment</code></td>
 <td>character (ICES metpt list)</td>
 <td align="center"></td>
 <td>see ICES reference codes for METPT</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>method_analysis</code></td>
 <td>character (ICES metpt list)</td>
 <td align="center"></td>
 <td>see ICES reference codes for METOA<br>required for bile metabolite
 measurements</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>method_extraction</code></td>
 <td>character (ICES metpt list)</td>
 <td align="center"></td>

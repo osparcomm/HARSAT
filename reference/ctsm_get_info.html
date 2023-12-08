@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,9 @@
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Resources</h6>
+    <a class="dropdown-item" href="../articles/datasets.html">Datasets</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM (read first)</a>
@@ -76,8 +79,42 @@
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+    <dl><dt>ref_table</dt>
+<dd><p>the reference table</p></dd>
 
-  </main></div>
+
+<dt>input</dt>
+<dd><p>the input</p></dd>
+
+
+<dt>output</dt>
+<dd><p>the output</p></dd>
+
+
+<dt>compartment</dt>
+<dd><p>the compartment</p></dd>
+
+
+<dt>na_action</dt>
+<dd><p>character, how to handle missing values, one of:
+<code>fail</code> (no missing values allowed), <code>input_ok</code> (allows missing values in input, but all
+non-missing values must be recognised, and must have output),
+<code>output_ok`` requires all input values to be present, but allows missing values in  output (for e.g. dryweight by species), or </code>ok` (allows missing values everywhere)</p></dd>
+
+
+<dt>info_type</dt>
+<dd><p>the information type, by default picked up from the function call</p></dd>
+
+
+<dt>sep</dt>
+<dd><p>character, the separator, defaulting to '.'</p></dd>
+
+</dl></div>
+
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

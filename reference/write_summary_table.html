@@ -32,7 +32,7 @@ of each time series
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,6 +53,9 @@ of each time series
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Resources</h6>
+    <a class="dropdown-item" href="../articles/datasets.html">Datasets</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM (read first)</a>
@@ -115,10 +118,10 @@ run_assessment.</p></dd>
 
 <dt>output_file</dt>
 <dd><p>The name of the output csv file. If using NULL, the file
-will be called biota_summary.csv, sediment_summary.csv or water_summary.csv
+will be called <code>biota_summary.csv</code>, <code>sediment_summary.csv</code> or <code>water_summary.csv</code>
 as appropriate. By default the file will be written to the working
 directory. If a file name is provided, a path to the output file can also
-be provided (e.g. using <code>file.path</code>). The output_dir option can also be
+be provided (e.g. using <code>file.path</code>). The `output_dir`` option can also be
 used to specify the output file directory.</p></dd>
 
 
@@ -130,15 +133,28 @@ exist.</p></dd>
 
 
 <dt>export</dt>
-<dd><p>Logical. TRUE (the default) writes the summary table to a csv
-file. FALSE returns the summary table as an R object (and does not write to
+<dd><p>Logical. <code>TRUE</code> (the default) writes the summary table to a csv
+file. <code>FALSE</code> returns the summary table as an R object (and does not write to
 a csv file).</p></dd>
 
 
+<dt>determinandGroups</dt>
+<dd><p>optional, a list specifying <code>labels</code> and <code>levels</code>
+to label the determinands</p></dd>
+
+
 <dt>collapse_AC</dt>
-<dd></dd>
+<dd><p>a names list of valid assessment criteria</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>a summary object, when <code>export</code> is <code>FALSE</code></p>
+
+
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

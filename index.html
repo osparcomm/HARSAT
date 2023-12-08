@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,9 @@
     <a class="dropdown-item" href="articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Resources</h6>
+    <a class="dropdown-item" href="articles/datasets.html">Datasets</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="articles/example_HELCOM.html">HELCOM (read first)</a>
@@ -85,11 +88,19 @@
 <div class="page-header"><h1 id="harsat">harsat<a class="anchor" aria-label="anchor" href="#harsat"></a>
 </h1></div>
 <div class="section level2">
-<h2 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
+<h2 id="what-is-harsat">What is HARSAT?<a class="anchor" aria-label="anchor" href="#what-is-harsat"></a>
+</h2>
+<p>HARSAT (Harmonised Regional Seas Assessment Tool), is a tool that is applied by The Arctic Monitoring and Assessment Programme (AMAP), the Helsinki Commission (HELCOM) and the OSPAR Commission (OSPAR) to support their assessments of data concerning contaminants (hazardous substances) and their effects in the marine environment.</p>
+<p>HARSAT code includes tools for pre-processing data, statistical trend analysis and comparison with threshold values, and post-processing for archiving and reporting.</p>
+<p>HARSAT is developed in the statistical computing language R. R is available for most operating systems and can be downloaded from the R-project website.</p>
+<p>Disclaimer: The HARSAT tool is made available under an Open Source licence. While every attempt has been made to ensure that the HARSAT version(s) developed and supported by AMAP/HELCOM/OSPAR are free of errors, any use of the tool by third parties, and the quality of products of third party use is the responsibility of the third party concerned.</p>
+</div>
+<div class="section level2">
+<h2 id="system-requirements">System requirements<a class="anchor" aria-label="anchor" href="#system-requirements"></a>
 </h2>
 <ul>
-<li>R programming language (version 4.2.1)</li>
-<li>Additional R packages to those which come with the standard R installation – they will be installed automatically, but you may need permissions or tools to do that</li>
+<li>R programming language (version 4.2.1 or later). Additional R packages to those which come with the standard R installation may be needed – they will normally be installed automatically, but you may need permissions or tools to do this</li>
+<li>R Studio (recommended; version 2023.03.1 or later). While not required, the HARSAT developers recommend running the HARSAT code using the RStudio integrated development environment.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -99,16 +110,17 @@
 <div class="section level3">
 <h3 id="in-rstudio">In RStudio<a class="anchor" aria-label="anchor" href="#in-rstudio"></a>
 </h3>
-<p>To do this, you will need a downloaded package bundle, typically a file called something like <code>harsat_0.1.1.tar.gz</code>.</p>
+<p>To do this, you will need a downloaded package bundle, typically a file called something like <code>harsat_0.1.2.tar.gz</code>.</p>
 <p>From the <code>Packages</code> tab, choose <code>Install</code>, make sure you have selected to install from a Package Archive File, then press the <code>Browse...</code> button and locate your bundled package file. Then finally press the <code>Install</code> button.</p>
 </div>
 <div class="section level3">
 <h3 id="from-the-r-command-line">From the R command line<a class="anchor" aria-label="anchor" href="#from-the-r-command-line"></a>
 </h3>
-<p>To do this, you will need a downloaded package bundle, typically a file called something like <code>harsat_0.1.1.tar.gz</code>.</p>
+<p>To do this, you will need a downloaded package bundle, typically a file called something like <code>harsat_0.1.2.tar.gz</code>.</p>
 <p>In the R command line, use a command (passing the filename of wherever you have downloaded the file to):</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"~/Downloads/harsat_0.1.1.tar"</span>, repos <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(remotes) <span class="sc">--</span> <span class="cf">if</span> needed</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(remotes)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_local</span>(<span class="st">"~/Downloads/harsat_0.1.2.tar"</span>)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="directly-from-github">Directly from Github<a class="anchor" aria-label="anchor" href="#directly-from-github"></a>

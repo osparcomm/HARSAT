@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,9 @@
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Resources</h6>
+    <a class="dropdown-item" href="../articles/datasets.html">Datasets</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM (read first)</a>
@@ -78,8 +81,55 @@
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+    <dl><dt>ctsm.obj</dt>
+<dd><p>the CTSM object, as returned from <code>tidy_data</code></p></dd>
 
-  </main></div>
+
+<dt>determinands</dt>
+<dd><p>the determinands to use, by default derived by
+calling <code>ctsm_get_determinands</code>, which takes values from
+the determinand reference table</p></dd>
+
+
+<dt>determinands.control</dt>
+<dd><p>determinands control values, when needed</p></dd>
+
+
+<dt>oddity_path</dt>
+<dd><p>a directory to write the oddities to</p></dd>
+
+
+<dt>return_early</dt>
+<dd><p>a boolean (default <code>FALSE</code>), if <code>TRUE</code>, returns early</p></dd>
+
+
+<dt>print_code_warnings</dt>
+<dd><p>a boolean (default <code>FALSE</code>)</p></dd>
+
+
+<dt>get_basis</dt>
+<dd><p>a basis function, by default <code><a href="get_basis_default.html">get_basis_default</a></code></p></dd>
+
+
+<dt>normalise</dt>
+<dd><p>boolean or function, if TRUE, uses a default normalization</p></dd>
+
+
+<dt>normalise.control</dt>
+<dd><p>a list of control data for the normalization function</p></dd>
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>a completed timeseries object, which can be used for assessments</p>
+    </div>
+
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

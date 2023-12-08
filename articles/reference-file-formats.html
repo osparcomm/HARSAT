@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,9 @@
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Resources</h6>
+    <a class="dropdown-item" href="../articles/datasets.html">Datasets</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM (read first)</a>
@@ -475,13 +478,13 @@ one of <code>biota_assess</code>, <code>sediment_assess</code> or
 <td><code>good_status</code></td>
 <td>character</td>
 <td align="center">yes</td>
-<td align="center">Whether <code>high</code> or <code>low</code> values
-of the determinand indicates a healthy environment. Only required for
+<td align="center">yes</td>
+<td>Whether <code>high</code> or <code>low</code> values of the
+determinand indicates a healthy environment. Only required for
 determinands where at least one of <code>biota_assess</code>,
 <code>sediment_assess</code> or <code>water_assess</code> are
 <code>TRUE</code>
 </td>
-<td></td>
 </tr>
 </tbody>
 </table>
@@ -681,17 +684,16 @@ following eleven columns:</p>
 <td><code>species_group</code></td>
 <td>character</td>
 <td align="center">yes</td>
-<td align="center">The species group, a key to the
-<code>species.csv</code> file</td>
-<td></td>
+<td align="center">no</td>
+<td>The species group, a key to the <code>species.csv</code> file</td>
 </tr>
 <tr class="odd">
 <td><code>species_subgroup</code></td>
 <td>character</td>
 <td align="center">yes</td>
-<td align="center">The species subgroup, a key to the
-<code>species.csv</code> file</td>
-<td></td>
+<td align="center">no</td>
+<td>The species subgroup, a key to the <code>species.csv</code>
+file</td>
 </tr>
 <tr class="even">
 <td><code>species</code></td>

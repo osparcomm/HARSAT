@@ -16,7 +16,7 @@ which are only applied when the typical species / lipid contend is 'high'
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,9 @@ which are only applied when the typical species / lipid contend is 'high'
     <a class="dropdown-item" href="../articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="../articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="../articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Resources</h6>
+    <a class="dropdown-item" href="../articles/datasets.html">Datasets</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="../articles/example_HELCOM.html">HELCOM (read first)</a>
@@ -80,21 +83,31 @@ which are only applied when the typical species / lipid contend is 'high'
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>data</dt>
-<dd></dd>
+<dd><p>the data</p></dd>
 
 
 <dt>AC</dt>
-<dd></dd>
+<dd><p>a list of assessment criteria</p></dd>
 
 
 <dt>rt</dt>
-<dd></dd>
+<dd><p>the reference tables</p></dd>
 
 
 <dt>export_all</dt>
-<dd></dd>
+<dd><p>logical, default <code>FALSE</code>, if <code>TRUE</code> returns all data,
+otherwise, just the assessment criteria</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>by default, the assessment criteria, if <code>export_all</code> is set <code>TRUE</code></p>
+
+
+<p>returns all the data instead</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

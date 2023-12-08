@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,9 @@
     <a class="dropdown-item" href="articles/file-management.html">File locations</a>
     <a class="dropdown-item" href="articles/reference-file-formats.html">Reference file formats</a>
     <a class="dropdown-item" href="articles/external-file-format.html">External file format</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Resources</h6>
+    <a class="dropdown-item" href="articles/datasets.html">Datasets</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Examples</h6>
     <a class="dropdown-item" href="articles/example_HELCOM.html">HELCOM (read first)</a>
@@ -109,20 +112,21 @@
 <p>Let’s assume the current version is <code>x.y.z</code></p>
 <pre><code>git checkout develop
 git flow release start x.y.z+1
-emacs DESCRIPTION ## Update version x.y.z-9000 -&gt; x.y.z+1
+emacs DESCRIPTION     ## Update version x.y.z-9000 -&gt; x.y.z+1
+emacs CHANGES.md      ## Update the change log, as appropriate
 R --quiet --vanilla &lt; vignettes/precompile.R
 R CMD build .
 R CMD check --no-manual harsat_x.y.z+1.tar.gz
 git add DESCRIPTION
 git commit -m "Updated version to x.y.z+1
 git flow release finish x.y.z+1
-git checkout master
+git checkout main
 git push
 git push --tags
 git push upstream
 git push --tags upstream
 git checkout develop
-emacs DESCRIPTION ## Bump version to x.y.(z+1)-9000
+emacs DESCRIPTION      ## Bump version to x.y.(z+1)-9000
 git commit -am "Bump develop version [ci skip]"
 git push
 git push upstream</code></pre>
