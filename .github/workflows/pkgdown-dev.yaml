@@ -73,7 +73,7 @@ jobs:
         cd $TEMP_DIR
         zip -r $WORK_DIR/docs/external.zip external
         cd $WORK_DIR
-        continue-on-error: true
+      continue-on-error: true
 
     - name: Build data and configuration archive for OSPAR 2022
       run: |
@@ -87,7 +87,7 @@ jobs:
         cd $TEMP_DIR
         zip -r $WORK_DIR/docs/ospar.zip ospar
         cd $WORK_DIR
-        continue-on-error: true
+      continue-on-error: true
 
     - name: Build data and configuration archive for HELCOM 2023
       run: |
@@ -101,7 +101,7 @@ jobs:
         cd $TEMP_DIR
         zip -r $WORK_DIR/docs/helcom.zip helcom
         cd $WORK_DIR
-        continue-on-error: true
+      continue-on-error: true
 
     ## Deploys everything in the docs/ folder to gh-pages. This means
     ## additional files can be deployed here.
