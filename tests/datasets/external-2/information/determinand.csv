@@ -1,0 +1,593 @@
+﻿determinand,common_name,pargroup,biota_group,sediment_group,water_group,biota_assess,sediment_assess,water_assess,biota_unit,sediment_unit,water_unit,biota_auxiliary,sediment_auxiliary,water_auxiliary,biota_sd_constant,biota_sd_variable,sediment_sd_constant,sediment_sd_variable,water_sd_constant,water_sd_variable,distribution,good_status,ORG,AssignedBy
+%DNATAIL,Comet assay,B-MBA,Effects,,,FALSE,FALSE,FALSE,%,,,CMT-QC-NR~LNMEA,,,,,,,,,beta,low,OSPAR,ICES
+%FEMALEPOP,proportion of females in population,B-END,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,,OSPAR/HELCOM,ICES
+%MALEPOP,proportion of males in population,B-END,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,,OSPAR,ICES
+ACHE,,B-MBA,Effects,,,FALSE,FALSE,FALSE,nmol/min/mg protein,,,LNMEA~LIPIDWT%~DRYWT%,,,0,0.4,,,,,lognormal,high,OSPAR,ICES
+ACNE,Acenaphthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.056667,0.253,0.4,0.186207,0.14445,0.15,lognormal,low,OSPAR,ICES
+ACNLE,Acenaphthylene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.101667,0.276779,0.333333,0.271315,0.116667,0.12925,lognormal,low,OSPAR,ICES
+AG,Silver,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,1.633333,0.15,,,,,lognormal,low,OSPAR,ICES
+AGMAX,maximum age,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,y,,,,,,,,,,,,,,OSPAR,ICES
+AGMEA,mean age,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,y,,,,,,,,,,,,,,AMAP,ICES
+AGMIN,minimum age,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,y,,,,,,,,,,,,,,OSPAR,ICES
+AL,Aluminium,I-MET,Metals,Auxiliary,Metals,FALSE,FALSE,FALSE,ug/kg,%,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,,,0.000667,0.125644,,,lognormal,low,OSPAR/HELCOM,ICES
+ALAD,,B-MBA,Effects,,,FALSE,FALSE,FALSE,ng/min/mg protein,,,LNMEA~LIPIDWT%~DRYWT%,,,0,0.2,,,,,lognormal,high,OSPAR,ICES
+ALD,Aldrin,OC-DN,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.005,0.25,0.006667,0.3,0,0.145625,lognormal,low,OSPAR,ICES
+ANT,Anthracene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.066667,0.22,0.333333,0.170818,0.14445,0.1085,lognormal,low,OSPAR/HELCOM,ICES
+AS,Arsenic,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,3.133333,0.075245,0.1,0.10025,,,lognormal,low,OSPAR,ICES
+ATRZ,atrazine,O-TRI,Triazine pesticides,Pesticides,Pesticides,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,0.976667,0.110279,lognormal,low,OSPAR,ICES
+AXIALGIRTH,Axial girth,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,,AMAP,USER
+BA,Barium,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,,,,,,,lognormal,low,OSPAR,ICES
+BAA,Benzo[a]anthracene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.093333,0.188502,0.333333,0.13,0.14445,0.118056,lognormal,low,OSPAR,
+BAF,Benzo[a]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BAP,Benzo[a]pyrene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.053333,0.211934,0.333333,0.15,0.066667,0.14,lognormal,low,OSPAR/HELCOM,ICES
+BAP3OH,3-hydroxy benzo(a)pyrene,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ng/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.2,,,,,lognormal,low,OSPAR,ICES
+BBA,Benz[b]anthtacene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BBF,Benzo[b]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BBJF,Benzo[b--j]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BBJKF,Benzo[b--j--k]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BBKF,Benzo[b--k]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.14,0.135946,0.666667,0.15,0.455567,0.27,lognormal,low,OSPAR,ICES
+BD100,2--2'--4--4'--6-pentabromodiphenyl ether (PBDE100),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.002679,0.203194,0.008333,0.1954,,,lognormal,low,OSPAR/HELCOM,ICES
+BD105,2--3--3'--4--4'-pentabromodiphenyl ether (PBDE105),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD116,Benzene-- pentabromophenoxy- (PBDE116),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD119,2--3'--4--4'--6-pentabromodiphenyl ether (BDE119),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BD126,3--3'--4--4'--5-pentabromodiphenyl ether (PBDE126),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.003006,0.230769,,,,,lognormal,low,OSPAR,ICES
+BD138,2--2'--3--4--4'--5'-hexabromodiphenyl ether (PBDE138),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BD139,2--2'--3--4--4'--6-Hexabromodiphenyl ether (PBDE139),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD140,2--2'--3--4--4'--6'-hexabromodiphenyl ether (PBDE140),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD153,2--2'--4--4'--5--5'-hexabromodiphenyl ether (PBDE153),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.0015,0.25,0.006667,0.224583,,,lognormal,low,OSPAR/HELCOM,ICES
+BD154,2--2'--4--4'--5--6'-hexabromodiphenyl ether (PBDE154),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.001832,0.267,0.006667,0.222,,,lognormal,low,OSPAR/HELCOM,ICES
+BD155,2--2'--4--4'--6--6'-hexabromodiphenyl ether (PBDE155),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD156,Benzene-- 1--2--3--4-tetrabromo-5-(3--4-dibromophenoxy)- (BDE156),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD163,benzene-- 1--2--4--5-tetrabromo-3-(3--4-dibromophenoxy)- (BDE163),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD166,2--3--4--4'--5--6-hexabromodiphenyl ether (BDE166),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD171,2--2'--3--3'--4--4'--6-Heptabromodiphenyl ether (PBDE171),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD175,Benzene-- 1--2--3--5-tetrabromo-4-(2--3--5-tribromophenoxy)- (BDE175),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD180,2--2'--3--4--4'--5--5'-Heptabromodiphenyl ether (PBDE180),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD181,2--2'--3--4--4'--5--6-heptabromodiphenyl ether (BDE181),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD183,2--2'--3--4--4'--5'--6-heptabromodiphenyl ether (BDE183),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.002631,0.2655,0.008333,0.3,,,lognormal,low,OSPAR,ICES
+BD184,2--2'--3--4--4'--6--6'-Heptabromodiphenyl ether (BDE184),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD190,2--3--3'--4--4'--5--6-heptabromodiphenyl ether (BDE190),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BD191,2--3--3'--4--4'--5'--6-Heptabromodiphenyl ether,O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD196,2--2'--3--3'--4--4'--5--6'-Octabromodiphenyl ether (BDE196),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD197,Benzene-- 1--1'-oxybis[2--3--4--6-tetrabromo-(BDE197),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD201,2--2'--3--3'--4--5'--6--6'-Octabromodiphenyl ether (PBDE201),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD202,Benzene-- 1--1'-oxybis[2--3--5--6-tetrabromo- (PBDE202),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD203,Benzene-- pentabromo(2--4--5-tribromophenoxy)-  (PBDE 203),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD205,Benzene-- 1--2--3--4--5-pentabromo-6-(3--4--5-tribromophenoxy)- (PBDE205),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD206,Benzene-- 1--2--3--4--5-pentabromo-6-(2--3--4--5-tetrabromophenoxy)- (PBDE206),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD207,Benzene-- pentabromo(2--3--4--6-tetrabromophenoxy)-  (PBDE 207),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD208,Benzene-- 1--2--3--4--5-pentabromo-6-(2--3--5--6-tetrabromophenoxy)- (PBDE208),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BD209,decabromobiphenyl (PBB209),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.033333,0.255556,0.27,0.262847,,,lognormal,low,OSPAR,ICES
+BDE1,Benzene-- 1-bromo-2-phenoxy- (PBDE1),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE10,Benzene-- 1--3-dibromo-2-phenoxy- (PBDE10),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE11,3--3'-Dibromodiphenyl ether (PBDE11),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE12,3--4-Dibromodiphenyl ether (PBDE12),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE13,Benzene-- 1-bromo-3-(4-bromophenoxy)- (PBDE13),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE15,4--4'-dibromodiphenyl ether (PBDE15),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE17,2--2'--4-tribromodiphenyl ether (BDE17),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BDE2,Benzene-- 1-bromo-3-phenoxy- (PBDE2),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE25,2--3'--4-tribromodiphenyl ether (BDE25),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE28,2--4--4'-tribromodiphenyl ether (PBDE28),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.002,0.282522,0.006667,0.253731,,,lognormal,low,OSPAR/HELCOM,ICES
+BDE3,Benzene-- 1-bromo-4-phenoxy-,O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE30,2--4--6-Tribromodiphenyl ether (PBDE30),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE32,2--4'--6-tribromodiphenyl ether (BDE32),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE33,2'--3--4-tribromodiphenyl ether (BDE33),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE35,3--3'--4-tribromodiphenyl ether (BDE35),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE37,3--4--4'-tribromodiphenyl ether (BDE37),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE47,2--2'--4--4'-tetrabromodiphenyl ether (PBDE47),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.003533,0.166667,0.006667,0.15,,,lognormal,low,OSPAR/HELCOM,ICES
+BDE49,2--2'--4--5'-tetrabromodiphenyl ether (BDE49),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BDE52,benzene-- 1--1'-oxybis[2--5-dibromo- (9CI)  (BDE52),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE54,Bis(2--6-dibromophenyl) ether (PBDE54),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE66,2--3'--4--4'-tetrabromodiphenyl ether (BDE66),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.0015,0.299,0.01,0.197727,,,lognormal,low,OSPAR,ICES
+BDE7,Benzene-- 2--4-dibromo-1-phenoxy-  (BDE 7),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE71,2--3'--4'--6-tetrabromodiphenyl ether (BDE71),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BDE75,2--4--4'--6-tetrabromodiphenyl ether (BDE75),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BDE77,3--3'--4--4'-tetrabromodiphenyl ether (BDE77),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BDE8,2--4'-Dibromodiphenyl ether (PBDE8),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BDE85,2--2'--3--4--4'-pentabromodiphenyl ether (PBDE85),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.001815,0.217445,0.01,0.192857,,,lognormal,low,OSPAR,ICES
+BDE99,2--2'--4--4'--5-pentabromodiphenyl ether (PBDE99),O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.003006,0.230769,0.006667,0.199703,,,lognormal,low,OSPAR/HELCOM,ICES
+BEP,Benzo[e]pyrene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.166667,0.101406,0.466667,0.079715,0.033667,0.127929,lognormal,low,OSPAR,ICES
+BFLA,benzo[a]fluorene,O-PAH,Polycyclic aromatic hydrocarbons,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BFLB,benzo[b]fluorene,O-PAH,Polycyclic aromatic hydrocarbons,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BGHIF,Benzo[ghi]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BGHIP,Benzo[g--h--i]perylene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.056667,0.21,0.333333,0.15,0.055567,0.115385,lognormal,low,OSPAR,ICES
+BJF,benzo[j]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BJKF,Benzo[j--k]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BKF,Benzo[k]fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BLUBBERTHICKNESS,Blubber thickness,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,,AMAP,USER
+BPA,Bisphenol A,O-PHC,Phenols/chlorophenols,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+BR-PFHXS,Perfluorohexanesulfonic acid - sum of all isomers with branched form,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+BR-PFOS,Perfluorooctanyl sulphonic acid - sum of all isomers with branched form,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+C13,Carbon isotope of mass 13,I-RNC,Auxiliary,,,FALSE,FALSE,FALSE,ppt/VPBD,,,,,,,,,,,,,,OSPAR,ICES
+C13D,delta C13 (isotope ratio 13C:12C),I-RNC,Auxiliary,,,FALSE,FALSE,FALSE,ppt,,,,,,,,,,,,,,AMAP,ICES
+CB1,1--1'-Biphenyl-- 2-chloro- (CB1),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB10,1--1'-Biphenyl-- 2--6-dichloro- (CB10),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB100,1--1'-Biphenyl-- 2--2'--4--4'--6-pentachloro- (CB100),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB101,2--2'--4--5--5'-pentachlorobiphenyl (CB101),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.033333,0.15,0.033333,0.151854,0,0.175,lognormal,low,OSPAR/HELCOM,ICES
+CB103,1--1'-Biphenyl-- 2--2'--4--5'--6-pentachloro- (CB103),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB105,2--3--3'--4--4'-pentachlorobiphenyl (CB105),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.00541,0.175,0.016333,0.180065,,,lognormal,low,OSPAR/HELCOM,ICES
+CB107,1--1'-Biphenyl-- 2--3--3'--4'--5-pentachloro- (CB107),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB110,2--3--3'--4'--6-pentachlorobiphenyl (CB110),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB114,2--3--4--4'--5-pentachlorobiphenyl (CB114),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB118,2--3'--4--4'--5-pentachlorobiphenyl (CB118),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.033333,0.151458,0.03,0.165,0,0.2,lognormal,low,OSPAR/HELCOM,ICES
+CB119,1--1'-Biphenyl-- 2--3'--4--4'--6-pentachloro- (CB119),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB12,3--4-Dichlorobiphenyl (CB12),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB122,1--1'-Biphenyl-- 2--3--3'--4'--5'-pentachloro- (CB122),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB123,1--1'-Biphenyl-- 2--3'--4--4'--5'-pentachloro- (CB123),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB124,1--1'-Biphenyl-- 2--3'--4'--5--5'-pentachloro- (CB124),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB126,3--3'--4--4'--5-pentachlorobiphenyl (CB126),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.00003,0.164144,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB128,2--2'--3--3'--4--4'-hexachlorobiphenyl (CB128),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB129,2--2'--3--3'--4--5-Hexachlorobiphenyl (CB129),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB13,3--4'-Dichlorobiphenyl (CB13),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB130,2--3--4-2'--3'--5'-Hexachlorobiphenyl (CB130),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB131,1--1'-Biphenyl-- 2--2'--3--3'--4--6-hexachloro- (CB131),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB132,2--2'--3--3'--4--6'-hexachlorobiphenyl (CB132),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB133,2--3--5--2'--3'--5'-Hexachlorobiphenyl (CB133),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB134,1--1'-Biphenyl-- 2--2'--3--3'--5--6-hexachloro- (CB134),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB135,1--1'-Biphenyl-- 2--2'--3--3'--5--6'-hexachloro- (CB135),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB136,2--3--6--2'--3'--6'-hexachlorobiphenyl (CB136),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB137,2--2'--3--4--4'--5-hexachlorobiphenyl (CB137),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB138,2--2'--3--4--4'--5'-hexachlorobiphenyl (CB138),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.033333,0.15,0.033333,0.16594,0,0.1875,lognormal,low,OSPAR/HELCOM,ICES
+CB138+163,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB141,2--2'--3--4--5--5'-hexachlorobiphenyl (CB141),OC-CB,Chlorobiphenyls,,,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB144,1--1'-Biphenyl-- 2--2'--3--4--5'--6-hexachloro- (CB144),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB146,1--1'-Biphenyl-- 2--2'--3--4'--5--5'-hexachloro- (CB146),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB147,1--1'-Biphenyl-- 2--2'--3--4'--5--6-hexachloro- (CB147),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB149,2--2'--3--4'--5'--6-hexachlorobiphenyl (CB149),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB15,1--1'-Biphenyl-- 4--4'-dichloro- (CB15),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB151,2--2'--3--5--5'--6-hexachlorobiphenyl (CB151),OC-CB,Chlorobiphenyls,,,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB153,2--2'--4--4'--5--5'-hexachlorobiphenyl (CB153),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.033333,0.139136,0.033333,0.143928,0,0.1875,lognormal,low,OSPAR/HELCOM,ICES
+CB155,1--1'-Biphenyl-- 2--2'--4--4'--6--6'-hexachloro- (CB155),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB156,2--3--3'--4--4'--5-hexachlorobiphenyl (CB156),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.003333,0.153069,0.003333,0.174141,,,lognormal,low,OSPAR/HELCOM,ICES
+CB156+172,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB157,2--3--4--3'--4'--5'-hexachlorobiphenyl (CB157),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB158,2--3--3'--4--4'--6-hexachlorobiphenyl (CB158),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB16,1--1'-Biphenyl-- 2--2'--3-trichloro- (CB16),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB163,2--3--3'--4'--5--6-hexachlorobiphenyl (CB163),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB166,1--1'-Biphenyl-- 2--3--4--4'--5--6-hexachloro- (CB166),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB167,2'--3--4--4'--5--5'-hexachlorobiphenyl (CB167),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB169,3--3'--4--4'--5--5'-hexachlorobiphenyl (CB169),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.0001,0.14,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB17,2--2'--4-trichlorobiphenyl (CB17),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB170,2--2'--3--3'--4--4'--5-heptachlorobiphenyl (CB170),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB171,2--2'--3--3'--4--4'--6-heptachlorobiphenyl (CB171),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB172,1--1'-Biphenyl-- 2--2'--3--3'--4--5--5'-heptachloro- (CB172),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB173,2--2'--3--3'--4--5--6-Heptachlorobiphenyl (CB173),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB174,1--1'-Biphenyl-- 2--2'--3--3'--4--5--6'-heptachloro- (CB174),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB175,1--1'-Biphenyl-- 2--2'--3--3'--4--5'--6-heptachloro- (CB175),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB176,1--1'-Biphenyl-- 2--2'--3--3'--4--6--6'-heptachloro- (CB176),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB177,2--2'--3--3'--4'--5--6-heptachlorobiphenyl (CB177),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB178,1--1'-Biphenyl-- 2--2'--3--3'--5--5'--6-heptachloro- (CB178),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB179,1--1'-Biphenyl-- 2--2'--3--3'--5--6--6'-heptachloro- (CB179),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB18,2--2'--5-trichlorobiphenyl (CB18),OC-CB,Chlorobiphenyls,,,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB180,2--2'--3--4--4'--5--5'-heptachlorobiphenyl (CB180),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.033333,0.15,0.03,0.174141,0,0.2,lognormal,low,OSPAR/HELCOM,
+CB182,2--2'--3--4--4'--5--6'-Heptachlorobiphenyl (CB182),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB183,2--2'--3--4--4'--5'--6-heptachlorobiphenyl (CB183),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB185,2--2'--3--4--5--5'--6-heptachlorobiphenyl (CB185),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB187,2--2'--3--4'--5--5'--6-heptachlorobiphenyl (CB187),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB188,2--2'--3--4'--5--6--6'-heptachlorobiphenyl (CB188),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB189,2--3--3'--4--4'--5--5'-heptachlorobiphenyl (CB189),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB19,1--1'-Biphenyl-- 2--2'--6-trichloro- (CB19),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB190,1--1'-Biphenyl-- 2--3--3'--4--4'--5--6-heptachloro-(CB190),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB191,2--3--3'--4--4'--5'--6-heptachlorobiphenyl (CB191),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB193,2--3--3'--4'--5--5'--6-Heptachlorobiphenyl (CB193),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB194,2--2'--3--3'--4--4'--5--5'-octachlorobiphenyl (CB194),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB195,2--2'--3--3'--4--4'--5--6-octachlorobiphenyl (CB195),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB196,2--2'--3--3'--4--4'--5'--6-octachlorobiphenyl (CB196),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB197,1--1'-Biphenyl-- 2--2'--3--3'--4--4'--6--6'-octachloro- (CB197),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB198,1--1'-Biphenyl-- 2--2'--3--3'--4--5--5'--6-octachloro- (CB198),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB199,2--2'--3--3'--4'--5--5'--6-octachlorobiphenyl (CB199),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB20,2'--3--3'-Trichlorobiphenyl (CB20),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB20+33,2'--3--3'-trichlorobiphenyl (CB20) + 2'--3--4-trichlorobiphenyl (CB33),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB200,2--2'--3--3'--4--5--6--6'-octachlorobiphenyl (CB200),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB201,2--2'--3--3'--4--5'--6--6'-octachlorobiphenyl (CB201),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB202,2--2'--3--3'--5--5'--6--6'-octachlorobiphenyl (CB202),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB203,2--2'--3--4--4'--5--5'--6-Octachlorobiphenyl (CB203),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB205,2--3--3'--4--4'--5--5'--6-octachlorobiphenyl (CB205),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB206,2--2'--3--3'--4--4'--5--5'--6-nonachlorobiphenyl (CB206),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB207,1--1'-Biphenyl-- 2--2'--3--3'--4--4'--5--6--6'-nonachloro- (CB207),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB208,2--2'--3--3'--4--5--5'--6--6'-nonachlorobiphenyl (CB208),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB209,2--2'--3--3'--4--4'--5--5'--6--6'-decachlorobiphenyl (CB209),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB21,1--1'-Biphenyl-- 2--3--4-trichloro- (CB21),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB22,1--1'-Biphenyl-- 2--3--4'-trichloro- (CB22),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB24,1--1'-Biphenyl-- 2--3--6-trichloro- (CB24),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB25,1--1'-Biphenyl-- 2--3'--4-trichloro- (CB25),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB26,2--3'--5-trichlorobiphenyl (CB26),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB27,1--1'-Biphenyl-- 2--3'--6-trichloro- (CB27),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB28,2--4--4'-trichlorobiphenyl (CB28),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.03,0.17,0.022667,0.169108,0,0.15,lognormal,low,OSPAR/HELCOM,ICES
+CB28+31,2--4--4'-trichlorobiphenyl (CB28) + 2--4'--5-trichlorobiphenyl (CB31),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB29,1--1'-Biphenyl-- 2--4--5-trichloro- (CB29),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB3,1--1'-Biphenyl-- 4-chloro- (CB3),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB31,2--4'--5-trichlorobiphenyl (CB31),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB32,1--1'-Biphenyl-- 2--4'--6-trichloro- (CB32),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB33,2'--3--4-trichlorobiphenyl (CB33),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB35,3--3'--4-trichlorobiphenyl (CB35),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB37,1--1'-Biphenyl-- 3--4--4'-trichloro- (CB37),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB4,1--1'-Biphenyl-- 2--2'-dichloro- (CB4),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB40,2--2'--3--3'-Tetrachlorobiphenyl (CB40),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB41,2--2'--3'--4'-Tetrachlorobiphenyl (CB41),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB42,1--1'-Biphenyl-- 2--2'--3--4'-tetrachloro- (CB42),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB43,1--1'-Biphenyl-- 2--2'--3--5-tetrachloro- (CB43),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB44,2--2'--3--5'-tetrachlorobiphenyl (CB44),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB45,1--1'-Biphenyl-- 2--2'--3--6-tetrachloro- (CB45),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB46,1--1'-Biphenyl-- 2--2'--3--6'-tetrachloro- (CB46),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB47,2--2'--4--4'-tetrachlorobiphenyl (CB47),OC-CB,Chlorobiphenyls,,,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB48,1--1'-Biphenyl-- 2--2'--4--5-tetrachloro- (CB48),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB49,2--2'--4--5'-tetrachlorobiphenyl (CB49),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB50,2--4--6--2'-Tetrachlorobiphenyl,OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB51,2--2'--4--6'-Tetrachlorobiphenyl (CB51),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB52,2--2'--5--5'-tetrachlorobiphenyl (CB52),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.033333,0.168269,0.033333,0.225862,0,0.1495,lognormal,low,OSPAR/HELCOM,ICES
+CB53,1--1'-Biphenyl-- 2--2'--5--6'-tetrachloro- (CB53),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB54,1--1'-Biphenyl-- 2--2'--6--6'-tetrachloro- (CB54),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB55,2--3--4--3'-Tetrachlorobiphenyl (CB55),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB56,2--3--3'--4'-tetrachlorobiphenyl (CB56),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB59,2--3--6--3'-Tetrachlorobiphenyl (CB59),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB6,1--1'-Biphenyl-- 2--3'-dichloro- (CB6),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB60,1--1'-Biphenyl-- 2--3--4--4'-tetrachloro- (CB60),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB61,2--3--4--5-Tetrachlorobiphenyl (CB61),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB63,1--1'-Biphenyl-- 2--3--4'--5-tetrachloro- (CB63),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB64,1--1'-Biphenyl-- 2--3--4'--6-tetrachloro- (CB64),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB65,1--1'-Biphenyl-- 2--3--5--6-tetrachloro- (CB65),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB66,2--3'--4--4'-tetrachlorobiphenyl (CB66),OC-CB,Chlorobiphenyls,,,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB67,1--1'-Biphenyl-- 2--3'--4--5-tetrachloro- (CB67),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB7,1--1'-Biphenyl-- 2--4-dichloro- (CB7),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB70,2--3'--4'--5-tetrachlorobiphenyl (CB70),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB71,1--1'-Biphenyl-- 2--3'--4'--6-tetrachloro- (CB71),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB72,2--3'--5--5'-tetrachlorobiphenyl (CB72),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB74,2--4--4'--5-tetrachlorobiphenyl (CB74),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB76,1--1'-Biphenyl-- 2--3'--4'--5'-tetrachloro- (CB76),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB77,3--3'--4--4'-tetrachlorobiphenyl (CB77),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB81,3--4--4'--5-tetrachlorobiphenyl (CB81),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB82,2--2'--3--3'--4'-pentachlorobiphenyl (CB82),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB83,1--1'-Biphenyl-- 2--2'--3--3'--5-pentachloro- (CB83),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB84,2--2'--3--3'--6-pentachlorobiphenyl (CB84),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB85,2--2'--3--4--4'-pentachlorobiphenyl (CB85),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB87,2--2'--3--4--5'-pentachlorobiphenyl (CB87),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB89,1--1'-Biphenyl-- 2--2'--3--4--6'-pentachloro- (CB89),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB9,2--5-Dichlorobiphenyl (CB9),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB90,1--1'-Biphenyl-- 2--2'--3--4'--5-pentachloro- (CB90),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB91,1--1'-Biphenyl-- 2--2'--3--4'--6-pentachloro- (CB91),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB92,1--1'-Biphenyl-- 2--2'--3--5--5'-pentachloro- (CB92),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB95,2--2'--3--5'--6-pentachlorobiphenyl (CB95),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB97,2--2'--3'--4--5-pentachlorobiphenyl (CB97),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CB98,2--3--2'--4'--6'-Pentachlorobiphenyl (CB98),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CB99,2--2'--4--4'--5-pentachlorobiphenyl (CB99),OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CCDAN,cis-chlordane (alpha-chlordane),OC-DN,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CCL4,carbon tetrachloride,OC-CL,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CD,Cadmium,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,0.526867,0.07022,0.005,0.109988,0.002333,0.121905,lognormal,low,AMAP,ICES
+CDD1N,1--2--3--7--8-pentachlorodibenzo-p-dioxin,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.000004,0.15,0.000073,0.237592,,,lognormal,low,OSPAR/HELCOM,ICES
+CDD4X,1--2--3--4--7--8-hexachlorodibenzo-p-dioxin,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDD6P,1--2--3--4--6--7--8-heptachlorodibenzo-p-dioxin,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDD6X,1--2--3--6--7--8-hexachlorodibenzo-p-dioxin,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDD9X,1--2--3--7--8--9-hexachlorodibenzo-p-dioxin,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDDO,1--2--3--4--6--7--8--9-octachlorodibenzo-p-dioxin,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDDSN,sum of pentachloro-dibenzo dioxin,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDDSP,sum of heptachloro-dibenzo dioxin,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDDST,sum of tetrachloro-dibenzo dioxin,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDDSX,sum of hexachloro-dibenzo dioxin,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDF2N,2--3--4--7--8-pentachlorodibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDF2T,2--3--7--8-tetrachloro-dibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.000008,0.149717,0.000067,0.237592,,,lognormal,low,OSPAR/HELCOM,ICES
+CDF4X,2--3--4--6--7--8-hexachlorodibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDF6P,1--2--3--4--6--7--8-heptachlorodibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDF6X,1--2--3--6--7--8-hexachlorodibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDF9P,1--2--3--4--7--8--9-heptachlorodibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDF9X,1--2--3--7--8--9-hexachlorodibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDFDN,1--2--3--7--8/1--2--3--4--8-pentachloro-dibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDFDX,1--2--3--4--7--8/1--2--3--4--7--9-hexachloro-dibenzofuran,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDFO,octachloro-dibenzofuran (group),OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDFP1,1--2--3--4--8-pentachlorodibenzofuran,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDFP2,1--2--3--7--8-pentachlorodibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CDFSN,sum of pentachloro-dibenzofuran,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDFSP,sum of heptachloro-dibenzofuran,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDFST,sum of tetrachloro-dibenzofuran,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDFSX,sum of hexachloro-dibenzofuran,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CDFX1,1--2--3--4--7--8-hexachloro-dibenzofuran,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,ICES
+CHR,Chrysene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.082917,0.13996,0.666667,0.122391,0.127783,0.136964,lognormal,low,OSPAR,ICES
+CHRTR,Chrysene / Triphenylene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+CINOR,inorganic carbon,I-MAJ,Major inorganic constituents,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+CL PFOS,CL PFOS,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+CL2,CBs (2 chlorine atoms),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CL3,CBs (3 chlorine atoms),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CL4,CBs (4 chlorine atoms),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CL5,CBs (5 chlorine atoms),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CL6,CBs (6 chlorine atoms),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CL7,CBs (7 chlorine atoms),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CL8,CBs (8 chlorine atoms),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CL9,CBs (9 chlorine atoms),OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+CMT-QC-NR,Comet assay cells screened,B-MBA,Auxiliary,,,FALSE,FALSE,FALSE,nr,,,,,,,,,,,,,,OSPAR,ICES
+CNONC,cis-nonachlor,OC-DN,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CO,Cobalt,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,0.3,0.125,,,,,lognormal,low,OSPAR,ICES
+CORG,organic Carbon,O-MAJ,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,0.01,0.1,,,,,OSPAR/HELCOM,ICES
+CPHL,chlorophyll-a,O-MAJ,Major organic constituents,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+CR,Chromium,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,3,0.145626,0.216667,0.08998,,,lognormal,low,OSPAR,ICES
+CS134,cesium-134,I-RNC,Radionuclide,,,TRUE,FALSE,FALSE,Bq/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CS137,cesium-137,I-RNC,Radionuclide,,,TRUE,FALSE,FALSE,Bq/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CTOT,total carbon,O-MAJ,Major organic constituents,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+CU,Copper,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,2,0.076316,0.158333,0.090478,0.025167,0.072003,lognormal,low,OSPAR/HELCOM,ICES
+CYFOS,chlorpyrifos,O-OP,Organophosphorus pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+CYFOSM,Chlorpyrifos-methyl,O-INS,Insecticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+D4,Octamethylcyclotetrasiloxane,O-MAJ,Siloxane,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+D5,Decamethylcyclopentasiloxane,O-MAJ,Siloxane,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+D6,Dodecamethylcyclohexasiloxane,O-MAJ,Siloxane,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+DAZPM,Diazepam,OP-GN,Pharmaceuticals,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+DBAHA,Dibenz[ah]anthracene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.045,0.230625,0.333333,0.253296,0.161117,0.1125,lognormal,low,OSPAR,ICES
+DBSN+,Dibutyl tin cation,O-MET,Organotins,Organotins,Organotins,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.3,0.2,0.116667,0.265426,,,lognormal,low,OSPAR,ICES
+DBT,Dibenzothiophene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.1,0.235417,0.166667,0.1,0.00011,0.192,lognormal,low,OSPAR,ICES
+DBTC1,C1 Dibenzothiophene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.25,0.104937,0.066667,0.093867,,,lognormal,low,OSPAR,ICES
+DBTC2,C2 Dibenzothiophene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.338333,0.107267,0.128333,0.128289,,,lognormal,low,OSPAR,ICES
+DBTC3,C3 Dibenzothiophenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.485,0.107088,0.083333,0.091049,,,lognormal,low,OSPAR,ICES
+DCFOP,o--p'-Dicofol,O-GPT,Pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+DCFPP,p--p'-Dicofol,O-GPT,Pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+DCV,dichlorvos,O-OP,Organophosphorus pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+DDEOP,DDE (o--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+DDEPP,DDE (p--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.016667,0.180882,0.005,0.26,0,0.146,lognormal,low,OSPAR,ICES
+DDTEP,DDT (p--p') + DDE (p--p'),OC-DD,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+DDTOP,DDT (o--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.006667,0.2625,0.006667,0.3,0,0.15,lognormal,low,OSPAR,ICES
+DDTPP,DDT (p--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.013333,0.25,0.005,0.26,0,0.077,lognormal,low,OSPAR,ICES
+DEPH,depth (of sampling),P-PHY,Physical measurements,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+DIC,dissolved inorganic carbon,I-MAJ,Major inorganic constituents,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+DIEL,dieldrin,OC-DN,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,AMAP,USER
+DIELD,dieldrin,OC-DN,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.003587,0.2,0.012833,0.18828,0,0.15,lognormal,low,OSPAR,ICES
+DOC,dissolved organic carbon,O-MAJ,Major organic constituents,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+DPSN+,Diphenyltin cation,O-MET,Organotins,Organotins,Organotins,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.3,0.2,0.116667,0.265426,,,lognormal,low,OSPAR,ICES
+DRYWT%,dry weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,,,AMAP,ICES
+END,endrin,OC-DN,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.017167,0.133862,,,0,0.15,lognormal,low,OSPAR,ICES
+ENDA,alpha-endosulfan,OC-CL,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+ENDB,beta-endosulfan,OC-CL,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+ENDN,Endosulphan,O-GPT,Pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+EROD,,B-MBA,Effects,,,FALSE,FALSE,FALSE,pmol/min/mg protein,,,LNMEA~LIPIDWT%~DRYWT%,,,0.5055,0.054412,,,,,lognormal,low,OSPAR,ICES
+EXLIP%,extractable lipid,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,,AMAP,ICES
+F-53B,F-53B,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+FATWT%,fat weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,,AMAP,ICES
+FE,Iron,I-MET,Metals,Auxiliary,Metals,FALSE,FALSE,FALSE,ug/kg,%,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,,,,,,,lognormal,low,OSPAR,ICES
+FLE,Fluorene ,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.08,0.21,0.433333,0.187868,0.127783,0.134182,lognormal,low,OSPAR,ICES
+FLU,Fluoranthene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.166667,0.12296,0.333333,0.087395,0.088883,0.128833,lognormal,low,OSPAR/HELCOM,ICES
+GIRTH,Girth (mean or individual),B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,,ICES,ICES
+GLYPH,glyphosate,O-HER,Herbicides,Pesticides,Pesticides,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,6.166667,0.202951,lognormal,low,OSPAR,ICES
+GOSOI,gonadal somatic index,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,idx,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,,,OSPAR,ICES
+GSMF63,Grain Size Mass Fraction < 63 micron,P-PHY,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,,%,,,,,,,,,,,,,OSPAR,ICES
+GST,,B-MBA,Effects,,,FALSE,FALSE,FALSE,nmol/min/mg protein,,,LNMEA~LIPIDWT%~DRYWT%,,,0,0.2,,,,,lognormal,high,OSPAR,ICES
+HBCD,1--2--5--6--9--10-hexabromocyclododecane,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.016667,0.25,0.07,0.321167,,,lognormal,low,OSPAR/HELCOM,ICES
+HBCDA,alpha-hexabromocyclododecane,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.002238,0.25,0.023333,0.3,,,lognormal,low,OSPAR/HELCOM,ICES
+HBCDB,beta-hexabromocyclododecane,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.043333,0.25,0.023333,0.3,,,lognormal,low,OSPAR/HELCOM,ICES
+HBCDD,Hexabromocyclododecane,O-BR,Organobromines,,,TRUE,,,ug/kg,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,AMAP,USER
+HBCDG,gamma-hexabromocyclododecane,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.023333,0.3,0.023333,0.329599,,,lognormal,low,OSPAR/HELCOM,ICES
+HCB,Hexachlorobenzene,OC-CL,Organochlorines,Organochlorines,Organochlorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.0117,0.213483,0.006667,0.376063,0,0.15,lognormal,low,OSPAR,ICES
+HCBD,Hexachlorobutadiene,OC-CL,Organochlorines,Organochlorines,Organochlorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.022567,0.155608,0.006667,0.376063,0,0.15,lognormal,low,OSPAR,ICES
+HCEPC,cis-heptachlorepoxide,OC-CL,Organochlorines,Organochlorines,Organochlorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+HCEPT,trans-heptachlorepoxide,OC-CL,Organochlorines,Organochlorines,Organochlorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+HCEPX,Heptachlor epoxide,OC-CL,Organochlorines,Organochlorines,Organochlorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.0139,0.165,0.006667,0.376063,0,0.15,lognormal,low,OSPAR,ICES
+HCH,Hexachlorocyclohexane,OC-HC,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.013333,0.22,,,0,0.1076,lognormal,low,OSPAR,ICES
+HCHA,alpha-HCH,OC-HC,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.003483,0.227,0.005167,0.3,0,0.139,lognormal,low,OSPAR,ICES
+HCHB,beta-HCH,OC-HC,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.006667,0.231818,0.006667,0.38234,0,0.15,lognormal,low,OSPAR,ICES
+HCHD,delta-HCH,OC-HC,Organochlorines,Organochlorines,Organochlorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+HCHE,epsilon-HCH (epsilon-hexachlorocyclohexane),OC-HC,Organochlorines,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+HCHG,gamma-HCH,OC-HC,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.0114,0.273053,0.005,0.3,0,0.114,lognormal,low,OSPAR,ICES
+HG,Mercury,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,0.541,0.087966,0.002167,0.100382,,,lognormal,low,AMAP,ICES
+I131,iodine-131,I-RNC,Radionuclide,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+IBPFN,Ibuprofen,OP-GN,Pharmaceuticals,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+ICDP,Indeno[123-cd]pyrene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.063333,0.260325,0.333333,0.114842,0.1,0.15,lognormal,low,OSPAR,ICES
+IMDCP,Imidacloprid,O-INS,Insecticides,Pesticides,Pesticides,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,0.005567,0.15,lognormal,low,OSPAR,ICES
+IMPS,Imposex stage,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low,OSPAR/HELCOM,ICES
+INTS,Intersex stage,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low,OSPAR/HELCOM,ICES
+INTSI,Intersex stage index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low,OSPAR/HELCOM,ICES
+ISOD,Isodrin,OC-DN,Organochlorines,Organochlorines,Organochlorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.033333,0.165139,,,0,0.214,lognormal,low,OSPAR,ICES
+L_PFCAS,L_PFCAS,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+L_PFDA,L_PFDA,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+L_PFNA,L_PFNA,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+L_PFOS,L_PFOS,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+L_PFUNA,L_PFUnA,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+LI,Lithium,I-MET,Metals,Auxiliary,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,,,0.033333,0.148842,,,lognormal,low,OSPAR/HELCOM,ICES
+LIPIDWT%,lipid weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,,AMAP,ICES
+LNMAX,maximum length,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,,OSPAR,ICES
+LNMEA,mean length,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,,AMAP,ICES
+LNMIN,minimum length,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,,OSPAR,ICES
+LOIGN,loss on ignition,O-MAJ,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,0,0.1,,,,,OSPAR/HELCOM,ICES
+LP,Lysosomal labilisation period,B-MBA,Effects,,,FALSE,FALSE,FALSE,mins,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,survival,high,OSPAR,
+LT240,Litter - <5mm plastic fragment,LT-MC,Litter: Total macro and microlitter reporting,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,low,ICES,ICES
+LT243,Litter - <5mm plastic fiber/filament,LT-MC,Litter: Total macro and microlitter reporting,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,low,ICES,ICES
+LT247,Litter - <5mm non-plastic particles-- fragments and fibers,LT-MC,Litter: Total macro and microlitter reporting,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,low,ICES,ICES
+LT249,Litter - <5mm plastic particle,LT-MC,Litter: Total macro and microlitter reporting,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,low,ICES,ICES
+LT-TOT,Litter - total,LT-LTR,Litter: Total macro and microlitter reporting,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,low,ICES,ICES
+MAXGIRTH,Maximum girth,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,,AMAP,USER
+MBSN+,Monobutyl tin cation,O-MET,Organotins,Organotins,Organotins,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.3,0.2,0.116667,0.265391,,,lognormal,low,OSPAR,ICES
+MCCP,medium chain chlorinated parrafin (C14-C17),OC-CP,Chlorinated paraffins,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.333333,0.138965,,,,,lognormal,low,OSPAR,ICES
+METHG,methyl mercury,O-MET,Organomercury,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+METOC,methoxychlor,OC-CL,Organochlorines,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+MIREX,Mirex,OC-CL,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,AMAP,
+MN,Manganese,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,,,,,,,lognormal,low,OSPAR,ICES
+MNC,Micronucleus assay,B-MBA,Effects,,,FALSE,FALSE,FALSE,nr/1000 cells,,,MNC-QC-NR~LNMEA,,,,,,,,,negativebinomial,low,OSPAR,ICES
+MNC-QC-NR,Micronucleus assay cells screened,B-MBA,Auxiliary,,,FALSE,FALSE,FALSE,nr,,,,,,,,,,,,,,OSPAR,ICES
+MOCON%,moisture content percent,P-PHY,Physical measurements,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+MORT%,mortality,B-TOX,Effects,Effects,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,,,,,,,OSPAR,
+MPSN+,Monophenyl tin cation,O-MET,Organotins,Organotins,Organotins,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.3,0.2,0.116667,0.265391,,,lognormal,low,OSPAR,
+N15,Nitrogen isotope of mass 15,I-RNC,Auxiliary,,,FALSE,FALSE,FALSE,ppt/air,,,,,,,,,,,,,,OSPAR,ICES
+N15D,delta N15 (isotope ratio 15N:14N),I-RNC,Auxiliary,,,FALSE,FALSE,FALSE,ppt,,,,,,,,,,,,,,AMAP,ICES
+NADONA,NaDONA,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+NAP,Naphthalene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.166667,0.242032,0.486667,0.140506,0.161117,0.175682,lognormal,low,OSPAR,ICES
+NAP1M,1-Methylnapthalene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+NAP2M,2-Methylnaphthalene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+NAP2OH,2-hydroxy naphthalene,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ng/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.175,,,,,lognormal,low,OSPAR,ICES
+NAPC1,C1 Naphthalenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.366667,0.21875,0.446667,0.103584,,,lognormal,low,OSPAR,ICES
+NAPC2,C2 Naphthalenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.166667,0.120714,0.52,0.072425,,,lognormal,low,OSPAR,ICES
+NAPC3,C3 Naphthalenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.186667,0.134487,0.083333,0.089862,,,lognormal,low,OSPAR,ICES
+NAPC4,C4 Naphthalenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.056667,0.117742,0.033333,0.10842,,,lognormal,low,OSPAR,ICES
+NETFOSAA,N-Ethylperfluorooctanesulfonamidoacetate,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+NFBSF,1--1--2--2--3--3--4--4--4-nonafluorobutane-1-sulphonyl fluoride,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+NFHXA,3--3--4--4--5--5--6--6--6-Nonafluoro-1-hexanesulfonic acid,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+NI,Nickel,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,3.333333,0.146991,0.15,0.084189,0.012167,0.061064,lognormal,low,OSPAR,ICES
+NONC3,nonachlor III,OC-DN,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+NORG,organic Nitrogen,O-MAJ,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,,,,,,,OSPAR,ICES
+N-PFBSA,Perfluorobutanesulfonic acid - sum of all isomers with linear form,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+N-PFDS,Perfluorodecanesulfonic acid - sum of all isomers with linear form,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+N-PFHpS,Perfluoroheptanesulfonic acid - sum of all isomers with linear form,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+N-PFHXS,Perfluorohexanesulfonic acid - sum of all isomers with linear form,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,
+N-PFOS,Perfluorooctanyl sulphonic acid - sum of all isomers with linear form,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low,OSPAR/HELCOM,
+N-PFOSD,Perfluorooctanesulfonamide - sum of all isomers with linear form,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+NRR,Neutral red retention time,B-MBA,Effects,,,FALSE,FALSE,FALSE,mins,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,survival,high,OSPAR,ICES
+NTOT,total nitrogen (N),I-NUT,Nutrients,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+OBDE,octa-bromodiphenyl ether (sum of congeners),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+OCB,OCB,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,AMAP,
+OCB1,2--2--5-endo--6-exo-8--9--10--10-octachlorobornane,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+OCB2,2-endo--3-exo--6-exo--8--8--9--10--10-octachlorobornane,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+OCDAN,oxychlordane,OC-DN,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.001,0.175,,,,,lognormal,low,OSPAR,ICES
+OCS,octachlorostyrene,OC-CL,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P31,Parlar 31,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P38,Parlar 38,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P39,Parlar 39,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P42,Parlar 42,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P42A,Parlar 42a,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P51,Parlar 51,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P56,Parlar 56,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P58,Parlar 58,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P59,Parlar 59,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+P69,Parlar 69 (2--2--5--5--6-exo--8b--8c--9c--10a--10b-decachlorobornane),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PA,Phenanthrene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.132083,0.14679,1,0.118578,0.222233,0.1095,lognormal,low,OSPAR,
+PA1OH,1-hydroxy phenanthrene,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ng/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.175,,,,,lognormal,low,OSPAR,
+PABC,Benzo[c]phenanthrene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,
+PAC1,C1 Phenanthrenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.166667,0.182622,0.38,0.066608,,,lognormal,low,OSPAR,
+PAC2,C2 Phenanthrenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.066667,0.153048,0.111667,0.07926,,,lognormal,low,OSPAR,
+PAC3,C3 Phenanthrenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.166667,0.182622,0.385,0.083324,,,lognormal,low,OSPAR,
+PAH,polycyclic aromatic hydrocarbons - unspecified,O-PAH,Polycyclic aromatic hydrocarbons,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PAM1,1-methylphenanthrene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,
+PB,Lead,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,2.333333,0.10368,0.283333,0.090517,0.0115,0.08951,lognormal,low,AMAP,ICES
+PB210,lead-210,I-RNC,Radionuclide,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+PBB,polybrominated biphenyls,O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB101,2--4--5--2'--5'-Pentabromobiphenyl (PBB101),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB126,1--1'-Biphenyl-- 3--3'--4--4'--5-pentabromo- (PBB126),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB15,4--4'-dibromobiphenyl,O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB153,2--2'--4--4'--5--5'-Hexabromo-1--1'-biphenyl,O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB153+BD154,PBB153 + BD154,O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,
+PBB169,3--3'--4--4'--5--5'-Hexabromobiphenyl (PBB169),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB49,2--2'--4--5'-tetrabromobiphenyl,O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB52,2--2'--5--5'-tetrabromobiphenyl,O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB77,3--3'--4--4'-Tetrabromobiphenyl (PBB77),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB80,3--3'--5--5'-Tetrabromobiphenyl,O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PBB81,1--1'-Biphenyl-- 3--4--4'--5-tetrabromo- (PBB81),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCA,Pentachloroanisole,OC-CL,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC,polychlorinated camphenes (as toxaphene) (chlorinated bornanes),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC25,Parlar 25,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC26,Parlar 26 (2-endo--3-exo--5-endo--6-exo--8--8--10--10 octachlorobornane),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC32,Parlar 32 (2-endo--2-exo--5-endo--6-exo--8--9--10 heptachlorobornane),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC40,Parlar 40 (2-endo--3-exo--5-endo--6-exo--8--9--10--10 octachlorobornane),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC40+41,Parlar 40 + Parlar 41,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC41,Parlar 41 (2-exo--3-endo--5-exo--8--9--9--10--10 octachlorobornane),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC44,Parlar 44 (2-exo--5--5--8--9--9--10--10 octachlorobornane),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC50,Parlar 50 (2-endo--3-exo--5-endo--6-exo--8--8--9--10--10 nonachlorobornane),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCC62,Parlar 62 (2-endo--2-exo--5-endo--5-exo--8--9--9--10--10 nonachlorobornane),OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCDD,polychlorinated dibenzo-p-dioxins,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCDF,polychlorinated dibenzo-furans,OC-DX,Dioxins,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCI,Penis classification index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low,OSPAR/HELCOM,
+PCP,pentachlorophenol,O-PHC,Phenols/chlorophenols,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,,,ICES,ICES
+PCT,polychlorinated terphenyls,OC-CL,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PCTA,pentachlorothioanisole,OC-CL,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PEBDE,penta-bromodiphenyl ether (sum of congeners),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PER,Perylene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.15,0.22255,0.138333,0.1,0.017217,0.125,lognormal,low,OSPAR,
+PFBA,Perfluorobutyric acid (PFBA),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFBS,Potassium perfluorobutanesulfonate (PFBS),O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.033333,0.34,,,,,lognormal,low,OSPAR,ICES
+PFBSA,Perfluorobutanesulfonic acid,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFCAS,PFCAs (C5-7),O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFDA,Perfluorodecanoic acid (PFDA),O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.043333,0.249459,,,,,lognormal,low,OSPAR,
+PFDOA,Perfluorododecanoic acid (PFDOA),O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.046667,0.278512,,,,,lognormal,low,OSPAR,
+PFDS,Perfluorodecanesulfonic acid - branched + linear form,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFDSA,1H--1H--2H--2H-Perfluorodecanesulfonic acid,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFDSI,Perfluorodecanesulfonate anion,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFDSK,Potassium Perfluorodecanesulfonate,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFECHS,Perfluor-4-ethylcyclohexan sulfonate (potassium salt),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFECHSB,PFECHSb,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFHPA,Perfluoroheptanoic acid (PFHpA),O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFHPS,Perfluoroheptanesulfonic acid (PFHpS),O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFHXA,Perfluorohexanoic acid (PFHxA),O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFHXDA,Perfluorohexadecanoic acid (PFHxDA),O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFHXS,Perfluorohexanesulfonic acid - branched + linear form,O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.018333,0.129765,,,,,lognormal,low,OSPAR,
+PFHXSI,Perfluorohexanesulfonate anion,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFHXSK,Potassium Perfluorohexansulfonate,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFNA,Perfluorononanoic acid (PFNA),O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.05,0.25,,,,,lognormal,low,OSPAR,
+PFNOA,Perfluorononanoic acid,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFNS,Perfluorononanesulfonic acid (PFNS),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFOA,Perfluorooctanoic acid (PFOA),O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.075,0.178,,,,,lognormal,low,OSPAR,ICES
+PFOCDA,Perfluorooctadecanoic acid,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFONS,PFONS,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFOS,Perfluorooctanyl sulphonic acid (PFOS),O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.066667,0.199772,,,0.003333,0.172725,lognormal,low,OSPAR/HELCOM,ICES
+PFOSA,Perfluorooctylsulfonate acid amide (PFOSA),O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.171667,0.165,,,,,lognormal,low,OSPAR,ICES
+PFOSD,Perfluorooctanesulfonamide - branched + linear forms,O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+PFOS-L,PFOS-L,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFOUDS,PFOUdS,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFPEA,Perfluoropentanoic acid (PFPeA),O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,ICES
+PFTA,PFTA,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFTDA,,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.07,0.323489,,,,,lognormal,low,OSPAR,ICES
+PFTETRA,PFTetra,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFTRDA,,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.07,0.26,,,,,lognormal,low,OSPAR,ICES
+PFTRIA,PFTriA,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+PFUNA,Perfluoroundecanoic acid (PFUnA),O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,ICES
+PFUNDA,PFUnDA,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.04,0.241605,,,,,lognormal,low,OSPAR,ICES
+PYR,Pyrene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.166667,0.1275,0.5,0.090558,0.14445,0.099621,lognormal,low,OSPAR,ICES
+PYR1OH,1-hydroxy pyrene,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ng/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.15,,,,,lognormal,low,OSPAR/HELCOM,ICES
+PYR1OHEQ,1-hydroxy pyrene equivalent,B-MBA,Metabolites,,,FALSE,FALSE,FALSE,ug/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.175,,,,,lognormal,low,OSPAR,ICES
+SBDE6,Sum of BDE 28-- 47-- 99-- 100-- 153-- 154,O-BR,Organobromines,PBDEs,PBDEs,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.010507,0.1875,0.0433,0.1727,,,lognormal,low,OSPAR/HELCOM,ICES
+SCB,sum of CBs.- Specify in method data (METDC). Deprecated. Request specific code,OC-CB,Chlorobiphenyls,,,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+SCB6,Sum of ICES 6 CBs,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.2,0.12801,,,,,lognormal,low,OSPAR/HELCOM,ICES
+SCB7,Sum of ICES 7 CBs,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.233333,0.128272,,,,,lognormal,low,OSPAR,ICES
+SCCP,short chain chlorinated paraffin,OC-CP,Chlorinated paraffins,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.333333,0.139728,,,,,lognormal,low,OSPAR,ICES
+SDBTC,Sum C1-3 Dibenzothiophenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,
+SDDT,sum of (DDT (p--p')-- DDE (p--p')-- DDD (p--p')-- DDT (o--p')-- DDE (o--p')-- DDD (o--p')),OC-DD,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+SDDTP,sum of (DDT (p--p')-- DDE (p--p')-- DDD (p--p')),OC-DD,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+SDEPL,sediment depth from surface (lower),P-PHY,Physical measurements,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+SDEPU,sediment depth from surface (upper),P-PHY,Physical measurements,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+SE,Selenium,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,2.984833,0.082638,,,,,lognormal,low,AMAP,ICES
+SFG,Scope for growth,B-TOX,Effects,,,FALSE,FALSE,FALSE,j/h/g,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,normal,high,OSPAR,ICES
+SIMZ,simazine,O-TRI,Triazine pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+SN,Tin,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,3.333333,0.25,,,,,lognormal,low,OSPAR,ICES
+SNAPC,Sum C1-3 Naphthalenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,
+SPAC,Sum C1-3 Phenanthrenes,O-PAH,Polycyclic aromatic hydrocarbons,PAH_alkylated,PAH_alkylated,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,
+SPAH,sum of PAHs (total),O-PAH,Polycyclic aromatic hydrocarbons,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+SPFCAS,sPFCAs (C8-14),O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+SPFSAS,sPFSAs,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,
+SR,Strontium,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,,,,,,,lognormal,low,OSPAR,ICES
+SURVT,Stress on stress,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,d,,,LNMEA,,,,,,,,,survival,high,OSPAR,
+TBBPA,Tetrabromobiphenol-A,O-BR,Organobromines,Organobromines,Organobromines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.066667,0.25,,,,,lognormal,low,OSPAR,ICES
+TBSN+,Tributyl tin cation,O-MET,Organotins,Organotins,Organotins,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.3,0.2,0.1,0.24,0.055,0.16,lognormal,low,OSPAR/HELCOM,ICES
+TCDAN,trans-chlordane (gamma-chlordane),OC-DN,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TCDD,,OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.000004,0.14,0.00006,0.237592,,,lognormal,low,OSPAR/HELCOM,ICES
+TDEOP,TDE (o--p') = DDD (o--p'),OC-DD,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TDEPP,TDE (p--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.006667,0.197,0.006667,0.3,0,0.16425,lognormal,low,OSPAR,ICES
+TEBDE,tetra-bromodiphenyl ether (sum of congeners),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TEMP,temperature,P-PHY,Physical measurements,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+TEQDFP,WHO-TEQ (DFP),OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,TEQ ug/kg,TEQ ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.000018,0.1375,0.000039,0.237592,,,lognormal,low,OSPAR/HELCOM,
+THCGC,total hydrocarbons (by GC),O-THC,Total hydrocarbons,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+THCGR,total hydrocarbons (by gravimetry),O-THC,Total hydrocarbons,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+THCIR,total hydrocarbons (by infrared spectrophotometry),O-THC,Total hydrocarbons,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+THCUV,total hydrocarbons (by UVF),O-THC,Total hydrocarbons,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+TNONC,trans-nonachlor,OC-DN,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,AMAP,ICES
+TOC,total organic carbon,O-MAJ,Major organic constituents,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
+TOP-PFBA,Sum of total oxidisable precursors of perfluorobutanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFBSA,Sum of total oxidisable precursors of perfluorobutanesulfonic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFDA,Sum of total oxidisable precursors of perfluorodecanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFDoA,Sum of total oxidisable precursors of perfluorododecanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFDS,Sum of total oxidisable precursors of perfluorodecanesulfonic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFHPA,Sum of total oxidisable precursors of perfluoroheptanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFHXA,Sum of total oxidisable precursors of perfluorohexanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFHxDA,Sum of total oxidisable precursors of perfluorohexadecanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFHXS,Sum of total oxidisable precursors of perfluorohexanesulfonic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFNA,Sum of total oxidisable precursors of perfluorononanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFOA,Sum of total oxidisable precursors of perfluorooctanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFOcDA,Sum of total oxidisable precursors of perfluorooctadecanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFOS,Sum of total oxidisable precursors of perfluorooctanesulfonic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFPeA,Sum of total oxidisable precursors of perfluoropentanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFTeDA,Sum of total oxidisable precursors of perfluorotetradecanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFTrDA,Sum of total oxidisable precursors of perfluorotridecanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TOP-PFUnda,Sum of total oxidisable precursors of perfluoroundecanoic acid (all isomers),O-FL,Organofluorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TPHC-U,total petroleum hydrocarbons - unspecified,O-THC,Total hydrocarbons,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
+TPSN+,Triphenyl tin cation,O-MET,Organotins,Organotins,Organotins,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.3,0.2,0.1,0.24,,,lognormal,low,OSPAR,ICES
+TRI,Triphenylene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low,OSPAR,ICES
+TRIZ,triazine,O-TRI,Triazine pesticides,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+TTOX,total toxaphene - method information necessary in METOA,OC-TC,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
+V,Vanadium,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,,,,,,,lognormal,low,OSPAR,ICES
+VDS,Vas Deferens Sequence,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low,OSPAR/HELCOM,ICES
+VDSI,Vas Deferens Sequence Index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low,OSPAR/HELCOM,ICES
+VSCCP,sery short chain chlorinated paraffin (C6-C9),OC-CP,Chlorinated paraffins,,,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,lognormal,low,ICES,ICES
+WTMAX,maximum weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,g,,,,,,,,,,,,,,OSPAR,ICES
+WTMEA,mean weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,g,,,,,,,,,,,,,,AMAP,ICES
+WTMIN,minimum weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,g,,,,,,,,,,,,,,OSPAR,ICES
+ZN,Zinc,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,50,0.073982,0.258333,0.084814,0.028667,0.082049,lognormal,low,OSPAR,ICES
+AROCLOR,PCB (Aroclor),O-CB,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,,ICES
+PCB,PCB,O-CB,Organochlorines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,,ICES
