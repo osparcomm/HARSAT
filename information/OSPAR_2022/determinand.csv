@@ -232,8 +232,8 @@ NRR,Neutral red retention time,B-MBA,Effects,,,TRUE,FALSE,FALSE,mins,,,LNMEA~LIP
 LP,Lysosomal labilisation period,B-MBA,Effects,,,TRUE,FALSE,FALSE,mins,,,LNMEA~LIPIDWT%~DRYWT%,,,,,,,,,survival,high
 VDS,Vas Deferens Sequence,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low
 VDSI,Vas Deferens Sequence Index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
-IMPS,Imposex stage,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
+IMPS,Imposex stage,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low
 PCI,Penis classification index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
-INTS,Intersex stage,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
+INTS,Intersex stage,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low
 INTSI,Intersex stage index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
 GSMF63,Grain Size Mass Fraction < 63 micron,P-PHY,,Auxiliary,,FALSE,FALSE,FALSE,,%,,,,,,,,,,,,

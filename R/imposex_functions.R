@@ -242,7 +242,7 @@ assess_imposex <- function(
       VDS[VDS > ntheta] <- ntheta
       VDS <- factor(VDS, levels = 0:ntheta)
     })
-  
+ 
     assessment <- imposex_assess_clm(
       data, theta, annualIndex, species, recent.trend, max.year
     )

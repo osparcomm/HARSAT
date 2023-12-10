@@ -155,7 +155,8 @@ imposex.clm.X.change <- function(year, model, model.control = list()) {
   X
 }
 
-  
+
+
 
 imposex.clm.predict <- function(clmFit, theta, data) {
 
@@ -172,7 +173,7 @@ imposex.clm.predict <- function(clmFit, theta, data) {
     Xpred <- do.call(imposex.clm.X.change, args)
   
   clmFit <- within(clmFit, {
-    vcov.unscaled <- 2 * solve(numDeriv::hessian)
+    vcov.unscaled <- 2 * solve(hessian)
     vcov <- vcov.unscaled * disp
     
     summary <- data.frame(est = par, se = sqrt(diag(vcov)))
@@ -198,7 +199,6 @@ imposex.clm.predict <- function(clmFit, theta, data) {
   
   clmFit
 }
-
 
 
 imposex_assess_clm <- function(
@@ -406,7 +406,7 @@ imposex_assess_clm <- function(
   # unidentifiable / undefined) 
   # NB Not sure this is strictly true now that we have banned linear terms before the change point, but 
   # safer to leave it like this for now
-  
+
   hessianInfo <- imposex.clm.fit(within(data, VDS <- VDS2), fit$model, theta, fit$model.control, 
                                  hessian = TRUE)
 
