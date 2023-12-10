@@ -806,17 +806,6 @@ report_assessment <- function(
   
   # reporting_functions.R
   
-  if (!"package:lattice" %in% search()) {
-    library("lattice")
-    on.exit(detach("package:lattice"))
-  }
-  
-  if (!"package:grid" %in% search()) {
-    library("grid")
-    on.exit(detach("package:grid"), add = TRUE)
-  }
-  
-  
   if (!dir.exists(output_dir)) {
     stop(
       "\nThe output directory '", output_dir, "' does not exist.\n", 

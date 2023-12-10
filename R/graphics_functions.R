@@ -38,17 +38,6 @@ plot_assessment <- function(
   
   # graphics_functions.R
 
-  if (!"package:lattice" %in% search()) {
-    library("lattice")
-    on.exit(detach("package:lattice"))
-  }
-  
-  if (!"package:grid" %in% search()) {
-    library("grid")
-    on.exit(detach("package:grid"), add = TRUE)
-  }
-
-  
   # check file_type, file_format and output_dir are valid
   
   file_format = match.arg(file_format)
