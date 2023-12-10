@@ -39,6 +39,10 @@ jobs:
           needs: |
             check
 
+      - name: Reinstall Matrix
+        run: install.packages("Matrix")
+        shell: Rscript {0}
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual")'
