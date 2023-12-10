@@ -367,8 +367,8 @@ I131,iodine-131,I-RNC,Radionuclide,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
 IBPFN,Ibuprofen,OP-GN,Pharmaceuticals,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
 ICDP,Indeno[123-cd]pyrene,O-PAH,Polycyclic aromatic hydrocarbons,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.063333,0.260325,0.333333,0.114842,0.1,0.15,lognormal,low,OSPAR,ICES
 IMDCP,Imidacloprid,O-INS,Insecticides,Pesticides,Pesticides,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,0.005567,0.15,lognormal,low,OSPAR,ICES
-IMPS,Imposex stage,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low,OSPAR/HELCOM,ICES
-INTS,Intersex stage,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low,OSPAR/HELCOM,ICES
+IMPS,Imposex stage,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low,OSPAR/HELCOM,ICES
+INTS,Intersex stage,B-END,Imposex,,,FALSE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low,OSPAR/HELCOM,ICES
 INTSI,Intersex stage index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low,OSPAR/HELCOM,ICES
 ISOD,Isodrin,OC-DN,Organochlorines,Organochlorines,Organochlorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.033333,0.165139,,,0,0.214,lognormal,low,OSPAR,ICES
 L_PFCAS,L_PFCAS,O-FL,Organofluorines,,,TRUE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,AMAP,

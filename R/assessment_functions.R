@@ -287,8 +287,8 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
 
       thetaID <- switch(
         info$purpose, 
-        CSEMP = stations[station_code, "CMA"],
-        OSPAR = paste(seriesInfo$country, stations[station_code, "OSPAR_subregion"]),
+        # CSEMP = stations[station_code, "CMA"],
+        OSPAR = paste(seriesInfo$country, stations[station_code, "ospar_subregion"]),
         HELCOM = seriesInfo$country
       )
 
@@ -500,13 +500,15 @@ get_index <- function(determinand, data, info) {
       call. = FALSE
     )
   }
-  
+
   
   if (distribution %in% "lognormal") {
     get_index_median(data, log = TRUE)
-  } else if (distribution %in% c("normal", "survival", "multinomial", "quasibinomial")) {
+  } else if (distribution %in% c("normal", "survival")) {
     get_index_median(data, log = FALSE)
-  } else if (distribution %in% c("beta", "negativebinomial")) {
+  } else if (distribution %in% c("multinomial", "quasibinomial")) {
+    get.index.biota.Imposex(data, determinand, info)
+  }else if (distribution %in% c("beta", "negativebinomial")) {
     get_index_weighted_mean(data, determinand) 
   } else {
     stop(
