@@ -1,0 +1,80 @@
+---
+title: "Report template usage"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Report template usage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The package includes a report template that may help you generate a 
+report for a given assessment. This is installed as a file `report_assessment.Rmd`
+in a directory `markdown`, so to use it, you'll need to use `system.file()` to 
+find the template file.
+
+You can use this report tempate in two different ways:
+
+## Through `report_assessment`
+
+The easiest way to generate reports is in bulk, as follows:
+
+```r
+## Do whatever you need to get the assessment object
+...
+assessment <- run_assessment(timeseries)
+
+report_assessment(
+  biota_assessment,
+  subset = NULL,
+  output_dir = my_output_dir
+)
+```
+
+This will generate all the reports, although you can pass a subsetting
+expression (just like with `plot_assessment`) to select which 
+individual assessments you want reports on. The reports are written 
+as HTML files into the given output directory.
+
+## Directly through R Markdown
+
+In this case, your usage will typically look a bit like this:
+
+```r
+library(rmarkdown)
+
+
+## Do whatever you need to get the assessment object
+...
+assessment <- run_assessment(timeseries)
+
+## Locate the report file
+package_dir = system.file(package = "harsat")
+template_dir = file.path(package_dir, "markdown")
+report_file <- file.path(template_dir, "report_assessment.Rmd")
+
+## Create a new filename for the output file, here we just
+## put it in a temporary file, but you'll usually want something
+## more persistent.
+output_file <- tempfile("plot", fileext = c(".htm"))
+
+## Choose what you want to report. Pick the series you want to
+## report like this.
+params = list(
+  assessment_object = assessment,
+  series = 'A902 PFOA Globicephala melas LI JV'
+)
+
+## Generate the report -- note the use of `new.env()` to make a 
+## nice clean enviroment containing only the parameters you pass,
+## as above. 
+rmarkdown::render(
+  report_file,
+  output_file = output_file,
+  params = params,
+  envir = new.env()
+)
+```
+
+Note that because this is R Markdown, you can do this as a child
+document from another template. You can also control the output
+format, generating PDF, for example. 

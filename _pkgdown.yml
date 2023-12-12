@@ -22,10 +22,6 @@ navbar:
       - text: External file format
         href: articles/external-file-format.html
       - text: -------
-      - text: "Resources"
-      - text: Datasets
-        href: articles/datasets.html
-      - text: -------
       - text: "Examples"
       - text: HELCOM (read first)
         href: articles/example_HELCOM.html
@@ -33,6 +29,12 @@ navbar:
         href: articles/example_OSPAR.html
       - text: AMAP external data
         href: articles/example_external_data.html
+      - text: -------
+      - text: "Additional resources"
+      - text: Datasets
+        href: articles/datasets.html
+      - text: Report template
+        href: articles/report-template.html
 
 reference:
 - title: Primary functions

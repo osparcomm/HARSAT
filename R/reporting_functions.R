@@ -817,14 +817,13 @@ report_assessment <- function(
   
   
   info <- assessment_obj$info
-  timeSeries <- assessment_obj$timeSeries 
-  
+  timeSeries <- assessment_obj$timeSeries   
   
   # set up time series information:
   # - merge with station information
   # - add in additional useful variables 
   # - subset if necessary
-  
+
   timeSeries <- tibble::rownames_to_column(timeSeries, "series")
   
   timeSeries <- dplyr::left_join(
@@ -851,13 +850,7 @@ report_assessment <- function(
     timeSeries$matrix <- "WT"
   }
   
-  if (!is.null(substitute(subset))) {
-    ok <- eval(substitute(subset), timeSeries, parent.frame())
-    timeSeries <- timeSeries[ok, ]
-    row.names(timeSeries) <- NULL
-  }
-  
-  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
+  timeSeries <- apply_subset(timeSeries, subset, parent.frame())
   
   series_id <- row.names(timeSeries)
   
@@ -904,8 +897,12 @@ report_assessment <- function(
     output_id <- gsub("\\", " ", output_id, fixed = TRUE)
     
     
+    package_dir = system.file(package = "harsat")
+    template_dir = file.path(package_dir, "markdown")
+    report_file <- file.path(template_dir, "report_assessment.Rmd")
+
     rmarkdown::render(
-      "report_assessment.Rmd", 
+      report_file, 
       params = list(
         assessment_object = assessment_obj, 
         series = id
@@ -916,8 +913,7 @@ report_assessment <- function(
   })
     
   invisible() 
-}  
-
+}
 
 
 
