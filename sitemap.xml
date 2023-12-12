@@ -40,6 +40,9 @@
     <loc>http://osparcomm.github.io/HARSAT/articles/reference-file-formats.html</loc>
   </url>
   <url>
+    <loc>http://osparcomm.github.io/HARSAT/articles/report-template.html</loc>
+  </url>
+  <url>
     <loc>http://osparcomm.github.io/HARSAT/authors.html</loc>
   </url>
   <url>
@@ -47,6 +50,9 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/add_stations.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/apply_subset.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/check_assessment.html</loc>
@@ -149,6 +155,9 @@
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/read_stations.html</loc>
+  </url>
+  <url>
+    <loc>http://osparcomm.github.io/HARSAT/reference/report_assessment.html</loc>
   </url>
   <url>
     <loc>http://osparcomm.github.io/HARSAT/reference/report_file_digest.html</loc>
