@@ -1,4 +1,5 @@
-# cumulative proportional odds model for imposex data
+# This file contains functions that fit a cumulative proportional odds model 
+# for imposex data
 
 imposex.VDS.p.calc <- function(theta, cumulate = FALSE) {
   if (cumulate) theta <- cumsum(theta)
