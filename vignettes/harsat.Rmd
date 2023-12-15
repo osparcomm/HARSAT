@@ -97,7 +97,7 @@ working.directory <- '/Users/stuart/git/HARSAT'
 
 ## Reading in the data
 
-The first step is to read in the data that we've got.
+The first step is to read in the data that we've got, using `read_data()`.
 We will go through some of these arguments.
 
 
@@ -168,7 +168,7 @@ as is done with the OSPAR estimates.
 
 ## Tidying the data
 
-The next step is to clean the data to prepare for analysis. This step tidies up the 
+The next step is to clean the data to prepare for analysis, using `tidy_data()`. This step tidies up the 
 data structures that we've got there. It does filtering so that we get data in the
  form that we want for say, an OSPAR assessment or a HELCOM assessment.
 It also streamlines some of the data files.
@@ -205,7 +205,7 @@ To this point, we've still not done anything with the datasets.
 
 ## Create a time series
 
-Now we can group the data into time series. This means identifying which data points 
+Now we can group the data into time series, using `create_timeseries()`. This means identifying which data points 
 belong to the same time series, and then set it up as a structure which then allows us 
 to do the assessments.
 

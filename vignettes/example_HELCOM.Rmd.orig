@@ -61,7 +61,7 @@ cat("```\n")
 
 # Water assessment
 
-First, we use `read_data` to read in the contaminant data, the station
+First, we use `read_data()` to read in the contaminant data, the station
 dictionary, and two important reference tables: the determinand and threshold
 reference tables. There are several things to note about the function call:  
 
@@ -255,14 +255,14 @@ The sediment data are grouped into time series which consist of the
 measurements of single determinand in a single matrix (the fraction the sample
 has been sieved to; e.g. `SED63` or `SEDTOT`) at a single monitoring station.
 
-The `create_timeseries` call for sediment differs from that for water in two
+The `create_timeseries()` call for sediment differs from that for water in two
 ways. First, `determinands.control` identifies two groups of determinands that
 need to be summed. Second, the arguments `normalise` and `normalise.control`
 specify how the normalisation for grain size should be carried out. There are
 default functions for normalisation that will work in many cases. However, the
 process for HELCOM is more complicated (because unlike other metals, copper is
 normalised to organic carbon rather than aluminium) so a customised function
-`normalise_sediment_HELCOM` is provided. The argument `normalise.control`
+`normalise_sediment_HELCOM()` is provided. The argument `normalise.control`
 specifies that metals (apart from copper) will be normalised to 5% aluminium
 and copper and organics will be normalised to 5% organic carbon. The normalise
 functions need a bit of work, so expect them to change.

@@ -50,6 +50,7 @@ reference:
   - check_assessment
   - write_summary_table
   - plot_assessment
+  - report_assessment
 - title: All functions
 - contents:
   - starts_with("", internal = TRUE)
