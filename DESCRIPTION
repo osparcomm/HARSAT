@@ -7,7 +7,7 @@ Authors@R: c(
     person(given = "OSPAR Commission (OSPAR)", email = "data@ospar.org", role = c("cph", "fnd", "cre", "aut")),
     person(given = "International Council for the Exploration of the Sea (ICES)", email = "info@ices.dk", role = c("cph", "aut")),
     person(given = "AmbieSense Ltd", email = "info@ambiesense.com", role = c("cph", "aut")),
-    person(given = "HARSAT User Group, 2023", email = "harsat@ospar.org", role = c("ctb"))
+    person(given = "HARSAT User Group", email = "harsat@ospar.org", role = c("ctb"))
   )
 Description: Tools for the assessment of data concerning contaminants (hazardous
   substances) and their effects in the marine environment. The code includes
