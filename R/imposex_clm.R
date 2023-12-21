@@ -162,7 +162,7 @@ imposex.clm.X.change <- function(year, model, model.control = list()) {
 imposex.clm.predict <- function(clmFit, theta, data) {
 
   # silence non-standard evaluation warnings
-  est <- se <- disp <- dfResid <- NULL
+  est <- se <- disp <- dfResid <- hessian <- NULL
 
   year <- seq(min(data$year), max(data$year))
   
