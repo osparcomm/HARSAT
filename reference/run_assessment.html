@@ -79,6 +79,7 @@ thresholds. Need to add a lot more in details.</p>
 <span>  get_AC_fn <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  recent_trend <span class="op">=</span> <span class="fl">20L</span>,</span>
 <span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  extra_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -117,6 +118,14 @@ consider trends in the last twenty year.</p></dd>
 <dt>parallel</dt>
 <dd><p>A logical which determines whether to use parallel
 computation; default = FALSE.</p></dd>
+
+
+<dt>extra_data</dt>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a> A named list used to
+pass additional data to specific assessment routines. At present it is
+only used for imposex assessments, where it passes two data frames called
+<code>VDS_estimates</code> and <code>VDS_confidence_limits</code>. Defaults to NULL, This
+argument will be generalised in the near future, so expect it to change.</p></dd>
 
 
 <dt>...</dt>
