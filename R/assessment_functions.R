@@ -23,6 +23,11 @@
 #'   consider trends in the last twenty year.
 #' @param parallel A logical which determines whether to use parallel
 #'   computation; default = FALSE.
+#' @param extra_data `r lifecycle::badge("experimental")` A named list used to
+#'   pass additional data to specific assessment routines. At present it is 
+#'   only used for imposex assessments, where it passes two data frames called
+#'   `VDS_estimates` and `VDS_confidence_limits`. Defaults to NULL, This 
+#'   argument will be generalised in the near future, so expect it to change.
 #' @param ... Extra arguments which are passed to assessment_engine.  See
 #'   details (which need to be written).
 #' @export
@@ -32,7 +37,8 @@ run_assessment <- function(
   AC = NULL, 
   get_AC_fn = NULL, 
   recent_trend = 20L, 
-  parallel = FALSE, 
+  parallel = FALSE,
+  extra_data = NULL,
   ...) {
   
   # location: assessment_functions.R
@@ -49,11 +55,27 @@ run_assessment <- function(
   if (!is.null(AC) && is.null(ctsm_ob$info$get_AC_fn)) {
     ctsm_ob$info$get_AC_fn <- get_AC[[ctsm_ob$info$compartment]]
   }
-
+  
+  if (any(ctsm_ob$data$group %in% "Imposex")) {
+    if (is.null(extra_data)) {
+      stop("`extra_data` must be supplied for imposex assessments")
+    }
+    
+    ok <- c("VDS_estimates", "VDS_confidence_limits") %in% names(extra_data)
+    if (!all(ok)) {
+      stop(
+        "argument extra_data must be a list with components ", 
+        "VDS_estimates and VDS_confidence_limits"
+      )
+    }
+  }
+  
+  ctsm_ob$info$extra_data <- extra_data
+  
   ctsm_ob$assessment <- vector(mode = "list", length = nrow(ctsm_ob$timeSeries))
   names(ctsm_ob$assessment) <- row.names(ctsm_ob$timeSeries)
 
-  ctsm_ob$call.data <- ctsm_ob$QA <- NULL
+  ctsm_ob$call.data <- NULL
 
   
   # identify which series are to be assessed in this run - defaults to all
@@ -285,39 +307,42 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
       species <- seriesInfo$species
       station_code <- seriesInfo$station_code
 
-      thetaID <- switch(
+      theta_id <- switch(
         info$purpose, 
         # CSEMP = stations[station_code, "CMA"],
         OSPAR = paste(seriesInfo$country, stations[station_code, "ospar_subregion"]),
         HELCOM = seriesInfo$country
       )
 
-      thetaID <- paste(thetaID, species)
+      theta_id <- paste(theta_id, species)
       
+      is_theta <- theta_id %in% names(info$extra_data$VDS_estimates)
 
+      theta <- NULL
+      if (is_theta) {
+        theta <- info$extra_data$VDS_estimates[[theta_id]]
+      }
+      
+      
       # if any individual data, need to augment annual indices with confidence 
       # intervals
       
       indiID <- with(x, tapply(n_individual, year, function(y) all(y == 1)))
       
-      if (any(indiID) & thetaID %in% names(biota.VDS.estimates)) {
+      if (any(indiID) & is_theta) {
 
         out$annualIndex[c("lower", "upper")] <- NA
         
         clID <- paste(station_code, names(indiID)[indiID], species)
         out$annualIndex[indiID, c("lower", "upper")] <- 
-          biota.VDS.cl[clID, c("lower", "upper")]
+          info$extra_data$VDS_confidence_limits[clID, c("lower", "upper")]
         
-        # adjust when indices are zero or max (had to add an observation with a 
-        # 1 or n-1 to get a fit)
+        # adjust when indices are zero or max (K = #cutpoints)
+        # had to add an observation with a 1 or n-1 to get a fit
         
-        ntheta <- biota.VDS.estimates[[thetaID]]$K
-        theta <- biota.VDS.estimates[[thetaID]]$par
-        theta <- theta[as.character(0:(ntheta-1))]
-
         out$annualIndex <- within(out$annualIndex, {
           lower[index == 0] <- 0
-          upper[index == ntheta] <- ntheta
+          upper[index == theta$K] <- theta$K
         })  
       }  
       
@@ -329,7 +354,7 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
         determinand = determinand, 
         species = species,
         station_code = station_code,
-        thetaID = thetaID, 
+        theta = theta, 
         max.year = info$max_year, 
         info.imposex = info$imposex, 
         recent.trend = info$recent.trend)
@@ -409,7 +434,7 @@ parallel_objects <- function(imposex = FALSE) {
     out <- c(
       out, 
       "imposex.assess.index", "imposex_class", 
-      "imposex.family", "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", 
+      "imposex.family", "cuts6.varmean",  
       "imposex_assess_clm", "imposex.clm.fit", "imposex.clm.X", 
       "imposex.clm.X.change", "imposex.clm.loglik.calc", "imposex.VDS.p.calc", 
       "imposex.clm.predict", "imposex.clm.cl", "imposex.clm.contrast"
@@ -507,7 +532,7 @@ get_index <- function(determinand, data, info) {
   } else if (distribution %in% c("normal", "survival")) {
     get_index_median(data, log = FALSE)
   } else if (distribution %in% c("multinomial", "quasibinomial")) {
-    get.index.biota.Imposex(data, determinand, info)
+    get_index_imposex(data, determinand, info)
   }else if (distribution %in% c("beta", "negativebinomial")) {
     get_index_weighted_mean(data, determinand) 
   } else {

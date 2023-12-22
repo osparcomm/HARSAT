@@ -1,6 +1,6 @@
 # functions to assess imposex data
 
-get.index.biota.Imposex <- function(data, determinand, info) {
+get_index_imposex <- function(data, determinand, info) {
 
   # silence non-standard evaluation warnings
   n_individual <- NULL
@@ -146,11 +146,11 @@ imposex.family <- list(
 
 assess_imposex <- function(
     data, annualIndex, AC, recent.years, determinand, species, 
-    station_code, thetaID, max.year, info.imposex, recent.trend = 20) {
+    station_code, theta = NULL, max.year, info.imposex, recent.trend = 20) {
 
   # silence non-standard evaluation warnings
-  concentration <- NULL
-  
+  .data <- NULL
+
   # main assessment routine for imposex data (imposex functions)
   
   # order data
@@ -225,23 +225,21 @@ assess_imposex <- function(
   # NB the following assumes that only a single imposex measure is assessed
   # for each station / species combination - need to make this bullet proof
   
-  if (all(indiID) & thetaID %in% names(biota.VDS.estimates)) {
+  if (all(indiID) & !is.null(theta)) {
     
-    # get theta estimates for modelling
+    # retain cut point estimates of theta for modelling
     
-    theta <- biota.VDS.estimates[[thetaID]]$par
-    theta <- list(est = theta[names(theta) %in% as.character(0:5)])
+    theta$est <- theta$par[1:theta$K]
     
-    ntheta <- length(theta$est)
-    theta$vcov <- biota.VDS.estimates[[thetaID]]$vcov[1:ntheta, 1:ntheta, drop = FALSE]
+    theta$vcov <- theta$vcov[1:theta$K, 1:theta$K, drop = FALSE]
     
     # restrict categories where too few data to estimate cut points
     
-    data <- within(data, {
-      VDS <- concentration
-      VDS[VDS > ntheta] <- ntheta
-      VDS <- factor(VDS, levels = 0:ntheta)
-    })
+    data <- dplyr::mutate(
+      data,
+      VDS = pmin(.data$concentration, theta$K),
+      VDS = factor(.data$VDS, levels = 0:theta$K)
+    )
  
     assessment <- imposex_assess_clm(
       data, theta, annualIndex, species, recent.trend, max.year

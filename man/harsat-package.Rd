@@ -28,5 +28,10 @@ Authors:
   \item AmbieSense Ltd \email{info@ambiesense.com} [copyright holder]
 }
 
+Other contributors:
+\itemize{
+  \item HARSAT User Group, 2023 \email{harsat@ospar.org} [contributor]
+}
+
 }
 \keyword{internal}
