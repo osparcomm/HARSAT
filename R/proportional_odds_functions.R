@@ -40,11 +40,14 @@ ctsm.VDS.p.calc <- function(theta, cumulate = FALSE) {
 
 #' ctsm.VDS.loglik.calc
 #' 
-#' @param theta
-#' @param data
-#' @param index.theta
-#' @param minus.twice
-#' @param cumulate a boolean, whether to use cumulative probabilities
+#' @param theta The maximum imposex stage
+#' @param data Individual imposex data.
+#' @param index.theta Allows for stage names that do not run from 0 to `theta` 
+#'   (optional) 
+#' @param minus.twice A logical specifying whehter to calculated the liklihood
+#'   (FALSE) or the deviance (TRUE); default FALSE
+#' @param cumulate A logical specifying whether to use cumulative probabilities; 
+#'   default FALSE
 #' @export
 ctsm.VDS.loglik.calc <- function(
   theta, data, index.theta, minus.twice = FALSE, cumulate = FALSE) {
@@ -72,10 +75,13 @@ ctsm.VDS.loglik.calc <- function(
 
 #' ctsm.VDS.index.opt
 #' 
-#' @param data
-#' @param theta
-#' @param refLevel
-#' @param calc.vcov
+#' @param data Individual imposex data
+#' @param theta Maximum imposex stage
+#' @param refLevel An (optional) reference level for parameter estimation; 
+#'   defaults to a index with intermediate levels of imposex 
+#' @param calc.vcov Logical specifying whether to calculate the covariance 
+#'   matrix of the parameter estimates; defaults to FALSE
+#'   
 #' @export
 ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
 
@@ -154,8 +160,12 @@ ctsm.VDS.index.opt <- function(data, theta, refLevel, calc.vcov = FALSE) {
 }
 
 
-#' ctsm.VDS.cl
+#' Calculates confidence limits for imposex time seriesl
 #' 
+#' @param fit The output from a call to `ctsm.VDS.index.opt` (sort of)
+#' @param nsim The number of simulations on which each set of confidence limits
+#' is based; default 1000
+#'
 #' @export
 ctsm.VDS.cl <- function(fit, nsim = 1000) {
   

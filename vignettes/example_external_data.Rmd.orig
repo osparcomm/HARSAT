@@ -90,6 +90,10 @@ biota_timeseries <- create_timeseries(
 
 Main runs
 
+Note: the `control` argument specifies that the post-hoc power metrics will 
+be based on a power of 80% and an annual percentage increase in concentration 
+of 10%.
+
 ```{r amap-assessment}
 biota_assessment <- run_assessment(
   biota_timeseries,
@@ -97,7 +101,9 @@ biota_assessment <- run_assessment(
   AC = NULL,
   get_AC_fn = NULL,
   recent_trend = 20L,
-  parallel = FALSE
+  parallel = FALSE, 
+  extra_data = NULL,
+  control = list(power = list(target_power = 80, target_trend = 10)) 
 )
 ```
 
@@ -110,7 +116,9 @@ biota_assessment <- run_assessment(
   AC = NULL,
   get_AC_fn = NULL,
   recent_trend = 20L,
-  parallel = TRUE
+  parallel = TRUE,
+  extra_data = NULL,
+  control = list(power = list(target_power = 80, target_trend = 10)) 
 )
 ```
 

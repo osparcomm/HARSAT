@@ -30,7 +30,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item HARSAT User Group, 2023 \email{harsat@ospar.org} [contributor]
+  \item HARSAT User Group \email{harsat@ospar.org} [contributor]
 }
 
 }

@@ -37,6 +37,9 @@ a csv file).}
 \item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
 to label the determinands}
 
+\item{classColour}{Specifies the colour scheme for the output symbology.
+Will be changed soon.}
+
 \item{collapse_AC}{a names list of valid assessment criteria}
 }
 \value{
