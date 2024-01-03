@@ -80,6 +80,7 @@ thresholds. Need to add a lot more in details.</p>
 <span>  recent_trend <span class="op">=</span> <span class="fl">20L</span>,</span>
 <span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  extra_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -128,8 +129,16 @@ only used for imposex assessments, where it passes two data frames called
 argument will be generalised in the near future, so expect it to change.</p></dd>
 
 
+<dt>control</dt>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a> A list of control
+parameters that allow the user to modify the way the assessment is run.
+At present, these only include parameters involved in post-hoc power
+calculations, but it is intended to move other structures such as
+<code>recent_trend</code> here. See details (which need to be written).</p></dd>
+
+
 <dt>...</dt>
-<dd><p>Extra arguments which are passed to assessment_engine.  See
+<dd><p>Extra arguments which are passed to assessment_engine. See
 details (which need to be written).</p></dd>
 
 </dl></div>
