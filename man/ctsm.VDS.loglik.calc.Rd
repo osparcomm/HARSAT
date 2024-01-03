@@ -13,7 +13,18 @@ ctsm.VDS.loglik.calc(
 )
 }
 \arguments{
-\item{cumulate}{a boolean, whether to use cumulative probabilities}
+\item{theta}{The maximum imposex stage}
+
+\item{data}{Individual imposex data.}
+
+\item{index.theta}{Allows for stage names that do not run from 0 to \code{theta}
+(optional)}
+
+\item{minus.twice}{A logical specifying whehter to calculated the liklihood
+(FALSE) or the deviance (TRUE); default FALSE}
+
+\item{cumulate}{A logical specifying whether to use cumulative probabilities;
+default FALSE}
 }
 \description{
 ctsm.VDS.loglik.calc

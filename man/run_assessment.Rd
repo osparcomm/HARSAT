@@ -12,6 +12,7 @@ run_assessment(
   recent_trend = 20L,
   parallel = FALSE,
   extra_data = NULL,
+  control = list(),
   ...
 )
 }
@@ -44,7 +45,13 @@ only used for imposex assessments, where it passes two data frames called
 \code{VDS_estimates} and \code{VDS_confidence_limits}. Defaults to NULL, This
 argument will be generalised in the near future, so expect it to change.}
 
-\item{...}{Extra arguments which are passed to assessment_engine.  See
+\item{control}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} A list of control
+parameters that allow the user to modify the way the assessment is run.
+At present, these only include parameters involved in post-hoc power
+calculations, but it is intended to move other structures such as
+\code{recent_trend} here. See details (which need to be written).}
+
+\item{...}{Extra arguments which are passed to assessment_engine. See
 details (which need to be written).}
 }
 \description{

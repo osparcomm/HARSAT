@@ -392,7 +392,8 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #'   a csv file).
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
 #'   to label the determinands
-#' @param classColour
+#' @param classColour Specifies the colour scheme for the output symbology. 
+#'   Will be changed soon.
 #' @param collapse_AC a names list of valid assessment criteria
 #'
 #' @returns a summary object, when `export` is `FALSE`
