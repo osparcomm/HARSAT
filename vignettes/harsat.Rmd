@@ -42,31 +42,20 @@ away you go.
 
 ## Installing `harsat` directly from GitHub
 
-To install the latest development version, use the `remotes` package:
+To install the latest version, use the `remotes` package:
 
 ```r
 # install.packages(remotes) -- if needed
 library(remotes)
-remotes::install_github("osparcomm/harsat", auth_token = 'XXXX') 
+remotes::install_github("osparcomm/harsat@main") 
 ```
 
-The stable version is similar:
+The development version is similar:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("osparcomm/HARSAT@main")
+devtools::install_github("osparcomm/HARSAT@develop")
 ```
-
-> Note: during development the repository is marked as private on GitHub, so you
-> will need a Personal Access Token (or PAT) to access it. Follow
-> [these instructions to create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token).
-> It'll be a short string, probably beginning with `ghp_`. Put the whole
-> string into the `auth_token` parameter, and that should install the 
-> `harsat` package directly.
->
-> Please note: we strongly recommend using only "classic" personal access tokens, and avoiding
-> the newer "fine grained" type. When it comes to "scopes" (permissions)
-> you only need to select the `repo` permissions -- no others are needed.
 
 > Note: many of the functions currently have a `cstm` prefix. When the
 > code was originally developed, we thought of it as "contaminant time series modelling", 

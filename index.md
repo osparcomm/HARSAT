@@ -62,21 +62,11 @@ remotes::install_local("~/Downloads/harsat_0.1.2.tar")
 ```
 ### Directly from Github
 
-Alternatively, you can also install `harsat` directly from GitHub. For this to work, at the moment, you will
-need a Github personal access token (the "classic" kind is best), because the repository will be private until
-`harsat` is finally released. As wth bundles, this ensures that all dependencies are up-to-date, properly 
-downloaded and installed.
-
-The short version is as follows:
-
-> The `XXXX` is a Github personal access token. You only need this optional parameter while
-> the `harsat` package is private because it is still under development. 
-> The [Getting Started](./articles/harsat.html) guide
-> has more information on how to create a personal access token. 
+Alternatively, you can also install `harsat` directly from GitHub. 
 
 ``` r
 library(remotes)
-remotes::install_github("osparcomm/HARSAT@main", auth_token = 'XXXX')
+remotes::install_github("osparcomm/HARSAT@main")
 ```
 
 The development version is similar, but changes more often, so we only recommend this if you
@@ -84,7 +74,7 @@ enjoy a more exciting time for your analysis.
 
 ``` r
 library(remotes)
-remotes::install_github("osparcomm/HARSAT", auth_token = 'XXXX')
+remotes::install_github("osparcomm/HARSAT@develop")
 ```
 
 ## Example usage
