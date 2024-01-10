@@ -11,7 +11,9 @@ write_summary_table(
   export = TRUE,
   determinandGroups = NULL,
   classColour = NULL,
-  collapse_AC = NULL
+  collapse_AC = NULL,
+  extra_output = NULL,
+  append = FALSE
 )
 }
 \arguments{
@@ -37,10 +39,18 @@ a csv file).}
 \item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
 to label the determinands}
 
-\item{classColour}{Specifies the colour scheme for the output symbology.
-Will be changed soon.}
+\item{classColour}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} Specifies the
+colour scheme for the output symbology. Will be changed soon.}
 
 \item{collapse_AC}{a names list of valid assessment criteria}
+
+\item{extra_output}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} A character vector
+specifying extra groups of variables to be included in the output.
+Currently only recognises "power" to give the seven power metrics computed
+for lognormally distributed data. Defaults to \code{NULL}; i.e. no extra output.}
+
+\item{append}{Logical. \code{FALSE} (the default) overwrites any existing summary
+file. \code{TRUE} appends data to it, creating it if it does not yet exist.}
 }
 \value{
 a summary object, when \code{export} is \code{FALSE}
