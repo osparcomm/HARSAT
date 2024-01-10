@@ -98,6 +98,25 @@ test_that('plotting works with configurations', {
     data.files <- list.files(My_output_dir, pattern = '\\.csv$')
     expect_equal(data.files, c('GL_RS_SAMBA_NOSUBSERIES.csv'))
 
+    ## Check initial data file size
+    initial.size <- file.size(file.path(My_output_dir, My_output_file))
+    expect_gt(initial.size, 0)
+
+    ## Write the summary again in append mode and check it's now even bigger
+    write_summary_table(
+        biota_assessment,
+        output_file = My_output_file,
+        output_dir = My_output_dir,
+        export = TRUE,
+        determinandGroups = NULL,
+        classColour = NULL,
+        collapse_AC = NULL,
+        append = TRUE
+    )
+
+    final.size <- file.size(file.path(My_output_dir, My_output_file))
+    expect_gt(final.size, initial.size)
+
     ## print("test2")
 
     ## If we pass NULL, all plots should be generated.

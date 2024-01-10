@@ -395,13 +395,16 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @param classColour Specifies the colour scheme for the output symbology. 
 #'   Will be changed soon.
 #' @param collapse_AC a names list of valid assessment criteria
+#' @param append Logical. `FALSE` (the default) overwrites any existing summary
+#'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
 #' @returns a summary object, when `export` is `FALSE`
 #'
 #' @export
 write_summary_table <- function(
-  assessment_obj, output_file = NULL, output_dir = ".", export = TRUE, 
-  determinandGroups = NULL, classColour = NULL, collapse_AC = NULL) {
+  assessment_obj, output_file = NULL, output_dir = ".", export = TRUE,
+  determinandGroups = NULL, classColour = NULL, collapse_AC = NULL,
+  append = FALSE) {
 
   # silence non-standard evaluation warnings
   climit_last_year <- NULL
@@ -748,7 +751,7 @@ write_summary_table <- function(
   # write summary to output_file or return summary object
     
   if (export) {
-    readr::write_excel_csv(summary, output_file, na = "")
+    readr::write_excel_csv(summary, output_file, na = "", append = append)
     return(invisible())
   } else {
     return(summary)
