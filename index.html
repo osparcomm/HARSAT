@@ -126,18 +126,14 @@
 <div class="section level3">
 <h3 id="directly-from-github">Directly from Github<a class="anchor" aria-label="anchor" href="#directly-from-github"></a>
 </h3>
-<p>Alternatively, you can also install <code>harsat</code> directly from GitHub. For this to work, at the moment, you will need a Github personal access token (the “classic” kind is best), because the repository will be private until <code>harsat</code> is finally released. As wth bundles, this ensures that all dependencies are up-to-date, properly downloaded and installed.</p>
-<p>The short version is as follows:</p>
-<blockquote>
-<p>The <code>XXXX</code> is a Github personal access token. You only need this optional parameter while the <code>harsat</code> package is private because it is still under development. The <a href="./articles/harsat.html">Getting Started</a> guide has more information on how to create a personal access token.</p>
-</blockquote>
+<p>Alternatively, you can also install <code>harsat</code> directly from GitHub.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT@main"</span>, auth_token <span class="op">=</span> <span class="st">'XXXX'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT@main"</span><span class="op">)</span></span></code></pre></div>
 <p>The development version is similar, but changes more often, so we only recommend this if you enjoy a more exciting time for your analysis.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT"</span>, auth_token <span class="op">=</span> <span class="st">'XXXX'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT@develop"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

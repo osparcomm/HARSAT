@@ -125,29 +125,16 @@ away you go.</p>
 <div class="section level2">
 <h2 id="installing-harsat-directly-from-github">Installing <code>harsat</code> directly from GitHub<a class="anchor" aria-label="anchor" href="#installing-harsat-directly-from-github"></a>
 </h2>
-<p>To install the latest development version, use the
-<code>remotes</code> package:</p>
+<p>To install the latest version, use the <code>remotes</code>
+package:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages(remotes) -- if needed</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/harsat"</span>, auth_token <span class="op">=</span> <span class="st">'XXXX'</span><span class="op">)</span> </span></code></pre></div>
-<p>The stable version is similar:</p>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/harsat@main"</span><span class="op">)</span> </span></code></pre></div>
+<p>The development version is similar:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT@main"</span><span class="op">)</span></span></code></pre></div>
-<blockquote>
-<p>Note: during development the repository is marked as private on
-GitHub, so you will need a Personal Access Token (or PAT) to access it.
-Follow <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token" class="external-link">these
-instructions to create a Personal Access Token</a>. It’ll be a short
-string, probably beginning with <code>ghp_</code>. Put the whole string
-into the <code>auth_token</code> parameter, and that should install the
-<code>harsat</code> package directly.</p>
-<p>Please note: we strongly recommend using only “classic” personal
-access tokens, and avoiding the newer “fine grained” type. When it comes
-to “scopes” (permissions) you only need to select the <code>repo</code>
-permissions – no others are needed.</p>
-</blockquote>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"osparcomm/HARSAT@develop"</span><span class="op">)</span></span></code></pre></div>
 <blockquote>
 <p>Note: many of the functions currently have a <code>cstm</code>
 prefix. When the code was originally developed, we thought of it as
