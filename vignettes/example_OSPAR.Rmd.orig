@@ -116,10 +116,12 @@ write_summary_table(
       "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
     )
   ),
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
@@ -222,22 +224,24 @@ write_summary_table(
       "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)"
     )
   ),
-  classColour = list(
-    below = c(
-      "BAC" = "blue", 
-      "ERL" = "green", 
-      "EAC" = "green", 
-      "EQS" = "green", 
-      "FEQG" = "green"
-    ),
-    above = c(
-      "BAC" = "orange", 
-      "ERL" = "red", 
-      "EAC" = "red", 
-      "EQS" = "red", 
-      "FEQG" = "red"
-    ),
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c(
+        "BAC" = "blue", 
+        "ERL" = "green", 
+        "EAC" = "green", 
+        "EQS" = "green", 
+        "FEQG" = "green"
+      ),
+      above = c(
+        "BAC" = "orange", 
+        "ERL" = "red", 
+        "EAC" = "red", 
+        "EQS" = "red", 
+        "FEQG" = "red"
+      ),
+      none = "black"
+    )
   ),
   collapse_AC = list(BAC = "BAC", EAC = c("EAC", "ERL", "EQS", "FEQG")),
   output_dir = summary.dir
@@ -379,6 +383,14 @@ biota_assessment <- update_assessment(
 check_assessment(biota_assessment)
 ```
 
+
+
+We now write the summary table. Here the symbology is based on environmental 
+thresholds. A separate call would be needed to get the symbology based on health 
+thresholds. The symbology functionality is still under development and it is 
+intended to allow both sets of symbologies to be calculated with a single call.
+
+
 ```{r ospar-biota-summary}
 write_summary_table(
   biota_assessment,
@@ -400,28 +412,26 @@ write_summary_table(
       "Biological effects (other)"
     )
   ),
-  classColour = list(
-    below = c(
-      "BAC" = "blue",
-      "NRC" = "blue",
-      "EAC" = "green", 
-      "FEQG" = "green",
-      "LRC" = "green", 
-      "QSsp" = "green", 
-      "MPC" = "green",
-      "QShh" = "green"
-    ),
-    above = c(
-      "BAC" = "orange", 
-      "NRC" = "orange", 
-      "EAC" = "red", 
-      "FEQG" = "red",
-      "LRC" = "red", 
-      "QSsp" = "red", 
-      "MPC" = "red",
-      "QShh" = "red"
-    ),
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c(
+        "BAC" = "blue",
+        "NRC" = "blue",
+        "EAC" = "green", 
+        "FEQG" = "green",
+        "LRC" = "green", 
+        "QSsp" = "green"
+      ),
+      above = c(
+        "BAC" = "orange", 
+        "NRC" = "orange", 
+        "EAC" = "red", 
+        "FEQG" = "red",
+        "LRC" = "red", 
+        "QSsp" = "red"
+      ),
+      none = "black"
+    )
   ),
   collapse_AC = list(
     BAC = c("BAC", "NRC"),
@@ -432,9 +442,7 @@ write_summary_table(
 )
 ```
 
-And finally, let's take a look at the `biota_summary.csv` file. Note that the 
-symbology in the summary table is still under development and currently does
-separate environmental and health tresholds in the status assessment.
+And finally, let's take a look at the `biota_summary.csv` file. 
 
 ```{r ospar-biota-summary-render,echo=FALSE}
 summary.data <- read.csv(file.path(summary.dir, "biota_summary.csv"))

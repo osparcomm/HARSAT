@@ -114,7 +114,7 @@ subset_assessment <- function(assessment_obj, subset) {
 
 #' @export
 ctsm_summary_overview <- function(
-    assessment, timeSeries, info, classColour, extra_output, fullSummary = FALSE) {
+    assessment, timeSeries, info, symbology, extra_output, fullSummary = FALSE) {
   
   # reporting_functions.R
   
@@ -169,14 +169,14 @@ ctsm_summary_overview <- function(
   
   # get shape and colour of plotting symbols
 
-  out <- ctsm_symbology_OSPAR(out, info, timeSeries, classColour)
+  out <- ctsm_symbology_OSPAR(out, info, timeSeries, symbology)
 
   if (fullSummary) out else out[c("shape", "colour")]
 }
 
 
 #' @export
-ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha = 0.05) {
+ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0.05) {
   
   # reporting_functions.R
   
@@ -223,9 +223,13 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
   # get the names of the variables which contain the difference between the 
   # meanly and the AC
   
-  if (!is.null(info$AC)) {
+  if (!is.null(symbology)) {
     
-    ACdiff <- paste(info$AC, "diff", sep = "")
+    classColour <- symbology$colour
+    
+    AC <- names(classColour$below)
+    
+    ACdiff <- paste(AC, "diff", sep = "")
     
     
     # when goodStatus is indicated by low concentrations, negative ACdiff is good
@@ -242,7 +246,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
       
       if (all(is.na(x))) return(classColour$none)
       
-      AC <- info$AC[!is.na(x)]
+      AC <- AC[!is.na(x)]
       x <- x[!is.na(x)]
       
       if (any(x < 0)) classColour$below[AC[which.max(x < 0)]]
@@ -255,7 +259,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
     
   } else {
     
-    summary$colour <- classColour$none
+    summary$colour <- NA_character_
     
   }
   
@@ -264,9 +268,9 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
   
   # get the names of the variables which contain the result of the non-parametric test for each AC
   
-  if (!is.null(info$AC)) {
+  if (!is.null(symbology)) {
     
-    ACbelow <- paste(info$AC, "below", sep = "")
+    ACbelow <- paste(AC, "below", sep = "")
     
     wk <- summary[ACbelow]
     wk[] <- lapply(wk, function(x) {
@@ -281,7 +285,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
       
       if (all(is.na(x))) return(NA)
       
-      AC <- info$AC[!is.na(x)]
+      AC <- AC[!is.na(x)]
       x <- x[!is.na(x)]
       
       if (any(x == "below")) classColour$below[AC[which.max(x == "below")]]
@@ -383,7 +387,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' * the trend assessments (p-values and trend estimates)
 #' * the status assessments (if there any thresholds)
 #' * (optionally) a symbology summarising the trend (shape) and status (colour)
-#' of each time series
+#' of each time series. This is experimental. 
 #'
 #' @param assessment_obj An assessment object resulting from a call to
 #'   run_assessment.
@@ -400,15 +404,18 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @param export Logical. `TRUE` (the default) writes the summary table to a csv
 #'   file. `FALSE` returns the summary table as an R object (and does not write to
 #'   a csv file).
+#' @param collapse_AC A names list of valid assessment criteria that allows
+#'   assessment criteria of the same 'type' to be reported together. See 
+#'   details.
+#' @param extra_output A character vector specifying extra summary metrics 
+#'   to be included in the output. Currently only recognises "power" to give the 
+#'   seven power metrics computed for lognormally distributed data. Defaults to 
+#'   `NULL`; i.e. no extra output. 
+#' @param symbology Experimental. Specifies the output symbology. Currently
+#'   assumes the thresholds are presented in increasing magnitude of 
+#'   environmental risk.
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
 #'   to label the determinands
-#' @param classColour `r lifecycle::badge("experimental")` Specifies the 
-#'   colour scheme for the output symbology. Will be changed soon.
-#' @param collapse_AC a names list of valid assessment criteria
-#' @param extra_output `r lifecycle::badge("experimental")` A character vector
-#'   specifying extra groups of variables to be included in the output. 
-#'   Currently only recognises "power" to give the seven power metrics computed
-#'   for lognormally distributed data. Defaults to `NULL`; i.e. no extra output. 
 #' @param append Logical. `FALSE` (the default) overwrites any existing summary
 #'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
@@ -417,8 +424,9 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @export
 write_summary_table <- function(
   assessment_obj, output_file = NULL, output_dir = ".", export = TRUE,
-  determinandGroups = NULL, classColour = NULL, collapse_AC = NULL,
-  extra_output = NULL, append = FALSE) {
+  collapse_AC = NULL, extra_output = NULL, 
+  symbology = NULL, 
+  determinandGroups = NULL, append = FALSE) {
 
   # silence non-standard evaluation warnings
   climit_last_year <- NULL
@@ -469,17 +477,21 @@ write_summary_table <- function(
   }
   
     
-  # assessment criteria must have an appropriate class colour
+  # assessment criteria that are used in the symbology must have an appropriate 
+  # class colour
     
   is_AC <- !is.null(info$AC)
   
   if (is_AC) {
     AC <- info$AC
+  }
+  
+  if (!is.null(symbology) && is_AC) {
     stopifnot(
-      !is.null(classColour),
-      AC %in% names(classColour$below), 
-      AC %in% names(classColour$above),
-      "none" %in% names(classColour)
+      !is.null(symbology$colour),
+      sort(names(symbology$colour$below)) == sort(names(symbology$colour$above)), 
+      names(symbology$colour$below) %in% AC, 
+      "none" %in% names(symbology$colour)
     )
   }
 
@@ -594,7 +606,8 @@ write_summary_table <- function(
   ## get summary from assessment 
   
   summary <- ctsm_summary_overview(
-    assessment, timeSeries, info, classColour, extra_output, fullSummary = TRUE
+    assessment, timeSeries, info, symbology, extra_output, 
+    fullSummary = TRUE
   )
 
   summary <- cbind(timeSeries, summary)
