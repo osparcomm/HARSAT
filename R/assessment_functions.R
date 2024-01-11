@@ -1472,11 +1472,12 @@ ctsm_lmm_power <- function(assessment, target_power = 80, target_trend = 10, siz
   # get key data, and return if too few years to compute power
   
   year <- unique(assessment$data$year)
-  n_year <- length(year) 
-  
+
   sd <- assessment$sd_components["sd_index"]
   
-  if (n_year < 3) {
+  method <- assessment$method 
+  
+  if (method == "none") {
     return(out)
   }
   
@@ -1488,7 +1489,7 @@ ctsm_lmm_power <- function(assessment, target_power = 80, target_trend = 10, siz
   
   target_power <- target_power / 100
   
-  if (n_year >= 5) {
+  if (method %in% c("linear", "smooth")) {
     out["dtrend_obs"] <- ctsm_dtrend(year, sd, power = target_power)
     out["dtrend_seq"] <- ctsm_dtrend(min(year):max(year), sd, power = target_power)
   }
@@ -1511,7 +1512,7 @@ ctsm_lmm_power <- function(assessment, target_power = 80, target_trend = 10, siz
   
   # power to detect the specified % change with same options as dtrend
   
-  if (n_year >= 5) {
+  if (method %in% c("linear", "smooth")) {
     out["power_obs"] <- ctsm_dpower(log(1 + target_trend), year, sd)
     out["power_seq"] <- ctsm_dpower(log(1 + target_trend), min(year):max(year), sd)
   }

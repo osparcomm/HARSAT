@@ -114,7 +114,7 @@ subset_assessment <- function(assessment_obj, subset) {
 
 #' @export
 ctsm_summary_overview <- function(
-    assessment, timeSeries, info, classColour, fullSummary = FALSE) {
+    assessment, timeSeries, info, classColour, extra_output, fullSummary = FALSE) {
   
   # reporting_functions.R
   
@@ -128,7 +128,17 @@ ctsm_summary_overview <- function(
   
   assessment <- assessment[row.names(timeSeries)]
   
-  summaryList <- sapply(assessment, "[[", "summary", simplify = FALSE)
+  summaryList <- sapply(
+    assessment, 
+    function(x) {
+      out <- x$summary 
+      if ("power" %in% extra_output && !is.null(x$power)) {
+        out <- cbind(out, x$power)
+      }
+      out
+    }, 
+    simplify = FALSE
+  )
   
   if (any(is.null(summaryList)) | (length(summaryList) != nrow(timeSeries))) {
     stop("coding error - contact HARSAT development team")
@@ -392,9 +402,13 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #'   a csv file).
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
 #'   to label the determinands
-#' @param classColour Specifies the colour scheme for the output symbology. 
-#'   Will be changed soon.
+#' @param classColour `r lifecycle::badge("experimental")` Specifies the 
+#'   colour scheme for the output symbology. Will be changed soon.
 #' @param collapse_AC a names list of valid assessment criteria
+#' @param extra_output `r lifecycle::badge("experimental")` A character vector
+#'   specifying extra groups of variables to be included in the output. 
+#'   Currently only recognises "power" to give the seven power metrics computed
+#'   for lognormally distributed data. Defaults to `NULL`; i.e. no extra output. 
 #' @param append Logical. `FALSE` (the default) overwrites any existing summary
 #'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
@@ -404,7 +418,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 write_summary_table <- function(
   assessment_obj, output_file = NULL, output_dir = ".", export = TRUE,
   determinandGroups = NULL, classColour = NULL, collapse_AC = NULL,
-  append = FALSE) {
+  extra_output = NULL, append = FALSE) {
 
   # silence non-standard evaluation warnings
   climit_last_year <- NULL
@@ -580,9 +594,9 @@ write_summary_table <- function(
   ## get summary from assessment 
   
   summary <- ctsm_summary_overview(
-    assessment, timeSeries, info, classColour, fullSummary = TRUE
+    assessment, timeSeries, info, classColour, extra_output, fullSummary = TRUE
   )
-  
+
   summary <- cbind(timeSeries, summary)
     
   summary$series <- row.names(summary)
@@ -610,8 +624,16 @@ write_summary_table <- function(
     "shape", "colour"
   ) 
   
-  summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
-
+  summary <- dplyr::relocate(summary, any_of(wk))
+  
+  if ("dtrend_obs" %in% names(summary)) {
+    wk <- c(
+      "dtrend_obs", "dtrend_seq", "dtrend_ten", "nyear_seq", 
+      "power_obs", "power_seq", "power_ten"
+    )
+    summary <- dplyr::relocate(summary, all_of(wk), .after = "dtrend") 
+  }
+  
   sortID <- intersect(
     c(info$region$id, "country", "CMA", "station_name", 
       "species", "detGroup", "determinand", "matrix"), 
@@ -644,6 +666,19 @@ write_summary_table <- function(
     summary <- dplyr::rename(summary, imposex_class = "class")
   }
   
+  if ("dtrend_obs" %in% names(summary)) {
+    summary <- dplyr::rename(
+      summary, 
+      power_dt_obs = "dtrend_obs",
+      power_dt_seq = "dtrend_seq",
+      power_dt_ten = "dtrend_ten",
+      power_ny_seq = "nyear_seq",
+      power_pw_obs = "power_obs",
+      power_pw_seq = "power_seq",
+      power_pw_ten = "power_ten",
+    )
+  }
+
   names(summary) <- gsub("diff$", "_diff", names(summary))
   names(summary) <- gsub("achieved$", "_achieved", names(summary))
   names(summary) <- gsub("below$", "_below", names(summary))

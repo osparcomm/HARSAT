@@ -130,7 +130,9 @@ check_assessment(biota_assessment, save_result = FALSE)
 
 # Summary files
 
-This writes the summary data to a file in `output/example_external_data`.
+This writes the summary data to a file in `output/example_external_data`. The 
+argument `extra_output = "power"` ensures that the power metrics for 
+lognormally distributed data will be exported. 
 
 ```{r amap-summary}
 summary.dir <- file.path(working.directory, "output", "example_external_data")
@@ -146,7 +148,8 @@ write_summary_table(
   export = TRUE,
   determinandGroups = NULL,
   classColour = NULL,
-  collapse_AC = NULL
+  collapse_AC = NULL, 
+  extra_output = "power"
 )
 ```
 
