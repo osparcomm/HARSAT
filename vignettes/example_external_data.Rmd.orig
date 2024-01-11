@@ -147,7 +147,7 @@ write_summary_table(
   output_dir = summary.dir,
   export = TRUE,
   determinandGroups = NULL,
-  classColour = NULL,
+  symbology = NULL,
   collapse_AC = NULL, 
   extra_output = "power"
 )

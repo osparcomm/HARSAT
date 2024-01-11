@@ -9,10 +9,10 @@ write_summary_table(
   output_file = NULL,
   output_dir = ".",
   export = TRUE,
-  determinandGroups = NULL,
-  classColour = NULL,
   collapse_AC = NULL,
   extra_output = NULL,
+  symbology = NULL,
+  determinandGroups = NULL,
   append = FALSE
 )
 }
@@ -36,18 +36,21 @@ exist.}
 file. \code{FALSE} returns the summary table as an R object (and does not write to
 a csv file).}
 
+\item{collapse_AC}{A names list of valid assessment criteria that allows
+assessment criteria of the same 'type' to be reported together. See
+details.}
+
+\item{extra_output}{A character vector specifying extra summary metrics
+to be included in the output. Currently only recognises "power" to give the
+seven power metrics computed for lognormally distributed data. Defaults to
+\code{NULL}; i.e. no extra output.}
+
+\item{symbology}{Experimental. Specifies the output symbology. Currently
+assumes the thresholds are presented in increasing magnitude of
+environmental risk.}
+
 \item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
 to label the determinands}
-
-\item{classColour}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} Specifies the
-colour scheme for the output symbology. Will be changed soon.}
-
-\item{collapse_AC}{a names list of valid assessment criteria}
-
-\item{extra_output}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} A character vector
-specifying extra groups of variables to be included in the output.
-Currently only recognises "power" to give the seven power metrics computed
-for lognormally distributed data. Defaults to \code{NULL}; i.e. no extra output.}
 
 \item{append}{Logical. \code{FALSE} (the default) overwrites any existing summary
 file. \code{TRUE} appends data to it, creating it if it does not yet exist.}
@@ -66,6 +69,6 @@ one-sided 95\% confidence limits
 \item the trend assessments (p-values and trend estimates)
 \item the status assessments (if there any thresholds)
 \item (optionally) a symbology summarising the trend (shape) and status (colour)
-of each time series
+of each time series. This is experimental.
 }
 }
