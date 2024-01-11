@@ -106,7 +106,9 @@ of each time series</p></li>
 <span>  export <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  determinandGroups <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  classColour <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  collapse_AC <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  collapse_AC <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extra_output <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  append <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -145,12 +147,24 @@ to label the determinands</p></dd>
 
 
 <dt>classColour</dt>
-<dd><p>Specifies the colour scheme for the output symbology.
-Will be changed soon.</p></dd>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a> Specifies the
+colour scheme for the output symbology. Will be changed soon.</p></dd>
 
 
 <dt>collapse_AC</dt>
 <dd><p>a names list of valid assessment criteria</p></dd>
+
+
+<dt>extra_output</dt>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a> A character vector
+specifying extra groups of variables to be included in the output.
+Currently only recognises "power" to give the seven power metrics computed
+for lognormally distributed data. Defaults to <code>NULL</code>; i.e. no extra output.</p></dd>
+
+
+<dt>append</dt>
+<dd><p>Logical. <code>FALSE</code> (the default) overwrites any existing summary
+file. <code>TRUE</code> appends data to it, creating it if it does not yet exist.</p></dd>
 
 </dl></div>
     <div class="section level2">
