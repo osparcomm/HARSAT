@@ -90,7 +90,7 @@ test_that('plotting works with configurations', {
         output_dir = My_output_dir,
         export = TRUE,
         determinandGroups = NULL,
-        classColour = NULL,
+        symbology = NULL,
         collapse_AC = NULL
     )
 
