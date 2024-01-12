@@ -2,10 +2,16 @@
 % Please edit documentation in R/proportional_odds_functions.R
 \name{ctsm.VDS.cl}
 \alias{ctsm.VDS.cl}
-\title{ctsm.VDS.cl}
+\title{Calculates confidence limits for imposex time seriesl}
 \usage{
 ctsm.VDS.cl(fit, nsim = 1000)
 }
+\arguments{
+\item{fit}{The output from a call to \code{ctsm.VDS.index.opt} (sort of)}
+
+\item{nsim}{The number of simulations on which each set of confidence limits
+is based; default 1000}
+}
 \description{
-ctsm.VDS.cl
+Calculates confidence limits for imposex time seriesl
 }

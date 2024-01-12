@@ -1,4 +1,5 @@
-# cumulative proportional odds model for imposex data
+# This file contains functions that fit a cumulative proportional odds model 
+# for imposex data
 
 imposex.VDS.p.calc <- function(theta, cumulate = FALSE) {
   if (cumulate) theta <- cumsum(theta)
@@ -10,8 +11,6 @@ imposex.VDS.p.calc <- function(theta, cumulate = FALSE) {
 
 
 imposex.clm.fit <- function(data, model, theta, model.control = list(), hessian = FALSE) {
-
-  library(mgcv)
   
   out <- list(model = model, model.control = model.control)
   
@@ -77,7 +76,7 @@ imposex.clm.X <- function(
     full = as.formula(response ~ as.factor(year))
   )
   
-  dummyGam <- gam(dummyFormula, data = data[data$internal, ])
+  dummyGam <- mgcv::gam(dummyFormula, data = data[data$internal, ])
   
   X <- predict(dummyGam, newdata = data, type = "lpmatrix")
   
@@ -157,9 +156,13 @@ imposex.clm.X.change <- function(year, model, model.control = list()) {
   X
 }
 
-  
+
+
 
 imposex.clm.predict <- function(clmFit, theta, data) {
+
+  # silence non-standard evaluation warnings
+  est <- se <- disp <- dfResid <- hessian <- NULL
 
   year <- seq(min(data$year), max(data$year))
   
@@ -199,9 +202,11 @@ imposex.clm.predict <- function(clmFit, theta, data) {
 }
 
 
-
 imposex_assess_clm <- function(
     data, theta, annualIndex, species, recent.trend = 20, max.year) {
+
+  # silence non-standard evaluation warnings
+  dfResid <- twiceLogLik <- pFixed <- NULL
 
   output <- list()
   summary <- list()
@@ -402,7 +407,7 @@ imposex_assess_clm <- function(
   # unidentifiable / undefined) 
   # NB Not sure this is strictly true now that we have banned linear terms before the change point, but 
   # safer to leave it like this for now
-  
+
   hessianInfo <- imposex.clm.fit(within(data, VDS <- VDS2), fit$model, theta, fit$model.control, 
                                  hessian = TRUE)
 

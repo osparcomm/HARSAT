@@ -2,6 +2,17 @@
 
 #' Gets data from the standard reference tables
 #'
+#' @param ref_table the reference table
+#' @param input the input
+#' @param output the output
+#' @param compartment the compartment
+#' @param na_action character, how to handle missing values, one of:
+#'   `fail` (no missing values allowed), `input_ok` (allows missing values in input, but all 
+#'    non-missing values must be recognised, and must have output),
+#'    `output_ok`` requires all input values to be present, but allows missing values in 
+#'    output (for e.g. dryweight by species), or `ok` (allows missing values everywhere)
+#' @param info_type the information type, by default picked up from the function call
+#' @param sep character, the separator, defaulting to '.'
 #' @export
 ctsm_get_info <- function(
   ref_table, 
@@ -319,7 +330,7 @@ values_range_check_species <- function(species_data, min_value, max_value) {
   # select conversion factor columns
   conversion_factors <- dplyr::select(
     species_data, 
-    ends_with("_drywt") | ends_with("_lipidwt")
+    dplyr::ends_with("_drywt") | dplyr::ends_with("_lipidwt")
   )
   
   # check the condition if conversion factors are in pre-defined range
@@ -347,6 +358,9 @@ values_range_check_species <- function(species_data, min_value, max_value) {
 
 get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   # location: information_functions.R
   # purpose: gets typical species drywt / lipidwt conversion factors and converts 
   #  to a more usable form
@@ -355,7 +369,7 @@ get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   wt_adj <- paste0("_", wt)
 
   data <- tibble::rownames_to_column(data, "species")
-  data <- dplyr::select(data, "species", ends_with(wt_adj)) 
+  data <- dplyr::select(data, "species", dplyr::ends_with(wt_adj)) 
 
   
   # deal with null case where there are no conversion factors 
@@ -369,7 +383,7 @@ get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   
   data <- tidyr::pivot_longer(
     data, 
-    ends_with(wt_adj), 
+    dplyr::ends_with(wt_adj), 
     names_to = "matrix", 
     values_to = wt, 
     values_drop_na = TRUE
@@ -377,7 +391,7 @@ get_species_cfs <- function(data, wt = c("drywt", "lipidwt")) {
   
   data <- tidyr::separate_wider_delim(
     data, 
-    .data$matrix, 
+    matrix, 
     delim = "_", 
     names = c("matrix", NA)
   ) 
@@ -852,11 +866,12 @@ ctsm_read_thresholds <- function(
 #'
 #' @return if `export` is `FALSE` (the default), returns the expanded data
 #' @export
-#'
-#' @examples
 convert_reftable <- function(
     input_file, output_file, export = TRUE) {
   
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   report_file_digest(input_file)
   data <- safe_read_file(input_file, na.strings = "", strip.white = TRUE)
   
@@ -902,7 +917,7 @@ convert_reftable <- function(
   
   data <- dplyr::arrange(
     data, 
-    dplyr::across(all_of(c(".determinand", "normaliser", "ospar_subregion")))
+    dplyr::across(dplyr::all_of(c(".determinand", "normaliser", "ospar_subregion")))
   )
   
   data$.determinand <- NULL
@@ -918,13 +933,13 @@ convert_reftable <- function(
   data <- dplyr::mutate(
     data, 
     dplyr::across(
-      all_of(TV), 
+      dplyr::all_of(TV), 
       ~ ifelse(is.na(.x), NA_character_, "D"), 
       .names = "{.col}_basis"
     )
   )
   
-  data <- dplyr::relocate(data, ends_with("basis"), .before = TV[1])
+  data <- dplyr::relocate(data, dplyr::ends_with("basis"), .before = TV[1])
   
   row.names(data) <- NULL
 
@@ -1012,8 +1027,8 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
 
   data <- dplyr::select(
     data,
-    all_of(c(var_id, "basis")), 
-    any_of(c("method_analysis", "sex"))
+    dplyr::all_of(c(var_id, "basis")), 
+    dplyr::any_of(c("method_analysis", "sex"))
   )
   
   
@@ -1050,8 +1065,8 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
       by_id <- var_id[ok]
       add_id <- var_id[!ok]
       dplyr::left_join(
-        dplyr::select(x, -all_of(add_id)),
-        dplyr::select(rt$species, all_of(var_id)),
+        dplyr::select(x, -dplyr::all_of(add_id)),
+        dplyr::select(rt$species, dplyr::all_of(var_id)),
         by = by_id,
         relationship = "many-to-many"  
       )
@@ -1069,7 +1084,7 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
   
   check <- dplyr::select(
     rt$thresholds, 
-    any_of(c("species", "determinand", "matrix", "method_analysis", "sex"))
+    dplyr::any_of(c("species", "determinand", "matrix", "method_analysis", "sex"))
   )
   
   if (any(duplicated(check))) {
@@ -1124,7 +1139,7 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
       wk_data <- data[[i]]
       wk_data <- dplyr::select(
         wk_data, 
-        all_of(c(by_id, "basis", "datatype", "order"))
+        dplyr::all_of(c(by_id, "basis", "datatype", "order"))
       )
       dplyr::left_join(
         wk_data, 
@@ -1335,23 +1350,26 @@ get_AC$water <- function(data, AC, rt, export_all = FALSE) {
 
 
 #' Gets OSPAR threshold values for biota
-#' 
+#' @description 
 #' Extends default extractor function get_AC$biota for the few cases which can 
 #' not be handled in a straightforward manner. This mostly relates to thresholds
 #' which are only applied when the typical species / lipid contend is 'high' 
 #' (currently defined as >= 3%)  
 #'
-#' @param data 
-#' @param AC 
-#' @param rt 
-#' @param export_all 
+#' @param data the data
+#' @param AC a list of assessment criteria
+#' @param rt the reference tables
+#' @param export_all logical, default `FALSE`, if `TRUE` returns all data, 
+#'   otherwise, just the assessment criteria
 #'
-#' @return
+#' @return by default, the assessment criteria, if `export_all` is set `TRUE`
+#'   returns all the data instead
 #' @export
-#'
-#' @examples
 get_AC_biota_OSPAR <- function(data, AC, rt, export_all = FALSE) {
   
+  # silence non-standard evaluation warnings
+  .data <- .id <- .AC <- NULL
+
   data <- get_AC$biota(data, AC, rt, export_all = TRUE)
   
   lipid_high <- 3
@@ -2029,8 +2047,23 @@ convert_units_workup <- function(units) {
 
 
 
-# Basis and matrix information and basis conversion ----
-
+#' Basis and matrix information and basis conversion
+#' 
+#' Converts concentrations between wet, dry and lipid bases
+#' 
+#' @param conc the concentration
+#' @param from the current basis
+#' @param to the target basis
+#' @param drywt assumed to be a percentage taking values in \[0, 100\]
+#' @param lipidwt assumed to be a percentage taking values in \[0, 100\];
+#'   assumed to be on a wet weight basis
+#' @param drywt_censoring required when `drywt` is present, 
+#'   character: must be '', '<', 'D', 'Q' or NA
+#' @param lipidwt_censoring required when `lipidwt` is present, 
+#'   character: must be '', '<', 'D', 'Q' or NA
+#' @param exclude a logical identifying records that do not need to be converted,
+#'   useful when the data contain biological effects measurements
+#' @param print_warning a boolean, gives the number of records lost during conversion
 #' @export
 ctsm_convert_basis <- function(
   conc, from, to, 
@@ -2041,23 +2074,10 @@ ctsm_convert_basis <- function(
   exclude = FALSE, 
   print_warning = TRUE) {
 
-  # source: information_functions.R
-  # dependencies: dplyr
-  
-  # converts concentrations between wet, dry and lipid bases
-
-  # from ~ current basis
-  # to ~ target basis
-
-  # drywt and lipidwt assumed to be percentages taking values in [0, 100]
+  # silence non-standard evaluation warnings
+  .data <- NULL
 
   # lipidwt assumed to be on a wet weight basis - could generalise (issue raised)
-  
-  # exclude is a logical identifying records that do not need to be converted -
-  # useful when the data contain biological effects measurements
-  
-  # print_warning gives the number of records lost during conversion
-  
   
   # set up working data frame
   
@@ -2069,7 +2089,7 @@ ctsm_convert_basis <- function(
   # ensure variables are stored as characters (rather than factors)
   
   var_id <- c("from", "to", "drywt_censoring", "lipidwt_censoring")
-  data <- dplyr::mutate(data, across(all_of(var_id), as.character))
+  data <- dplyr::mutate(data, dplyr::across(dplyr::all_of(var_id), as.character))
 
   
   # check arguments have admissible values
@@ -2267,6 +2287,15 @@ ctsm_check_convert_basis <- function(data) {
 # biota_OSPAR is the current (2023) OSPAR biota configuration
 # biota_HELCOM is the current (2023) HELCOM biota configuration
 
+#' The default function for generating a basis
+#' 
+#' This default is very simplistic, but works in all cases for sediment and water
+#' most_common was used by AMAP in their mercury assessment and takes the most 
+#' common basis reported in each station, species (biota), matrix and  
+#' determinand_group combination
+#' 
+#' @param data the data
+#' @param info the information object
 #' @export
 get_basis_default <- function(data, info) {
   
@@ -2355,13 +2384,15 @@ get_basis_most_common <- function(data, info) {
 
 #' Gets the OSPAR biota target basis
 #' 
-#' @param data
-#' @param info
+#' @param data the data
+#' @param info the information object
 #' @export
 get_basis_biota_OSPAR <- function(data, info) {
   
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   # note hard-wiring of lipid_high which should be passed as a control variable
-  
   
   if (info$compartment != "biota"){
     stop("Incorrect compartment specified")
@@ -2379,7 +2410,7 @@ get_basis_biota_OSPAR <- function(data, info) {
   
   out <- dplyr::mutate(
     out,
-    across(everything(), as.character),
+    dplyr::across(dplyr::everything(), as.character),
     species_group = ctsm_get_info(info$species, .data$species, "species_group")
   )
   
@@ -2539,6 +2570,40 @@ get.info.imposex <- function(
 
 
 
+# TEF values ----
+
+#' TEF values for selected groups of compounds
+#' 
+#' A list of named vectors which currently provide the TEFs for the WHO TEQ for 
+#' dioxins, furans and dioxin-like (planar) polychlorinated biphenyls.
+#' DFP_environmental and DFP_human_health provide the TEFs appropriate for 
+#' testing against the environmental and human health standards respectively.
+#' 
+#' Adding further TEFs will require more development to the relevant 
+#' determinand_link function 
+#' 
+#' @export 
+info_TEF <- list(
+  DFP_environmental = c(
+    "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
+    "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
+    "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+    "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
+    "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+    "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+  ), 
+  DFP_human_health = c(
+    "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
+    "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
+    "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+    "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
+    "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
+    "CDF9X" = 0.1, "CDFO" = 0.0003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+  )
+)
+
+
+
 # ICES RECO codes ----
 
 # reads in data from csv files exported from ICES RECO
@@ -2655,29 +2720,75 @@ get.info.imposex <- function(
 # Station utility functions ----
 
 #' Get station code from station name
-#'
+#' @description 
 #' Gets the station code corresponding to the station name and country from the 
-#' station dictionary. Only works for one country at a time
+#' station dictionary. 
 #'
-#' @param station_name
-#' @param country
-#' @param stations
+#' @param station_name a station name
+#' @param country a country
+#' @param stations the station dictionary
 #' @export
 get_station_code <- function(station_name, country, stations) {
     
-  stopifnot(length(country) == 1)
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   n <- length(station_name)
   
+  if (!(length(country) %in% c(1L, n))) {
+    stop(
+      "'country' must either be a single character or the same length as 'station_name'"
+    )  
+  }
+  
   out <- data.frame(station_name = station_name, country = country) 
-  out <- mutate(out, across(.fns = as.character))
+
+  if (any(is.na(out))) {
+    stop("missing values not allowed in 'station_name' or 'country'")
+  }
     
-  
+  id <- c("station_name", "country")
+  out <- dplyr::mutate(out, dplyr::across(dplyr::all_of(id), as.character))
+    
+  id <- c("station_name", "country", "station_code")
   stations <- stations[c("station_name", "country", "station_code")]
-  stations <- mutate(stations, across(.fns = as.character)) 
+  stations <- dplyr::mutate(stations, dplyr::across(dplyr::all_of(id), as.character)) 
   
-  out <- dplyr::left_join(out, stations, by = c("station_name", "country"))
+  out <- dplyr::left_join(
+    out, 
+    stations, 
+    by = c("station_name", "country"), 
+    relationship = "many-to-many"
+  )
   
-  stopifnot(!is.na(out), n == nrow(out))
+  if (any(is.na(out$station_code))) {
+    out_error <- dplyr::filter(out, is.na(.data$station_code))
+    out_error <- paste(out_error$country, out_error$station_name)
+    warning(
+      "the following station_names are not recognised:\n", 
+      paste(out_error, collapse = "\n"), 
+      immediate. = TRUE
+    )
+  }
   
+  if (nrow(out) != n) {
+    out_error <- unique(out)
+    out_error <- tidyr::unite(
+      out_error, 
+      "id", 
+      dplyr::all_of(c("country", "station_name")),
+      sep = " "
+    )
+    out_error <- dplyr::filter(
+      out_error, 
+      .data$id %in% .data$id[duplicated(.data$id)]
+    )
+    out_error <- paste(out_error$id, out_error$station_code)
+    stop(
+      "the following station_names match to multiple station_codes:\n", 
+      paste(out_error, collapse = "\n")
+    )
+  }
+    
   out$station_code
 }

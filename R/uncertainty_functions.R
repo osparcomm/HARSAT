@@ -1,8 +1,9 @@
 #' @export
 ctsm_uncrt_workup <- function(clean_data) {
 
-  library(dplyr)
-  
+  # silence non-standard evaluation warnings
+  determinands <- qaID <- uncertainty <- concentration <- NULL
+
   # turn 'clean' data into uncertainty data
   
   # read in data
@@ -64,21 +65,21 @@ ctsm_uncrt_workup <- function(clean_data) {
     
     AL_names <- paste0("AL", id_aux)
     AL <- data[c(id, AL_names)]
-    AL <- mutate(AL, determinand = "AL", group = "auxiliary")
+    AL <- dplyr::mutate(AL, determinand = "AL", group = "auxiliary")
     AL <- unique(AL)
     pos <- match(AL_names, names(AL))
     names(AL)[pos] <- out_names
 
     LI_names <- paste0("LI", id_aux)
     LI <- data[c(id, LI_names)]
-    LI <- mutate(LI, determinand = "LI", group = "auxiliary")
+    LI <- dplyr::mutate(LI, determinand = "LI", group = "auxiliary")
     LI <- unique(LI)
     pos <- match(LI_names, names(LI))
     names(LI)[pos] <- out_names
 
     CORG_names <- paste0("CORG", id_aux)
     CORG <- data[c(id, CORG_names)]
-    CORG <- mutate(CORG, determinand = "CORG", group = "auxiliary")
+    CORG <- dplyr::mutate(CORG, determinand = "CORG", group = "auxiliary")
     CORG <- unique(CORG)
     pos <- match(CORG_names, names(CORG))
     names(CORG)[pos] <- out_names
@@ -91,7 +92,7 @@ ctsm_uncrt_workup <- function(clean_data) {
     if (is_LOIGN) {
       LOIGN_names <- paste0("LOIGN", id_aux)
       LOIGN <- data[c(id, LOIGN_names)]
-      LOIGN <- mutate(LOIGN, determinand = "LOIGN", group = "auxiliary")
+      LOIGN <- dplyr::mutate(LOIGN, determinand = "LOIGN", group = "auxiliary")
       LOIGN <- unique(LOIGN)
       pos <- match(LOIGN_names, names(LOIGN))
       names(LOIGN)[pos] <- out_names
@@ -149,14 +150,17 @@ ctsm_uncrt_workup <- function(clean_data) {
 #' @export
 ctsm_uncrt_estimate <- function(data) {
   
+  # silence non-standard evaluation warnings
+  .data <- n <- relative_u <- sd_variable <- sd_constant <- NULL
+
   # initialise output with total number of values by determinand
   
   options(dplyr.summarise.inform = FALSE)
   on.exit(options(dplyr.summarise.inform = NULL))
 
   out <- data %>% 
-    group_by(.data$determinand) %>% 
-    summarise(n_values = n())
+    dplyr::group_by(.data$determinand) %>% 
+    dplyr::summarise(n_values = n())
 
   
   # remove duplicate combinations of concentration and uncertainty (and associated censoring variables)
@@ -174,33 +178,33 @@ ctsm_uncrt_estimate <- function(data) {
   # get number of 'unique values
   
   out_unique <- data %>% 
-    group_by(.data$determinand) %>% 
-    summarise(n_unique = n(), n_alabo = n_distinct(.data$alabo))
+    dplyr::group_by(.data$determinand) %>% 
+    dplyr::summarise(n_unique = n(), n_alabo = dplyr::n_distinct(.data$alabo))
 
-  out <- left_join(out, out_unique, by = "determinand")
+  out <- dplyr::left_join(out, out_unique, by = "determinand")
   
 
   # remove data that is way off
   
   data <- data %>% 
-    filter(between(relative_u, 1, 100)) 
+    dplyr::filter(dplyr::between(relative_u, 1, 100)) 
   
   
   # relative error
   # median relative_u for values above the detection level by alabo
   
   out_relative <- data %>% 
-    filter(.data$censoring == "") %>% 
-    group_by(.data$determinand, .data$alabo) %>% 
-    summarise(sd_variable = median(.data$relative_u) / 100) 
+    dplyr::filter(.data$censoring == "") %>% 
+    dplyr::group_by(.data$determinand, .data$alabo) %>% 
+    dplyr::summarise(sd_variable = median(.data$relative_u) / 100) 
   
   # now the median value across alabos
   
   out_relative <- out_relative %>% 
-    group_by(.data$determinand) %>% 
-    summarise(sd_variable = median(sd_variable))
+    dplyr::group_by(.data$determinand) %>% 
+    dplyr::summarise(sd_variable = median(sd_variable))
   
-  out <- left_join(out, out_relative, by = "determinand")
+  out <- dplyr::left_join(out, out_relative, by = "determinand")
   
   
   # constant error
@@ -208,18 +212,18 @@ ctsm_uncrt_estimate <- function(data) {
   # don't use "<" because we can't trust any of the limit values
   
   out_constant <- data %>% 
-    filter(.data$censoring %in% c("D", "Q", "")) %>% 
-    drop_na(.data$limit_detection) %>% 
-    group_by(.data$determinand, .data$alabo) %>% 
-    summarise(sd_constant = median(.data$limit_detection) / 3) 
+    dplyr::filter(.data$censoring %in% c("D", "Q", "")) %>% 
+    tidyr::drop_na(.data$limit_detection) %>% 
+    dplyr::group_by(.data$determinand, .data$alabo) %>% 
+    dplyr::summarise(sd_constant = median(.data$limit_detection) / 3) 
   
   # now the median value across alabos
   
   out_constant <- out_constant %>% 
-    group_by(.data$determinand) %>% 
-    summarise(sd_constant = median(sd_constant))
+    dplyr::group_by(.data$determinand) %>% 
+    dplyr::summarise(sd_constant = median(sd_constant))
   
-  out <- left_join(out, out_constant, by = "determinand")
+  out <- dplyr::left_join(out, out_constant, by = "determinand")
   
   # tidy up
   
@@ -233,8 +237,6 @@ ctsm_uncrt_estimate <- function(data) {
 
 #' @export
 ctsm_uncrt_plot_estimates <- function(uncrt_obj, old_estimates, group_id) {
-
-  library(lattice)
 
   id <- with(uncrt_obj$data, group %in% group_id)  
   data <- uncrt_obj$data[id, ]
@@ -281,11 +283,16 @@ ctsm_uncrt_plot_estimates <- function(uncrt_obj, old_estimates, group_id) {
 }
 
 
+#' Generates a relative uncertainty plot
+#' 
+#' @param uncrt_obj an uncertainty object
+#' @param det_id a list of determinand ids
 #' @export
 ctsm_uncrt_plot_data <- function(uncrt_obj, det_id) {
-  
-  library(lattice)
 
+  # silence non-standard evaluation warnings
+  alabo <- NULL
+  
   id <- with(uncrt_obj$data, determinand %in% det_id)  
   data <- uncrt_obj$data[id, ]
 

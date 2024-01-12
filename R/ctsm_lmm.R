@@ -3,6 +3,12 @@
 ctsm.lmm.fit <- function(
   data, dfSmooth, varComp.start, fixed_bound = 5, random_bound = 3, controlLmmFit = NULL, ...) {
 
+  # silence non-standard evaluation warnings
+  sdAnalytic <- NULL
+  bound.lower <- bound.upper <- NULL
+  pFixed <- pRandom <- NULL
+  est <- se <- sdAnalytic <- twiceLogLik <- nYearPos <- NULL
+
   # get total number of years
 
   nYear <- length(unique(data$year))  
@@ -78,7 +84,7 @@ ctsm.lmm.fit <- function(
     parInfo <- list(
       fixef = as.data.frame(summary(lmerFit)$coefficients)[1:2],
       varComp = data.frame(
-        start = as.data.frame(nlme::VarCorr(lmerFit))$sdcor
+        start = as.data.frame(lme4::VarCorr(lmerFit))$sdcor
       )
     )
     
@@ -239,6 +245,10 @@ ctsm.lmm.fit <- function(
 
 ctsm.lmm.hess <- function(ctsm.ob, hess.d = 0.001, hess.r = 6, ...) {
 
+  # silence non-standard evaluation warnings
+  est <- fit <- hessian <- idFixed <- dfResid <- Xpred <- NULL
+
+
   # now get standard errors on fixed effects only (since harder to get full vcov matrix with 
   # variance estimates if data are not well behaved)
 
@@ -299,6 +309,9 @@ ctsm.lmm.dcalc <- function(x, censoring, mean, sd, log = FALSE) {
 # Utility function that returns double the negative log likelihood
 
 negTwiceLogLik <- function(data, mu, varComp) {
+
+  # silence non-standard evaluation warnings
+  sdAnalytic <- NULL
 
   sdSample <- if ("sdSample" %in% names(varComp)) varComp["sdSample"] else 0
   sdYear <- varComp["sdYear"]

@@ -23,7 +23,17 @@
 #'   consider trends in the last twenty year.
 #' @param parallel A logical which determines whether to use parallel
 #'   computation; default = FALSE.
-#' @param ... Extra arguments which are passed to assessment_engine.  See
+#' @param extra_data `r lifecycle::badge("experimental")` A named list used to
+#'   pass additional data to specific assessment routines. At present it is 
+#'   only used for imposex assessments, where it passes two data frames called
+#'   `VDS_estimates` and `VDS_confidence_limits`. Defaults to NULL, This 
+#'   argument will be generalised in the near future, so expect it to change.
+#' @param control `r lifecycle::badge("experimental")` A list of control 
+#'   parameters that allow the user to modify the way the assessment is run. 
+#'   At present, these only include parameters involved in post-hoc power 
+#'   calculations, but it is intended to move other structures such as 
+#'   `recent_trend` here. See details (which need to be written).
+#' @param ... Extra arguments which are passed to assessment_engine. See
 #'   details (which need to be written).
 #' @export
 run_assessment <- function(
@@ -32,7 +42,9 @@ run_assessment <- function(
   AC = NULL, 
   get_AC_fn = NULL, 
   recent_trend = 20L, 
-  parallel = FALSE, 
+  parallel = FALSE,
+  extra_data = NULL,
+  control = list(),
   ...) {
   
   # location: assessment_functions.R
@@ -49,11 +61,47 @@ run_assessment <- function(
   if (!is.null(AC) && is.null(ctsm_ob$info$get_AC_fn)) {
     ctsm_ob$info$get_AC_fn <- get_AC[[ctsm_ob$info$compartment]]
   }
+  
+  if (any(ctsm_ob$data$group %in% "Imposex")) {
+    if (is.null(extra_data)) {
+      stop("`extra_data` must be supplied for imposex assessments")
+    }
+    
+    ok <- c("VDS_estimates", "VDS_confidence_limits") %in% names(extra_data)
+    if (!all(ok)) {
+      stop(
+        "argument extra_data must be a list with components ", 
+        "VDS_estimates and VDS_confidence_limits"
+      )
+    }
+  }
+  
+  ctsm_ob$info$extra_data <- extra_data
+
+  
+  # update control information
+  
+  cntrl <- run_control_default()
+  
+  cntrl <- run_control_modify(cntrl, control)
+  
+  if (any(names(cntrl) %in% names(ctsm_ob$info))) {
+    id <- names(cntrl)
+    id <- id[id %in% names(ctsm_ob$info)]
+    warning(
+      "\n conflict between components of ctsm_ob$info and control parameters ", 
+      "- results may be unexpected:\n ",
+      paste(id, collapse = ", "), "\n",
+      call. = FALSE, immediate. = TRUE)
+  }
+  
+  ctsm_ob$info <- append(ctsm_ob$info, cntrl)
+  
 
   ctsm_ob$assessment <- vector(mode = "list", length = nrow(ctsm_ob$timeSeries))
   names(ctsm_ob$assessment) <- row.names(ctsm_ob$timeSeries)
 
-  ctsm_ob$call.data <- ctsm_ob$QA <- NULL
+  ctsm_ob$call.data <- NULL
 
   
   # identify which series are to be assessed in this run - defaults to all
@@ -87,7 +135,7 @@ run_assessment <- function(
 
 #' Update timeseries assessments
 #'
-#' Refits models for particular timeseries, or does fits new models when an
+#' Refits models for particular timeseries, or fits new models when an
 #' assessment is being done in chunks.
 #'
 #' @param ctsm_ob A HARSAT object resulting from a call to run_assessment
@@ -157,6 +205,9 @@ update_assessment <- function(ctsm_ob, subset = NULL, parallel = FALSE, ...) {
 
 
 assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
+
+  # silence non-standard evaluation warnings
+  .data <- index <- NULL
 
   # location: assessment_functions.R
   
@@ -282,39 +333,42 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
       species <- seriesInfo$species
       station_code <- seriesInfo$station_code
 
-      thetaID <- switch(
+      theta_id <- switch(
         info$purpose, 
-        CSEMP = stations[station_code, "CMA"],
-        OSPAR = paste(seriesInfo$country, stations[station_code, "OSPAR_subregion"]),
+        # CSEMP = stations[station_code, "CMA"],
+        OSPAR = paste(seriesInfo$country, stations[station_code, "ospar_subregion"]),
         HELCOM = seriesInfo$country
       )
 
-      thetaID <- paste(thetaID, species)
+      theta_id <- paste(theta_id, species)
       
+      is_theta <- theta_id %in% names(info$extra_data$VDS_estimates)
 
+      theta <- NULL
+      if (is_theta) {
+        theta <- info$extra_data$VDS_estimates[[theta_id]]
+      }
+      
+      
       # if any individual data, need to augment annual indices with confidence 
       # intervals
       
       indiID <- with(x, tapply(n_individual, year, function(y) all(y == 1)))
       
-      if (any(indiID) & thetaID %in% names(biota.VDS.estimates)) {
+      if (any(indiID) & is_theta) {
 
         out$annualIndex[c("lower", "upper")] <- NA
         
         clID <- paste(station_code, names(indiID)[indiID], species)
         out$annualIndex[indiID, c("lower", "upper")] <- 
-          biota.VDS.cl[clID, c("lower", "upper")]
+          info$extra_data$VDS_confidence_limits[clID, c("lower", "upper")]
         
-        # adjust when indices are zero or max (had to add an observation with a 
-        # 1 or n-1 to get a fit)
+        # adjust when indices are zero or max (K = #cutpoints)
+        # had to add an observation with a 1 or n-1 to get a fit
         
-        ntheta <- biota.VDS.estimates[[thetaID]]$K
-        theta <- biota.VDS.estimates[[thetaID]]$par
-        theta <- theta[as.character(0:(ntheta-1))]
-
         out$annualIndex <- within(out$annualIndex, {
           lower[index == 0] <- 0
-          upper[index == ntheta] <- ntheta
+          upper[index == theta$K] <- theta$K
         })  
       }  
       
@@ -326,7 +380,7 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
         determinand = determinand, 
         species = species,
         station_code = station_code,
-        thetaID = thetaID, 
+        theta = theta, 
         max.year = info$max_year, 
         info.imposex = info$imposex, 
         recent.trend = info$recent.trend)
@@ -365,7 +419,8 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
         max.year = info$max_year, 
         recent.trend = info$recent.trend, 
         distribution = distribution, 
-        good.status = good.status
+        good.status = good.status,
+        power = info$power
       )
       
       args.list <- c(args.list, list(...))
@@ -387,6 +442,93 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
 }
 
 
+
+#' Default control parameters for `run_assessment`
+#'
+#' `r lifecycle::badge("experimental")` Default parameters that control the way
+#'  the assessment is run. Presently only includes parameters for post-hoc 
+#'  power, but it is intended to move `recent_trend` here, along with the 
+#'  arguments that control the calculation of numerical derivatives.  
+#'
+#' @returns A list with the following components:
+#' * `power` A list with the following components (all expressed as 
+#'   percentages):  
+#'   - `target_power` default = 90%
+#'   - `target_trend` default = 5%
+#'   - `size` default = 5%  
+#'   The power calculations are currently only applied to log-normally 
+#'   distributed data, which is why the trend is expressed as a percentage.
+#'
+run_control_default <- function() {
+
+  # location: assessment_functions.R
+  
+  power = list(
+    target_power = 90,
+    target_trend = 5,
+    size = 5
+  )
+  
+  list(power = power)  
+}
+
+
+
+
+
+#' Modifies control parameters for `run_assessment`
+#'
+#' Undates default control parameters with user specification and does basis
+#' error checking.
+#'
+#' @param run_control_default List of default control parameters produced by a 
+#'   call to `run_control_default`
+#' @param control List of replacement control parameters; defaults to an empty 
+#'   list. 
+#'
+#' @returns List of updated control parameters  
+#' 
+run_control_modify <- function(control_default, control = list()) {
+  
+  # location: assessment_functions.R
+  
+  control <- modifyList(control_default, control, keep.null = TRUE)
+
+  if (control$power$target_power <= control$power$size) {
+    stop(
+      "error in target_power component of control$power:\n", 
+      "target_power must be greater than size"
+    )
+  }
+    
+  if (control$power$size <= 0 | control$power$size >= 100) {
+    stop(
+      "error in size component of control$power:\n", 
+      "size (%) must be greater than 0 and less than 100"
+    )
+  }
+  
+  if (control$power$target_power >= 100) {
+    stop(
+      "error in target_power component of control$power:\n", 
+      "target_power must be less that 100%"
+    )
+  }
+
+  if (control$power$target_trend <= -100) {
+    stop(
+      "error in target_trend component of control$power:\n", 
+      "target_trend must be greater than -100%"
+    )
+  }
+  
+  control
+}
+
+
+
+
+
 parallel_objects <- function(imposex = FALSE) {
   
   # assessment_functions.R
@@ -406,7 +548,7 @@ parallel_objects <- function(imposex = FALSE) {
     out <- c(
       out, 
       "imposex.assess.index", "imposex_class", 
-      "imposex.family", "cuts6.varmean", "biota.VDS.cl", "biota.VDS.estimates", 
+      "imposex.family", "cuts6.varmean",  
       "imposex_assess_clm", "imposex.clm.fit", "imposex.clm.X", 
       "imposex.clm.X.change", "imposex.clm.loglik.calc", "imposex.VDS.p.calc", 
       "imposex.clm.predict", "imposex.clm.cl", "imposex.clm.contrast"
@@ -497,13 +639,15 @@ get_index <- function(determinand, data, info) {
       call. = FALSE
     )
   }
-  
+
   
   if (distribution %in% "lognormal") {
     get_index_median(data, log = TRUE)
-  } else if (distribution %in% c("normal", "survival", "multinomial", "quasibinomial")) {
+  } else if (distribution %in% c("normal", "survival")) {
     get_index_median(data, log = FALSE)
-  } else if (distribution %in% c("beta", "negativebinomial")) {
+  } else if (distribution %in% c("multinomial", "quasibinomial")) {
+    get_index_imposex(data, determinand, info)
+  }else if (distribution %in% c("beta", "negativebinomial")) {
     get_index_weighted_mean(data, determinand) 
   } else {
     stop(
@@ -598,7 +742,11 @@ get_index_weighted_mean <- function(data, determinand) {
 
 assess_lmm <- function(
     data, annualIndex, AC, recent.years, determinand, max.year, 
-    recent.trend = 20, distribution, good.status, choose_model, ...) {
+    recent.trend = 20, distribution, good.status, choose_model, 
+    power, ...) {
+
+  # silence non-standard evaluation warnings
+  year <- NULL
 
   # choose_model forces exit with a particular model: 2 = linear, 3 = smooth on 2df etc, with an 
   # error if that model doesn't exist 
@@ -849,7 +997,7 @@ assess_lmm <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         fit, 
-        year = max(data$year), 
+        yearID = max(data$year), 
         refvalue = switch(distribution, lognormal = log(i), normal = i), 
         lower.tail = switch(good.status, low = TRUE, high = FALSE)
       )
@@ -859,6 +1007,19 @@ assess_lmm <- function(
   }
 
 
+  # compute power statistics (other than dtrend)
+  # need to extend this to normally distributed data at some point
+  
+  if (distribution == "lognormal") {
+    output$power <- ctsm_lmm_power(
+      output, 
+      target_power = power$target_power,
+      target_trend = power$target_trend,
+      size = power$size
+    )
+  }
+  
+  
   # construct summary output -
   
   output$summary <- data.frame(
@@ -936,7 +1097,12 @@ assess_lmm <- function(
         low = tail(output$pred$ci.upper, 1), 
         high = tail(output$pred$ci.lower, 1)
       )
-      dtrend <- ctsm.dtrend(1:10, sigma, power = 0.9)
+      dtrend <- ctsm_dtrend(
+        1:10, 
+        sigma, 
+        alpha = power$size / 100,
+        power = power$target_power / 100
+      )
     }
                              
                              
@@ -1286,9 +1452,87 @@ check_convergence_lmm <- function(assessment, coeff_se_tol = 0.001) {
 }
 
 
-ctsm.power <- function(
-  q, year, sigma, alpha = 0.05, sigma_type = c("index", "slope"), 
-  alternative = c("two.sided", "less", "greater")) {
+# Power functions ----
+
+ctsm_lmm_power <- function(assessment, target_power = 80, target_trend = 10, size = 5) {
+  
+  # intialise output
+  
+  id <-c(
+    "dtrend_obs", "dtrend_seq", "dtrend_ten", 
+    "nyear_seq", 
+    "power_obs", "power_seq", "power_ten" 
+  )
+  
+  out <- vector("list", 7) 
+  names(out) <- id
+  out[id] <- NA
+  
+  
+  # get key data, and return if too few years to compute power
+  
+  year <- unique(assessment$data$year)
+
+  sd <- assessment$sd_components["sd_index"]
+  
+  method <- assessment$method 
+  
+  if (method == "none") {
+    return(out)
+  }
+  
+  
+  # detectable trend (on log scale) of 
+  # 1 current time series over observed time span
+  # 2 current time series with no gaps (e.g. annual monitoring from min_year to max_year)
+  # 3 in ten years of sequential monitoring
+  
+  target_power <- target_power / 100
+  
+  if (method %in% c("linear", "smooth")) {
+    out["dtrend_obs"] <- ctsm_dtrend(year, sd, power = target_power)
+    out["dtrend_seq"] <- ctsm_dtrend(min(year):max(year), sd, power = target_power)
+  }
+  
+  out["dtrend_ten"] <- ctsm_dtrend(1:10, sd, power = target_power)
+  
+  # back-transform to percentage annual (positive) change
+  
+  id <- c("dtrend_obs", "dtrend_seq", "dtrend_ten")
+  
+  out[id] <- lapply(out[id], function(y) round(100 * (exp(y) - 1), 1))
+  
+  
+  # number of sequential years to detect the specified % change
+  
+  target_trend <- target_trend / 100
+  
+  out["nyear_seq"] <- ctsm_dyear(log(1 + target_trend), sd, power = target_power)
+  
+  
+  # power to detect the specified % change with same options as dtrend
+  
+  if (method %in% c("linear", "smooth")) {
+    out["power_obs"] <- ctsm_dpower(log(1 + target_trend), year, sd)
+    out["power_seq"] <- ctsm_dpower(log(1 + target_trend), min(year):max(year), sd)
+  }
+  
+  out["power_ten"] <- ctsm_dpower(log(1 + target_trend), 1:10, sd)
+  
+  # turn into percentages
+  
+  id <- c("power_obs", "power_seq", "power_ten") 
+
+  out[id] <- lapply(out[id], function(y) round(100 * y))
+  
+  out
+}
+
+
+
+ctsm_dpower <- function(
+    q, year, sigma, alpha = 0.05, sigma_type = c("index", "slope"), 
+    alternative = c("two.sided", "less", "greater")) {
   
   # power of (log-)linear regression
   
@@ -1342,9 +1586,9 @@ ctsm.power <- function(
 }
 
 
-ctsm.dtrend <- function(
-  year, sigma, alpha = 0.05, power = 0.8, sigma_type = c("index", "slope"), 
-  alternative = c("two.sided", "less", "greater")) {
+ctsm_dtrend <- function(
+    year, sigma, alpha = 0.05, power = 0.8, sigma_type = c("index", "slope"), 
+    alternative = c("two.sided", "less", "greater")) {
   
   sigma_type <- match.arg(sigma_type)
   alternative <- match.arg(alternative)
@@ -1363,15 +1607,15 @@ ctsm.dtrend <- function(
   
   uniroot(
     function(q) 
-      ctsm.power(q, year, sigma, alpha, sigma_type, alternative) - power, 
+      ctsm_dpower(q, year, sigma, alpha, sigma_type, alternative) - power, 
     lower = lower, upper = upper, extendInt = extendInt
   )$root
 }
 
 
-ctsm.dyear <- function(
-  q, sigma, alpha = 0.05, power = 0.8, sigma_type = c("index", "slope"), 
-  alternative = c("two.sided", "less", "greater")) {
+ctsm_dyear <- function(
+    q, sigma, alpha = 0.05, power = 0.8, sigma_type = c("index", "slope"), 
+    alternative = c("two.sided", "less", "greater")) {
   
   sigma_type <- match.arg(sigma_type)
   alternative <- match.arg(alternative)
@@ -1385,11 +1629,14 @@ ctsm.dyear <- function(
   n_year <- 2
   while (achieved_power < power) {
     n_year <- n_year + 1
-    achieved_power <- ctsm.power(q, 1:n_year, sigma, alpha, sigma_type, alternative)
+    achieved_power <- ctsm_dpower(q, 1:n_year, sigma, alpha, sigma_type, alternative)
   }
   
   n_year
 }
+
+
+
 
 
 # Other distributions ----
@@ -1397,6 +1644,10 @@ ctsm.dyear <- function(
 assess_survival <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
+
+  # silence non-standard evaluation warnings
+  .data <- est <- lcl <- ucl <- p <- se <- NULL
+  info <- NULL
 
   # assess survival data, often expressed as interval data 
   
@@ -1468,7 +1719,7 @@ assess_survival <- function(
   
   data <- dplyr::mutate(
     data, 
-    time = if_else(.data$time == 0, .data$time2 / 10, .data$time)
+    time = dplyr::if_else(.data$time == 0, .data$time2 / 10, .data$time)
   )
   
   
@@ -1681,7 +1932,7 @@ assess_survival <- function(
       stop("need to update code")
     }
     
-    contrast.whole <- ctsm_assess_survival_contrast(
+    contrast.whole <- assess_survival_contrast(
       output, 
       start = min(data$year), 
       end = max(data$year)
@@ -1690,7 +1941,7 @@ assess_survival <- function(
     
     start.year <- max(max.year - recent.trend + 1, min(data$year))
     if (sum(unique(data$year) >= start.year - 0.5) >= 5) {
-      contrast.recent <- ctsm_assess_survival_contrast(
+      contrast.recent <- assess_survival_contrast(
         output, 
         start = start.year, 
         end = max(data$year)
@@ -1715,9 +1966,9 @@ assess_survival <- function(
   if (output$method %in% c("mean", "linear", "smooth")) {
 
     output$reference.values <- lapply(AC, function(i) {
-      ctsm_assess_survival_refvalue(
+      assess_survival_refvalue(
         output, 
-        year = max(data$year), 
+        year_id = max(data$year), 
         refvalue = i,
         good_status = good_status
       )
@@ -1879,6 +2130,9 @@ assess_survival <- function(
 
 assess_survival_contrast <- function(ctsm.ob, start, end) {
 
+  # silence non-standard evaluation warnings
+  fit <- NULL
+
   # based on ctsm.lmm.contrast - should be able to make it almost identical but
   # first need to get variance covariance matrix of fitted values
   
@@ -1959,6 +2213,9 @@ assess_beta <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
   
+  # silence non-standard evaluation warnings
+  info <- weight <- NULL
+
   # percentage data that are not based on counts (e.g. comet assay) 
   
   # check valid determinands 
@@ -2178,7 +2435,7 @@ assess_beta <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         output, 
-        year = max(data$year), 
+        yearID = max(data$year), 
         refvalue = qlogis(i / 100),
         lower.tail = switch(good_status, low = TRUE, high = FALSE)
       )
@@ -2356,6 +2613,9 @@ assess_negativebinomial <- function(
   data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
   nYearFull, firstYearFull) {
   
+  # silence non-standard evaluation warnings
+  info <- weight <- NULL
+
   # over-dispersed count data (perhaps very low over-dispersed values from a 
   # binomial distribution, such an MNC) 
   
@@ -2565,7 +2825,7 @@ assess_negativebinomial <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         output, 
-        year = max(data$year), 
+        yearID = max(data$year), 
         refvalue = qlogis(i / 100),
         lower.tail = switch(good_status, low = TRUE, high = FALSE)
       )
@@ -2737,71 +2997,4 @@ assess_negativebinomial <- function(
   output
 }
 
-
-# Post analysis functions ----
-
-ctsm_post_analysis_power <- function(assessment_obj, target_power = 0.8) {
-  
-  lapply(assessment_obj$assessment, function(x) {
-    
-    # intialise output
-    
-    id <-c(paste("dtrend", 1:3, sep = "_"), "dyear", paste("dpower", 1:3, sep = "_"))
-    
-    x$summary[id] <- NA
-    
-    
-    # get key data, and return if too few years to compute power
-    
-    year <- unique(x$data$year)
-    n_year <- length(year) 
-    
-    sd <- x$sd_components["sd_index"]
-    
-    if (n_year < 3)
-      return(x)
-    
-    
-    # detectable trend (on log scale) of 
-    # 1 current time series over observed time span
-    # 2 current time series with no gaps (e.g. annual monitoring from min_year to max_year)
-    # 3 in ten years of sequential monitoring
-    
-    if (n_year >= 5) {
-      x$summary$dtrend_1 <- ctsm.dtrend(year, sd, power = target_power)
-      x$summary$dtrend_2 <- ctsm.dtrend(min(year):max(year), sd, power = target_power)
-    }
-    
-    x$summary$dtrend_3 <- ctsm.dtrend(1:10, sd, power = target_power)
-    
-    # back-transform to percentage annual (positive) change
-    
-    id <- paste("dtrend", 1:3, sep = "_")
-    
-    x$summary[id] <- lapply(x$summary[id], function(y) round(100 * (exp(y) - 1), 1))
-    
-    
-    # number of sequential years to detect a 10% trend
-    
-    x$summary$dyear <- ctsm.dyear(log(1 + 0.1), sd, power = target_power)
-    
-    
-    # power to detect an annual 10% change with same options as dtrend
-    
-    if (n_year >= 5) {
-      x$summary$dpower_1 <- ctsm.power(log(1 + 0.1), year, sd)
-      x$summary$dpower_2 <- ctsm.power(log(1 + 0.1), min(year):max(year), sd)
-    }
-    
-    x$summary$dpower_3 <- ctsm.power(log(1 + 0.1), 1:10, sd)
-    
-    # turn into percentages
-    
-    id <- paste("dpower", 1:3, sep = "_")
-    
-    x$summary[id] <- lapply(x$summary[id], function(y) round(100 * y))
-    
-    x
-  })  
-}
 

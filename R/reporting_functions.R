@@ -2,6 +2,14 @@
 
 ctsm.Mercator <- function(x) atanh(sin(x * pi / 180))
 
+#' Calculates a polar projection
+#' 
+#' Calculates easting and northing in Lambert Azimuthal Equal 
+#' Area North Polar aspect projection
+#' 
+#' @param latitude the latitude
+#' @param longitude the longitude
+#' @return a list with projected `longitude` (easting) and `latitude` (northing) values
 #' @export
 ctsm.projection <- function(latitude, longitude) {
   # calculates easting and northing in Lambert Azimuthal Equal Area North Polar aspect projection
@@ -57,37 +65,48 @@ ctsm.projection <- function(latitude, longitude) {
 
 # support functions ----
 
+#' Subsets an assessment object
+#' 
+#' Selects specific time series and simplifies the data, stations and 
+#' assessment components to match
+#'  
+#' @param assessment_obj An assessment object resulting from a call to
+#'   run_assessment.
+#' @param subset A vector specifying the timeseries to be retained. An
+#'   expression will be evaluated in the timeSeries component of assessment_obj; 
+#'   use 'series' to identify individual timeseries.
+#'
+#' @returns a new assessment object, after applying the subset
+#.
 #' @export
-ctsm_subset_assessment <- function(assessment_obj, subset) {
+subset_assessment <- function(assessment_obj, subset) {
   
   # reporting_functions.R
   # subsets an assessment object by filtering on the timeSeries component
   
   timeSeries <- assessment_obj$timeSeries
   
+  timeSeries <- tibble::rownames_to_column(timeSeries, "series")
   ok <- eval(substitute(subset), timeSeries, parent.frame())
   timeSeries <- timeSeries[ok, ]
+  series_id <- timeSeries$series
+  
+  row.names(timeSeries) <- NULL
+  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
   
   assessment_obj$timeSeries <- timeSeries
 
   
   # update other components to be consistent
   
-  id <- row.names(timeSeries)
+  assessment_obj$assessment <- assessment_obj$assessment[series_id]
   
-  assessment_obj$assessment <- assessment_obj$assessment[id]
-  
-  ok <- assessment_obj$data$seriesID %in% id
+  ok <- assessment_obj$data$seriesID %in% series_id
   assessment_obj$data <- assessment_obj$data[ok, ]
   
-  ok <- row.names(assessment_obj$stations) %in% timeSeries$station 
+  ok <- assessment_obj$stations$station_code %in% timeSeries$station_code 
   assessment_obj$stations <- assessment_obj$stations[ok, ]
-  
-  
-  # drop redundant factor levels
-  
-  id <- c("timeSeries", "data", "stations")
-  assessment_obj[id] <- lapply(assessment_obj[id], droplevels)
+  row.names(assessment_obj$stations) <- NULL
   
   assessment_obj
 }  
@@ -95,7 +114,7 @@ ctsm_subset_assessment <- function(assessment_obj, subset) {
 
 #' @export
 ctsm_summary_overview <- function(
-    assessment, timeSeries, info, classColour, fullSummary = FALSE) {
+    assessment, timeSeries, info, symbology, extra_output, fullSummary = FALSE) {
   
   # reporting_functions.R
   
@@ -109,7 +128,17 @@ ctsm_summary_overview <- function(
   
   assessment <- assessment[row.names(timeSeries)]
   
-  summaryList <- sapply(assessment, "[[", "summary", simplify = FALSE)
+  summaryList <- sapply(
+    assessment, 
+    function(x) {
+      out <- x$summary 
+      if ("power" %in% extra_output && !is.null(x$power)) {
+        out <- cbind(out, x$power)
+      }
+      out
+    }, 
+    simplify = FALSE
+  )
   
   if (any(is.null(summaryList)) | (length(summaryList) != nrow(timeSeries))) {
     stop("coding error - contact HARSAT development team")
@@ -140,14 +169,14 @@ ctsm_summary_overview <- function(
   
   # get shape and colour of plotting symbols
 
-  out <- ctsm_symbology_OSPAR(out, info, timeSeries, classColour)
+  out <- ctsm_symbology_OSPAR(out, info, timeSeries, symbology)
 
   if (fullSummary) out else out[c("shape", "colour")]
 }
 
 
 #' @export
-ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha = 0.05) {
+ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0.05) {
   
   # reporting_functions.R
   
@@ -194,9 +223,13 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
   # get the names of the variables which contain the difference between the 
   # meanly and the AC
   
-  if (!is.null(info$AC)) {
+  if (!is.null(symbology)) {
     
-    ACdiff <- paste(info$AC, "diff", sep = "")
+    classColour <- symbology$colour
+    
+    AC <- names(classColour$below)
+    
+    ACdiff <- paste(AC, "diff", sep = "")
     
     
     # when goodStatus is indicated by low concentrations, negative ACdiff is good
@@ -213,7 +246,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
       
       if (all(is.na(x))) return(classColour$none)
       
-      AC <- info$AC[!is.na(x)]
+      AC <- AC[!is.na(x)]
       x <- x[!is.na(x)]
       
       if (any(x < 0)) classColour$below[AC[which.max(x < 0)]]
@@ -226,7 +259,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
     
   } else {
     
-    summary$colour <- classColour$none
+    summary$colour <- NA_character_
     
   }
   
@@ -235,9 +268,9 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
   
   # get the names of the variables which contain the result of the non-parametric test for each AC
   
-  if (!is.null(info$AC)) {
+  if (!is.null(symbology)) {
     
-    ACbelow <- paste(info$AC, "below", sep = "")
+    ACbelow <- paste(AC, "below", sep = "")
     
     wk <- summary[ACbelow]
     wk[] <- lapply(wk, function(x) {
@@ -252,7 +285,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, classColour, alpha =
       
       if (all(is.na(x))) return(NA)
       
-      AC <- info$AC[!is.na(x)]
+      AC <- AC[!is.na(x)]
       x <- x[!is.na(x)]
       
       if (any(x == "below")) classColour$below[AC[which.max(x == "below")]]
@@ -354,33 +387,49 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' * the trend assessments (p-values and trend estimates)
 #' * the status assessments (if there any thresholds)
 #' * (optionally) a symbology summarising the trend (shape) and status (colour)
-#' of each time series
+#' of each time series. This is experimental. 
 #'
 #' @param assessment_obj An assessment object resulting from a call to
 #'   run_assessment.
 #' @param output_file The name of the output csv file. If using NULL, the file
-#'   will be called biota_summary.csv, sediment_summary.csv or water_summary.csv
+#'   will be called `biota_summary.csv`, `sediment_summary.csv` or `water_summary.csv`
 #'   as appropriate. By default the file will be written to the working
 #'   directory. If a file name is provided, a path to the output file can also
-#'   be provided (e.g. using `file.path`). The output_dir option can also be
+#'   be provided (e.g. using `file.path`). The `output_dir`` option can also be
 #'   used to specify the output file directory.
 #' @param output_dir The output directory for `output_file`. The default is the
 #'   working directory. Any file path provided in `output_file`, will be
 #'   appended to `output_dir`. The resulting output directory must already
 #'   exist.
-#' @param export Logical. TRUE (the default) writes the summary table to a csv
-#'   file. FALSE returns the summary table as an R object (and does not write to
+#' @param export Logical. `TRUE` (the default) writes the summary table to a csv
+#'   file. `FALSE` returns the summary table as an R object (and does not write to
 #'   a csv file).
-#' @param determinandGroups
-#' @param classColour
-#' @param collapse_AC
+#' @param collapse_AC A names list of valid assessment criteria that allows
+#'   assessment criteria of the same 'type' to be reported together. See 
+#'   details.
+#' @param extra_output A character vector specifying extra summary metrics 
+#'   to be included in the output. Currently only recognises "power" to give the 
+#'   seven power metrics computed for lognormally distributed data. Defaults to 
+#'   `NULL`; i.e. no extra output. 
+#' @param symbology Experimental. Specifies the output symbology. Currently
+#'   assumes the thresholds are presented in increasing magnitude of 
+#'   environmental risk.
+#' @param determinandGroups optional, a list specifying `labels` and `levels`
+#'   to label the determinands
+#' @param append Logical. `FALSE` (the default) overwrites any existing summary
+#'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
-#' @returns
+#' @returns a summary object, when `export` is `FALSE`
 #'
 #' @export
 write_summary_table <- function(
-  assessment_obj, output_file = NULL, output_dir = ".", export = TRUE, 
-  determinandGroups = NULL, classColour = NULL, collapse_AC = NULL) {
+  assessment_obj, output_file = NULL, output_dir = ".", export = TRUE,
+  collapse_AC = NULL, extra_output = NULL, 
+  symbology = NULL, 
+  determinandGroups = NULL, append = FALSE) {
+
+  # silence non-standard evaluation warnings
+  climit_last_year <- NULL
 
   # reporting_functions.R
   
@@ -428,17 +477,21 @@ write_summary_table <- function(
   }
   
     
-  # assessment criteria must have an appropriate class colour
+  # assessment criteria that are used in the symbology must have an appropriate 
+  # class colour
     
   is_AC <- !is.null(info$AC)
   
   if (is_AC) {
     AC <- info$AC
+  }
+  
+  if (!is.null(symbology) && is_AC) {
     stopifnot(
-      !is.null(classColour),
-      AC %in% names(classColour$below), 
-      AC %in% names(classColour$above),
-      "none" %in% names(classColour)
+      !is.null(symbology$colour),
+      sort(names(symbology$colour$below)) == sort(names(symbology$colour$above)), 
+      names(symbology$colour$below) %in% AC, 
+      "none" %in% names(symbology$colour)
     )
   }
 
@@ -553,9 +606,10 @@ write_summary_table <- function(
   ## get summary from assessment 
   
   summary <- ctsm_summary_overview(
-    assessment, timeSeries, info, classColour, fullSummary = TRUE
+    assessment, timeSeries, info, symbology, extra_output, 
+    fullSummary = TRUE
   )
-  
+
   summary <- cbind(timeSeries, summary)
     
   summary$series <- row.names(summary)
@@ -583,8 +637,16 @@ write_summary_table <- function(
     "shape", "colour"
   ) 
   
-  summary <- summary[c(wk[wk %in% names(summary)], setdiff(names(summary), wk))]
-
+  summary <- dplyr::relocate(summary, any_of(wk))
+  
+  if ("dtrend_obs" %in% names(summary)) {
+    wk <- c(
+      "dtrend_obs", "dtrend_seq", "dtrend_ten", "nyear_seq", 
+      "power_obs", "power_seq", "power_ten"
+    )
+    summary <- dplyr::relocate(summary, all_of(wk), .after = "dtrend") 
+  }
+  
   sortID <- intersect(
     c(info$region$id, "country", "CMA", "station_name", 
       "species", "detGroup", "determinand", "matrix"), 
@@ -617,6 +679,19 @@ write_summary_table <- function(
     summary <- dplyr::rename(summary, imposex_class = "class")
   }
   
+  if ("dtrend_obs" %in% names(summary)) {
+    summary <- dplyr::rename(
+      summary, 
+      power_dt_obs = "dtrend_obs",
+      power_dt_seq = "dtrend_seq",
+      power_dt_ten = "dtrend_ten",
+      power_ny_seq = "nyear_seq",
+      power_pw_obs = "power_obs",
+      power_pw_seq = "power_seq",
+      power_pw_ten = "power_ten",
+    )
+  }
+
   names(summary) <- gsub("diff$", "_diff", names(summary))
   names(summary) <- gsub("achieved$", "_achieved", names(summary))
   names(summary) <- gsub("below$", "_below", names(summary))
@@ -706,7 +781,7 @@ write_summary_table <- function(
     
     summary <- dplyr::relocate(
       summary, 
-      tidyselect::all_of(id), 
+      dplyr::all_of(id), 
       .after = climit_last_year
     )
     
@@ -724,7 +799,7 @@ write_summary_table <- function(
   # write summary to output_file or return summary object
     
   if (export) {
-    readr::write_excel_csv(summary, output_file, na = "")
+    readr::write_excel_csv(summary, output_file, na = "", append = append)
     return(invisible())
   } else {
     return(summary)
@@ -749,6 +824,149 @@ ctsm_collapse_AC <- function(x, type = c("real", "character")) {
 }
 
 
+# html reports ----
+
+#' Reports the assessment of individual time series
+#'
+#' Generates a series of html reports with, for each time series, meta data, 
+#' plots of the data with the fitted assessment model, statistical summaries, 
+#' and a simple interpretation of the fitted model.
+#'
+#' @param assessment_obj An assessment object resulting from a call to
+#'   run_assessment
+#' @param subset An optional vector specifying which timeseries are to be
+#'   reported. An expression will be evaluated in the timeSeries component of
+#'   assessment_obj; use 'series' to identify individual timeseries.
+#' @param output_dir The output directory for the assessment plots (possibly
+#'   supplied using 'file.path'). The default is the working directory. The
+#'   output directory must already exist.
+#' @param max_report The maximum number of reports that will be generated.
+#'   Defaults to 100. Each report is about 1MB in size and takes a few seconds 
+#'   to run, so this prevents a ridiculous number of reports being created. 
+#'
+#' @returns A series of html files with, for each time series, meta data, 
+#'   plots of the data with the fitted assessment model, statistical summaries, 
+#'   and a simple interpretation of the fitted model.
+#'
+#'
+#' @export
+report_assessment <- function(
+    assessment_obj, 
+    subset = NULL, 
+    output_dir = ".",
+    max_report = 100L) {
+  
+  # reporting_functions.R
+  
+  if (!dir.exists(output_dir)) {
+    stop(
+      "\nThe output directory '", output_dir, "' does not exist.\n", 
+      "Create it or check the information supplied to argument 'output_dir'",
+      " is correct.",
+      call. = FALSE
+    )
+  }
+  
+  
+  info <- assessment_obj$info
+  timeSeries <- assessment_obj$timeSeries   
+  
+  # set up time series information:
+  # - merge with station information
+  # - add in additional useful variables 
+  # - subset if necessary
+
+  timeSeries <- tibble::rownames_to_column(timeSeries, "series")
+  
+  timeSeries <- dplyr::left_join(
+    timeSeries, 
+    assessment_obj$stations, 
+    by = "station_code"
+  )
+  
+  timeSeries$group <- ctsm_get_info(
+    info$determinand, 
+    timeSeries$determinand, 
+    "group", 
+    info$compartment,
+    sep = "_"
+  )
+  
+  timeSeries$distribution <- ctsm_get_info(
+    info$determinand, 
+    timeSeries$determinand, 
+    "distribution"
+  )
+  
+  if (info$compartment == "water") {
+    timeSeries$matrix <- "WT"
+  }
+  
+  timeSeries <- apply_subset(timeSeries, subset, parent.frame())
+  
+  series_id <- row.names(timeSeries)
+  
+
+  
+  
+  # ensure number of series does not exceed max_report
+  
+  n_series <- length(series_id)
+  
+  if (n_series > max_report) {
+    stop(
+      "\nYou have asked for ", n_series, " reports which exceeds the number ", 
+      "allowed.\n", 
+      "To continue increase the report limit with the 'max_report' argument.\n", 
+      "Be aware that each report will be larger than 1MB.",
+      call. = FALSE
+    )
+  }
+    
+
+  # report on each time series
+  
+  lapply(series_id, function(id) {
+
+    # get file name from id, and add country and station name 
+    # for easier identification
+    
+    series <- timeSeries[id, ]
+    
+    output_id <- sub(
+      series$station_code,
+      paste(series$station_code, series$country, series$station_name), 
+      id,
+      fixed=TRUE
+    )
+
+    # get rid of any slashes that might have crept in 
+    
+    output_id <- gsub(" / ", " ", output_id, fixed = TRUE)
+    output_id <- gsub("/", " ", output_id, fixed = TRUE)
+    
+    output_id <- gsub(" \ ", " ", output_id, fixed = TRUE)
+    output_id <- gsub("\\", " ", output_id, fixed = TRUE)
+    
+    
+    package_dir = system.file(package = "harsat")
+    template_dir = file.path(package_dir, "markdown")
+    report_file <- file.path(template_dir, "report_assessment.Rmd")
+
+    rmarkdown::render(
+      report_file, 
+      params = list(
+        assessment_object = assessment_obj, 
+        series = id
+      ),
+      output_file = output_id, 
+      output_dir = output_dir
+    )
+  })
+    
+  invisible() 
+}
+
 
 
 # OHAT ----
@@ -756,6 +974,9 @@ ctsm_collapse_AC <- function(x, type = c("real", "character")) {
 #' @export
 ctsm_OHAT_legends <- function(
   assessments, determinandGroups, regionalGroups = NULL, distanceGroups = NULL, path) {
+
+  # silence non-standard evaluation warnings
+  info <- NULL
 
   out <- sapply(names(assessments), simplify = FALSE, USE.NAMES = TRUE, FUN = function(media) {
 
@@ -794,10 +1015,10 @@ ctsm_OHAT_legends <- function(
   })
   
   legends <- lapply(out, "[[", "legends") %>% 
-    bind_rows(.id = "Compartment")
+    dplyr::bind_rows(.id = "Compartment")
   
   help <- lapply(out, "[[", "help") %>% 
-    bind_rows(.id = "Compartment")
+    dplyr::bind_rows(.id = "Compartment")
   
   list(legends = legends, help = help)
 }  
@@ -851,7 +1072,7 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
   )
 
   standard_shape <- standard_shape %>% 
-    bind_rows() %>% 
+    dplyr::bind_rows() %>% 
     as.data.frame()
   
   standard_shape <- list(low = standard_shape, high = standard_shape)
@@ -952,9 +1173,9 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
       Tooltip = AC_explanation
     )
     
-    out <- mutate_if(out, is.factor, as.character)
+    out <- dplyr::mutate_if(out, is.factor, as.character)
     
-    out <- bind_rows(out, standard_shape[[statusID]])
+    out <- dplyr::bind_rows(out, standard_shape[[statusID]])
     
     out
   })
@@ -1010,7 +1231,7 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
       )
     )
     
-    out <- bind_rows(info_regional, info_distance, help_info)
+    out <- dplyr::bind_rows(info_regional, info_distance, help_info)
     
     out <- as.data.frame(out)
     
@@ -1019,8 +1240,8 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
     
   names(legend_info) <- names(help_info) <- row.names(legends)
   
-  legend_info <- bind_rows(legend_info, .id = "Determinand_code")
-  help_info <- bind_rows(help_info, .id = "Determinand_code")
+  legend_info <- dplyr::bind_rows(legend_info, .id = "Determinand_code")
+  help_info <- dplyr::bind_rows(help_info, .id = "Determinand_code")
   
   list(legends = legend_info, help = help_info)
 }

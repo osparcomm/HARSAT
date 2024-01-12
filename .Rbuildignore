@@ -10,3 +10,11 @@
 ^vignettes/.RData$
 ^output
 ^oddities
+^CHANGES\.md$
+^CONTRIBUTING\.md$
+^CNAME$
+^index\.md$
+^[^/]+\.[Rr]$
+^information$
+^example_external_data_adjustments\.Rmd$
+^data/example_[^/]+/?.*$

@@ -28,6 +28,9 @@ jobs:
         with:
           use-public-rspm: true
 
+      ## qpdf is needed for size checks on outputs, otherwise we get spurious warnings
+      - run: sudo apt-get install -y libqpdf-dev
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
@@ -35,6 +38,10 @@ jobs:
             local::.
           needs: |
             check
+
+      - name: Reinstall Matrix
+        run: install.packages("Matrix")
+        shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
         with:

@@ -32,20 +32,12 @@ plot_assessment <- function(
     output_dir = ".",
     file_type = c("data", "index"),
     file_format = c("png", "pdf")) {
+
+  # silence non-standard evaluation warnings
+  seriesID <- NULL
   
   # graphics_functions.R
 
-  if (!"package:lattice" %in% search()) {
-    library("lattice")
-    on.exit(detach("package:lattice"))
-  }
-  
-  if (!"package:grid" %in% search()) {
-    library("grid")
-    on.exit(detach("package:grid"), add = TRUE)
-  }
-
-  
   # check file_type, file_format and output_dir are valid
   
   file_format = match.arg(file_format)
@@ -105,14 +97,8 @@ plot_assessment <- function(
   if (info$compartment == "water") {
     timeSeries$matrix <- "WT"
   }
-  
-  if (!is.null(substitute(subset))) {
-    ok <- eval(substitute(subset), timeSeries, parent.frame())
-    timeSeries <- timeSeries[ok, ]
-    row.names(timeSeries) <- NULL
-  }
 
-  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
+  timeSeries <- apply_subset(timeSeries, subset, parent.frame())
   
   series_id <- row.names(timeSeries)
 
@@ -194,6 +180,45 @@ plot_assessment <- function(
 }  
 
 
+#' Apply subsetting to a time series
+#' @description 
+#' This is an internal function that applies a subsetting function to a timeseries.
+#' It is somewhat complex, due to way it is designed to be called. The subset is designed
+#' to be passed either as a value (`NULL` or  logical), as a expression, or as a variable
+#' holding an expression. When it is an expression, it is applied in the context of the
+#' timeseries data frame to generate a vector of booleans for subsetting. The complexity
+#' comes from the way this implements lazy evaluation, so we cannot evaluate the expression
+#' in the normal calling context.
+#' 
+#' The function also removes row names, and converts the series column to row names.
+#' 
+#' @param timeSeries a time series data frame
+#' @param subset (default `NULL`) either `NULL`, which selects all entries, or a logical,
+#'   which `TRUE` selects all entries and `FALSE` none of them, or an expression, which
+#'   will be evaluated in the context of the dataframe to generate a subsetting vector.
+#' @param env the calling environment for variable values.
+apply_subset <- function(timeSeries, subset, env = parent.frame()) {
+  subsetExpression <- substitute(subset, parent.frame())
+  subsetExpressionType <- typeof(subsetExpression)
+  if (subsetExpressionType == 'NULL') {
+    ## Do nothing
+  } else if (subsetExpressionType == 'logical') {
+    timeSeries <- timeSeries[subset, ]
+    row.names(timeSeries) <- NULL
+  } else if (subsetExpressionType == 'symbol' || subsetExpressionType == 'language') {
+    ok <- eval(subsetExpression, timeSeries, env)
+    if (is.null(ok)) {
+      ok <- TRUE
+    } else if (is.expression(ok)) {
+      ok <- eval(ok, timeSeries, env)
+    }
+    timeSeries <- timeSeries[ok, ]
+    row.names(timeSeries) <- NULL
+  }
+  
+  timeSeries <- tibble::column_to_rownames(timeSeries, "series")
+  return(timeSeries)
+}
 
 
 ctsm.format <- function(x, y = x, nsig = 3) {
@@ -436,6 +461,9 @@ plot.axis <- function(side, ntick.x = 4, ntick.y = 5, xykey.cex = 1, plot.type =
 
 plot.AC <- function(AC, ylim, useLogs = TRUE) {
 
+  # silence non-standard evaluation warnings
+  value <- NULL
+
   AC <- AC[!is.na(AC)]
   AC <- sort(if (useLogs) log(AC) else AC)
   AC <- data.frame(id = names(AC), value = AC, ok = AC >= ylim[1] & AC <= ylim[2], stringsAsFactors = FALSE)
@@ -447,6 +475,9 @@ plot.AC <- function(AC, ylim, useLogs = TRUE) {
 plot.data <- function(
     data, assessment, series, info, type = c("data", "assessment"), 
     xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = FALSE, ...) {
+
+  # silence non-standard evaluation warnings
+  .data <- year <- censoring <- NULL
 
   type <- match.arg(type) 
 
@@ -841,6 +872,9 @@ plot.panel <- function(
 plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0, ntick.x = 3, ntick.y = 3, 
                            newPage = TRUE, ...) {
 
+  # silence non-standard evaluation warnings
+  censoring <- concOriginal <- censoringOriginal <- info.imposex <- series <- NULL
+
   # auxiliary_id specifies the choice of 'auxiliary' variables to plot: 
   # default:
   #   sediment = value, concentration, AL, CORG
@@ -1122,6 +1156,9 @@ plot.scales <- function(x, n = 5, min.n = 3, logData = FALSE, f = 0.05) {
 
 plot.multiassessment <- function(data, assessment, info, ...) {
 
+  # silence non-standard evaluation warnings
+  .data <- series <- NULL
+
   is.data <- sapply(assessment, function(i) !is.null(i))
   
   is.pred <- sapply(assessment, function(i) !is.null(i) && !is.null(i$pred))
@@ -1357,6 +1394,9 @@ plot.multiassessment <- function(data, assessment, info, ...) {
 
 plot.multidata <- function(data, info,  ...) {
 
+  # silence non-standard evaluation warnings
+  series <- NULL
+
   data <- subset(data, !is.na(concentration))
 
   series_distribution <- ctsm_get_info("determinand", data$determinand, "distribution")
@@ -1434,7 +1474,7 @@ plot.multidata <- function(data, info,  ...) {
 }
 
 
-ctsm.panel.pairs <- function (z, panel = lattice.getOption("panel.splom"), lower.panel = panel, 
+ctsm.panel.pairs <- function (z, panel = lattice::lattice.getOption("panel.splom"), lower.panel = panel, 
     upper.panel = panel, diag.panel = "diag.panel.splom", as.matrix = FALSE, 
     groups = NULL, panel.subscripts, subscripts, pscales = 5, 
     prepanel.limits = function(x) if (is.factor(x)) levels(x) else extendrange(range(as.numeric(x), 
@@ -1578,6 +1618,9 @@ plot.info <- function(series, info, plot.type = c("data", "auxiliary"), ...) {
 
 plot.ratio.data <- function(data, numerator, denominator, type = c("logistic", "log")) {
 
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   type <- match.arg(type)
   
   id <- c(
@@ -1619,6 +1662,9 @@ plot.ratio.pred <- function(
   type = c("logistic", "log"), 
   control = list(nyear = 5, prop_censoring = 0.1)
 ) {
+
+  # silence non-standard evaluation warnings
+  se <- NULL
 
   type <- match.arg(type)
   
@@ -1692,6 +1738,9 @@ plot.ratio.pred <- function(
 
 plot.ratio <- function(data, info, ...) {
   
+  # silence non-standard evaluation warnings
+  series <- NULL
+
   # get working data 
   # sediment - use non-normalised concentrations
   # biota - could use values before conversion to target bases, but would need to 

@@ -89,7 +89,7 @@ FATWT%,fat weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 PYR1OH,1-hydroxy pyrene,B-MBA,Metabolites,,,TRUE,FALSE,FALSE,ng/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.15,,,,,lognormal,low
 VDS,Vas Deferens Sequence,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low
 VDSI,Vas Deferens Sequence Index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
-IMPS,Imposex stage,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
+IMPS,Imposex stage,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low
 PCI,Penis classification index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
-INTS,Intersex stage,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
+INTS,Intersex stage,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low
 INTSI,Intersex stage index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low

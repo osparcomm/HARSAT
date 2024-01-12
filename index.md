@@ -1,10 +1,35 @@
 
 # harsat
 
-## Requirements
+## What is HARSAT?
 
-- R programming language (version 4.2.1)
-- Additional R packages to those which come with the standard R installation -- they will be installed automatically, but you may need permissions or tools to do that
+HARSAT (Harmonised Regional Seas Assessment Tool), is a tool that is 
+applied by The Arctic Monitoring and Assessment Programme (AMAP), 
+the Helsinki Commission (HELCOM) and the OSPAR Commission (OSPAR) 
+to support their assessments of data concerning contaminants 
+(hazardous substances) and their effects in the marine environment. 
+
+HARSAT code includes tools for pre-processing data, statistical trend analysis 
+and comparison with threshold values, and post-processing for archiving and 
+reporting.
+
+HARSAT is developed in the statistical computing language R. R is available 
+for most operating systems and can be downloaded from the R-project website.
+
+Disclaimer: The HARSAT tool is made available under an Open Source licence. 
+While every attempt has been made to ensure that the HARSAT version(s) 
+developed and supported by AMAP/HELCOM/OSPAR are free of errors, any use 
+of the tool by third parties, and the quality of products of third party 
+use is the responsibility of the third party concerned.
+
+## System requirements
+
+- R programming language (version 4.2.1 or later). Additional R packages to 
+  those which come with the standard R installation
+  may be needed -- they will normally be installed automatically, but you may need permissions or tools to do this
+- R Studio (recommended; version 2023.03.1 or later). While not required, 
+  the HARSAT developers recommend running the HARSAT code using the RStudio 
+  integrated development environment.
 
 ## Installation
 
@@ -37,21 +62,11 @@ remotes::install_local("~/Downloads/harsat_0.1.2.tar")
 ```
 ### Directly from Github
 
-Alternatively, you can also install `harsat` directly from GitHub. For this to work, at the moment, you will
-need a Github personal access token (the "classic" kind is best), because the repository will be private until
-`harsat` is finally released. As wth bundles, this ensures that all dependencies are up-to-date, properly 
-downloaded and installed.
-
-The short version is as follows:
-
-> The `XXXX` is a Github personal access token. You only need this optional parameter while
-> the `harsat` package is private because it is still under development. 
-> The [Getting Started](./articles/harsat.html) guide
-> has more information on how to create a personal access token. 
+Alternatively, you can also install `harsat` directly from GitHub. 
 
 ``` r
 library(remotes)
-remotes::install_github("osparcomm/HARSAT@main", auth_token = 'XXXX')
+remotes::install_github("osparcomm/HARSAT@main")
 ```
 
 The development version is similar, but changes more often, so we only recommend this if you
@@ -59,7 +74,7 @@ enjoy a more exciting time for your analysis.
 
 ``` r
 library(remotes)
-remotes::install_github("osparcomm/HARSAT", auth_token = 'XXXX')
+remotes::install_github("osparcomm/HARSAT@develop")
 ```
 
 ## Example usage

@@ -9,9 +9,11 @@ write_summary_table(
   output_file = NULL,
   output_dir = ".",
   export = TRUE,
+  collapse_AC = NULL,
+  extra_output = NULL,
+  symbology = NULL,
   determinandGroups = NULL,
-  classColour = NULL,
-  collapse_AC = NULL
+  append = FALSE
 )
 }
 \arguments{
@@ -19,10 +21,10 @@ write_summary_table(
 run_assessment.}
 
 \item{output_file}{The name of the output csv file. If using NULL, the file
-will be called biota_summary.csv, sediment_summary.csv or water_summary.csv
+will be called \code{biota_summary.csv}, \code{sediment_summary.csv} or \code{water_summary.csv}
 as appropriate. By default the file will be written to the working
 directory. If a file name is provided, a path to the output file can also
-be provided (e.g. using \code{file.path}). The output_dir option can also be
+be provided (e.g. using \code{file.path}). The `output_dir`` option can also be
 used to specify the output file directory.}
 
 \item{output_dir}{The output directory for \code{output_file}. The default is the
@@ -30,11 +32,31 @@ working directory. Any file path provided in \code{output_file}, will be
 appended to \code{output_dir}. The resulting output directory must already
 exist.}
 
-\item{export}{Logical. TRUE (the default) writes the summary table to a csv
-file. FALSE returns the summary table as an R object (and does not write to
+\item{export}{Logical. \code{TRUE} (the default) writes the summary table to a csv
+file. \code{FALSE} returns the summary table as an R object (and does not write to
 a csv file).}
 
-\item{collapse_AC}{}
+\item{collapse_AC}{A names list of valid assessment criteria that allows
+assessment criteria of the same 'type' to be reported together. See
+details.}
+
+\item{extra_output}{A character vector specifying extra summary metrics
+to be included in the output. Currently only recognises "power" to give the
+seven power metrics computed for lognormally distributed data. Defaults to
+\code{NULL}; i.e. no extra output.}
+
+\item{symbology}{Experimental. Specifies the output symbology. Currently
+assumes the thresholds are presented in increasing magnitude of
+environmental risk.}
+
+\item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
+to label the determinands}
+
+\item{append}{Logical. \code{FALSE} (the default) overwrites any existing summary
+file. \code{TRUE} appends data to it, creating it if it does not yet exist.}
+}
+\value{
+a summary object, when \code{export} is \code{FALSE}
 }
 \description{
 Creates a data frame summarising the assessment of each time series and
@@ -47,6 +69,6 @@ one-sided 95\% confidence limits
 \item the trend assessments (p-values and trend estimates)
 \item the status assessments (if there any thresholds)
 \item (optionally) a symbology summarising the trend (shape) and status (colour)
-of each time series
+of each time series. This is experimental.
 }
 }

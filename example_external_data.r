@@ -24,8 +24,8 @@ devtools::load_all()
 biota_data <- read_data(
   compartment = "biota",
   purpose = "AMAP",
-  contaminants = "AMAP_external_data_new_data_only_CAN_MarineMammals.csv",
-  stations = "AMAP_external_new_stations_only.csv",
+  contaminants = "EXTERNAL_FO_PW_DATA.csv",
+  stations = "EXTERNAL_AMAP_STATIONS.csv",
   data_dir = file.path("data", "example_external_data"),
   data_format = "external",
   info_dir = file.path("information", "AMAP"),
@@ -77,10 +77,12 @@ check_assessment(biota_assessment)
 write_summary_table(
   biota_assessment,
   output_dir = file.path("output", "example_external_data"), 
-  classColour = list(
-    below = c("NRC" = "blue", "LRC" = "green", "MRC" = "orange", "HRC" = "darkorange"),
-    above = c("NRC" = "red", "LRC" = "red", "MRC" = "red", "HRC" = "red"),
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("NRC" = "blue", "LRC" = "green", "MRC" = "orange", "HRC" = "darkorange"),
+      above = c("NRC" = "red", "LRC" = "red", "MRC" = "red", "HRC" = "red"),
+      none = "black"
+    )
   )
 )
 

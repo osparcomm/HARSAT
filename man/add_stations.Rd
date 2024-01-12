@@ -15,8 +15,6 @@ add_stations(data, stations, info)
 \code{purpose}, \code{compartment}, and \code{add_stations}. The latter is a list of
 control parameters supplied through \code{control_default} or \code{control_modify}
 which control how the station matching is achieved. See details.}
-
-\item{compartment}{A string: \code{"biota"}, \code{"sediment"} or \code{"water"}}
 }
 \value{
 A data frame containing the contaminant data augmented by variables

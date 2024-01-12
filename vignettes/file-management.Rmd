@@ -207,7 +207,7 @@ There are a few important things to see here:
 
 When `harsat` does all this, it will log the file it actually used, *and also*
 log a "thumbprint" of the file contents -- typically something like 
-a string of hexadecimal digits. This will be the same whereever the file
+a string of hexadecimal digits. This will be the same wherever the file
 comes from, so long as the contents of the file are the same. If you move a
 file into a different directory but don't edit it, the same thumbprint will
 show. So, the thumbprints are a vital tool in tracking reproducibility, as 

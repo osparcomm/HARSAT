@@ -33,23 +33,21 @@ it, as covered in the [Getting Started](/harsat.html) guide).
 library(harsat)
 ```
 
-And loading the R package `here`, because we use the working directory to find
+We set up our main directory to find
 the data files. If you use your own data files, you will need to point to
-a directory containing a copy.
-
+a directory containing a copy. We usually do this by putting our data files
+in a directory `data`, and information files in a directory `information`,
+but you can use any directory for these.
 
 ```r
-library(here)
-#> here() starts at /Users/stuart/git/HARSAT
-working.directory <- here()
+working.directory <- '/Users/stuart/git/HARSAT'
 ```
 
 # Water assessment
 
 The OSPAR water assessment is very similar to the HOLAS assessment. The main 
 difference is that more determinands are assessed which means that 
-`determinands.control` needs to do more work in `create_timeseries`. 
-
+`determinands.control` needs to do more work in `create_timeseries()`. 
 
 
 ```r
@@ -187,10 +185,12 @@ write_summary_table(
       "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
     )
   ),
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
@@ -5377,8 +5377,8 @@ Now let's look at the `water_summary.csv` file:
 # Sediment assessment
 
 The main differences in the sediment assessment relate to the normalisation
-procedure in `create_timeseries` and the use of multiple thresholds in 
-`run_assessment`.  
+procedure in `create_timeseries()` and the use of multiple thresholds in 
+`run_assessment()`.  
 
 
 
@@ -5443,29 +5443,16 @@ sediment_data <- tidy_data(sediment_data)
 #> Cleaning contaminant and biological effects data
 ```
 
-The TEQs for the WHO TEQ for dioxins, furans and planar PCBs (labelled TEQDFP) 
-are the values for the secondary poisoning QS. This stage won't be necessary in
-later releases.
-
-
-```r
-info_TEQ <- c(
-  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
-  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
-)
-```
-
-A customised function `normalise_sediment_OSPAR` has been written to implement 
+A customised function `normalise_sediment_OSPAR()` has been written to implement 
 the OSPAR normalisation procedure. This is necessary because the pivot values 
 used for normalising metals are region-specific. That aside, the procedure is
 straightforward: all metals are normalised to 5% aluminium and all organics are 
 normalised to 2.5% organic carbon, unless the samples were taken in the Iberian 
 Coast or Gulf of Cadiz OSPAR subregions, in which case the concentrations are 
 not normalised.
+
+The TEFs for the WHO TEQ for dioxins, furans and planar PCBs (labelled TEQDFP) 
+are the values for the secondary poisoning QS. 
 
 
 ```r
@@ -5479,7 +5466,11 @@ sediment_timeseries <- create_timeseries(
     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
     CB138 = list(det = c("CB138+163"), action = "replace"),
     CB156 = list(det = c("CB156+172"), action = "replace"),
-    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_environmental), 
+      action = "bespoke", 
+      weights = info_TEF$DFP_environmental
+    ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum")
   ),
   normalise = normalise_sediment_OSPAR,
@@ -5560,22 +5551,24 @@ write_summary_table(
       "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)"
     )
   ),
-  classColour = list(
-    below = c(
-      "BAC" = "blue", 
-      "ERL" = "green", 
-      "EAC" = "green", 
-      "EQS" = "green", 
-      "FEQG" = "green"
-    ),
-    above = c(
-      "BAC" = "orange", 
-      "ERL" = "red", 
-      "EAC" = "red", 
-      "EQS" = "red", 
-      "FEQG" = "red"
-    ),
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c(
+        "BAC" = "blue", 
+        "ERL" = "green", 
+        "EAC" = "green", 
+        "EQS" = "green", 
+        "FEQG" = "green"
+      ),
+      above = c(
+        "BAC" = "orange", 
+        "ERL" = "red", 
+        "EAC" = "red", 
+        "EQS" = "red", 
+        "FEQG" = "red"
+      ),
+      none = "black"
+    )
   ),
   collapse_AC = list(BAC = "BAC", EAC = c("EAC", "ERL", "EQS", "FEQG")),
   output_dir = summary.dir
@@ -13803,7 +13796,7 @@ weight basis, metal concentrations in fish on a wet weight basis, and most
 organic concentrations in fish on either a wet weight or lipid weight basis, 
 depending on the typical lipid content of the fish and tissue. There are also
 rules for birds and mammals. This is dealt with using the customised function
-`get_basis_biota_OSPAR`. 
+`get_basis_biota_OSPAR()`. 
 
 
 
@@ -13832,7 +13825,11 @@ biota_timeseries <- create_timeseries(
       det = c("CB28", "CB52", "CB101", "CB118", "CB138", "CB153", "CB180"), 
       action = "sum"
     ),
-    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_environmental), 
+      action = "bespoke", 
+      weights = info_TEF$DFP_environmental
+    ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"),
     HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
@@ -13896,10 +13893,10 @@ biota_timeseries <- create_timeseries(
 ```
 
 Here, we demonstrate how to split up the modelling stage of the assessment into
-several parts. The call to `run_assessment` only assesses the metal time series
-(as specified by the metals in `wk_metals`). The call to `update_assessment` 
+several parts. The call to `run_assessment()` only assesses the metal time series
+(as specified by the metals in `wk_metals`). The call to `update_assessment()` 
 then assesses all the remaining time series. In general, you can subset both
-`run_assessment` and `update_assessment` using any column in the time series
+`run_assessment()` and `update_assessment()` using any column in the time series
 component of `biota_timeseries`; this includes `determinand`, `matrix`, 
 `species` and, as a special case, `series`, if you just want to update
 one or two time series. The latter is particularly useful if a 
@@ -13910,7 +13907,7 @@ The application of thresholds is also more complicated and can not be handled by
 the standard routines. For example, Background Assessment Concentrations for 
 cadmium and lead in fish are only applied to species / tissue combinations where 
 the lipid content is $>=$ 3%. This is dealt with by using the customised 
-function `get_AC_biota_OSPAR`.
+function `get_AC_biota_OSPAR()`.
 
 
 
@@ -13961,6 +13958,14 @@ check_assessment(biota_assessment)
 ```
 
 
+
+We now write the summary table. Here the symbology is based on environmental 
+thresholds. A separate call would be needed to get the symbology based on health 
+thresholds. The symbology functionality is still under development and it is 
+intended to allow both sets of symbologies to be calculated with a single call.
+
+
+
 ```r
 write_summary_table(
   biota_assessment,
@@ -13982,28 +13987,26 @@ write_summary_table(
       "Biological effects (other)"
     )
   ),
-  classColour = list(
-    below = c(
-      "BAC" = "blue",
-      "NRC" = "blue",
-      "EAC" = "green", 
-      "FEQG" = "green",
-      "LRC" = "green", 
-      "QSsp" = "green", 
-      "MPC" = "green",
-      "QShh" = "green"
-    ),
-    above = c(
-      "BAC" = "orange", 
-      "NRC" = "orange", 
-      "EAC" = "red", 
-      "FEQG" = "red",
-      "LRC" = "red", 
-      "QSsp" = "red", 
-      "MPC" = "red",
-      "QShh" = "red"
-    ),
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c(
+        "BAC" = "blue",
+        "NRC" = "blue",
+        "EAC" = "green", 
+        "FEQG" = "green",
+        "LRC" = "green", 
+        "QSsp" = "green"
+      ),
+      above = c(
+        "BAC" = "orange", 
+        "NRC" = "orange", 
+        "EAC" = "red", 
+        "FEQG" = "red",
+        "LRC" = "red", 
+        "QSsp" = "red"
+      ),
+      none = "black"
+    )
   ),
   collapse_AC = list(
     BAC = c("BAC", "NRC"),
@@ -14014,9 +14017,7 @@ write_summary_table(
 )
 ```
 
-And finally, let's take a look at the `biota_summary.csv` file. Note that the 
-symbology in the summary table is still under development and currently does
-separate environmental and health tresholds in the status assessment.
+And finally, let's take a look at the `biota_summary.csv` file. 
 
 <table class='datatable'>
  <thead>
@@ -14104,7 +14105,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 7 </td>
    <td style="text-align:right;"> 7 </td>
    <td style="text-align:right;"> 7 </td>
@@ -14224,7 +14225,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 7 </td>
    <td style="text-align:right;"> 7 </td>
    <td style="text-align:right;"> 7 </td>
@@ -15484,7 +15485,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> upward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> red </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:right;"> 17 </td>
@@ -17044,7 +17045,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> downward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 12 </td>
    <td style="text-align:right;"> 12 </td>
    <td style="text-align:right;"> 12 </td>
@@ -18064,7 +18065,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> red </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
@@ -18664,7 +18665,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> upward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> red </td>
    <td style="text-align:right;"> 11 </td>
    <td style="text-align:right;"> 11 </td>
    <td style="text-align:right;"> 11 </td>
@@ -18724,7 +18725,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> downward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 11 </td>
    <td style="text-align:right;"> 11 </td>
    <td style="text-align:right;"> 11 </td>
@@ -19084,7 +19085,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> downward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> red </td>
    <td style="text-align:right;"> 13 </td>
    <td style="text-align:right;"> 13 </td>
    <td style="text-align:right;"> 13 </td>
@@ -19144,7 +19145,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> red </td>
    <td style="text-align:right;"> 24 </td>
    <td style="text-align:right;"> 24 </td>
    <td style="text-align:right;"> 24 </td>
@@ -21124,7 +21125,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 23 </td>
    <td style="text-align:right;"> 23 </td>
    <td style="text-align:right;"> 23 </td>
@@ -21184,7 +21185,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> red </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 9 </td>
@@ -22204,7 +22205,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_filled_circle </td>
-   <td style="text-align:left;"> red </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 4 </td>
@@ -23824,7 +23825,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> upward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:right;"> 11 </td>
    <td style="text-align:right;"> 11 </td>
@@ -23884,7 +23885,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 3 </td>
@@ -24004,7 +24005,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> downward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> red </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
@@ -24784,7 +24785,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 3 </td>
@@ -25084,7 +25085,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> red </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 2 </td>
@@ -25924,7 +25925,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> downward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 10 </td>
    <td style="text-align:right;"> 10 </td>
    <td style="text-align:right;"> 10 </td>
@@ -26944,7 +26945,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_open_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 1 </td>
@@ -27004,7 +27005,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_open_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 0 </td>
@@ -27784,7 +27785,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
@@ -28264,7 +28265,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 9 </td>
@@ -28324,7 +28325,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_open_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 0 </td>
@@ -28744,7 +28745,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> upward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> red </td>
    <td style="text-align:right;"> 16 </td>
    <td style="text-align:right;"> 16 </td>
    <td style="text-align:right;"> 16 </td>
@@ -29164,7 +29165,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 5 </td>
@@ -29584,7 +29585,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> downward_triangle </td>
-   <td style="text-align:left;"> red </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 9 </td>
@@ -30244,7 +30245,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> downward_triangle </td>
-   <td style="text-align:left;"> red </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 9 </td>
@@ -30844,7 +30845,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> large_filled_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 14 </td>
    <td style="text-align:right;"> 14 </td>
    <td style="text-align:right;"> 14 </td>
@@ -30904,7 +30905,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_open_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 0 </td>
@@ -31204,7 +31205,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> small_open_circle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> black </td>
    <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 2 </td>
@@ -31324,7 +31325,7 @@ separate environmental and health tresholds in the status assessment.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> NA </td>
    <td style="text-align:left;"> downward_triangle </td>
-   <td style="text-align:left;"> green </td>
+   <td style="text-align:left;"> orange </td>
    <td style="text-align:right;"> 24 </td>
    <td style="text-align:right;"> 24 </td>
    <td style="text-align:right;"> 24 </td>

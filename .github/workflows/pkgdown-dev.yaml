@@ -1,0 +1,113 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+#
+# This is a secondary pkgdown action, linked only to pushes to develop, i.e., 
+# when a develop pull request is merged. This will update the web site when
+# a develop PR is merged. It is a transitional flow.
+#
+# TODO: Remove this action when we want to link documentation only to the 
+# main branch and public releases.
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+  
+name: pkgdown-dev
+
+jobs:
+  pkgdown-dev:
+    runs-on: ubuntu-latest
+    # Only restrict concurrency for non-PR jobs
+    concurrency:
+      group: pkgdown-dev-${{ github.event_name != 'pull_request' || github.run_id }}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: r-lib/actions/setup-pandoc@v2
+
+    - uses: r-lib/actions/setup-r@v2
+      with:
+        use-public-rspm: true
+
+    ## qpdf is needed for size checks on outputs, otherwise we get spurious warnings
+    - run: sudo apt-get install -y libqpdf-dev
+
+    - uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        extra-packages: |
+            any::pkgdown
+            any::rcmdcheck
+            local::.
+        needs: |
+            website
+            check
+
+    - name: Build site
+      run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+      shell: Rscript {0}
+
+    ## Note that by using renames and recursive copies, dates are preserved, so
+    ## the zip files will be identical. This minimizes the changes to gh-pages.
+    ## At least, that's the general idea. 
+    ##
+    ## It may seem complex, but it's pretty quick.
+    - name: Create a working directory for archive creation
+      run: |
+        echo "TEMP_DIR=$(mktemp -d)" >> $GITHUB_ENV
+        echo "WORK_DIR=$(pwd)" >> $GITHUB_ENV
+
+    - name: Build data and configuration archive for AMAP/external
+      run: |
+        set +f
+        mkdir -p $TEMP_DIR/external
+        cp -R data/example_external_data $TEMP_DIR/external/
+        mv $TEMP_DIR/external/example_external_data $TEMP_DIR/external/data
+        cp -R information/AMAP $TEMP_DIR/external/
+        mv $TEMP_DIR/external/AMAP $TEMP_DIR/external/information
+        mv $TEMP_DIR/external/data/README*.* $TEMP_DIR/external/
+        cd $TEMP_DIR
+        zip -r $WORK_DIR/docs/external.zip external
+        cd $WORK_DIR
+      continue-on-error: true
+
+    - name: Build data and configuration archive for OSPAR 2022
+      run: |
+        set +f
+        mkdir -p $TEMP_DIR/ospar
+        cp -R data/example_OSPAR $TEMP_DIR/ospar/
+        mv $TEMP_DIR/ospar/example_OSPAR $TEMP_DIR/ospar/data
+        cp -R information/OSPAR_2022 $TEMP_DIR/ospar/
+        mv $TEMP_DIR/ospar/OSPAR_2022 $TEMP_DIR/ospar/information
+        mv $TEMP_DIR/ospar/data/README*.* $TEMP_DIR/ospar/
+        cd $TEMP_DIR
+        zip -r $WORK_DIR/docs/ospar.zip ospar
+        cd $WORK_DIR
+      continue-on-error: true
+
+    - name: Build data and configuration archive for HELCOM 2023
+      run: |
+        set +f
+        mkdir -p $TEMP_DIR/helcom
+        cp -R data/example_HELCOM $TEMP_DIR/helcom/
+        mv $TEMP_DIR/helcom/example_HELCOM $TEMP_DIR/helcom/data
+        cp -R information/HELCOM_2023 $TEMP_DIR/helcom/
+        mv $TEMP_DIR/helcom/HELCOM_2023 $TEMP_DIR/helcom/information
+        mv $TEMP_DIR/helcom/data/README*.* $TEMP_DIR/helcom/
+        cd $TEMP_DIR
+        zip -r $WORK_DIR/docs/helcom.zip helcom
+        cd $WORK_DIR
+      continue-on-error: true
+
+    ## Deploys everything in the docs/ folder to gh-pages. This means
+    ## additional files can be deployed here.
+    - name: Deploy to GitHub pages 🚀
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      with:
+        clean: false
+        branch: gh-pages
+        folder: docs

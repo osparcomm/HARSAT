@@ -1,6 +1,9 @@
 # functions to assess imposex data
 
-get.index.biota.Imposex <- function(data, determinand, info) {
+get_index_imposex <- function(data, determinand, info) {
+
+  # silence non-standard evaluation warnings
+  n_individual <- NULL
 
   data$nfemale <- round(data$n_individual * data[["%FEMALEPOP"]] / 100)
   if (any(is.na(data$nfemale)))
@@ -81,7 +84,6 @@ imposex.variance <- list(
     devi.calc <- function(i, mu, y) {
       mu <- mu[i]
       y <- y[i]
-      assign("y", y, frame = 1)
       integrate(function(mu) (y - mu) / imposex.variance$variance(mu), mu, y)$integral
     }
     devi <- 2 * sapply(1:length(mu), devi.calc, mu = mu, y = y)
@@ -113,9 +115,12 @@ imposex.family <- list(
     devi.calc <- function(i, mu, y) {
       mu <- mu[i]
       y <- y[i]
-      assign("y", y)
-      integrate(function(mu) {(y - mu) / imposex.family$variance(mu)}, lower = mu, upper = y)$value     
-        # double check
+      out <- integrate(
+        function(mu) {(y - mu) / imposex.family$variance(mu)}, 
+        lower = mu, 
+        upper = y
+      )
+      out$value
     }
     devi <- 2 * sapply(1:length(mu), devi.calc, mu = mu, y = y)
     #			sign(y - mu) * sqrt(abs(devi) * w)
@@ -141,8 +146,11 @@ imposex.family <- list(
 
 assess_imposex <- function(
     data, annualIndex, AC, recent.years, determinand, species, 
-    station_code, thetaID, max.year, info.imposex, recent.trend = 20) {
-  
+    station_code, theta = NULL, max.year, info.imposex, recent.trend = 20) {
+
+  # silence non-standard evaluation warnings
+  .data <- NULL
+
   # main assessment routine for imposex data (imposex functions)
   
   # order data
@@ -217,24 +225,22 @@ assess_imposex <- function(
   # NB the following assumes that only a single imposex measure is assessed
   # for each station / species combination - need to make this bullet proof
   
-  if (all(indiID) & thetaID %in% names(biota.VDS.estimates)) {
+  if (all(indiID) & !is.null(theta)) {
     
-    # get theta estimates for modelling
+    # retain cut point estimates of theta for modelling
     
-    theta <- biota.VDS.estimates[[thetaID]]$par
-    theta <- list(est = theta[names(theta) %in% as.character(0:5)])
+    theta$est <- theta$par[1:theta$K]
     
-    ntheta <- length(theta$est)
-    theta$vcov <- biota.VDS.estimates[[thetaID]]$vcov[1:ntheta, 1:ntheta, drop = FALSE]
+    theta$vcov <- theta$vcov[1:theta$K, 1:theta$K, drop = FALSE]
     
     # restrict categories where too few data to estimate cut points
     
-    data <- within(data, {
-      VDS <- concentration
-      VDS[VDS > ntheta] <- ntheta
-      VDS <- factor(VDS, levels = 0:ntheta)
-    })
-  
+    data <- dplyr::mutate(
+      data,
+      VDS = pmin(.data$concentration, theta$K),
+      VDS = factor(.data$VDS, levels = 0:theta$K)
+    )
+ 
     assessment <- imposex_assess_clm(
       data, theta, annualIndex, species, recent.trend, max.year
     )
@@ -289,32 +295,32 @@ imposex_class <- function(species, x) {
 
   switch(
     species, 
-    "Nucella lapillus" = case_when(
+    "Nucella lapillus" = dplyr::case_when(
       x < 0.3  ~ "A", 
       x < 2.0  ~ "B", 
       x < 4.0  ~ "C", 
       x <= 5.0 ~ "D",
       TRUE     ~ "E"
     ), 
-    "Tritia nitida / reticulata" = case_when(
+    "Tritia nitida / reticulata" = dplyr::case_when(
       x < 0.3  ~ "B",
       x < 2.0  ~ "C",
       x <= 3.5 ~ "D",
       TRUE     ~ "F"
     ), 
-    "Buccinum undatum" = case_when(
+    "Buccinum undatum" = dplyr::case_when(
       x < 0.3  ~ "B", 
       x < 2.0  ~ "C", 
       x <= 3.5 ~ "D",
       TRUE     ~ "F"
     ),
-    "Neptunea antiqua" = case_when(
+    "Neptunea antiqua" = dplyr::case_when(
       x < 0.3  ~ "A",
       x < 2.0  ~ "B",
       x <= 4   ~ "C",
       TRUE     ~ "F"
     ),
-    "Littorina littorea" = case_when(
+    "Littorina littorea" = dplyr::case_when(
       x < 0.3  ~ "C",
       x < 0.5  ~ "D",
       x <= 1.2 ~ "E", 
@@ -328,6 +334,9 @@ imposex_class <- function(species, x) {
 
 imposex.assess.index <- function(annualIndex, species, determinand, info.imposex) {
   
+  # silence non-standard evaluation warnings
+  se <- NULL
+
   year <- annualIndex$year
   value <- annualIndex$index
   weights <- annualIndex$nfemale

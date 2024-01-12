@@ -6,6 +6,11 @@
 \usage{
 get_basis_biota_OSPAR(data, info)
 }
+\arguments{
+\item{data}{the data}
+
+\item{info}{the information object}
+}
 \description{
 Gets the OSPAR biota target basis
 }

@@ -7,8 +7,7 @@
 ## system, but we check serial too to be safe.
 
 library(harsat)
-library(here)
-working.directory <- here()
+working.directory <- getwd()
 
 
 water_data <- read_data(

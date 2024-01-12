@@ -6,6 +6,17 @@
 \usage{
 ctsm.VDS.index.opt(data, theta, refLevel, calc.vcov = FALSE)
 }
+\arguments{
+\item{data}{Individual imposex data}
+
+\item{theta}{Maximum imposex stage}
+
+\item{refLevel}{An (optional) reference level for parameter estimation;
+defaults to a index with intermediate levels of imposex}
+
+\item{calc.vcov}{Logical specifying whether to calculate the covariance
+matrix of the parameter estimates; defaults to FALSE}
+}
 \description{
 ctsm.VDS.index.opt
 }

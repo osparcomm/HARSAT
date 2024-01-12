@@ -73,7 +73,7 @@ The determinand file will be `determinand.csv` in your information files directo
 | `water_sd_constant` | character | no | yes | See `biota_sd_constant` |
 | `water_sd_variable` | character | no | yes | See `biota_sd_variable` |
 | `distribution` | character | yes | yes | A distribution type; for chemical contaminants, this should be set to `lognormal`. Only required for determinands where at least one of `biota_assess`, `sediment_assess` or `water_assess` are `TRUE` |
-| `good_status` | character | yes | Whether `high` or `low` values of the determinand indicates a healthy environment. Only required for determinands where at least one of `biota_assess`, `sediment_assess` or `water_assess` are `TRUE` |
+| `good_status` | character | yes | yes | Whether `high` or `low` values of the determinand indicates a healthy environment. Only required for determinands where at least one of `biota_assess`, `sediment_assess` or `water_assess` are `TRUE` |
 
 A yes* in the mandatory column means that e.g. `biota_group`, `biota_assess` etc. are mandatory for a biota assessment, but can be omitted if there is only going to be a sediment and water assessment.
 
@@ -131,8 +131,8 @@ The biota threshold file will be `thresholds_biota.csv` in your information file
 | column name   | type      | mandatory | NA allowed | comments              |
 | ------------- | --------- | :-------: | :--------: | --------------------- |
 | `determinand` | character | yes | no | The determinand code, which must key to the determinands file |
-| `species_group` | character | yes | The species group, a key to the `species.csv` file |
-| `species_subgroup` | character | yes | The species subgroup, a key to the `species.csv` file |
+| `species_group` | character | yes | no | The species group, a key to the `species.csv` file |
+| `species_subgroup` | character | yes | no | The species subgroup, a key to the `species.csv` file |
 | `species` | character | yes | yes | The species, a key to the `species.csv` file (and specifically the `reference_species` column) |
 | `matrix` | character | yes | no | The tissue type (ICES code); for example `EH`, `MU`, `SB`. If the threshold can be applied to multiple tissues then provide all the relevant tissues separated by a tilde. For example, `LI~MU~SB`. |
 | `method_analysis` | character | yes | yes | The method of analysis (ICES code). Only provide values for PAH metabolites, otherwise leave blank. |

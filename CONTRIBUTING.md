@@ -100,7 +100,8 @@ Let's assume the current version is `x.y.z`
 ```
 git checkout develop
 git flow release start x.y.z+1
-emacs DESCRIPTION ## Update version x.y.z-9000 -> x.y.z+1
+emacs DESCRIPTION     ## Update version x.y.z-9000 -> x.y.z+1
+emacs CHANGES.md      ## Update the change log, as appropriate
 R --quiet --vanilla < vignettes/precompile.R
 R CMD build .
 R CMD check --no-manual harsat_x.y.z+1.tar.gz
@@ -113,7 +114,7 @@ git push --tags
 git push upstream
 git push --tags upstream
 git checkout develop
-emacs DESCRIPTION ## Bump version to x.y.(z+1)-9000
+emacs DESCRIPTION      ## Bump version to x.y.(z+1)-9000
 git commit -am "Bump develop version [ci skip]"
 git push
 git push upstream

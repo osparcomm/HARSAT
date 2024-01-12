@@ -45,18 +45,23 @@ it, as covered in the [Getting Started](/harsat.html) guide).
 library(harsat)
 ```
 
-And load the R package `here`, because we use the working directory to find
+We set up our main directory to find
 the data files. If you use your own data files, you will need to point to
-a directory containing a copy.
+a directory containing a copy. We usually do this by putting our data files
+in a directory `data`, and information files in a directory `information`,
+but you can use any directory for these.
 
-```{r}
-library(here)
-working.directory <- here()
+```{r, echo=FALSE,results='asis'}
+library(rprojroot)
+working.directory <- is_r_package$find_file()
+cat("```r\n")
+cat("working.directory <- '", working.directory, "'\n", sep="");
+cat("```\n")
 ```
 
 # Water assessment
 
-First, we use `read_data` to read in the contaminant data, the station
+First, we use `read_data()` to read in the contaminant data, the station
 dictionary, and two important reference tables: the determinand and threshold
 reference tables. There are several things to note about the function call:  
 
@@ -215,10 +220,12 @@ write_summary_table(
     levels = c("Metals", "Organotins", "Organofluorines"), 
     labels = c("Metals", "Organotins", "Organofluorines")
   ),
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
@@ -250,14 +257,14 @@ The sediment data are grouped into time series which consist of the
 measurements of single determinand in a single matrix (the fraction the sample
 has been sieved to; e.g. `SED63` or `SEDTOT`) at a single monitoring station.
 
-The `create_timeseries` call for sediment differs from that for water in two
+The `create_timeseries()` call for sediment differs from that for water in two
 ways. First, `determinands.control` identifies two groups of determinands that
 need to be summed. Second, the arguments `normalise` and `normalise.control`
 specify how the normalisation for grain size should be carried out. There are
 default functions for normalisation that will work in many cases. However, the
 process for HELCOM is more complicated (because unlike other metals, copper is
 normalised to organic carbon rather than aluminium) so a customised function
-`normalise_sediment_HELCOM` is provided. The argument `normalise.control`
+`normalise_sediment_HELCOM()` is provided. The argument `normalise.control`
 specifies that metals (apart from copper) will be normalised to 5% aluminium
 and copper and organics will be normalised to 5% organic carbon. The normalise
 functions need a bit of work, so expect them to change.
@@ -317,10 +324,12 @@ write_summary_table(
       "Organobromines", "Organobromines" 
     )
   ),
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
@@ -356,17 +365,6 @@ need to provide the individual TEQs to allow the construction of the WHO TEQ
 for dioxins, furans and planar PCBS (labelled TEQDFP). These are the values
 for the human health QS. This stage won't be necessary in later releases.
 
-```{r helcom-teqs}
-info_TEQ <- c(
-  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
-  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.0003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
-)
-```
-
 The biota data are grouped into time series which consist of the 
 measurements of a single determinand in a single matrix (tissue type; e.g. 
 'EH', `LI' or `SB`) in a single species at a single monitoring station. PAH
@@ -381,8 +379,9 @@ before the six PCBs are summed to give SCB6 in order for them to be included
 in the sum.
 
 There are also two 'bespoke' actions in `determinands.control`. These are
-customised functions that do more complicated things. One of
-them computes the TEQDFP. The other deals with the three different ways in
+customised functions that do more complicated things. One of them computes the 
+WHO TEQ for dioxins, furans and planar PCBS (labelled TEQDFP) using the TEFs 
+for the human health QS. The other deals with the three different ways in
 which lipid weight measurements can be submitted.
 
 Finally, `normalise_biota_HELCOM()` is a customised function that determines which
@@ -411,7 +410,11 @@ biota_timeseries <- create_timeseries(
       det = c("CB28", "CB52", "CB101", "CB138", "CB153", "CB180"), 
       action = "sum"
     ),
-    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_human_health), 
+      action = "bespoke", 
+      weights = info_TEF$DFP_human_health
+    ),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   ),
   normalise = normalise_biota_HELCOM,
@@ -468,10 +471,12 @@ write_summary_table(
       "PCBs and dioxins", "PCBs and dioxins"
     )
   ),
-  classColour = list(
-    below = c("BAC" = "green", "EAC" = "green", "EQS" = "green", "MPC" = "green"),
-    above = c("BAC" = "red", "EAC" = "red", "EQS" = "red", "MPC" = "red"),
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = c("EAC", "EQS", "MPC")),
   output_dir = summary.dir

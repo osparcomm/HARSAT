@@ -1,12 +1,13 @@
 Package: harsat
 Title: Harmonized Regional Seas Assessment Tool
-Version: 0.1.3.1003
+Version: 1.0.0
 Authors@R: c(
     person(given = "Arctic Monitoring and Assessment Programme (AMAP)", email = "amap@amap.no", role = c("cph", "fnd", "aut")),
     person(given = "Helsinki Commission (HELCOM)", email = "secretariat@helcom.fi", role = c("cph", "fnd", "aut")),
     person(given = "OSPAR Commission (OSPAR)", email = "data@ospar.org", role = c("cph", "fnd", "cre", "aut")),
     person(given = "International Council for the Exploration of the Sea (ICES)", email = "info@ices.dk", role = c("cph", "aut")),
-    person(given = "AmbieSense Ltd", email = "info@ambiesense.com", role = c("cph", "aut"))
+    person(given = "AmbieSense Ltd", email = "info@ambiesense.com", role = c("cph", "aut")),
+    person(given = "HARSAT User Group", email = "harsat@ospar.org", role = c("ctb"))
   )
 Description: Tools for the assessment of data concerning contaminants (hazardous
   substances) and their effects in the marine environment. The code includes
@@ -19,7 +20,7 @@ BugReports: https://github.com/osparcomm/HARSAT/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr, rmarkdown
-Depends: R (>= 4.2.1)
+Depends: R (>= 4.2.1.0)
 Imports:
   flexsurv,
   lme4,
@@ -31,6 +32,8 @@ Imports:
   MASS,
   mvtnorm, 
   dplyr,
+  magrittr,
+  lattice,
   lubridate,
   readr,
   stringr,
@@ -42,5 +45,6 @@ Imports:
 Suggests: 
   knitr,
   rmarkdown,
+  rprojroot,
   testthat (>= 3.0.0)
 Config/testthat/edition: 3

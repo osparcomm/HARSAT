@@ -55,14 +55,25 @@ write_summary_table(
       "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
     )
   ),
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_OSPAR")
 )
+
+
+report_assessment(
+  water_assessment, 
+  subset = determinand %in% "ZN",
+  output_dir = file.path("output", "reports")
+)
+
+
 
 
 # Sediment ----
@@ -80,16 +91,6 @@ sediment_data <- read_data(
 sediment_data <- tidy_data(sediment_data)
 
 
-info_TEQ <- c(
-  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
-  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
-)
-
-
 sediment_timeseries <- create_timeseries(
   sediment_data,
   determinands.control = list(
@@ -100,7 +101,11 @@ sediment_timeseries <- create_timeseries(
     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
     CB138 = list(det = c("CB138+163"), action = "replace"),
     CB156 = list(det = c("CB156+172"), action = "replace"),
-    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_environmental), 
+      action = "bespoke", 
+      weights = info_TEF$DFP_environmental
+    ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum")
   ),
   normalise = normalise_sediment_OSPAR,
@@ -159,6 +164,14 @@ write_summary_table(
 )
 
 
+report_assessment(
+  sediment_assessment, 
+  subset = series == "10744 BD153 SEDTOT",
+  output_dir = file.path("output", "reports")
+)
+
+
+
 
 # Biota ----
 
@@ -173,15 +186,6 @@ biota_data <- read_data(
 )  
 
 biota_data <- tidy_data(biota_data)
-
-info_TEQ <- c(
-  "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
-  "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-  "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-  "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-  "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-  "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
-)
 
 biota_timeseries <- create_timeseries(
   biota_data,
@@ -207,7 +211,11 @@ biota_timeseries <- create_timeseries(
       det = c("CB28", "CB52", "CB101", "CB118", "CB138", "CB153", "CB180"), 
       action = "sum"
     ),
-    TEQDFP = list(det = names(info_TEQ), action = "bespoke"),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_environmental), 
+      action = "bespoke", 
+      weights = info_TEF$DFP_environmental
+    ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"),
     HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum"),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
@@ -253,54 +261,94 @@ check_assessment(biota_assessment)
 
 
 
+
+
+# environmental summary
+
+wk_groups <- list(
+  levels = c(
+    "Metals", "Organotins", 
+    "PAH_parent", "PAH_alkylated", "Metabolites", 
+    "PBDEs", "Organobromines", 
+    "Organofluorines", 
+    "Chlorobiphenyls", "Dioxins", "Organochlorines",
+    "Effects"
+  ),  
+  labels = c(
+    "Metals", "Organotins", 
+    "PAH parent compounds", "PAH alkylated compounds", "PAH metabolites", 
+    "Polybrominated diphenyl ethers", "Organobromines (other)", 
+    "Organofluorines", 
+    "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)",
+    "Biological effects (other)"
+  )
+)
+
 write_summary_table(
   biota_assessment,
-  determinandGroups = list(
-    levels = c(
-      "Metals", "Organotins", 
-      "PAH_parent", "PAH_alkylated", "Metabolites", 
-      "PBDEs", "Organobromines", 
-      "Organofluorines", 
-      "Chlorobiphenyls", "Dioxins", "Organochlorines",
-      "Effects"
-    ),  
-    labels = c(
-      "Metals", "Organotins", 
-      "PAH parent compounds", "PAH alkylated compounds", "PAH metabolites", 
-      "Polybrominated diphenyl ethers", "Organobromines (other)", 
-      "Organofluorines", 
-      "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)",
-      "Biological effects (other)"
+  determinandGroups = wk_groups,
+  symbology = list(
+    colour = list(
+      below = c(
+        "BAC" = "blue",
+        "NRC" = "blue",
+        "EAC" = "green", 
+        "FEQG" = "green",
+        "LRC" = "green", 
+        "QSsp" = "green"
+      ),
+      above = c(
+        "BAC" = "orange", 
+        "NRC" = "orange", 
+        "EAC" = "red", 
+        "FEQG" = "red",
+        "LRC" = "red", 
+        "QSsp" = "red"
+      ),
+      none = "black"
     )
-  ),
-  classColour = list(
-    below = c(
-      "BAC" = "blue",
-      "NRC" = "blue",
-      "EAC" = "green", 
-      "FEQG" = "green",
-      "LRC" = "green", 
-      "QSsp" = "green", 
-      "MPC" = "green",
-      "QShh" = "green"
-    ),
-    above = c(
-      "BAC" = "orange", 
-      "NRC" = "orange", 
-      "EAC" = "red", 
-      "FEQG" = "red",
-      "LRC" = "red", 
-      "QSsp" = "red", 
-      "MPC" = "red",
-      "QShh" = "green"
-    ),
-    none = "black"
   ),
   collapse_AC = list(
     BAC = c("BAC", "NRC"),
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
   ),
+  output_file = "biota_summary_env.csv",
   output_dir = file.path("output", "example_OSPAR")
 )
 
+
+# health summary
+
+write_summary_table(
+  biota_assessment,
+  determinandGroups = wk_groups,
+  symbology = list(
+    colour = list(
+      below = c(
+        "MPC" = "green", 
+        "QShh" = "green"
+      ),
+      above = c(
+        "MPC" = "red", 
+        "QShh" = "red"
+      ),
+      none = "black"
+    )
+  ),
+  collapse_AC = list(
+    BAC = c("BAC", "NRC"),
+    EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
+    HQS = c("MPC", "QShh")
+  ),
+  output_file = "biota_summary_health.csv",
+  output_dir = file.path("output", "example_OSPAR")
+)
+
+
+
+report_assessment(
+  biota_assessment, 
+  subset = determinand %in% "ZN",
+  output_dir = file.path("output", "reports")
+)
