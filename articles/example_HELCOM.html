@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,8 +132,8 @@ We usually do this by putting our data files in a directory
 <div class="section level2">
 <h2 id="water-assessment">Water assessment<a class="anchor" aria-label="anchor" href="#water-assessment"></a>
 </h2>
-<p>First, we use <code>read_data</code> to read in the contaminant data,
-the station dictionary, and two important reference tables: the
+<p>First, we use <code><a href="../reference/read_data.html">read_data()</a></code> to read in the contaminant
+data, the station dictionary, and two important reference tables: the
 determinand and threshold reference tables. There are several things to
 note about the function call:</p>
 <ul>
@@ -362,10 +362,12 @@ release.</p>
 <span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Metals"</span>, <span class="st">"Organotins"</span>, <span class="st">"Organofluorines"</span><span class="op">)</span>, </span>
 <span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Metals"</span>, <span class="st">"Organotins"</span>, <span class="st">"Organofluorines"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  classColour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
-<span>    above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
-<span>    none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
+<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
+<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
@@ -440,7 +442,7 @@ which are described below</p>
 measurements of single determinand in a single matrix (the fraction the
 sample has been sieved to; e.g. <code>SED63</code> or
 <code>SEDTOT</code>) at a single monitoring station.</p>
-<p>The <code>create_timeseries</code> call for sediment differs from
+<p>The <code><a href="../reference/create_timeseries.html">create_timeseries()</a></code> call for sediment differs from
 that for water in two ways. First, <code>determinands.control</code>
 identifies two groups of determinands that need to be summed. Second,
 the arguments <code>normalise</code> and <code>normalise.control</code>
@@ -449,7 +451,7 @@ There are default functions for normalisation that will work in many
 cases. However, the process for HELCOM is more complicated (because
 unlike other metals, copper is normalised to organic carbon rather than
 aluminium) so a customised function
-<code>normalise_sediment_HELCOM</code> is provided. The argument
+<code><a href="../reference/normalise_sediment_HELCOM.html">normalise_sediment_HELCOM()</a></code> is provided. The argument
 <code>normalise.control</code> specifies that metals (apart from copper)
 will be normalised to 5% aluminium and copper and organics will be
 normalised to 5% organic carbon. The normalise functions need a bit of
@@ -534,10 +536,12 @@ for external data) or print out the summary table</p>
 <span>      <span class="st">"Organobromines"</span>, <span class="st">"Organobromines"</span> </span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  classColour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
-<span>    above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
-<span>    none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
+<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
+<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
@@ -757,10 +761,12 @@ a topic for a future vignette.</p>
 <span>      <span class="st">"PCBs and dioxins"</span>, <span class="st">"PCBs and dioxins"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  classColour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"green"</span>, <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"green"</span>, <span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span>, <span class="st">"MPC"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>,</span>
-<span>    above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"MPC"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>,</span>
-<span>    none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
+<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
+<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAC"</span>, <span class="st">"EQS"</span>, <span class="st">"MPC"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>

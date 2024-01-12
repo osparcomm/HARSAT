@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -128,7 +128,7 @@ We usually do this by putting our data files in a directory
 <p>The OSPAR water assessment is very similar to the HOLAS assessment.
 The main difference is that more determinands are assessed which means
 that <code>determinands.control</code> needs to do more work in
-<code>create_timeseries</code>.</p>
+<code><a href="../reference/create_timeseries.html">create_timeseries()</a></code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"water"</span>,</span>
@@ -252,10 +252,12 @@ that <code>determinands.control</code> needs to do more work in
 <span>      <span class="st">"Polychlorinated biphenyls"</span>, <span class="st">"Organochlorines (other)"</span>, <span class="st">"Pesticides"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  classColour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
-<span>    above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
-<span>    none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
+<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
+<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
@@ -15088,8 +15090,8 @@ NA
 <h2 id="sediment-assessment">Sediment assessment<a class="anchor" aria-label="anchor" href="#sediment-assessment"></a>
 </h2>
 <p>The main differences in the sediment assessment relate to the
-normalisation procedure in <code>create_timeseries</code> and the use of
-multiple thresholds in <code>run_assessment</code>.</p>
+normalisation procedure in <code><a href="../reference/create_timeseries.html">create_timeseries()</a></code> and the use
+of multiple thresholds in <code><a href="../reference/run_assessment.html">run_assessment()</a></code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"sediment"</span>, </span>
@@ -15149,8 +15151,8 @@ multiple thresholds in <code>run_assessment</code>.</p>
 <span><span class="co">#&gt; Cleaning station dictionary</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cleaning contaminant and biological effects data</span></span></code></pre></div>
-<p>A customised function <code>normalise_sediment_OSPAR</code> has been
-written to implement the OSPAR normalisation procedure. This is
+<p>A customised function <code><a href="../reference/normalise_sediment_OSPAR.html">normalise_sediment_OSPAR()</a></code> has
+been written to implement the OSPAR normalisation procedure. This is
 necessary because the pivot values used for normalising metals are
 region-specific. That aside, the procedure is straightforward: all
 metals are normalised to 5% aluminium and all organics are normalised to
@@ -15246,22 +15248,24 @@ look at the <code>thresholds_sediment.csv</code> file.</p>
 <span>      <span class="st">"Polychlorinated biphenyls"</span>, <span class="st">"Dioxins"</span>, <span class="st">"Organochlorines (other)"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  classColour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"blue"</span>, </span>
-<span>      <span class="st">"ERL"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
-<span>      <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
-<span>      <span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
-<span>      <span class="st">"FEQG"</span> <span class="op">=</span> <span class="st">"green"</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"orange"</span>, </span>
-<span>      <span class="st">"ERL"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
-<span>      <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
-<span>      <span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
-<span>      <span class="st">"FEQG"</span> <span class="op">=</span> <span class="st">"red"</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"blue"</span>, </span>
+<span>        <span class="st">"ERL"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
+<span>        <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
+<span>        <span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
+<span>        <span class="st">"FEQG"</span> <span class="op">=</span> <span class="st">"green"</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"orange"</span>, </span>
+<span>        <span class="st">"ERL"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
+<span>        <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
+<span>        <span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
+<span>        <span class="st">"FEQG"</span> <span class="op">=</span> <span class="st">"red"</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>BAC <span class="op">=</span> <span class="st">"BAC"</span>, EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAC"</span>, <span class="st">"ERL"</span>, <span class="st">"EQS"</span>, <span class="st">"FEQG"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
@@ -38619,7 +38623,7 @@ dry weight basis, metal concentrations in fish on a wet weight basis,
 and most organic concentrations in fish on either a wet weight or lipid
 weight basis, depending on the typical lipid content of the fish and
 tissue. There are also rules for birds and mammals. This is dealt with
-using the customised function <code>get_basis_biota_OSPAR</code>.</p>
+using the customised function <code><a href="../reference/get_basis_biota_OSPAR.html">get_basis_biota_OSPAR()</a></code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
@@ -38711,23 +38715,23 @@ using the customised function <code>get_basis_biota_OSPAR</code>.</p>
 <span><span class="co">#&gt;     April, May, June, July </span></span>
 <span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2017 and 2022</span></span></code></pre></div>
 <p>Here, we demonstrate how to split up the modelling stage of the
-assessment into several parts. The call to <code>run_assessment</code>
+assessment into several parts. The call to <code><a href="../reference/run_assessment.html">run_assessment()</a></code>
 only assesses the metal time series (as specified by the metals in
-<code>wk_metals</code>). The call to <code>update_assessment</code> then
-assesses all the remaining time series. In general, you can subset both
-<code>run_assessment</code> and <code>update_assessment</code> using any
-column in the time series component of <code>biota_timeseries</code>;
-this includes <code>determinand</code>, <code>matrix</code>,
-<code>species</code> and, as a special case, <code>series</code>, if you
-just want to update one or two time series. The latter is particularly
-useful if a series has not converged and you want to rerun that series
-with different optimisation controls (subject of a separate
-vignette).</p>
+<code>wk_metals</code>). The call to <code><a href="../reference/update_assessment.html">update_assessment()</a></code>
+then assesses all the remaining time series. In general, you can subset
+both <code><a href="../reference/run_assessment.html">run_assessment()</a></code> and <code><a href="../reference/update_assessment.html">update_assessment()</a></code>
+using any column in the time series component of
+<code>biota_timeseries</code>; this includes <code>determinand</code>,
+<code>matrix</code>, <code>species</code> and, as a special case,
+<code>series</code>, if you just want to update one or two time series.
+The latter is particularly useful if a series has not converged and you
+want to rerun that series with different optimisation controls (subject
+of a separate vignette).</p>
 <p>The application of thresholds is also more complicated and can not be
 handled by the standard routines. For example, Background Assessment
 Concentrations for cadmium and lead in fish are only applied to species
 / tissue combinations where the lipid content is <span class="math inline">\(&gt;=\)</span> 3%. This is dealt with by using the
-customised function <code>get_AC_biota_OSPAR</code>.</p>
+customised function <code><a href="../reference/get_AC_biota_OSPAR.html">get_AC_biota_OSPAR()</a></code>.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wk_metals</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AG"</span>, <span class="st">"AS"</span>, <span class="st">"CD"</span>, <span class="st">"CO"</span>, <span class="st">"CR"</span>, <span class="st">"CU"</span>, <span class="st">"HG"</span>, <span class="st">"NI"</span>, <span class="st">"PB"</span>, <span class="st">"SE"</span>, <span class="st">"SN"</span>, <span class="st">"ZN"</span><span class="op">)</span></span>
@@ -38768,6 +38772,11 @@ a topic for a future vignette.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All assessment models have converged</span></span></code></pre></div>
+<p>We now write the summary table. Here the symbology is based on
+environmental thresholds. A separate call would be needed to get the
+symbology based on health thresholds. The symbology functionality is
+still under development and it is intended to allow both sets of
+symbologies to be calculated with a single call.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
@@ -38789,28 +38798,26 @@ a topic for a future vignette.</p>
 <span>      <span class="st">"Biological effects (other)"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  classColour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"blue"</span>,</span>
-<span>      <span class="st">"NRC"</span> <span class="op">=</span> <span class="st">"blue"</span>,</span>
-<span>      <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
-<span>      <span class="st">"FEQG"</span> <span class="op">=</span> <span class="st">"green"</span>,</span>
-<span>      <span class="st">"LRC"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
-<span>      <span class="st">"QSsp"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
-<span>      <span class="st">"MPC"</span> <span class="op">=</span> <span class="st">"green"</span>,</span>
-<span>      <span class="st">"QShh"</span> <span class="op">=</span> <span class="st">"green"</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"orange"</span>, </span>
-<span>      <span class="st">"NRC"</span> <span class="op">=</span> <span class="st">"orange"</span>, </span>
-<span>      <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
-<span>      <span class="st">"FEQG"</span> <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>      <span class="st">"LRC"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
-<span>      <span class="st">"QSsp"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
-<span>      <span class="st">"MPC"</span> <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>      <span class="st">"QShh"</span> <span class="op">=</span> <span class="st">"red"</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>        <span class="st">"NRC"</span> <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>        <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
+<span>        <span class="st">"FEQG"</span> <span class="op">=</span> <span class="st">"green"</span>,</span>
+<span>        <span class="st">"LRC"</span> <span class="op">=</span> <span class="st">"green"</span>, </span>
+<span>        <span class="st">"QSsp"</span> <span class="op">=</span> <span class="st">"green"</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        <span class="st">"BAC"</span> <span class="op">=</span> <span class="st">"orange"</span>, </span>
+<span>        <span class="st">"NRC"</span> <span class="op">=</span> <span class="st">"orange"</span>, </span>
+<span>        <span class="st">"EAC"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
+<span>        <span class="st">"FEQG"</span> <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span>        <span class="st">"LRC"</span> <span class="op">=</span> <span class="st">"red"</span>, </span>
+<span>        <span class="st">"QSsp"</span> <span class="op">=</span> <span class="st">"red"</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    BAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span>, <span class="st">"NRC"</span><span class="op">)</span>,</span>
@@ -38820,9 +38827,7 @@ a topic for a future vignette.</p>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>And finally, let’s take a look at the <code>biota_summary.csv</code>
-file. Note that the symbology in the summary table is still under
-development and currently does separate environmental and health
-tresholds in the status assessment.</p>
+file.</p>
 <table class="table datatable">
 <thead><tr>
 <th style="text-align:left;">
@@ -39065,7 +39070,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 7
@@ -39403,7 +39408,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 7
@@ -42913,7 +42918,7 @@ NA
 upward_triangle
 </td>
 <td style="text-align:left;">
-green
+red
 </td>
 <td style="text-align:right;">
 17
@@ -47312,7 +47317,7 @@ NA
 downward_triangle
 </td>
 <td style="text-align:left;">
-green
+black
 </td>
 <td style="text-align:right;">
 12
@@ -50170,7 +50175,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-red
+orange
 </td>
 <td style="text-align:right;">
 5
@@ -51860,7 +51865,7 @@ NA
 upward_triangle
 </td>
 <td style="text-align:left;">
-green
+red
 </td>
 <td style="text-align:right;">
 11
@@ -52033,7 +52038,7 @@ NA
 downward_triangle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 11
@@ -53043,7 +53048,7 @@ NA
 downward_triangle
 </td>
 <td style="text-align:left;">
-green
+red
 </td>
 <td style="text-align:right;">
 13
@@ -53216,7 +53221,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+red
 </td>
 <td style="text-align:right;">
 24
@@ -58760,7 +58765,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 23
@@ -58931,7 +58936,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+red
 </td>
 <td style="text-align:right;">
 9
@@ -61814,7 +61819,7 @@ NA
 small_filled_circle
 </td>
 <td style="text-align:left;">
-red
+black
 </td>
 <td style="text-align:right;">
 4
@@ -66356,7 +66361,7 @@ NA
 upward_triangle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 17
@@ -66527,7 +66532,7 @@ NA
 small_filled_circle
 </td>
 <td style="text-align:left;">
-green
+black
 </td>
 <td style="text-align:right;">
 3
@@ -66862,7 +66867,7 @@ NA
 downward_triangle
 </td>
 <td style="text-align:left;">
-green
+red
 </td>
 <td style="text-align:right;">
 5
@@ -69068,7 +69073,7 @@ NA
 small_filled_circle
 </td>
 <td style="text-align:left;">
-green
+black
 </td>
 <td style="text-align:right;">
 5
@@ -69912,7 +69917,7 @@ NA
 small_filled_circle
 </td>
 <td style="text-align:left;">
-green
+red
 </td>
 <td style="text-align:right;">
 3
@@ -72287,7 +72292,7 @@ NA
 downward_triangle
 </td>
 <td style="text-align:left;">
-green
+black
 </td>
 <td style="text-align:right;">
 10
@@ -75156,7 +75161,7 @@ NA
 small_open_circle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 1
@@ -75325,7 +75330,7 @@ NA
 small_open_circle
 </td>
 <td style="text-align:left;">
-green
+black
 </td>
 <td style="text-align:right;">
 1
@@ -77507,7 +77512,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 5
@@ -78850,7 +78855,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 9
@@ -79021,7 +79026,7 @@ NA
 small_open_circle
 </td>
 <td style="text-align:left;">
-green
+black
 </td>
 <td style="text-align:right;">
 4
@@ -80201,7 +80206,7 @@ NA
 upward_triangle
 </td>
 <td style="text-align:left;">
-green
+red
 </td>
 <td style="text-align:right;">
 16
@@ -81379,7 +81384,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 5
@@ -82576,7 +82581,7 @@ NA
 downward_triangle
 </td>
 <td style="text-align:left;">
-red
+black
 </td>
 <td style="text-align:right;">
 9
@@ -84440,7 +84445,7 @@ NA
 downward_triangle
 </td>
 <td style="text-align:left;">
-red
+black
 </td>
 <td style="text-align:right;">
 9
@@ -86113,7 +86118,7 @@ NA
 large_filled_circle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 14
@@ -86284,7 +86289,7 @@ NA
 small_open_circle
 </td>
 <td style="text-align:left;">
-green
+black
 </td>
 <td style="text-align:right;">
 4
@@ -87123,7 +87128,7 @@ NA
 small_open_circle
 </td>
 <td style="text-align:left;">
-green
+black
 </td>
 <td style="text-align:right;">
 2
@@ -87454,7 +87459,7 @@ NA
 downward_triangle
 </td>
 <td style="text-align:left;">
-green
+orange
 </td>
 <td style="text-align:right;">
 24

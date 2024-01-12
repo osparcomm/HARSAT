@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3.1004</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -196,6 +196,9 @@ the data</p>
 <h2 id="assessment">Assessment<a class="anchor" aria-label="anchor" href="#assessment"></a>
 </h2>
 <p>Main runs</p>
+<p>Note: the <code>control</code> argument specifies that the post-hoc
+power metrics will be based on a power of 80% and an annual percentage
+increase in concentration of 10%.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_assessment.html">run_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_timeseries</span>,</span>
@@ -203,7 +206,9 @@ the data</p>
 <span>  AC <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  get_AC_fn <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  recent_trend <span class="op">=</span> <span class="fl">20L</span>,</span>
-<span>  parallel <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>  extra_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>power <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>target_power <span class="op">=</span> <span class="fl">80</span>, target_trend <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; assessing series:  station_code A902; determinand BD100; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg</span></span>
@@ -401,7 +406,9 @@ the data</p>
 <span>  AC <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  get_AC_fn <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  recent_trend <span class="op">=</span> <span class="fl">20L</span>,</span>
-<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  extra_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>power <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>target_power <span class="op">=</span> <span class="fl">80</span>, target_trend <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="check-convergence">Check convergence<a class="anchor" aria-label="anchor" href="#check-convergence"></a>
@@ -415,7 +422,9 @@ the data</p>
 <h2 id="summary-files">Summary files<a class="anchor" aria-label="anchor" href="#summary-files"></a>
 </h2>
 <p>This writes the summary data to a file in
-<code>output/example_external_data</code>.</p>
+<code>output/example_external_data</code>. The argument
+<code>extra_output = "power"</code> ensures that the power metrics for
+lognormally distributed data will be exported.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">summary.dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"output"</span>, <span class="st">"example_external_data"</span><span class="op">)</span></span>
 <span></span>
@@ -429,8 +438,9 @@ the data</p>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span>,</span>
 <span>  export <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  determinandGroups <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  classColour <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  collapse_AC <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  symbology <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  collapse_AC <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>  extra_output <span class="op">=</span> <span class="st">"power"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
