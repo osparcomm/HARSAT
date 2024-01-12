@@ -1,5 +1,13 @@
 ## Change log
 
+### Version 1.0.0
+
+- Initial public release
+
+### Version 0.1.3
+
+- Various fixes
+
 ### Version 0.1.2
 
 - Fixed issues when packaged; see #326, #328

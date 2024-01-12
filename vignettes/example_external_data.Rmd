@@ -125,6 +125,10 @@ biota_timeseries <- create_timeseries(
 
 Main runs
 
+Note: the `control` argument specifies that the post-hoc power metrics will 
+be based on a power of 80% and an annual percentage increase in concentration 
+of 10%.
+
 
 ```r
 biota_assessment <- run_assessment(
@@ -133,7 +137,9 @@ biota_assessment <- run_assessment(
   AC = NULL,
   get_AC_fn = NULL,
   recent_trend = 20L,
-  parallel = FALSE
+  parallel = FALSE, 
+  extra_data = NULL,
+  control = list(power = list(target_power = 80, target_trend = 10)) 
 )
 #> 
 #> assessing series:  station_code A902; determinand BD100; species Globicephala melas; matrix BB; subseries JV; basis L; unit ug/kg
@@ -334,7 +340,9 @@ biota_assessment <- run_assessment(
   AC = NULL,
   get_AC_fn = NULL,
   recent_trend = 20L,
-  parallel = TRUE
+  parallel = TRUE,
+  extra_data = NULL,
+  control = list(power = list(target_power = 80, target_trend = 10)) 
 )
 ```
 
@@ -348,7 +356,9 @@ check_assessment(biota_assessment, save_result = FALSE)
 
 # Summary files
 
-This writes the summary data to a file in `output/example_external_data`.
+This writes the summary data to a file in `output/example_external_data`. The 
+argument `extra_output = "power"` ensures that the power metrics for 
+lognormally distributed data will be exported. 
 
 
 ```r
@@ -364,8 +374,9 @@ write_summary_table(
   output_dir = summary.dir,
   export = TRUE,
   determinandGroups = NULL,
-  classColour = NULL,
-  collapse_AC = NULL
+  symbology = NULL,
+  collapse_AC = NULL, 
+  extra_output = "power"
 )
 ```
 
