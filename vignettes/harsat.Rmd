@@ -244,7 +244,7 @@ water_timeseries <- create_timeseries(
 
 ## Assessment
 
-The next the next stage is to do the assessment.
+The next the next stage is to do the assessment, using `run_assessment()`.
 
 We've created a time series object, and pass that into this call.
 We have to say which thresholds we're going to use when we do the assessment and there are other options which we can put in here.
@@ -264,7 +264,7 @@ water_assessment <- run_assessment(
 
 There are various little warnings: these ones are nothing to worry about.
 
-We can then check that everything is converged.
+We can then check that everything is converged, using `check_assessment()`.
 
 
 ```r
@@ -288,7 +288,7 @@ if (!dir.exists(summary.dir)) {
 }
 ```
 
-And then we can generate the summary proper.
+And then we can generate the summary proper, using `write_summary_table()`.
 The summary file which will be very familiar to those who have been involved in the OSPAR and the HELCOM
 assessments. The summary files have information about each time series, 
 what the time series represents (which is the first set of columns), followed
@@ -317,5 +317,6 @@ write_summary_table(
   collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
 )
+#> Error in write_summary_table(water_assessment, determinandGroups = list(levels = c("Metals", : unused argument (classColour = list(below = c(EQS = "green"), above = c(EQS = "red"), none = "black"))
 ```
 
