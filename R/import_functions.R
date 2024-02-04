@@ -1290,25 +1290,28 @@ add_stations <- function(data, stations, info){
         .id = .id | 
           (.data$country == "France") |
           (.data$country == "Spain" & .data$.year > 2004) |
-          (.data$country == "The Netherlands" & .data$.year > 2006)
+          (.data$country == "The Netherlands" & .data$.year > 2006) |
+          (.data$country == "Germany" & .data$.year > 2022)
       ),
       sediment = dplyr::mutate(
         x, 
         .id = .id |   
           (.data$country == "France" & .data$.year > 2008) |
           (.data$country == "Spain" & .data$.year > 2004) |
-          (.data$country == "The Netherlands" & .data$.year > 2006)
+          (.data$country == "The Netherlands" & .data$.year > 2006) |
+          (.data$country == "Germany" & .data$.year > 2022)
       ),
       water = dplyr::mutate(
         x, 
         .id = .id |  
           (.data$country == "France") |
           (.data$country == "Spain" & .data$.year > 2004) |
-          (.data$country == "The Netherlands" & .data$.year > 2006)
+          (.data$country == "The Netherlands" & .data$.year > 2006) |
+          (.data$country == "Germany" & .data$.year > 2022)
       ),
     )
     
-    # and Germany currently only matches by name for HELCOM biota
+    # and Germany always matches by name for HELCOM biota
     
     if (info$compartment == "biota" && info$purpose == "HELCOM") {
       x <- dplyr::mutate(x, .id = .id | (.data$country %in% "Germany"))
