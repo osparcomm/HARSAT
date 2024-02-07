@@ -285,6 +285,11 @@ control_default <- function(purpose, compartment) {
   # use_stage is a logical which determines whether, for biota, stage is used
   # to populate subseries
   
+  # relative_uncertainties is a 2-vector giving the range of acceptable 
+  # relative uncertainties for log-normally distributed data; the default is
+  # to accept relative uncertainties greater than (but not equal) to 1% and 
+  # less than (but not equal to) 100%
+  
   region <- list()
   
   region$id <- switch(
@@ -315,6 +320,8 @@ control_default <- function(purpose, compartment) {
   )
   
   use_stage <- FALSE
+  
+  relative_uncertainty <- c(1, 100)
 
   add_stations <- switch(
     purpose, 
@@ -366,7 +373,8 @@ control_default <- function(purpose, compartment) {
     region = region,
     add_stations = add_stations,
     bivalve_spawning_season = bivalve_spawning_season,
-    use_stage = use_stage
+    use_stage = use_stage,
+    relative_uncertainty = relative_uncertainty
   )
 }
 
@@ -409,6 +417,17 @@ control_modify <- function(control_default, control) {
         call. = FALSE
       )
     }
+  }
+
+  
+  if (length(control$relative_uncertainty) != 2L || 
+      control$relative_uncertainty[1] < 0 || 
+      control$relative_uncertainty[1] > control$relative_uncertainty[2]) {
+    stop(
+      "error in control argument: invalid range of acceptable relative ", 
+      "uncertainties",
+      call. = FALSE
+    )
   }
   
   control
@@ -2418,7 +2437,13 @@ create_timeseries <- function(
     data$pargroup <- ctsm_get_info(info$determinand, data$determinand, "pargroup")
   }
   
+  # NB distribution will be missing for auxiliary data
 
+  data$distribution <- ctsm_get_info(
+    info$determinand, data$determinand, "distribution", na_action = "output_ok"
+  )
+  
+  
   # drop samples which only have auxiliary data
   
   ok <- with(data, sample %in% sample[group != "Auxiliary"])
@@ -2473,62 +2498,27 @@ create_timeseries <- function(
 
   # ensure censoring, limit of detection and limit of quantification are consistent
 
-  data <- ctsm_check_censoring(data, info, print_code_warnings)
+  data <- check_censoring(data, info, print_code_warnings)
   
 
-  # convert uncertainty into standard deviations, and remove any associated variables
-  
-  data <- ctsm_check(
-    data, 
-    !is.na(uncertainty) & uncertainty <= 0, 
-    action = "make.NA", 
-    message = "Non-positive uncertainties", 
-    file_name = "non_positive_uncertainties", 
-    missing_id = "uncertainty",
-    info = info
-  )
-  
-  data <- dplyr::mutate(
-    data, 
-    uncertainty_sd = dplyr::case_when(
-      unit_uncertainty %in% "U2" ~ uncertainty / 2, 
-      unit_uncertainty %in% "%" ~ value * uncertainty / 100, 
-      TRUE ~ uncertainty
-    ),
-    uncertainty_rel = 100 * (uncertainty_sd / value)
-  )                 
+  # ensure uncertainties are plausible
 
-  wk_id <- match("unit_uncertainty", names(data))
-  wk_n <- ncol(data)
-  data <- data[c(
-    names(data)[1:wk_id], 
-    "uncertainty_sd", "uncertainty_rel", 
-    names(data)[(wk_id+1):(wk_n-2)])]
+  data <- check_uncertainty(data, info, type = "reported")
+
   
-  ctsm_check(
-    data, 
-    !is.na(uncertainty) & uncertainty_rel >= 100, 
-    action = "warning", 
-    message = "Large uncertainties", 
-    file_name = "large uncertainties",
-    info = info
-  )
-  
-  # delete data with large relative uncertainties
-  
+  # convert all uncertainties to unit SD
+
   data <- dplyr::mutate(
     data, 
-    uncertainty_sd = dplyr::if_else(
-      .data$uncertainty_rel < 100, 
-      .data$uncertainty_sd, 
-      NA_real_
-    ),
-    uncertainty = .data$uncertainty_sd, 
-    unit_uncertainty = NULL,
-    uncertainty_sd = NULL, 
-    uncertainty_rel = NULL
+    uncertainty = dplyr::case_when(
+      .data$unit_uncertainty %in% "U2" ~ .data$uncertainty / 2, 
+      .data$unit_uncertainty %in% "%" ~ .data$value * .data$uncertainty / 100, 
+      .default = .data$uncertainty
+    ), 
+    unit_uncertainty = "SD" 
   )
-  
+
+
 
   # sort out determinands where several determinands represent the same variable of interest
   # three types of behaviour: replace, sum and bespoke
@@ -2643,7 +2633,19 @@ create_timeseries <- function(
     
   }
 
+  # check that all normal and lognormal data have uncertainties
   
+  data <- ctsm_check(
+    data, 
+    distribution %in% c("normal", "lognormal") & !is.na(concentration) & 
+      is.na(uncertainty), 
+    action = "delete", 
+    message = "Missing uncertainties which cannot be imputed", 
+    file_name = "missing_uncertainties", 
+    info = info
+  )
+  
+
   # filter contaminant data to remove bivalve and gastropod records in the 
   # spawning season when they are elevated / more variable
   
@@ -2700,20 +2702,25 @@ create_timeseries <- function(
     data <- normalise(data, station_dictionary, info, normalise.control)
   }
     
-
-  # remove concentrations where:
-  #   uncertainty is missing
-  #   uncertainty cv is > 100%
-  # ensure uncertainty and censoring are missing when concentration is missing
+  # check whether implausible uncertainties have been calculated during the 
+  #   data processing (e.g. during normalisation)
+  # if so - make concentration, uncertainty and censoring missing
   
-  ok <- !is.na(data$concentration) & !is.na(data$uncertainty)
-  ok <- ok & (data$uncertainty <= data$concentration)
+  data <- check_uncertainty(data, info, type = "calculated")
   
-  data$concentration[!ok] <- NA_real_
-  data$uncertainty[!ok] <- NA_real_
-  data$censoring[!ok] <- NA_character_
   
-
+  # final check to ensure all normal and lognormal data have an uncertainty
+  
+  notok <- data$distribution %in% c("normal", "lognormal") & 
+    !is.na(data$concentration) & is.na(data$uncertainty)
+  
+  if (any(notok)) {
+    stop(
+      "uncertainties missing where they should be present: \n", 
+      "contact HARSAT development team")
+  }
+  
+  
   # drop groups of data at stations with no data in recent years
 
   cat("   Dropping groups of compounds / stations with no data between", 
@@ -3651,7 +3658,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, weights) {
 }  
 
 
-ctsm_check_censoring <- function(data, info, print_code_warnings) {
+check_censoring <- function(data, info, print_code_warnings) {
   
   # silence non-standard evaluation warnings
   value <- limit_detection <- limit_quantification <- NULL
@@ -3795,6 +3802,93 @@ ctsm_check_censoring <- function(data, info, print_code_warnings) {
 }
 
 
+check_uncertainty <- function(data, info, type = c("reported", "calculated")) { 
+
+  # import_functions.r
+  
+  # uncertainties must be non-negative for all data
+  # uncertainties must be strictly positive for normal or lognormal data
+  # relative uncertainties must be within specified range (1, 100) default for
+  #   lognormal data
+  
+  # type = reported is used for submitted data
+  # type = calculated is used to check whether implausible uncertainties have
+  #   been created in e.g. the normalisation process
+  
+  type <- match.arg(type)
+  
+  
+  # calculate relative uncertainties for lognormal data
+  # use value for reported data and concentration for calculated data
+  
+  id <- switch(type, reported = "value", calculated = "concentration")
+
+  data <- dplyr::mutate(
+    data, 
+    .ok = .data$distribution %in% "lognormal", 
+    relative_uncertainty = dplyr::case_when(
+      .ok & .data$unit_uncertainty %in% "SD" ~ 
+        100 * .data$uncertainty / .data[[id]], 
+      .ok & .data$unit_uncertainty %in% "U2" ~ 
+        100 * .data$uncertainty / (2 * .data[[id]]),
+      .ok & .data$unit_uncertainty %in% "%" ~ .data$uncertainty,
+      .default = NA_real_
+    ), 
+    .ok = NULL
+  )
+    
+  data <- dplyr::mutate(
+    data,
+    reason = dplyr::case_when(
+      .data$uncertainty < 0                                        ~ "negative", 
+      .data$distribution %in% c("normal", "lognormal") & 
+        .data$uncertainty == 0                                     ~ "zero",
+      .data$distribution %in% "lognormal" & 
+        .data$relative_uncertainty <= info$relative_uncertainty[1] ~ "small",
+      .data$distribution %in% "lognormal" & 
+        .data$relative_uncertainty >= info$relative_uncertainty[2] ~ "large", 
+      .default = "ok"
+    )
+  )    
+
+  data <- dplyr::relocate(
+    data, 
+    "relative_uncertainty", 
+    .after = "unit_uncertainty"
+  )
+  
+  data <- dplyr::relocate(data, "reason")
+
+  if (type == "reported") {
+    message <- "Implausible uncertainties reported with data"
+    file_name <- "implausible_uncertainties_reported"
+    missing_id <- "uncertainty"
+  } 
+  
+  if (type == "calculated") {
+    message <- "Implausible uncertainties calculated in data processing"
+    file_name <- "implausible_uncertainties_calculated"
+    missing_id <- c("concentration", "uncertainty", "censoring")
+  }
+      
+  data <- ctsm_check(
+    data, 
+    reason != "ok", 
+    action = "make.NA", 
+    message = message, 
+    file_name = file_name, 
+    missing_id = missing_id,
+    info = info
+  )
+  
+  data$reason <- NULL
+  data$relative_uncertainty <- NULL
+
+  data
+}
+  
+  
+  
 check_subseries <- function(data, info) {
 
   # import_functions.R
@@ -4463,7 +4557,7 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
   data
 }
 
-#' Normalises sediment concentrations, HELCOM vwersion
+#' Normalises sediment concentrations, HELCOM version
 #' 
 #' @param data the data object
 #' @param station_dictionary the station dictionary

@@ -129,3 +129,4 @@ plot_assessment(
   output_dir = file.path("output", "graphics"), 
   file_format = "pdf"
 )
+
