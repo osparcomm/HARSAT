@@ -1,32 +1,30 @@
 #' @export
-ctsm_uncrt_workup <- function(clean_data) {
+ctsm_uncrt_workup <- function(harsat_obj) {
 
   # silence non-standard evaluation warnings
-  determinands <- qaID <- uncertainty <- concentration <- NULL
-
+  .data <- NULL
+  
   # turn 'clean' data into uncertainty data
   
   # read in data
   
-  data <- clean_data$data
-  stations <- clean_data$stations
-  compartment <- clean_data$info$compartment
+  data <- harsat_obj$data
+  stations <- harsat_obj$stations
+  info <- harsat_obj$info
 
-  rm(clean_data)
+  rm(harsat_obj)
   
   
   # link to country
   
-  data$country <- stations[as.character(data$station), "country"]
+  data <- dplyr::left_join(
+    data, 
+    stations[c("station_code", "country")], 
+    by = "station_code"
+  )
   
 
-  # get alabo and remove missing alabo
-  
-  data <- within(data, {
-    alabo <- sapply(strsplit(as.character(qaID), "_"), "[", 3)
-    alabo[alabo %in% "NA"] <- NA
-    alabo <- factor(alabo)
-  })
+  # remove data with no analytical laboratory information
   
   data <- data[!is.na(data$alabo), ]
   
@@ -38,23 +36,25 @@ ctsm_uncrt_workup <- function(clean_data) {
   id_aux <- c(
     "", ".uncertainty", ".censoring", ".limit_detection", ".limit_quantification"
   )
+
   
-  id <- intersect(
-    c("country", "alabo", "year", "sample", "group", "determinand", 
-      "concentration", "uncertainty", 
-      "censoring", "limit_detection", "limit_quantification", 
-      paste0("AL", id_aux), 
-      paste0("LI", id_aux),
-      paste0("CORG", id_aux), 
-      paste0("LOIGN", id_aux)),
-    names(data)
+  id <- c(
+    "country", "alabo", "year", "sample", "group", "determinand", 
+    "concentration", "uncertainty", 
+    "censoring", "limit_detection", "limit_quantification", 
+    paste0("AL", id_aux), 
+    paste0("LI", id_aux),
+    paste0("CORG", id_aux), 
+    paste0("LOIGN", id_aux)
   )
-  data <- data[id]
+  
+  data <- dplyr::select(data, any_of(id))
+  
   
 
   # sort out AL and CORG etc for sediment
   
-  if (compartment == "sediment") {
+  if (info$compartment == "sediment") {
     
     id <- c("country", "alabo", "year", "group", "sample", "determinand")
 
@@ -115,37 +115,46 @@ ctsm_uncrt_workup <- function(clean_data) {
 
 
   # restrict to 'log-normally' distributed responses
+  # keep explicit mention of CORG and LOIGN just in case
   
-  ok <- with(data, {
-    dist <- ctsm_get_info(
-      "determinand", determinand, "distribution", na_action = "output_ok"
+  data <- dplyr::mutate(
+    data, 
+    distribution = ctsm_get_info(
+      info$determinand, 
+      .data$determinand, 
+      "distribution", 
+      na_action = "output_ok"
     ) 
-    dist %in% "lognormal" | determinand %in% c("CORG", "LOIGN")
-  })
-  
-  data <- data[ok, ]
+  )  
 
+  data <- dplyr::filter(
+    data, 
+    .data$distribution %in% "lognormal" | .data$determinand %in% c("CORG", "LOIGN")
+  )
+  
 
   # order groups and determinands within group
   
-  det_list <- determinands[[stringr::str_to_title(compartment)]]
-
-  data <- within(data, {
-    group <- factor(as.character(group), levels = c(names(det_list), "auxiliary"))
-    determinand <- factor(
-      as.character(determinand), 
-      levels = c(unlist(det_list), "AL", "LI", "CORG", "LOIGN"))
-  })
+  # det_list <- determinands[[stringr::str_to_title(compartment)]]
+  # 
+  # data <- within(data, {
+  #   group <- factor(as.character(group), levels = c(names(det_list), "auxiliary"))
+  #   determinand <- factor(
+  #     as.character(determinand), 
+  #     levels = c(unlist(det_list), "AL", "LI", "CORG", "LOIGN"))
+  # })
 
   
   # calculate relative uncertainty
   
-  data <- within(data, relative_u <- 100 * uncertainty / concentration)
+  data <- dplyr::mutate(
+    data, 
+    relative_u = 100 * .data$uncertainty / .data$concentration
+  )
 
-  data <- droplevels(data)
-
-  list(compartment = compartment, data = data)
+  list(compartment = info$compartment, data = data)
 }
+
 
 #' @export
 ctsm_uncrt_estimate <- function(data) {
