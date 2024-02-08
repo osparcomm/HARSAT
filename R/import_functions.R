@@ -2266,7 +2266,7 @@ create_timeseries <- function(
     )
   }
 
-    
+
   # normalisation can either be a logical (TRUE uses default normalisation function)
   # or a function
   
@@ -2561,8 +2561,6 @@ create_timeseries <- function(
 
   cat("\nCreating time series data\n")  
 
-  data <- data[setdiff(names(data), c("qalink", "alabo"))]
-
 
   # create new.unit and concentration columns comprising the details from the
   # determinand file in the information folder, required to get correct unit details
@@ -2605,7 +2603,7 @@ create_timeseries <- function(
   if (return_early) {
     out <- c(
       out, 
-      output_timeseries(data, station_dictionary, info) 
+      output_timeseries(data, station_dictionary, info, extra = "alabo")
     )
     
     return(out)
@@ -2846,7 +2844,7 @@ ctsm_check <- function(
 }
   
 
-output_timeseries <- function(data, station_dictionary, info) {
+output_timeseries <- function(data, station_dictionary, info, extra = NULL) {
   
   # silence non-standard evaluation warnings
   .data <- .group <- seriesID <- NULL
@@ -2879,6 +2877,10 @@ output_timeseries <- function(data, station_dictionary, info) {
     "concentration", "new.basis", "new.unit", "censoring",  
     "limit_detection", "limit_quantification", "uncertainty"
   )
+  
+  if (!is.null(extra)) {
+    id <- c(id, extra)
+  }
   
   auxiliary <- ctsm_get_auxiliary(data$determinand, info)
   auxiliary_id <- paste0(
