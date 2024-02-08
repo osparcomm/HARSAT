@@ -160,16 +160,16 @@ ctsm_uncrt_workup <- function(harsat_obj) {
 ctsm_uncrt_estimate <- function(data) {
   
   # silence non-standard evaluation warnings
-  .data <- n <- relative_u <- sd_variable <- sd_constant <- NULL
+  .data <- NULL
 
   # initialise output with total number of values by determinand
   
   options(dplyr.summarise.inform = FALSE)
   on.exit(options(dplyr.summarise.inform = NULL))
 
-  out <- data %>% 
-    dplyr::group_by(.data$determinand) %>% 
-    dplyr::summarise(n_values = n())
+  out <- data |> 
+    dplyr::group_by(.data$determinand) |> 
+    dplyr::summarise(n_values = dplyr::n())
 
   
   # remove duplicate combinations of concentration and uncertainty (and associated censoring variables)
@@ -186,9 +186,12 @@ ctsm_uncrt_estimate <- function(data) {
   
   # get number of 'unique values
   
-  out_unique <- data %>% 
-    dplyr::group_by(.data$determinand) %>% 
-    dplyr::summarise(n_unique = n(), n_alabo = dplyr::n_distinct(.data$alabo))
+  out_unique <- data |> 
+    dplyr::group_by(.data$determinand) |> 
+    dplyr::summarise(
+      n_unique = dplyr::n(), 
+      n_alabo = dplyr::n_distinct(.data$alabo)
+    )
 
   out <- dplyr::left_join(out, out_unique, by = "determinand")
   
@@ -202,16 +205,16 @@ ctsm_uncrt_estimate <- function(data) {
   # relative error
   # median relative_u for values above the detection level by alabo
   
-  out_relative <- data %>% 
-    dplyr::filter(.data$censoring == "") %>% 
-    dplyr::group_by(.data$determinand, .data$alabo) %>% 
+  out_relative <- data |> 
+    dplyr::filter(.data$censoring == "") |> 
+    dplyr::group_by(.data$determinand, .data$alabo) |> 
     dplyr::summarise(sd_variable = median(.data$relative_u) / 100) 
   
   # now the median value across alabos
   
-  out_relative <- out_relative %>% 
-    dplyr::group_by(.data$determinand) %>% 
-    dplyr::summarise(sd_variable = median(sd_variable))
+  out_relative <- out_relative |> 
+    dplyr::group_by(.data$determinand) |> 
+    dplyr::summarise(sd_variable = median(.data$sd_variable))
   
   out <- dplyr::left_join(out, out_relative, by = "determinand")
   
@@ -220,25 +223,25 @@ ctsm_uncrt_estimate <- function(data) {
   # median limit_detection for values with censoring == D, Q or "" by alabo
   # don't use "<" because we can't trust any of the limit values
   
-  out_constant <- data %>% 
-    dplyr::filter(.data$censoring %in% c("D", "Q", "")) %>% 
-    tidyr::drop_na(.data$limit_detection) %>% 
-    dplyr::group_by(.data$determinand, .data$alabo) %>% 
+  out_constant <- data |> 
+    dplyr::filter(.data$censoring %in% c("D", "Q", "")) |> 
+    tidyr::drop_na(.data$limit_detection) |> 
+    dplyr::group_by(.data$determinand, .data$alabo) |> 
     dplyr::summarise(sd_constant = median(.data$limit_detection) / 3) 
   
   # now the median value across alabos
   
-  out_constant <- out_constant %>% 
-    dplyr::group_by(.data$determinand) %>% 
-    dplyr::summarise(sd_constant = median(sd_constant))
+  out_constant <- out_constant |> 
+    dplyr::group_by(.data$determinand) |> 
+    dplyr::summarise(sd_constant = median(.data$sd_constant))
   
   out <- dplyr::left_join(out, out_constant, by = "determinand")
   
   # tidy up
   
-  out <- out %>% 
-    as.data.frame() %>% 
-    column_to_rownames("determinand") %>% 
+  out <- out |> 
+    as.data.frame() |> 
+    tibble::column_to_rownames("determinand") |> 
     round(6)
     
   out
