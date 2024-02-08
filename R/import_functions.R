@@ -2603,14 +2603,9 @@ create_timeseries <- function(
   
 
   if (return_early) {
-    out  = c(
+    out <- c(
       out, 
-      ctsm.import.value(
-        data, 
-        station_dictionary, 
-        info$compartment, 
-        info$purpose, 
-        print_code_warnings)
+      output_timeseries(data, station_dictionary, info) 
     )
     
     return(out)
@@ -2735,7 +2730,7 @@ create_timeseries <- function(
   
   out <- c(
     out, 
-    ctsm_import_value(data, station_dictionary, info)
+    output_timeseries(data, station_dictionary, info)
   )
   
   out
@@ -2851,7 +2846,7 @@ ctsm_check <- function(
 }
   
 
-ctsm_import_value <- function(data, station_dictionary, info) {
+output_timeseries <- function(data, station_dictionary, info) {
   
   # silence non-standard evaluation warnings
   .data <- .group <- seriesID <- NULL
