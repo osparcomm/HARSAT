@@ -248,27 +248,28 @@ ctsm_uncrt_estimate <- function(data) {
 }
 
 #' @export
-ctsm_uncrt_plot_estimates <- function(uncrt_obj, old_estimates, group_id) {
+ctsm_uncrt_plot_estimates <- function(uncrt_obj, group_id) {
 
-  id <- with(uncrt_obj$data, group %in% group_id)  
-  data <- uncrt_obj$data[id, ]
+  data <- dplyr::filter(uncrt_obj$data, .data$group %in% group_id)
   
-  data <- data[with(data, order(determinand, concentration)), ]
+  data <- dplyr::arrange(data, .data$determinand, .data$concentration)
   
-  ok <- with(data, relative_u >= 1 & relative_u <= 100)
-  data <- data[ok, ]
-
+  data <- dplyr::filter(data, .data$relative_u >= 1 & .data$relative_u <= 100)
+  
   new <- uncrt_obj$estimates[c("sd_constant", "sd_variable")]
   names(new) <- c("sdC", "sdV")
   
-  var_id <- paste(uncrt_obj$compartment, c("sd_constant", "sd_variable"), sep= ".")
-  old <- old_estimates[var_id]
+  var_id <- paste0(uncrt_obj$compartment, c("_sd_constant", "_sd_variable"))
+  old <- uncrt_obj$old_estimates[var_id]
   names(old) <- c("sdC", "sdV")
   
   xyplot(
     relative_u ~ concentration | determinand, data = data, 
     aspect = 1,
-    scales = list(alternating = FALSE, x = list(log = TRUE, relation = "free", equispaced = FALSE)), 
+    scales = list(
+      alternating = FALSE, 
+      x = list(log = TRUE, relation = "free", equispaced = FALSE)
+    ), 
     as.table = TRUE,
     panel = function(x, y, subscripts) {
       data <- data[subscripts, ]
