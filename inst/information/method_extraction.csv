@@ -10,6 +10,7 @@ AM-AQR,"APDC-complexation, MIBK-extraction, Aqua regia digestion",nn
 AM-HF-C,"APDC-complexation, MIBK-extraction, HF/HNO3 digestion",
 ANT,Acetonenitrile (legacy data text),nn
 AQR,Aqua regia extraction HNO3:HCL = 1:3,Pw
+ASE-DCM-HX,Accelerated Solvent Extraction with dichloromethane and hexane,nn
 BRB,Bromate/Bromide solvent,nn
 CD,Cadmium reduction,nn
 CDS,Cadmium reduction and Sulfanilamid and N-1-Naphtylethylendiamindihydrochlorid,nn
@@ -19,6 +20,7 @@ CTC,Extraction with carbon tetrachloride,nn
 DBC,"DBCDTC-Complexation, Chloroform-Methanol-Extraction",nn
 DCM,Dichloromethane,nn
 DET,Diethyl ether,
+dSPE-Q,QuEChERS buffered acetonitrile (MeCN) extraction with salting out with MgSO4 and cleanup on dispersive solid-phase column,nn
 dSPE-QEN,QuEChERS following EN 15662,nn
 ETA,Ethylacetate,nn
 ETH,Ethanol,nn
@@ -52,7 +54,7 @@ KPX-BA,Potassium-peroxodisulphate and boric acid (K2S2O8-H3BO3),
 LMF-A,Lithium metaborate fusion LiBO2 followed by dissolution in acid,Tot
 LMF-A-L,Lithium metaborate fusion LiBO2 followed by dissolution in acid (Lanthanoides),Tot
 MDCM,Methanol and dichloromethane,nn
-METH,Methanol,
+METH,Methanol,nn
 MGN-MGO,Ashing in presence of magnesiumnitrate and magnesiumoxide,
 MHCL,Methanol and HCL,nn
 MHX,Methanol/hexane mixture in acetic acid environment,nn
@@ -72,6 +74,7 @@ SFE,Supercritical Fluid Extraction,nn
 SMD,Smedes extraction (cyclohexane/isopropanol),nn
 SOX,Soxhlet method,nn
 SPE-DCM,Solid phase extraction with dichloromethane,
+SPE-MNA-SPE,Solid phase extraction with methanol and NaOH and Solid phase extraction,nn
 TCF,"Extraction with 1,1,2-Trichlortrifluorethan",nn
 TOL,Toluene,nn
 TOT,Total extraction method - report in METOA,nn
