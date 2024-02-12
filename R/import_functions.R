@@ -2533,7 +2533,7 @@ create_timeseries <- function(
       bespoke = get(paste("determinand.link", i, sep = "."), mode = "function")
     )
     
-    args = list(data = data, keep = i, drop = wk$det)
+    args = list(data = data, info = info, keep = i, drop = wk$det)
     if ("weights" %in% names(wk)) {
       args = c(args, list(weights = wk$weights))
     }
@@ -3251,7 +3251,7 @@ ctsm_check_determinands <- function(info, data, determinands, control = NULL) {
 
 
 
-determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...) {
+determinand.link.check <- function(data, info, keep, drop, printDuplicates = TRUE, ...) {
 
   # check whether any drop and keep are both submitted for the same sample and 
   # matrix and, if so, delete drop - note that ctsm_check doesn't do the
@@ -3278,7 +3278,8 @@ determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...
         keep, "and", dropTxt, "submitted in same sample - deleting", dropTxt, 
         "data"
       ), 
-      file_name = paste("determinand_link", keep, sep = "_"), 
+      file_name = paste("determinand_link", keep, sep = "_"),
+      info = info,
       ...
     )
   }
@@ -3287,7 +3288,7 @@ determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...
 }  
   
 
-determinand.link.replace <- function(data, keep, drop, ...) {
+determinand.link.replace <- function(data, info, keep, drop, ...) {
 
   # core function for relabelling determinand 'drop' as determinand 'keep'
   # most of the work is checking that there aren't data submitted as both for the same
@@ -3302,7 +3303,7 @@ determinand.link.replace <- function(data, keep, drop, ...) {
   
   # check for samples with both drop and keep and, if they exist, delete drop
 
-  data <- determinand.link.check(data, keep, drop, ...)
+  data <- determinand.link.check(data, info, keep, drop, ...)
   
   
   # relabel the levels so that drop becomes keep
@@ -3314,7 +3315,7 @@ determinand.link.replace <- function(data, keep, drop, ...) {
 }  
 
 
-determinand.link.imposex <- function(data, keep, drop, ...) {
+determinand.link.imposex <- function(data, info, keep, drop, ...) {
   
   stopifnot(length(keep) == 1, length(drop) == 1)
 
@@ -3370,7 +3371,7 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
 
 determinand.link.VDS <- determinand.link.IMPS <- determinand.link.INTS <- determinand.link.imposex
 
-determinand.link.BBKF <- function(data, keep, drop, ...) {
+determinand.link.BBKF <- function(data, info, keep, drop, ...) {
   
   stopifnot(
     identical(keep, "BBKF"), 
@@ -3379,30 +3380,36 @@ determinand.link.BBKF <- function(data, keep, drop, ...) {
   
   # first sum samples with both BBF and BKF
   
-  data <- determinand.link.sum(data, "BBKF", c("BBF", "BKF"))
+  data <- determinand.link.sum(data, info, "BBKF", c("BBF", "BKF"))
   
   # now sum samples with both BBJF and BKF to give BBJKF
   
-  data <- determinand.link.sum(data, "BBJKF", c("BBJF", "BKF"))
+  data <- determinand.link.sum(data, info, "BBJKF", c("BBJF", "BKF"))
   
   # now replace BBJKF with BBKF
   
-  data <- determinand.link.replace(data, "BBKF", "BBJKF")
+  data <- determinand.link.replace(data, info, "BBKF", "BBJKF")
   
   data
 }
 
 
 
-assign("determinand.link.LIPIDWT%", function(data, keep, drop, ...) {
+assign("determinand.link.LIPIDWT%", function(data, info, keep, drop, ...) {
 
   stopifnot(identical(keep, "LIPIDWT%"), identical(sort(drop), c("EXLIP%", "FATWT%")))
 
   # if multiple values present, choose FATWT%, then LIPIDWT%, then EXLIP% (from Foppe)
   
-  data <- determinand.link.check(data, keep = "LIPIDWT%", drop = "EXLIP%", printDuplicates = FALSE, ...)
-  data <- determinand.link.check(data, keep = "FATWT%", drop = "EXLIP%", printDuplicates = FALSE, ...)
-  data <- determinand.link.check(data, keep = "FATWT%", drop = "LIPIDWT%", printDuplicates = FALSE, ...)
+  data <- determinand.link.check(
+    data, info, keep = "LIPIDWT%", drop = "EXLIP%", printDuplicates = FALSE, ...
+  )
+  data <- determinand.link.check(
+    data, info, keep = "FATWT%", drop = "EXLIP%", printDuplicates = FALSE, ...
+  )
+  data <- determinand.link.check(
+    data, info, keep = "FATWT%", drop = "LIPIDWT%", printDuplicates = FALSE, ...
+  )
 
   if (!any(data$determinand %in% drop)) return(data)
 
@@ -3417,7 +3424,7 @@ assign("determinand.link.LIPIDWT%", function(data, keep, drop, ...) {
 })  
 
 
-determinand.link.sum <- function(data, keep, drop, ...) {
+determinand.link.sum <- function(data, info, keep, drop, ...) {
   
   stopifnot(length(keep) == 1, length(drop) > 1)
   
@@ -3538,7 +3545,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
 
 
 
-determinand.link.TEQDFP <- function(data, keep, drop, weights) {
+determinand.link.TEQDFP <- function(data, info, keep, drop, weights) {
 
   stopifnot(length(keep) == 1, length(drop) > 1)
   
