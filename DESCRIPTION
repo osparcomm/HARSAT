@@ -22,18 +22,19 @@ RoxygenNote: 7.2.3
 VignetteBuilder: knitr, rmarkdown
 Depends: R (>= 4.2.1.0)
 Imports:
+  dplyr,
   flexsurv,
+  lattice,
   lme4,
+  MASS,
   mgcv,
+  mvtnorm, 
   numDeriv,
   optimx,
   parallel,
   pbapply,
-  MASS,
-  mvtnorm, 
-  dplyr,
+  TeachingDemos,
   magrittr,
-  lattice,
   lubridate,
   readr,
   stringr,
