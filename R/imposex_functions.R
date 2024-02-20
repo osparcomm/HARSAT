@@ -240,9 +240,14 @@ assess_imposex <- function(
       VDS = pmin(.data$concentration, theta$K),
       VDS = factor(.data$VDS, levels = 0:theta$K)
     )
- 
+
+    # create seed for random number generation based on combination of 
+    # station_code and species 
+    
+    seed <- TeachingDemos::char2seed(paste0(station_code, species))
+     
     assessment <- imposex_assess_clm(
-      data, theta, annualIndex, species, recent.trend, max.year
+      data, theta, annualIndex, species, recent.trend, max.year, seed
     )
   }
   else {

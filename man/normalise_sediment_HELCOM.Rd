@@ -2,7 +2,7 @@
 % Please edit documentation in R/import_functions.R
 \name{normalise_sediment_HELCOM}
 \alias{normalise_sediment_HELCOM}
-\title{Normalises sediment concentrations, HELCOM vwersion}
+\title{Normalises sediment concentrations, HELCOM version}
 \usage{
 normalise_sediment_HELCOM(data, station_dictionary, info, control)
 }
@@ -16,5 +16,5 @@ normalise_sediment_HELCOM(data, station_dictionary, info, control)
 \item{control}{control values}
 }
 \description{
-Normalises sediment concentrations, HELCOM vwersion
+Normalises sediment concentrations, HELCOM version
 }
