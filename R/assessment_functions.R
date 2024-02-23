@@ -978,9 +978,9 @@ assess_lmm <- function(
     contrast.whole <- ctsm.lmm.contrast(fit, start = min(data$year), end = max(data$year))
     row.names(contrast.whole) <- "whole"
     
-    start.year <- max(max.year - recent.trend + 1, min(data$year))
-    if (sum(unique(data$year) >= start.year - 0.5) >= 5) {
-      contrast.recent <- ctsm.lmm.contrast(fit, start = start.year, end = max(data$year))
+    start_recent <- max(max.year - recent.trend + 1, min(data$year))
+    if (sum(unique(data$year) >= start_recent - 0.5) >= 5) {
+      contrast.recent <- ctsm.lmm.contrast(fit, start = start_recent, end = max(data$year))
       row.names(contrast.recent) <- "recent"
       contrast.whole <- rbind(contrast.whole, contrast.recent)
     }		
@@ -1065,15 +1065,46 @@ assess_lmm <- function(
     
     if (output$method %in% c("linear", "smooth")) {
       
-      # for linear trend and recent trend, use pltrend (from likelihood ratio test) if 
-      # method = "linear", because a better test 
-      # really need to go into profile likelihood territory here!
+      # pltrend
+      # method = "linear" use p_linear (from likelihood ratio test)  
+      # method = "smooth" use p from the Wald test in contrasts 
+      # for linear model, likelihood ratio test is a better test (fewer 
+      #   approximations) than the Wald test
+      # for smooth model, would be better to go into profile likelihood 
+      #   territory (future enhancement) 
       
-      pltrend <- if (output$method == "linear") p_linear else with(output$contrasts["whole", ], p)
+      # prtrend
+      # same approach; however p_linear could be misleading when the years at 
+      #   the end of the time series are all censored values and a flat model is 
+      #   fitted; the estimate of rtrend is shrunk to reflect this, but p_linear 
+      #   might be misleadingly significant; something to think about in the 
+      #   future
+      # however, there is a pathological case when all the fitted values in the 
+      #   recent period have the same value; rtrend is zero, and yet can still be 
+      #   significant based on p_linear even though there are no data to support 
+      #   this; in this case use p from the Wald test (which is unity)
+      
+      if (output$method == "linear") {
+        pltrend <- p_linear
+      } else {
+        pltrend <- output$contrasts["whole", "p"]
+      }
+      
       ltrend <- with(output$contrasts["whole", ], estimate / (end - start))
       
       if ("recent" %in% row.names(output$contrasts)) {
-        prtrend <- if (output$method == "linear") p_linear else with(output$contrasts["recent", ], p)
+        
+        max_year_pos <- 
+        
+        if (
+          output$method == "linear" & 
+          max(data$year[data$censoring %in% ""]) > start_recent
+        ) {
+          prtrend <- p_linear
+        } else {
+          prtrend <- output$contrasts["recent", "p"]
+        }          
+
         rtrend <- with(output$contrasts["recent", ], estimate / (end - start))
       }
     }
@@ -1292,8 +1323,17 @@ ctsm.lmm.contrast <- function(ctsm.ob, start, end) {
   wk <- t(wk) %*% ctsm.ob$Xpred[pos, ]
   se.contrast <- sqrt(wk %*% ctsm.ob$vcov %*% t(wk))
 
-  t.stat <- contrast / se.contrast
-  p.contrast <- 1 - pf(t.stat^2, 1, ctsm.ob$dfResid)
+  # catch pathological case where contrast = 0 and se.contrast = 0
+  # this can happen if all the data between start and end are censored, so
+  # a 'flat' model is fitted
+  
+  if (dplyr::near(contrast, 0L) & dplyr::near(se.contrast, 0L)) {
+    p.contrast <- 1
+  } else {
+    t.stat <- contrast / se.contrast
+    p.contrast <- 1 - pf(t.stat^2, 1, ctsm.ob$dfResid)
+  }
+  
   data.frame(start, end, estimate = contrast, se = se.contrast, p = p.contrast)
 }
 
