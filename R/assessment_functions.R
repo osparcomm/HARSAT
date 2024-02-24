@@ -1094,8 +1094,6 @@ assess_lmm <- function(
       
       if ("recent" %in% row.names(output$contrasts)) {
         
-        max_year_pos <- 
-        
         if (
           output$method == "linear" & 
           max(data$year[data$censoring %in% ""]) > start_recent
