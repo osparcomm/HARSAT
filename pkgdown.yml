@@ -1,4 +1,4 @@
-pandoc: 2.19.2
+pandoc: 3.1.11
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
@@ -11,7 +11,7 @@ articles:
   harsat: harsat.html
   reference-file-formats: reference-file-formats.html
   report-template: report-template.html
-last_built: 2024-02-24T21:30Z
+last_built: 2024-03-01T12:51Z
 urls:
   reference: http://osparcomm.github.io/HARSAT/reference
   article: http://osparcomm.github.io/HARSAT/articles
