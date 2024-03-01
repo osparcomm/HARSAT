@@ -3346,6 +3346,7 @@ determinand.link.imposex <- function(data, info, keep, drop, ...) {
     action = "warning",  
     message = paste("inconsistent", keep, "and", drop, "submitted in same year"), 
     file_name = paste("determinand_link", keep, sep = "_"), 
+    info = info,
     ...
   )
   
