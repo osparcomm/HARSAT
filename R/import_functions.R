@@ -2591,7 +2591,7 @@ create_timeseries <- function(
   # missing values for correction
   
   if (info$compartment == "biota") {
-    data <- ctsm.imposex.check.femalepop(data)
+    data <- ctsm.imposex.check.femalepop(data, info)
   }
   
 
