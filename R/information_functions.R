@@ -2081,6 +2081,10 @@ ctsm_convert_basis <- function(
   
   # set up working data frame
   
+  if (all(exclude)) {
+    return(conc)
+  }
+  
   data <- data.frame(
     conc, from, to, drywt, drywt_censoring, lipidwt, lipidwt_censoring, exclude 
   )
