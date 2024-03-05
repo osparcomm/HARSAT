@@ -175,6 +175,8 @@ ctsm.VDS.cl <- function(fit, nsim = 1000) {
   
   indexID <- setdiff(names(fit$par), cutsID)
 
+  set.seed(fit$seed)
+  
   data <- MASS::mvrnorm(nsim, fit$par, fit$vcov)
 
   data.cuts <- data[, cutsID, drop = FALSE]
