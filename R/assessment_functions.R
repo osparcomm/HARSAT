@@ -836,6 +836,7 @@ assess_lmm <- function(
         AC = AC,
         recent.years = recent.years, 
         determinand = determinand, 
+        good_status = good.status,
         max.year = max.year,
         recent.trend = recent.trend,
         nYearFull = nYearFull, 
@@ -1680,8 +1681,8 @@ ctsm_dyear <- function(
 # Other distributions ----
 
 assess_survival <- function(
-  data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
-  nYearFull, firstYearFull) {
+  data, annualIndex, AC, recent.years, determinand, good_status, max.year, 
+  recent.trend, nYearFull, firstYearFull) {
 
   # silence non-standard evaluation warnings
   .data <- est <- lcl <- ucl <- p <- se <- NULL
@@ -1779,11 +1780,6 @@ assess_survival <- function(
   data$year_adj <- data$year - min(recent.years)
     
   
-  # establish other info
-  
-  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
-  
-
   # type of fit depends on number of years:
   # nYear <= 2 none
   # nYear <= 4 mean 
@@ -2248,8 +2244,8 @@ assess_survival_refvalue <- function(
 
 
 assess_beta <- function(
-  data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
-  nYearFull, firstYearFull) {
+  data, annualIndex, AC, recent.years, determinand, good_status, max.year, 
+  recent.trend, nYearFull, firstYearFull) {
   
   # silence non-standard evaluation warnings
   info <- weight <- NULL
@@ -2296,11 +2292,7 @@ assess_beta <- function(
   
   data$year_fac <- factor(data$year)
   
-  # establish other info
-  
-  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
-  
-  
+
   # type of fit depends on number of years:
   # nYear <= 2 none
   # nYear <= 4 mean 
@@ -2648,8 +2640,8 @@ assess_beta <- function(
 
 
 assess_negativebinomial <- function(
-  data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
-  nYearFull, firstYearFull) {
+  data, annualIndex, AC, recent.years, determinand, good_status, max.year, 
+  recent.trend, nYearFull, firstYearFull) {
   
   # silence non-standard evaluation warnings
   info <- weight <- NULL
@@ -2686,11 +2678,7 @@ assess_negativebinomial <- function(
   
   data$year_fac <- factor(data$year)
   
-  # establish other info
-  
-  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
-  
-  
+
   # type of fit depends on number of years:
   # nYear <= 2 none
   # nYear <= 4 mean 
