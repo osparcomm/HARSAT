@@ -710,6 +710,7 @@ ctsm_get_datatype <- function(determinand, info, abbr = FALSE){
     startsWith(pargroup, "OC-")                ~ "contaminant",
     pargroup %in% c("I-MET", "I-RNC")          ~ "contaminant",
     pargroup %in% c("B-MBA", "B-TOX", "B-END") ~ "effect",
+    determinand %in% "SURVT"                   ~ "effect",
     pargroup %in% c("B-GRS", "B-HST")          ~ "disease",
     TRUE                                       ~ "auxiliary"
   )
