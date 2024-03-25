@@ -2640,12 +2640,12 @@ assess_beta <- function(
 
 
 assess_negativebinomial <- function(
-  data, annualIndex, AC, recent.years, determinand, good_status, max.year, 
-  recent.trend, nYearFull, firstYearFull) {
-  
+    data, annualIndex, AC, recent.years, determinand, good_status, max.year, 
+    recent.trend, nYearFull, firstYearFull) {
+
   # silence non-standard evaluation warnings
   info <- weight <- NULL
-
+  
   # over-dispersed count data (perhaps very low over-dispersed values from a 
   # binomial distribution, such an MNC) 
   
@@ -2661,11 +2661,26 @@ assess_negativebinomial <- function(
   output <- list(data = data)
   
   
-  # set up offset - e.g. for MNC these are the number of individuals
-  # specified in MNc-QC-NR
+  # check all values are valid counts
+  # response currently expressed as numbers per 1000 cells 
   
-  if (!("offset" %in% names(data))) {
-    data$offset <- 1
+  data$response <- data$response * data[["MNC-QC-NR"]] / 1000 
+  
+  if (!(all(data$response >= 0) & 
+        isTRUE(all.equal(data$response, as.integer(data$response))))) {
+    stop("invalid values for negative binomial distribution data")
+  }
+  
+  
+  # set up offset 
+  # for MNC these are the number of cells specified in MNC-QC-NR (but note that 
+  # the offset is then log transformed in the call to gam - this should be 
+  # rationalised)
+  
+  if ("offset" %in% names(data)) {
+    data$offset <- log(data$offset / 1000)
+  } else {
+    data$offset <- 0
   }
   
   
@@ -2678,7 +2693,7 @@ assess_negativebinomial <- function(
   
   data$year_fac <- factor(data$year)
   
-
+  
   # type of fit depends on number of years:
   # nYear <= 2 none
   # nYear <= 4 mean 
@@ -2688,7 +2703,7 @@ assess_negativebinomial <- function(
   # have only currently coded for mean and linear - look at ctsm.anyyear.lmm for 
   # extensions to smoothers
   
-  if (nYear >= 3) {
+  if (nYear >= 7) {
     stop("time series too long: need to include code for smoothers")
   } 
   
@@ -2707,9 +2722,9 @@ assess_negativebinomial <- function(
     
     fits$mean <- mgcv::gam(
       response ~ 1 + s(year_fac, bs = "re"), 
-      weights = weight, 
-      data = data, 
-      family = "betar",
+      data = data,
+      offset = data$offset,
+      family = "nb",
       method = "ML"
     )
     
@@ -2814,7 +2829,7 @@ assess_negativebinomial <- function(
   }
   
   
-  # get estimated change in logit value over whole time series and in the 
+  # get estimated change in log value over whole time series and in the 
   # most recent # e.g. twenty years of monitoring (truncate when data missing 
   # and only compute if at least five years in that period)
   # NB p value from contrast is NOT the same as from likelihood ratio test even 
@@ -2851,8 +2866,8 @@ assess_negativebinomial <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         output, 
-        yearID = max(data$year), 
-        refvalue = qlogis(i / 100),
+        year = max(data$year), 
+        refvalue = log(i),
         lower.tail = switch(good_status, low = TRUE, high = FALSE)
       )
     })
@@ -2942,14 +2957,20 @@ assess_negativebinomial <- function(
       })
     else {
       meanLY <- tail(output$pred$fit, 1)
-      meanLY <- 100 * plogis(meanLY)
+      meanLY <- exp(meanLY)
       clLY <- switch(
         good_status, 
         low = tail(output$pred$ci.upper, 1), 
         high = tail(output$pred$ci.lower, 1)
       )
-      clLY <- 100 * plogis(clLY)
+      clLY <- exp(clLY)
     }
+    
+    # turn trends into 'percentage trends'
+    
+    ltrend <- ltrend * 100
+    rtrend <- rtrend * 100
+    
   })  
   
   if (!is.null(AC)) {
@@ -2975,7 +2996,7 @@ assess_negativebinomial <- function(
           else if (rtrend >= 0)
             bigYear
           else {
-            wk <- (qlogis(value / 100) - qlogis(meanLY / 100)) / rtrend
+            wk <- (exp(value) - exp(meanLY)) / rtrend
             wk <- round(wk + maxYear)
             min(wk, bigYear)
           }
@@ -2989,7 +3010,7 @@ assess_negativebinomial <- function(
           else if (rtrend <= 0)
             bigYear
           else {
-            wk <- (qlogis(value / 100) - qlogis(meanLY / 100)) / rtrend
+            wk <- (exp(value) - exp(meanLY)) / rtrend
             wk <- round(wk + maxYear)
             min(wk, bigYear)
           }
@@ -3022,5 +3043,3 @@ assess_negativebinomial <- function(
   rownames(output$summary) <- NULL
   output
 }
-
-
