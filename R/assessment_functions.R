@@ -1789,7 +1789,7 @@ assess_survival <- function(
   # have only currently coded for mean and linear - look at ctsm.anyyear.lmm for 
   # extensions to smoothers
 
-  if (determinand %in% c("NRR", "SURVT") & nYear >= 7) {
+  if (determinand %in% c("NRR", "SURVT") & nYear >= 8) {
     stop("time series too long: need to include code for smoothers")
   } 
     
