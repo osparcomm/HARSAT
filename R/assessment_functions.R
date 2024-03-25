@@ -1820,7 +1820,7 @@ assess_survival <- function(
     # mean model
     
     fits$mean <- flexsurv::flexsurvreg(
-      Surv(time, time2, type = "interval2") ~ 1,
+      survival::Surv(time, time2, type = "interval2") ~ 1,
       dist = surv_dist, 
       data = data
     )

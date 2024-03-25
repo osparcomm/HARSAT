@@ -22,10 +22,13 @@ RoxygenNote: 7.2.3
 VignetteBuilder: knitr, rmarkdown
 Depends: R (>= 4.2.1.0)
 Imports:
+  digest,
   dplyr,
   flexsurv,
   lattice,
   lme4,
+  lubridate,
+  magrittr,
   MASS,
   mgcv,
   mvtnorm, 
@@ -33,16 +36,14 @@ Imports:
   optimx,
   parallel,
   pbapply,
-  TeachingDemos,
-  magrittr,
-  lubridate,
   readr,
-  stringr,
-  tibble,
-  tidyr,
+  readxl,
   sf,
-  digest,
-  readxl
+  stringr,
+  survival,
+  TeachingDemos,
+  tibble,
+  tidyr
 Suggests: 
   knitr,
   rmarkdown,
