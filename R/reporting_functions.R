@@ -316,14 +316,11 @@ ctsm.web.AC <- function(assessment_ob, classification) {
     drop = TRUE
   )
   
-  # identity all AC that are relevant to the overall assessment
-  # more AC might be included in the assessment for each timeseries - this
-  # is a legacy issue that needs to be resolved - has arisen in looking
-  # at both environmental and health criteria
+  # identity all AC that are relevant
   
-  AC_id <- assessment_ob$info$AC
-  stopifnot(AC_id %in% names(classification[["below"]]))
-
+  AC_id <- names(classification[["below"]])
+  stopifnot(AC_id %in% assessment_ob$info$AC)
+  
   # loop over determinands
 
   out <- sapply(assessment_id, USE.NAMES = TRUE, simplify = FALSE, FUN = function(id) {
@@ -973,17 +970,16 @@ report_assessment <- function(
 
 #' @export
 ctsm_OHAT_legends <- function(
-  assessments, determinandGroups, regionalGroups = NULL, distanceGroups = NULL, path) {
+  assessments, determinandGroups, determinands, symbology, 
+  regionalGroups = NULL, distanceGroups = NULL, path) {
 
   # silence non-standard evaluation warnings
   info <- NULL
 
   out <- sapply(names(assessments), simplify = FALSE, USE.NAMES = TRUE, FUN = function(media) {
 
-    assessment.ob <- assessments[[media]]
-    assessment <- assessment.ob$assessment
-    classColour <- assessment.ob$classColour
-    determinands <- assessment.ob$determinands
+    assessment <- assessments[[media]]
+    classColour <- symbology[[media]]
     regionalGroups <- regionalGroups[[media]]
     distanceGroups <- distanceGroups[[media]]
     
@@ -994,16 +990,16 @@ ctsm_OHAT_legends <- function(
 
     compartment <- assessment$info$compartment
     group <- ctsm_get_info(
-      info$determinand, determinands, "group", compartment, sep = "_"
+      assessment$info$determinand, determinands, "group", compartment, sep = "_"
     )
     web_group <- factor(
       group, 
       levels = determinandGroups$levels, 
       labels = determinandGroups$labels
     )
-    web_group <- wk_group[, drop = TRUE]
+    web_group <- web_group[, drop = TRUE]
     
-    goodStatus <- ctsm_get_info(info$determinand, determinands, "good_status")
+    goodStatus <- ctsm_get_info(assessment$info$determinand, determinands, "good_status")
     goodStatus <- as.character(goodStatus)
 
     legendName <- apply(legends, 1, function(i) paste(colnames(legends)[i], collapse = " "))
