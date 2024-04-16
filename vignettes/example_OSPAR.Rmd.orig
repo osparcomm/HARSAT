@@ -291,10 +291,6 @@ rules for birds and mammals. This is dealt with using the customised function
 
 ```{r ospar-biota-timeseries}
 
-# ad-hoc fix to remove SURVT data for now
-
-biota_data$info$determinand["SURVT", "biota_assess"] <- FALSE
-
 biota_timeseries <- create_timeseries(
   biota_data,
   determinands.control = list(

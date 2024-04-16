@@ -837,6 +837,9 @@ ctsm_collapse_AC <- function(x, type = c("real", "character")) {
 #' @param output_dir The output directory for the assessment plots (possibly
 #'   supplied using 'file.path'). The default is the working directory. The
 #'   output directory must already exist.
+#' @param output_file An alterntive file name to override the default. This is  
+#'   currently only implemented for a single report. If not supplied, the .html
+#'   extension will be added. 
 #' @param max_report The maximum number of reports that will be generated.
 #'   Defaults to 100. Each report is about 1MB in size and takes a few seconds 
 #'   to run, so this prevents a ridiculous number of reports being created. 
@@ -851,6 +854,7 @@ report_assessment <- function(
     assessment_obj, 
     subset = NULL, 
     output_dir = ".",
+    output_file = NULL, 
     max_report = 100L) {
   
   # reporting_functions.R
@@ -864,6 +868,14 @@ report_assessment <- function(
     )
   }
   
+  if (!is.null(output_file) & length(output_file) > 1) {
+    stop(
+      "\n`output_file` can currently only be a single character string for",
+      " renaming a single\nreport.", 
+      call. = FALSE
+    )
+  }
+
   
   info <- assessment_obj$info
   timeSeries <- assessment_obj$timeSeries   
@@ -921,31 +933,50 @@ report_assessment <- function(
   }
     
 
+  # if output_file supplied, ensure there is only one series
+  
+  if (!is.null(output_file) & n_series > 1) {
+    stop(
+      "\n`output_file` can currently only be used to rename a single report", 
+      " and ", n_series, " reports have\nbeen requested", 
+      call. = FALSE
+    )
+  }
+  
+  
   # report on each time series
   
   lapply(series_id, function(id) {
 
-    # get file name from id, and add country and station name 
-    # for easier identification
-    
-    series <- timeSeries[id, ]
-    
-    output_id <- sub(
-      series$station_code,
-      paste(series$station_code, series$country, series$station_name), 
-      id,
-      fixed=TRUE
-    )
+    # get file name
+    # if not supplied, use id and add country and station name for easier 
+    # identification
 
-    # get rid of any slashes that might have crept in 
+    if (!is.null(output_file)) {
+      
+      output_id = output_file
+      
+    } else {
     
-    output_id <- gsub(" / ", " ", output_id, fixed = TRUE)
-    output_id <- gsub("/", " ", output_id, fixed = TRUE)
-    
-    output_id <- gsub(" \ ", " ", output_id, fixed = TRUE)
-    output_id <- gsub("\\", " ", output_id, fixed = TRUE)
-    
-    
+      series <- timeSeries[id, ]
+      
+      output_id <- sub(
+        series$station_code,
+        paste(series$station_code, series$country, series$station_name), 
+        id,
+        fixed=TRUE
+      )
+      
+      # get rid of any slashes that might have crept in 
+      
+      output_id <- gsub(" / ", " ", output_id, fixed = TRUE)
+      output_id <- gsub("/", " ", output_id, fixed = TRUE)
+      
+      output_id <- gsub(" \ ", " ", output_id, fixed = TRUE)
+      output_id <- gsub("\\", " ", output_id, fixed = TRUE)
+      
+    }
+          
     package_dir = system.file(package = "harsat")
     template_dir = file.path(package_dir, "markdown")
     report_file <- file.path(template_dir, "report_assessment.Rmd")

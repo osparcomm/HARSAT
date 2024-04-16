@@ -107,54 +107,6 @@ argument.
 \subsection{External data}{
 
 If \code{data_format = "external"}, a simplified data and station file can
-be supplied. These should be .csv files, preferably saved with a UTF-8
-encoding. All missing value should be supplied as empty cells, not as \code{NA}
-or some other code.
-
-The data file has one row for each measurement. The mandatory variables
-are:
-\itemize{
-\item \code{country}: identifies the source of the data. For international
-assessments, this is typically the country of origin, but for national
-assessments it could be a local monitoring authority. It is read in as a
-character string.
-\item \code{station_code}: the code of the station where the data were collected.
-This can be numeric, but is read in as a character string.
-\item \code{station_name}: the name of the station where the data were collected.
-This is usually more meaningful to a user than \code{station_code}.
-\item \code{year}: an integer giving the monitoring year.
-\item \code{sample}: an identifier that is used to match measurements from the same
-individual (biota), sediment sample or water sample. This can be numeric,
-but will be read in as a character string. Take care over this variable as
-if it is incorrectly specified you could lose a lot of data.
-\item \code{determinand}: the code identifying the thing measured. This should
-match a record in the determinand reference table.
-\item \code{matrix}: the code identifying the tissue (biota) or size fraction
-(sediment) of the sample. Use ICES codes at present. For water it should
-always be set to \code{"WT"}.
-\item \code{unit}: the unit of the measurement. Use ICES codes at present.
-\item \code{value}: the numeric value of the measurement.
-}
-
-The values of \code{country}, \code{station_code} and \code{station_name} (in each row)
-must match an entry in the station file. No missing values are allowed in
-the mandatory data variables.
-
-The station file has one row for each station. The mandatory variables are:
-\itemize{
-\item \code{country}: see data file variables
-\item \code{station_code}: see data file variables
-\item \code{station_name}: see data file variables
-\item \code{station_latitude}: the nominal latitude of the station (nominal because
-samples are rarely taken at exactly the same location each year). This
-should be provided as decimal degrees (or a numeric value based on some
-other projection).
-\item \code{station_longitude}: the nominal longitude of the station. This should
-be provided as decimal degress (or a numeric value based on some other
-projection).
-}
-
-The optional variables (including the semi-optional regional information)
-will be documented at a later date.
+be supplied. See \code{vignette("external-file-format")} for details.
 }
 }

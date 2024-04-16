@@ -8,7 +8,6 @@ ctsm_check_variable <- function(data, var_id, info) {
     return(data)
   }
   
-  
   # augment data with four variables: 
   # ok says whether original value is ok and should be retained
   # ok.delete says whether original value is valid but is not to be used in the  
@@ -59,7 +58,7 @@ ctsm_check_variable <- function(data, var_id, info) {
     stop(
       "Not all cases considered when checking '", var_id, "': see '", 
       outfile_name, "'\n", 
-      "You might need to contact the HARSAT development team to fix this.", 
+      "  You might need to contact the HARSAT development team to fix this." 
     )
   }
 

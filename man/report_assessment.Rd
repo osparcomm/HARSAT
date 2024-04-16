@@ -8,6 +8,7 @@ report_assessment(
   assessment_obj,
   subset = NULL,
   output_dir = ".",
+  output_file = NULL,
   max_report = 100L
 )
 }
@@ -22,6 +23,10 @@ assessment_obj; use 'series' to identify individual timeseries.}
 \item{output_dir}{The output directory for the assessment plots (possibly
 supplied using 'file.path'). The default is the working directory. The
 output directory must already exist.}
+
+\item{output_file}{An alterntive file name to override the default. This is
+currently only implemented for a single report. If not supplied, the .html
+extension will be added.}
 
 \item{max_report}{The maximum number of reports that will be generated.
 Defaults to 100. Each report is about 1MB in size and takes a few seconds

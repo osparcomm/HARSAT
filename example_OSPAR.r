@@ -75,7 +75,6 @@ report_assessment(
 
 
 
-
 # Sediment ----
 
 sediment_data <- read_data(
@@ -190,11 +189,6 @@ biota_data <- read_data(
 biota_data <- tidy_data(biota_data)
 
 
-# ad-hoc fix to remove SURVT data for now
-
-biota_data$info$determinand["SURVT", "biota_assess"] <- FALSE
-
-
 biota_timeseries <- create_timeseries(
   biota_data,
   determinands.control = list(
@@ -266,9 +260,6 @@ biota_assessment <- update_assessment(
 )
 
 check_assessment(biota_assessment)
-
-
-
 
 
 # environmental summary
