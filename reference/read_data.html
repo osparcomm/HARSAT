@@ -12,7 +12,7 @@ parameters that dictate the assessment process."><!-- mathjax --><script src="ht
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
@@ -205,45 +205,7 @@ argument.</p>
 
 
 <p>If <code>data_format = "external"</code>, a simplified data and station file can
-be supplied. These should be .csv files, preferably saved with a UTF-8
-encoding. All missing value should be supplied as empty cells, not as <code>NA</code>
-or some other code.</p>
-<p>The data file has one row for each measurement. The mandatory variables
-are:</p><ul><li><p><code>country</code>: identifies the source of the data. For international
-assessments, this is typically the country of origin, but for national
-assessments it could be a local monitoring authority. It is read in as a
-character string.</p></li>
-<li><p><code>station_code</code>: the code of the station where the data were collected.
-This can be numeric, but is read in as a character string.</p></li>
-<li><p><code>station_name</code>: the name of the station where the data were collected.
-This is usually more meaningful to a user than <code>station_code</code>.</p></li>
-<li><p><code>year</code>: an integer giving the monitoring year.</p></li>
-<li><p><code>sample</code>: an identifier that is used to match measurements from the same
-individual (biota), sediment sample or water sample. This can be numeric,
-but will be read in as a character string. Take care over this variable as
-if it is incorrectly specified you could lose a lot of data.</p></li>
-<li><p><code>determinand</code>: the code identifying the thing measured. This should
-match a record in the determinand reference table.</p></li>
-<li><p><code>matrix</code>: the code identifying the tissue (biota) or size fraction
-(sediment) of the sample. Use ICES codes at present. For water it should
-always be set to <code>"WT"</code>.</p></li>
-<li><p><code>unit</code>: the unit of the measurement. Use ICES codes at present.</p></li>
-<li><p><code>value</code>: the numeric value of the measurement.</p></li>
-</ul><p>The values of <code>country</code>, <code>station_code</code> and <code>station_name</code> (in each row)
-must match an entry in the station file. No missing values are allowed in
-the mandatory data variables.</p>
-<p>The station file has one row for each station. The mandatory variables are:</p><ul><li><p><code>country</code>: see data file variables</p></li>
-<li><p><code>station_code</code>: see data file variables</p></li>
-<li><p><code>station_name</code>: see data file variables</p></li>
-<li><p><code>station_latitude</code>: the nominal latitude of the station (nominal because
-samples are rarely taken at exactly the same location each year). This
-should be provided as decimal degrees (or a numeric value based on some
-other projection).</p></li>
-<li><p><code>station_longitude</code>: the nominal longitude of the station. This should
-be provided as decimal degress (or a numeric value based on some other
-projection).</p></li>
-</ul><p>The optional variables (including the semi-optional regional information)
-will be documented at a later date.</p>
+be supplied. See <code><a href="../articles/external-file-format.html">vignette("external-file-format")</a></code> for details.</p>
 </div>
 
     </div>

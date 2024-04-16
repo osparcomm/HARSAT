@@ -23,7 +23,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
@@ -94,7 +94,8 @@
     
     
 <p>These are the column headers for CSV-formatted reference table files.
-<code>harsat</code> uses three different reference tables:</p>
+Ideally, the files should be UTF-8 encoded.</p>
+<p><code>harsat</code> uses three different reference tables:</p>
 <ol style="list-style-type: decimal">
 <li>A species file</li>
 <li>A determinand file</li>
@@ -103,6 +104,8 @@
 <p>All these files should be in your information files directory.</p>
 <p>Do not use any forward or backward slashes in the reference
 files.</p>
+<p>Missing values should be supplied as blank cells, not as
+<code>NA</code>.</p>
 <p>The order of the columns does not matter, as long as they are named
 consistently with the specification below.</p>
 <div class="section level2">
@@ -429,7 +432,7 @@ given by <code>biota_unit</code>
 <td align="center">yes</td>
 <td>If supplied, this allows the imputation of measurement uncertainty
 for determinands in a biota assessment when they are missing from the
-data file. <code>sd_constant</code> is the proportional error expressed
+data file. <code>sd_variable</code> is the proportional error expressed
 as a percentage (%)</td>
 </tr>
 <tr class="even">

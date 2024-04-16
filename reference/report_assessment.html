@@ -10,7 +10,7 @@ and a simple interpretation of the fitted model."><!-- mathjax --><script src="h
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
@@ -79,6 +79,7 @@ and a simple interpretation of the fitted model.</p>
 <span>  <span class="va">assessment_obj</span>,</span>
 <span>  subset <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="st">"."</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max_report <span class="op">=</span> <span class="fl">100L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -100,6 +101,12 @@ assessment_obj; use 'series' to identify individual timeseries.</p></dd>
 <dd><p>The output directory for the assessment plots (possibly
 supplied using 'file.path'). The default is the working directory. The
 output directory must already exist.</p></dd>
+
+
+<dt>output_file</dt>
+<dd><p>An alterntive file name to override the default. This is
+currently only implemented for a single report. If not supplied, the .html
+extension will be added.</p></dd>
 
 
 <dt>max_report</dt>

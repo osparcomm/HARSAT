@@ -1,17 +1,17 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.0.8
 pkgdown_sha: ~
 articles:
   datasets: datasets.html
+  example_external_data: example_external_data.html
   example_HELCOM: example_HELCOM.html
   example_OSPAR: example_OSPAR.html
-  example_external_data: example_external_data.html
   external-file-format: external-file-format.html
   file-management: file-management.html
   harsat: harsat.html
   reference-file-formats: reference-file-formats.html
   report-template: report-template.html
-last_built: 2024-04-02T18:21Z
+last_built: 2024-04-16T13:17Z
 urls:
   reference: http://osparcomm.github.io/HARSAT/reference
   article: http://osparcomm.github.io/HARSAT/articles

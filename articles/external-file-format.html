@@ -23,7 +23,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
@@ -93,11 +93,16 @@
 
     
     
-<p>These are the column headers for CSV-formatted external data
-files.</p>
+<p>These are the column headers for CSV-formatted external data files.
+The files should be UTF-8 encoded.</p>
+<p>Missing values should be supplied as blank cells, not as
+<code>NA</code> or some other code.</p>
+<p>Other columns can also be supplied, but will typically be
+ignored.</p>
 <div class="section level2">
 <h2 id="contaminant-data">Contaminant data<a class="anchor" aria-label="anchor" href="#contaminant-data"></a>
 </h2>
+<p>The data file has one row for each measurement.</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -116,39 +121,45 @@ files.</p>
 <td><code>country</code></td>
 <td>character</td>
 <td align="center">yes</td>
-<td>must match country in station file<br>no missing values</td>
+<td>identifies the source of the data; for international assessments
+this is typically the country of origin, but for national assessments it
+could be a local monitoring authority<br>must match <code>country</code>
+in station file<br>no missing values</td>
 </tr>
 <tr class="even">
 <td><code>station_code</code></td>
 <td>alphanumeric</td>
 <td align="center">yes</td>
-<td>must match station_code in station file<br>no missing values</td>
+<td>the station (code) where the sample was collected<br>must match
+<code>station_code</code> in station file<br>no missing values</td>
 </tr>
 <tr class="odd">
 <td><code>station_name</code></td>
-<td>character</td>
+<td>alphanumeric</td>
 <td align="center">yes</td>
-<td>must match station_name in station file<br>no missing values</td>
+<td>the station (name) where the sample was collected; this is often
+more intuitive to a user than <code>station_code</code><br>must match
+<code>station_name</code> in station file<br>no missing values</td>
 </tr>
 <tr class="even">
 <td><code>sample_latitude</code></td>
 <td>numeric (decimal degrees)</td>
 <td align="center"></td>
-<td>doesn’t need to match station latitude in station file</td>
+<td>need not match <code>station_latitude</code> in station file</td>
 </tr>
 <tr class="odd">
 <td><code>sample_longitude</code></td>
 <td>numeric (decimal degrees)</td>
 <td align="center"></td>
-<td>doesn’t need to match station longitude in station file</td>
+<td>need not match <code>station_longitude</code> in station file</td>
 </tr>
 <tr class="even">
 <td><code>year</code></td>
 <td>integer</td>
 <td align="center">yes</td>
-<td>monitoring year<br>doesn’t necessarily match date since a sampling
-season running from e.g. November 2021 to May 2022 might all be
-considered the 2022 monitoring year<br>no missing values</td>
+<td>monitoring year<br>doesn’t necessarily match <code>date</code> since
+a sampling season running from e.g. November 2021 to May 2022 might all
+be considered the 2022 monitoring year<br>no missing values</td>
 </tr>
 <tr class="odd">
 <td><code>date</code></td>
@@ -161,9 +172,9 @@ considered the 2022 monitoring year<br>no missing values</td>
 <td>numeric (m)</td>
 <td align="center"></td>
 <td>sediment: assumed to be a surface sediment sample with depth being
-the lower depth of the grab; water: assumed to be a surface water sample
-with depth being the upper depth of the sample; biota: not used, so can
-supply whatever is useful (or omit)</td>
+the lower depth of the grab<br>water: assumed to be a surface water
+sample with depth being the upper depth of the sample<br>biota: not
+used, so can supply whatever is useful (or omit)</td>
 </tr>
 <tr class="odd">
 <td><code>species</code></td>
@@ -178,7 +189,7 @@ species reference table</td>
 <td align="center"></td>
 <td>see ICES reference codes for SEXCO<br>required for EROD
 assessments<br>desirable if sex is used to subdivide timeseries (see
-subseries)</td>
+<code>subseries</code>)</td>
 </tr>
 <tr class="odd">
 <td><code>n_individual</code></td>
@@ -277,22 +288,22 @@ also be present</td>
 </tr>
 <tr class="even">
 <td><code>method_pretreatment</code></td>
-<td>character (ICES metpt list)</td>
+<td>character</td>
 <td align="center"></td>
-<td>see ICES reference codes for METPT</td>
+<td>use ICES reference codes for METPT</td>
 </tr>
 <tr class="odd">
 <td><code>method_analysis</code></td>
-<td>character (ICES metpt list)</td>
+<td>character</td>
 <td align="center"></td>
-<td>see ICES reference codes for METOA<br>required for bile metabolite
+<td>use ICES reference codes for METOA<br>required for bile metabolite
 measurements</td>
 </tr>
 <tr class="even">
 <td><code>method_extraction</code></td>
-<td>character (ICES metpt list)</td>
+<td>character</td>
 <td align="center"></td>
-<td>see ICES reference codes for METCX<br>required for sediment
+<td>use ICES reference codes for METCX<br>required for sediment
 normalisation (typically for metals)</td>
 </tr>
 </tbody>
@@ -301,6 +312,7 @@ normalisation (typically for metals)</td>
 <div class="section level2">
 <h2 id="station-data">Station data<a class="anchor" aria-label="anchor" href="#station-data"></a>
 </h2>
+<p>The station file has one row for each station.</p>
 <table class="table">
 <colgroup>
 <col width="23%">
@@ -320,11 +332,12 @@ normalisation (typically for metals)</td>
 <td>character</td>
 <td align="center"></td>
 <td>the regional columns can be called anything (and are
-optional)<br>OSPAR: use <code>OSPAR_region</code> and
-<code>OSPAR_subregion</code><br>HELCOM: use
+optional)<br>for OSPAR assessments, use <code>OSPAR_region</code> and
+<code>OSPAR_subregion</code><br>for HELCOM assessments use
 <code>HELCOM_subbasin</code>, <code>HELCOM_L3</code> and
-<code>HELCOM_L4</code>
-</td>
+<code>HELCOM_L4</code><br>for other assessments any regional columns
+must be explicitly identified when calling <code>read_data</code> using
+the <code>control</code> argument</td>
 </tr>
 <tr class="even">
 <td><code>OSPAR_subregion</code></td>
