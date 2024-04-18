@@ -47,7 +47,7 @@ in a directory `data`, and information files in a directory `information`,
 but you can use any directory for these.
 
 ```r
-working.directory <- '/Users/stuart/git/HARSAT'
+working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 ```
 
 # Water assessment
@@ -92,23 +92,23 @@ water_data <- read_data(
   info_dir = file.path(working.directory, "information", "HELCOM_2023"), 
   extraction = "2023/08/23"
 )
-#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv 
-#> Found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv 
-#> Found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_water.csv 
-#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
-#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
-#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
-#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_water.csv': '599000609710f7a53450f16fef814d1c'
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\species.csv 
+#> Found in path thresholds_water.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_water.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv': '4b48cbec9c71380f4b464779e643cab2'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_water.csv': '7e9487630022c11b0c3dd6d553a9955b'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt': 'ada1ffa58215843e8e4d5f4d74f5e21e'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt': 'd229a1c984d507537840e73080f3773c'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/water.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/water.txt': 'd229a93b6e1c8b37008d375365488db4'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/water.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/water.txt': 'b18b0556f6f78378c6f0a77682f51988'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: HELCOM 
@@ -335,25 +335,25 @@ sediment_data <- read_data(
   info_dir = file.path(working.directory, "information", "HELCOM_2023"),
   extraction = "2023/08/23"
 )
-#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv 
-#> Found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv 
-#> Found in path thresholds_sediment.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_sediment.csv 
-#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
-#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
-#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
-#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/method_extraction.csv': 'b3c891f17b9b35774114edaa2f58b6cc'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/pivot_values.csv': '372ad2d2ef807cec64ce1a7bd1967158'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_sediment.csv': '52456c255f587a539177d5fa0fbb7cf1'
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\species.csv 
+#> Found in path thresholds_sediment.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_sediment.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv': '4b48cbec9c71380f4b464779e643cab2'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv': '28e38bdd0b9e735643c60026dcda8a78'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv': '23ca1799017bfea360d586b1a70bffd4'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_sediment.csv': '41c686160bc8e0877477239eec0f0b1b'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt': 'ada1ffa58215843e8e4d5f4d74f5e21e'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt': 'd229a1c984d507537840e73080f3773c'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/sediment.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/sediment.txt': '0cd5fa2f4a07a2750a56a24b2fe887bf'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/sediment.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/sediment.txt': 'a5635836e9a69f3dd8be42d5078cad6b'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: HELCOM 
@@ -442,8 +442,7 @@ sediment_timeseries <- create_timeseries(
 #>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
 #>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
 #>    Detection limit higher than data: see detection_limit_high.csv
-#>    Non-positive uncertainties: see non_positive_uncertainties.csv
-#>    Large uncertainties: see large_uncertainties.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
 #>    Data submitted as BDE28, BDE47, BDE99, BD100, BD153, BD154 summed to give 
 #> SBDE6
 #>      61 of 124 samples lost due to incomplete submissions
@@ -458,6 +457,7 @@ sediment_timeseries <- create_timeseries(
 #>    Normalising metals to AL using pivot values
 #>    Normalising organics to 5% CORG
 #>    Removing sediment data where normaliser is a less than
+#>    Implausible uncertainties calculated in data processing: see implausible_uncertainties_calculated.csv
 #>    Dropping groups of compounds / stations with no data between 2015 and 2020
 ```
 
@@ -530,25 +530,25 @@ biota_data <- read_data(
   info_dir = file.path(working.directory, "information", "HELCOM_2023"), 
   extraction = "2023/08/23"
 )
-#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv 
-#> Found in path species.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv 
-#> Found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_biota.csv 
-#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
-#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
-#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
-#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/determinand.csv': 'ed6c2f076d852976e23eab797bd16164'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/species.csv': '895d4f259f2a1ee8d9c7ec52210f584c'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/imposex.csv': '7e42cb57944b9d79216ad25c12ccada5'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/HELCOM_2023/thresholds_biota.csv': '1798bfbfb15104c2cbf8ff00ccf13abd'
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\species.csv 
+#> Found in path thresholds_biota.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_biota.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv': '4b48cbec9c71380f4b464779e643cab2'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\species.csv': '769328e51065226809c91944b6d8fe79'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv': 'b602a882d4783085c896bcf130c8f848'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_biota.csv': '9af82cd9730c0b135edd4a003724e8a6'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/stations.txt': 'ada1ffa58215843e8e4d5f4d74f5e21e'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt': 'd229a1c984d507537840e73080f3773c'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_HELCOM/biota.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_HELCOM/biota.txt': 'a986e6899ecd6c9fbc0bd7854b452c9a'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/biota.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/biota.txt': '0a1a33c4e668e63c97a6d50cdc644d22'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: HELCOM 
@@ -661,8 +661,7 @@ biota_timeseries <- create_timeseries(
 #>    Non-positive quantification limits: see non_positive_quant_limits.csv
 #>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
 #>    Detection limit higher than data: see detection_limit_high.csv
-#>    Non-positive uncertainties: see non_positive_uncertainties.csv
-#>    Large uncertainties: see large_uncertainties.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
 #>    Data submitted as BDE28, BDE47, BDE99, BD100, BD153, BD154 summed to give 
 #> SBDE6
 #>      257 of 497 samples lost due to incomplete submissions
@@ -710,7 +709,6 @@ errors. Dealing with non-converged timeseries is a topic for a future vignette.
 check_assessment(biota_assessment)
 #> The following assessment models have not converged:
 #> 2299 PYR1OH Limanda limanda BI HPLC-FD
-#> 5844 CD Clupea harengus LI
 
 biota_assessment <- update_assessment(
   biota_assessment, 
@@ -721,8 +719,7 @@ biota_assessment <- update_assessment(
 #> assessing series:  station_code 2299; determinand PYR1OH; species Limanda limanda; matrix BI; method_analysis HPLC-FD; unit ng/ml
 
 check_assessment(biota_assessment)
-#> The following assessment models have not converged:
-#> 5844 CD Clupea harengus LI
+#> All assessment models have converged
 ```
 
 
