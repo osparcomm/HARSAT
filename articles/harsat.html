@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.1005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -160,7 +160,7 @@ by putting our data files in a directory <code>data</code>, and
 information files in a directory <code>information</code>, but you can
 use any directory for these.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">working.directory</span> <span class="op">&lt;-</span> <span class="st">'/Users/stuart/git/HARSAT'</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">working.directory</span> <span class="op">&lt;-</span> <span class="st">'C:/Users/robfr/Documents/HARSAT/HARSAT'</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reading-in-the-data">Reading in the data<a class="anchor" aria-label="anchor" href="#reading-in-the-data"></a>
@@ -178,23 +178,23 @@ arguments.</p>
 <span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span>, <span class="st">"OSPAR_2022"</span><span class="op">)</span>,</span>
 <span>  extraction <span class="op">=</span> <span class="st">"2023/08/23"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv </span></span>
-<span><span class="co">#&gt; Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv </span></span>
-<span><span class="co">#&gt; Found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv </span></span>
-<span><span class="co">#&gt; Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv </span></span>
-<span><span class="co">#&gt; Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv </span></span>
-<span><span class="co">#&gt; Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv </span></span>
-<span><span class="co">#&gt; Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv </span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv': '2b165f406bb440297435ea3f46eb3612'</span></span>
+<span><span class="co">#&gt; Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv </span></span>
+<span><span class="co">#&gt; Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv </span></span>
+<span><span class="co">#&gt; Found in path thresholds_water.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv </span></span>
+<span><span class="co">#&gt; Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv </span></span>
+<span><span class="co">#&gt; Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv </span></span>
+<span><span class="co">#&gt; Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv </span></span>
+<span><span class="co">#&gt; Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv </span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv': '615ef96f716ef1d43c01ab67f383c881'</span></span>
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'</span></span>
+<span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt': '0ccaec75c5fd7e875c730467d58fdb26'</span></span>
+<span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt': '13d63b6161b671165b215b58f5e22469'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matching data with station dictionary</span></span>
 <span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
@@ -314,6 +314,7 @@ control just how the data are manipulated.</p>
 <span><span class="co">#&gt;    Limit of quantification less than limit of detection: see limits_inconsistent.csv</span></span>
 <span><span class="co">#&gt;    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv</span></span>
 <span><span class="co">#&gt;    Detection limit higher than data: see detection_limit_high.csv</span></span>
+<span><span class="co">#&gt;    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv</span></span>
 <span><span class="co">#&gt;    Data submitted as CHRTR relabelled as CHR </span></span>
 <span><span class="co">#&gt;    Data submitted as BBF, BKF summed to give BBKF</span></span>
 <span><span class="co">#&gt;      1 of 71 samples lost due to incomplete submissions</span></span>

@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.1005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,7 +120,7 @@ We usually do this by putting our data files in a directory
 <code>data</code>, and information files in a directory
 <code>information</code>, but you can use any directory for these.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">working.directory</span> <span class="op">&lt;-</span> <span class="st">'/Users/stuart/git/HARSAT'</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">working.directory</span> <span class="op">&lt;-</span> <span class="st">'C:/Users/robfr/Documents/HARSAT/HARSAT'</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="water-assessment">Water assessment<a class="anchor" aria-label="anchor" href="#water-assessment"></a>
@@ -139,23 +139,23 @@ that <code>determinands.control</code> needs to do more work in
 <span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span>, <span class="st">"OSPAR_2022"</span><span class="op">)</span>,</span>
 <span>  extraction <span class="op">=</span> <span class="st">"2023/08/23"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv </span></span>
-<span><span class="co">#&gt; Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv </span></span>
-<span><span class="co">#&gt; Found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv </span></span>
-<span><span class="co">#&gt; Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv </span></span>
-<span><span class="co">#&gt; Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv </span></span>
-<span><span class="co">#&gt; Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv </span></span>
-<span><span class="co">#&gt; Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv </span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv': '2b165f406bb440297435ea3f46eb3612'</span></span>
+<span><span class="co">#&gt; Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv </span></span>
+<span><span class="co">#&gt; Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv </span></span>
+<span><span class="co">#&gt; Found in path thresholds_water.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv </span></span>
+<span><span class="co">#&gt; Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv </span></span>
+<span><span class="co">#&gt; Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv </span></span>
+<span><span class="co">#&gt; Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv </span></span>
+<span><span class="co">#&gt; Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv </span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv': '615ef96f716ef1d43c01ab67f383c881'</span></span>
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'</span></span>
+<span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt': '0ccaec75c5fd7e875c730467d58fdb26'</span></span>
+<span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt': '13d63b6161b671165b215b58f5e22469'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matching data with station dictionary</span></span>
 <span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
@@ -172,8 +172,7 @@ that <code>determinands.control</code> needs to do more work in
 <span></span>
 <span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">water_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Oddities will be written to 'oddities/water' with previous oddities backed up to</span></span>
-<span><span class="co">#&gt;  'oddities/water_backup'</span></span>
+<span><span class="co">#&gt; Oddities will be written to 'oddities/water'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dropping 411 records from data flagged for deletion. Possible reasons are:</span></span>
 <span><span class="co">#&gt;  - vflag = suspect</span></span>
@@ -212,6 +211,7 @@ that <code>determinands.control</code> needs to do more work in
 <span><span class="co">#&gt;    Limit of quantification less than limit of detection: see limits_inconsistent.csv</span></span>
 <span><span class="co">#&gt;    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv</span></span>
 <span><span class="co">#&gt;    Detection limit higher than data: see detection_limit_high.csv</span></span>
+<span><span class="co">#&gt;    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv</span></span>
 <span><span class="co">#&gt;    Data submitted as CHRTR relabelled as CHR </span></span>
 <span><span class="co">#&gt;    Data submitted as BBF, BKF summed to give BBKF</span></span>
 <span><span class="co">#&gt;      1 of 71 samples lost due to incomplete submissions</span></span>
@@ -610,7 +610,7 @@ NA
 0.2642877
 </td>
 <td style="text-align:right;">
-0.8079560
+0.8079549
 </td>
 <td style="text-align:left;">
 </td>
@@ -729,7 +729,7 @@ NA
 1.9403931
 </td>
 <td style="text-align:right;">
-4.4243067
+4.4243256
 </td>
 <td style="text-align:left;">
 </td>
@@ -849,7 +849,7 @@ NA
 0.0342139
 </td>
 <td style="text-align:right;">
-0.0586748
+0.0586751
 </td>
 <td style="text-align:left;">
 </td>
@@ -969,7 +969,7 @@ NA
 0.0347176
 </td>
 <td style="text-align:right;">
-0.0446955
+0.0446956
 </td>
 <td style="text-align:left;">
 </td>
@@ -1451,7 +1451,7 @@ NA
 0.0010141
 </td>
 <td style="text-align:right;">
-0.0017480
+0.0017375
 </td>
 <td style="text-align:left;">
 </td>
@@ -2295,7 +2295,7 @@ NA
 0.1593088
 </td>
 <td style="text-align:right;">
-0.2251622
+0.2251621
 </td>
 <td style="text-align:left;">
 </td>
@@ -2415,7 +2415,7 @@ NA
 0.4915249
 </td>
 <td style="text-align:right;">
-0.6665299
+0.6665300
 </td>
 <td style="text-align:left;">
 </td>
@@ -2535,7 +2535,7 @@ NA
 0.0122965
 </td>
 <td style="text-align:right;">
-0.0201135
+0.0201136
 </td>
 <td style="text-align:left;">
 </td>
@@ -2655,7 +2655,7 @@ NA
 0.0608592
 </td>
 <td style="text-align:right;">
-0.1669677
+0.1669681
 </td>
 <td style="text-align:left;">
 </td>
@@ -2895,7 +2895,7 @@ NA
 0.0375571
 </td>
 <td style="text-align:right;">
-0.0747836
+0.0747835
 </td>
 <td style="text-align:left;">
 </td>
@@ -3255,7 +3255,7 @@ NA
 0.0301767
 </td>
 <td style="text-align:right;">
-0.0499804
+0.0499803
 </td>
 <td style="text-align:left;">
 </td>
@@ -3375,7 +3375,7 @@ NA
 1.3776942
 </td>
 <td style="text-align:right;">
-2.4084546
+2.4085277
 </td>
 <td style="text-align:left;">
 </td>
@@ -3495,7 +3495,7 @@ NA
 0.0218170
 </td>
 <td style="text-align:right;">
-0.0324892
+0.0324885
 </td>
 <td style="text-align:left;">
 </td>
@@ -3615,7 +3615,7 @@ NA
 0.6971756
 </td>
 <td style="text-align:right;">
-1.0166068
+1.0166054
 </td>
 <td style="text-align:left;">
 </td>
@@ -3735,7 +3735,7 @@ NA
 0.1854117
 </td>
 <td style="text-align:right;">
-0.4934672
+0.4934678
 </td>
 <td style="text-align:left;">
 </td>
@@ -4095,7 +4095,7 @@ NA
 0.0070453
 </td>
 <td style="text-align:right;">
-0.0235891
+0.0235892
 </td>
 <td style="text-align:left;">
 </td>
@@ -4576,7 +4576,7 @@ NA
 1.5024002
 </td>
 <td style="text-align:right;">
-2.3889251
+2.3889254
 </td>
 <td style="text-align:left;">
 </td>
@@ -5176,7 +5176,7 @@ NA
 1.5345685
 </td>
 <td style="text-align:right;">
-4.9992653
+4.9992398
 </td>
 <td style="text-align:left;">
 EQS
@@ -5185,7 +5185,7 @@ EQS
 2.0e+03
 </td>
 <td style="text-align:right;">
--1995.0007347
+-1995.0007602
 </td>
 <td style="text-align:right;">
 2021
@@ -5899,7 +5899,7 @@ NA
 4.2013867
 </td>
 <td style="text-align:right;">
-6.3756677
+6.3756630
 </td>
 <td style="text-align:left;">
 </td>
@@ -6499,7 +6499,7 @@ NA
 0.7230029
 </td>
 <td style="text-align:right;">
-1.9410264
+1.9410317
 </td>
 <td style="text-align:left;">
 </td>
@@ -7705,7 +7705,7 @@ NA
 0.0901546
 </td>
 <td style="text-align:right;">
-0.1212221
+0.1212222
 </td>
 <td style="text-align:left;">
 EQS
@@ -7714,7 +7714,7 @@ EQS
 2.0e+00
 </td>
 <td style="text-align:right;">
--1.8787779
+-1.8787778
 </td>
 <td style="text-align:right;">
 2017
@@ -8307,7 +8307,7 @@ NA
 0.0029571
 </td>
 <td style="text-align:right;">
-0.0091140
+0.0091139
 </td>
 <td style="text-align:left;">
 EQS
@@ -8316,7 +8316,7 @@ EQS
 1.0e+02
 </td>
 <td style="text-align:right;">
--99.9908860
+-99.9908861
 </td>
 <td style="text-align:right;">
 2019
@@ -8429,7 +8429,7 @@ NA
 0.0019921
 </td>
 <td style="text-align:right;">
-0.0033308
+0.0033309
 </td>
 <td style="text-align:left;">
 </td>
@@ -9270,7 +9270,7 @@ NA
 2.1057059
 </td>
 <td style="text-align:right;">
-3.7494366
+3.7494368
 </td>
 <td style="text-align:left;">
 </td>
@@ -9492,13 +9492,13 @@ black
 0.0004
 </td>
 <td style="text-align:right;">
-0.4532
+0.4531
 </td>
 <td style="text-align:right;">
 0.9
 </td>
 <td style="text-align:right;">
-0.4532
+0.4531
 </td>
 <td style="text-align:right;">
 0.9
@@ -9510,7 +9510,7 @@ black
 0.6833377
 </td>
 <td style="text-align:right;">
-0.8793254
+0.8793163
 </td>
 <td style="text-align:left;">
 </td>
@@ -9752,7 +9752,7 @@ NA
 0.0117176
 </td>
 <td style="text-align:right;">
-1.9080359
+1.9080383
 </td>
 <td style="text-align:left;">
 EQS
@@ -9761,7 +9761,7 @@ EQS
 1.3e+00
 </td>
 <td style="text-align:right;">
-0.6080359
+0.6080383
 </td>
 <td style="text-align:right;">
 2020
@@ -10355,7 +10355,7 @@ NA
 0.9199809
 </td>
 <td style="text-align:right;">
-2.5982052
+2.5981971
 </td>
 <td style="text-align:left;">
 </td>
@@ -10718,7 +10718,7 @@ NA
 0.7934854
 </td>
 <td style="text-align:right;">
-2.2375378
+2.2375377
 </td>
 <td style="text-align:left;">
 </td>
@@ -12169,7 +12169,7 @@ NA
 1.0907904
 </td>
 <td style="text-align:right;">
-2.8631028
+2.8630501
 </td>
 <td style="text-align:left;">
 </td>
@@ -12529,7 +12529,7 @@ NA
 0.3373065
 </td>
 <td style="text-align:right;">
-0.4675318
+0.4675314
 </td>
 <td style="text-align:left;">
 EQS
@@ -12538,7 +12538,7 @@ EQS
 8.6e+00
 </td>
 <td style="text-align:right;">
--8.1324682
+-8.1324686
 </td>
 <td style="text-align:right;">
 2020
@@ -15102,25 +15102,25 @@ of multiple thresholds in <code><a href="../reference/run_assessment.html">run_a
 <span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span>, <span class="st">"OSPAR_2022"</span><span class="op">)</span>, </span>
 <span>  extraction <span class="op">=</span> <span class="st">"2023/08/23"</span></span>
 <span><span class="op">)</span>  </span>
-<span><span class="co">#&gt; Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv </span></span>
-<span><span class="co">#&gt; Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv </span></span>
-<span><span class="co">#&gt; Found in path thresholds_sediment.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_sediment.csv </span></span>
-<span><span class="co">#&gt; Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv </span></span>
-<span><span class="co">#&gt; Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv </span></span>
-<span><span class="co">#&gt; Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv </span></span>
-<span><span class="co">#&gt; Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv </span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/method_extraction.csv': 'b3c891f17b9b35774114edaa2f58b6cc'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/pivot_values.csv': '372ad2d2ef807cec64ce1a7bd1967158'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_sediment.csv': 'dcf8d4a452f93ead01729866ca6b139c'</span></span>
+<span><span class="co">#&gt; Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv </span></span>
+<span><span class="co">#&gt; Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv </span></span>
+<span><span class="co">#&gt; Found in path thresholds_sediment.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_sediment.csv </span></span>
+<span><span class="co">#&gt; Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv </span></span>
+<span><span class="co">#&gt; Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv </span></span>
+<span><span class="co">#&gt; Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv </span></span>
+<span><span class="co">#&gt; Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv </span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv': '28e38bdd0b9e735643c60026dcda8a78'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv': '23ca1799017bfea360d586b1a70bffd4'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_sediment.csv': 'ab2fddb32a8b1d126004febbf6375b5d'</span></span>
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'</span></span>
+<span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/sediment.txt'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/sediment.txt': '26c2ab1c30d6b5cead9250df216efbc2'</span></span>
+<span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/sediment.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/sediment.txt': '0cb722db8f8ea4ed263e1cb8c8334665'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matching data with station dictionary</span></span>
 <span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
@@ -15136,8 +15136,7 @@ of multiple thresholds in <code><a href="../reference/run_assessment.html">run_a
 <span><span class="co">#&gt; Argument max_year taken to be the maximum year in the data: 2021</span></span>
 <span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">sediment_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Oddities will be written to 'oddities/sediment' with previous oddities backed up to</span></span>
-<span><span class="co">#&gt;  'oddities/sediment_backup'</span></span>
+<span><span class="co">#&gt; Oddities will be written to 'oddities/sediment'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dropping 75 records from data flagged for deletion. Possible reasons are:</span></span>
 <span><span class="co">#&gt;  - vflag = suspect</span></span>
@@ -15202,7 +15201,7 @@ not normalised.</p>
 <span><span class="co">#&gt;    Limit of quantification less than limit of detection: see limits_inconsistent.csv</span></span>
 <span><span class="co">#&gt;    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv</span></span>
 <span><span class="co">#&gt;    Detection limit higher than data: see detection_limit_high.csv</span></span>
-<span><span class="co">#&gt;    Large uncertainties: see large_uncertainties.csv</span></span>
+<span><span class="co">#&gt;    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv</span></span>
 <span><span class="co">#&gt;    Data submitted as BBF, BKF summed to give BBKF</span></span>
 <span><span class="co">#&gt;    Data submitted as BBJF, BKF summed to give BBJKF</span></span>
 <span><span class="co">#&gt;      104 of 104 samples lost due to incomplete submissions</span></span>
@@ -15219,6 +15218,7 @@ not normalised.</p>
 <span><span class="co">#&gt;    Warning: Nss values for CR hard-wired to 5.0 (AL) or 52 (LI) for all digestions</span></span>
 <span><span class="co">#&gt;    Normalising organics to 2.5% CORG</span></span>
 <span><span class="co">#&gt;    Removing sediment data where normaliser is a less than</span></span>
+<span><span class="co">#&gt;    Implausible uncertainties calculated in data processing: see implausible_uncertainties_calculated.csv</span></span>
 <span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2016 and 2021</span></span></code></pre></div>
 <p>Five thresholds are applied. The Background Assessment Concentrations
 (BACs) differ between ospar_subregions. To see how that is implemented,
@@ -15647,7 +15647,7 @@ NA
 7.6492369
 </td>
 <td style="text-align:right;">
-12.4844431
+12.4844430
 </td>
 <td style="text-align:left;">
 BAC
@@ -15656,7 +15656,7 @@ BAC
 0.190
 </td>
 <td style="text-align:right;">
-12.2944431
+12.2944430
 </td>
 <td style="text-align:right;">
 NA
@@ -16318,7 +16318,7 @@ NA
 9.7752928
 </td>
 <td style="text-align:right;">
-333.2085461
+333.2085424
 </td>
 <td style="text-align:left;">
 </td>
@@ -16717,7 +16717,7 @@ NA
 1.5241197
 </td>
 <td style="text-align:right;">
-2.7882848
+2.7882850
 </td>
 <td style="text-align:left;">
 BAC
@@ -16726,7 +16726,7 @@ BAC
 0.120
 </td>
 <td style="text-align:right;">
-2.6682848
+2.6682850
 </td>
 <td style="text-align:right;">
 NA
@@ -16740,7 +16740,7 @@ EAC
 2.70
 </td>
 <td style="text-align:right;">
-8.828480e-02
+8.828500e-02
 </td>
 <td style="text-align:right;">
 2019
@@ -16852,7 +16852,7 @@ NA
 18.8753953
 </td>
 <td style="text-align:right;">
-77.4193597
+77.4193598
 </td>
 <td style="text-align:left;">
 BAC
@@ -16861,7 +16861,7 @@ BAC
 8.000
 </td>
 <td style="text-align:right;">
-69.4193597
+69.4193598
 </td>
 <td style="text-align:right;">
 NA
@@ -16987,7 +16987,7 @@ NA
 17.3299558
 </td>
 <td style="text-align:right;">
-26.5929954
+26.5931662
 </td>
 <td style="text-align:left;">
 </td>
@@ -17383,13 +17383,13 @@ NA
 -0.8
 </td>
 <td style="text-align:right;">
-17.9
+17.8
 </td>
 <td style="text-align:right;">
-210.3469203
+210.4998016
 </td>
 <td style="text-align:right;">
-388.7486333
+385.5535038
 </td>
 <td style="text-align:left;">
 BAC
@@ -17398,10 +17398,10 @@ BAC
 103.000
 </td>
 <td style="text-align:right;">
-285.7486333
+282.5535038
 </td>
 <td style="text-align:right;">
-2109
+2110
 </td>
 <td style="text-align:left;">
 above
@@ -17659,7 +17659,7 @@ NA
 1.5278464
 </td>
 <td style="text-align:right;">
-2.9801733
+2.9801382
 </td>
 <td style="text-align:left;">
 </td>
@@ -18062,7 +18062,7 @@ NA
 13.9782469
 </td>
 <td style="text-align:right;">
-44.9733385
+44.9733223
 </td>
 <td style="text-align:left;">
 </td>
@@ -18195,7 +18195,7 @@ NA
 10.4852634
 </td>
 <td style="text-align:right;">
-18.6243267
+18.6243266
 </td>
 <td style="text-align:left;">
 </td>
@@ -18328,7 +18328,7 @@ NA
 0.3415152
 </td>
 <td style="text-align:right;">
-0.9961428
+0.9961422
 </td>
 <td style="text-align:left;">
 BAC
@@ -18337,7 +18337,7 @@ BAC
 0.120
 </td>
 <td style="text-align:right;">
-0.8761428
+0.8761422
 </td>
 <td style="text-align:right;">
 3000
@@ -18352,7 +18352,7 @@ EAC
 2.70
 </td>
 <td style="text-align:right;">
--1.703857e+00
+-1.703858e+00
 </td>
 <td style="text-align:right;">
 2020
@@ -18465,7 +18465,7 @@ NA
 80.0934477
 </td>
 <td style="text-align:right;">
-165.0513734
+165.0511546
 </td>
 <td style="text-align:left;">
 BAC
@@ -18474,7 +18474,7 @@ BAC
 103.000
 </td>
 <td style="text-align:right;">
-62.0513734
+62.0511546
 </td>
 <td style="text-align:right;">
 2018
@@ -18600,7 +18600,7 @@ NA
 11.6236043
 </td>
 <td style="text-align:right;">
-22.1468058
+22.1467252
 </td>
 <td style="text-align:left;">
 </td>
@@ -18733,7 +18733,7 @@ NA
 97.9305843
 </td>
 <td style="text-align:right;">
-117.2890199
+117.2889974
 </td>
 <td style="text-align:left;">
 </td>
@@ -18755,7 +18755,7 @@ ERL
 81.00
 </td>
 <td style="text-align:right;">
-3.628902e+01
+3.628900e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -18868,7 +18868,7 @@ NA
 8.3584236
 </td>
 <td style="text-align:right;">
-10.5355845
+10.5535455
 </td>
 <td style="text-align:left;">
 BAC
@@ -18877,7 +18877,7 @@ BAC
 32.000
 </td>
 <td style="text-align:right;">
--21.4644155
+-21.4464545
 </td>
 <td style="text-align:right;">
 2020
@@ -18892,7 +18892,7 @@ ERL
 240.00
 </td>
 <td style="text-align:right;">
--2.294644e+02
+-2.294465e+02
 </td>
 <td style="text-align:right;">
 2020
@@ -19005,7 +19005,7 @@ NA
 9.1370801
 </td>
 <td style="text-align:right;">
-11.5815694
+11.5814966
 </td>
 <td style="text-align:left;">
 </td>
@@ -19138,7 +19138,7 @@ NA
 8.1270914
 </td>
 <td style="text-align:right;">
-12.0526609
+12.0546912
 </td>
 <td style="text-align:left;">
 BAC
@@ -19147,7 +19147,7 @@ BAC
 16.000
 </td>
 <td style="text-align:right;">
--3.9473391
+-3.9453088
 </td>
 <td style="text-align:right;">
 2020
@@ -19162,7 +19162,7 @@ ERL
 261.00
 </td>
 <td style="text-align:right;">
--2.489473e+02
+-2.489453e+02
 </td>
 <td style="text-align:right;">
 2020
@@ -19275,7 +19275,7 @@ NA
 20.0087767
 </td>
 <td style="text-align:right;">
-27.0948686
+27.0948915
 </td>
 <td style="text-align:left;">
 BAC
@@ -19284,7 +19284,7 @@ BAC
 24.000
 </td>
 <td style="text-align:right;">
-3.0948686
+3.0948915
 </td>
 <td style="text-align:right;">
 2020
@@ -19412,7 +19412,7 @@ NA
 4.8714973
 </td>
 <td style="text-align:right;">
-5.8651171
+5.8651188
 </td>
 <td style="text-align:left;">
 </td>
@@ -19545,7 +19545,7 @@ NA
 21.3008515
 </td>
 <td style="text-align:right;">
-45.5518827
+45.5512218
 </td>
 <td style="text-align:left;">
 </td>
@@ -19678,7 +19678,7 @@ NA
 6.5587942
 </td>
 <td style="text-align:right;">
-22.5315109
+22.5322761
 </td>
 <td style="text-align:left;">
 </td>
@@ -19811,7 +19811,7 @@ NA
 0.1428399
 </td>
 <td style="text-align:right;">
-50.5311334
+50.5314827
 </td>
 <td style="text-align:left;">
 BAC
@@ -19820,7 +19820,7 @@ BAC
 0.050
 </td>
 <td style="text-align:right;">
-50.4811334
+50.4814827
 </td>
 <td style="text-align:right;">
 NA
@@ -19835,7 +19835,7 @@ FEQG
 1.00
 </td>
 <td style="text-align:right;">
-4.953113e+01
+4.953148e+01
 </td>
 <td style="text-align:right;">
 2021
@@ -20082,7 +20082,7 @@ NA
 33.2459810
 </td>
 <td style="text-align:right;">
-57.5383470
+57.5383454
 </td>
 <td style="text-align:left;">
 BAC
@@ -20091,7 +20091,7 @@ BAC
 5.000
 </td>
 <td style="text-align:right;">
-52.5383470
+52.5383454
 </td>
 <td style="text-align:right;">
 2069
@@ -20486,7 +20486,7 @@ NA
 3.9267126
 </td>
 <td style="text-align:right;">
-9.7602011
+9.7602006
 </td>
 <td style="text-align:left;">
 </td>
@@ -20618,7 +20618,7 @@ NA
 35.5236210
 </td>
 <td style="text-align:right;">
-47.1405502
+47.1406906
 </td>
 <td style="text-align:left;">
 BAC
@@ -20627,7 +20627,7 @@ BAC
 16.000
 </td>
 <td style="text-align:right;">
-31.1405502
+31.1406906
 </td>
 <td style="text-align:right;">
 3000
@@ -20642,7 +20642,7 @@ ERL
 261.00
 </td>
 <td style="text-align:right;">
--2.138594e+02
+-2.138593e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -21023,7 +21023,7 @@ NA
 176.9489655
 </td>
 <td style="text-align:right;">
-205.1498197
+205.1498238
 </td>
 <td style="text-align:left;">
 BAC
@@ -21032,7 +21032,7 @@ BAC
 122.000
 </td>
 <td style="text-align:right;">
-83.1498197
+83.1498238
 </td>
 <td style="text-align:right;">
 2027
@@ -21160,7 +21160,7 @@ NA
 177.5006764
 </td>
 <td style="text-align:right;">
-216.1974328
+216.1974414
 </td>
 <td style="text-align:left;">
 BAC
@@ -21169,7 +21169,7 @@ BAC
 122.000
 </td>
 <td style="text-align:right;">
-94.1974328
+94.1974414
 </td>
 <td style="text-align:right;">
 2027
@@ -21184,7 +21184,7 @@ ERL
 150.00
 </td>
 <td style="text-align:right;">
-6.619743e+01
+6.619744e+01
 </td>
 <td style="text-align:right;">
 2024
@@ -21297,7 +21297,7 @@ NA
 256.8557305
 </td>
 <td style="text-align:right;">
-403.3279483
+403.3336740
 </td>
 <td style="text-align:left;">
 BAC
@@ -21306,7 +21306,7 @@ BAC
 122.000
 </td>
 <td style="text-align:right;">
-281.3279483
+281.3336740
 </td>
 <td style="text-align:right;">
 2141
@@ -21321,7 +21321,7 @@ ERL
 150.00
 </td>
 <td style="text-align:right;">
-2.533279e+02
+2.533337e+02
 </td>
 <td style="text-align:right;">
 2108
@@ -21434,7 +21434,7 @@ NA
 93.7391593
 </td>
 <td style="text-align:right;">
-103.3514654
+103.3517060
 </td>
 <td style="text-align:left;">
 BAC
@@ -21443,7 +21443,7 @@ BAC
 24.000
 </td>
 <td style="text-align:right;">
-79.3514654
+79.3517060
 </td>
 <td style="text-align:right;">
 2126
@@ -21458,7 +21458,7 @@ ERL
 665.00
 </td>
 <td style="text-align:right;">
--5.616485e+02
+-5.616483e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -21571,7 +21571,7 @@ NA
 0.0124304
 </td>
 <td style="text-align:right;">
-0.0368966
+0.0368964
 </td>
 <td style="text-align:left;">
 </td>
@@ -21841,7 +21841,7 @@ NA
 0.3907767
 </td>
 <td style="text-align:right;">
-0.4814161
+0.4814163
 </td>
 <td style="text-align:left;">
 BAC
@@ -21850,7 +21850,7 @@ BAC
 0.310
 </td>
 <td style="text-align:right;">
-0.1714161
+0.1714163
 </td>
 <td style="text-align:right;">
 2029
@@ -21865,7 +21865,7 @@ ERL
 1.20
 </td>
 <td style="text-align:right;">
--7.185839e-01
+-7.185837e-01
 </td>
 <td style="text-align:right;">
 2021
@@ -21978,7 +21978,7 @@ NA
 0.5399518
 </td>
 <td style="text-align:right;">
-0.8057462
+0.8057464
 </td>
 <td style="text-align:left;">
 BAC
@@ -21987,7 +21987,7 @@ BAC
 0.310
 </td>
 <td style="text-align:right;">
-0.4957462
+0.4957464
 </td>
 <td style="text-align:right;">
 2032
@@ -22002,7 +22002,7 @@ ERL
 1.20
 </td>
 <td style="text-align:right;">
--3.942538e-01
+-3.942536e-01
 </td>
 <td style="text-align:right;">
 2021
@@ -22115,7 +22115,7 @@ NA
 84.2085193
 </td>
 <td style="text-align:right;">
-93.6304389
+93.6467575
 </td>
 <td style="text-align:left;">
 BAC
@@ -22124,7 +22124,7 @@ BAC
 24.000
 </td>
 <td style="text-align:right;">
-69.6304389
+69.6467575
 </td>
 <td style="text-align:right;">
 3000
@@ -22139,7 +22139,7 @@ ERL
 665.00
 </td>
 <td style="text-align:right;">
--5.713696e+02
+-5.713532e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -22252,7 +22252,7 @@ NA
 0.1223601
 </td>
 <td style="text-align:right;">
-0.1686230
+0.1686226
 </td>
 <td style="text-align:left;">
 </td>
@@ -22385,7 +22385,7 @@ NA
 17.5725588
 </td>
 <td style="text-align:right;">
-21.1210080
+21.1210085
 </td>
 <td style="text-align:left;">
 BAC
@@ -22394,7 +22394,7 @@ BAC
 27.000
 </td>
 <td style="text-align:right;">
--5.8789920
+-5.8789915
 </td>
 <td style="text-align:right;">
 2017
@@ -22657,7 +22657,7 @@ NA
 32.1279297
 </td>
 <td style="text-align:right;">
-35.7272265
+35.7272272
 </td>
 <td style="text-align:left;">
 BAC
@@ -22666,7 +22666,7 @@ BAC
 36.000
 </td>
 <td style="text-align:right;">
--0.2727735
+-0.2727728
 </td>
 <td style="text-align:right;">
 2021
@@ -22792,7 +22792,7 @@ NA
 35.0417076
 </td>
 <td style="text-align:right;">
-40.4264084
+40.4264462
 </td>
 <td style="text-align:left;">
 BAC
@@ -22801,7 +22801,7 @@ BAC
 36.000
 </td>
 <td style="text-align:right;">
-4.4264084
+4.4264462
 </td>
 <td style="text-align:right;">
 2021
@@ -23061,7 +23061,7 @@ black
 4.5794713
 </td>
 <td style="text-align:right;">
-6.5818075
+6.5818084
 </td>
 <td style="text-align:left;">
 </td>
@@ -23597,7 +23597,7 @@ NA
 49.4394452
 </td>
 <td style="text-align:right;">
-54.2409018
+54.2408759
 </td>
 <td style="text-align:left;">
 BAC
@@ -23606,7 +23606,7 @@ BAC
 38.000
 </td>
 <td style="text-align:right;">
-16.2409018
+16.2408759
 </td>
 <td style="text-align:right;">
 2056
@@ -23621,7 +23621,7 @@ ERL
 47.00
 </td>
 <td style="text-align:right;">
-7.240902e+00
+7.240876e+00
 </td>
 <td style="text-align:right;">
 2024
@@ -24002,7 +24002,7 @@ NA
 81.0797223
 </td>
 <td style="text-align:right;">
-115.1596858
+115.1592557
 </td>
 <td style="text-align:left;">
 </td>
@@ -24024,7 +24024,7 @@ ERL
 81.00
 </td>
 <td style="text-align:right;">
-3.415969e+01
+3.415926e+01
 </td>
 <td style="text-align:right;">
 2021
@@ -24137,7 +24137,7 @@ NA
 85.0696678
 </td>
 <td style="text-align:right;">
-131.1793385
+131.1811961
 </td>
 <td style="text-align:left;">
 </td>
@@ -24159,7 +24159,7 @@ ERL
 81.00
 </td>
 <td style="text-align:right;">
-5.017934e+01
+5.018120e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -24400,13 +24400,13 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-26.3
+25.8
 </td>
 <td style="text-align:right;">
-38.5458249
+38.4399651
 </td>
 <td style="text-align:right;">
-114.3244897
+111.9533979
 </td>
 <td style="text-align:left;">
 BAC
@@ -24415,7 +24415,7 @@ BAC
 30.000
 </td>
 <td style="text-align:right;">
-84.3244897
+81.9533979
 </td>
 <td style="text-align:right;">
 NA
@@ -24429,7 +24429,7 @@ ERL
 430.00
 </td>
 <td style="text-align:right;">
--3.156755e+02
+-3.180466e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -24674,7 +24674,7 @@ NA
 31.0052370
 </td>
 <td style="text-align:right;">
-34.7650582
+34.7650601
 </td>
 <td style="text-align:left;">
 BAC
@@ -24683,7 +24683,7 @@ BAC
 27.000
 </td>
 <td style="text-align:right;">
-7.7650582
+7.7650601
 </td>
 <td style="text-align:right;">
 2039
@@ -24698,7 +24698,7 @@ ERL
 34.00
 </td>
 <td style="text-align:right;">
-7.650582e-01
+7.650601e-01
 </td>
 <td style="text-align:right;">
 2021
@@ -24811,7 +24811,7 @@ NA
 180.9338724
 </td>
 <td style="text-align:right;">
-208.4848190
+208.4848198
 </td>
 <td style="text-align:left;">
 BAC
@@ -24820,7 +24820,7 @@ BAC
 122.000
 </td>
 <td style="text-align:right;">
-86.4848190
+86.4848198
 </td>
 <td style="text-align:right;">
 2047
@@ -24948,7 +24948,7 @@ NA
 0.3268515
 </td>
 <td style="text-align:right;">
-0.5708141
+0.5708069
 </td>
 <td style="text-align:left;">
 BAC
@@ -24957,7 +24957,7 @@ BAC
 0.160
 </td>
 <td style="text-align:right;">
-0.4108141
+0.4108069
 </td>
 <td style="text-align:right;">
 3000
@@ -25083,7 +25083,7 @@ NA
 23.3176722
 </td>
 <td style="text-align:right;">
-28.3145048
+28.3145261
 </td>
 <td style="text-align:left;">
 BAC
@@ -25092,7 +25092,7 @@ BAC
 25.000
 </td>
 <td style="text-align:right;">
-3.3145048
+3.3145261
 </td>
 <td style="text-align:right;">
 2021
@@ -25218,7 +25218,7 @@ NA
 162.3162514
 </td>
 <td style="text-align:right;">
-175.9811123
+175.9796251
 </td>
 <td style="text-align:left;">
 BAC
@@ -25227,7 +25227,7 @@ BAC
 122.000
 </td>
 <td style="text-align:right;">
-53.9811123
+53.9796251
 </td>
 <td style="text-align:right;">
 2337
@@ -25242,7 +25242,7 @@ ERL
 150.00
 </td>
 <td style="text-align:right;">
-2.598111e+01
+2.597963e+01
 </td>
 <td style="text-align:right;">
 2108
@@ -25355,7 +25355,7 @@ NA
 48.3551881
 </td>
 <td style="text-align:right;">
-52.4647959
+52.4647968
 </td>
 <td style="text-align:left;">
 BAC
@@ -25364,7 +25364,7 @@ BAC
 38.000
 </td>
 <td style="text-align:right;">
-14.4647959
+14.4647968
 </td>
 <td style="text-align:right;">
 2044
@@ -25379,7 +25379,7 @@ ERL
 47.00
 </td>
 <td style="text-align:right;">
-5.464796e+00
+5.464797e+00
 </td>
 <td style="text-align:right;">
 2024
@@ -25766,7 +25766,7 @@ NA
 51.9959559
 </td>
 <td style="text-align:right;">
-64.9009443
+64.9009187
 </td>
 <td style="text-align:left;">
 BAC
@@ -25775,7 +25775,7 @@ BAC
 39.000
 </td>
 <td style="text-align:right;">
-25.9009443
+25.9009187
 </td>
 <td style="text-align:right;">
 2034
@@ -25903,7 +25903,7 @@ NA
 37.1110282
 </td>
 <td style="text-align:right;">
-45.6793612
+45.6793479
 </td>
 <td style="text-align:left;">
 BAC
@@ -25912,7 +25912,7 @@ BAC
 25.000
 </td>
 <td style="text-align:right;">
-20.6793612
+20.6793479
 </td>
 <td style="text-align:right;">
 3000
@@ -26038,7 +26038,7 @@ NA
 50.6045734
 </td>
 <td style="text-align:right;">
-72.1917839
+72.1917775
 </td>
 <td style="text-align:left;">
 BAC
@@ -26047,7 +26047,7 @@ BAC
 20.000
 </td>
 <td style="text-align:right;">
-52.1917839
+52.1917775
 </td>
 <td style="text-align:right;">
 2048
@@ -26175,7 +26175,7 @@ NA
 25.4065239
 </td>
 <td style="text-align:right;">
-29.5861739
+29.5861728
 </td>
 <td style="text-align:left;">
 BAC
@@ -26184,7 +26184,7 @@ BAC
 25.000
 </td>
 <td style="text-align:right;">
-4.5861739
+4.5861728
 </td>
 <td style="text-align:right;">
 2023
@@ -26310,7 +26310,7 @@ NA
 185.8620053
 </td>
 <td style="text-align:right;">
-204.2140298
+204.2140233
 </td>
 <td style="text-align:left;">
 BAC
@@ -26319,7 +26319,7 @@ BAC
 122.000
 </td>
 <td style="text-align:right;">
-82.2140298
+82.2140233
 </td>
 <td style="text-align:right;">
 2055
@@ -26334,7 +26334,7 @@ ERL
 150.00
 </td>
 <td style="text-align:right;">
-5.421403e+01
+5.421402e+01
 </td>
 <td style="text-align:right;">
 2038
@@ -26444,10 +26444,10 @@ black
 53.5
 </td>
 <td style="text-align:right;">
-348.2567082
+348.2567083
 </td>
 <td style="text-align:right;">
-2087.1723418
+2087.1695517
 </td>
 <td style="text-align:left;">
 </td>
@@ -27380,7 +27380,7 @@ NA
 87.7924194
 </td>
 <td style="text-align:right;">
-126.3425480
+126.3425590
 </td>
 <td style="text-align:left;">
 BAC
@@ -27389,7 +27389,7 @@ BAC
 36.000
 </td>
 <td style="text-align:right;">
-90.3425480
+90.3425590
 </td>
 <td style="text-align:right;">
 3000
@@ -29126,7 +29126,7 @@ NA
 67.3610094
 </td>
 <td style="text-align:right;">
-160.4225459
+160.4217651
 </td>
 <td style="text-align:left;">
 BAC
@@ -29135,7 +29135,7 @@ BAC
 80.000
 </td>
 <td style="text-align:right;">
-80.4225459
+80.4217651
 </td>
 <td style="text-align:right;">
 2019
@@ -29261,7 +29261,7 @@ NA
 27.9195093
 </td>
 <td style="text-align:right;">
-35.8018636
+35.8018530
 </td>
 <td style="text-align:left;">
 </td>
@@ -29394,7 +29394,7 @@ NA
 2.8958131
 </td>
 <td style="text-align:right;">
-3.7894398
+3.7894254
 </td>
 <td style="text-align:left;">
 </td>
@@ -29524,10 +29524,10 @@ NA
 12.6
 </td>
 <td style="text-align:right;">
-110.5869001
+110.5869002
 </td>
 <td style="text-align:right;">
-160.0920936
+160.0921414
 </td>
 <td style="text-align:left;">
 BAC
@@ -29536,7 +29536,7 @@ BAC
 122.000
 </td>
 <td style="text-align:right;">
-38.0920936
+38.0921414
 </td>
 <td style="text-align:right;">
 2020
@@ -29551,7 +29551,7 @@ ERL
 150.00
 </td>
 <td style="text-align:right;">
-1.009209e+01
+1.009214e+01
 </td>
 <td style="text-align:right;">
 2020
@@ -30066,7 +30066,7 @@ NA
 10.8927655
 </td>
 <td style="text-align:right;">
-17.0609808
+17.0614630
 </td>
 <td style="text-align:left;">
 </td>
@@ -30336,7 +30336,7 @@ green
 0.5271708
 </td>
 <td style="text-align:right;">
-1.1023415
+1.1023416
 </td>
 <td style="text-align:left;">
 BAC
@@ -30345,7 +30345,7 @@ BAC
 0.120
 </td>
 <td style="text-align:right;">
-0.9823415
+0.9823416
 </td>
 <td style="text-align:right;">
 2067
@@ -30360,7 +30360,7 @@ EAC
 2.70
 </td>
 <td style="text-align:right;">
--1.597659e+00
+-1.597658e+00
 </td>
 <td style="text-align:right;">
 2021
@@ -30473,7 +30473,7 @@ NA
 0.1426633
 </td>
 <td style="text-align:right;">
-0.3413434
+0.3413416
 </td>
 <td style="text-align:left;">
 BAC
@@ -30482,7 +30482,7 @@ BAC
 0.050
 </td>
 <td style="text-align:right;">
-0.2913434
+0.2913416
 </td>
 <td style="text-align:right;">
 2043
@@ -30610,7 +30610,7 @@ NA
 17.2422238
 </td>
 <td style="text-align:right;">
-26.5431217
+26.5430186
 </td>
 <td style="text-align:left;">
 </td>
@@ -30880,7 +30880,7 @@ blue
 94.4031461
 </td>
 <td style="text-align:right;">
-110.6922948
+110.6922812
 </td>
 <td style="text-align:left;">
 BAC
@@ -30889,7 +30889,7 @@ BAC
 122.000
 </td>
 <td style="text-align:right;">
--11.3077052
+-11.3077188
 </td>
 <td style="text-align:right;">
 2016
@@ -30904,7 +30904,7 @@ ERL
 150.00
 </td>
 <td style="text-align:right;">
--3.930771e+01
+-3.930772e+01
 </td>
 <td style="text-align:right;">
 2016
@@ -31017,7 +31017,7 @@ NA
 0.0996671
 </td>
 <td style="text-align:right;">
-0.2456764
+0.2456768
 </td>
 <td style="text-align:left;">
 BAC
@@ -31026,7 +31026,7 @@ BAC
 0.050
 </td>
 <td style="text-align:right;">
-0.1956764
+0.1956768
 </td>
 <td style="text-align:right;">
 3000
@@ -31154,7 +31154,7 @@ NA
 101.9663912
 </td>
 <td style="text-align:right;">
-240.6797252
+240.6598269
 </td>
 <td style="text-align:left;">
 </td>
@@ -38570,25 +38570,25 @@ actively worked on.</p>
 <span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span>, <span class="st">"OSPAR_2022"</span><span class="op">)</span>, </span>
 <span>  extraction <span class="op">=</span> <span class="st">"2023/08/23"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv </span></span>
-<span><span class="co">#&gt; Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv </span></span>
-<span><span class="co">#&gt; Found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_biota.csv </span></span>
-<span><span class="co">#&gt; Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv </span></span>
-<span><span class="co">#&gt; Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv </span></span>
-<span><span class="co">#&gt; Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv </span></span>
-<span><span class="co">#&gt; Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv </span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv': 'e0678c65e9c433f04cfff5ec95659bb4'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/imposex.csv': '7e42cb57944b9d79216ad25c12ccada5'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_biota.csv': 'f728e56db82dc936b4b384cc0471477a'</span></span>
+<span><span class="co">#&gt; Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv </span></span>
+<span><span class="co">#&gt; Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv </span></span>
+<span><span class="co">#&gt; Found in path thresholds_biota.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_biota.csv </span></span>
+<span><span class="co">#&gt; Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv </span></span>
+<span><span class="co">#&gt; Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv </span></span>
+<span><span class="co">#&gt; Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv </span></span>
+<span><span class="co">#&gt; Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv </span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv': '952a6e718e07b8bc501eafe42a74a760'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv': 'b602a882d4783085c896bcf130c8f848'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_biota.csv': 'a487aa3bb6738f95ab9462e4420e124a'</span></span>
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'</span></span>
+<span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
-<span><span class="co">#&gt;  '/Users/stuart/git/HARSAT/data/example_OSPAR/biota.txt'</span></span>
-<span><span class="co">#&gt; MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/biota.txt': 'b00f0c9665ec57492b8f14f1323ff635'</span></span>
+<span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/biota.txt'</span></span>
+<span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/biota.txt': 'abfd256bda44cde5ed63693c75ec9024'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matching data with station dictionary</span></span>
 <span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
@@ -38604,8 +38604,7 @@ actively worked on.</p>
 <span><span class="co">#&gt; Argument max_year taken to be the maximum year in the data: 2022</span></span>
 <span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
-<span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
+<span><span class="co">#&gt; Oddities will be written to 'oddities/biota'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dropping 11 records from data flagged for deletion. Possible reasons are:</span></span>
 <span><span class="co">#&gt;  - vflag = suspect</span></span>
@@ -38625,7 +38624,8 @@ weight basis, depending on the typical lipid content of the fish and
 tissue. There are also rules for birds and mammals. This is dealt with
 using the customised function <code><a href="../reference/get_basis_biota_OSPAR.html">get_basis_biota_OSPAR()</a></code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biota_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span></span>
+<span><span class="va">biota_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_data</span>,</span>
 <span>  determinands.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    CHR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="st">"CHRTR"</span>, action <span class="op">=</span> <span class="st">"replace"</span><span class="op">)</span>,</span>
@@ -38678,8 +38678,7 @@ using the customised function <code><a href="../reference/get_basis_biota_OSPAR.
 <span><span class="co">#&gt;    Unrecognised censoring values: deleted data in 'censoring_codes_unrecognised.csv</span></span>
 <span><span class="co">#&gt;    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv</span></span>
 <span><span class="co">#&gt;    Detection limit higher than data: see detection_limit_high.csv</span></span>
-<span><span class="co">#&gt;    Non-positive uncertainties: see non_positive_uncertainties.csv</span></span>
-<span><span class="co">#&gt;    Large uncertainties: see large_uncertainties.csv</span></span>
+<span><span class="co">#&gt;    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv</span></span>
 <span><span class="co">#&gt;    Data submitted as CHRTR relabelled as CHR </span></span>
 <span><span class="co">#&gt;    Data submitted as BBF, BKF summed to give BBKF</span></span>
 <span><span class="co">#&gt;      125 of 149 samples lost due to incomplete submissions</span></span>
@@ -39118,7 +39117,7 @@ NA
 1.316844e+02
 </td>
 <td style="text-align:right;">
-2.086121e+02
+2.086102e+02
 </td>
 <td style="text-align:left;">
 BAC
@@ -39127,7 +39126,7 @@ BAC
 2.600000e+01
 </td>
 <td style="text-align:right;">
-1.826121e+02
+1.826102e+02
 </td>
 <td style="text-align:right;">
 2053
@@ -39168,7 +39167,7 @@ MPC
 1.000000e+03
 </td>
 <td style="text-align:right;">
--7.913879e+02
+-7.913898e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -39289,7 +39288,7 @@ NA
 2.034604e+04
 </td>
 <td style="text-align:right;">
-2.566752e+04
+2.566750e+04
 </td>
 <td style="text-align:left;">
 </td>
@@ -39456,7 +39455,7 @@ NA
 9.308773e+02
 </td>
 <td style="text-align:right;">
-1.052552e+03
+1.052550e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -39465,7 +39464,7 @@ BAC
 9.600000e+02
 </td>
 <td style="text-align:right;">
-9.255238e+01
+9.255016e+01
 </td>
 <td style="text-align:right;">
 2021
@@ -39506,7 +39505,7 @@ MPC
 6.097561e+03
 </td>
 <td style="text-align:right;">
--5.045009e+03
+-5.045011e+03
 </td>
 <td style="text-align:right;">
 2021
@@ -39966,7 +39965,7 @@ NA
 3.876517e+01
 </td>
 <td style="text-align:right;">
-8.468271e+01
+8.468272e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -41105,19 +41104,19 @@ black
 NA
 </td>
 <td style="text-align:right;">
-0.1938
+0.1939
 </td>
 <td style="text-align:right;">
-0.1938
+0.1939
 </td>
 <td style="text-align:right;">
-0.1938
+0.1939
 </td>
 <td style="text-align:right;">
 -9.4
 </td>
 <td style="text-align:right;">
-0.1938
+0.1939
 </td>
 <td style="text-align:right;">
 -9.4
@@ -41126,10 +41125,10 @@ NA
 40.5
 </td>
 <td style="text-align:right;">
-3.915469e-01
+3.907754e-01
 </td>
 <td style="text-align:right;">
-9.897512e-01
+8.558981e-01
 </td>
 <td style="text-align:left;">
 </td>
@@ -42293,7 +42292,7 @@ black
 8.920403e-01
 </td>
 <td style="text-align:right;">
-1.149973e+00
+1.149974e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -42966,7 +42965,7 @@ red
 2.626357e+02
 </td>
 <td style="text-align:right;">
-3.306569e+02
+3.306568e+02
 </td>
 <td style="text-align:left;">
 BAC
@@ -42975,7 +42974,7 @@ BAC
 9.000000e+01
 </td>
 <td style="text-align:right;">
-2.406569e+02
+2.406568e+02
 </td>
 <td style="text-align:right;">
 3000
@@ -42990,7 +42989,7 @@ QSsp
 121.951219
 </td>
 <td style="text-align:right;">
-208.7056527
+208.7056200
 </td>
 <td style="text-align:right;">
 3000
@@ -44644,7 +44643,7 @@ NA
 6.591527e+03
 </td>
 <td style="text-align:right;">
-7.454657e+03
+7.454648e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -44653,7 +44652,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
-1.454657e+03
+1.454648e+03
 </td>
 <td style="text-align:right;">
 3000
@@ -44813,7 +44812,7 @@ NA
 1.365729e+01
 </td>
 <td style="text-align:right;">
-4.074705e+01
+4.074714e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -44822,7 +44821,7 @@ BAC
 1.100000e+01
 </td>
 <td style="text-align:right;">
-2.974705e+01
+2.974714e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -44837,7 +44836,7 @@ EAC
 1700.000000
 </td>
 <td style="text-align:right;">
--1659.2529538
+-1659.2528610
 </td>
 <td style="text-align:right;">
 2021
@@ -44984,7 +44983,7 @@ NA
 1.355463e+03
 </td>
 <td style="text-align:right;">
-1.789453e+03
+1.789465e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -45151,7 +45150,7 @@ NA
 1.387296e+01
 </td>
 <td style="text-align:right;">
-4.212455e+01
+4.212456e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -45160,7 +45159,7 @@ BAC
 9.000000e+00
 </td>
 <td style="text-align:right;">
-3.312455e+01
+3.312456e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -45175,7 +45174,7 @@ EAC
 100.000000
 </td>
 <td style="text-align:right;">
--57.8754484
+-57.8754427
 </td>
 <td style="text-align:right;">
 2021
@@ -45322,7 +45321,7 @@ NA
 2.702145e+03
 </td>
 <td style="text-align:right;">
-4.916236e+03
+4.916237e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -45498,7 +45497,7 @@ BAC
 8.100000e+00
 </td>
 <td style="text-align:right;">
-2.916903e+00
+2.916904e+00
 </td>
 <td style="text-align:right;">
 3000
@@ -45658,7 +45657,7 @@ NA
 3.369492e+01
 </td>
 <td style="text-align:right;">
-8.614906e+01
+8.614927e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -45667,7 +45666,7 @@ BAC
 1.220000e+01
 </td>
 <td style="text-align:right;">
-7.394906e+01
+7.394927e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -45682,7 +45681,7 @@ EAC
 110.000000
 </td>
 <td style="text-align:right;">
--23.8509445
+-23.8507337
 </td>
 <td style="text-align:right;">
 2021
@@ -45710,7 +45709,7 @@ QShh
 1.829268e+02
 </td>
 <td style="text-align:right;">
--9.677777e+01
+-9.677756e+01
 </td>
 <td style="text-align:right;">
 2021
@@ -45999,7 +45998,7 @@ NA
 4.330671e+00
 </td>
 <td style="text-align:right;">
-1.054091e+01
+1.054093e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -46021,7 +46020,7 @@ EAC
 290.000000
 </td>
 <td style="text-align:right;">
--279.4590853
+-279.4590727
 </td>
 <td style="text-align:right;">
 2021
@@ -46165,10 +46164,10 @@ red
 13.9
 </td>
 <td style="text-align:right;">
-1.552505e+01
+1.552506e+01
 </td>
 <td style="text-align:right;">
-1.967680e+01
+1.967682e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -46177,7 +46176,7 @@ BAC
 7.000000e-01
 </td>
 <td style="text-align:right;">
-1.897680e+01
+1.897682e+01
 </td>
 <td style="text-align:right;">
 2066
@@ -46192,7 +46191,7 @@ EAC
 10.107927
 </td>
 <td style="text-align:right;">
-9.5688777
+9.5688945
 </td>
 <td style="text-align:right;">
 2027
@@ -46336,10 +46335,10 @@ red
 17.7
 </td>
 <td style="text-align:right;">
-1.300401e+01
+1.300410e+01
 </td>
 <td style="text-align:right;">
-1.732732e+01
+1.732749e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -46348,7 +46347,7 @@ BAC
 6.000000e-01
 </td>
 <td style="text-align:right;">
-1.672732e+01
+1.672749e+01
 </td>
 <td style="text-align:right;">
 2067
@@ -46363,7 +46362,7 @@ EAC
 2.088415
 </td>
 <td style="text-align:right;">
-15.2389089
+15.2390736
 </td>
 <td style="text-align:right;">
 2048
@@ -46534,7 +46533,7 @@ EAC
 26.481098
 </td>
 <td style="text-align:right;">
-0.5806135
+0.5806136
 </td>
 <td style="text-align:right;">
 2021
@@ -46681,7 +46680,7 @@ green
 6.237495e+01
 </td>
 <td style="text-align:right;">
-9.016173e+01
+9.016172e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -46690,7 +46689,7 @@ BAC
 6.000000e-01
 </td>
 <td style="text-align:right;">
-8.956173e+01
+8.956172e+01
 </td>
 <td style="text-align:right;">
 2322
@@ -46705,7 +46704,7 @@ EAC
 132.405488
 </td>
 <td style="text-align:right;">
--42.2437608
+-42.2437721
 </td>
 <td style="text-align:right;">
 2021
@@ -46852,7 +46851,7 @@ NA
 2.086848e+00
 </td>
 <td style="text-align:right;">
-3.234972e+00
+3.234784e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -46861,7 +46860,7 @@ BAC
 6.000000e-01
 </td>
 <td style="text-align:right;">
-2.634972e+00
+2.634784e+00
 </td>
 <td style="text-align:right;">
 3000
@@ -46876,7 +46875,7 @@ EAC
 39.178658
 </td>
 <td style="text-align:right;">
--35.9436865
+-35.9438748
 </td>
 <td style="text-align:right;">
 2021
@@ -47047,7 +47046,7 @@ EAC
 5.596951
 </td>
 <td style="text-align:right;">
--5.1214788
+-5.1214789
 </td>
 <td style="text-align:right;">
 2021
@@ -47218,7 +47217,7 @@ EAC
 9.021951
 </td>
 <td style="text-align:right;">
--4.2395474
+-4.2395472
 </td>
 <td style="text-align:right;">
 2021
@@ -47413,7 +47412,7 @@ MPC
 4.573171e+02
 </td>
 <td style="text-align:right;">
--3.481419e+02
+-3.481418e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -48038,7 +48037,7 @@ NA
 1.148711e+00
 </td>
 <td style="text-align:right;">
-2.847476e+00
+2.847727e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -48047,7 +48046,7 @@ BAC
 7.500000e-01
 </td>
 <td style="text-align:right;">
-2.097476e+00
+2.097727e+00
 </td>
 <td style="text-align:right;">
 3000
@@ -48374,7 +48373,7 @@ NA
 5.373398e-01
 </td>
 <td style="text-align:right;">
-8.544452e-01
+8.544514e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -48383,7 +48382,7 @@ BAC
 6.000000e-01
 </td>
 <td style="text-align:right;">
-2.544452e-01
+2.544514e-01
 </td>
 <td style="text-align:right;">
 2021
@@ -49211,7 +49210,7 @@ NA
 9.409999e+00
 </td>
 <td style="text-align:right;">
-1.266532e+01
+1.266533e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -49723,7 +49722,7 @@ BAC
 2.400000e+00
 </td>
 <td style="text-align:right;">
-9.054590e+00
+9.054593e+00
 </td>
 <td style="text-align:right;">
 3000
@@ -49859,31 +49858,31 @@ orange
 NA
 </td>
 <td style="text-align:right;">
-0.0090
+0.0111
 </td>
 <td style="text-align:right;">
-0.0090
+0.0111
 </td>
 <td style="text-align:right;">
-0.0090
-</td>
-<td style="text-align:right;">
--4.3
-</td>
-<td style="text-align:right;">
-0.0090
+0.0111
 </td>
 <td style="text-align:right;">
 -4.3
 </td>
 <td style="text-align:right;">
-9.1
+0.0111
 </td>
 <td style="text-align:right;">
-2.727439e+01
+-4.3
 </td>
 <td style="text-align:right;">
-3.745632e+01
+9.2
+</td>
+<td style="text-align:right;">
+2.727930e+01
+</td>
+<td style="text-align:right;">
+3.752830e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -49892,10 +49891,10 @@ BAC
 5.102041e-01
 </td>
 <td style="text-align:right;">
-3.694612e+01
+3.701810e+01
 </td>
 <td style="text-align:right;">
-2112
+2113
 </td>
 <td style="text-align:left;">
 above
@@ -50052,7 +50051,7 @@ NA
 1.413949e-01
 </td>
 <td style="text-align:right;">
-2.115986e-01
+2.115979e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -50061,7 +50060,7 @@ BAC
 1.500000e-01
 </td>
 <td style="text-align:right;">
-6.159860e-02
+6.159790e-02
 </td>
 <td style="text-align:right;">
 2021
@@ -50076,7 +50075,7 @@ EAC
 22.000000
 </td>
 <td style="text-align:right;">
--21.7884014
+-21.7884021
 </td>
 <td style="text-align:right;">
 2021
@@ -50394,7 +50393,7 @@ NA
 6.610692e+03
 </td>
 <td style="text-align:right;">
-8.450020e+03
+8.449752e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -50561,7 +50560,7 @@ NA
 6.198193e+03
 </td>
 <td style="text-align:right;">
-8.513470e+03
+8.513507e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -50728,7 +50727,7 @@ NA
 5.865732e-01
 </td>
 <td style="text-align:right;">
-1.238822e+00
+1.238823e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -50737,7 +50736,7 @@ BAC
 1.300000e+00
 </td>
 <td style="text-align:right;">
--6.117750e-02
+-6.117710e-02
 </td>
 <td style="text-align:right;">
 2020
@@ -50752,7 +50751,7 @@ EAC
 29.000000
 </td>
 <td style="text-align:right;">
--27.7611775
+-27.7611771
 </td>
 <td style="text-align:right;">
 2020
@@ -50899,7 +50898,7 @@ NA
 1.914322e+01
 </td>
 <td style="text-align:right;">
-2.572905e+01
+2.572904e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -50908,7 +50907,7 @@ BAC
 1.220000e+01
 </td>
 <td style="text-align:right;">
-1.352905e+01
+1.352904e+01
 </td>
 <td style="text-align:right;">
 2026
@@ -50923,7 +50922,7 @@ EAC
 110.000000
 </td>
 <td style="text-align:right;">
--84.2709545
+-84.2709606
 </td>
 <td style="text-align:right;">
 2019
@@ -51072,7 +51071,7 @@ NA
 4.457526e+03
 </td>
 <td style="text-align:right;">
-7.019330e+03
+7.019332e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -51081,7 +51080,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
-1.019330e+03
+1.019332e+03
 </td>
 <td style="text-align:right;">
 2019
@@ -51241,7 +51240,7 @@ NA
 2.254849e+03
 </td>
 <td style="text-align:right;">
-5.096016e+03
+5.095479e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -51635,6 +51634,174 @@ NA
 </tr>
 <tr>
 <td style="text-align:left;">
+7182 SURVT Mytilus edulis WO
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+Northern North Sea
+</td>
+<td style="text-align:left;">
+United Kingdom
+</td>
+<td style="text-align:right;">
+7182
+</td>
+<td style="text-align:left;">
+EScotland_YthanEstuary_sh01
+</td>
+<td style="text-align:left;">
+E Scotland (Ythan Estuary)
+</td>
+<td style="text-align:right;">
+57.32123
+</td>
+<td style="text-align:right;">
+-1.994370
+</td>
+<td style="text-align:left;">
+RH
+</td>
+<td style="text-align:left;">
+TT
+</td>
+<td style="text-align:left;">
+SURVT
+</td>
+<td style="text-align:left;">
+Biological effects (other)
+</td>
+<td style="text-align:left;">
+Mytilus edulis
+</td>
+<td style="text-align:left;">
+WO
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+d
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+small_filled_circle
+</td>
+<td style="text-align:left;">
+green
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:right;">
+2020
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+7.822224e+00
+</td>
+<td style="text-align:right;">
+7.413895e+00
+</td>
+<td style="text-align:left;">
+BAC
+</td>
+<td style="text-align:right;">
+1.000000e+01
+</td>
+<td style="text-align:right;">
+-2.586105e+00
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+EAC
+</td>
+<td style="text-align:right;">
+5.000000
+</td>
+<td style="text-align:right;">
+2.4138954
+</td>
+<td style="text-align:right;">
+2020
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 7208 BDE66 Pleuronectes platessa LI
 </td>
 <td style="text-align:right;">
@@ -51889,31 +52056,31 @@ red
 NA
 </td>
 <td style="text-align:right;">
-0.0350
+0.0376
 </td>
 <td style="text-align:right;">
-0.0350
+0.0376
 </td>
 <td style="text-align:right;">
-0.0350
+0.0376
 </td>
 <td style="text-align:right;">
-4.8
+4.7
 </td>
 <td style="text-align:right;">
-0.0350
+0.0376
 </td>
 <td style="text-align:right;">
-4.8
+4.7
 </td>
 <td style="text-align:right;">
-11.3
+11.6
 </td>
 <td style="text-align:right;">
-4.413530e+02
+4.412843e+02
 </td>
 <td style="text-align:right;">
-6.083309e+02
+6.103200e+02
 </td>
 <td style="text-align:left;">
 BAC
@@ -51922,7 +52089,7 @@ BAC
 9.000000e+01
 </td>
 <td style="text-align:right;">
-5.183309e+02
+5.203200e+02
 </td>
 <td style="text-align:right;">
 3000
@@ -51937,7 +52104,7 @@ QSsp
 121.951219
 </td>
 <td style="text-align:right;">
-486.3796676
+488.3688062
 </td>
 <td style="text-align:right;">
 3000
@@ -51965,7 +52132,7 @@ MPC
 3.048780e+03
 </td>
 <td style="text-align:right;">
--2.440450e+03
+-2.438460e+03
 </td>
 <td style="text-align:right;">
 2019
@@ -52062,31 +52229,31 @@ orange
 NA
 </td>
 <td style="text-align:right;">
-0.0329
+0.0346
 </td>
 <td style="text-align:right;">
-0.0329
+0.0346
 </td>
 <td style="text-align:right;">
-0.0329
-</td>
-<td style="text-align:right;">
--3.7
-</td>
-<td style="text-align:right;">
-0.0329
+0.0346
 </td>
 <td style="text-align:right;">
 -3.7
 </td>
 <td style="text-align:right;">
-9.1
+0.0346
 </td>
 <td style="text-align:right;">
-3.053810e+03
+-3.7
 </td>
 <td style="text-align:right;">
-4.000937e+03
+9.2
+</td>
+<td style="text-align:right;">
+3.054208e+03
+</td>
+<td style="text-align:right;">
+4.008297e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -52095,7 +52262,7 @@ BAC
 1.300000e+03
 </td>
 <td style="text-align:right;">
-2.700937e+03
+2.708297e+03
 </td>
 <td style="text-align:right;">
 2042
@@ -52136,7 +52303,7 @@ MPC
 9.146341e+03
 </td>
 <td style="text-align:right;">
--5.145404e+03
+-5.138044e+03
 </td>
 <td style="text-align:right;">
 2019
@@ -52402,31 +52569,31 @@ black
 NA
 </td>
 <td style="text-align:right;">
-0.3617
+0.3644
 </td>
 <td style="text-align:right;">
-0.3617
+0.3644
 </td>
 <td style="text-align:right;">
-0.3617
-</td>
-<td style="text-align:right;">
--1.3
-</td>
-<td style="text-align:right;">
-0.3617
+0.3644
 </td>
 <td style="text-align:right;">
 -1.3
 </td>
 <td style="text-align:right;">
-6.6
+0.3644
 </td>
 <td style="text-align:right;">
-1.186483e+04
+-1.3
 </td>
 <td style="text-align:right;">
-1.471283e+04
+6.8
+</td>
+<td style="text-align:right;">
+1.185828e+04
+</td>
+<td style="text-align:right;">
+1.473781e+04
 </td>
 <td style="text-align:left;">
 </td>
@@ -52593,7 +52760,7 @@ NA
 3.404049e+03
 </td>
 <td style="text-align:right;">
-4.713604e+03
+4.713631e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -52760,7 +52927,7 @@ NA
 1.624333e+02
 </td>
 <td style="text-align:right;">
-2.253627e+02
+2.253620e+02
 </td>
 <td style="text-align:left;">
 </td>
@@ -52927,7 +53094,7 @@ NA
 5.782819e+03
 </td>
 <td style="text-align:right;">
-6.317354e+03
+6.317364e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -52936,7 +53103,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
-3.173537e+02
+3.173641e+02
 </td>
 <td style="text-align:right;">
 2019
@@ -53120,7 +53287,7 @@ EAC
 12.000000
 </td>
 <td style="text-align:right;">
-6.4198941
+6.4198934
 </td>
 <td style="text-align:right;">
 2021
@@ -53293,7 +53460,7 @@ QSsp
 121.951219
 </td>
 <td style="text-align:right;">
-470.2344314
+470.2344817
 </td>
 <td style="text-align:right;">
 2035
@@ -53442,7 +53609,7 @@ black
 1.802870e+01
 </td>
 <td style="text-align:right;">
-2.973969e+01
+2.973973e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -53609,7 +53776,7 @@ NA
 4.743194e+03
 </td>
 <td style="text-align:right;">
-5.661246e+03
+5.661239e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -53618,7 +53785,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
--3.387544e+02
+-3.387612e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -53778,7 +53945,7 @@ NA
 1.646761e+03
 </td>
 <td style="text-align:right;">
-2.958782e+03
+2.958734e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -56118,7 +56285,7 @@ NA
 9.527265e+00
 </td>
 <td style="text-align:right;">
-1.416868e+01
+1.416865e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -57151,7 +57318,7 @@ EAC
 80.000000
 </td>
 <td style="text-align:right;">
--70.5353266
+-70.5353269
 </td>
 <td style="text-align:right;">
 2020
@@ -57297,7 +57464,7 @@ NA
 1.061902e+01
 </td>
 <td style="text-align:right;">
-1.629257e+01
+1.629258e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -57306,7 +57473,7 @@ BAC
 8.100000e+00
 </td>
 <td style="text-align:right;">
-8.192574e+00
+8.192575e+00
 </td>
 <td style="text-align:right;">
 2025
@@ -57463,10 +57630,10 @@ NA
 59.5
 </td>
 <td style="text-align:right;">
-1.054408e+01
+1.054405e+01
 </td>
 <td style="text-align:right;">
-5.085901e+01
+5.085813e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -57969,7 +58136,7 @@ NA
 2.143187e+00
 </td>
 <td style="text-align:right;">
-3.478543e+00
+3.478541e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -57991,7 +58158,7 @@ QSsp
 165.000000
 </td>
 <td style="text-align:right;">
--161.5214572
+-161.5214594
 </td>
 <td style="text-align:right;">
 2021
@@ -58137,10 +58304,10 @@ green
 9.9
 </td>
 <td style="text-align:right;">
-1.209565e+01
+1.209626e+01
 </td>
 <td style="text-align:right;">
-1.685229e+01
+1.685318e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -58149,7 +58316,7 @@ BAC
 2.093023e-01
 </td>
 <td style="text-align:right;">
-1.664299e+01
+1.664387e+01
 </td>
 <td style="text-align:right;">
 2157
@@ -58164,7 +58331,7 @@ QSsp
 334.000000
 </td>
 <td style="text-align:right;">
--317.1477084
+-317.1468237
 </td>
 <td style="text-align:right;">
 2020
@@ -58192,7 +58359,7 @@ QShh
 2.941176e+03
 </td>
 <td style="text-align:right;">
--2.924324e+03
+-2.924323e+03
 </td>
 <td style="text-align:right;">
 2020
@@ -58312,7 +58479,7 @@ NA
 1.845246e+01
 </td>
 <td style="text-align:right;">
-1.456063e+01
+1.456048e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -58646,7 +58813,7 @@ NA
 6.846897e+03
 </td>
 <td style="text-align:right;">
-1.359641e+04
+1.359640e+04
 </td>
 <td style="text-align:left;">
 </td>
@@ -58813,7 +58980,7 @@ NA
 1.901907e+03
 </td>
 <td style="text-align:right;">
-2.224243e+03
+2.224020e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -58822,7 +58989,7 @@ BAC
 9.600000e+02
 </td>
 <td style="text-align:right;">
-1.264243e+03
+1.264020e+03
 </td>
 <td style="text-align:right;">
 3000
@@ -58863,7 +59030,7 @@ MPC
 6.097561e+03
 </td>
 <td style="text-align:right;">
--3.873318e+03
+-3.873541e+03
 </td>
 <td style="text-align:right;">
 2021
@@ -58984,7 +59151,7 @@ NA
 1.536832e+02
 </td>
 <td style="text-align:right;">
-2.016510e+02
+2.016500e+02
 </td>
 <td style="text-align:left;">
 BAC
@@ -58993,7 +59160,7 @@ BAC
 9.000000e+01
 </td>
 <td style="text-align:right;">
-1.116510e+02
+1.116500e+02
 </td>
 <td style="text-align:right;">
 2064
@@ -59008,7 +59175,7 @@ QSsp
 121.951219
 </td>
 <td style="text-align:right;">
-79.6997825
+79.6987737
 </td>
 <td style="text-align:right;">
 2039
@@ -59036,7 +59203,7 @@ MPC
 3.048780e+03
 </td>
 <td style="text-align:right;">
--2.847129e+03
+-2.847130e+03
 </td>
 <td style="text-align:right;">
 2020
@@ -59139,13 +59306,13 @@ black
 0.0018
 </td>
 <td style="text-align:right;">
-0.3964
+0.3995
 </td>
 <td style="text-align:right;">
 -2.0
 </td>
 <td style="text-align:right;">
-0.0971
+0.0973
 </td>
 <td style="text-align:right;">
 4.9
@@ -59157,7 +59324,7 @@ black
 6.003179e+01
 </td>
 <td style="text-align:right;">
-1.246740e+02
+1.249964e+02
 </td>
 <td style="text-align:left;">
 </td>
@@ -59324,7 +59491,7 @@ NA
 5.875961e+03
 </td>
 <td style="text-align:right;">
-6.704890e+03
+6.704888e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -59333,7 +59500,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
-7.048897e+02
+7.048879e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -59493,7 +59660,7 @@ NA
 5.162003e+00
 </td>
 <td style="text-align:right;">
-1.107543e+01
+1.108761e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -60332,7 +60499,7 @@ NA
 1.695841e+03
 </td>
 <td style="text-align:right;">
-2.030936e+03
+2.030933e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -60499,7 +60666,7 @@ green
 3.053404e+01
 </td>
 <td style="text-align:right;">
-6.817610e+01
+6.817609e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -60508,7 +60675,7 @@ BAC
 2.500000e+00
 </td>
 <td style="text-align:right;">
-6.567610e+01
+6.567609e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -60523,7 +60690,7 @@ EAC
 80.000000
 </td>
 <td style="text-align:right;">
--11.8239033
+-11.8239067
 </td>
 <td style="text-align:right;">
 2020
@@ -60670,7 +60837,7 @@ green
 1.112510e+01
 </td>
 <td style="text-align:right;">
-2.960848e+01
+2.960838e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -60679,7 +60846,7 @@ BAC
 1.400000e+00
 </td>
 <td style="text-align:right;">
-2.820848e+01
+2.820838e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -60694,7 +60861,7 @@ EAC
 600.000000
 </td>
 <td style="text-align:right;">
--570.3915200
+-570.3916234
 </td>
 <td style="text-align:right;">
 2020
@@ -60722,7 +60889,7 @@ QShh
 3.048780e+01
 </td>
 <td style="text-align:right;">
--8.793249e-01
+-8.794283e-01
 </td>
 <td style="text-align:right;">
 2020
@@ -60843,7 +61010,7 @@ NA
 2.408702e-01
 </td>
 <td style="text-align:right;">
-4.151733e-01
+4.151734e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -60852,7 +61019,7 @@ BAC
 5.429900e-03
 </td>
 <td style="text-align:right;">
-4.097434e-01
+4.097435e-01
 </td>
 <td style="text-align:right;">
 3000
@@ -61525,7 +61692,7 @@ NA
 2.973331e-01
 </td>
 <td style="text-align:right;">
-4.742029e-01
+4.742097e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -61534,7 +61701,7 @@ BAC
 5.429900e-03
 </td>
 <td style="text-align:right;">
-4.687731e-01
+4.687798e-01
 </td>
 <td style="text-align:right;">
 3000
@@ -61562,7 +61729,7 @@ FEQG
 73.512195
 </td>
 <td style="text-align:right;">
--73.037992
+-73.037985
 </td>
 <td style="text-align:right;">
 2020
@@ -61867,7 +62034,7 @@ NA
 1.016794e+00
 </td>
 <td style="text-align:right;">
-1.376183e+00
+1.376186e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -61915,7 +62082,7 @@ QShh
 5.182930e-02
 </td>
 <td style="text-align:right;">
-1.324354e+00
+1.324357e+00
 </td>
 <td style="text-align:right;">
 NA
@@ -62201,7 +62368,7 @@ NA
 2.506238e+00
 </td>
 <td style="text-align:right;">
-4.265789e+00
+4.265803e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -62210,7 +62377,7 @@ BAC
 8.100000e+00
 </td>
 <td style="text-align:right;">
--3.834211e+00
+-3.834197e+00
 </td>
 <td style="text-align:right;">
 2020
@@ -63046,7 +63213,7 @@ NA
 4.786980e+00
 </td>
 <td style="text-align:right;">
-6.193307e+00
+6.193305e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -63212,7 +63379,7 @@ black
 9.432131e+03
 </td>
 <td style="text-align:right;">
-1.200035e+04
+1.200034e+04
 </td>
 <td style="text-align:left;">
 </td>
@@ -63378,7 +63545,7 @@ NA
 1.584089e+00
 </td>
 <td style="text-align:right;">
-3.232474e+00
+3.232467e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -63520,19 +63687,19 @@ orange
 NA
 </td>
 <td style="text-align:right;">
-0.7351
+0.7333
 </td>
 <td style="text-align:right;">
-0.7351
+0.7333
 </td>
 <td style="text-align:right;">
-0.7351
+0.7333
 </td>
 <td style="text-align:right;">
 0.4
 </td>
 <td style="text-align:right;">
-0.7351
+0.7333
 </td>
 <td style="text-align:right;">
 0.4
@@ -63541,10 +63708,10 @@ NA
 9.5
 </td>
 <td style="text-align:right;">
-8.945326e+03
+8.949618e+03
 </td>
 <td style="text-align:right;">
-1.088514e+04
+1.089833e+04
 </td>
 <td style="text-align:left;">
 BAC
@@ -63553,7 +63720,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
-4.885137e+03
+4.898335e+03
 </td>
 <td style="text-align:right;">
 3000
@@ -65558,7 +65725,7 @@ NA
 1.155751e+01
 </td>
 <td style="text-align:right;">
-1.766374e+01
+1.766375e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -65892,7 +66059,7 @@ NA
 1.891081e+01
 </td>
 <td style="text-align:right;">
-7.498441e+01
+7.498486e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -65901,7 +66068,7 @@ BAC
 1.220000e+01
 </td>
 <td style="text-align:right;">
-6.278441e+01
+6.278486e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -65916,7 +66083,7 @@ EAC
 110.000000
 </td>
 <td style="text-align:right;">
--35.0155891
+-35.0151414
 </td>
 <td style="text-align:right;">
 2021
@@ -65944,7 +66111,7 @@ QShh
 1.940492e+02
 </td>
 <td style="text-align:right;">
--1.190647e+02
+-1.190643e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -66382,7 +66549,7 @@ orange
 2020
 </td>
 <td style="text-align:right;">
-0.0071
+0.0070
 </td>
 <td style="text-align:right;">
 0.0001
@@ -66394,22 +66561,22 @@ orange
 0.0000
 </td>
 <td style="text-align:right;">
-13.5
+13.6
 </td>
 <td style="text-align:right;">
 0.0000
 </td>
 <td style="text-align:right;">
-13.5
+13.6
 </td>
 <td style="text-align:right;">
-8.2
+8.4
 </td>
 <td style="text-align:right;">
-1.209735e+03
+1.206902e+03
 </td>
 <td style="text-align:right;">
-1.625164e+03
+1.631504e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -66418,7 +66585,7 @@ BAC
 1.300000e+03
 </td>
 <td style="text-align:right;">
-3.251638e+02
+3.315040e+02
 </td>
 <td style="text-align:right;">
 2020
@@ -66459,7 +66626,7 @@ MPC
 9.146341e+03
 </td>
 <td style="text-align:right;">
--7.521178e+03
+-7.514837e+03
 </td>
 <td style="text-align:right;">
 2020
@@ -66748,7 +66915,7 @@ NA
 5.471304e+00
 </td>
 <td style="text-align:right;">
-5.247959e+01
+5.247962e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -66939,7 +67106,7 @@ EAC
 12.000000
 </td>
 <td style="text-align:right;">
-19.2015028
+19.2015015
 </td>
 <td style="text-align:right;">
 2030
@@ -66967,7 +67134,7 @@ QShh
 9.268293e+01
 </td>
 <td style="text-align:right;">
--6.148142e+01
+-6.148143e+01
 </td>
 <td style="text-align:right;">
 2022
@@ -67255,7 +67422,7 @@ orange
 7.109217e+00
 </td>
 <td style="text-align:right;">
-9.556026e+00
+9.556025e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -67264,7 +67431,7 @@ BAC
 2.400000e+00
 </td>
 <td style="text-align:right;">
-7.156026e+00
+7.156025e+00
 </td>
 <td style="text-align:right;">
 2036
@@ -67424,7 +67591,7 @@ NA
 5.564609e+00
 </td>
 <td style="text-align:right;">
-4.128231e+01
+4.128065e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -67433,7 +67600,7 @@ BAC
 8.181818e-01
 </td>
 <td style="text-align:right;">
-4.046413e+01
+4.046247e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -67448,7 +67615,7 @@ QSsp
 334.000000
 </td>
 <td style="text-align:right;">
--292.7176879
+-292.7193527
 </td>
 <td style="text-align:right;">
 2022
@@ -67476,7 +67643,7 @@ QShh
 2.083333e+03
 </td>
 <td style="text-align:right;">
--2.042051e+03
+-2.042053e+03
 </td>
 <td style="text-align:right;">
 2022
@@ -67597,7 +67764,7 @@ NA
 2.132071e+00
 </td>
 <td style="text-align:right;">
-4.292670e+00
+4.292669e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -68465,7 +68632,7 @@ EAC
 132.405488
 </td>
 <td style="text-align:right;">
--128.1546405
+-128.1546404
 </td>
 <td style="text-align:right;">
 2017
@@ -69796,7 +69963,7 @@ NA
 7.006825e+03
 </td>
 <td style="text-align:right;">
-7.839426e+03
+7.839430e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -69805,7 +69972,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
-1.839426e+03
+1.839430e+03
 </td>
 <td style="text-align:right;">
 3000
@@ -70134,7 +70301,7 @@ NA
 2.618194e+00
 </td>
 <td style="text-align:right;">
-5.149778e+00
+5.149781e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -70143,7 +70310,7 @@ BAC
 2.500000e+00
 </td>
 <td style="text-align:right;">
-2.649778e+00
+2.649782e+00
 </td>
 <td style="text-align:right;">
 3000
@@ -70158,7 +70325,7 @@ EAC
 80.000000
 </td>
 <td style="text-align:right;">
--74.8502224
+-74.8502185
 </td>
 <td style="text-align:right;">
 2021
@@ -70640,7 +70807,7 @@ blue
 3.854160e+03
 </td>
 <td style="text-align:right;">
-4.696115e+03
+4.696116e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -70649,7 +70816,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
--1.303885e+03
+-1.303884e+03
 </td>
 <td style="text-align:right;">
 2018
@@ -71509,7 +71676,7 @@ EAC
 26.481098
 </td>
 <td style="text-align:right;">
--25.3078107
+-25.3078108
 </td>
 <td style="text-align:right;">
 2018
@@ -71998,7 +72165,7 @@ NA
 8.382260e-02
 </td>
 <td style="text-align:right;">
-2.913039e-01
+2.913036e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -72007,7 +72174,7 @@ BAC
 7.500000e-01
 </td>
 <td style="text-align:right;">
--4.586961e-01
+-4.586964e-01
 </td>
 <td style="text-align:right;">
 2018
@@ -72022,7 +72189,7 @@ EAC
 5.596951
 </td>
 <td style="text-align:right;">
--5.3056473
+-5.3056476
 </td>
 <td style="text-align:right;">
 2018
@@ -72169,7 +72336,7 @@ NA
 1.171265e-01
 </td>
 <td style="text-align:right;">
-3.133840e-01
+3.133843e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -72178,7 +72345,7 @@ BAC
 7.500000e-01
 </td>
 <td style="text-align:right;">
--4.366160e-01
+-4.366157e-01
 </td>
 <td style="text-align:right;">
 2018
@@ -72193,7 +72360,7 @@ EAC
 9.021951
 </td>
 <td style="text-align:right;">
--8.7085672
+-8.7085670
 </td>
 <td style="text-align:right;">
 2018
@@ -72340,7 +72507,7 @@ NA
 3.368199e+00
 </td>
 <td style="text-align:right;">
-4.590677e+00
+4.590676e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -72849,7 +73016,7 @@ NA
 5.737986e+00
 </td>
 <td style="text-align:right;">
-1.736160e+01
+1.736162e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -73040,7 +73207,7 @@ EAC
 100.000000
 </td>
 <td style="text-align:right;">
--40.1976817
+-40.1976820
 </td>
 <td style="text-align:right;">
 2021
@@ -73524,7 +73691,7 @@ NA
 3.280735e+00
 </td>
 <td style="text-align:right;">
-1.443685e+01
+1.443684e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -73533,7 +73700,7 @@ BAC
 8.100000e+00
 </td>
 <td style="text-align:right;">
-6.336848e+00
+6.336841e+00
 </td>
 <td style="text-align:right;">
 2020
@@ -76381,7 +76548,7 @@ orange
 7.002625e+03
 </td>
 <td style="text-align:right;">
-7.977351e+03
+7.977361e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -76390,7 +76557,7 @@ BAC
 6.000000e+03
 </td>
 <td style="text-align:right;">
-1.977351e+03
+1.977361e+03
 </td>
 <td style="text-align:right;">
 3000
@@ -76550,7 +76717,7 @@ NA
 1.284506e+03
 </td>
 <td style="text-align:right;">
-2.428518e+03
+2.428544e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -76693,31 +76860,31 @@ orange
 NA
 </td>
 <td style="text-align:right;">
-0.7592
+0.7965
 </td>
 <td style="text-align:right;">
-0.7592
+0.7965
 </td>
 <td style="text-align:right;">
-0.7592
-</td>
-<td style="text-align:right;">
--0.3
-</td>
-<td style="text-align:right;">
-0.7592
+0.7965
 </td>
 <td style="text-align:right;">
 -0.3
 </td>
 <td style="text-align:right;">
-8.1
+0.7965
 </td>
 <td style="text-align:right;">
-8.962650e+04
+-0.3
 </td>
 <td style="text-align:right;">
-1.121350e+05
+7.9
+</td>
+<td style="text-align:right;">
+8.969351e+04
+</td>
+<td style="text-align:right;">
+1.108173e+05
 </td>
 <td style="text-align:left;">
 BAC
@@ -76726,10 +76893,10 @@ BAC
 6.300000e+04
 </td>
 <td style="text-align:right;">
-4.913499e+04
+4.781733e+04
 </td>
 <td style="text-align:right;">
-2129
+2157
 </td>
 <td style="text-align:left;">
 above
@@ -76886,7 +77053,7 @@ NA
 5.895511e+04
 </td>
 <td style="text-align:right;">
-6.829194e+04
+6.829196e+04
 </td>
 <td style="text-align:left;">
 BAC
@@ -76895,7 +77062,7 @@ BAC
 6.300000e+04
 </td>
 <td style="text-align:right;">
-5.291944e+03
+5.291963e+03
 </td>
 <td style="text-align:right;">
 2020
@@ -77055,7 +77222,7 @@ NA
 1.618750e+00
 </td>
 <td style="text-align:right;">
-3.567369e+00
+3.567368e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -77064,7 +77231,7 @@ BAC
 2.400000e+00
 </td>
 <td style="text-align:right;">
-1.167369e+00
+1.167368e+00
 </td>
 <td style="text-align:right;">
 2020
@@ -77369,31 +77536,31 @@ black
 NA
 </td>
 <td style="text-align:right;">
-0.5937
+0.5908
 </td>
 <td style="text-align:right;">
-0.5937
+0.5908
 </td>
 <td style="text-align:right;">
-0.5937
+0.5908
 </td>
 <td style="text-align:right;">
-18.8
+18.7
 </td>
 <td style="text-align:right;">
-0.5937
+0.5908
 </td>
 <td style="text-align:right;">
-18.8
+18.7
 </td>
 <td style="text-align:right;">
-131.3
+130.2
 </td>
 <td style="text-align:right;">
-1.788205e+01
+1.811408e+01
 </td>
 <td style="text-align:right;">
-1.287941e+03
+1.246110e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -77560,7 +77727,7 @@ NA
 4.513217e+02
 </td>
 <td style="text-align:right;">
-1.114588e+03
+1.114590e+03
 </td>
 <td style="text-align:left;">
 BAC
@@ -77569,7 +77736,7 @@ BAC
 9.600000e+02
 </td>
 <td style="text-align:right;">
-1.545879e+02
+1.545895e+02
 </td>
 <td style="text-align:right;">
 2019
@@ -77610,7 +77777,7 @@ MPC
 6.097561e+03
 </td>
 <td style="text-align:right;">
--4.982973e+03
+-4.982971e+03
 </td>
 <td style="text-align:right;">
 2019
@@ -77731,7 +77898,7 @@ NA
 1.218477e+00
 </td>
 <td style="text-align:right;">
-9.630652e+00
+9.663559e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -78402,7 +78569,7 @@ NA
 5.972304e-01
 </td>
 <td style="text-align:right;">
-7.002018e+02
+7.002288e+02
 </td>
 <td style="text-align:left;">
 </td>
@@ -78545,19 +78712,19 @@ black
 NA
 </td>
 <td style="text-align:right;">
-0.0824
+0.0811
 </td>
 <td style="text-align:right;">
-0.0824
+0.0811
 </td>
 <td style="text-align:right;">
-0.0824
+0.0811
 </td>
 <td style="text-align:right;">
 2.8
 </td>
 <td style="text-align:right;">
-0.0824
+0.0811
 </td>
 <td style="text-align:right;">
 2.8
@@ -78566,10 +78733,10 @@ NA
 8.1
 </td>
 <td style="text-align:right;">
-3.057967e+04
+3.060942e+04
 </td>
 <td style="text-align:right;">
-3.884929e+04
+3.887465e+04
 </td>
 <td style="text-align:left;">
 </td>
@@ -78712,19 +78879,19 @@ black
 NA
 </td>
 <td style="text-align:right;">
-0.6907
+0.6826
 </td>
 <td style="text-align:right;">
-0.6907
+0.6826
 </td>
 <td style="text-align:right;">
-0.6907
+0.6826
 </td>
 <td style="text-align:right;">
 0.5
 </td>
 <td style="text-align:right;">
-0.6907
+0.6826
 </td>
 <td style="text-align:right;">
 0.5
@@ -78733,10 +78900,10 @@ NA
 6.4
 </td>
 <td style="text-align:right;">
-3.964118e+03
+3.966763e+03
 </td>
 <td style="text-align:right;">
-4.781710e+03
+4.787691e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -78903,7 +79070,7 @@ NA
 1.845006e+02
 </td>
 <td style="text-align:right;">
-3.008291e+02
+3.008280e+02
 </td>
 <td style="text-align:left;">
 BAC
@@ -78912,7 +79079,7 @@ BAC
 2.600000e+01
 </td>
 <td style="text-align:right;">
-2.748291e+02
+2.748280e+02
 </td>
 <td style="text-align:right;">
 3000
@@ -78953,7 +79120,7 @@ MPC
 1.000000e+03
 </td>
 <td style="text-align:right;">
--6.991709e+02
+-6.991720e+02
 </td>
 <td style="text-align:right;">
 2020
@@ -79433,7 +79600,7 @@ EAC
 110.000000
 </td>
 <td style="text-align:right;">
--84.6833526
+-84.6833533
 </td>
 <td style="text-align:right;">
 2018
@@ -79751,7 +79918,7 @@ NA
 1.440957e+03
 </td>
 <td style="text-align:right;">
-1.815972e+03
+1.815969e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -79918,7 +80085,7 @@ NA
 1.928844e+03
 </td>
 <td style="text-align:right;">
-2.410726e+03
+2.410708e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -80061,31 +80228,31 @@ orange
 NA
 </td>
 <td style="text-align:right;">
-0.0296
+0.0320
 </td>
 <td style="text-align:right;">
-0.0296
+0.0320
 </td>
 <td style="text-align:right;">
-0.0296
-</td>
-<td style="text-align:right;">
--3.8
-</td>
-<td style="text-align:right;">
-0.0296
+0.0320
 </td>
 <td style="text-align:right;">
 -3.8
 </td>
 <td style="text-align:right;">
-15.5
+0.0320
 </td>
 <td style="text-align:right;">
-6.789019e+04
+-3.8
 </td>
 <td style="text-align:right;">
-9.561041e+04
+15.7
+</td>
+<td style="text-align:right;">
+6.765536e+04
+</td>
+<td style="text-align:right;">
+9.564331e+04
 </td>
 <td style="text-align:left;">
 BAC
@@ -80094,7 +80261,7 @@ BAC
 6.300000e+04
 </td>
 <td style="text-align:right;">
-3.261041e+04
+3.264331e+04
 </td>
 <td style="text-align:right;">
 2021
@@ -80230,31 +80397,31 @@ red
 NA
 </td>
 <td style="text-align:right;">
-0.0494
+0.0438
 </td>
 <td style="text-align:right;">
-0.0494
+0.0438
 </td>
 <td style="text-align:right;">
-0.0494
+0.0438
 </td>
 <td style="text-align:right;">
-1.9
+2.0
 </td>
 <td style="text-align:right;">
-0.0494
+0.0438
 </td>
 <td style="text-align:right;">
-1.9
+2.0
 </td>
 <td style="text-align:right;">
-8.5
+8.2
 </td>
 <td style="text-align:right;">
-1.590096e+02
+1.576562e+02
 </td>
 <td style="text-align:right;">
-1.953489e+02
+1.926865e+02
 </td>
 <td style="text-align:left;">
 BAC
@@ -80263,7 +80430,7 @@ BAC
 9.000000e+01
 </td>
 <td style="text-align:right;">
-1.053489e+02
+1.026865e+02
 </td>
 <td style="text-align:right;">
 3000
@@ -80278,7 +80445,7 @@ QSsp
 121.951219
 </td>
 <td style="text-align:right;">
-73.3977062
+70.7353242
 </td>
 <td style="text-align:right;">
 3000
@@ -80306,7 +80473,7 @@ MPC
 3.048780e+03
 </td>
 <td style="text-align:right;">
--2.853432e+03
+-2.856094e+03
 </td>
 <td style="text-align:right;">
 2019
@@ -80427,7 +80594,7 @@ NA
 1.269818e+04
 </td>
 <td style="text-align:right;">
-1.767981e+04
+1.767594e+04
 </td>
 <td style="text-align:left;">
 </td>
@@ -80582,19 +80749,19 @@ black
 6.5
 </td>
 <td style="text-align:right;">
-0.0044
+0.0045
 </td>
 <td style="text-align:right;">
 5.3
 </td>
 <td style="text-align:right;">
-7.5
+7.6
 </td>
 <td style="text-align:right;">
-2.188535e+04
+2.187976e+04
 </td>
 <td style="text-align:right;">
-2.991320e+04
+2.990755e+04
 </td>
 <td style="text-align:left;">
 </td>
@@ -81441,7 +81608,7 @@ BAC
 9.600000e+02
 </td>
 <td style="text-align:right;">
-7.164403e+01
+7.164424e+01
 </td>
 <td style="text-align:right;">
 2021
@@ -81612,7 +81779,7 @@ BAC
 6.500000e-02
 </td>
 <td style="text-align:right;">
-5.119632e+00
+5.119633e+00
 </td>
 <td style="text-align:right;">
 2046
@@ -81640,7 +81807,7 @@ FEQG
 20.000000
 </td>
 <td style="text-align:right;">
--14.815368
+-14.815367
 </td>
 <td style="text-align:right;">
 2020
@@ -81774,7 +81941,7 @@ NA
 5.201285e-01
 </td>
 <td style="text-align:right;">
-7.782011e-01
+7.782012e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -81783,7 +81950,7 @@ BAC
 6.500000e-02
 </td>
 <td style="text-align:right;">
-7.132011e-01
+7.132012e-01
 </td>
 <td style="text-align:right;">
 2038
@@ -82455,10 +82622,10 @@ NA
 13.5
 </td>
 <td style="text-align:right;">
-1.445111e-01
+1.445166e-01
 </td>
 <td style="text-align:right;">
-2.319564e-01
+2.319647e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -82467,7 +82634,7 @@ BAC
 6.500000e-02
 </td>
 <td style="text-align:right;">
-1.669564e-01
+1.669647e-01
 </td>
 <td style="text-align:right;">
 2024
@@ -82495,7 +82662,7 @@ FEQG
 20.000000
 </td>
 <td style="text-align:right;">
--19.768044
+-19.768035
 </td>
 <td style="text-align:right;">
 2020
@@ -82798,7 +82965,7 @@ NA
 1.622263e+00
 </td>
 <td style="text-align:right;">
-4.302480e+00
+4.302497e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -82820,7 +82987,7 @@ QSsp
 3340.000000
 </td>
 <td style="text-align:right;">
--3335.6975196
+-3335.6975027
 </td>
 <td style="text-align:right;">
 2020
@@ -82966,7 +83133,7 @@ NA
 1.039588e+00
 </td>
 <td style="text-align:right;">
-3.049004e+00
+3.049102e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -83133,7 +83300,7 @@ NA
 1.124000e-03
 </td>
 <td style="text-align:right;">
-6.248620e+01
+6.248614e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -83467,7 +83634,7 @@ NA
 2.873469e+00
 </td>
 <td style="text-align:right;">
-5.550273e+00
+5.550272e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -83476,7 +83643,7 @@ BAC
 6.500000e-02
 </td>
 <td style="text-align:right;">
-5.485273e+00
+5.485271e+00
 </td>
 <td style="text-align:right;">
 2051
@@ -83504,7 +83671,7 @@ FEQG
 20.000000
 </td>
 <td style="text-align:right;">
--14.449727
+-14.449729
 </td>
 <td style="text-align:right;">
 2020
@@ -83638,7 +83805,7 @@ NA
 4.549631e-01
 </td>
 <td style="text-align:right;">
-6.690603e-01
+6.690600e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -83647,7 +83814,7 @@ BAC
 6.500000e-02
 </td>
 <td style="text-align:right;">
-6.040603e-01
+6.040600e-01
 </td>
 <td style="text-align:right;">
 2042
@@ -83809,7 +83976,7 @@ NA
 4.548695e+00
 </td>
 <td style="text-align:right;">
-6.268090e+00
+6.268089e+00
 </td>
 <td style="text-align:left;">
 BAC
@@ -83818,7 +83985,7 @@ BAC
 6.500000e-02
 </td>
 <td style="text-align:right;">
-6.203090e+00
+6.203089e+00
 </td>
 <td style="text-align:right;">
 2069
@@ -83846,7 +84013,7 @@ FEQG
 80.000000
 </td>
 <td style="text-align:right;">
--73.731910
+-73.731911
 </td>
 <td style="text-align:right;">
 2020
@@ -84322,7 +84489,7 @@ NA
 1.553649e-01
 </td>
 <td style="text-align:right;">
-3.584500e-01
+3.584499e-01
 </td>
 <td style="text-align:left;">
 BAC
@@ -84331,7 +84498,7 @@ BAC
 6.500000e-02
 </td>
 <td style="text-align:right;">
-2.934500e-01
+2.934499e-01
 </td>
 <td style="text-align:right;">
 2026
@@ -85018,7 +85185,7 @@ QSsp
 3340.000000
 </td>
 <td style="text-align:right;">
--3336.5011712
+-3336.5011714
 </td>
 <td style="text-align:right;">
 2020
@@ -85164,7 +85331,7 @@ NA
 8.913997e-01
 </td>
 <td style="text-align:right;">
-2.066000e+00
+2.065998e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -85331,7 +85498,7 @@ NA
 2.494000e-03
 </td>
 <td style="text-align:right;">
-1.275083e+03
+1.275085e+03
 </td>
 <td style="text-align:left;">
 </td>
@@ -85498,7 +85665,7 @@ NA
 1.317860e-02
 </td>
 <td style="text-align:right;">
-3.389176e+00
+3.389185e+00
 </td>
 <td style="text-align:left;">
 </td>
@@ -86166,7 +86333,7 @@ NA
 5.715751e+01
 </td>
 <td style="text-align:right;">
-8.490202e+01
+8.490190e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -86175,7 +86342,7 @@ BAC
 2.600000e+01
 </td>
 <td style="text-align:right;">
-5.890202e+01
+5.890190e+01
 </td>
 <td style="text-align:right;">
 2044
@@ -86216,7 +86383,7 @@ MPC
 1.000000e+03
 </td>
 <td style="text-align:right;">
--9.150980e+02
+-9.150981e+02
 </td>
 <td style="text-align:right;">
 2020
@@ -86672,7 +86839,7 @@ NA
 2.359492e+01
 </td>
 <td style="text-align:right;">
-4.155589e+01
+4.155590e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -86681,7 +86848,7 @@ BAC
 1.400000e+00
 </td>
 <td style="text-align:right;">
-4.015589e+01
+4.015590e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -86696,7 +86863,7 @@ EAC
 600.000000
 </td>
 <td style="text-align:right;">
--558.4441054
+-558.4440997
 </td>
 <td style="text-align:right;">
 2021
@@ -86724,7 +86891,7 @@ QShh
 3.048780e+01
 </td>
 <td style="text-align:right;">
-1.106809e+01
+1.106810e+01
 </td>
 <td style="text-align:right;">
 2021
@@ -87341,7 +87508,7 @@ NA
 1.447601e+02
 </td>
 <td style="text-align:right;">
-3.574847e+02
+3.574835e+02
 </td>
 <td style="text-align:left;">
 BAC
@@ -87350,7 +87517,7 @@ BAC
 8.100000e+00
 </td>
 <td style="text-align:right;">
-3.493847e+02
+3.493835e+02
 </td>
 <td style="text-align:right;">
 3000
@@ -87839,7 +88006,7 @@ NA
 2.534392e+01
 </td>
 <td style="text-align:right;">
-4.253511e+01
+4.253478e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -87848,7 +88015,7 @@ BAC
 1.220000e+01
 </td>
 <td style="text-align:right;">
-3.033511e+01
+3.033478e+01
 </td>
 <td style="text-align:right;">
 3000
@@ -87863,7 +88030,7 @@ EAC
 110.000000
 </td>
 <td style="text-align:right;">
--67.4648945
+-67.4652232
 </td>
 <td style="text-align:right;">
 2021
@@ -87891,7 +88058,7 @@ QShh
 1.829268e+02
 </td>
 <td style="text-align:right;">
--1.403917e+02
+-1.403921e+02
 </td>
 <td style="text-align:right;">
 2021
@@ -88009,7 +88176,7 @@ NA
 6.022694e+01
 </td>
 <td style="text-align:right;">
-7.344098e+01
+7.344101e+01
 </td>
 <td style="text-align:left;">
 BAC
@@ -88018,7 +88185,7 @@ BAC
 9.000000e+01
 </td>
 <td style="text-align:right;">
--1.655902e+01
+-1.655899e+01
 </td>
 <td style="text-align:right;">
 2021
@@ -88033,7 +88200,7 @@ QSsp
 121.951219
 </td>
 <td style="text-align:right;">
--48.5102432
+-48.5102067
 </td>
 <td style="text-align:right;">
 2021
@@ -88061,7 +88228,7 @@ MPC
 3.048780e+03
 </td>
 <td style="text-align:right;">
--2.975340e+03
+-2.975339e+03
 </td>
 <td style="text-align:right;">
 2021
@@ -88343,7 +88510,7 @@ NA
 4.144080e-02
 </td>
 <td style="text-align:right;">
-6.552550e-02
+6.552540e-02
 </td>
 <td style="text-align:left;">
 </td>
@@ -88507,7 +88674,7 @@ NA
 4.782990e-02
 </td>
 <td style="text-align:right;">
-8.925290e-02
+8.925300e-02
 </td>
 <td style="text-align:left;">
 </td>
@@ -88529,7 +88696,7 @@ EAC
 22.000000
 </td>
 <td style="text-align:right;">
--21.9107471
+-21.9107470
 </td>
 <td style="text-align:right;">
 2018
