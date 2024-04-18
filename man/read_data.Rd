@@ -33,9 +33,8 @@ read_data(
 supplied using 'file.path'). Defaults to "."; i.e. the working directory.}
 
 \item{data_format}{A string specifying whether the data were extracted from
-the ICES webservice ("ICES" - the default) or are in the simplified format
-designed for other data sources ("external"). The value "ICES_old" is
-deprecated.}
+the ICES webservice (\code{"ICES"} - the default) or are in the simplified
+format designed for other data sources (\code{"external"}).}
 
 \item{info_files}{A list of files specifying reference tables which override
 the defaults. See examples.}
@@ -89,6 +88,14 @@ will be \code{FALSE} if the vflag entry is \code{"S"} or suspect. Records for wh
 }
 \item \code{stations}
 }
+}
+\description{
+Reads in contaminant and effects data, the station dictionary and various
+reference tables. For data from the ICES webservice, it matches data to
+stations in the station dictionary.  It also allows the user to set control
+parameters that dictate the assessment process.
+}
+\details{
 \subsection{Control parameters}{
 
 Many aspects of the assessment process can be controlled through the
@@ -96,10 +103,10 @@ parameters stored in \code{info$control}. This is a list populated with default
 values which can then be overwritten, if required, using the \code{control}
 argument.
 }
+
+\subsection{External data}{
+
+If \code{data_format = "external"}, a simplified data and station file can
+be supplied. See \code{vignette("external-file-format")} for details.
 }
-\description{
-Reads in contaminant and effects data, the station dictionary and various
-reference tables. For data from the ICES webservice, it matches data to
-stations in the station dictionary.  It also allows the user to set control
-parameters that dictate the assessment process.
 }

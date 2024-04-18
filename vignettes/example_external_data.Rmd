@@ -26,7 +26,7 @@ in a directory `data`, and information files in a directory `information`,
 but you can use any directory for these.
 
 ```r
-working.directory <- '/Users/stuart/git/HARSAT'
+working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 ```
 
 # Read data
@@ -44,25 +44,25 @@ biota_data <- read_data(
   data_format = "external",
   info_dir = file.path(working.directory, "information", "AMAP"),
 )
-#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/AMAP/determinand.csv 
-#> Found in path species.csv /Users/stuart/git/HARSAT/information/AMAP/species.csv 
-#> Found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/AMAP/thresholds_biota.csv 
-#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
-#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
-#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
-#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/determinand.csv': '7e310c487109c531aa62cb9a217f879b'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/species.csv': 'a3d78e2147a3fc2867b82d1d16a3ae88'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/imposex.csv': '7e42cb57944b9d79216ad25c12ccada5'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/AMAP/thresholds_biota.csv': '7208225201dcbb851427a4df70760106'
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\AMAP\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\AMAP\species.csv 
+#> Found in path thresholds_biota.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\AMAP\thresholds_biota.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\AMAP\determinand.csv': '80bca84d428856c93e89c52aebf8b144'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\AMAP\species.csv': '1aba5ace8155923ed18bd9d0b414e48e'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv': 'b602a882d4783085c896bcf130c8f848'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\AMAP\thresholds_biota.csv': 'a6d82623b8968910b59c1308a646e8a8'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_AMAP_STATIONS.csv'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_AMAP_STATIONS.csv': '4abf9ba9b2f033e296d4ddc3b99c16d7'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_external_data/EXTERNAL_AMAP_STATIONS.csv'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_external_data/EXTERNAL_AMAP_STATIONS.csv': '91e7eb7661ce43b02c68cc81153ac3d7'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv': 'dce2913be61985213ac903f69a783c9f'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv': '9ade644c5bdb561f0c3bf4a3560a2c15'
 #> 
 #> Argument max_year taken to be the maximum year in the data: 2020
 ```
@@ -118,6 +118,7 @@ biota_timeseries <- create_timeseries(
 #> 
 #> Creating time series data
 #>    Converting data to appropriate basis for statistical analysis
+#>    Missing uncertainties which cannot be imputed: deleted data in 'missing_uncertainties.csv
 #>    Dropping groups of compounds / stations with no data between 2015 and 2020
 ```
 

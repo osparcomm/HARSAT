@@ -1,6 +1,6 @@
 Package: harsat
 Title: Harmonized Regional Seas Assessment Tool
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person(given = "Arctic Monitoring and Assessment Programme (AMAP)", email = "amap@amap.no", role = c("cph", "fnd", "aut")),
     person(given = "Helsinki Commission (HELCOM)", email = "secretariat@helcom.fi", role = c("cph", "fnd", "aut")),
@@ -22,26 +22,28 @@ RoxygenNote: 7.2.3
 VignetteBuilder: knitr, rmarkdown
 Depends: R (>= 4.2.1.0)
 Imports:
+  digest,
+  dplyr,
   flexsurv,
+  lattice,
   lme4,
+  lubridate,
+  magrittr,
+  MASS,
   mgcv,
+  mvtnorm, 
   numDeriv,
   optimx,
   parallel,
   pbapply,
-  MASS,
-  mvtnorm, 
-  dplyr,
-  magrittr,
-  lattice,
-  lubridate,
   readr,
-  stringr,
-  tibble,
-  tidyr,
+  readxl,
   sf,
-  digest,
-  readxl
+  stringr,
+  survival,
+  TeachingDemos,
+  tibble,
+  tidyr
 Suggests: 
   knitr,
   rmarkdown,

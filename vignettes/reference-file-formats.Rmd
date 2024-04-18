@@ -7,7 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-These are the column headers for CSV-formatted reference table files.
+These are the column headers for CSV-formatted reference table files. Ideally, the files should be UTF-8 encoded.
+
 `harsat` uses three different reference tables: 
 
 1. A species file
@@ -17,6 +18,8 @@ These are the column headers for CSV-formatted reference table files.
 All these files should be in your information files directory.  
 
 Do not use any forward or backward slashes in the reference files.
+
+Missing values should be supplied as blank cells, not as `NA`.
 
 The order of the columns does not matter, as long as they are named consistently with the specification below.
 
@@ -67,7 +70,7 @@ The determinand file will be `determinand.csv` in your information files directo
 | `sediment_auxiliary` | character | yes* | yes | Identifies all the auxiliary measurements that should be associated with the determinand. These should be separated by a `~`. For example, for metal contaminants, this might be 'AL~LI~CORG' |
 | `water_auxiliary` | character | yes" | yes | Identifies all the auxiliary measurements that should be associated with the determinand. These should be separated by a `~`. Not currently used much for water assessments |
 | `biota_sd_constant` | character | no | yes | If supplied, this allows the imputation of measurement uncertainty for determinands in a biota assessment when they are missing from the data file. `sd_constant` is the constant error with units given by `biota_unit` |
-| `biota_sd_variable` | character | no | yes | If supplied, this allows the imputation of measurement uncertainty for determinands in a biota assessment when they are missing from the data file. `sd_constant` is the proportional error expressed as a percentage (%) |
+| `biota_sd_variable` | character | no | yes | If supplied, this allows the imputation of measurement uncertainty for determinands in a biota assessment when they are missing from the data file. `sd_variable` is the proportional error expressed as a percentage (%) |
 | `sediment_sd_constant` | character | no | yes | See `biota_sd_constant` |
 | `sediment_sd_variable` | character | no | yes | See `biota_sd_variable` |
 | `water_sd_constant` | character | no | yes | See `biota_sd_constant` |

@@ -710,6 +710,7 @@ ctsm_get_datatype <- function(determinand, info, abbr = FALSE){
     startsWith(pargroup, "OC-")                ~ "contaminant",
     pargroup %in% c("I-MET", "I-RNC")          ~ "contaminant",
     pargroup %in% c("B-MBA", "B-TOX", "B-END") ~ "effect",
+    determinand %in% "SURVT"                   ~ "effect",
     pargroup %in% c("B-GRS", "B-HST")          ~ "disease",
     TRUE                                       ~ "auxiliary"
   )
@@ -2080,6 +2081,10 @@ ctsm_convert_basis <- function(
   # lipidwt assumed to be on a wet weight basis - could generalise (issue raised)
   
   # set up working data frame
+  
+  if (all(exclude)) {
+    return(conc)
+  }
   
   data <- data.frame(
     conc, from, to, drywt, drywt_censoring, lipidwt, lipidwt_censoring, exclude 

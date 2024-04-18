@@ -203,13 +203,21 @@ imposex.clm.predict <- function(clmFit, theta, data) {
 
 
 imposex_assess_clm <- function(
-    data, theta, annualIndex, species, recent.trend = 20, max.year) {
+    data, theta, annualIndex, species, recent.trend = 20, max.year, 
+    seed = NULL) {
 
   # silence non-standard evaluation warnings
   dfResid <- twiceLogLik <- pFixed <- NULL
 
   output <- list()
   summary <- list()
+  
+  
+  # set seed for random number generations (used to obtain confidence limits on
+  # fitted trend)
+  
+  set.seed(seed)
+  
   
   # decide whether there are sufficient years to model data
   # appropriate type of fit depends on total number of years and 

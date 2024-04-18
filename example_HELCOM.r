@@ -154,10 +154,12 @@ write_summary_table(
     levels = c("Metals", "Organotins", "Organofluorines"), 
     labels = c("Metals", "Organotins", "Organofluorines")
   ),
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
@@ -239,10 +241,12 @@ write_summary_table(
       "Organobromines", "Organobromines" 
     )
   ),
-  classColour = list(
-    below = c("EQS" = "green"), 
-    above = c("EQS" = "red"), 
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
@@ -356,10 +360,12 @@ write_summary_table(
       "PCBs and dioxins", "PCBs and dioxins"
     )
   ),
-  classColour = list(
-    below = c("BAC" = "green", "EAC" = "green", "EQS" = "green", "MPC" = "green"),
-    above = c("BAC" = "red", "EAC" = "red", "EQS" = "red", "MPC" = "red"),
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c("BAC" = "green", "EAC" = "green", "EQS" = "green", "MPC" = "green"),
+      above = c("BAC" = "red", "EAC" = "red", "EQS" = "red", "MPC" = "red"),
+      none = "black"
+    )
   ),
   collapse_AC = list(EAC = c("EAC", "EQS", "MPC")),
   output_dir = file.path("output", "example_HELCOM")

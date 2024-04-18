@@ -836,6 +836,7 @@ assess_lmm <- function(
         AC = AC,
         recent.years = recent.years, 
         determinand = determinand, 
+        good_status = good.status,
         max.year = max.year,
         recent.trend = recent.trend,
         nYearFull = nYearFull, 
@@ -978,9 +979,9 @@ assess_lmm <- function(
     contrast.whole <- ctsm.lmm.contrast(fit, start = min(data$year), end = max(data$year))
     row.names(contrast.whole) <- "whole"
     
-    start.year <- max(max.year - recent.trend + 1, min(data$year))
-    if (sum(unique(data$year) >= start.year - 0.5) >= 5) {
-      contrast.recent <- ctsm.lmm.contrast(fit, start = start.year, end = max(data$year))
+    start_recent <- max(max.year - recent.trend + 1, min(data$year))
+    if (sum(unique(data$year) >= start_recent - 0.5) >= 5) {
+      contrast.recent <- ctsm.lmm.contrast(fit, start = start_recent, end = max(data$year))
       row.names(contrast.recent) <- "recent"
       contrast.whole <- rbind(contrast.whole, contrast.recent)
     }		
@@ -1065,15 +1066,44 @@ assess_lmm <- function(
     
     if (output$method %in% c("linear", "smooth")) {
       
-      # for linear trend and recent trend, use pltrend (from likelihood ratio test) if 
-      # method = "linear", because a better test 
-      # really need to go into profile likelihood territory here!
+      # pltrend
+      # method = "linear" use p_linear (from likelihood ratio test)  
+      # method = "smooth" use p from the Wald test in contrasts 
+      # for linear model, likelihood ratio test is a better test (fewer 
+      #   approximations) than the Wald test
+      # for smooth model, would be better to go into profile likelihood 
+      #   territory (future enhancement) 
       
-      pltrend <- if (output$method == "linear") p_linear else with(output$contrasts["whole", ], p)
+      # prtrend
+      # same approach; however p_linear could be misleading when the years at 
+      #   the end of the time series are all censored values and a flat model is 
+      #   fitted; the estimate of rtrend is shrunk to reflect this, but p_linear 
+      #   might be misleadingly significant; something to think about in the 
+      #   future
+      # however, there is a pathological case when all the fitted values in the 
+      #   recent period have the same value; rtrend is zero, and yet can still be 
+      #   significant based on p_linear even though there are no data to support 
+      #   this; in this case use p from the Wald test (which is unity)
+      
+      if (output$method == "linear") {
+        pltrend <- p_linear
+      } else {
+        pltrend <- output$contrasts["whole", "p"]
+      }
+      
       ltrend <- with(output$contrasts["whole", ], estimate / (end - start))
       
       if ("recent" %in% row.names(output$contrasts)) {
-        prtrend <- if (output$method == "linear") p_linear else with(output$contrasts["recent", ], p)
+        
+        if (
+          output$method == "linear" & 
+          max(data$year[data$censoring %in% ""]) > start_recent
+        ) {
+          prtrend <- p_linear
+        } else {
+          prtrend <- output$contrasts["recent", "p"]
+        }          
+
         rtrend <- with(output$contrasts["recent", ], estimate / (end - start))
       }
     }
@@ -1292,8 +1322,17 @@ ctsm.lmm.contrast <- function(ctsm.ob, start, end) {
   wk <- t(wk) %*% ctsm.ob$Xpred[pos, ]
   se.contrast <- sqrt(wk %*% ctsm.ob$vcov %*% t(wk))
 
-  t.stat <- contrast / se.contrast
-  p.contrast <- 1 - pf(t.stat^2, 1, ctsm.ob$dfResid)
+  # catch pathological case where contrast = 0 and se.contrast = 0
+  # this can happen if all the data between start and end are censored, so
+  # a 'flat' model is fitted
+  
+  if (dplyr::near(contrast, 0L) & dplyr::near(se.contrast, 0L)) {
+    p.contrast <- 1
+  } else {
+    t.stat <- contrast / se.contrast
+    p.contrast <- 1 - pf(t.stat^2, 1, ctsm.ob$dfResid)
+  }
+  
   data.frame(start, end, estimate = contrast, se = se.contrast, p = p.contrast)
 }
 
@@ -1642,8 +1681,8 @@ ctsm_dyear <- function(
 # Other distributions ----
 
 assess_survival <- function(
-  data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
-  nYearFull, firstYearFull) {
+  data, annualIndex, AC, recent.years, determinand, good_status, max.year, 
+  recent.trend, nYearFull, firstYearFull) {
 
   # silence non-standard evaluation warnings
   .data <- est <- lcl <- ucl <- p <- se <- NULL
@@ -1741,11 +1780,6 @@ assess_survival <- function(
   data$year_adj <- data$year - min(recent.years)
     
   
-  # establish other info
-  
-  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
-  
-
   # type of fit depends on number of years:
   # nYear <= 2 none
   # nYear <= 4 mean 
@@ -1755,7 +1789,7 @@ assess_survival <- function(
   # have only currently coded for mean and linear - look at ctsm.anyyear.lmm for 
   # extensions to smoothers
 
-  if (determinand %in% c("NRR", "SURVT") & nYear >= 7) {
+  if (determinand %in% c("NRR", "SURVT") & nYear >= 8) {
     stop("time series too long: need to include code for smoothers")
   } 
     
@@ -1786,7 +1820,7 @@ assess_survival <- function(
     # mean model
     
     fits$mean <- flexsurv::flexsurvreg(
-      Surv(time, time2, type = "interval2") ~ 1,
+      survival::Surv(time, time2, type = "interval2") ~ 1,
       dist = surv_dist, 
       data = data
     )
@@ -2210,8 +2244,8 @@ assess_survival_refvalue <- function(
 
 
 assess_beta <- function(
-  data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
-  nYearFull, firstYearFull) {
+  data, annualIndex, AC, recent.years, determinand, good_status, max.year, 
+  recent.trend, nYearFull, firstYearFull) {
   
   # silence non-standard evaluation warnings
   info <- weight <- NULL
@@ -2258,11 +2292,7 @@ assess_beta <- function(
   
   data$year_fac <- factor(data$year)
   
-  # establish other info
-  
-  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
-  
-  
+
   # type of fit depends on number of years:
   # nYear <= 2 none
   # nYear <= 4 mean 
@@ -2610,12 +2640,12 @@ assess_beta <- function(
 
 
 assess_negativebinomial <- function(
-  data, annualIndex, AC, recent.years, determinand, max.year, recent.trend, 
-  nYearFull, firstYearFull) {
-  
+    data, annualIndex, AC, recent.years, determinand, good_status, max.year, 
+    recent.trend, nYearFull, firstYearFull) {
+
   # silence non-standard evaluation warnings
   info <- weight <- NULL
-
+  
   # over-dispersed count data (perhaps very low over-dispersed values from a 
   # binomial distribution, such an MNC) 
   
@@ -2631,11 +2661,26 @@ assess_negativebinomial <- function(
   output <- list(data = data)
   
   
-  # set up offset - e.g. for MNC these are the number of individuals
-  # specified in MNc-QC-NR
+  # check all values are valid counts
+  # response currently expressed as numbers per 1000 cells 
   
-  if (!("offset" %in% names(data))) {
-    data$offset <- 1
+  data$response <- data$response * data[["MNC-QC-NR"]] / 1000 
+  
+  if (!(all(data$response >= 0) & 
+        isTRUE(all.equal(data$response, as.integer(data$response))))) {
+    stop("invalid values for negative binomial distribution data")
+  }
+  
+  
+  # set up offset 
+  # for MNC these are the number of cells specified in MNC-QC-NR (but note that 
+  # the offset is then log transformed in the call to gam - this should be 
+  # rationalised)
+  
+  if ("offset" %in% names(data)) {
+    data$offset <- log(data$offset / 1000)
+  } else {
+    data$offset <- 0
   }
   
   
@@ -2648,10 +2693,6 @@ assess_negativebinomial <- function(
   
   data$year_fac <- factor(data$year)
   
-  # establish other info
-  
-  good_status <- ctsm_get_info(info$determinand, determinand, "good_status")
-  
   
   # type of fit depends on number of years:
   # nYear <= 2 none
@@ -2662,7 +2703,7 @@ assess_negativebinomial <- function(
   # have only currently coded for mean and linear - look at ctsm.anyyear.lmm for 
   # extensions to smoothers
   
-  if (nYear >= 3) {
+  if (nYear >= 7) {
     stop("time series too long: need to include code for smoothers")
   } 
   
@@ -2681,9 +2722,9 @@ assess_negativebinomial <- function(
     
     fits$mean <- mgcv::gam(
       response ~ 1 + s(year_fac, bs = "re"), 
-      weights = weight, 
-      data = data, 
-      family = "betar",
+      data = data,
+      offset = data$offset,
+      family = "nb",
       method = "ML"
     )
     
@@ -2788,7 +2829,7 @@ assess_negativebinomial <- function(
   }
   
   
-  # get estimated change in logit value over whole time series and in the 
+  # get estimated change in log value over whole time series and in the 
   # most recent # e.g. twenty years of monitoring (truncate when data missing 
   # and only compute if at least five years in that period)
   # NB p value from contrast is NOT the same as from likelihood ratio test even 
@@ -2825,8 +2866,8 @@ assess_negativebinomial <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         output, 
-        yearID = max(data$year), 
-        refvalue = qlogis(i / 100),
+        year = max(data$year), 
+        refvalue = log(i),
         lower.tail = switch(good_status, low = TRUE, high = FALSE)
       )
     })
@@ -2916,14 +2957,20 @@ assess_negativebinomial <- function(
       })
     else {
       meanLY <- tail(output$pred$fit, 1)
-      meanLY <- 100 * plogis(meanLY)
+      meanLY <- exp(meanLY)
       clLY <- switch(
         good_status, 
         low = tail(output$pred$ci.upper, 1), 
         high = tail(output$pred$ci.lower, 1)
       )
-      clLY <- 100 * plogis(clLY)
+      clLY <- exp(clLY)
     }
+    
+    # turn trends into 'percentage trends'
+    
+    ltrend <- ltrend * 100
+    rtrend <- rtrend * 100
+    
   })  
   
   if (!is.null(AC)) {
@@ -2949,7 +2996,7 @@ assess_negativebinomial <- function(
           else if (rtrend >= 0)
             bigYear
           else {
-            wk <- (qlogis(value / 100) - qlogis(meanLY / 100)) / rtrend
+            wk <- (exp(value) - exp(meanLY)) / rtrend
             wk <- round(wk + maxYear)
             min(wk, bigYear)
           }
@@ -2963,7 +3010,7 @@ assess_negativebinomial <- function(
           else if (rtrend <= 0)
             bigYear
           else {
-            wk <- (qlogis(value / 100) - qlogis(meanLY / 100)) / rtrend
+            wk <- (exp(value) - exp(meanLY)) / rtrend
             wk <- round(wk + maxYear)
             min(wk, bigYear)
           }
@@ -2996,5 +3043,3 @@ assess_negativebinomial <- function(
   rownames(output$summary) <- NULL
   output
 }
-
-

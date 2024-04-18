@@ -290,6 +290,7 @@ rules for birds and mammals. This is dealt with using the customised function
 
 
 ```{r ospar-biota-timeseries}
+
 biota_timeseries <- create_timeseries(
   biota_data,
   determinands.control = list(

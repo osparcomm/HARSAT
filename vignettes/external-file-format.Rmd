@@ -7,22 +7,29 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-These are the column headers for CSV-formatted external data files.
+These are the column headers for CSV-formatted external data files.  The files should be UTF-8 encoded.  
+
+Missing values should be supplied as blank cells, not as `NA` or some other code.
+
+Other columns can also be supplied, but will typically be ignored.
+
 
 ## Contaminant data 
 
+The data file has one row for each measurement.
+
 | column name   | type      | mandatory | comments              |
 | ------------- | --------- | :-------: | --------------------- |
-| `country` | character | yes | must match country in station file<br>no missing values |
-| `station_code` | alphanumeric | yes | must match station_code in station file<br>no missing values |
-| `station_name` | character | yes | must match station_name in station file<br>no missing values |
-| `sample_latitude` | numeric (decimal degrees)  |  | doesn’t need to match station latitude in station file |
-| `sample_longitude` | numeric (decimal degrees)  |  | doesn’t need to match station longitude in station file |
-| `year` | integer | yes | monitoring year<br>doesn’t necessarily match date since a sampling season running from e.g. November 2021 to May 2022 might all be considered the 2022 monitoring year<br>no missing values |
+| `country` | character | yes | identifies the source of the data; for international assessments this is typically the country of origin, but for national assessments it could be a local monitoring authority<br>must match `country` in station file<br>no missing values |
+| `station_code` | alphanumeric | yes | the station (code) where the sample was collected<br>must match `station_code` in station file<br>no missing values |
+| `station_name` | alphanumeric | yes | the station (name) where the sample was collected; this is often more intuitive to a user than `station_code`<br>must match `station_name` in station file<br>no missing values |
+| `sample_latitude` | numeric (decimal degrees)  |  | need not match `station_latitude` in station file |
+| `sample_longitude` | numeric (decimal degrees)  |  | need not match `station_longitude` in station file |
+| `year` | integer | yes | monitoring year<br>doesn’t necessarily match `date` since a sampling season running from e.g. November 2021 to May 2022 might all be considered the 2022 monitoring year<br>no missing values |
 | `date` | date: use ISO 8601 standard e.g. 2023-06-28 |  | sampling date |
-| `depth` | numeric (m) |  | sediment: assumed to be a surface sediment sample with depth being the lower depth of the grab; water: assumed to be a surface water sample with depth being the upper depth of the sample; biota: not used, so can supply whatever is useful (or omit) |
+| `depth` | numeric (m) |  | sediment: assumed to be a surface sediment sample with depth being the lower depth of the grab<br>water: assumed to be a surface water sample with depth being the upper depth of the sample<br>biota: not used, so can supply whatever is useful (or omit) |
 | `species` | character  | yes (biota) | latin name which must match a `submitted_species` in the species reference table | no missing values (biota) |
-| `sex` | character |  | see ICES reference codes for SEXCO<br>required for EROD assessments<br>desirable if sex is used to subdivide timeseries (see subseries) |
+| `sex` | character |  | see ICES reference codes for SEXCO<br>required for EROD assessments<br>desirable if sex is used to subdivide timeseries (see `subseries`) |
 | `n_individual` | integer |  | number of pooled individuals in the sample<br>required for imposex assessments  |
 | `subseries` | character |  | used to split up timeseries by e.g. sex or age<br>for example: `juvenile`, `adult_male`, `adult_female`<br>missing values indicate that all records in a timeseries will be considered together (no subdivision) |
 | `sample` | alphanumeric  | yes | links measurements made on the same individuals (biota), in the same sediment grab or in the same water sample<br>no missing values |
@@ -36,15 +43,17 @@ These are the column headers for CSV-formatted external data files.
 | `limit_quantification` | numeric |  | same unit as value |
 | `uncertainty` | numeric  |  | analytical uncertainty in the measurement<br>same unit as value |
 | `unit_uncertainty` | character |  | `SD`, `U2` or `%`<br>if `uncertainty` is present, `unit_uncertainty` must also be present |
-| `method_pretreatment` | character (ICES metpt list) |  | see ICES reference codes for METPT |
-| `method_analysis` | character (ICES metpt list) |  | see ICES reference codes for METOA<br>required for bile metabolite measurements |
-| `method_extraction` | character (ICES metpt list) |  | see ICES reference codes for METCX<br>required for sediment normalisation (typically for metals) |
+| `method_pretreatment` | character |  | use ICES reference codes for METPT |
+| `method_analysis` | character |  | use ICES reference codes for METOA<br>required for bile metabolite measurements |
+| `method_extraction` | character |  | use ICES reference codes for METCX<br>required for sediment normalisation (typically for metals) |
  
 ## Station data
 
+The station file has one row for each station.
+
 | current_name | Type     | mandatory  | Comments              |
 | ------------ | -------- | :--------: | --------------------- |
-| `OSPAR_region` | character |  | the regional columns can be called anything (and are optional)<br>OSPAR: use `OSPAR_region` and `OSPAR_subregion`<br>HELCOM: use `HELCOM_subbasin`, `HELCOM_L3` and `HELCOM_L4` |
+| `OSPAR_region` | character |  | the regional columns can be called anything (and are optional)<br>for OSPAR assessments, use `OSPAR_region` and `OSPAR_subregion`<br>for HELCOM assessments use `HELCOM_subbasin`, `HELCOM_L3` and `HELCOM_L4`<br>for other assessments any regional columns must be explicitly identified when calling `read_data` using the `control` argument |
 | `OSPAR_subregion` | character |  | see above |
 | `country` | character | yes | no missing values |
 | `station_code` | alphanumeric | yes | no missing values |

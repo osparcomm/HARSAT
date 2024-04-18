@@ -75,7 +75,6 @@ report_assessment(
 
 
 
-
 # Sediment ----
 
 sediment_data <- read_data(
@@ -142,22 +141,24 @@ write_summary_table(
       "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)"
     )
   ),
-  classColour = list(
-    below = c(
-      "BAC" = "blue", 
-      "ERL" = "green", 
-      "EAC" = "green", 
-      "EQS" = "green", 
-      "FEQG" = "green"
-    ),
-    above = c(
-      "BAC" = "orange", 
-      "ERL" = "red", 
-      "EAC" = "red", 
-      "EQS" = "red", 
-      "FEQG" = "red"
-    ),
-    none = "black"
+  symbology = list(
+    colour = list(
+      below = c(
+        "BAC" = "blue", 
+        "ERL" = "green", 
+        "EAC" = "green", 
+        "EQS" = "green", 
+        "FEQG" = "green"
+      ),
+      above = c(
+        "BAC" = "orange", 
+        "ERL" = "red", 
+        "EAC" = "red", 
+        "EQS" = "red", 
+        "FEQG" = "red"
+      ),
+      none = "black"
+    )
   ),
   collapse_AC = list(BAC = "BAC", EAC = c("EAC", "ERL", "EQS", "FEQG")),
   output_dir = file.path("output", "example_OSPAR")
@@ -186,6 +187,7 @@ biota_data <- read_data(
 )  
 
 biota_data <- tidy_data(biota_data)
+
 
 biota_timeseries <- create_timeseries(
   biota_data,
@@ -244,7 +246,7 @@ biota_assessment <- run_assessment(
 
 biota_assessment <- update_assessment(
   biota_assessment, 
-  subset = !determinand %in% wk_metals,
+  subset = !determinand %in% wk_metals, 
   parallel = TRUE
 )
 
@@ -258,9 +260,6 @@ biota_assessment <- update_assessment(
 )
 
 check_assessment(biota_assessment)
-
-
-
 
 
 # environmental summary

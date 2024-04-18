@@ -19,9 +19,8 @@ library(readxl)
 #' @param data_dir The directory where the data files can be found (sometimes
 #'   supplied using 'file.path'). Defaults to "."; i.e. the working directory.
 #' @param data_format A string specifying whether the data were extracted from
-#'   the ICES webservice ("ICES" - the default) or are in the simplified format
-#'   designed for other data sources ("external"). The value "ICES_old" is 
-#'   deprecated.
+#'   the ICES webservice (`"ICES"` - the default) or are in the simplified
+#'   format designed for other data sources (`"external"`). 
 #' @param info_files A list of files specifying reference tables which override
 #'   the defaults. See examples.
 #' @param info_dir The directory where the reference tables can be found
@@ -65,13 +64,20 @@ library(readxl)
 #'   `retain == FALSE` are deleted later in `tidy_data`
 #' * `stations`
 #'
-#' ## Control parameters
+#' @details
 #'
-#' Many aspects of the assessment process can be controlled through the
-#' parameters stored in `info$control`. This is a list populated with default
-#' values which can then be overwritten, if required, using the `control`
-#' argument.
+#'   ## Control parameters
 #'
+#'   Many aspects of the assessment process can be controlled through the
+#'   parameters stored in `info$control`. This is a list populated with default
+#'   values which can then be overwritten, if required, using the `control`
+#'   argument.
+#'
+#'   ## External data
+#'
+#'   If `data_format = "external"`, a simplified data and station file can
+#'   be supplied. See `vignette("external-file-format")` for details.
+#'   
 #' @export
 read_data <- function(
   compartment = c("biota", "sediment", "water"), 
@@ -285,6 +291,11 @@ control_default <- function(purpose, compartment) {
   # use_stage is a logical which determines whether, for biota, stage is used
   # to populate subseries
   
+  # relative_uncertainties is a 2-vector giving the range of acceptable 
+  # relative uncertainties for log-normally distributed data; the default is
+  # to accept relative uncertainties greater than (but not equal) to 1% and 
+  # less than (but not equal to) 100%
+  
   region <- list()
   
   region$id <- switch(
@@ -315,6 +326,8 @@ control_default <- function(purpose, compartment) {
   )
   
   use_stage <- FALSE
+  
+  relative_uncertainty <- c(1, 100)
 
   add_stations <- switch(
     purpose, 
@@ -366,7 +379,8 @@ control_default <- function(purpose, compartment) {
     region = region,
     add_stations = add_stations,
     bivalve_spawning_season = bivalve_spawning_season,
-    use_stage = use_stage
+    use_stage = use_stage,
+    relative_uncertainty = relative_uncertainty
   )
 }
 
@@ -409,6 +423,17 @@ control_modify <- function(control_default, control) {
         call. = FALSE
       )
     }
+  }
+
+  
+  if (length(control$relative_uncertainty) != 2L || 
+      control$relative_uncertainty[1] < 0 || 
+      control$relative_uncertainty[1] > control$relative_uncertainty[2]) {
+    stop(
+      "error in control argument: invalid range of acceptable relative ", 
+      "uncertainties",
+      call. = FALSE
+    )
   }
   
   control
@@ -1290,25 +1315,28 @@ add_stations <- function(data, stations, info){
         .id = .id | 
           (.data$country == "France") |
           (.data$country == "Spain" & .data$.year > 2004) |
-          (.data$country == "The Netherlands" & .data$.year > 2006)
+          (.data$country == "The Netherlands" & .data$.year > 2006) |
+          (.data$country == "Germany" & .data$.year > 2022)
       ),
       sediment = dplyr::mutate(
         x, 
         .id = .id |   
           (.data$country == "France" & .data$.year > 2008) |
           (.data$country == "Spain" & .data$.year > 2004) |
-          (.data$country == "The Netherlands" & .data$.year > 2006)
+          (.data$country == "The Netherlands" & .data$.year > 2006) |
+          (.data$country == "Germany" & .data$.year > 2022)
       ),
       water = dplyr::mutate(
         x, 
         .id = .id |  
           (.data$country == "France") |
           (.data$country == "Spain" & .data$.year > 2004) |
-          (.data$country == "The Netherlands" & .data$.year > 2006)
+          (.data$country == "The Netherlands" & .data$.year > 2006) |
+          (.data$country == "Germany" & .data$.year > 2022)
       ),
     )
     
-    # and Germany currently only matches by name for HELCOM biota
+    # and Germany always matches by name for HELCOM biota
     
     if (info$compartment == "biota" && info$purpose == "HELCOM") {
       x <- dplyr::mutate(x, .id = .id | (.data$country %in% "Germany"))
@@ -2244,7 +2272,7 @@ create_timeseries <- function(
     )
   }
 
-    
+
   # normalisation can either be a logical (TRUE uses default normalisation function)
   # or a function
   
@@ -2415,7 +2443,13 @@ create_timeseries <- function(
     data$pargroup <- ctsm_get_info(info$determinand, data$determinand, "pargroup")
   }
   
+  # NB distribution will be missing for auxiliary data
 
+  data$distribution <- ctsm_get_info(
+    info$determinand, data$determinand, "distribution", na_action = "output_ok"
+  )
+  
+  
   # drop samples which only have auxiliary data
   
   ok <- with(data, sample %in% sample[group != "Auxiliary"])
@@ -2470,62 +2504,27 @@ create_timeseries <- function(
 
   # ensure censoring, limit of detection and limit of quantification are consistent
 
-  data <- ctsm_check_censoring(data, info, print_code_warnings)
+  data <- check_censoring(data, info, print_code_warnings)
   
 
-  # convert uncertainty into standard deviations, and remove any associated variables
-  
-  data <- ctsm_check(
-    data, 
-    !is.na(uncertainty) & uncertainty <= 0, 
-    action = "make.NA", 
-    message = "Non-positive uncertainties", 
-    file_name = "non_positive_uncertainties", 
-    missing_id = "uncertainty",
-    info = info
-  )
-  
-  data <- dplyr::mutate(
-    data, 
-    uncertainty_sd = dplyr::case_when(
-      unit_uncertainty %in% "U2" ~ uncertainty / 2, 
-      unit_uncertainty %in% "%" ~ value * uncertainty / 100, 
-      TRUE ~ uncertainty
-    ),
-    uncertainty_rel = 100 * (uncertainty_sd / value)
-  )                 
+  # ensure uncertainties are plausible
 
-  wk_id <- match("unit_uncertainty", names(data))
-  wk_n <- ncol(data)
-  data <- data[c(
-    names(data)[1:wk_id], 
-    "uncertainty_sd", "uncertainty_rel", 
-    names(data)[(wk_id+1):(wk_n-2)])]
+  data <- check_uncertainty(data, info, type = "reported")
+
   
-  ctsm_check(
-    data, 
-    !is.na(uncertainty) & uncertainty_rel >= 100, 
-    action = "warning", 
-    message = "Large uncertainties", 
-    file_name = "large uncertainties",
-    info = info
-  )
-  
-  # delete data with large relative uncertainties
-  
+  # convert all uncertainties to unit SD
+
   data <- dplyr::mutate(
     data, 
-    uncertainty_sd = dplyr::if_else(
-      .data$uncertainty_rel < 100, 
-      .data$uncertainty_sd, 
-      NA_real_
-    ),
-    uncertainty = .data$uncertainty_sd, 
-    unit_uncertainty = NULL,
-    uncertainty_sd = NULL, 
-    uncertainty_rel = NULL
+    uncertainty = dplyr::case_when(
+      .data$unit_uncertainty %in% "U2" ~ .data$uncertainty / 2, 
+      .data$unit_uncertainty %in% "%" ~ .data$value * .data$uncertainty / 100, 
+      .default = .data$uncertainty
+    ), 
+    unit_uncertainty = "SD" 
   )
-  
+
+
 
   # sort out determinands where several determinands represent the same variable of interest
   # three types of behaviour: replace, sum and bespoke
@@ -2540,7 +2539,7 @@ create_timeseries <- function(
       bespoke = get(paste("determinand.link", i, sep = "."), mode = "function")
     )
     
-    args = list(data = data, keep = i, drop = wk$det)
+    args = list(data = data, info = info, keep = i, drop = wk$det)
     if ("weights" %in% names(wk)) {
       args = c(args, list(weights = wk$weights))
     }
@@ -2567,8 +2566,6 @@ create_timeseries <- function(
   rownames(data) <- NULL
 
   cat("\nCreating time series data\n")  
-
-  data <- data[setdiff(names(data), c("qalink", "alabo"))]
 
 
   # create new.unit and concentration columns comprising the details from the
@@ -2600,7 +2597,7 @@ create_timeseries <- function(
   # missing values for correction
   
   if (info$compartment == "biota") {
-    data <- ctsm.imposex.check.femalepop(data)
+    data <- ctsm.imposex.check.femalepop(data, info)
   }
   
 
@@ -2610,14 +2607,9 @@ create_timeseries <- function(
   
 
   if (return_early) {
-    out  = c(
+    out <- c(
       out, 
-      ctsm.import.value(
-        data, 
-        station_dictionary, 
-        info$compartment, 
-        info$purpose, 
-        print_code_warnings)
+      output_timeseries(data, station_dictionary, info, extra = "alabo")
     )
     
     return(out)
@@ -2640,7 +2632,19 @@ create_timeseries <- function(
     
   }
 
+  # check that all normal and lognormal data have uncertainties
   
+  data <- ctsm_check(
+    data, 
+    distribution %in% c("normal", "lognormal") & !is.na(concentration) & 
+      is.na(uncertainty), 
+    action = "delete", 
+    message = "Missing uncertainties which cannot be imputed", 
+    file_name = "missing_uncertainties", 
+    info = info
+  )
+  
+
   # filter contaminant data to remove bivalve and gastropod records in the 
   # spawning season when they are elevated / more variable
   
@@ -2697,20 +2701,25 @@ create_timeseries <- function(
     data <- normalise(data, station_dictionary, info, normalise.control)
   }
     
-
-  # remove concentrations where:
-  #   uncertainty is missing
-  #   uncertainty cv is > 100%
-  # ensure uncertainty and censoring are missing when concentration is missing
+  # check whether implausible uncertainties have been calculated during the 
+  #   data processing (e.g. during normalisation)
+  # if so - make concentration, uncertainty and censoring missing
   
-  ok <- !is.na(data$concentration) & !is.na(data$uncertainty)
-  ok <- ok & (data$uncertainty <= data$concentration)
+  data <- check_uncertainty(data, info, type = "calculated")
   
-  data$concentration[!ok] <- NA_real_
-  data$uncertainty[!ok] <- NA_real_
-  data$censoring[!ok] <- NA_character_
   
-
+  # final check to ensure all normal and lognormal data have an uncertainty
+  
+  notok <- data$distribution %in% c("normal", "lognormal") & 
+    !is.na(data$concentration) & is.na(data$uncertainty)
+  
+  if (any(notok)) {
+    stop(
+      "uncertainties missing where they should be present: \n", 
+      "contact HARSAT development team")
+  }
+  
+  
   # drop groups of data at stations with no data in recent years
 
   cat("   Dropping groups of compounds / stations with no data between", 
@@ -2725,7 +2734,7 @@ create_timeseries <- function(
   
   out <- c(
     out, 
-    ctsm_import_value(data, station_dictionary, info)
+    output_timeseries(data, station_dictionary, info)
   )
   
   out
@@ -2841,7 +2850,7 @@ ctsm_check <- function(
 }
   
 
-ctsm_import_value <- function(data, station_dictionary, info) {
+output_timeseries <- function(data, station_dictionary, info, extra = NULL) {
   
   # silence non-standard evaluation warnings
   .data <- .group <- seriesID <- NULL
@@ -2874,6 +2883,10 @@ ctsm_import_value <- function(data, station_dictionary, info) {
     "concentration", "new.basis", "new.unit", "censoring",  
     "limit_detection", "limit_quantification", "uncertainty"
   )
+  
+  if (!is.null(extra)) {
+    id <- c(id, extra)
+  }
   
   auxiliary <- ctsm_get_auxiliary(data$determinand, info)
   auxiliary_id <- paste0(
@@ -3244,7 +3257,7 @@ ctsm_check_determinands <- function(info, data, determinands, control = NULL) {
 
 
 
-determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...) {
+determinand.link.check <- function(data, info, keep, drop, printDuplicates = TRUE, ...) {
 
   # check whether any drop and keep are both submitted for the same sample and 
   # matrix and, if so, delete drop - note that ctsm_check doesn't do the
@@ -3271,7 +3284,8 @@ determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...
         keep, "and", dropTxt, "submitted in same sample - deleting", dropTxt, 
         "data"
       ), 
-      file_name = paste("determinand_link", keep, sep = "_"), 
+      file_name = paste("determinand_link", keep, sep = "_"),
+      info = info,
       ...
     )
   }
@@ -3280,7 +3294,7 @@ determinand.link.check <- function(data, keep, drop, printDuplicates = TRUE, ...
 }  
   
 
-determinand.link.replace <- function(data, keep, drop, ...) {
+determinand.link.replace <- function(data, info, keep, drop, ...) {
 
   # core function for relabelling determinand 'drop' as determinand 'keep'
   # most of the work is checking that there aren't data submitted as both for the same
@@ -3295,7 +3309,7 @@ determinand.link.replace <- function(data, keep, drop, ...) {
   
   # check for samples with both drop and keep and, if they exist, delete drop
 
-  data <- determinand.link.check(data, keep, drop, ...)
+  data <- determinand.link.check(data, info, keep, drop, ...)
   
   
   # relabel the levels so that drop becomes keep
@@ -3307,7 +3321,7 @@ determinand.link.replace <- function(data, keep, drop, ...) {
 }  
 
 
-determinand.link.imposex <- function(data, keep, drop, ...) {
+determinand.link.imposex <- function(data, info, keep, drop, ...) {
   
   stopifnot(length(keep) == 1, length(drop) == 1)
 
@@ -3338,6 +3352,7 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
     action = "warning",  
     message = paste("inconsistent", keep, "and", drop, "submitted in same year"), 
     file_name = paste("determinand_link", keep, sep = "_"), 
+    info = info,
     ...
   )
   
@@ -3363,7 +3378,7 @@ determinand.link.imposex <- function(data, keep, drop, ...) {
 
 determinand.link.VDS <- determinand.link.IMPS <- determinand.link.INTS <- determinand.link.imposex
 
-determinand.link.BBKF <- function(data, keep, drop, ...) {
+determinand.link.BBKF <- function(data, info, keep, drop, ...) {
   
   stopifnot(
     identical(keep, "BBKF"), 
@@ -3372,30 +3387,36 @@ determinand.link.BBKF <- function(data, keep, drop, ...) {
   
   # first sum samples with both BBF and BKF
   
-  data <- determinand.link.sum(data, "BBKF", c("BBF", "BKF"))
+  data <- determinand.link.sum(data, info, "BBKF", c("BBF", "BKF"))
   
   # now sum samples with both BBJF and BKF to give BBJKF
   
-  data <- determinand.link.sum(data, "BBJKF", c("BBJF", "BKF"))
+  data <- determinand.link.sum(data, info, "BBJKF", c("BBJF", "BKF"))
   
   # now replace BBJKF with BBKF
   
-  data <- determinand.link.replace(data, "BBKF", "BBJKF")
+  data <- determinand.link.replace(data, info, "BBKF", "BBJKF")
   
   data
 }
 
 
 
-assign("determinand.link.LIPIDWT%", function(data, keep, drop, ...) {
+assign("determinand.link.LIPIDWT%", function(data, info, keep, drop, ...) {
 
   stopifnot(identical(keep, "LIPIDWT%"), identical(sort(drop), c("EXLIP%", "FATWT%")))
 
   # if multiple values present, choose FATWT%, then LIPIDWT%, then EXLIP% (from Foppe)
   
-  data <- determinand.link.check(data, keep = "LIPIDWT%", drop = "EXLIP%", printDuplicates = FALSE, ...)
-  data <- determinand.link.check(data, keep = "FATWT%", drop = "EXLIP%", printDuplicates = FALSE, ...)
-  data <- determinand.link.check(data, keep = "FATWT%", drop = "LIPIDWT%", printDuplicates = FALSE, ...)
+  data <- determinand.link.check(
+    data, info, keep = "LIPIDWT%", drop = "EXLIP%", printDuplicates = FALSE, ...
+  )
+  data <- determinand.link.check(
+    data, info, keep = "FATWT%", drop = "EXLIP%", printDuplicates = FALSE, ...
+  )
+  data <- determinand.link.check(
+    data, info, keep = "FATWT%", drop = "LIPIDWT%", printDuplicates = FALSE, ...
+  )
 
   if (!any(data$determinand %in% drop)) return(data)
 
@@ -3410,7 +3431,7 @@ assign("determinand.link.LIPIDWT%", function(data, keep, drop, ...) {
 })  
 
 
-determinand.link.sum <- function(data, keep, drop, ...) {
+determinand.link.sum <- function(data, info, keep, drop, ...) {
   
   stopifnot(length(keep) == 1, length(drop) > 1)
   
@@ -3531,7 +3552,7 @@ determinand.link.sum <- function(data, keep, drop, ...) {
 
 
 
-determinand.link.TEQDFP <- function(data, keep, drop, weights) {
+determinand.link.TEQDFP <- function(data, info, keep, drop, weights) {
 
   stopifnot(length(keep) == 1, length(drop) > 1)
   
@@ -3648,7 +3669,7 @@ determinand.link.TEQDFP <- function(data, keep, drop, weights) {
 }  
 
 
-ctsm_check_censoring <- function(data, info, print_code_warnings) {
+check_censoring <- function(data, info, print_code_warnings) {
   
   # silence non-standard evaluation warnings
   value <- limit_detection <- limit_quantification <- NULL
@@ -3792,6 +3813,93 @@ ctsm_check_censoring <- function(data, info, print_code_warnings) {
 }
 
 
+check_uncertainty <- function(data, info, type = c("reported", "calculated")) { 
+
+  # import_functions.r
+  
+  # uncertainties must be non-negative for all data
+  # uncertainties must be strictly positive for normal or lognormal data
+  # relative uncertainties must be within specified range (1, 100) default for
+  #   lognormal data
+  
+  # type = reported is used for submitted data
+  # type = calculated is used to check whether implausible uncertainties have
+  #   been created in e.g. the normalisation process
+  
+  type <- match.arg(type)
+  
+  
+  # calculate relative uncertainties for lognormal data
+  # use value for reported data and concentration for calculated data
+  
+  id <- switch(type, reported = "value", calculated = "concentration")
+
+  data <- dplyr::mutate(
+    data, 
+    .ok = .data$distribution %in% "lognormal", 
+    relative_uncertainty = dplyr::case_when(
+      .ok & .data$unit_uncertainty %in% "SD" ~ 
+        100 * .data$uncertainty / .data[[id]], 
+      .ok & .data$unit_uncertainty %in% "U2" ~ 
+        100 * .data$uncertainty / (2 * .data[[id]]),
+      .ok & .data$unit_uncertainty %in% "%" ~ .data$uncertainty,
+      .default = NA_real_
+    ), 
+    .ok = NULL
+  )
+    
+  data <- dplyr::mutate(
+    data,
+    reason = dplyr::case_when(
+      .data$uncertainty < 0                                        ~ "negative", 
+      .data$distribution %in% c("normal", "lognormal") & 
+        .data$uncertainty == 0                                     ~ "zero",
+      .data$distribution %in% "lognormal" & 
+        .data$relative_uncertainty <= info$relative_uncertainty[1] ~ "small",
+      .data$distribution %in% "lognormal" & 
+        .data$relative_uncertainty >= info$relative_uncertainty[2] ~ "large", 
+      .default = "ok"
+    )
+  )    
+
+  data <- dplyr::relocate(
+    data, 
+    "relative_uncertainty", 
+    .after = "unit_uncertainty"
+  )
+  
+  data <- dplyr::relocate(data, "reason")
+
+  if (type == "reported") {
+    message <- "Implausible uncertainties reported with data"
+    file_name <- "implausible_uncertainties_reported"
+    missing_id <- "uncertainty"
+  } 
+  
+  if (type == "calculated") {
+    message <- "Implausible uncertainties calculated in data processing"
+    file_name <- "implausible_uncertainties_calculated"
+    missing_id <- c("concentration", "uncertainty", "censoring")
+  }
+      
+  data <- ctsm_check(
+    data, 
+    reason != "ok", 
+    action = "make.NA", 
+    message = message, 
+    file_name = file_name, 
+    missing_id = missing_id,
+    info = info
+  )
+  
+  data$reason <- NULL
+  data$relative_uncertainty <- NULL
+
+  data
+}
+  
+  
+  
 check_subseries <- function(data, info) {
 
   # import_functions.R
@@ -4460,7 +4568,7 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
   data
 }
 
-#' Normalises sediment concentrations, HELCOM vwersion
+#' Normalises sediment concentrations, HELCOM version
 #' 
 #' @param data the data object
 #' @param station_dictionary the station dictionary

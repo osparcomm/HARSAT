@@ -1,32 +1,30 @@
 #' @export
-ctsm_uncrt_workup <- function(clean_data) {
+ctsm_uncrt_workup <- function(harsat_obj) {
 
   # silence non-standard evaluation warnings
-  determinands <- qaID <- uncertainty <- concentration <- NULL
-
+  .data <- NULL
+  
   # turn 'clean' data into uncertainty data
   
   # read in data
   
-  data <- clean_data$data
-  stations <- clean_data$stations
-  compartment <- clean_data$info$compartment
+  data <- harsat_obj$data
+  stations <- harsat_obj$stations
+  info <- harsat_obj$info
 
-  rm(clean_data)
+  rm(harsat_obj)
   
   
   # link to country
   
-  data$country <- stations[as.character(data$station), "country"]
+  data <- dplyr::left_join(
+    data, 
+    stations[c("station_code", "country")], 
+    by = "station_code"
+  )
   
 
-  # get alabo and remove missing alabo
-  
-  data <- within(data, {
-    alabo <- sapply(strsplit(as.character(qaID), "_"), "[", 3)
-    alabo[alabo %in% "NA"] <- NA
-    alabo <- factor(alabo)
-  })
+  # remove data with no analytical laboratory information
   
   data <- data[!is.na(data$alabo), ]
   
@@ -38,23 +36,25 @@ ctsm_uncrt_workup <- function(clean_data) {
   id_aux <- c(
     "", ".uncertainty", ".censoring", ".limit_detection", ".limit_quantification"
   )
+
   
-  id <- intersect(
-    c("country", "alabo", "year", "sample", "group", "determinand", 
-      "concentration", "uncertainty", 
-      "censoring", "limit_detection", "limit_quantification", 
-      paste0("AL", id_aux), 
-      paste0("LI", id_aux),
-      paste0("CORG", id_aux), 
-      paste0("LOIGN", id_aux)),
-    names(data)
+  id <- c(
+    "country", "alabo", "year", "sample", "group", "determinand", 
+    "concentration", "uncertainty", 
+    "censoring", "limit_detection", "limit_quantification", 
+    paste0("AL", id_aux), 
+    paste0("LI", id_aux),
+    paste0("CORG", id_aux), 
+    paste0("LOIGN", id_aux)
   )
-  data <- data[id]
+  
+  data <- dplyr::select(data, any_of(id))
+  
   
 
   # sort out AL and CORG etc for sediment
   
-  if (compartment == "sediment") {
+  if (info$compartment == "sediment") {
     
     id <- c("country", "alabo", "year", "group", "sample", "determinand")
 
@@ -115,52 +115,61 @@ ctsm_uncrt_workup <- function(clean_data) {
 
 
   # restrict to 'log-normally' distributed responses
+  # keep explicit mention of CORG and LOIGN just in case
   
-  ok <- with(data, {
-    dist <- ctsm_get_info(
-      "determinand", determinand, "distribution", na_action = "output_ok"
+  data <- dplyr::mutate(
+    data, 
+    distribution = ctsm_get_info(
+      info$determinand, 
+      .data$determinand, 
+      "distribution", 
+      na_action = "output_ok"
     ) 
-    dist %in% "lognormal" | determinand %in% c("CORG", "LOIGN")
-  })
-  
-  data <- data[ok, ]
+  )  
 
+  data <- dplyr::filter(
+    data, 
+    .data$distribution %in% "lognormal" | .data$determinand %in% c("CORG", "LOIGN")
+  )
+  
 
   # order groups and determinands within group
   
-  det_list <- determinands[[stringr::str_to_title(compartment)]]
-
-  data <- within(data, {
-    group <- factor(as.character(group), levels = c(names(det_list), "auxiliary"))
-    determinand <- factor(
-      as.character(determinand), 
-      levels = c(unlist(det_list), "AL", "LI", "CORG", "LOIGN"))
-  })
+  # det_list <- determinands[[stringr::str_to_title(compartment)]]
+  # 
+  # data <- within(data, {
+  #   group <- factor(as.character(group), levels = c(names(det_list), "auxiliary"))
+  #   determinand <- factor(
+  #     as.character(determinand), 
+  #     levels = c(unlist(det_list), "AL", "LI", "CORG", "LOIGN"))
+  # })
 
   
   # calculate relative uncertainty
   
-  data <- within(data, relative_u <- 100 * uncertainty / concentration)
+  data <- dplyr::mutate(
+    data, 
+    relative_u = 100 * .data$uncertainty / .data$concentration
+  )
 
-  data <- droplevels(data)
-
-  list(compartment = compartment, data = data)
+  list(compartment = info$compartment, data = data)
 }
+
 
 #' @export
 ctsm_uncrt_estimate <- function(data) {
   
   # silence non-standard evaluation warnings
-  .data <- n <- relative_u <- sd_variable <- sd_constant <- NULL
+  .data <- NULL
 
   # initialise output with total number of values by determinand
   
   options(dplyr.summarise.inform = FALSE)
   on.exit(options(dplyr.summarise.inform = NULL))
 
-  out <- data %>% 
-    dplyr::group_by(.data$determinand) %>% 
-    dplyr::summarise(n_values = n())
+  out <- data |> 
+    dplyr::group_by(.data$determinand) |> 
+    dplyr::summarise(n_values = dplyr::n())
 
   
   # remove duplicate combinations of concentration and uncertainty (and associated censoring variables)
@@ -177,9 +186,12 @@ ctsm_uncrt_estimate <- function(data) {
   
   # get number of 'unique values
   
-  out_unique <- data %>% 
-    dplyr::group_by(.data$determinand) %>% 
-    dplyr::summarise(n_unique = n(), n_alabo = dplyr::n_distinct(.data$alabo))
+  out_unique <- data |> 
+    dplyr::group_by(.data$determinand) |> 
+    dplyr::summarise(
+      n_unique = dplyr::n(), 
+      n_alabo = dplyr::n_distinct(.data$alabo)
+    )
 
   out <- dplyr::left_join(out, out_unique, by = "determinand")
   
@@ -193,16 +205,16 @@ ctsm_uncrt_estimate <- function(data) {
   # relative error
   # median relative_u for values above the detection level by alabo
   
-  out_relative <- data %>% 
-    dplyr::filter(.data$censoring == "") %>% 
-    dplyr::group_by(.data$determinand, .data$alabo) %>% 
+  out_relative <- data |> 
+    dplyr::filter(.data$censoring == "") |> 
+    dplyr::group_by(.data$determinand, .data$alabo) |> 
     dplyr::summarise(sd_variable = median(.data$relative_u) / 100) 
   
   # now the median value across alabos
   
-  out_relative <- out_relative %>% 
-    dplyr::group_by(.data$determinand) %>% 
-    dplyr::summarise(sd_variable = median(sd_variable))
+  out_relative <- out_relative |> 
+    dplyr::group_by(.data$determinand) |> 
+    dplyr::summarise(sd_variable = median(.data$sd_variable))
   
   out <- dplyr::left_join(out, out_relative, by = "determinand")
   
@@ -211,52 +223,53 @@ ctsm_uncrt_estimate <- function(data) {
   # median limit_detection for values with censoring == D, Q or "" by alabo
   # don't use "<" because we can't trust any of the limit values
   
-  out_constant <- data %>% 
-    dplyr::filter(.data$censoring %in% c("D", "Q", "")) %>% 
-    tidyr::drop_na(.data$limit_detection) %>% 
-    dplyr::group_by(.data$determinand, .data$alabo) %>% 
+  out_constant <- data |> 
+    dplyr::filter(.data$censoring %in% c("D", "Q", "")) |> 
+    tidyr::drop_na(.data$limit_detection) |> 
+    dplyr::group_by(.data$determinand, .data$alabo) |> 
     dplyr::summarise(sd_constant = median(.data$limit_detection) / 3) 
   
   # now the median value across alabos
   
-  out_constant <- out_constant %>% 
-    dplyr::group_by(.data$determinand) %>% 
-    dplyr::summarise(sd_constant = median(sd_constant))
+  out_constant <- out_constant |> 
+    dplyr::group_by(.data$determinand) |> 
+    dplyr::summarise(sd_constant = median(.data$sd_constant))
   
   out <- dplyr::left_join(out, out_constant, by = "determinand")
   
   # tidy up
   
-  out <- out %>% 
-    as.data.frame() %>% 
-    column_to_rownames("determinand") %>% 
+  out <- out |> 
+    as.data.frame() |> 
+    tibble::column_to_rownames("determinand") |> 
     round(6)
     
   out
 }
 
 #' @export
-ctsm_uncrt_plot_estimates <- function(uncrt_obj, old_estimates, group_id) {
+ctsm_uncrt_plot_estimates <- function(uncrt_obj, group_id) {
 
-  id <- with(uncrt_obj$data, group %in% group_id)  
-  data <- uncrt_obj$data[id, ]
+  data <- dplyr::filter(uncrt_obj$data, .data$group %in% group_id)
   
-  data <- data[with(data, order(determinand, concentration)), ]
+  data <- dplyr::arrange(data, .data$determinand, .data$concentration)
   
-  ok <- with(data, relative_u >= 1 & relative_u <= 100)
-  data <- data[ok, ]
-
+  data <- dplyr::filter(data, .data$relative_u >= 1 & .data$relative_u <= 100)
+  
   new <- uncrt_obj$estimates[c("sd_constant", "sd_variable")]
   names(new) <- c("sdC", "sdV")
   
-  var_id <- paste(uncrt_obj$compartment, c("sd_constant", "sd_variable"), sep= ".")
-  old <- old_estimates[var_id]
+  var_id <- paste0(uncrt_obj$compartment, c("_sd_constant", "_sd_variable"))
+  old <- uncrt_obj$old_estimates[var_id]
   names(old) <- c("sdC", "sdV")
   
   xyplot(
     relative_u ~ concentration | determinand, data = data, 
     aspect = 1,
-    scales = list(alternating = FALSE, x = list(log = TRUE, relation = "free", equispaced = FALSE)), 
+    scales = list(
+      alternating = FALSE, 
+      x = list(log = TRUE, relation = "free", equispaced = FALSE)
+    ), 
     as.table = TRUE,
     panel = function(x, y, subscripts) {
       data <- data[subscripts, ]
