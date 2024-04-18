@@ -81,7 +81,7 @@ in a directory `data`, and information files in a directory `information`,
 but you can use any directory for these.
 
 ```r
-working.directory <- '/Users/stuart/git/HARSAT'
+working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 ```
 
 ## Reading in the data
@@ -100,23 +100,23 @@ water_data <- read_data(
   info_dir = file.path(working.directory, "information", "OSPAR_2022"),
   extraction = "2023/08/23"
 )
-#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv 
-#> Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv 
-#> Found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv 
-#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
-#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
-#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
-#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv': '2b165f406bb440297435ea3f46eb3612'
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv 
+#> Found in path thresholds_water.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv': '615ef96f716ef1d43c01ab67f383c881'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt': '0ccaec75c5fd7e875c730467d58fdb26'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt': '13d63b6161b671165b215b58f5e22469'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: OSPAR 
@@ -228,6 +228,7 @@ water_timeseries <- create_timeseries(
 #>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
 #>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
 #>    Detection limit higher than data: see detection_limit_high.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
 #>    Data submitted as CHRTR relabelled as CHR 
 #>    Data submitted as BBF, BKF summed to give BBKF
 #>      1 of 71 samples lost due to incomplete submissions

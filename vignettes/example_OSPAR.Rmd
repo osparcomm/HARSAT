@@ -40,7 +40,7 @@ in a directory `data`, and information files in a directory `information`,
 but you can use any directory for these.
 
 ```r
-working.directory <- '/Users/stuart/git/HARSAT'
+working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 ```
 
 # Water assessment
@@ -60,23 +60,23 @@ water_data <- read_data(
   info_dir = file.path(working.directory, "information", "OSPAR_2022"),
   extraction = "2023/08/23"
 )
-#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv 
-#> Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv 
-#> Found in path thresholds_water.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv 
-#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
-#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
-#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
-#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_water.csv': '2b165f406bb440297435ea3f46eb3612'
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv 
+#> Found in path thresholds_water.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv': '615ef96f716ef1d43c01ab67f383c881'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/water.txt': '0ccaec75c5fd7e875c730467d58fdb26'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt': '13d63b6161b671165b215b58f5e22469'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: OSPAR 
@@ -93,8 +93,7 @@ water_data <- read_data(
 
 water_data <- tidy_data(water_data)
 #> 
-#> Oddities will be written to 'oddities/water' with previous oddities backed up to
-#>  'oddities/water_backup'
+#> Oddities will be written to 'oddities/water'
 #> 
 #> Dropping 411 records from data flagged for deletion. Possible reasons are:
 #>  - vflag = suspect
@@ -136,6 +135,7 @@ water_timeseries <- create_timeseries(
 #>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
 #>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
 #>    Detection limit higher than data: see detection_limit_high.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
 #>    Data submitted as CHRTR relabelled as CHR 
 #>    Data submitted as BBF, BKF summed to give BBKF
 #>      1 of 71 samples lost due to incomplete submissions
@@ -322,7 +322,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 37.6 </td>
    <td style="text-align:right;"> 0.2642877 </td>
-   <td style="text-align:right;"> 0.8079560 </td>
+   <td style="text-align:right;"> 0.8079549 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -364,7 +364,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -9.9 </td>
    <td style="text-align:right;"> 23.1 </td>
    <td style="text-align:right;"> 1.9403931 </td>
-   <td style="text-align:right;"> 4.4243067 </td>
+   <td style="text-align:right;"> 4.4243256 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -406,7 +406,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 4.5 </td>
    <td style="text-align:right;"> 17.9 </td>
    <td style="text-align:right;"> 0.0342139 </td>
-   <td style="text-align:right;"> 0.0586748 </td>
+   <td style="text-align:right;"> 0.0586751 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -448,7 +448,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 3.6 </td>
    <td style="text-align:right;"> 10.8 </td>
    <td style="text-align:right;"> 0.0347176 </td>
-   <td style="text-align:right;"> 0.0446955 </td>
+   <td style="text-align:right;"> 0.0446956 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -616,7 +616,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -0.1 </td>
    <td style="text-align:right;"> 19.0 </td>
    <td style="text-align:right;"> 0.0010141 </td>
-   <td style="text-align:right;"> 0.0017480 </td>
+   <td style="text-align:right;"> 0.0017375 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -910,7 +910,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -5.7 </td>
    <td style="text-align:right;"> 12.6 </td>
    <td style="text-align:right;"> 0.1593088 </td>
-   <td style="text-align:right;"> 0.2251622 </td>
+   <td style="text-align:right;"> 0.2251621 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -952,7 +952,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -2.5 </td>
    <td style="text-align:right;"> 14.8 </td>
    <td style="text-align:right;"> 0.4915249 </td>
-   <td style="text-align:right;"> 0.6665299 </td>
+   <td style="text-align:right;"> 0.6665300 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -994,7 +994,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -3.1 </td>
    <td style="text-align:right;"> 17.0 </td>
    <td style="text-align:right;"> 0.0122965 </td>
-   <td style="text-align:right;"> 0.0201135 </td>
+   <td style="text-align:right;"> 0.0201136 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1036,7 +1036,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -3.5 </td>
    <td style="text-align:right;"> 45.3 </td>
    <td style="text-align:right;"> 0.0608592 </td>
-   <td style="text-align:right;"> 0.1669677 </td>
+   <td style="text-align:right;"> 0.1669681 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1120,7 +1120,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -5.7 </td>
    <td style="text-align:right;"> 25.1 </td>
    <td style="text-align:right;"> 0.0375571 </td>
-   <td style="text-align:right;"> 0.0747836 </td>
+   <td style="text-align:right;"> 0.0747835 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1246,7 +1246,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -3.6 </td>
    <td style="text-align:right;"> 19.2 </td>
    <td style="text-align:right;"> 0.0301767 </td>
-   <td style="text-align:right;"> 0.0499804 </td>
+   <td style="text-align:right;"> 0.0499803 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1288,7 +1288,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -0.9 </td>
    <td style="text-align:right;"> 22.2 </td>
    <td style="text-align:right;"> 1.3776942 </td>
-   <td style="text-align:right;"> 2.4084546 </td>
+   <td style="text-align:right;"> 2.4085277 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1330,7 +1330,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 0.5 </td>
    <td style="text-align:right;"> 12.0 </td>
    <td style="text-align:right;"> 0.0218170 </td>
-   <td style="text-align:right;"> 0.0324892 </td>
+   <td style="text-align:right;"> 0.0324885 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1372,7 +1372,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -4.3 </td>
    <td style="text-align:right;"> 15.2 </td>
    <td style="text-align:right;"> 0.6971756 </td>
-   <td style="text-align:right;"> 1.0166068 </td>
+   <td style="text-align:right;"> 1.0166054 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1414,7 +1414,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -11.7 </td>
    <td style="text-align:right;"> 35.8 </td>
    <td style="text-align:right;"> 0.1854117 </td>
-   <td style="text-align:right;"> 0.4934672 </td>
+   <td style="text-align:right;"> 0.4934678 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1540,7 +1540,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -19.5 </td>
    <td style="text-align:right;"> 54.6 </td>
    <td style="text-align:right;"> 0.0070453 </td>
-   <td style="text-align:right;"> 0.0235891 </td>
+   <td style="text-align:right;"> 0.0235892 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1708,7 +1708,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 10.7 </td>
    <td style="text-align:right;"> 1.5024002 </td>
-   <td style="text-align:right;"> 2.3889251 </td>
+   <td style="text-align:right;"> 2.3889254 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -1918,10 +1918,10 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 31.7 </td>
    <td style="text-align:right;"> 1.5345685 </td>
-   <td style="text-align:right;"> 4.9992653 </td>
+   <td style="text-align:right;"> 4.9992398 </td>
    <td style="text-align:left;"> EQS </td>
    <td style="text-align:right;"> 2.0e+03 </td>
-   <td style="text-align:right;"> -1995.0007347 </td>
+   <td style="text-align:right;"> -1995.0007602 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;">  </td>
   </tr>
@@ -2170,7 +2170,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 4.4 </td>
    <td style="text-align:right;"> 9.8 </td>
    <td style="text-align:right;"> 4.2013867 </td>
-   <td style="text-align:right;"> 6.3756677 </td>
+   <td style="text-align:right;"> 6.3756630 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -2380,7 +2380,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 22.9 </td>
    <td style="text-align:right;"> 0.7230029 </td>
-   <td style="text-align:right;"> 1.9410264 </td>
+   <td style="text-align:right;"> 1.9410317 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -2800,10 +2800,10 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -11.6 </td>
    <td style="text-align:right;"> 11.1 </td>
    <td style="text-align:right;"> 0.0901546 </td>
-   <td style="text-align:right;"> 0.1212221 </td>
+   <td style="text-align:right;"> 0.1212222 </td>
    <td style="text-align:left;"> EQS </td>
    <td style="text-align:right;"> 2.0e+00 </td>
-   <td style="text-align:right;"> -1.8787779 </td>
+   <td style="text-align:right;"> -1.8787778 </td>
    <td style="text-align:right;"> 2017 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -3010,10 +3010,10 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -11.1 </td>
    <td style="text-align:right;"> 36.6 </td>
    <td style="text-align:right;"> 0.0029571 </td>
-   <td style="text-align:right;"> 0.0091140 </td>
+   <td style="text-align:right;"> 0.0091139 </td>
    <td style="text-align:left;"> EQS </td>
    <td style="text-align:right;"> 1.0e+02 </td>
-   <td style="text-align:right;"> -99.9908860 </td>
+   <td style="text-align:right;"> -99.9908861 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -3052,7 +3052,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -2.1 </td>
    <td style="text-align:right;"> 16.9 </td>
    <td style="text-align:right;"> 0.0019921 </td>
-   <td style="text-align:right;"> 0.0033308 </td>
+   <td style="text-align:right;"> 0.0033309 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -3346,7 +3346,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 14.0 </td>
    <td style="text-align:right;"> 2.1057059 </td>
-   <td style="text-align:right;"> 3.7494366 </td>
+   <td style="text-align:right;"> 3.7494368 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -3424,13 +3424,13 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 0.0005 </td>
    <td style="text-align:right;"> 0.5607 </td>
    <td style="text-align:right;"> 0.0004 </td>
-   <td style="text-align:right;"> 0.4532 </td>
+   <td style="text-align:right;"> 0.4531 </td>
    <td style="text-align:right;"> 0.9 </td>
-   <td style="text-align:right;"> 0.4532 </td>
+   <td style="text-align:right;"> 0.4531 </td>
    <td style="text-align:right;"> 0.9 </td>
    <td style="text-align:right;"> 8.8 </td>
    <td style="text-align:right;"> 0.6833377 </td>
-   <td style="text-align:right;"> 0.8793254 </td>
+   <td style="text-align:right;"> 0.8793163 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -3514,10 +3514,10 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 46.7 </td>
    <td style="text-align:right;"> 0.0117176 </td>
-   <td style="text-align:right;"> 1.9080359 </td>
+   <td style="text-align:right;"> 1.9080383 </td>
    <td style="text-align:left;"> EQS </td>
    <td style="text-align:right;"> 1.3e+00 </td>
-   <td style="text-align:right;"> 0.6080359 </td>
+   <td style="text-align:right;"> 0.6080383 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -3724,7 +3724,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 39.8 </td>
    <td style="text-align:right;"> 0.9199809 </td>
-   <td style="text-align:right;"> 2.5982052 </td>
+   <td style="text-align:right;"> 2.5981971 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -3850,7 +3850,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 17.0 </td>
    <td style="text-align:right;"> 22.2 </td>
    <td style="text-align:right;"> 0.7934854 </td>
-   <td style="text-align:right;"> 2.2375378 </td>
+   <td style="text-align:right;"> 2.2375377 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -4354,7 +4354,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 25.1 </td>
    <td style="text-align:right;"> 1.0907904 </td>
-   <td style="text-align:right;"> 2.8631028 </td>
+   <td style="text-align:right;"> 2.8630501 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -4480,10 +4480,10 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 2.6 </td>
    <td style="text-align:right;"> 7.7 </td>
    <td style="text-align:right;"> 0.3373065 </td>
-   <td style="text-align:right;"> 0.4675318 </td>
+   <td style="text-align:right;"> 0.4675314 </td>
    <td style="text-align:left;"> EQS </td>
    <td style="text-align:right;"> 8.6e+00 </td>
-   <td style="text-align:right;"> -8.1324682 </td>
+   <td style="text-align:right;"> -8.1324686 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -5392,25 +5392,25 @@ sediment_data <- read_data(
   info_dir = file.path(working.directory, "information", "OSPAR_2022"), 
   extraction = "2023/08/23"
 )  
-#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv 
-#> Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv 
-#> Found in path thresholds_sediment.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_sediment.csv 
-#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
-#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
-#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
-#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/method_extraction.csv': 'b3c891f17b9b35774114edaa2f58b6cc'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/pivot_values.csv': '372ad2d2ef807cec64ce1a7bd1967158'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_sediment.csv': 'dcf8d4a452f93ead01729866ca6b139c'
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv 
+#> Found in path thresholds_sediment.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_sediment.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv': '28e38bdd0b9e735643c60026dcda8a78'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv': '23ca1799017bfea360d586b1a70bffd4'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_sediment.csv': 'ab2fddb32a8b1d126004febbf6375b5d'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/sediment.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/sediment.txt': '26c2ab1c30d6b5cead9250df216efbc2'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/sediment.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/sediment.txt': '0cb722db8f8ea4ed263e1cb8c8334665'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: OSPAR 
@@ -5426,8 +5426,7 @@ sediment_data <- read_data(
 #> Argument max_year taken to be the maximum year in the data: 2021
 sediment_data <- tidy_data(sediment_data)
 #> 
-#> Oddities will be written to 'oddities/sediment' with previous oddities backed up to
-#>  'oddities/sediment_backup'
+#> Oddities will be written to 'oddities/sediment'
 #> 
 #> Dropping 75 records from data flagged for deletion. Possible reasons are:
 #>  - vflag = suspect
@@ -5496,7 +5495,7 @@ sediment_timeseries <- create_timeseries(
 #>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
 #>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
 #>    Detection limit higher than data: see detection_limit_high.csv
-#>    Large uncertainties: see large_uncertainties.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
 #>    Data submitted as BBF, BKF summed to give BBKF
 #>    Data submitted as BBJF, BKF summed to give BBJKF
 #>      104 of 104 samples lost due to incomplete submissions
@@ -5513,6 +5512,7 @@ sediment_timeseries <- create_timeseries(
 #>    Warning: Nss values for CR hard-wired to 5.0 (AL) or 52 (LI) for all digestions
 #>    Normalising organics to 2.5% CORG
 #>    Removing sediment data where normaliser is a less than
+#>    Implausible uncertainties calculated in data processing: see implausible_uncertainties_calculated.csv
 #>    Dropping groups of compounds / stations with no data between 2016 and 2021
 ```
 
@@ -5710,10 +5710,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 11.4 </td>
    <td style="text-align:right;"> 7.6492369 </td>
-   <td style="text-align:right;"> 12.4844431 </td>
+   <td style="text-align:right;"> 12.4844430 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.190 </td>
-   <td style="text-align:right;"> 12.2944431 </td>
+   <td style="text-align:right;"> 12.2944430 </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> EAC </td>
@@ -5945,7 +5945,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 41.3 </td>
    <td style="text-align:right;"> 9.7752928 </td>
-   <td style="text-align:right;"> 333.2085461 </td>
+   <td style="text-align:right;"> 333.2085424 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -6086,15 +6086,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 15.7 </td>
    <td style="text-align:right;"> 1.5241197 </td>
-   <td style="text-align:right;"> 2.7882848 </td>
+   <td style="text-align:right;"> 2.7882850 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.120 </td>
-   <td style="text-align:right;"> 2.6682848 </td>
+   <td style="text-align:right;"> 2.6682850 </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 2.70 </td>
-   <td style="text-align:right;"> 8.828480e-02 </td>
+   <td style="text-align:right;"> 8.828500e-02 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;">  </td>
   </tr>
@@ -6133,10 +6133,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 12.9 </td>
    <td style="text-align:right;"> 18.8753953 </td>
-   <td style="text-align:right;"> 77.4193597 </td>
+   <td style="text-align:right;"> 77.4193598 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 8.000 </td>
-   <td style="text-align:right;"> 69.4193597 </td>
+   <td style="text-align:right;"> 69.4193598 </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> ERL </td>
@@ -6180,7 +6180,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.2 </td>
    <td style="text-align:right;"> 14.7 </td>
    <td style="text-align:right;"> 17.3299558 </td>
-   <td style="text-align:right;"> 26.5929954 </td>
+   <td style="text-align:right;"> 26.5931662 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -6319,13 +6319,13 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.8 </td>
    <td style="text-align:right;"> 0.7914 </td>
    <td style="text-align:right;"> -0.8 </td>
-   <td style="text-align:right;"> 17.9 </td>
-   <td style="text-align:right;"> 210.3469203 </td>
-   <td style="text-align:right;"> 388.7486333 </td>
+   <td style="text-align:right;"> 17.8 </td>
+   <td style="text-align:right;"> 210.4998016 </td>
+   <td style="text-align:right;"> 385.5535038 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 103.000 </td>
-   <td style="text-align:right;"> 285.7486333 </td>
-   <td style="text-align:right;"> 2109 </td>
+   <td style="text-align:right;"> 282.5535038 </td>
+   <td style="text-align:right;"> 2110 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
@@ -6415,7 +6415,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -3.5 </td>
    <td style="text-align:right;"> 18.2 </td>
    <td style="text-align:right;"> 1.5278464 </td>
-   <td style="text-align:right;"> 2.9801733 </td>
+   <td style="text-align:right;"> 2.9801382 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -6556,7 +6556,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 7.8 </td>
    <td style="text-align:right;"> 39.0 </td>
    <td style="text-align:right;"> 13.9782469 </td>
-   <td style="text-align:right;"> 44.9733385 </td>
+   <td style="text-align:right;"> 44.9733223 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -6603,7 +6603,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 13.9 </td>
    <td style="text-align:right;"> 10.4852634 </td>
-   <td style="text-align:right;"> 18.6243267 </td>
+   <td style="text-align:right;"> 18.6243266 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -6650,15 +6650,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 6.6 </td>
    <td style="text-align:right;"> 44.6 </td>
    <td style="text-align:right;"> 0.3415152 </td>
-   <td style="text-align:right;"> 0.9961428 </td>
+   <td style="text-align:right;"> 0.9961422 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.120 </td>
-   <td style="text-align:right;"> 0.8761428 </td>
+   <td style="text-align:right;"> 0.8761422 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 2.70 </td>
-   <td style="text-align:right;"> -1.703857e+00 </td>
+   <td style="text-align:right;"> -1.703858e+00 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -6697,10 +6697,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 6.4 </td>
    <td style="text-align:right;"> 20.4 </td>
    <td style="text-align:right;"> 80.0934477 </td>
-   <td style="text-align:right;"> 165.0513734 </td>
+   <td style="text-align:right;"> 165.0511546 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 103.000 </td>
-   <td style="text-align:right;"> 62.0513734 </td>
+   <td style="text-align:right;"> 62.0511546 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -6744,7 +6744,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 3.5 </td>
    <td style="text-align:right;"> 18.1 </td>
    <td style="text-align:right;"> 11.6236043 </td>
-   <td style="text-align:right;"> 22.1468058 </td>
+   <td style="text-align:right;"> 22.1467252 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -6791,7 +6791,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 3.7 </td>
    <td style="text-align:right;"> 5.0 </td>
    <td style="text-align:right;"> 97.9305843 </td>
-   <td style="text-align:right;"> 117.2890199 </td>
+   <td style="text-align:right;"> 117.2889974 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -6799,7 +6799,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 81.00 </td>
-   <td style="text-align:right;"> 3.628902e+01 </td>
+   <td style="text-align:right;"> 3.628900e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -6838,15 +6838,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.0 </td>
    <td style="text-align:right;"> 8.3 </td>
    <td style="text-align:right;"> 8.3584236 </td>
-   <td style="text-align:right;"> 10.5355845 </td>
+   <td style="text-align:right;"> 10.5535455 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 32.000 </td>
-   <td style="text-align:right;"> -21.4644155 </td>
+   <td style="text-align:right;"> -21.4464545 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 240.00 </td>
-   <td style="text-align:right;"> -2.294644e+02 </td>
+   <td style="text-align:right;"> -2.294465e+02 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -6885,7 +6885,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.7 </td>
    <td style="text-align:right;"> 7.8 </td>
    <td style="text-align:right;"> 9.1370801 </td>
-   <td style="text-align:right;"> 11.5815694 </td>
+   <td style="text-align:right;"> 11.5814966 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -6932,15 +6932,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.3 </td>
    <td style="text-align:right;"> 13.9 </td>
    <td style="text-align:right;"> 8.1270914 </td>
-   <td style="text-align:right;"> 12.0526609 </td>
+   <td style="text-align:right;"> 12.0546912 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 16.000 </td>
-   <td style="text-align:right;"> -3.9473391 </td>
+   <td style="text-align:right;"> -3.9453088 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 261.00 </td>
-   <td style="text-align:right;"> -2.489473e+02 </td>
+   <td style="text-align:right;"> -2.489453e+02 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -6979,10 +6979,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 2.0 </td>
    <td style="text-align:right;"> 10.7 </td>
    <td style="text-align:right;"> 20.0087767 </td>
-   <td style="text-align:right;"> 27.0948686 </td>
+   <td style="text-align:right;"> 27.0948915 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 24.000 </td>
-   <td style="text-align:right;"> 3.0948686 </td>
+   <td style="text-align:right;"> 3.0948915 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
@@ -7026,7 +7026,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -2.4 </td>
    <td style="text-align:right;"> 6.4 </td>
    <td style="text-align:right;"> 4.8714973 </td>
-   <td style="text-align:right;"> 5.8651171 </td>
+   <td style="text-align:right;"> 5.8651188 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -7073,7 +7073,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 1.8 </td>
    <td style="text-align:right;"> 31.9 </td>
    <td style="text-align:right;"> 21.3008515 </td>
-   <td style="text-align:right;"> 45.5518827 </td>
+   <td style="text-align:right;"> 45.5512218 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -7120,7 +7120,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 3.1 </td>
    <td style="text-align:right;"> 36.2 </td>
    <td style="text-align:right;"> 6.5587942 </td>
-   <td style="text-align:right;"> 22.5315109 </td>
+   <td style="text-align:right;"> 22.5322761 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -7167,15 +7167,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 170.9 </td>
    <td style="text-align:right;"> 0.1428399 </td>
-   <td style="text-align:right;"> 50.5311334 </td>
+   <td style="text-align:right;"> 50.5314827 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.050 </td>
-   <td style="text-align:right;"> 50.4811334 </td>
+   <td style="text-align:right;"> 50.4814827 </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> FEQG </td>
    <td style="text-align:right;"> 1.00 </td>
-   <td style="text-align:right;"> 4.953113e+01 </td>
+   <td style="text-align:right;"> 4.953148e+01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -7261,10 +7261,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -3.9 </td>
    <td style="text-align:right;"> 21.9 </td>
    <td style="text-align:right;"> 33.2459810 </td>
-   <td style="text-align:right;"> 57.5383470 </td>
+   <td style="text-align:right;"> 57.5383454 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 5.000 </td>
-   <td style="text-align:right;"> 52.5383470 </td>
+   <td style="text-align:right;"> 52.5383454 </td>
    <td style="text-align:right;"> 2069 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
@@ -7402,7 +7402,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 31.7 </td>
    <td style="text-align:right;"> 3.9267126 </td>
-   <td style="text-align:right;"> 9.7602011 </td>
+   <td style="text-align:right;"> 9.7602006 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -7449,15 +7449,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.7 </td>
    <td style="text-align:right;"> 8.8 </td>
    <td style="text-align:right;"> 35.5236210 </td>
-   <td style="text-align:right;"> 47.1405502 </td>
+   <td style="text-align:right;"> 47.1406906 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 16.000 </td>
-   <td style="text-align:right;"> 31.1405502 </td>
+   <td style="text-align:right;"> 31.1406906 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 261.00 </td>
-   <td style="text-align:right;"> -2.138594e+02 </td>
+   <td style="text-align:right;"> -2.138593e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -7590,10 +7590,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -5.8 </td>
    <td style="text-align:right;"> 5.1 </td>
    <td style="text-align:right;"> 176.9489655 </td>
-   <td style="text-align:right;"> 205.1498197 </td>
+   <td style="text-align:right;"> 205.1498238 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 122.000 </td>
-   <td style="text-align:right;"> 83.1498197 </td>
+   <td style="text-align:right;"> 83.1498238 </td>
    <td style="text-align:right;"> 2027 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
@@ -7637,15 +7637,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -6.2 </td>
    <td style="text-align:right;"> 5.0 </td>
    <td style="text-align:right;"> 177.5006764 </td>
-   <td style="text-align:right;"> 216.1974328 </td>
+   <td style="text-align:right;"> 216.1974414 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 122.000 </td>
-   <td style="text-align:right;"> 94.1974328 </td>
+   <td style="text-align:right;"> 94.1974414 </td>
    <td style="text-align:right;"> 2027 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 150.00 </td>
-   <td style="text-align:right;"> 6.619743e+01 </td>
+   <td style="text-align:right;"> 6.619744e+01 </td>
    <td style="text-align:right;"> 2024 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -7684,15 +7684,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.6 </td>
    <td style="text-align:right;"> 10.4 </td>
    <td style="text-align:right;"> 256.8557305 </td>
-   <td style="text-align:right;"> 403.3279483 </td>
+   <td style="text-align:right;"> 403.3336740 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 122.000 </td>
-   <td style="text-align:right;"> 281.3279483 </td>
+   <td style="text-align:right;"> 281.3336740 </td>
    <td style="text-align:right;"> 2141 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 150.00 </td>
-   <td style="text-align:right;"> 2.533279e+02 </td>
+   <td style="text-align:right;"> 2.533337e+02 </td>
    <td style="text-align:right;"> 2108 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -7731,15 +7731,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -1.3 </td>
    <td style="text-align:right;"> 3.7 </td>
    <td style="text-align:right;"> 93.7391593 </td>
-   <td style="text-align:right;"> 103.3514654 </td>
+   <td style="text-align:right;"> 103.3517060 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 24.000 </td>
-   <td style="text-align:right;"> 79.3514654 </td>
+   <td style="text-align:right;"> 79.3517060 </td>
    <td style="text-align:right;"> 2126 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 665.00 </td>
-   <td style="text-align:right;"> -5.616485e+02 </td>
+   <td style="text-align:right;"> -5.616483e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -7778,7 +7778,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -13.3 </td>
    <td style="text-align:right;"> 37.6 </td>
    <td style="text-align:right;"> 0.0124304 </td>
-   <td style="text-align:right;"> 0.0368966 </td>
+   <td style="text-align:right;"> 0.0368964 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -7872,15 +7872,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -2.8 </td>
    <td style="text-align:right;"> 5.1 </td>
    <td style="text-align:right;"> 0.3907767 </td>
-   <td style="text-align:right;"> 0.4814161 </td>
+   <td style="text-align:right;"> 0.4814163 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.310 </td>
-   <td style="text-align:right;"> 0.1714161 </td>
+   <td style="text-align:right;"> 0.1714163 </td>
    <td style="text-align:right;"> 2029 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 1.20 </td>
-   <td style="text-align:right;"> -7.185839e-01 </td>
+   <td style="text-align:right;"> -7.185837e-01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -7919,15 +7919,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -5.0 </td>
    <td style="text-align:right;"> 10.8 </td>
    <td style="text-align:right;"> 0.5399518 </td>
-   <td style="text-align:right;"> 0.8057462 </td>
+   <td style="text-align:right;"> 0.8057464 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.310 </td>
-   <td style="text-align:right;"> 0.4957462 </td>
+   <td style="text-align:right;"> 0.4957464 </td>
    <td style="text-align:right;"> 2032 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 1.20 </td>
-   <td style="text-align:right;"> -3.942538e-01 </td>
+   <td style="text-align:right;"> -3.942536e-01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -7966,15 +7966,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.1 </td>
    <td style="text-align:right;"> 3.8 </td>
    <td style="text-align:right;"> 84.2085193 </td>
-   <td style="text-align:right;"> 93.6304389 </td>
+   <td style="text-align:right;"> 93.6467575 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 24.000 </td>
-   <td style="text-align:right;"> 69.6304389 </td>
+   <td style="text-align:right;"> 69.6467575 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 665.00 </td>
-   <td style="text-align:right;"> -5.713696e+02 </td>
+   <td style="text-align:right;"> -5.713532e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -8013,7 +8013,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -3.3 </td>
    <td style="text-align:right;"> 11.5 </td>
    <td style="text-align:right;"> 0.1223601 </td>
-   <td style="text-align:right;"> 0.1686230 </td>
+   <td style="text-align:right;"> 0.1686226 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -8060,10 +8060,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 1.8 </td>
    <td style="text-align:right;"> 6.9 </td>
    <td style="text-align:right;"> 17.5725588 </td>
-   <td style="text-align:right;"> 21.1210080 </td>
+   <td style="text-align:right;"> 21.1210085 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 27.000 </td>
-   <td style="text-align:right;"> -5.8789920 </td>
+   <td style="text-align:right;"> -5.8789915 </td>
    <td style="text-align:right;"> 2017 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;"> ERL </td>
@@ -8154,10 +8154,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -3.7 </td>
    <td style="text-align:right;"> 4.0 </td>
    <td style="text-align:right;"> 32.1279297 </td>
-   <td style="text-align:right;"> 35.7272265 </td>
+   <td style="text-align:right;"> 35.7272272 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 36.000 </td>
-   <td style="text-align:right;"> -0.2727735 </td>
+   <td style="text-align:right;"> -0.2727728 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -8201,10 +8201,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -1.4 </td>
    <td style="text-align:right;"> 3.8 </td>
    <td style="text-align:right;"> 35.0417076 </td>
-   <td style="text-align:right;"> 40.4264084 </td>
+   <td style="text-align:right;"> 40.4264462 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 36.000 </td>
-   <td style="text-align:right;"> 4.4264084 </td>
+   <td style="text-align:right;"> 4.4264462 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -8295,7 +8295,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -5.6 </td>
    <td style="text-align:right;"> 11.1 </td>
    <td style="text-align:right;"> 4.5794713 </td>
-   <td style="text-align:right;"> 6.5818075 </td>
+   <td style="text-align:right;"> 6.5818084 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -8483,15 +8483,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.7 </td>
    <td style="text-align:right;"> 6.6 </td>
    <td style="text-align:right;"> 49.4394452 </td>
-   <td style="text-align:right;"> 54.2409018 </td>
+   <td style="text-align:right;"> 54.2408759 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 38.000 </td>
-   <td style="text-align:right;"> 16.2409018 </td>
+   <td style="text-align:right;"> 16.2408759 </td>
    <td style="text-align:right;"> 2056 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 47.00 </td>
-   <td style="text-align:right;"> 7.240902e+00 </td>
+   <td style="text-align:right;"> 7.240876e+00 </td>
    <td style="text-align:right;"> 2024 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -8624,7 +8624,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -1.4 </td>
    <td style="text-align:right;"> 11.0 </td>
    <td style="text-align:right;"> 81.0797223 </td>
-   <td style="text-align:right;"> 115.1596858 </td>
+   <td style="text-align:right;"> 115.1592557 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -8632,7 +8632,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 81.00 </td>
-   <td style="text-align:right;"> 3.415969e+01 </td>
+   <td style="text-align:right;"> 3.415926e+01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -8671,7 +8671,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.9 </td>
    <td style="text-align:right;"> 10.6 </td>
    <td style="text-align:right;"> 85.0696678 </td>
-   <td style="text-align:right;"> 131.1793385 </td>
+   <td style="text-align:right;"> 131.1811961 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -8679,7 +8679,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 81.00 </td>
-   <td style="text-align:right;"> 5.017934e+01 </td>
+   <td style="text-align:right;"> 5.018120e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -8763,17 +8763,17 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 26.3 </td>
-   <td style="text-align:right;"> 38.5458249 </td>
-   <td style="text-align:right;"> 114.3244897 </td>
+   <td style="text-align:right;"> 25.8 </td>
+   <td style="text-align:right;"> 38.4399651 </td>
+   <td style="text-align:right;"> 111.9533979 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 30.000 </td>
-   <td style="text-align:right;"> 84.3244897 </td>
+   <td style="text-align:right;"> 81.9533979 </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 430.00 </td>
-   <td style="text-align:right;"> -3.156755e+02 </td>
+   <td style="text-align:right;"> -3.180466e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;">  </td>
   </tr>
@@ -8859,15 +8859,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.8 </td>
    <td style="text-align:right;"> 5.0 </td>
    <td style="text-align:right;"> 31.0052370 </td>
-   <td style="text-align:right;"> 34.7650582 </td>
+   <td style="text-align:right;"> 34.7650601 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 27.000 </td>
-   <td style="text-align:right;"> 7.7650582 </td>
+   <td style="text-align:right;"> 7.7650601 </td>
    <td style="text-align:right;"> 2039 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 34.00 </td>
-   <td style="text-align:right;"> 7.650582e-01 </td>
+   <td style="text-align:right;"> 7.650601e-01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -8906,10 +8906,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -1.5 </td>
    <td style="text-align:right;"> 4.8 </td>
    <td style="text-align:right;"> 180.9338724 </td>
-   <td style="text-align:right;"> 208.4848190 </td>
+   <td style="text-align:right;"> 208.4848198 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 122.000 </td>
-   <td style="text-align:right;"> 86.4848190 </td>
+   <td style="text-align:right;"> 86.4848198 </td>
    <td style="text-align:right;"> 2047 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
@@ -8953,10 +8953,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.7 </td>
    <td style="text-align:right;"> 14.4 </td>
    <td style="text-align:right;"> 0.3268515 </td>
-   <td style="text-align:right;"> 0.5708141 </td>
+   <td style="text-align:right;"> 0.5708069 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.160 </td>
-   <td style="text-align:right;"> 0.4108141 </td>
+   <td style="text-align:right;"> 0.4108069 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -9000,10 +9000,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.8 </td>
    <td style="text-align:right;"> 8.0 </td>
    <td style="text-align:right;"> 23.3176722 </td>
-   <td style="text-align:right;"> 28.3145048 </td>
+   <td style="text-align:right;"> 28.3145261 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 25.000 </td>
-   <td style="text-align:right;"> 3.3145048 </td>
+   <td style="text-align:right;"> 3.3145261 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -9047,15 +9047,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.1 </td>
    <td style="text-align:right;"> 3.9 </td>
    <td style="text-align:right;"> 162.3162514 </td>
-   <td style="text-align:right;"> 175.9811123 </td>
+   <td style="text-align:right;"> 175.9796251 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 122.000 </td>
-   <td style="text-align:right;"> 53.9811123 </td>
+   <td style="text-align:right;"> 53.9796251 </td>
    <td style="text-align:right;"> 2337 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 150.00 </td>
-   <td style="text-align:right;"> 2.598111e+01 </td>
+   <td style="text-align:right;"> 2.597963e+01 </td>
    <td style="text-align:right;"> 2108 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -9094,15 +9094,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -1.1 </td>
    <td style="text-align:right;"> 4.0 </td>
    <td style="text-align:right;"> 48.3551881 </td>
-   <td style="text-align:right;"> 52.4647959 </td>
+   <td style="text-align:right;"> 52.4647968 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 38.000 </td>
-   <td style="text-align:right;"> 14.4647959 </td>
+   <td style="text-align:right;"> 14.4647968 </td>
    <td style="text-align:right;"> 2044 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 47.00 </td>
-   <td style="text-align:right;"> 5.464796e+00 </td>
+   <td style="text-align:right;"> 5.464797e+00 </td>
    <td style="text-align:right;"> 2024 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -9235,10 +9235,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -2.2 </td>
    <td style="text-align:right;"> 8.4 </td>
    <td style="text-align:right;"> 51.9959559 </td>
-   <td style="text-align:right;"> 64.9009443 </td>
+   <td style="text-align:right;"> 64.9009187 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 39.000 </td>
-   <td style="text-align:right;"> 25.9009443 </td>
+   <td style="text-align:right;"> 25.9009187 </td>
    <td style="text-align:right;"> 2034 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
@@ -9282,10 +9282,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 1.1 </td>
    <td style="text-align:right;"> 8.5 </td>
    <td style="text-align:right;"> 37.1110282 </td>
-   <td style="text-align:right;"> 45.6793612 </td>
+   <td style="text-align:right;"> 45.6793479 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 25.000 </td>
-   <td style="text-align:right;"> 20.6793612 </td>
+   <td style="text-align:right;"> 20.6793479 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -9329,10 +9329,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -3.5 </td>
    <td style="text-align:right;"> 14.8 </td>
    <td style="text-align:right;"> 50.6045734 </td>
-   <td style="text-align:right;"> 72.1917839 </td>
+   <td style="text-align:right;"> 72.1917775 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 20.000 </td>
-   <td style="text-align:right;"> 52.1917839 </td>
+   <td style="text-align:right;"> 52.1917775 </td>
    <td style="text-align:right;"> 2048 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
@@ -9376,10 +9376,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.8 </td>
    <td style="text-align:right;"> 6.5 </td>
    <td style="text-align:right;"> 25.4065239 </td>
-   <td style="text-align:right;"> 29.5861739 </td>
+   <td style="text-align:right;"> 29.5861728 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 25.000 </td>
-   <td style="text-align:right;"> 4.5861739 </td>
+   <td style="text-align:right;"> 4.5861728 </td>
    <td style="text-align:right;"> 2023 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -9423,15 +9423,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -1.2 </td>
    <td style="text-align:right;"> 4.7 </td>
    <td style="text-align:right;"> 185.8620053 </td>
-   <td style="text-align:right;"> 204.2140298 </td>
+   <td style="text-align:right;"> 204.2140233 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 122.000 </td>
-   <td style="text-align:right;"> 82.2140298 </td>
+   <td style="text-align:right;"> 82.2140233 </td>
    <td style="text-align:right;"> 2055 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 150.00 </td>
-   <td style="text-align:right;"> 5.421403e+01 </td>
+   <td style="text-align:right;"> 5.421402e+01 </td>
    <td style="text-align:right;"> 2038 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -9469,8 +9469,8 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.7289 </td>
    <td style="text-align:right;"> -2.3 </td>
    <td style="text-align:right;"> 53.5 </td>
-   <td style="text-align:right;"> 348.2567082 </td>
-   <td style="text-align:right;"> 2087.1723418 </td>
+   <td style="text-align:right;"> 348.2567083 </td>
+   <td style="text-align:right;"> 2087.1695517 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -9799,10 +9799,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 4.6 </td>
    <td style="text-align:right;"> 9.9 </td>
    <td style="text-align:right;"> 87.7924194 </td>
-   <td style="text-align:right;"> 126.3425480 </td>
+   <td style="text-align:right;"> 126.3425590 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 36.000 </td>
-   <td style="text-align:right;"> 90.3425480 </td>
+   <td style="text-align:right;"> 90.3425590 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -10410,10 +10410,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 13.7 </td>
    <td style="text-align:right;"> 33.3 </td>
    <td style="text-align:right;"> 67.3610094 </td>
-   <td style="text-align:right;"> 160.4225459 </td>
+   <td style="text-align:right;"> 160.4217651 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 80.000 </td>
-   <td style="text-align:right;"> 80.4225459 </td>
+   <td style="text-align:right;"> 80.4217651 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -10457,7 +10457,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.7 </td>
    <td style="text-align:right;"> 8.2 </td>
    <td style="text-align:right;"> 27.9195093 </td>
-   <td style="text-align:right;"> 35.8018636 </td>
+   <td style="text-align:right;"> 35.8018530 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -10504,7 +10504,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 1.5 </td>
    <td style="text-align:right;"> 8.8 </td>
    <td style="text-align:right;"> 2.8958131 </td>
-   <td style="text-align:right;"> 3.7894398 </td>
+   <td style="text-align:right;"> 3.7894254 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -10550,16 +10550,16 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 0.0396 </td>
    <td style="text-align:right;"> 4.5 </td>
    <td style="text-align:right;"> 12.6 </td>
-   <td style="text-align:right;"> 110.5869001 </td>
-   <td style="text-align:right;"> 160.0920936 </td>
+   <td style="text-align:right;"> 110.5869002 </td>
+   <td style="text-align:right;"> 160.0921414 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 122.000 </td>
-   <td style="text-align:right;"> 38.0920936 </td>
+   <td style="text-align:right;"> 38.0921414 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 150.00 </td>
-   <td style="text-align:right;"> 1.009209e+01 </td>
+   <td style="text-align:right;"> 1.009214e+01 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -10739,7 +10739,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -1.1 </td>
    <td style="text-align:right;"> 25.9 </td>
    <td style="text-align:right;"> 10.8927655 </td>
-   <td style="text-align:right;"> 17.0609808 </td>
+   <td style="text-align:right;"> 17.0614630 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -10833,15 +10833,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -3.2 </td>
    <td style="text-align:right;"> 23.6 </td>
    <td style="text-align:right;"> 0.5271708 </td>
-   <td style="text-align:right;"> 1.1023415 </td>
+   <td style="text-align:right;"> 1.1023416 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.120 </td>
-   <td style="text-align:right;"> 0.9823415 </td>
+   <td style="text-align:right;"> 0.9823416 </td>
    <td style="text-align:right;"> 2067 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 2.70 </td>
-   <td style="text-align:right;"> -1.597659e+00 </td>
+   <td style="text-align:right;"> -1.597658e+00 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -10880,10 +10880,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -4.7 </td>
    <td style="text-align:right;"> 40.7 </td>
    <td style="text-align:right;"> 0.1426633 </td>
-   <td style="text-align:right;"> 0.3413434 </td>
+   <td style="text-align:right;"> 0.3413416 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.050 </td>
-   <td style="text-align:right;"> 0.2913434 </td>
+   <td style="text-align:right;"> 0.2913416 </td>
    <td style="text-align:right;"> 2043 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> FEQG </td>
@@ -10927,7 +10927,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -2.8 </td>
    <td style="text-align:right;"> 17.3 </td>
    <td style="text-align:right;"> 17.2422238 </td>
-   <td style="text-align:right;"> 26.5431217 </td>
+   <td style="text-align:right;"> 26.5430186 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -11021,15 +11021,15 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -5.3 </td>
    <td style="text-align:right;"> 4.6 </td>
    <td style="text-align:right;"> 94.4031461 </td>
-   <td style="text-align:right;"> 110.6922948 </td>
+   <td style="text-align:right;"> 110.6922812 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 122.000 </td>
-   <td style="text-align:right;"> -11.3077052 </td>
+   <td style="text-align:right;"> -11.3077188 </td>
    <td style="text-align:right;"> 2016 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;"> ERL </td>
    <td style="text-align:right;"> 150.00 </td>
-   <td style="text-align:right;"> -3.930771e+01 </td>
+   <td style="text-align:right;"> -3.930772e+01 </td>
    <td style="text-align:right;"> 2016 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -11068,10 +11068,10 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 6.9 </td>
    <td style="text-align:right;"> 23.8 </td>
    <td style="text-align:right;"> 0.0996671 </td>
-   <td style="text-align:right;"> 0.2456764 </td>
+   <td style="text-align:right;"> 0.2456768 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 0.050 </td>
-   <td style="text-align:right;"> 0.1956764 </td>
+   <td style="text-align:right;"> 0.1956768 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> FEQG </td>
@@ -11115,7 +11115,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> -0.9 </td>
    <td style="text-align:right;"> 22.9 </td>
    <td style="text-align:right;"> 101.9663912 </td>
-   <td style="text-align:right;"> 240.6797252 </td>
+   <td style="text-align:right;"> 240.6598269 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -13741,25 +13741,25 @@ biota_data <- read_data(
   info_dir = file.path(working.directory, "information", "OSPAR_2022"), 
   extraction = "2023/08/23"
 )
-#> Found in path determinand.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv 
-#> Found in path species.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv 
-#> Found in path thresholds_biota.csv /Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_biota.csv 
-#> Found in package method_extraction.csv /Users/stuart/git/HARSAT/inst/information/method_extraction.csv 
-#> Found in package pivot_values.csv /Users/stuart/git/HARSAT/inst/information/pivot_values.csv 
-#> Found in package matrix.csv /Users/stuart/git/HARSAT/inst/information/matrix.csv 
-#> Found in package imposex.csv /Users/stuart/git/HARSAT/inst/information/imposex.csv 
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/determinand.csv': '912a86ca3efdc719e405a7632e2b89ce'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/matrix.csv': '9ba2731a7d90accddac659025835a6e4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/species.csv': 'e0678c65e9c433f04cfff5ec95659bb4'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/inst/information/imposex.csv': '7e42cb57944b9d79216ad25c12ccada5'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/information/OSPAR_2022/thresholds_biota.csv': 'f728e56db82dc936b4b384cc0471477a'
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv 
+#> Found in path thresholds_biota.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_biota.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv': '952a6e718e07b8bc501eafe42a74a760'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv': 'b602a882d4783085c896bcf130c8f848'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_biota.csv': 'a487aa3bb6738f95ab9462e4420e124a'
 #> Reading station dictionary from:
-#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/stations.txt': '057984ad2a1885bc5d15a41ee3b34471'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'
 #> 
 #> Reading contaminant and effects data from:
-#>  '/Users/stuart/git/HARSAT/data/example_OSPAR/biota.txt'
-#> MD5 digest for: '/Users/stuart/git/HARSAT/data/example_OSPAR/biota.txt': 'b00f0c9665ec57492b8f14f1323ff635'
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/biota.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/biota.txt': 'abfd256bda44cde5ed63693c75ec9024'
 #> 
 #> Matching data with station dictionary
 #>  - restricting to stations in these convention areas: OSPAR 
@@ -13775,8 +13775,7 @@ biota_data <- read_data(
 #> Argument max_year taken to be the maximum year in the data: 2022
 biota_data <- tidy_data(biota_data)
 #> 
-#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
-#>  'oddities/biota_backup'
+#> Oddities will be written to 'oddities/biota'
 #> 
 #> Dropping 11 records from data flagged for deletion. Possible reasons are:
 #>  - vflag = suspect
@@ -13801,6 +13800,7 @@ rules for birds and mammals. This is dealt with using the customised function
 
 
 ```r
+
 biota_timeseries <- create_timeseries(
   biota_data,
   determinands.control = list(
@@ -13854,8 +13854,7 @@ biota_timeseries <- create_timeseries(
 #>    Unrecognised censoring values: deleted data in 'censoring_codes_unrecognised.csv
 #>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
 #>    Detection limit higher than data: see detection_limit_high.csv
-#>    Non-positive uncertainties: see non_positive_uncertainties.csv
-#>    Large uncertainties: see large_uncertainties.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
 #>    Data submitted as CHRTR relabelled as CHR 
 #>    Data submitted as BBF, BKF summed to give BBKF
 #>      125 of 149 samples lost due to incomplete submissions
@@ -14121,10 +14120,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -5.1 </td>
    <td style="text-align:right;"> 13.7 </td>
    <td style="text-align:right;"> 1.316844e+02 </td>
-   <td style="text-align:right;"> 2.086121e+02 </td>
+   <td style="text-align:right;"> 2.086102e+02 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.600000e+01 </td>
-   <td style="text-align:right;"> 1.826121e+02 </td>
+   <td style="text-align:right;"> 1.826102e+02 </td>
    <td style="text-align:right;"> 2053 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -14139,7 +14138,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 1.000000e+03 </td>
-   <td style="text-align:right;"> -7.913879e+02 </td>
+   <td style="text-align:right;"> -7.913898e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -14181,7 +14180,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 7.4 </td>
    <td style="text-align:right;"> 6.7 </td>
    <td style="text-align:right;"> 2.034604e+04 </td>
-   <td style="text-align:right;"> 2.566752e+04 </td>
+   <td style="text-align:right;"> 2.566750e+04 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -14241,10 +14240,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.1 </td>
    <td style="text-align:right;"> 3.2 </td>
    <td style="text-align:right;"> 9.308773e+02 </td>
-   <td style="text-align:right;"> 1.052552e+03 </td>
+   <td style="text-align:right;"> 1.052550e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.600000e+02 </td>
-   <td style="text-align:right;"> 9.255238e+01 </td>
+   <td style="text-align:right;"> 9.255016e+01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -14259,7 +14258,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 6.097561e+03 </td>
-   <td style="text-align:right;"> -5.045009e+03 </td>
+   <td style="text-align:right;"> -5.045011e+03 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -14421,7 +14420,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 8.8 </td>
    <td style="text-align:right;"> 26.1 </td>
    <td style="text-align:right;"> 3.876517e+01 </td>
-   <td style="text-align:right;"> 8.468271e+01 </td>
+   <td style="text-align:right;"> 8.468272e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -14833,15 +14832,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2005 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.1938 </td>
-   <td style="text-align:right;"> 0.1938 </td>
-   <td style="text-align:right;"> 0.1938 </td>
+   <td style="text-align:right;"> 0.1939 </td>
+   <td style="text-align:right;"> 0.1939 </td>
+   <td style="text-align:right;"> 0.1939 </td>
    <td style="text-align:right;"> -9.4 </td>
-   <td style="text-align:right;"> 0.1938 </td>
+   <td style="text-align:right;"> 0.1939 </td>
    <td style="text-align:right;"> -9.4 </td>
    <td style="text-align:right;"> 40.5 </td>
-   <td style="text-align:right;"> 3.915469e-01 </td>
-   <td style="text-align:right;"> 9.897512e-01 </td>
+   <td style="text-align:right;"> 3.907754e-01 </td>
+   <td style="text-align:right;"> 8.558981e-01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -15261,7 +15260,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -1.0 </td>
    <td style="text-align:right;"> 9.3 </td>
    <td style="text-align:right;"> 8.920403e-01 </td>
-   <td style="text-align:right;"> 1.149973e+00 </td>
+   <td style="text-align:right;"> 1.149974e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -15501,15 +15500,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 6.7 </td>
    <td style="text-align:right;"> 9.0 </td>
    <td style="text-align:right;"> 2.626357e+02 </td>
-   <td style="text-align:right;"> 3.306569e+02 </td>
+   <td style="text-align:right;"> 3.306568e+02 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.000000e+01 </td>
-   <td style="text-align:right;"> 2.406569e+02 </td>
+   <td style="text-align:right;"> 2.406568e+02 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 121.951219 </td>
-   <td style="text-align:right;"> 208.7056527 </td>
+   <td style="text-align:right;"> 208.7056200 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -16101,10 +16100,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.3 </td>
    <td style="text-align:right;"> 7.2 </td>
    <td style="text-align:right;"> 6.591527e+03 </td>
-   <td style="text-align:right;"> 7.454657e+03 </td>
+   <td style="text-align:right;"> 7.454648e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> 1.454657e+03 </td>
+   <td style="text-align:right;"> 1.454648e+03 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -16161,15 +16160,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 8.3 </td>
    <td style="text-align:right;"> 51.8 </td>
    <td style="text-align:right;"> 1.365729e+01 </td>
-   <td style="text-align:right;"> 4.074705e+01 </td>
+   <td style="text-align:right;"> 4.074714e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.100000e+01 </td>
-   <td style="text-align:right;"> 2.974705e+01 </td>
+   <td style="text-align:right;"> 2.974714e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 1700.000000 </td>
-   <td style="text-align:right;"> -1659.2529538 </td>
+   <td style="text-align:right;"> -1659.2528610 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -16221,7 +16220,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -1.0 </td>
    <td style="text-align:right;"> 11.8 </td>
    <td style="text-align:right;"> 1.355463e+03 </td>
-   <td style="text-align:right;"> 1.789453e+03 </td>
+   <td style="text-align:right;"> 1.789465e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -16281,15 +16280,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 8.5 </td>
    <td style="text-align:right;"> 48.1 </td>
    <td style="text-align:right;"> 1.387296e+01 </td>
-   <td style="text-align:right;"> 4.212455e+01 </td>
+   <td style="text-align:right;"> 4.212456e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.000000e+00 </td>
-   <td style="text-align:right;"> 3.312455e+01 </td>
+   <td style="text-align:right;"> 3.312456e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 100.000000 </td>
-   <td style="text-align:right;"> -57.8754484 </td>
+   <td style="text-align:right;"> -57.8754427 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -16341,7 +16340,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 4.2 </td>
    <td style="text-align:right;"> 26.9 </td>
    <td style="text-align:right;"> 2.702145e+03 </td>
-   <td style="text-align:right;"> 4.916236e+03 </td>
+   <td style="text-align:right;"> 4.916237e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -16404,7 +16403,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.101690e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 8.100000e+00 </td>
-   <td style="text-align:right;"> 2.916903e+00 </td>
+   <td style="text-align:right;"> 2.916904e+00 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -16461,15 +16460,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 7.6 </td>
    <td style="text-align:right;"> 37.0 </td>
    <td style="text-align:right;"> 3.369492e+01 </td>
-   <td style="text-align:right;"> 8.614906e+01 </td>
+   <td style="text-align:right;"> 8.614927e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.220000e+01 </td>
-   <td style="text-align:right;"> 7.394906e+01 </td>
+   <td style="text-align:right;"> 7.394927e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 110.000000 </td>
-   <td style="text-align:right;"> -23.8509445 </td>
+   <td style="text-align:right;"> -23.8507337 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -16479,7 +16478,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 1.829268e+02 </td>
-   <td style="text-align:right;"> -9.677777e+01 </td>
+   <td style="text-align:right;"> -9.677756e+01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -16581,7 +16580,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 19.3 </td>
    <td style="text-align:right;"> 39.1 </td>
    <td style="text-align:right;"> 4.330671e+00 </td>
-   <td style="text-align:right;"> 1.054091e+01 </td>
+   <td style="text-align:right;"> 1.054093e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -16589,7 +16588,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 290.000000 </td>
-   <td style="text-align:right;"> -279.4590853 </td>
+   <td style="text-align:right;"> -279.4590727 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -16640,16 +16639,16 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.0000 </td>
    <td style="text-align:right;"> -6.9 </td>
    <td style="text-align:right;"> 13.9 </td>
-   <td style="text-align:right;"> 1.552505e+01 </td>
-   <td style="text-align:right;"> 1.967680e+01 </td>
+   <td style="text-align:right;"> 1.552506e+01 </td>
+   <td style="text-align:right;"> 1.967682e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 7.000000e-01 </td>
-   <td style="text-align:right;"> 1.897680e+01 </td>
+   <td style="text-align:right;"> 1.897682e+01 </td>
    <td style="text-align:right;"> 2066 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 10.107927 </td>
-   <td style="text-align:right;"> 9.5688777 </td>
+   <td style="text-align:right;"> 9.5688945 </td>
    <td style="text-align:right;"> 2027 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -16700,16 +16699,16 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.0004 </td>
    <td style="text-align:right;"> -6.7 </td>
    <td style="text-align:right;"> 17.7 </td>
-   <td style="text-align:right;"> 1.300401e+01 </td>
-   <td style="text-align:right;"> 1.732732e+01 </td>
+   <td style="text-align:right;"> 1.300410e+01 </td>
+   <td style="text-align:right;"> 1.732749e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e-01 </td>
-   <td style="text-align:right;"> 1.672732e+01 </td>
+   <td style="text-align:right;"> 1.672749e+01 </td>
    <td style="text-align:right;"> 2067 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 2.088415 </td>
-   <td style="text-align:right;"> 15.2389089 </td>
+   <td style="text-align:right;"> 15.2390736 </td>
    <td style="text-align:right;"> 2048 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -16769,7 +16768,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 26.481098 </td>
-   <td style="text-align:right;"> 0.5806135 </td>
+   <td style="text-align:right;"> 0.5806136 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -16821,15 +16820,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -1.5 </td>
    <td style="text-align:right;"> 14.8 </td>
    <td style="text-align:right;"> 6.237495e+01 </td>
-   <td style="text-align:right;"> 9.016173e+01 </td>
+   <td style="text-align:right;"> 9.016172e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e-01 </td>
-   <td style="text-align:right;"> 8.956173e+01 </td>
+   <td style="text-align:right;"> 8.956172e+01 </td>
    <td style="text-align:right;"> 2322 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 132.405488 </td>
-   <td style="text-align:right;"> -42.2437608 </td>
+   <td style="text-align:right;"> -42.2437721 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -16881,15 +16880,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.3 </td>
    <td style="text-align:right;"> 23.4 </td>
    <td style="text-align:right;"> 2.086848e+00 </td>
-   <td style="text-align:right;"> 3.234972e+00 </td>
+   <td style="text-align:right;"> 3.234784e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e-01 </td>
-   <td style="text-align:right;"> 2.634972e+00 </td>
+   <td style="text-align:right;"> 2.634784e+00 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 39.178658 </td>
-   <td style="text-align:right;"> -35.9436865 </td>
+   <td style="text-align:right;"> -35.9438748 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -16949,7 +16948,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 5.596951 </td>
-   <td style="text-align:right;"> -5.1214788 </td>
+   <td style="text-align:right;"> -5.1214789 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -17009,7 +17008,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 9.021951 </td>
-   <td style="text-align:right;"> -4.2395474 </td>
+   <td style="text-align:right;"> -4.2395472 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -17079,7 +17078,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 4.573171e+02 </td>
-   <td style="text-align:right;"> -3.481419e+02 </td>
+   <td style="text-align:right;"> -3.481418e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -17301,10 +17300,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.4 </td>
    <td style="text-align:right;"> 41.9 </td>
    <td style="text-align:right;"> 1.148711e+00 </td>
-   <td style="text-align:right;"> 2.847476e+00 </td>
+   <td style="text-align:right;"> 2.847727e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 7.500000e-01 </td>
-   <td style="text-align:right;"> 2.097476e+00 </td>
+   <td style="text-align:right;"> 2.097727e+00 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -17421,10 +17420,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.7 </td>
    <td style="text-align:right;"> 23.2 </td>
    <td style="text-align:right;"> 5.373398e-01 </td>
-   <td style="text-align:right;"> 8.544452e-01 </td>
+   <td style="text-align:right;"> 8.544514e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e-01 </td>
-   <td style="text-align:right;"> 2.544452e-01 </td>
+   <td style="text-align:right;"> 2.544514e-01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -17721,7 +17720,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -2.1 </td>
    <td style="text-align:right;"> 16.2 </td>
    <td style="text-align:right;"> 9.409999e+00 </td>
-   <td style="text-align:right;"> 1.266532e+01 </td>
+   <td style="text-align:right;"> 1.266533e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -17904,7 +17903,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.145459e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.400000e+00 </td>
-   <td style="text-align:right;"> 9.054590e+00 </td>
+   <td style="text-align:right;"> 9.054593e+00 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -17953,19 +17952,19 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2003 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.0090 </td>
-   <td style="text-align:right;"> 0.0090 </td>
-   <td style="text-align:right;"> 0.0090 </td>
+   <td style="text-align:right;"> 0.0111 </td>
+   <td style="text-align:right;"> 0.0111 </td>
+   <td style="text-align:right;"> 0.0111 </td>
    <td style="text-align:right;"> -4.3 </td>
-   <td style="text-align:right;"> 0.0090 </td>
+   <td style="text-align:right;"> 0.0111 </td>
    <td style="text-align:right;"> -4.3 </td>
-   <td style="text-align:right;"> 9.1 </td>
-   <td style="text-align:right;"> 2.727439e+01 </td>
-   <td style="text-align:right;"> 3.745632e+01 </td>
+   <td style="text-align:right;"> 9.2 </td>
+   <td style="text-align:right;"> 2.727930e+01 </td>
+   <td style="text-align:right;"> 3.752830e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 5.102041e-01 </td>
-   <td style="text-align:right;"> 3.694612e+01 </td>
-   <td style="text-align:right;"> 2112 </td>
+   <td style="text-align:right;"> 3.701810e+01 </td>
+   <td style="text-align:right;"> 2113 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
@@ -18021,15 +18020,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -0.6 </td>
    <td style="text-align:right;"> 12.1 </td>
    <td style="text-align:right;"> 1.413949e-01 </td>
-   <td style="text-align:right;"> 2.115986e-01 </td>
+   <td style="text-align:right;"> 2.115979e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.500000e-01 </td>
-   <td style="text-align:right;"> 6.159860e-02 </td>
+   <td style="text-align:right;"> 6.159790e-02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 22.000000 </td>
-   <td style="text-align:right;"> -21.7884014 </td>
+   <td style="text-align:right;"> -21.7884021 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -18141,7 +18140,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.7 </td>
    <td style="text-align:right;"> 7.5 </td>
    <td style="text-align:right;"> 6.610692e+03 </td>
-   <td style="text-align:right;"> 8.450020e+03 </td>
+   <td style="text-align:right;"> 8.449752e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -18201,7 +18200,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 3.9 </td>
    <td style="text-align:right;"> 10.1 </td>
    <td style="text-align:right;"> 6.198193e+03 </td>
-   <td style="text-align:right;"> 8.513470e+03 </td>
+   <td style="text-align:right;"> 8.513507e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -18261,15 +18260,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 13.1 </td>
    <td style="text-align:right;"> 28.5 </td>
    <td style="text-align:right;"> 5.865732e-01 </td>
-   <td style="text-align:right;"> 1.238822e+00 </td>
+   <td style="text-align:right;"> 1.238823e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.300000e+00 </td>
-   <td style="text-align:right;"> -6.117750e-02 </td>
+   <td style="text-align:right;"> -6.117710e-02 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 29.000000 </td>
-   <td style="text-align:right;"> -27.7611775 </td>
+   <td style="text-align:right;"> -27.7611771 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -18321,15 +18320,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -6.7 </td>
    <td style="text-align:right;"> 6.2 </td>
    <td style="text-align:right;"> 1.914322e+01 </td>
-   <td style="text-align:right;"> 2.572905e+01 </td>
+   <td style="text-align:right;"> 2.572904e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.220000e+01 </td>
-   <td style="text-align:right;"> 1.352905e+01 </td>
+   <td style="text-align:right;"> 1.352904e+01 </td>
    <td style="text-align:right;"> 2026 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 110.000000 </td>
-   <td style="text-align:right;"> -84.2709545 </td>
+   <td style="text-align:right;"> -84.2709606 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -18381,10 +18380,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -3.6 </td>
    <td style="text-align:right;"> 16.0 </td>
    <td style="text-align:right;"> 4.457526e+03 </td>
-   <td style="text-align:right;"> 7.019330e+03 </td>
+   <td style="text-align:right;"> 7.019332e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> 1.019330e+03 </td>
+   <td style="text-align:right;"> 1.019332e+03 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -18441,7 +18440,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.9 </td>
    <td style="text-align:right;"> 29.8 </td>
    <td style="text-align:right;"> 2.254849e+03 </td>
-   <td style="text-align:right;"> 5.096016e+03 </td>
+   <td style="text-align:right;"> 5.095479e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -18584,6 +18583,66 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> 7182 SURVT Mytilus edulis WO </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:left;"> Northern North Sea </td>
+   <td style="text-align:left;"> United Kingdom </td>
+   <td style="text-align:right;"> 7182 </td>
+   <td style="text-align:left;"> EScotland_YthanEstuary_sh01 </td>
+   <td style="text-align:left;"> E Scotland (Ythan Estuary) </td>
+   <td style="text-align:right;"> 57.32123 </td>
+   <td style="text-align:right;"> -1.994370 </td>
+   <td style="text-align:left;"> RH </td>
+   <td style="text-align:left;"> TT </td>
+   <td style="text-align:left;"> SURVT </td>
+   <td style="text-align:left;"> Biological effects (other) </td>
+   <td style="text-align:left;"> Mytilus edulis </td>
+   <td style="text-align:left;"> WO </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> d </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> small_filled_circle </td>
+   <td style="text-align:left;"> green </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 2012 </td>
+   <td style="text-align:right;"> 2012 </td>
+   <td style="text-align:right;"> 2020 </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> 7.822224e+00 </td>
+   <td style="text-align:right;"> 7.413895e+00 </td>
+   <td style="text-align:left;"> BAC </td>
+   <td style="text-align:right;"> 1.000000e+01 </td>
+   <td style="text-align:right;"> -2.586105e+00 </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> EAC </td>
+   <td style="text-align:right;"> 5.000000 </td>
+   <td style="text-align:right;"> 2.4138954 </td>
+   <td style="text-align:right;"> 2020 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> 7208 BDE66 Pleuronectes platessa LI </td>
    <td style="text-align:right;"> 2 </td>
    <td style="text-align:left;"> Northern North Sea </td>
@@ -18673,23 +18732,23 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2006 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.0350 </td>
-   <td style="text-align:right;"> 0.0350 </td>
-   <td style="text-align:right;"> 0.0350 </td>
-   <td style="text-align:right;"> 4.8 </td>
-   <td style="text-align:right;"> 0.0350 </td>
-   <td style="text-align:right;"> 4.8 </td>
-   <td style="text-align:right;"> 11.3 </td>
-   <td style="text-align:right;"> 4.413530e+02 </td>
-   <td style="text-align:right;"> 6.083309e+02 </td>
+   <td style="text-align:right;"> 0.0376 </td>
+   <td style="text-align:right;"> 0.0376 </td>
+   <td style="text-align:right;"> 0.0376 </td>
+   <td style="text-align:right;"> 4.7 </td>
+   <td style="text-align:right;"> 0.0376 </td>
+   <td style="text-align:right;"> 4.7 </td>
+   <td style="text-align:right;"> 11.6 </td>
+   <td style="text-align:right;"> 4.412843e+02 </td>
+   <td style="text-align:right;"> 6.103200e+02 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.000000e+01 </td>
-   <td style="text-align:right;"> 5.183309e+02 </td>
+   <td style="text-align:right;"> 5.203200e+02 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 121.951219 </td>
-   <td style="text-align:right;"> 486.3796676 </td>
+   <td style="text-align:right;"> 488.3688062 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -18699,7 +18758,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 3.048780e+03 </td>
-   <td style="text-align:right;"> -2.440450e+03 </td>
+   <td style="text-align:right;"> -2.438460e+03 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -18733,18 +18792,18 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2005 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.0329 </td>
-   <td style="text-align:right;"> 0.0329 </td>
-   <td style="text-align:right;"> 0.0329 </td>
+   <td style="text-align:right;"> 0.0346 </td>
+   <td style="text-align:right;"> 0.0346 </td>
+   <td style="text-align:right;"> 0.0346 </td>
    <td style="text-align:right;"> -3.7 </td>
-   <td style="text-align:right;"> 0.0329 </td>
+   <td style="text-align:right;"> 0.0346 </td>
    <td style="text-align:right;"> -3.7 </td>
-   <td style="text-align:right;"> 9.1 </td>
-   <td style="text-align:right;"> 3.053810e+03 </td>
-   <td style="text-align:right;"> 4.000937e+03 </td>
+   <td style="text-align:right;"> 9.2 </td>
+   <td style="text-align:right;"> 3.054208e+03 </td>
+   <td style="text-align:right;"> 4.008297e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.300000e+03 </td>
-   <td style="text-align:right;"> 2.700937e+03 </td>
+   <td style="text-align:right;"> 2.708297e+03 </td>
    <td style="text-align:right;"> 2042 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -18759,7 +18818,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 9.146341e+03 </td>
-   <td style="text-align:right;"> -5.145404e+03 </td>
+   <td style="text-align:right;"> -5.138044e+03 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -18853,15 +18912,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2007 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.3617 </td>
-   <td style="text-align:right;"> 0.3617 </td>
-   <td style="text-align:right;"> 0.3617 </td>
+   <td style="text-align:right;"> 0.3644 </td>
+   <td style="text-align:right;"> 0.3644 </td>
+   <td style="text-align:right;"> 0.3644 </td>
    <td style="text-align:right;"> -1.3 </td>
-   <td style="text-align:right;"> 0.3617 </td>
+   <td style="text-align:right;"> 0.3644 </td>
    <td style="text-align:right;"> -1.3 </td>
-   <td style="text-align:right;"> 6.6 </td>
-   <td style="text-align:right;"> 1.186483e+04 </td>
-   <td style="text-align:right;"> 1.471283e+04 </td>
+   <td style="text-align:right;"> 6.8 </td>
+   <td style="text-align:right;"> 1.185828e+04 </td>
+   <td style="text-align:right;"> 1.473781e+04 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -18921,7 +18980,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -2.4 </td>
    <td style="text-align:right;"> 8.2 </td>
    <td style="text-align:right;"> 3.404049e+03 </td>
-   <td style="text-align:right;"> 4.713604e+03 </td>
+   <td style="text-align:right;"> 4.713631e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -18981,7 +19040,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2.0 </td>
    <td style="text-align:right;"> 8.0 </td>
    <td style="text-align:right;"> 1.624333e+02 </td>
-   <td style="text-align:right;"> 2.253627e+02 </td>
+   <td style="text-align:right;"> 2.253620e+02 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -19041,10 +19100,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -0.4 </td>
    <td style="text-align:right;"> 2.9 </td>
    <td style="text-align:right;"> 5.782819e+03 </td>
-   <td style="text-align:right;"> 6.317354e+03 </td>
+   <td style="text-align:right;"> 6.317364e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> 3.173537e+02 </td>
+   <td style="text-align:right;"> 3.173641e+02 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -19109,7 +19168,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 12.000000 </td>
-   <td style="text-align:right;"> 6.4198941 </td>
+   <td style="text-align:right;"> 6.4198934 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -19169,7 +19228,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 121.951219 </td>
-   <td style="text-align:right;"> 470.2344314 </td>
+   <td style="text-align:right;"> 470.2344817 </td>
    <td style="text-align:right;"> 2035 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -19221,7 +19280,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2.1 </td>
    <td style="text-align:right;"> 23.8 </td>
    <td style="text-align:right;"> 1.802870e+01 </td>
-   <td style="text-align:right;"> 2.973969e+01 </td>
+   <td style="text-align:right;"> 2.973973e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -19281,10 +19340,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -1.1 </td>
    <td style="text-align:right;"> 11.2 </td>
    <td style="text-align:right;"> 4.743194e+03 </td>
-   <td style="text-align:right;"> 5.661246e+03 </td>
+   <td style="text-align:right;"> 5.661239e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> -3.387544e+02 </td>
+   <td style="text-align:right;"> -3.387612e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -19341,7 +19400,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2.7 </td>
    <td style="text-align:right;"> 21.4 </td>
    <td style="text-align:right;"> 1.646761e+03 </td>
-   <td style="text-align:right;"> 2.958782e+03 </td>
+   <td style="text-align:right;"> 2.958734e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -20181,7 +20240,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.0 </td>
    <td style="text-align:right;"> 8.9 </td>
    <td style="text-align:right;"> 9.527265e+00 </td>
-   <td style="text-align:right;"> 1.416868e+01 </td>
+   <td style="text-align:right;"> 1.416865e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -20549,7 +20608,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 80.000000 </td>
-   <td style="text-align:right;"> -70.5353266 </td>
+   <td style="text-align:right;"> -70.5353269 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:left;">  </td>
@@ -20601,10 +20660,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -6.9 </td>
    <td style="text-align:right;"> 6.4 </td>
    <td style="text-align:right;"> 1.061902e+01 </td>
-   <td style="text-align:right;"> 1.629257e+01 </td>
+   <td style="text-align:right;"> 1.629258e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 8.100000e+00 </td>
-   <td style="text-align:right;"> 8.192574e+00 </td>
+   <td style="text-align:right;"> 8.192575e+00 </td>
    <td style="text-align:right;"> 2025 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -20660,8 +20719,8 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.0063 </td>
    <td style="text-align:right;"> -53.7 </td>
    <td style="text-align:right;"> 59.5 </td>
-   <td style="text-align:right;"> 1.054408e+01 </td>
-   <td style="text-align:right;"> 5.085901e+01 </td>
+   <td style="text-align:right;"> 1.054405e+01 </td>
+   <td style="text-align:right;"> 5.085813e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -20841,7 +20900,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -17.3 </td>
    <td style="text-align:right;"> 24.7 </td>
    <td style="text-align:right;"> 2.143187e+00 </td>
-   <td style="text-align:right;"> 3.478543e+00 </td>
+   <td style="text-align:right;"> 3.478541e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -20849,7 +20908,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 165.000000 </td>
-   <td style="text-align:right;"> -161.5214572 </td>
+   <td style="text-align:right;"> -161.5214594 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -20900,16 +20959,16 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.0245 </td>
    <td style="text-align:right;"> -3.0 </td>
    <td style="text-align:right;"> 9.9 </td>
-   <td style="text-align:right;"> 1.209565e+01 </td>
-   <td style="text-align:right;"> 1.685229e+01 </td>
+   <td style="text-align:right;"> 1.209626e+01 </td>
+   <td style="text-align:right;"> 1.685318e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.093023e-01 </td>
-   <td style="text-align:right;"> 1.664299e+01 </td>
+   <td style="text-align:right;"> 1.664387e+01 </td>
    <td style="text-align:right;"> 2157 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 334.000000 </td>
-   <td style="text-align:right;"> -317.1477084 </td>
+   <td style="text-align:right;"> -317.1468237 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -20919,7 +20978,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 2.941176e+03 </td>
-   <td style="text-align:right;"> -2.924324e+03 </td>
+   <td style="text-align:right;"> -2.924323e+03 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -20961,7 +21020,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.9 </td>
    <td style="text-align:right;"> 14.0 </td>
    <td style="text-align:right;"> 1.845246e+01 </td>
-   <td style="text-align:right;"> 1.456063e+01 </td>
+   <td style="text-align:right;"> 1.456048e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -21081,7 +21140,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 4.5 </td>
    <td style="text-align:right;"> 28.9 </td>
    <td style="text-align:right;"> 6.846897e+03 </td>
-   <td style="text-align:right;"> 1.359641e+04 </td>
+   <td style="text-align:right;"> 1.359640e+04 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -21141,10 +21200,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -0.1 </td>
    <td style="text-align:right;"> 8.7 </td>
    <td style="text-align:right;"> 1.901907e+03 </td>
-   <td style="text-align:right;"> 2.224243e+03 </td>
+   <td style="text-align:right;"> 2.224020e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.600000e+02 </td>
-   <td style="text-align:right;"> 1.264243e+03 </td>
+   <td style="text-align:right;"> 1.264020e+03 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -21159,7 +21218,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 6.097561e+03 </td>
-   <td style="text-align:right;"> -3.873318e+03 </td>
+   <td style="text-align:right;"> -3.873541e+03 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -21201,15 +21260,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -1.2 </td>
    <td style="text-align:right;"> 10.4 </td>
    <td style="text-align:right;"> 1.536832e+02 </td>
-   <td style="text-align:right;"> 2.016510e+02 </td>
+   <td style="text-align:right;"> 2.016500e+02 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.000000e+01 </td>
-   <td style="text-align:right;"> 1.116510e+02 </td>
+   <td style="text-align:right;"> 1.116500e+02 </td>
    <td style="text-align:right;"> 2064 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 121.951219 </td>
-   <td style="text-align:right;"> 79.6997825 </td>
+   <td style="text-align:right;"> 79.6987737 </td>
    <td style="text-align:right;"> 2039 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -21219,7 +21278,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 3.048780e+03 </td>
-   <td style="text-align:right;"> -2.847129e+03 </td>
+   <td style="text-align:right;"> -2.847130e+03 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -21255,13 +21314,13 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.0030 </td>
    <td style="text-align:right;"> 0.3076 </td>
    <td style="text-align:right;"> 0.0018 </td>
-   <td style="text-align:right;"> 0.3964 </td>
+   <td style="text-align:right;"> 0.3995 </td>
    <td style="text-align:right;"> -2.0 </td>
-   <td style="text-align:right;"> 0.0971 </td>
+   <td style="text-align:right;"> 0.0973 </td>
    <td style="text-align:right;"> 4.9 </td>
    <td style="text-align:right;"> 23.1 </td>
    <td style="text-align:right;"> 6.003179e+01 </td>
-   <td style="text-align:right;"> 1.246740e+02 </td>
+   <td style="text-align:right;"> 1.249964e+02 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -21321,10 +21380,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -1.6 </td>
    <td style="text-align:right;"> 5.0 </td>
    <td style="text-align:right;"> 5.875961e+03 </td>
-   <td style="text-align:right;"> 6.704890e+03 </td>
+   <td style="text-align:right;"> 6.704888e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> 7.048897e+02 </td>
+   <td style="text-align:right;"> 7.048879e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -21381,7 +21440,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -0.8 </td>
    <td style="text-align:right;"> 40.0 </td>
    <td style="text-align:right;"> 5.162003e+00 </td>
-   <td style="text-align:right;"> 1.107543e+01 </td>
+   <td style="text-align:right;"> 1.108761e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -21681,7 +21740,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.3 </td>
    <td style="text-align:right;"> 9.6 </td>
    <td style="text-align:right;"> 1.695841e+03 </td>
-   <td style="text-align:right;"> 2.030936e+03 </td>
+   <td style="text-align:right;"> 2.030933e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -21741,15 +21800,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 14.2 </td>
    <td style="text-align:right;"> 33.7 </td>
    <td style="text-align:right;"> 3.053404e+01 </td>
-   <td style="text-align:right;"> 6.817610e+01 </td>
+   <td style="text-align:right;"> 6.817609e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.500000e+00 </td>
-   <td style="text-align:right;"> 6.567610e+01 </td>
+   <td style="text-align:right;"> 6.567609e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 80.000000 </td>
-   <td style="text-align:right;"> -11.8239033 </td>
+   <td style="text-align:right;"> -11.8239067 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -21801,15 +21860,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 15.5 </td>
    <td style="text-align:right;"> 41.2 </td>
    <td style="text-align:right;"> 1.112510e+01 </td>
-   <td style="text-align:right;"> 2.960848e+01 </td>
+   <td style="text-align:right;"> 2.960838e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.400000e+00 </td>
-   <td style="text-align:right;"> 2.820848e+01 </td>
+   <td style="text-align:right;"> 2.820838e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 600.000000 </td>
-   <td style="text-align:right;"> -570.3915200 </td>
+   <td style="text-align:right;"> -570.3916234 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -21819,7 +21878,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 3.048780e+01 </td>
-   <td style="text-align:right;"> -8.793249e-01 </td>
+   <td style="text-align:right;"> -8.794283e-01 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> above </td>
   </tr>
@@ -21861,10 +21920,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 8.3 </td>
    <td style="text-align:right;"> 23.6 </td>
    <td style="text-align:right;"> 2.408702e-01 </td>
-   <td style="text-align:right;"> 4.151733e-01 </td>
+   <td style="text-align:right;"> 4.151734e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 5.429900e-03 </td>
-   <td style="text-align:right;"> 4.097434e-01 </td>
+   <td style="text-align:right;"> 4.097435e-01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -22101,10 +22160,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.7 </td>
    <td style="text-align:right;"> 24.5 </td>
    <td style="text-align:right;"> 2.973331e-01 </td>
-   <td style="text-align:right;"> 4.742029e-01 </td>
+   <td style="text-align:right;"> 4.742097e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 5.429900e-03 </td>
-   <td style="text-align:right;"> 4.687731e-01 </td>
+   <td style="text-align:right;"> 4.687798e-01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -22114,7 +22173,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> FEQG </td>
    <td style="text-align:right;"> 73.512195 </td>
-   <td style="text-align:right;"> -73.037992 </td>
+   <td style="text-align:right;"> -73.037985 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -22221,7 +22280,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 11.9 </td>
    <td style="text-align:right;"> 1.016794e+00 </td>
-   <td style="text-align:right;"> 1.376183e+00 </td>
+   <td style="text-align:right;"> 1.376186e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -22239,7 +22298,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 5.182930e-02 </td>
-   <td style="text-align:right;"> 1.324354e+00 </td>
+   <td style="text-align:right;"> 1.324357e+00 </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:left;">  </td>
   </tr>
@@ -22341,10 +22400,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -2.4 </td>
    <td style="text-align:right;"> 29.6 </td>
    <td style="text-align:right;"> 2.506238e+00 </td>
-   <td style="text-align:right;"> 4.265789e+00 </td>
+   <td style="text-align:right;"> 4.265803e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 8.100000e+00 </td>
-   <td style="text-align:right;"> -3.834211e+00 </td>
+   <td style="text-align:right;"> -3.834197e+00 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -22641,7 +22700,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 8.3 </td>
    <td style="text-align:right;"> 5.9 </td>
    <td style="text-align:right;"> 4.786980e+00 </td>
-   <td style="text-align:right;"> 6.193307e+00 </td>
+   <td style="text-align:right;"> 6.193305e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -22701,7 +22760,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.0 </td>
    <td style="text-align:right;"> 9.1 </td>
    <td style="text-align:right;"> 9.432131e+03 </td>
-   <td style="text-align:right;"> 1.200035e+04 </td>
+   <td style="text-align:right;"> 1.200034e+04 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -22761,7 +22820,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 3.7 </td>
    <td style="text-align:right;"> 31.6 </td>
    <td style="text-align:right;"> 1.584089e+00 </td>
-   <td style="text-align:right;"> 3.232474e+00 </td>
+   <td style="text-align:right;"> 3.232467e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -22813,18 +22872,18 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2001 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.7351 </td>
-   <td style="text-align:right;"> 0.7351 </td>
-   <td style="text-align:right;"> 0.7351 </td>
+   <td style="text-align:right;"> 0.7333 </td>
+   <td style="text-align:right;"> 0.7333 </td>
+   <td style="text-align:right;"> 0.7333 </td>
    <td style="text-align:right;"> 0.4 </td>
-   <td style="text-align:right;"> 0.7351 </td>
+   <td style="text-align:right;"> 0.7333 </td>
    <td style="text-align:right;"> 0.4 </td>
    <td style="text-align:right;"> 9.5 </td>
-   <td style="text-align:right;"> 8.945326e+03 </td>
-   <td style="text-align:right;"> 1.088514e+04 </td>
+   <td style="text-align:right;"> 8.949618e+03 </td>
+   <td style="text-align:right;"> 1.089833e+04 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> 4.885137e+03 </td>
+   <td style="text-align:right;"> 4.898335e+03 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -23541,7 +23600,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2.2 </td>
    <td style="text-align:right;"> 5.6 </td>
    <td style="text-align:right;"> 1.155751e+01 </td>
-   <td style="text-align:right;"> 1.766374e+01 </td>
+   <td style="text-align:right;"> 1.766375e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -23661,15 +23720,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 7.9 </td>
    <td style="text-align:right;"> 31.6 </td>
    <td style="text-align:right;"> 1.891081e+01 </td>
-   <td style="text-align:right;"> 7.498441e+01 </td>
+   <td style="text-align:right;"> 7.498486e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.220000e+01 </td>
-   <td style="text-align:right;"> 6.278441e+01 </td>
+   <td style="text-align:right;"> 6.278486e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 110.000000 </td>
-   <td style="text-align:right;"> -35.0155891 </td>
+   <td style="text-align:right;"> -35.0151414 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -23679,7 +23738,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 1.940492e+02 </td>
-   <td style="text-align:right;"> -1.190647e+02 </td>
+   <td style="text-align:right;"> -1.190643e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -23832,19 +23891,19 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1990 </td>
    <td style="text-align:right;"> 2009 </td>
    <td style="text-align:right;"> 2020 </td>
-   <td style="text-align:right;"> 0.0071 </td>
+   <td style="text-align:right;"> 0.0070 </td>
    <td style="text-align:right;"> 0.0001 </td>
    <td style="text-align:right;"> 0.0000 </td>
    <td style="text-align:right;"> 0.0000 </td>
-   <td style="text-align:right;"> 13.5 </td>
+   <td style="text-align:right;"> 13.6 </td>
    <td style="text-align:right;"> 0.0000 </td>
-   <td style="text-align:right;"> 13.5 </td>
-   <td style="text-align:right;"> 8.2 </td>
-   <td style="text-align:right;"> 1.209735e+03 </td>
-   <td style="text-align:right;"> 1.625164e+03 </td>
+   <td style="text-align:right;"> 13.6 </td>
+   <td style="text-align:right;"> 8.4 </td>
+   <td style="text-align:right;"> 1.206902e+03 </td>
+   <td style="text-align:right;"> 1.631504e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.300000e+03 </td>
-   <td style="text-align:right;"> 3.251638e+02 </td>
+   <td style="text-align:right;"> 3.315040e+02 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -23859,7 +23918,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 9.146341e+03 </td>
-   <td style="text-align:right;"> -7.521178e+03 </td>
+   <td style="text-align:right;"> -7.514837e+03 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -23961,7 +24020,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 64.8 </td>
    <td style="text-align:right;"> 5.471304e+00 </td>
-   <td style="text-align:right;"> 5.247959e+01 </td>
+   <td style="text-align:right;"> 5.247962e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -24029,7 +24088,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 12.000000 </td>
-   <td style="text-align:right;"> 19.2015028 </td>
+   <td style="text-align:right;"> 19.2015015 </td>
    <td style="text-align:right;"> 2030 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -24039,7 +24098,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 9.268293e+01 </td>
-   <td style="text-align:right;"> -6.148142e+01 </td>
+   <td style="text-align:right;"> -6.148143e+01 </td>
    <td style="text-align:right;"> 2022 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -24141,10 +24200,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -7.9 </td>
    <td style="text-align:right;"> 9.3 </td>
    <td style="text-align:right;"> 7.109217e+00 </td>
-   <td style="text-align:right;"> 9.556026e+00 </td>
+   <td style="text-align:right;"> 9.556025e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.400000e+00 </td>
-   <td style="text-align:right;"> 7.156026e+00 </td>
+   <td style="text-align:right;"> 7.156025e+00 </td>
    <td style="text-align:right;"> 2036 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -24201,15 +24260,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 12.6 </td>
    <td style="text-align:right;"> 62.2 </td>
    <td style="text-align:right;"> 5.564609e+00 </td>
-   <td style="text-align:right;"> 4.128231e+01 </td>
+   <td style="text-align:right;"> 4.128065e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 8.181818e-01 </td>
-   <td style="text-align:right;"> 4.046413e+01 </td>
+   <td style="text-align:right;"> 4.046247e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 334.000000 </td>
-   <td style="text-align:right;"> -292.7176879 </td>
+   <td style="text-align:right;"> -292.7193527 </td>
    <td style="text-align:right;"> 2022 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -24219,7 +24278,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 2.083333e+03 </td>
-   <td style="text-align:right;"> -2.042051e+03 </td>
+   <td style="text-align:right;"> -2.042053e+03 </td>
    <td style="text-align:right;"> 2022 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -24261,7 +24320,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 17.7 </td>
    <td style="text-align:right;"> 2.132071e+00 </td>
-   <td style="text-align:right;"> 4.292670e+00 </td>
+   <td style="text-align:right;"> 4.292669e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -24569,7 +24628,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 132.405488 </td>
-   <td style="text-align:right;"> -128.1546405 </td>
+   <td style="text-align:right;"> -128.1546404 </td>
    <td style="text-align:right;"> 2017 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -25041,10 +25100,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.4 </td>
    <td style="text-align:right;"> 6.8 </td>
    <td style="text-align:right;"> 7.006825e+03 </td>
-   <td style="text-align:right;"> 7.839426e+03 </td>
+   <td style="text-align:right;"> 7.839430e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> 1.839426e+03 </td>
+   <td style="text-align:right;"> 1.839430e+03 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -25161,15 +25220,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 4.5 </td>
    <td style="text-align:right;"> 29.0 </td>
    <td style="text-align:right;"> 2.618194e+00 </td>
-   <td style="text-align:right;"> 5.149778e+00 </td>
+   <td style="text-align:right;"> 5.149781e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.500000e+00 </td>
-   <td style="text-align:right;"> 2.649778e+00 </td>
+   <td style="text-align:right;"> 2.649782e+00 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 80.000000 </td>
-   <td style="text-align:right;"> -74.8502224 </td>
+   <td style="text-align:right;"> -74.8502185 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -25341,10 +25400,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -3.1 </td>
    <td style="text-align:right;"> 6.8 </td>
    <td style="text-align:right;"> 3.854160e+03 </td>
-   <td style="text-align:right;"> 4.696115e+03 </td>
+   <td style="text-align:right;"> 4.696116e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> -1.303885e+03 </td>
+   <td style="text-align:right;"> -1.303884e+03 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -25649,7 +25708,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 26.481098 </td>
-   <td style="text-align:right;"> -25.3078107 </td>
+   <td style="text-align:right;"> -25.3078108 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -25821,15 +25880,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -4.7 </td>
    <td style="text-align:right;"> 46.9 </td>
    <td style="text-align:right;"> 8.382260e-02 </td>
-   <td style="text-align:right;"> 2.913039e-01 </td>
+   <td style="text-align:right;"> 2.913036e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 7.500000e-01 </td>
-   <td style="text-align:right;"> -4.586961e-01 </td>
+   <td style="text-align:right;"> -4.586964e-01 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 5.596951 </td>
-   <td style="text-align:right;"> -5.3056473 </td>
+   <td style="text-align:right;"> -5.3056476 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -25881,15 +25940,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -8.5 </td>
    <td style="text-align:right;"> 36.8 </td>
    <td style="text-align:right;"> 1.171265e-01 </td>
-   <td style="text-align:right;"> 3.133840e-01 </td>
+   <td style="text-align:right;"> 3.133843e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 7.500000e-01 </td>
-   <td style="text-align:right;"> -4.366160e-01 </td>
+   <td style="text-align:right;"> -4.366157e-01 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 9.021951 </td>
-   <td style="text-align:right;"> -8.7085672 </td>
+   <td style="text-align:right;"> -8.7085670 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -25941,7 +26000,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -4.9 </td>
    <td style="text-align:right;"> 12.4 </td>
    <td style="text-align:right;"> 3.368199e+00 </td>
-   <td style="text-align:right;"> 4.590677e+00 </td>
+   <td style="text-align:right;"> 4.590676e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -26121,7 +26180,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -4.1 </td>
    <td style="text-align:right;"> 31.8 </td>
    <td style="text-align:right;"> 5.737986e+00 </td>
-   <td style="text-align:right;"> 1.736160e+01 </td>
+   <td style="text-align:right;"> 1.736162e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -26189,7 +26248,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 100.000000 </td>
-   <td style="text-align:right;"> -40.1976817 </td>
+   <td style="text-align:right;"> -40.1976820 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -26361,10 +26420,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -26.3 </td>
    <td style="text-align:right;"> 33.2 </td>
    <td style="text-align:right;"> 3.280735e+00 </td>
-   <td style="text-align:right;"> 1.443685e+01 </td>
+   <td style="text-align:right;"> 1.443684e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 8.100000e+00 </td>
-   <td style="text-align:right;"> 6.336848e+00 </td>
+   <td style="text-align:right;"> 6.336841e+00 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -27381,10 +27440,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.1 </td>
    <td style="text-align:right;"> 4.0 </td>
    <td style="text-align:right;"> 7.002625e+03 </td>
-   <td style="text-align:right;"> 7.977351e+03 </td>
+   <td style="text-align:right;"> 7.977361e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.000000e+03 </td>
-   <td style="text-align:right;"> 1.977351e+03 </td>
+   <td style="text-align:right;"> 1.977361e+03 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -27441,7 +27500,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.3 </td>
    <td style="text-align:right;"> 18.1 </td>
    <td style="text-align:right;"> 1.284506e+03 </td>
-   <td style="text-align:right;"> 2.428518e+03 </td>
+   <td style="text-align:right;"> 2.428544e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -27493,19 +27552,19 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2004 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.7592 </td>
-   <td style="text-align:right;"> 0.7592 </td>
-   <td style="text-align:right;"> 0.7592 </td>
+   <td style="text-align:right;"> 0.7965 </td>
+   <td style="text-align:right;"> 0.7965 </td>
+   <td style="text-align:right;"> 0.7965 </td>
    <td style="text-align:right;"> -0.3 </td>
-   <td style="text-align:right;"> 0.7592 </td>
+   <td style="text-align:right;"> 0.7965 </td>
    <td style="text-align:right;"> -0.3 </td>
-   <td style="text-align:right;"> 8.1 </td>
-   <td style="text-align:right;"> 8.962650e+04 </td>
-   <td style="text-align:right;"> 1.121350e+05 </td>
+   <td style="text-align:right;"> 7.9 </td>
+   <td style="text-align:right;"> 8.969351e+04 </td>
+   <td style="text-align:right;"> 1.108173e+05 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.300000e+04 </td>
-   <td style="text-align:right;"> 4.913499e+04 </td>
-   <td style="text-align:right;"> 2129 </td>
+   <td style="text-align:right;"> 4.781733e+04 </td>
+   <td style="text-align:right;"> 2157 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
@@ -27561,10 +27620,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 3.4 </td>
    <td style="text-align:right;"> 4.9 </td>
    <td style="text-align:right;"> 5.895511e+04 </td>
-   <td style="text-align:right;"> 6.829194e+04 </td>
+   <td style="text-align:right;"> 6.829196e+04 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.300000e+04 </td>
-   <td style="text-align:right;"> 5.291944e+03 </td>
+   <td style="text-align:right;"> 5.291963e+03 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -27621,10 +27680,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -11.0 </td>
    <td style="text-align:right;"> 26.7 </td>
    <td style="text-align:right;"> 1.618750e+00 </td>
-   <td style="text-align:right;"> 3.567369e+00 </td>
+   <td style="text-align:right;"> 3.567368e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.400000e+00 </td>
-   <td style="text-align:right;"> 1.167369e+00 </td>
+   <td style="text-align:right;"> 1.167368e+00 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -27733,15 +27792,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2011 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.5937 </td>
-   <td style="text-align:right;"> 0.5937 </td>
-   <td style="text-align:right;"> 0.5937 </td>
-   <td style="text-align:right;"> 18.8 </td>
-   <td style="text-align:right;"> 0.5937 </td>
-   <td style="text-align:right;"> 18.8 </td>
-   <td style="text-align:right;"> 131.3 </td>
-   <td style="text-align:right;"> 1.788205e+01 </td>
-   <td style="text-align:right;"> 1.287941e+03 </td>
+   <td style="text-align:right;"> 0.5908 </td>
+   <td style="text-align:right;"> 0.5908 </td>
+   <td style="text-align:right;"> 0.5908 </td>
+   <td style="text-align:right;"> 18.7 </td>
+   <td style="text-align:right;"> 0.5908 </td>
+   <td style="text-align:right;"> 18.7 </td>
+   <td style="text-align:right;"> 130.2 </td>
+   <td style="text-align:right;"> 1.811408e+01 </td>
+   <td style="text-align:right;"> 1.246110e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -27801,10 +27860,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 3.2 </td>
    <td style="text-align:right;"> 19.4 </td>
    <td style="text-align:right;"> 4.513217e+02 </td>
-   <td style="text-align:right;"> 1.114588e+03 </td>
+   <td style="text-align:right;"> 1.114590e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.600000e+02 </td>
-   <td style="text-align:right;"> 1.545879e+02 </td>
+   <td style="text-align:right;"> 1.545895e+02 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -27819,7 +27878,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 6.097561e+03 </td>
-   <td style="text-align:right;"> -4.982973e+03 </td>
+   <td style="text-align:right;"> -4.982971e+03 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -27861,7 +27920,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 3.8 </td>
    <td style="text-align:right;"> 47.5 </td>
    <td style="text-align:right;"> 1.218477e+00 </td>
-   <td style="text-align:right;"> 9.630652e+00 </td>
+   <td style="text-align:right;"> 9.663559e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -28101,7 +28160,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 74.3 </td>
    <td style="text-align:right;"> 5.972304e-01 </td>
-   <td style="text-align:right;"> 7.002018e+02 </td>
+   <td style="text-align:right;"> 7.002288e+02 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -28153,15 +28212,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2006 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.0824 </td>
-   <td style="text-align:right;"> 0.0824 </td>
-   <td style="text-align:right;"> 0.0824 </td>
+   <td style="text-align:right;"> 0.0811 </td>
+   <td style="text-align:right;"> 0.0811 </td>
+   <td style="text-align:right;"> 0.0811 </td>
    <td style="text-align:right;"> 2.8 </td>
-   <td style="text-align:right;"> 0.0824 </td>
+   <td style="text-align:right;"> 0.0811 </td>
    <td style="text-align:right;"> 2.8 </td>
    <td style="text-align:right;"> 8.1 </td>
-   <td style="text-align:right;"> 3.057967e+04 </td>
-   <td style="text-align:right;"> 3.884929e+04 </td>
+   <td style="text-align:right;"> 3.060942e+04 </td>
+   <td style="text-align:right;"> 3.887465e+04 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -28213,15 +28272,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2006 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.6907 </td>
-   <td style="text-align:right;"> 0.6907 </td>
-   <td style="text-align:right;"> 0.6907 </td>
+   <td style="text-align:right;"> 0.6826 </td>
+   <td style="text-align:right;"> 0.6826 </td>
+   <td style="text-align:right;"> 0.6826 </td>
    <td style="text-align:right;"> 0.5 </td>
-   <td style="text-align:right;"> 0.6907 </td>
+   <td style="text-align:right;"> 0.6826 </td>
    <td style="text-align:right;"> 0.5 </td>
    <td style="text-align:right;"> 6.4 </td>
-   <td style="text-align:right;"> 3.964118e+03 </td>
-   <td style="text-align:right;"> 4.781710e+03 </td>
+   <td style="text-align:right;"> 3.966763e+03 </td>
+   <td style="text-align:right;"> 4.787691e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -28281,10 +28340,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.7 </td>
    <td style="text-align:right;"> 16.6 </td>
    <td style="text-align:right;"> 1.845006e+02 </td>
-   <td style="text-align:right;"> 3.008291e+02 </td>
+   <td style="text-align:right;"> 3.008280e+02 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.600000e+01 </td>
-   <td style="text-align:right;"> 2.748291e+02 </td>
+   <td style="text-align:right;"> 2.748280e+02 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -28299,7 +28358,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 1.000000e+03 </td>
-   <td style="text-align:right;"> -6.991709e+02 </td>
+   <td style="text-align:right;"> -6.991720e+02 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -28469,7 +28528,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 110.000000 </td>
-   <td style="text-align:right;"> -84.6833526 </td>
+   <td style="text-align:right;"> -84.6833533 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -28581,7 +28640,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -1.8 </td>
    <td style="text-align:right;"> 7.6 </td>
    <td style="text-align:right;"> 1.440957e+03 </td>
-   <td style="text-align:right;"> 1.815972e+03 </td>
+   <td style="text-align:right;"> 1.815969e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -28641,7 +28700,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -0.8 </td>
    <td style="text-align:right;"> 7.7 </td>
    <td style="text-align:right;"> 1.928844e+03 </td>
-   <td style="text-align:right;"> 2.410726e+03 </td>
+   <td style="text-align:right;"> 2.410708e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -28693,18 +28752,18 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1999 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.0296 </td>
-   <td style="text-align:right;"> 0.0296 </td>
-   <td style="text-align:right;"> 0.0296 </td>
+   <td style="text-align:right;"> 0.0320 </td>
+   <td style="text-align:right;"> 0.0320 </td>
+   <td style="text-align:right;"> 0.0320 </td>
    <td style="text-align:right;"> -3.8 </td>
-   <td style="text-align:right;"> 0.0296 </td>
+   <td style="text-align:right;"> 0.0320 </td>
    <td style="text-align:right;"> -3.8 </td>
-   <td style="text-align:right;"> 15.5 </td>
-   <td style="text-align:right;"> 6.789019e+04 </td>
-   <td style="text-align:right;"> 9.561041e+04 </td>
+   <td style="text-align:right;"> 15.7 </td>
+   <td style="text-align:right;"> 6.765536e+04 </td>
+   <td style="text-align:right;"> 9.564331e+04 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.300000e+04 </td>
-   <td style="text-align:right;"> 3.261041e+04 </td>
+   <td style="text-align:right;"> 3.264331e+04 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -28753,23 +28812,23 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1999 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 0.0494 </td>
-   <td style="text-align:right;"> 0.0494 </td>
-   <td style="text-align:right;"> 0.0494 </td>
-   <td style="text-align:right;"> 1.9 </td>
-   <td style="text-align:right;"> 0.0494 </td>
-   <td style="text-align:right;"> 1.9 </td>
-   <td style="text-align:right;"> 8.5 </td>
-   <td style="text-align:right;"> 1.590096e+02 </td>
-   <td style="text-align:right;"> 1.953489e+02 </td>
+   <td style="text-align:right;"> 0.0438 </td>
+   <td style="text-align:right;"> 0.0438 </td>
+   <td style="text-align:right;"> 0.0438 </td>
+   <td style="text-align:right;"> 2.0 </td>
+   <td style="text-align:right;"> 0.0438 </td>
+   <td style="text-align:right;"> 2.0 </td>
+   <td style="text-align:right;"> 8.2 </td>
+   <td style="text-align:right;"> 1.576562e+02 </td>
+   <td style="text-align:right;"> 1.926865e+02 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.000000e+01 </td>
-   <td style="text-align:right;"> 1.053489e+02 </td>
+   <td style="text-align:right;"> 1.026865e+02 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 121.951219 </td>
-   <td style="text-align:right;"> 73.3977062 </td>
+   <td style="text-align:right;"> 70.7353242 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -28779,7 +28838,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 3.048780e+03 </td>
-   <td style="text-align:right;"> -2.853432e+03 </td>
+   <td style="text-align:right;"> -2.856094e+03 </td>
    <td style="text-align:right;"> 2019 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -28821,7 +28880,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -0.3 </td>
    <td style="text-align:right;"> 8.0 </td>
    <td style="text-align:right;"> 1.269818e+04 </td>
-   <td style="text-align:right;"> 1.767981e+04 </td>
+   <td style="text-align:right;"> 1.767594e+04 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -28877,11 +28936,11 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.0000 </td>
    <td style="text-align:right;"> 0.0006 </td>
    <td style="text-align:right;"> 6.5 </td>
-   <td style="text-align:right;"> 0.0044 </td>
+   <td style="text-align:right;"> 0.0045 </td>
    <td style="text-align:right;"> 5.3 </td>
-   <td style="text-align:right;"> 7.5 </td>
-   <td style="text-align:right;"> 2.188535e+04 </td>
-   <td style="text-align:right;"> 2.991320e+04 </td>
+   <td style="text-align:right;"> 7.6 </td>
+   <td style="text-align:right;"> 2.187976e+04 </td>
+   <td style="text-align:right;"> 2.990755e+04 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -29184,7 +29243,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.031644e+03 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.600000e+02 </td>
-   <td style="text-align:right;"> 7.164403e+01 </td>
+   <td style="text-align:right;"> 7.164424e+01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -29244,7 +29303,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 5.184633e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.500000e-02 </td>
-   <td style="text-align:right;"> 5.119632e+00 </td>
+   <td style="text-align:right;"> 5.119633e+00 </td>
    <td style="text-align:right;"> 2046 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -29254,7 +29313,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> FEQG </td>
    <td style="text-align:right;"> 20.000000 </td>
-   <td style="text-align:right;"> -14.815368 </td>
+   <td style="text-align:right;"> -14.815367 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -29301,10 +29360,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -11.5 </td>
    <td style="text-align:right;"> 12.9 </td>
    <td style="text-align:right;"> 5.201285e-01 </td>
-   <td style="text-align:right;"> 7.782011e-01 </td>
+   <td style="text-align:right;"> 7.782012e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.500000e-02 </td>
-   <td style="text-align:right;"> 7.132011e-01 </td>
+   <td style="text-align:right;"> 7.132012e-01 </td>
    <td style="text-align:right;"> 2038 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -29540,11 +29599,11 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 0.0000 </td>
    <td style="text-align:right;"> -19.7 </td>
    <td style="text-align:right;"> 13.5 </td>
-   <td style="text-align:right;"> 1.445111e-01 </td>
-   <td style="text-align:right;"> 2.319564e-01 </td>
+   <td style="text-align:right;"> 1.445166e-01 </td>
+   <td style="text-align:right;"> 2.319647e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.500000e-02 </td>
-   <td style="text-align:right;"> 1.669564e-01 </td>
+   <td style="text-align:right;"> 1.669647e-01 </td>
    <td style="text-align:right;"> 2024 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -29554,7 +29613,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> FEQG </td>
    <td style="text-align:right;"> 20.000000 </td>
-   <td style="text-align:right;"> -19.768044 </td>
+   <td style="text-align:right;"> -19.768035 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -29661,7 +29720,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 33.7 </td>
    <td style="text-align:right;"> 1.622263e+00 </td>
-   <td style="text-align:right;"> 4.302480e+00 </td>
+   <td style="text-align:right;"> 4.302497e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -29669,7 +29728,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 3340.000000 </td>
-   <td style="text-align:right;"> -3335.6975196 </td>
+   <td style="text-align:right;"> -3335.6975027 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:left;">  </td>
@@ -29721,7 +29780,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 37.3 </td>
    <td style="text-align:right;"> 1.039588e+00 </td>
-   <td style="text-align:right;"> 3.049004e+00 </td>
+   <td style="text-align:right;"> 3.049102e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -29781,7 +29840,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 113.7 </td>
    <td style="text-align:right;"> 1.124000e-03 </td>
-   <td style="text-align:right;"> 6.248620e+01 </td>
+   <td style="text-align:right;"> 6.248614e+01 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -29901,10 +29960,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -12.2 </td>
    <td style="text-align:right;"> 24.6 </td>
    <td style="text-align:right;"> 2.873469e+00 </td>
-   <td style="text-align:right;"> 5.550273e+00 </td>
+   <td style="text-align:right;"> 5.550272e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.500000e-02 </td>
-   <td style="text-align:right;"> 5.485273e+00 </td>
+   <td style="text-align:right;"> 5.485271e+00 </td>
    <td style="text-align:right;"> 2051 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -29914,7 +29973,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> FEQG </td>
    <td style="text-align:right;"> 20.000000 </td>
-   <td style="text-align:right;"> -14.449727 </td>
+   <td style="text-align:right;"> -14.449729 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -29961,10 +30020,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -8.9 </td>
    <td style="text-align:right;"> 12.0 </td>
    <td style="text-align:right;"> 4.549631e-01 </td>
-   <td style="text-align:right;"> 6.690603e-01 </td>
+   <td style="text-align:right;"> 6.690600e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.500000e-02 </td>
-   <td style="text-align:right;"> 6.040603e-01 </td>
+   <td style="text-align:right;"> 6.040600e-01 </td>
    <td style="text-align:right;"> 2042 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -30021,10 +30080,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -8.6 </td>
    <td style="text-align:right;"> 11.9 </td>
    <td style="text-align:right;"> 4.548695e+00 </td>
-   <td style="text-align:right;"> 6.268090e+00 </td>
+   <td style="text-align:right;"> 6.268089e+00 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.500000e-02 </td>
-   <td style="text-align:right;"> 6.203090e+00 </td>
+   <td style="text-align:right;"> 6.203089e+00 </td>
    <td style="text-align:right;"> 2069 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -30034,7 +30093,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> FEQG </td>
    <td style="text-align:right;"> 80.000000 </td>
-   <td style="text-align:right;"> -73.731910 </td>
+   <td style="text-align:right;"> -73.731911 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -30201,10 +30260,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -15.6 </td>
    <td style="text-align:right;"> 30.7 </td>
    <td style="text-align:right;"> 1.553649e-01 </td>
-   <td style="text-align:right;"> 3.584500e-01 </td>
+   <td style="text-align:right;"> 3.584499e-01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 6.500000e-02 </td>
-   <td style="text-align:right;"> 2.934500e-01 </td>
+   <td style="text-align:right;"> 2.934499e-01 </td>
    <td style="text-align:right;"> 2026 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -30449,7 +30508,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 3340.000000 </td>
-   <td style="text-align:right;"> -3336.5011712 </td>
+   <td style="text-align:right;"> -3336.5011714 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:left;">  </td>
@@ -30501,7 +30560,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 29.1 </td>
    <td style="text-align:right;"> 8.913997e-01 </td>
-   <td style="text-align:right;"> 2.066000e+00 </td>
+   <td style="text-align:right;"> 2.065998e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -30561,7 +30620,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 150.9 </td>
    <td style="text-align:right;"> 2.494000e-03 </td>
-   <td style="text-align:right;"> 1.275083e+03 </td>
+   <td style="text-align:right;"> 1.275085e+03 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -30621,7 +30680,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> 161.3 </td>
    <td style="text-align:right;"> 1.317860e-02 </td>
-   <td style="text-align:right;"> 3.389176e+00 </td>
+   <td style="text-align:right;"> 3.389185e+00 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -30861,10 +30920,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -3.3 </td>
    <td style="text-align:right;"> 16.2 </td>
    <td style="text-align:right;"> 5.715751e+01 </td>
-   <td style="text-align:right;"> 8.490202e+01 </td>
+   <td style="text-align:right;"> 8.490190e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 2.600000e+01 </td>
-   <td style="text-align:right;"> 5.890202e+01 </td>
+   <td style="text-align:right;"> 5.890190e+01 </td>
    <td style="text-align:right;"> 2044 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -30879,7 +30938,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 1.000000e+03 </td>
-   <td style="text-align:right;"> -9.150980e+02 </td>
+   <td style="text-align:right;"> -9.150981e+02 </td>
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -31041,15 +31100,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 26.5 </td>
    <td style="text-align:right;"> 14.6 </td>
    <td style="text-align:right;"> 2.359492e+01 </td>
-   <td style="text-align:right;"> 4.155589e+01 </td>
+   <td style="text-align:right;"> 4.155590e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.400000e+00 </td>
-   <td style="text-align:right;"> 4.015589e+01 </td>
+   <td style="text-align:right;"> 4.015590e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 600.000000 </td>
-   <td style="text-align:right;"> -558.4441054 </td>
+   <td style="text-align:right;"> -558.4440997 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -31059,7 +31118,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 3.048780e+01 </td>
-   <td style="text-align:right;"> 1.106809e+01 </td>
+   <td style="text-align:right;"> 1.106810e+01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -31281,10 +31340,10 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 3.9 </td>
    <td style="text-align:right;"> 25.6 </td>
    <td style="text-align:right;"> 1.447601e+02 </td>
-   <td style="text-align:right;"> 3.574847e+02 </td>
+   <td style="text-align:right;"> 3.574835e+02 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 8.100000e+00 </td>
-   <td style="text-align:right;"> 3.493847e+02 </td>
+   <td style="text-align:right;"> 3.493835e+02 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;">  </td>
@@ -31461,15 +31520,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 1.2 </td>
    <td style="text-align:right;"> 14.4 </td>
    <td style="text-align:right;"> 2.534392e+01 </td>
-   <td style="text-align:right;"> 4.253511e+01 </td>
+   <td style="text-align:right;"> 4.253478e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 1.220000e+01 </td>
-   <td style="text-align:right;"> 3.033511e+01 </td>
+   <td style="text-align:right;"> 3.033478e+01 </td>
    <td style="text-align:right;"> 3000 </td>
    <td style="text-align:left;"> above </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 110.000000 </td>
-   <td style="text-align:right;"> -67.4648945 </td>
+   <td style="text-align:right;"> -67.4652232 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -31479,7 +31538,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> QShh </td>
    <td style="text-align:right;"> 1.829268e+02 </td>
-   <td style="text-align:right;"> -1.403917e+02 </td>
+   <td style="text-align:right;"> -1.403921e+02 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -31521,15 +31580,15 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -2.7 </td>
    <td style="text-align:right;"> 5.2 </td>
    <td style="text-align:right;"> 6.022694e+01 </td>
-   <td style="text-align:right;"> 7.344098e+01 </td>
+   <td style="text-align:right;"> 7.344101e+01 </td>
    <td style="text-align:left;"> BAC </td>
    <td style="text-align:right;"> 9.000000e+01 </td>
-   <td style="text-align:right;"> -1.655902e+01 </td>
+   <td style="text-align:right;"> -1.655899e+01 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;"> QSsp </td>
    <td style="text-align:right;"> 121.951219 </td>
-   <td style="text-align:right;"> -48.5102432 </td>
+   <td style="text-align:right;"> -48.5102067 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
@@ -31539,7 +31598,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> MPC </td>
    <td style="text-align:right;"> 3.048780e+03 </td>
-   <td style="text-align:right;"> -2.975340e+03 </td>
+   <td style="text-align:right;"> -2.975339e+03 </td>
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -31641,7 +31700,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -37.8 </td>
    <td style="text-align:right;"> 77.9 </td>
    <td style="text-align:right;"> 4.144080e-02 </td>
-   <td style="text-align:right;"> 6.552550e-02 </td>
+   <td style="text-align:right;"> 6.552540e-02 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -31701,7 +31760,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> -36.4 </td>
    <td style="text-align:right;"> 45.8 </td>
    <td style="text-align:right;"> 4.782990e-02 </td>
-   <td style="text-align:right;"> 8.925290e-02 </td>
+   <td style="text-align:right;"> 8.925300e-02 </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:right;"> NA </td>
    <td style="text-align:right;"> NA </td>
@@ -31709,7 +31768,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> EAC </td>
    <td style="text-align:right;"> 22.000000 </td>
-   <td style="text-align:right;"> -21.9107471 </td>
+   <td style="text-align:right;"> -21.9107470 </td>
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:left;"> below </td>
    <td style="text-align:left;">  </td>
