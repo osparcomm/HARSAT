@@ -942,6 +942,16 @@ read_contaminants <- function(file, data_dir = ".", info) {
   
   if (info$data_format == "external") {
   
+    ok1 <- "uncertainty" %in% names(data)
+    ok2 <- "unit_uncertainty" %in% names(data)
+    
+    if   ((ok1 & !ok2) | (!ok1 & ok2)){
+      stop(
+        "If including uncertainty, both 'uncertainty' and 'unit_uncertainty' ",
+        "columns need to be included. One of these is missing."
+      )
+    }
+    
     # numeric (non-integer) variables
       
     id <- c(
