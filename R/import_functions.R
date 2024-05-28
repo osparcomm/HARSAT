@@ -2537,7 +2537,7 @@ create_timeseries <- function(
 
 
   # sort out determinands where several determinands represent the same variable of interest
-  # three types of behaviour: replace, sum and bespoke
+  # four types of behaviour: replace, sum, weights and bespoke
 
   for (i in names(determinands.control)) {
     
@@ -2546,6 +2546,7 @@ create_timeseries <- function(
       wk$action, 
       replace = determinand.link.replace,
       sum = determinand.link.sum,
+      weights = determinand.link.weights,
       bespoke = get(paste("determinand.link", i, sep = "."), mode = "function")
     )
     
@@ -3677,6 +3678,127 @@ determinand.link.TEQDFP <- function(data, info, keep, drop, weights) {
   
   data
 }  
+
+
+
+
+determinand.link.weights <- function(data, info, keep, drop, weights) {
+  
+  stopifnot(length(keep) == 1, length(drop) > 1)
+  
+  if (!any(data$determinand %in% drop)) 
+    return(data)
+  
+  
+  # identify samples with drop and not keep, which are the ones that will be summed
+  # if keep already exists, then don't need to do anything
+  # don't delete drop data because might want to assess them individually
+  
+  ID <- with(data, paste(sample, matrix))
+  
+  dropID <- data$determinand %in% drop 
+  keepID <- data$determinand %in% keep
+  
+  sum_ID <- ID %in% setdiff(ID[dropID], ID[keepID])
+  
+  if (sum(sum_ID) == 0)
+    return(data)
+  
+  dropTxt <- paste(drop, collapse = ", ")
+  cat("   Data submitted as", dropTxt, "summed to give", keep, fill = TRUE)
+  
+  
+  # get relevant sample matrix combinations
+  
+  data <- split(data, with(data, determinand %in% drop))
+  
+  ID <- with(data[["TRUE"]], paste(sample, matrix))
+  
+  summed_data <- by(data[["TRUE"]], ID, function(x) {
+    
+    # check all bases are the same 
+    
+    if (!all(drop %in% x$determinand)) return(NULL)
+    
+    stopifnot(dplyr::n_distinct(x$basis) == 1)
+    
+    
+    # convert to ug/kg and then to TEQ
+    
+    id <- c("value", "uncertainty", "limit_detection", "limit_quantification")
+    
+    new_unit = ctsm_get_info(info$determinand,keep,"unit",info$compartment,sep="_")
+    
+    x[id] <- lapply(x[id], convert_units, from = x$unit, to = new_unit)
+    
+    TEQ <- weights[as.character(x$determinand)]
+    
+    x[id] <- lapply(x[id], "*", TEQ)
+    
+    
+    # make output row have all the information from the largest determinand (ad-hoc) 
+    
+    # ensures a sensible qaID, method_analysis, etc.
+    
+    
+    out <- x[which.max(x$value), ]
+    
+    out$determinand <- keep
+    out$unit <- ctsm_get_info(info$determinand,keep,"unit",info$compartment,sep="_")
+    out$group <- ctsm_get_info(info$determinand,keep,"group",info$compartment,sep="_")
+    out$pargroup <- ctsm_get_info(info$determinand,keep,"pargroup")
+    
+    # sum value and limit_detection, make it a less-than if all are less-thans, and take 
+    # proportional uncertainty from maximum value (for which uncertainty is reported)
+    # if no uncertainties reported at all, then have provided value of CB126 in info.unertainty
+    # with sdConstant multiplied by 0.1 to reflect TEQ effect on detection limit
+    
+    out$value <- sum(x$value)
+    out$limit_detection <- sum(x$limit_detection)
+    out$limit_quantification <- sum(x$limit_quantification)
+    
+    if ("" %in% x$censoring)
+      out$censoring <- ""
+    else if (dplyr::n_distinct(x$censoring) == 1) 
+      out$censoring <- unique(x$censoring) 
+    else 
+      out$censoring <- "<"
+    out$censoring <- if(all(x$censoring %in% "<")) "<" else ""
+    
+    if (all(is.na(x$uncertainty))) 
+      out$uncertainty <- NA
+    else {
+      wk <- x[!is.na(x$uncertainty), ]
+      pos <- which.max(wk$value)
+      upct <- with(wk, uncertainty / value)[pos]
+      out$uncertainty <- out$value * upct
+    }
+    
+    out
+    
+  })
+  
+  summed_data <- do.call(rbind, summed_data)
+  
+  
+  # see how many samples have been lost due to incomplete submissions
+  
+  nTotal <- length(unique(ID))
+  nSummed <- if (is.null(summed_data)) 0 else nrow(summed_data)
+  nLost <- nTotal - nSummed
+  
+  if (nLost > 0) 
+    message("     ", nLost, " of ", nTotal, " samples lost due to incomplete submissions")
+  
+  
+  # combine data for both drop and keep and then add back into main data set
+  
+  data[["TRUE"]] <- rbind(data[["TRUE"]], summed_data)
+  
+  data <- do.call(rbind, data)
+  
+  data
+}
 
 
 check_censoring <- function(data, info, print_code_warnings) {
