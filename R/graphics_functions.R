@@ -844,7 +844,7 @@ plot.panel <- function(
   censoring[is_censoring] <- tolower(censoring[is_censoring])
   
   if (any(is_censoring)) {
-    lpoints(
+    lattice::lpoints(
       x[is_censoring], 
       y[is_censoring], 
       pch = censoring[is_censoring], 
@@ -854,7 +854,7 @@ plot.panel <- function(
   }
     
   if (any(!is_censoring)) {
-    lpoints(
+    lattice::lpoints(
       x[!is_censoring], 
       y[!is_censoring], 
       pch = wk.pch, 
@@ -864,7 +864,14 @@ plot.panel <- function(
   }
 
   if (!missing(type) && type == "assessment" && "lower" %in% names(indiCL)) {
-    with(indiCL, lsegments(year, lower, year, upper, lwd = 2, col = "black"))
+    lattice::lsegments(
+      indiCL$year, 
+      indiCL$lower, 
+      indiCL$year, 
+      indiCL$upper, 
+      lwd = 2, 
+      col = "black"
+    )
   }
 }
 
