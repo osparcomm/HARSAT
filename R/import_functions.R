@@ -3534,7 +3534,6 @@ determinand.link.sum <- function(data, info, keep, drop, weights = NULL) {
       out$censoring <- unique(x$censoring) 
     else 
       out$censoring <- "<"
-      out$censoring <- if(all(x$censoring %in% "<")) "<" else ""
     
     if (all(is.na(x$uncertainty))) 
       out$uncertainty <- NA
