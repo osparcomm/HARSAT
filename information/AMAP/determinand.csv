@@ -552,7 +552,7 @@ TDEOP,TDE (o--p') = DDD (o--p'),OC-DD,Organochlorines,,,TRUE,FALSE,FALSE,ug/kg,,
 TDEPP,TDE (p--p'),OC-DD,Organochlorines,Organochlorines,Organochlorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.006667,0.197,0.006667,0.3,0,0.16425,lognormal,low,OSPAR,ICES
 TEBDE,tetra-bromodiphenyl ether (sum of congeners),O-BR,Organobromines,,,FALSE,FALSE,FALSE,ug/kg,,,,,,,,,,,,lognormal,low,ICES,ICES
 TEMP,temperature,P-PHY,Physical measurements,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,,,ICES,ICES
-TEQDFP,WHO-TEQ (DFP),OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,TEQ ug/kg,TEQ ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.000018,0.1375,0.000039,0.237592,,,lognormal,low,OSPAR/HELCOM,
+TEQDFP,WHO-TEQ (DFP),OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.000018,0.1375,0.000039,0.237592,,,lognormal,low,OSPAR/HELCOM,
 THCGC,total hydrocarbons (by GC),O-THC,Total hydrocarbons,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
 THCGR,total hydrocarbons (by gravimetry),O-THC,Total hydrocarbons,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES
 THCIR,total hydrocarbons (by infrared spectrophotometry),O-THC,Total hydrocarbons,,,FALSE,FALSE,FALSE,,,,,,,,,,,,,lognormal,low,ICES,ICES

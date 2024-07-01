@@ -513,11 +513,29 @@ ctsm.check.unit.biota <- function(data, info) {
     })
     
   id <- data$determinand %in% "TEQDFP"
-  if (any(id))
+  if (any(id)) {
+    
+    TEQ_unit <- paste("TEQ", standard_unit)
+    
     data[id,] <- within(data[id,], {
-      ok <- unit %in% paste("TEQ", standard_unit)
+      ok <- unit %in% c(standard_unit, TEQ_unit)
       action <- ifelse(ok, "none", "error")
+      
+      if (any(TEQ_unit %in% unit)) {
+        lifecycle::deprecate_warn(
+          "1.0.2", 
+          I("use of units of the form 'TEQ ug/kg' or 'TEQ pg/g'"),
+          details = c(
+            i = "use e.g. 'ug/kg' instead of 'TEQ ug/kg'", 
+            i = "you might need to update the determinand reference table"
+          ),
+          env = rlang::caller_env(), 
+          user_env = rlang::caller_env(2)
+        )
+      }  
+    
     })
+  }
 
   id <- data$determinand %in% c("LNMEA")
   if (any(id))

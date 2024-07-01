@@ -3444,7 +3444,7 @@ assign("determinand.link.LIPIDWT%", function(data, info, keep, drop, ...) {
 
 
 determinand.link.sum <- function(data, info, keep, drop, weights = NULL) {
-  
+
   stopifnot(length(keep) == 1, length(drop) > 1)
   
   if (!any(data$determinand %in% drop)) 
@@ -3453,10 +3453,10 @@ determinand.link.sum <- function(data, info, keep, drop, weights = NULL) {
   
   if (!is.null(weights))     {
     if (!identical(sort(drop), sort(names(weights)))) {
-    stop(
-      "error in weights list",
-      call. = FALSE
-    )
+      stop(
+        "error in weights list",
+        call. = FALSE
+      )
     }     
   }
   
@@ -3490,15 +3490,23 @@ determinand.link.sum <- function(data, info, keep, drop, weights = NULL) {
     
     # check all bases are the same 
     
-    stopifnot(dplyr::n_distinct(x$basis) == 1)
-    
     if (!all(drop %in% x$determinand)) return(NULL)
+
+    if (dplyr::n_distinct(x$basis) != 1) {
+      stop(
+        "the determinands in `drop` are reported in different bases within ", 
+        "the same sample;\ncode to deal with this has not yet been written so ", 
+        "please raise an issue with the harsat\ndevelopment team",
+        call. = FALSE
+      )  
+    }
+
     
     # extract unit and weights information      
       
     id <- c("value", "uncertainty", "limit_detection", "limit_quantification")
       
-    target_unit = ctsm_get_info(info$determinand, keep, "unit", info$compartment,sep="_")
+    target_unit = ctsm_get_info(info$determinand, keep, "unit", info$compartment, sep="_")
       
     x[id] <- lapply(x[id], convert_units, from = x$unit, to = target_unit)
       
@@ -3518,7 +3526,7 @@ determinand.link.sum <- function(data, info, keep, drop, weights = NULL) {
     
     out$determinand <- keep
     out$unit <- target_unit 
-    out$group <- ctsm_get_info(info$determinand, keep, "group", info$compartment,sep="_")
+    out$group <- ctsm_get_info(info$determinand, keep, "group", info$compartment, sep="_")
     out$pargroup <- ctsm_get_info(info$determinand, keep, "pargroup")
     
     # sum value and limit_detection, make it a less-than if all are less-thans, and take 
@@ -3575,6 +3583,20 @@ determinand.link.sum <- function(data, info, keep, drop, weights = NULL) {
 
 
 determinand.link.TEQDFP <- function(data, info, keep, drop, weights) {
+  
+  lifecycle::deprecate_warn(
+    "1.0.2", 
+    "determinand.link.TEQDFP()", 
+    details = c(
+      i = paste(
+        "use `determinand.link.sum()` with the TEFs supplied in the weights",
+        "argument"
+      ), 
+      i = 'see `vignette("example_HELCOM")` for further details'
+    ),
+    env = rlang::caller_env(), 
+    user_env = rlang::caller_env(2)
+  )
 
   stopifnot(length(keep) == 1, length(drop) > 1)
   
@@ -3634,7 +3656,13 @@ determinand.link.TEQDFP <- function(data, info, keep, drop, weights) {
     out <- x[which.max(x$value), ]
     
     out$determinand <- keep
-    out$unit <- "TEQ ug/kg"
+    
+    target_unit <- ctsm_get_info(info$determinand, keep, "unit", info$compartment, sep="_")
+    if (grepl("TEQ", target_unit)) {
+      out$unit <- "TEQ ug/kg"
+    } else {
+      out$unit <- "ug/kg"
+    }
     out$group <- "Dioxins"
     out$pargroup <- "OC-DX"
     

@@ -370,19 +370,25 @@ measurements of a single determinand in a single matrix (tissue type; e.g.
 'EH', `LI' or `SB`) in a single species at a single monitoring station. PAH
 metabolite data are further grouped by `method_analysis`.
 
-The `determinands.control` argument does rather more here. There are four summed
-variables: PFOS, SBDE6, HBCD and SCB6. There is also one variable CB138+163
-which needs to be relabeled as (replaced by) CB138. For the purposes of the
-assessment, the contribution of CB163 is regarded as small. Similarly CB138+163 
-is taken to be a good proxy for CB138. Note that the replacements must be done
-before the six PCBs are summed to give SCB6 in order for them to be included
-in the sum.
+The `determinands.control` argument does rather more here. There are five summed
+variables: PFOS, SBDE6, HBCD, SCB6 and TEQDFP. There is also one variable 
+CB138+163 which needs to be relabeled as (replaced by) CB138. For the purposes 
+of the assessment, the contribution of CB163 is regarded as small. Similarly 
+CB138+163 is taken to be a good proxy for CB138. Note that the replacements must 
+be done before the six PCBs are summed to give SCB6 in order for them to be 
+included in the sum.
 
-There are also two 'bespoke' actions in `determinands.control`. These are
-customised functions that do more complicated things. One of them computes the 
-WHO TEQ for dioxins, furans and planar PCBS (labelled TEQDFP) using the TEFs 
-for the human health QS. The other deals with the three different ways in
-which lipid weight measurements can be submitted.
+The calculation of TEQDFP is more complex than that of the other summed variables.
+TEQDFP is the label used for the World Health Organisation Toxic Equivalent sum
+for dioxins, furans and planar polychlorinated biphenyls. This is calculated 
+using the Toxic Equivalency Factors (TEFs) stored in `info_TEQ$HOLAS3`, with the 
+TEFS identified as `weights`. Note that the weights used in the example below
+are those used in the HELCOM HOLAS 3 assessment, but have been superseeded; see
+`help("info_TEQ")` for more details. 
+
+There is also one 'bespoke' action in `determinands.control`. This triggers a 
+customised functions that does more complicated things. Here it deals with the  
+three different ways in which lipid weight measurements can be submitted.
 
 Finally, `normalise_biota_HELCOM()` is a customised function that determines which
 measurements are normalised to 5% lipid in a HELCOM assessment. Again, the 
@@ -411,9 +417,9 @@ biota_timeseries <- create_timeseries(
       action = "sum"
     ),
     TEQDFP = list(
-      det = names(info_TEF$DFP_human_health), 
-      action = "bespoke", 
-      weights = info_TEF$DFP_human_health
+      det = names(info_TEF$DFP_HOLAS3),
+      action = "sum",
+      weights = info_TEF$DFP_HOLAS3
     ),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   ),

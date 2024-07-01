@@ -311,9 +311,9 @@ biota_timeseries <- create_timeseries(
       action = "sum"
     ),
     TEQDFP = list(
-      det = names(info_TEF$DFP_human_health), 
-      action = "bespoke", 
-      weights = info_TEF$DFP_human_health
+      det = names(info_TEF$DFP_HOLAS3),
+      action = "sum",
+      weights = info_TEF$DFP_HOLAS3
     ),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   ),
