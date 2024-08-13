@@ -1,189 +1,65 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/404.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/CHANGES.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/CONTRIBUTING.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/datasets.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/example_HELCOM.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/example_OSPAR.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/example_external_data.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/external-file-format.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/file-management.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/harsat.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/reference-file-formats.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/articles/report-template.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/authors.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/index.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/add_stations.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/apply_subset.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/check_assessment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/check_convergence_lmm.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/convert_reftable.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/convert_units.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/create_timeseries.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/cstm.VDS.environment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.cl.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.index.opt.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.loglik.calc.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.p.calc.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.varlist.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm.projection.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_TBT_convert.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_convert_basis.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_determinands.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_info.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/ctsm_uncrt_plot_data.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/get_AC.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/get_AC_biota_OSPAR.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/get_basis_biota_OSPAR.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/get_basis_default.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/get_station_code.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/get_timeseries.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/harsat-package.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/info_TEF.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/locate_information_file.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/normalise_biota_HELCOM.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/normalise_sediment_HELCOM.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/normalise_sediment_OSPAR.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/plot_assessment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/read_contaminants.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/read_data.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/read_stations.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/report_assessment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/report_file_digest.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/run_assessment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/run_control_default.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/run_control_modify.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/safe_read_file.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/subset_assessment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/tidy_data.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/update_assessment.html</loc>
-  </url>
-  <url>
-    <loc>http://osparcomm.github.io/HARSAT/reference/write_summary_table.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>http://osparcomm.github.io/HARSAT/404.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/CHANGES.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/CONTRIBUTING.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/LICENSE-text.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/datasets.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/example_HELCOM.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/example_OSPAR.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/example_external_data.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/external-file-format.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/file-management.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/harsat.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/index.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/reference-file-formats.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/articles/report-template.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/authors.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/index.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/add_stations.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/apply_subset.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/check_assessment.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/check_convergence_lmm.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/convert_reftable.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/convert_units.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/create_timeseries.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/cstm.VDS.environment.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.cl.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.index.opt.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.loglik.calc.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.p.calc.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm.VDS.varlist.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm.projection.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm_TBT_convert.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm_convert_basis.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_determinands.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm_get_info.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/ctsm_uncrt_plot_data.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/get_AC.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/get_AC_biota_OSPAR.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/get_basis_biota_OSPAR.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/get_basis_default.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/get_station_code.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/get_timeseries.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/harsat-package.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/index.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/info_TEF.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/locate_information_file.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_biota_HELCOM.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_sediment_HELCOM.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_sediment_OSPAR.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/plot_assessment.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/read_contaminants.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/read_data.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/read_stations.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/report_assessment.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/report_file_digest.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/run_assessment.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/run_control_default.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/run_control_modify.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/safe_read_file.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/subset_assessment.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/tidy_data.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/update_assessment.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/write_summary_table.html</loc></url>
 </urlset>
+
