@@ -2,36 +2,68 @@
 
 #' Graphical summaries of an assessment
 #'
-#' Generates a series of assessment plots with the raw data, or the annual
-#' indices, or both. The plots are exported as either png or pdf files.
+#' Generates a series of assessment plots for each time series. The plots are 
+#' exported as either png or pdf files.
 #'
 #' @param assessment_obj An assessment object resulting from a call to
 #'   run_assessment
 #' @param subset An optional vector specifying which timeseries are to be
 #'   plotted. An expression will be evaluated in the timeSeries component of
-#'   assessment_obj; use 'series' to identify individual timeseries.
+#'   assessment_obj; use `series` to identify individual timeseries.
 #' @param output_dir The output directory for the assessment plots (possibly
-#'   supplied using 'file.path'). The default is the working directory. The
+#'   supplied using `file.path`). The default is the working directory. The
 #'   output directory must already exist.
-#' @param file_type Specifies whether the plots show the raw data ('file_type =
-#'   "data"'), annual indices summarising the data for each year ('file_type =
-#'   "index"'), or (the default) whether two files should be produced for each
-#'   time series, one with the raw data and one with the annual indices.
-#' @param file_format Whether the files should be png (the default) or pdf.
+#' @param file_type A character vector specifying the types of assessment plot. 
+#'   The default `c("data", "index", "auxiliary")` produces three plots for 
+#'   each time series. See details 
+#' @param file_format A character string specifying Whether the files should be 
+#'   png (the default) or pdf.
+#' @param auxiliary A character string specifying the auxiliary variables 
+#'   plotted if `file_type = "auxiliary"`. See details
 #'
 #' @returns A series of png or pdf files with graphical summaries of an
-#'   assessment. The plots show the fitted trends with pointwise two-sided 90%
-#'   confidence limits and either the raw data, or indices summarising the data
-#'   for each year.
-#'
+#'   assessment. 
+#'   
+#' @details
+#' 
+#'   ## Types of assessment plots 
+#' 
+#'   * `file_type = "data"` shows the raw data with the fitted trend and 
+#'   pointwise two-sided 90% confidence bands   
+#'   * `file_type = "index"` shows annual indices that summarise the data for 
+#'   each year with the fitted trend and pointwise two-sided 90% confidence 
+#'   bands   
+#'   * `file_type = "auxiliary"` shows the raw data and key auxiliary variables 
+#'   see below)
+#'   
+#'   ## Auxiliary variables
+#' 
+#'   The default (`auxiliary = "default`) is to plot the following variables:  
+#'   
+#'   * biota: concentration, LNMEA (mean length), DRYWT% (dry weight content), 
+#'   LIPIDWT% (lipi weight content)
+#'   * sediment: non-normalised concentration, normalised concentration, AL 
+#'   (aluminiun concentration), CORG (organic carbon content)
+#'   * water: no plots are generated at present
+#'   
+#'   At present, it is only possible to change the last three variable for biota 
+#'   and the last two variables for sediment. For example, for metals in 
+#'   sediment, you might specify `auxiliary = c("AL", "LI")` to plot aluminium
+#'   and lithium concentrations instead of aluminium and organic carbon.
+#'   
+#'   The auxiliary variables must be specified as such in the determinand 
+#'   reference table in e.g. the `biota_auxiliary` or `sediment_auxiliary` 
+#'   column. At present, plots for only a limited range of auxiliary variables 
+#'   are supported. 
 #'
 #' @export
 plot_assessment <- function(
     assessment_obj, 
     subset = NULL, 
     output_dir = ".",
-    file_type = c("data", "index"),
-    file_format = c("png", "pdf")) {
+    file_type = c("data", "index", "auxiliary"),
+    file_format = c("png", "pdf"), 
+    auxiliary = "default") {
 
   # silence non-standard evaluation warnings
   seriesID <- NULL
@@ -42,13 +74,27 @@ plot_assessment <- function(
   
   file_format = match.arg(file_format)
   
-  if (!all(file_type %in% c("data", "index"))) {
+
+  if (!all(file_type %in% c("data", "index", "auxiliary"))) {
     stop(
       "\nArgument 'file_type' is invalid: ", 
-      "must be 'data' or 'index' or both of them", 
+      "must be 'data','index', 'auxiliary' or some combination of these", 
       call. = FALSE
     )
   }
+  
+  if ("auxiliary" %in% file_type && assessment_obj$info$compartment == "water") {
+    warning(
+      "Auxiliary plots are not currently generated for water assessments",
+      call. = FALSE
+    )
+    file_type <- setdiff(file_type, "auxiliary")
+    
+    if (length(file_type) == 0L) {
+      return(invisible())
+    }
+  }  
+
   
   if (!dir.exists(output_dir)) {
     stop(
@@ -60,9 +106,6 @@ plot_assessment <- function(
   }
 
   
-  
-  
-
   info <- assessment_obj$info
   timeSeries <- assessment_obj$timeSeries 
   
@@ -103,6 +146,49 @@ plot_assessment <- function(
   series_id <- row.names(timeSeries)
 
 
+  # identify variables for auxiliary plots - only applies to biota and 
+  # sediment at present
+  
+  if ("auxiliary" %in% file_type) {
+
+    if (length(auxiliary) == 1 && auxiliary == "default") {
+      auxiliary <- switch(
+        info$compartment, 
+        sediment = c("AL", "CORG"), 
+        biota = c("LNMEA", "DRYWT%", "LIPIDWT%")
+      )
+    } 
+    
+    ok_length <- switch(info$compartment, sediment = 2, biota = 3)
+
+    if (length(auxiliary) != ok_length) {
+      stop(
+        "\nArgument 'auxiliary' is invalid: ", 
+        "must be either 'default' or a length-", ok_length, 
+        " character vector\nspecifying the auxiliary variables to be plotted",  
+        call. = FALSE
+      )
+    }
+
+    ok <- auxiliary %in% names(assessment_obj$data)    
+    if (!all(ok)) {
+      stop(
+        "\nArgument 'auxiliary' is invalid: ",
+        "the following variables are not in the data:\n", 
+        paste(auxiliary[!ok], collapse = ", "),   
+        call. = FALSE
+      )
+    }
+    
+    auxiliary_id <- switch(
+      info$compartment,
+      sediment = c("value", "concentration", auxiliary),
+      biota = c("concentration", auxiliary)
+    ) 
+
+  }
+
+  
   # plot each timeSeries
   
   lapply(series_id, function(id) {
@@ -116,7 +202,7 @@ plot_assessment <- function(
         
     series <- timeSeries[id, ]
     
-    
+
     # get file name from id, and add country and station name 
     # for easier identification
     
@@ -150,7 +236,7 @@ plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot.data(data, assessment, series, info, type = "assessment", xykey.cex = 1.4) 
+      plot_data(data, assessment, series, info, type = "assessment", xykey.cex = 1.4) 
       dev.off()
       
     }    
@@ -169,10 +255,29 @@ plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot.data(data, assessment, series, info, type = "data", xykey.cex = 1.4)
+      plot_data(data, assessment, series, info, type = "data", xykey.cex = 1.4)
       dev.off()
       
     }  
+
+    
+    # plot data with auxiliary variables
+    
+    if ("auxiliary" %in% file_type) {
+      
+      output_file <- paste0(output_id, " auxiliary.", file_format)
+      output_file <- file.path(output_dir, output_file)
+      
+      switch(
+        file_format, 
+        png = png(output_file, width = 680, height = 480), 
+        pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
+      )
+     
+      plot_auxiliary(data, assessment, series, info, auxiliary_id, xykey.cex = 1.4) 
+      dev.off()
+      
+    }    
     
   })
   
@@ -318,7 +423,7 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
   if (auxiliary.plot) { 
     start.text <- paste(
       switch(
-        info$group, 
+        series$group, 
         Effects = "Effect", 
         Imposex = "Imposex", 
         "Concentration"
@@ -472,7 +577,7 @@ plot.AC <- function(AC, ylim, useLogs = TRUE) {
 
 
 
-plot.data <- function(
+plot_data <- function(
     data, assessment, series, info, type = c("data", "assessment"), 
     xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = FALSE, ...) {
 
@@ -876,69 +981,64 @@ plot.panel <- function(
 }
 
 
-plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0, ntick.x = 3, ntick.y = 3, 
-                           newPage = TRUE, ...) {
+plot_auxiliary <- function(
+    data, assessment, series, info, auxiliary,  
+    xykey.cex = 1.0, ntick.x = 3, ntick.y = 3, newPage = TRUE, ...) {
 
   # silence non-standard evaluation warnings
-  censoring <- concOriginal <- censoringOriginal <- info.imposex <- series <- NULL
+  info.imposex <- NULL
 
-  # auxiliary_id specifies the choice of 'auxiliary' variables to plot: 
+  # auxiliary specifies the choice of 'auxiliary' variables to plot: 
   # default:
   #   sediment = value, concentration, AL, CORG
   #   biota = concentration, LNMEA, DRYWT%, LIPIDWT%
   #   water = not specified yet
   # otherwise must contain four relevant variables
   
-  distribution <- ctsm_get_info("determinand", info$determinand, "distribution")
-  
-  if (info$determinand %in% "MNC") {
+  if (series$determinand %in% "MNC") {
     warning("remember to fix distribution changes")
     distribution <- "normal"
   }
   
-  useLogs <- distribution %in% "lognormal"
+  useLogs <- series$distribution %in% "lognormal"
   
-
-  data <- within(data, {
-    if (useLogs) concentration <- log(concentration)
-    concentration.censoring <- censoring
-
-    if (exists("concOriginal")) {
-      if (useLogs) value <- log(concOriginal)
-      value.censoring <- censoringOriginal
-    }
-  })
-
-  
-  stopifnot(
-    is.character(auxiliary_id),
-    length(auxiliary_id) %in% c(1, 4)
+  data <- dplyr::mutate(
+    data, 
+    concentration = if (useLogs) log(.data$concentration) else .data$concentration,
+    concentration.censoring = .data$censoring
   )
   
-  if (length(auxiliary_id) == 1 && auxiliary_id == "default") {
-    auxiliary <- switch(
-      info$compartment, 
-      sediment = c("value", "concentration", "AL", "CORG"), 
-      biota = c("concentration", "LNMEA", "DRYWT%", "LIPIDWT%")
+  if ("concOriginal" %in% names(data)) {
+    data <- dplyr::mutate(
+      data, 
+      value = if (useLogs) log(.data$concOriginal) else .data$concOriginal,
+      value.censoring = .data$censoringOriginal
     )
-  } else {
-    auxiliary <- auxiliary_id
   }
-    
+
+
   auxiliary.censoring <- paste(auxiliary, "censoring", sep = ".")
   
   # not all auxiliary variables have censorings, so create dummy columns
   
   ok <- auxiliary.censoring %in% names(data)
-  if (!all(ok))
-    data[auxiliary.censoring[!ok]] <- lapply(data[auxiliary[!ok]], function(x) ifelse(is.na(x), NA, ""))
-    
+  if (!all(ok)) {
+    data[auxiliary.censoring[!ok]] <- lapply(
+      data[auxiliary[!ok]], 
+      function(x) ifelse(is.na(x), NA, "")
+    )
+  }
   data <- data[c("year", auxiliary, auxiliary.censoring)]
 
 
   data <- reshape(
-    data, varying = list(auxiliary, auxiliary.censoring), v.names = c("value", "censoring"), direction = "long", 
-    timevar = "type", times = auxiliary)
+    data, 
+    varying = list(auxiliary, auxiliary.censoring), 
+    v.names = c("value", "censoring"), 
+    direction = "long", 
+    timevar = "type", 
+    times = auxiliary
+  )
   
   data <- within(data, type <- ordered(type, levels = auxiliary))
 
@@ -947,45 +1047,52 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
   is.data <- unlist(with(data, tapply(value, type, function(i) !all(is.na(i)))))
   data <- within(data, value[type %in% names(is.data[!is.data])] <- 0)
 
-  ylim <- with(data, tapply(value, type, extendrange, f = 0.07))        # this is what R will use in xyplot
-  if (info$compartment == "sediment")
-  {
-    ylim$value <- with(subset(data, type %in% c("value", "concentration")), extendrange(value, f = 0.07))
+  # this is what R will use in xyplot
+  ylim <- with(data, tapply(value, type, extendrange, f = 0.07))        
+  if (info$compartment == "sediment") {
+    ylim$value <- with(
+      subset(data, type %in% c("value", "concentration")), 
+      extendrange(value, f = 0.07)
+    )
     ylim$concentration <- ylim$value
   }
   
-  if (info$determinand %in% c("VDS", "IMPS", "INTS")) 
-  {
-    wk <- info.imposex[
-      info.imposex$species %in% info$species & info.imposex$determinand %in% info$determinand, "max_value"]
-    ylim$concentration <- extendrange(c(0, wk), f = 0.07)
+  if (series$determinand %in% c("VDS", "IMPS", "INTS")) {
+    wk <- dplyr::filter(
+      info$imposex, 
+      .data$species == series$species,
+      .data$determinand == series$determinand
+    )
+    imposex_max_value <- wk$max_value
+    ylim$concentration <- extendrange(c(0, imposex_max_value), f = 0.07)
   }            
   
   
-  ykey <- sapply(levels(data$type), function(i)
-  {
-    if (is.data[i])
-    {  
+  ykey <- sapply(levels(data$type), function(i) {
+    if (is.data[i]) {
       wk <- plot.scales(
-        ylim[[i]], n = ntick.y, logData = (useLogs & i %in% c("value", "concentration")))
+        ylim[[i]], 
+        n = ntick.y, 
+        logData = (useLogs & i %in% c("value", "concentration"))
+      )
       max(nchar(format(wk)))
     }
     else 0
   })
   key.ylab.padding <- max(ykey[c(1, 3)])
   
-  ylim <- with(data, tapply(value, type, range, na.rm = TRUE))          # but this is what must get passed in!
-  if (info$compartment == "sediment")
-  {
-    ylim$value <- with(subset(data, type %in% c("value", "concentration")), range(value, na.rm = TRUE))
+  # but this is what must get passed in!
+  ylim <- with(data, tapply(value, type, range, na.rm = TRUE))          
+  if (info$compartment == "sediment") {
+    ylim$value <- with(
+      subset(data, type %in% c("value", "concentration")), 
+      range(value, na.rm = TRUE)
+    )
     ylim$concentration <- ylim$value
   }
 
-  if (info$determinand %in% c("VDS", "IMPS", "INTS")) 
-  {
-    wk <- info.imposex[
-      info.imposex$species %in% info$species & info.imposex$determinand %in% info$determinand, "max_value"]
-    ylim$concentration <- c(0, wk)
+  if (series$determinand %in% c("VDS", "IMPS", "INTS")) {
+    ylim$concentration <- c(0, imposex_max_value)
   }            
   
   # not perfect, but it does the job without plotting everything in their own viewport
@@ -1017,26 +1124,33 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
         layout.widths = list(
           left.padding = 2, axis.left = 0, ylab.axis.padding = 0, ylab = 0, 
           key.ylab.padding = key.ylab.padding * xykey.cex, 
-          right.padding = 0, key.right = 0, axis.key.padding = 0, axis.right = 0, strip.left = 0, 
-          key.left = 0, axis.panel = 0
+          right.padding = 0, key.right = 0, axis.key.padding = 0, 
+          axis.right = 0, strip.left = 0, key.left = 0, axis.panel = 0
         ),
         layout.heights = list(
           axis.bottom = 0, bottom.padding = 2, axis.xlab.padding = 0, xlab = 0, 
           xlab.key.padding = xykey.cex, key.sub.padding = 0, 
-          axis.top = 0, top.padding = 0, main = 0, main.key.padding = 0, key.top = 0, 
-          key.axis.padding = 0, axis.panel = 0)
+          axis.top = 0, top.padding = 0, main = 0, main.key.padding = 0, 
+          key.top = 0, key.axis.padding = 0, axis.panel = 0)
       ), 
       axis = function(side, ...) 
-        plot.axis(side, ntick.x = ntick.x, ntick.y = ntick.y, xykey.cex = xykey.cex, 
-                  plot.type = "auxiliary", is.data = is.data, useLogs = useLogs, ...),
+        plot.axis(
+          side, ntick.x = ntick.x, ntick.y = ntick.y, xykey.cex = xykey.cex, 
+          plot.type = "auxiliary", is.data = is.data, useLogs = useLogs, ...
+        ),
       panel = function(x, y, subscripts) {
         type.id <- levels(type)[which.packet()]
         
-        if (info$compartment == "sediment" && "country" %in% names(info) && 
-            info$country == "Spain" && type.id == "concentration")
+        if (info$compartment == "sediment" && 
+            "country" %in% names(series) && 
+            series$country == "Spain" && 
+            type.id == "concentration"
+        ) {
           grid.text("data not-normalised", 0.5, 0.5, gp = gpar(cex = xykey.cex))
-        else {
-          if (any(duplicated(x))) x <- jitter(x, amount = 0.1)
+        } else {
+          if (any(duplicated(x))) {
+            x <- jitter(x, amount = 0.1)
+          }
           censoring <- tolower(as.character(censoring[subscripts]))
           censoring <- ifelse(censoring %in% "", "+", censoring)
           lpoints(x, y, pch = censoring, cex = 2.5, col = "black")
@@ -1048,21 +1162,24 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
           concentration = switch(
             info$compartment, 
             biota = paste(
-              info$determinand, 
+              series$determinand, 
               dplyr::case_when(
-                info$group %in% "Effects"               ~ "",
-                info$determinand %in% "VDS"             ~ "stage",
-                info$determinand %in% c("IMPS", "INTS") ~ "",
-                TRUE                                    ~ "concentration"
+                series$group %in% "Effects"               ~ "",
+                series$determinand %in% "VDS"             ~ "stage",
+                series$determinand %in% c("IMPS", "INTS") ~ "",
+                TRUE                                      ~ "concentration"
               )
             ),
-            sediment = paste(info$determinand, "normalised")
+            sediment = paste(series$determinand, "normalised")
           ),
-          value = paste(info$determinand, "non-normalised"),
+          value = paste(series$determinand, "non-normalised"),
           LNMEA = {
-            family <- as.character(ctsm_get_info("species", info$species, "family"))
+            family <- ctsm_get_info(info$species, series$species, "species_group")
             unit <- ctsm_get_info(
-              "determinand", type.id, "unit", info$compartment, sep = "_"
+              info$determinand, 
+              type.id, "unit", 
+              info$compartment, 
+              sep = "_"
             )
             paste(
               "Mean ", 
@@ -1079,10 +1196,14 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
           },
           {
             unit <- ctsm_get_info(
-              "determinand", type.id, "unit", info$compartment, sep = "_"
+              info$determinand, 
+              type.id, 
+              "unit", 
+              info$compartment, 
+              sep = "_"
             )
             paste0(
-              ctsm_get_info("determinand", type.id, "common_name"), 
+              ctsm_get_info(info$determinand, type.id, "common_name"), 
               " (", unit, ")"
             )
           }
