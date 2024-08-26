@@ -364,7 +364,7 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
     MoreArgs = list(html = html, compartment = info$compartment)
   )
   
-  names(unitText) <- info$seriesID
+  names(unitText) <- series$seriesID
   
   unitID <- unique(unitText)
   
@@ -1161,17 +1161,21 @@ plot.scales <- function(x, n = 5, min.n = 3, logData = FALSE, f = 0.05) {
 
 
 
-plot.multiassessment <- function(data, assessment, info, ...) {
+plot_multiassessment <- function(data, assessment, series, info, ...) {
 
   # silence non-standard evaluation warnings
-  .data <- series <- NULL
+  .data <- NULL
 
   is.data <- sapply(assessment, function(i) !is.null(i))
   
   is.pred <- sapply(assessment, function(i) !is.null(i) && !is.null(i$pred))
   is.AC <- sapply(assessment, function(i) !is.null(i) && !all(is.na(i$AC)))
   
-  series_distribution <- ctsm_get_info("determinand", info$determinand, "distribution")
+  series_distribution <- ctsm_get_info(
+    info$determinand, 
+    series$determinand, 
+    "distribution"
+  )
   
   if (any(info$determinand %in% "MNC")) {
     warning("remember to fix distribution changes")
@@ -1180,18 +1184,22 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   
   useLogs <- series_distribution %in% "lognormal"
   
-  names(useLogs) <- info$seriesID
+  names(useLogs) <- series$seriesID
   
-  
+
   # make data types compatible - i.e. raw data or assessment indices
 
-  data <- sapply(info$seriesID, simplify = FALSE, function(i) {
+  data <- sapply(series$seriesID, simplify = FALSE, function(i) {
     if (is.data[i]) {
       out <- assessment[[i]]$annualIndex
       names(out)[2] <- "concentration"
       out
     }
-    else data.frame(year = info$max.year, concentration = 0, censoring = factor("", levels = c("", "<")))
+    else data.frame(
+      year = info$max_year, 
+      concentration = 0, 
+      censoring = factor("", levels = c("", "<"))
+    )
   })  
     
 
@@ -1214,13 +1222,24 @@ plot.multiassessment <- function(data, assessment, info, ...) {
 
   # set up graphical structures
 
-  ylim <- sapply(info$seriesID, simplify = FALSE, function(i) {
-    args.list <- list(data[[i]]$concentration)         # NB have taken logs above, so this is log concentration
-    if (is.pred[[i]]) args.list <- c(args.list, assessment[[i]]$pred$ci.lower, assessment[[i]]$pred$ci.upper)
+  ylim <- sapply(series$seriesID, simplify = FALSE, function(i) {
+    # NB have taken logs above, so this is log concentration
+    args.list <- list(data[[i]]$concentration)         
+    if (is.pred[[i]]) {
+      args.list <- c(
+        args.list, 
+        assessment[[i]]$pred$ci.lower, 
+        assessment[[i]]$pred$ci.upper
+      )
+    }
     do.call("plot.data.ylim", args.list)
   })
 
-  args.list <- sapply(info$seriesID[is.data], simplify = FALSE, function(i) data[[i]]$year)
+  args.list <- sapply(
+    series$seriesID[is.data], 
+    simplify = FALSE, 
+    function(i) data[[i]]$year
+  )
   args.list <- c(args.list, info$recent_years)
   xlim <- do.call("plot.data.xlim", args.list)
 
@@ -1230,17 +1249,17 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   # ensures ylabels are formatted correctly and fit into viewport
 
   ntick.y <- ntick.x <- 3
-  ykey <- sapply(info$seriesID, simplify = FALSE, function(i) 
+  ykey <- sapply(series$seriesID, simplify = FALSE, function(i) 
     format(plot.scales(ylim[[i]], n = ntick.y, logData = useLogs[i])))
   key.ylab.padding <- max(sapply(ykey, function(i) max(nchar(i))))
   
 
-  ndet <- length(info$seriesID)
+  ndet <- length(series$seriesID)
   layout.row <- ceiling(sqrt(ndet))
   layout.col <- ceiling(ndet / layout.row)
 
   add.xlab = 1:ndet <= layout.col
-  names(add.xlab) <- info$seriesID
+  names(add.xlab) <- series$seriesID
 
   xykey.cex <- switch(layout.row, 1.4, 1.1, 0.9, 0.7, 0.6)
 
@@ -1249,7 +1268,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   
   xAC <- 0.5
 
-  AC.width <- sapply(info$seriesID[is.data], simplify = FALSE, function(i) {
+  AC.width <- sapply(series$seriesID[is.data], simplify = FALSE, function(i) {
     
     if (!is.AC[[i]]) return(unit(0, "npc"))
 
@@ -1291,7 +1310,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   AC.width <- do.call("max", AC.width)
 
 
-  data.plot <- sapply(info$seriesID, simplify = FALSE, function(i) {
+  data.plot <- sapply(series$seriesID, simplify = FALSE, function(i) {
     xyplot(
       data[[i]]$concentration ~ data[[i]]$year, 
       ylim = ylim[[i]], 
@@ -1399,14 +1418,11 @@ plot.multiassessment <- function(data, assessment, info, ...) {
 
 
 
-plot.multidata <- function(data, info,  ...) {
-
-  # silence non-standard evaluation warnings
-  series <- NULL
+plot_multidata <- function(data, series, info,  ...) {
 
   data <- subset(data, !is.na(concentration))
 
-  series_distribution <- ctsm_get_info("determinand", data$determinand, "distribution")
+  series_distribution <- ctsm_get_info(info$determinand, data$determinand, "distribution")
   
   if (any(data$determinand %in% "MNC")) {
     warning("remember to fix distribution changes")
@@ -1435,10 +1451,10 @@ plot.multidata <- function(data, info,  ...) {
   # varnames doesn't appear to work in splom, so make sure we give the columns the names
   # we want printed
   
-  plot.data <- data[c("year", paste("concentration", info$seriesID, sep = "."))]
-  names(plot.data) <- varnames <- c("year", info$plotNames$data)
+  plot.data <- data[c("year", paste("concentration", series$seriesID, sep = "."))]
+  names(plot.data) <- varnames <- c("year", series$plotNames$data)
   
-  colID <- c("year", info$seriesID)
+  colID <- c("year", series$seriesID)
 
 
   pscales <- lapply(names(plot.data), function(i) {
@@ -1466,10 +1482,19 @@ plot.multidata <- function(data, info,  ...) {
     varnames = varnames, varname.cex = varname.cex,  
     superpanel = function(z, panel, ...) ctsm.panel.pairs(z, panel = panel, ...),
     par.settings = list(
-      layout.heights = list(bottom.padding = 0, axis.bottom = 0, axis.xlab.padding = 0, xlab = 0)),
+      layout.heights = list(
+        bottom.padding = 0, axis.bottom = 0, axis.xlab.padding = 0, xlab = 0
+      )
+    ),
     panel = function(x, y, i, j) {
-      censoring <- if (i > 1) data[paste("censoring", colID[i], sep = ".")] else rep("", length(x))
-      lpoints(x, y, col = "black", pch = ifelse(censoring == "", "+", "<"), cex = 1.1)
+      censoring <- if (i > 1) {
+        data[paste("censoring", colID[i], sep = ".")]
+      } else {
+        rep("", length(x))
+      }
+      lpoints(
+        x, y, col = "black", pch = ifelse(censoring == "", "+", "<"), cex = 1.1
+      )
     }  
   )
 
@@ -1623,7 +1648,7 @@ plot.info <- function(series, info, plot.type = c("data", "auxiliary"), ...) {
 
 
 
-plot.ratio.data <- function(data, numerator, denominator, type = c("logistic", "log")) {
+plot_ratio_data <- function(data, numerator, denominator, type = c("logistic", "log")) {
 
   # silence non-standard evaluation warnings
   .data <- NULL
@@ -1664,7 +1689,7 @@ plot.ratio.data <- function(data, numerator, denominator, type = c("logistic", "
 }
 
 
-plot.ratio.pred <- function(
+plot_ratio_pred <- function(
   data, 
   type = c("logistic", "log"), 
   control = list(nyear = 5, prop_censoring = 0.1)
@@ -1743,11 +1768,8 @@ plot.ratio.pred <- function(
 
 
 
-plot.ratio <- function(data, info, ...) {
+plot_ratio <- function(data, series, info, ...) {
   
-  # silence non-standard evaluation warnings
-  series <- NULL
-
   # get working data 
   # sediment - use non-normalised concentrations
   # biota - could use values before conversion to target bases, but would need to 
@@ -1762,7 +1784,7 @@ plot.ratio <- function(data, info, ...) {
   # set up ratios
   
   det_id <- switch(
-    info$group, 
+    series$group, 
     Metals = c("SE", "HG"),
     PAH_parent = c("ANT", "PA", "FLU", "PYR", "ICDP", "BGHIP", "BAA", "CHR"), 
     PBDEs = c("BDE47", "BD153"), 
@@ -1771,7 +1793,7 @@ plot.ratio <- function(data, info, ...) {
   )
   
   ratio_id <- switch(
-    info$group, 
+    series$group, 
     Metals = "SE / HG",
     PAH_parent = c(
       "ANT / (ANT + PA)", "FLU / (FLU + PYR)", "ICDP / (ICDP + BGHIP)", 
@@ -1784,7 +1806,7 @@ plot.ratio <- function(data, info, ...) {
   
   
   numerator_id <- switch(
-    info$group,
+    series$group,
     Metals = "SE",
     PAH_parent = c("ANT", "FLU", "ICDP", "BAA"), 
     PBDEs = "BDE47",
@@ -1793,7 +1815,7 @@ plot.ratio <- function(data, info, ...) {
   )
   
   denominator_id <- switch(
-    info$group,
+    series$group,
     Metals = "HG",
     PAH_parent = c("PA", "PYR", "BGHIP", "CHR"),
     PBDEs = "BD153",
@@ -1802,7 +1824,7 @@ plot.ratio <- function(data, info, ...) {
   )
   
   ratio_type <- switch(
-    info$group,
+    series$group,
     PAH_parent = "logistic",
     "log"
   )
@@ -1810,7 +1832,7 @@ plot.ratio <- function(data, info, ...) {
   use_logs <- ratio_type %in% "log"
   
   ref_lines <- switch(
-    info$group, 
+    series$group, 
     Metals = list(78.96 / 200.59),
     PAH_parent = list(0.1, c(0.4, 0.5), c(0.2, 0.5), c(0.2, 0.35)),
     PBDEs = list(NA), 
@@ -1819,7 +1841,7 @@ plot.ratio <- function(data, info, ...) {
   )
   
   ref_txt <- switch(
-    info$group, 
+    series$group, 
     Metals = list(c("no mediation", "possible mediation")),
     PAH_parent = list(
       c("petrogenic", "pyrolitic"), 
@@ -1878,7 +1900,7 @@ plot.ratio <- function(data, info, ...) {
   data <- mapply(
     numerator = numerator_id, 
     denominator = denominator_id, 
-    FUN = plot.ratio.data,
+    FUN = plot_ratio_data,
     MoreArgs = list(data = data, type = ratio_type), 
     SIMPLIFY = FALSE
   )
@@ -1896,7 +1918,7 @@ plot.ratio <- function(data, info, ...) {
   }
   
   
-  pred <- lapply(data, plot.ratio.pred, type = ratio_type)
+  pred <- lapply(data, plot_ratio_pred, type = ratio_type)
   
   names(data) <- names(pred) <- names(is_data) <- ratio_id  
   
