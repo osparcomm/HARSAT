@@ -38,23 +38,36 @@
 #'   
 #'   ## Auxiliary variables
 #' 
-#'   The default (`auxiliary = "default`) is to plot the following variables:  
+#'   The default (`auxiliary = "default"`) is to plot the following variables:  
 #'   
-#'   * biota: concentration, LNMEA (mean length), DRYWT% (dry weight content), 
-#'   LIPIDWT% (lipi weight content)
-#'   * sediment: non-normalised concentration, normalised concentration, AL 
-#'   (aluminiun concentration), CORG (organic carbon content)
+#'   * biota: determinand concentration, LNMEA (mean length), DRYWT% (dry weight 
+#'   content), LIPIDWT% (lipi weight content)
+#'   * sediment: non-normalised determinand concentration, normalised 
+#'   determinand concentration, AL (aluminium concentration), CORG (organic 
+#'   carbon content)
 #'   * water: no plots are generated at present
 #'   
-#'   At present, it is only possible to change the last three variable for biota 
-#'   and the last two variables for sediment. For example, for metals in 
-#'   sediment, you might specify `auxiliary = c("AL", "LI")` to plot aluminium
-#'   and lithium concentrations instead of aluminium and organic carbon.
+#'   For biota, the determinand concentration will always be plotted, but it is 
+#'   possible to change the three auxiliary variables. For example, to plot 
+#'   WTMEA (mean weight) instead of LIPIDWT% you would set `auxiliary = 
+#'   c("LNMEA", "WTMEA", "DRYWT%)`. For this to work, WTMEA must previously have
+#'   been specified as an auxiliary variable for the determinand in question 
+#'   using the `biota_auxliary` column in the determinand reference table. At 
+#'   present, there must always be three auxiliary variables for biota.
 #'   
-#'   The auxiliary variables must be specified as such in the determinand 
-#'   reference table in e.g. the `biota_auxiliary` or `sediment_auxiliary` 
-#'   column. At present, plots for only a limited range of auxiliary variables 
-#'   are supported. 
+#'   For sediment, the non-normalised determinand concentration and the 
+#'   normalised determinand concentration will always be plotted, but it is 
+#'   possible to change the two auxiliary variables. For example, for metals in 
+#'   sediment, you might set `auxiliary = c("AL", "LI")` to plot aluminium
+#'   and lithium concentrations instead of aluminium and organic carbon 
+#'   concentrations. Again, for this to work, LI must previously have been 
+#'   specified as an auxiliary variable for the determinand in question using 
+#'   the `sediment_auxliary` column in the determinand reference table. 
+#'   At present, there must always be two auxiliary variables for sediment.
+#'   
+#'   At present, plots for only a limited range of auxiliary variables are 
+#'   supported. More flexibility in these plots, such as changing the number of 
+#'   auxiliary variables, is desirable and will emerge in due course.
 #'
 #' @export
 plot_assessment <- function(
