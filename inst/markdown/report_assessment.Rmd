@@ -627,14 +627,14 @@ txt <- if (anova_ok) "Finally, the tab" else "The tab also"
 #### Assessment plot
 
 ```{r assessment_plot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
-plot.data(data, assessment, info, assessment_object$info, type = "assessment", xykey.cex = 1.4)
+plot_data(data, assessment, info, assessment_object$info, type = "assessment", xykey.cex = 1.4)
 ```
 
 
 #### Trend with data
 
 ```{r data_plot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
-plot.data(data, assessment, info, assessment_object$info, type = "data", xykey.cex = 1.4)
+plot_data(data, assessment, info, assessment_object$info, type = "data", xykey.cex = 1.4)
 ```
 
 
