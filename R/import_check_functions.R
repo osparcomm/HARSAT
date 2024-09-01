@@ -155,7 +155,7 @@ ctsm.check.basis.biota <- function(data, info) {
       new[!ok] <- "W"
     })
 
-  id <- data$determinand %in% c("EXLIP%", "FATWT%", "LIPIDWT%")
+  id <- data$determinand %in% c("EXLIP%", "FATWT%", "LIPIDWT%", "WTMEA")
   if (any(id))
     data[id,] <- within(data[id,], {    
       ok <- basis %in% c("W", "D")
@@ -164,8 +164,8 @@ ctsm.check.basis.biota <- function(data, info) {
     })
 
   id <- data$determinand %in% c(
-    "VDS", "IMPS", "INTS", "VDSI", "PCI", "INTSI", "%FEMALEPOP", "SURVT", "NRR", "LP", "%DNATAIL", 
-    "MNC", "CMT-QC-NR", "MNC-QC-NR")
+    "VDS", "IMPS", "INTS", "VDSI", "PCI", "INTSI", "%FEMALEPOP", "SURVT", "NRR", 
+    "LP", "%DNATAIL", "MNC", "CMT-QC-NR", "MNC-QC-NR")
   if (any(id))
     data[id,] <- within(data[id,], {    
       ok <- is.na(basis)
@@ -250,7 +250,7 @@ ctsm.check.matrix.biota <- function(data, info) {
   # actually LNMEA could be feather length (but have not allowed for this at present)
   # NB procedures for merging with LNMEA are similary complicated for birds
 
-  id <- data$determinand %in% "LNMEA"
+  id <- data$determinand %in% c("LNMEA", "WTMEA")
   if (any(id))
     data[id,] <- within(data[id,], {
       ok <- (species_group %in% c("Fish", "Mammal") & matrix %in% "WO") |
@@ -513,8 +513,8 @@ ctsm.check.sex.biota <- function(data, info) {
 ctsm.check.unit.biota <- function(data, info) {
 
   standard_unit <- c(
-    "g/g", "mg/mg", "ug/ug", "ng/ng", "pg/pg", "mg/g", "ug/g", "ng/g", "pg/g", "g/kg", "mg/kg", 
-    "ug/kg", "ng/kg", "pg/kg")
+    "g/g", "mg/mg", "ug/ug", "ng/ng", "pg/pg", "mg/g", "ug/g", "ng/g", "pg/g", 
+    "g/kg", "mg/kg", "ug/kg", "ng/kg", "pg/kg")
   
   id <- ctsm_is_contaminant(data$pargroup, exclude = "I-RNC") & data$determinand != "TEQDFP"
   if (any(id))
@@ -559,6 +559,13 @@ ctsm.check.unit.biota <- function(data, info) {
   if (any(id))
     data[id,] <- within(data[id,], {
       ok <- unit %in% "y"
+      action <- ifelse(ok, "none", "error")
+    })
+  
+  id <- data$determinand %in% c("WTMEA")
+  if (any(id))
+    data[id,] <- within(data[id,], {
+      ok <- unit %in% c("kg", "g", "mg")
       action <- ifelse(ok, "none", "error")
     })
   
@@ -786,7 +793,7 @@ ctsm.check.value.biota <- function(data, info) {
   
   id <- ctsm_is_contaminant(data$pargroup, exclude = "I-MTC") | 
     data$group %in% "Metabolites" | 
-    data$determinand %in% c("EROD", "ALAD", "ACHE", "GST", "AGMEA", "LNMEA")
+    data$determinand %in% c("EROD", "ALAD", "ACHE", "GST", "AGMEA", "LNMEA", "WTMEA")
 
   if (any(id))
     data[id,] <- within(data[id,], {
