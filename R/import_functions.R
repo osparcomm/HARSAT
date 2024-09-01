@@ -68,10 +68,36 @@ library(readxl)
 #'
 #'   ## Control parameters
 #'
-#'   Many aspects of the assessment process can be controlled through the
-#'   parameters stored in `info$control`. This is a list populated with default
-#'   values which can then be overwritten, if required, using the `control`
-#'   argument.
+#'   Many aspects of the assessment process can be controlled using parameters 
+#'   which are stored in the `info` component of the harsat data object. The 
+#'   default control values can be overwritten using the `control` argument.  
+#'   
+#'   * `reporting_window` A scalar (default 6) which determines whether 
+#'   timeseries are excluded because they have no 'recent' data. Formally, 
+#'   timeseries are excluded if they have no data in the period 
+#'   `max_year - reporting_window + 1` and `max_year`, so the default approach
+#'   is to exclude timeseries if they have no dat in the most recent six 
+#'   monitoring years. The value of 6 is chosen to match with Marine Strategy 
+#'   Framework Directive reporting periods. 
+#'   * `region`  
+#'   * `add_stations`
+#'   * `bivalve_spawning_season`
+#'   * `use_stage`
+#'   * `relative_uncertainty`
+#'   * `auxiliary` A list which allows flexibility in the treatment of auxiliary 
+#'   variables. At present, there is just one component `by_matrix`, a 
+#'   character vector that determines which auxiliary variables are matched to 
+#'   the contaminant data by `sample` and `matrix` as opposed to just `sample`. 
+#'   For sediment and water, the default is `all`; i.e. all variables are 
+#'   matched by `sample` and `matrix`. This ensures, for example, that 
+#'   sediment normalisers such as aluminium and organic carbon content are 
+#'   matched to chemical measurements in the same grain fraction. For biota, the 
+#'   default is `c("DRYWT%", "LIPIDWT%)`, so these variables are matched by 
+#'   `sample` and `matrix` and all other variables (e.g. LNMEA or %FEMALEPOP) 
+#'   are matched by `sample`. Thus, dry weight and lipid weight contents are 
+#'   matched to chemical measurements in the same tissue. However, mean length 
+#'   (which is usually the lenght of the whole organism) is matched to all 
+#'   tissue types. 
 #'
 #'   ## External data
 #'
@@ -272,7 +298,7 @@ safe_read_file <- function(file, header=TRUE, sep=",", quote="\"", dec=".", fill
 
 control_default <- function(purpose, compartment) {
   
-  # import functions
+  # import_functions.R
   # sets up default values that control the assessment
   
   # reporting_window is set to 6 to match the MSFD reporting cycle
@@ -295,6 +321,12 @@ control_default <- function(purpose, compartment) {
   # relative uncertainties for log-normally distributed data; the default is
   # to accept relative uncertainties greater than (but not equal) to 1% and 
   # less than (but not equal to) 100%
+
+  # auxiliary is a list (to be extended) that allows flexibility in the 
+  # treatment of auxiliary variables
+  # by_matrix determines which variables are merged by matrix in addition to 
+  # by sample; default is DRYWT% and LIPIDWT% for biota and everything for 
+  # sediment and water
   
   region <- list()
   
@@ -373,14 +405,22 @@ control_default <- function(purpose, compartment) {
     )
   )
     
-
+  auxiliary = list(
+    by_matrix = switch(
+      compartment, 
+      biota = c("DRYWT%", "LIPIDWT%"), 
+      "all"
+    )
+  ) 
+  
   list(
     reporting_window = 6L, 
     region = region,
     add_stations = add_stations,
     bivalve_spawning_season = bivalve_spawning_season,
     use_stage = use_stage,
-    relative_uncertainty = relative_uncertainty
+    relative_uncertainty = relative_uncertainty,
+    auxiliary = auxiliary
   )
 }
 
@@ -2227,7 +2267,7 @@ tidy_contaminants <- function(data, info) {
 
 
 
-
+# create timeseries ----
 
 #' Create a time series
 #' 
@@ -2600,7 +2640,7 @@ create_timeseries <- function(
 
   # merge auxiliary data with determinand data
 
-  data <- ctsm_merge_auxiliary(data, info)
+  data <- merge_auxiliary(data, info)
   
 
   # impute %femalepop when missing and sex = 1 - write out remaining
@@ -4006,15 +4046,18 @@ check_subseries <- function(data, info) {
 }
 
 
-ctsm_merge_auxiliary <- function(data, info) {
+merge_auxiliary <- function(data, info) {
 
   # import_functions.R
   # merge auxiliary variables with data
 
+  control <- info$auxiliary
+  
+  
   # identify auxiliary variables and split data set accordingly
-    
+  
   auxiliary_var <- ctsm_get_auxiliary(data$determinand, info)
-
+  
   id <- data$determinand %in% auxiliary_var
     
   auxiliary <- data[id, ]
@@ -4032,9 +4075,14 @@ ctsm_merge_auxiliary <- function(data, info) {
   auxiliary <- split(auxiliary, auxiliary$determinand)
   
   
-  # catch for LNMEA measured in WO and ES for birds - probably shouldn't happen because the 
-  # sample will differ?  need to check
+  # update control 
+
+  if (length(control$by_matrix) == 1L && control$by_matrix == "all") {
+    control$by_matrix <- auxiliary_var
+  }
+
   
+  # merge auxiliary variables one at a time
   
   for (aux_id in names(auxiliary)) {
 
@@ -4049,7 +4097,7 @@ ctsm_merge_auxiliary <- function(data, info) {
     # additional variables for some auxiliaries
     # need to make this more flexible - issue raised
     
-    if (aux_id %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN", "AL", "LI")) {
+    if (aux_id %in% control$by_matrix) {
       
       merge_id <- c(merge_id, "matrix")
       
@@ -4109,6 +4157,7 @@ ctsm_merge_auxiliary <- function(data, info) {
   
   data <- droplevels(data)
 }
+
 
 ctsm_convert_to_target_basis <- function(data, info, get_basis) {
 

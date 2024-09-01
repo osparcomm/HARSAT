@@ -450,25 +450,25 @@ ctsm.check.species_group.biota <- function(data, info) {
 
 ctsm.check.sex.biota <- function(data, info) {
 
+  # check sex has valid ICES codes 
+  # extra checks for imposex determinands and EROD 
+
   # silence non-standard evaluation warnings
   sex <- NULL
 
-  # NB any changes should really be made at the sub-sample level
   
-  id <- ctsm_is_contaminant(data$pargroup) | 
-    data$group %in% "Metabolites" | 
-    data$determinand %in% c("AGMEA", "LNMEA", "DRYWT%", "EXLIP%", "FATWT%", "LIPIDWT%") | 
-    data$determinand %in% c("ALAD", "SFG", "ACHE", "GST", "SURVT", "NRR", "LP", "%DNATAIL", 
-                            "MNC", "CMT-QC-NR", "MNC-QC-NR")
+  # global check of ICES codes 
+  
+  data <- dplyr::mutate(
+    data, 
+    ok = .data$sex %in% c("F", "H", "I", "M", "T", "U", "X", NA),
+    action = dplyr::if_else(ok, "none", "warning"),
+    new[!ok] <- NA
+  )
+  
 
-  if (any(id))
-    data[id,] <- within(data[id,], {
-      ok <- sex %in% c("F", "I", "M", "U", "X", NA)
-      action <- ifelse(ok, "none", "warning")
-      new[!ok] <- NA
-    })
-
-
+  # imposex
+  
   id <- data$determinand %in% c("VDS", "IMPS", "INTS")
   if (any(id))
     data[id,] <- within(data[id,], {
@@ -476,7 +476,7 @@ ctsm.check.sex.biota <- function(data, info) {
       action <- ifelse(ok, "none", ifelse(sex %in% NA, "warning", "error"))
       new[sex %in% NA] <- "F"
     })
-  
+
   id <- data$determinand %in% c("VDSI", "PCI", "INTSI", "%FEMALEPOP")
   if (any(id))
     data[id,] <- within(data[id,], {
@@ -485,15 +485,26 @@ ctsm.check.sex.biota <- function(data, info) {
       new[sex %in% NA] <- "X"
     })
 
+  
+  # EROD
+  
   id <- data$determinand %in% "EROD"
   if (any(id))
     data[id,] <- within(data[id,], {    
       ok <- sex %in% c("F", "M")
-      ok.delete <- sex %in% c("U", "I", "X")
+      ok.delete <- sex %in% c("H", "I", "T", "U", "X")
       action <- ifelse(ok, "none", ifelse(ok.delete, "delete", "error"))
       if (any(ok.delete))
         cat("   Dropping EROD data with immature or unidentifiable sex\n")
     })
+
+  # id <- is.na(data$ok)
+  # if (any(id)) 
+  #   data[id,] <- within(data[id,], {
+  #     ok <- sex %in% c("F", "I", "M", "T", "U", "X", NA)
+  #     action <- ifelse(ok, "none", "warning")
+  #     new[!ok] <- NA
+  #   })
 
   data             
 }             
