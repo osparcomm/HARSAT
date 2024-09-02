@@ -180,11 +180,35 @@ will be <code>FALSE</code> if the vflag entry is <code>"S"</code> or suspect. Re
 <h3 id="control-parameters">Control parameters<a class="anchor" aria-label="anchor" href="#control-parameters"></a></h3>
 
 
-<p>Many aspects of the assessment process can be controlled through the
-parameters stored in <code>info$control</code>. This is a list populated with default
-values which can then be overwritten, if required, using the <code>control</code>
-argument.</p>
-</div>
+<p>Many aspects of the assessment process can be controlled using parameters
+which are stored in the <code>info</code> component of the harsat data object. The
+default control values can be overwritten using the <code>control</code> argument.</p><ul><li><p><code>reporting_window</code> A scalar (default 6) which determines whether
+timeseries are excluded because they have no 'recent' data. Formally,
+timeseries are excluded if they have no data in the period
+<code>max_year - reporting_window + 1</code> and <code>max_year</code>, so the default approach
+is to exclude timeseries if they have no dat in the most recent six
+monitoring years. The value of 6 is chosen to match with Marine Strategy
+Framework Directive reporting periods.</p></li>
+<li><p><code>region</code></p></li>
+<li><p><code>add_stations</code></p></li>
+<li><p><code>bivalve_spawning_season</code></p></li>
+<li><p><code>use_stage</code></p></li>
+<li><p><code>relative_uncertainty</code></p></li>
+<li><p><code>auxiliary</code> A list which allows flexibility in the treatment of auxiliary
+variables. At present, there is just one component <code>by_matrix</code>, a
+character vector that determines which auxiliary variables are matched to
+the contaminant data by <code>sample</code> and <code>matrix</code> as opposed to just <code>sample</code>.
+For sediment and water, the default is <code>all</code>; i.e. all variables are
+matched by <code>sample</code> and <code>matrix</code>. This ensures, for example, that
+sediment normalisers such as aluminium and organic carbon content are
+matched to chemical measurements in the same grain fraction. For biota, the
+default is <code>c("DRYWT%", "LIPIDWT%)</code>, so these variables are matched by
+<code>sample</code> and <code>matrix</code> and all other variables (e.g. LNMEA or %FEMALEPOP)
+are matched by <code>sample</code>. Thus, dry weight and lipid weight contents are
+matched to chemical measurements in the same tissue. However, mean length
+(which is usually the lenght of the whole organism) is matched to all
+tissue types.</p></li>
+</ul></div>
 
 <div class="section">
 <h3 id="external-data">External data<a class="anchor" aria-label="anchor" href="#external-data"></a></h3>
