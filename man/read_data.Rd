@@ -98,10 +98,37 @@ parameters that dictate the assessment process.
 \details{
 \subsection{Control parameters}{
 
-Many aspects of the assessment process can be controlled through the
-parameters stored in \code{info$control}. This is a list populated with default
-values which can then be overwritten, if required, using the \code{control}
-argument.
+Many aspects of the assessment process can be controlled using parameters
+which are stored in the \code{info} component of the harsat data object. The
+default control values can be overwritten using the \code{control} argument.
+\itemize{
+\item \code{reporting_window} A scalar (default 6) which determines whether
+timeseries are excluded because they have no 'recent' data. Formally,
+timeseries are excluded if they have no data in the period
+\code{max_year - reporting_window + 1} and \code{max_year}, so the default approach
+is to exclude timeseries if they have no dat in the most recent six
+monitoring years. The value of 6 is chosen to match with Marine Strategy
+Framework Directive reporting periods.
+\item \code{region}
+\item \code{add_stations}
+\item \code{bivalve_spawning_season}
+\item \code{use_stage}
+\item \code{relative_uncertainty}
+\item \code{auxiliary} A list which allows flexibility in the treatment of auxiliary
+variables. At present, there is just one component \code{by_matrix}, a
+character vector that determines which auxiliary variables are matched to
+the contaminant data by \code{sample} and \code{matrix} as opposed to just \code{sample}.
+For sediment and water, the default is \code{all}; i.e. all variables are
+matched by \code{sample} and \code{matrix}. This ensures, for example, that
+sediment normalisers such as aluminium and organic carbon content are
+matched to chemical measurements in the same grain fraction. For biota, the
+default is \verb{c("DRYWT\%", "LIPIDWT\%)}, so these variables are matched by
+\code{sample} and \code{matrix} and all other variables (e.g. LNMEA or \%FEMALEPOP)
+are matched by \code{sample}. Thus, dry weight and lipid weight contents are
+matched to chemical measurements in the same tissue. However, mean length
+(which is usually the lenght of the whole organism) is matched to all
+tissue types.
+}
 }
 
 \subsection{External data}{
