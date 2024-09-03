@@ -1516,7 +1516,7 @@ plot_multiassessment <- function(data, assessment, series, info, ...) {
         }
 
         pushViewport(viewport(clip = "off"))
-        grid.text(info$plotNames$assessment[i], 0, unit(1, "npc") + unit(1, "char"), 
+        grid.text(series$plotNames$assessment[i], 0, unit(1, "npc") + unit(1, "char"), 
                   just = c("left", "bottom"), gp = gpar(cex = xykey.cex))
         upViewport()
       })
