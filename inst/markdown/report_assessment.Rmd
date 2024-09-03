@@ -638,24 +638,30 @@ plot_data(data, assessment, info, assessment_object$info, type = "data", xykey.c
 ```
 
 
-<!-- #### Auxiliary data -->
+#### Auxiliary data
 
-<!-- ```{r, include = FALSE} -->
-<!-- ok <- params$compartment %in% c("biota", "sediment") -->
-<!-- ``` -->
+```{r, include = FALSE}
+ok <- info$compartment %in% c("biota", "sediment")
+```
 
-<!-- ```{asis, eval = !ok} -->
-<!-- <br>  -->
-<!-- No auxiliary variables currently plotted. -->
-<!-- ``` -->
+```{asis, eval = !ok}
+<br>
+No auxiliary variables currently plotted.
+```
 
-<!-- ```{r auxiliary_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7} -->
-<!-- auxiliary_id <- "default" -->
-<!-- if (info$compartment %in% "sediment" & info$group %in% "Metals")  -->
-<!--   auxiliary_id <- c("value", "concentration", "AL", "LI") -->
+```{r auxiliary_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+auxiliary_id <- switch(
+  info$compartment, 
+  biota = c("concentration", "LNMEA", "DRYWT%", "LIPIDWT%"), 
+  sediment = {
+    out <- c("value", "concentration", "AL")
+    if (info$group %in% "Metals") out <- c(out, "LI") else out <- c(out, "CORG")
+    out
+  }
+)
 
-<!-- plot.auxiliary(data, info, auxiliary_id = auxiliary_id, xykey.cex = 1.2) -->
-<!-- ``` -->
+plot_auxiliary(data, assessment, info, assessment_object$info, auxiliary = auxiliary_id, xykey.cex = 1.2)
+```
 
 
 
@@ -668,46 +674,47 @@ plot_data(data, assessment, info, assessment_object$info, type = "data", xykey.c
 
 
 
-<!-- #### Assessments (related `r txt_compounds`) -->
+#### Assessments (related `r txt_compounds`)
 
-<!-- ```{r, include = FALSE} -->
-<!-- ok <- ! info$detGroup %in% "Imposex" -->
-<!-- ``` -->
+```{r, include = FALSE}
+ok <- ! info$detGroup %in% "Imposex"
+```
 
-<!-- ```{asis, eval = !ok} -->
-<!-- <br> -->
-<!-- No related responses assessed. -->
-<!-- ``` -->
+```{asis, eval = !ok}
+<br>
+No related responses assessed.
+```
 
-<!-- ```{r multi_assessment, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7} -->
-<!-- plot.multiassessment( -->
-<!--   assessment_object$data, assessment_object$assessment, info_multi, type = "assessment") -->
-<!-- ``` -->
-
-
-<!-- #### Data (related `r txt_compounds`) -->
-
-<!-- ```{r, include = FALSE} -->
-<!-- ok <- ! info$detGroup %in% "Imposex" -->
-<!-- ``` -->
-
-<!-- ```{asis, eval = !ok} -->
-<!-- <br> -->
-<!-- No related responses assessed. -->
-<!-- ``` -->
-
-<!-- ```{r multi_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7} -->
-<!-- plot.multidata(assessment_object$data, info_multi) -->
-<!-- ``` -->
+```{r multi_assessment, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+plot_multiassessment(
+  assessment_object$data, assessment_object$assessment, info_multi, assessment_object$info
+)
+```
 
 
-<!-- ```{asis, eval = is_ratio} -->
-<!-- #### Contaminant ratios -->
-<!-- ``` -->
+#### Data (related `r txt_compounds`)
 
-<!-- ```{r ratio_plot, eval = is_ratio, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7} -->
-<!-- plot.ratio(assessment_object$data, info_multi) -->
-<!-- ``` -->
+```{r, include = FALSE}
+ok <- ! info$detGroup %in% "Imposex"
+```
+
+```{asis, eval = !ok}
+<br>
+No related responses assessed.
+```
+
+```{r multi_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+plot_multidata(assessment_object$data, info_multi, assessment_object$info)
+```
+
+
+```{asis, eval = is_ratio}
+#### Contaminant ratios
+```
+
+```{r ratio_plot, eval = is_ratio, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+plot_ratio(assessment_object$data, info_multi, assessment_object$info)
+```
 
 
 #### Statistical analysis
