@@ -2794,15 +2794,18 @@ create_timeseries <- function(
 
 #' Extracts timeSeries
 #'
-#' Gets the timeSeries component of a `harsat` object, optionally having added
-#' extra information about each station
+#' Gets the `timeSeries` component of a `harsat` object, optionally adding extra 
+#' information about each station
 #'
-#' @param harsat_obj A `harsat` object following a call to [`create_timeseries`]`.
-#' @param add logical (default `TRUE`), if `TRUE`, adds extra information 
-#'   about each station; if `FALSE`, simply returns the existing timeseries,
-#'
-#' @return A data.frame containing the timeSeries component with (optionally)
-#'   extra information about each station.
+#' @param harsat_obj A `harsat` object following a call to 
+#'   [`create_timeseries`]
+#' @param add logical (default `TRUE`); `TRUE` adds the `station_name` and 
+#'   `country` associated with each station; `FALSE` simply returns the 
+#'   existing timeseries information
+#'   
+#' @return A data.frame containing the `timeSeries` component with (optionally)
+#'   extra information about each station. The `series` column is the identifier 
+#'   of each timeseries. 
 #' @export
 get_timeseries <- function(harsat_obj, add = TRUE) {
   
@@ -2810,14 +2813,19 @@ get_timeseries <- function(harsat_obj, add = TRUE) {
     stop("the time series have not yet been created")
   }
   
+  out <- harsat_obj$timeSeries
+  
+  out <- tibble::rownames_to_column(out, "series")
+  
   if (!add) {
-    return(harsat_obj$timeSeries)
+    return(out)
   }
   
   out <- dplyr::left_join(
-    harsat_obj$timeSeries, 
+    out, 
     harsat_obj$stations[c("station_code", "station_name", "country")], 
-    by = "station_code") 
+    by = "station_code"
+  ) 
   
   out <- dplyr::relocate(
     out, 
