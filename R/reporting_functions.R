@@ -974,7 +974,10 @@ report_assessment <- function(
       
       output_id <- gsub(" \ ", " ", output_id, fixed = TRUE)
       output_id <- gsub("\\", " ", output_id, fixed = TRUE)
+
+      # and any % e.g. %DNATAIL!
       
+      output_id <- gsub("%", "", output_id, fixed = TRUE)
     }
           
     package_dir = system.file(package = "harsat")
