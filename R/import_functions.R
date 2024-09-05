@@ -2653,7 +2653,7 @@ create_timeseries <- function(
 
   # convert data to basis of assessment
   
-  data <- ctsm_convert_to_target_basis(data, info, get_basis)
+  data <- convert_to_target_basis(data, info, get_basis)
   
 
   if (return_early) {
@@ -2668,7 +2668,7 @@ create_timeseries <- function(
 
   # estimate missing uncertainties
 
-  data$uncertainty <- ctsm_estimate_uncertainty(data, "concentration", info)
+  data$uncertainty <- estimate_uncertainty(data, "concentration", info)
 
   if (info$compartment == "sediment") {
     
@@ -2676,7 +2676,7 @@ create_timeseries <- function(
       
       if (norm_id %in% names(data)) {
         norm_uncrt <- paste0(norm_id, ".uncertainty")
-        data[[norm_uncrt]] <- ctsm_estimate_uncertainty(data, norm_id, info)
+        data[[norm_uncrt]] <- estimate_uncertainty(data, norm_id, info)
       }    
     }
     
@@ -4167,7 +4167,7 @@ merge_auxiliary <- function(data, info) {
 }
 
 
-ctsm_convert_to_target_basis <- function(data, info, get_basis) {
+convert_to_target_basis <- function(data, info, get_basis) {
 
   # location: import_functions.R
   # purpose:  convert data and auxiliary variables to their target basis as 
@@ -5166,14 +5166,14 @@ ctsm_normalise_calculate <- function(Cm, Nm, Nss, var_Cm, var_Nm, Cx, Nx, var_Cx
 
 
 
-ctsm_estimate_uncertainty <- function(data, response_id, info) {
+estimate_uncertainty <- function(data, response_id, info) {
 
   # silence non-standard evaluation warnings
   .data <- NULL
 
   # import_functions.R
   
-  # estimating missing uncertainties
+  # estimates missing uncertainties
   
   # only returns uncertainty so can modify data object at will
   
@@ -5237,12 +5237,28 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
   # a dry or lipid weight
 
   if (info$compartment == "biota") {
+    
+    # ensure lipidwt and drywt columns are present (if they haven't been supplied)
+    
+    is_lipid <- "LIPIDWT%" %in% names(data)
+    is_dry <- "DRYWT%" %in% names(data)
+    
+    if (!is_lipid) {
+      data[["LIPIDWT%"]] <- NA_real_
+      data[["LIPIDWT%.censoring"]] <- NA_character_
+    }
+    
+    if (!is_dry) {
+      data[["DRYWT%"]] <- NA_real_
+      data[["DRYWT%.censoring"]] <- NA_character_
+    }
+
     data$sd_constant <- ctsm_convert_basis(
       data$sd_constant, 
       "W", 
       data$new.basis, 
-      data[["DRYWT%"]], 
-      data[["LIPIDWT%"]], 
+      drywt = data[["DRYWT%"]],  
+      lipidwt = data[["LIPIDWT%"]],
       drywt_censoring = data[["DRYWT%.censoring"]], 
       lipidwt_censoring = data[["LIPIDWT%.censoring"]], 
       exclude = data$group %in% c("Imposex", "Effects", "Metabolites"),
