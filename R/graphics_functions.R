@@ -154,6 +154,24 @@ plot_assessment <- function(
     timeSeries$matrix <- "WT"
   }
 
+  # ad-hoc fix to deal with EROD labelling (which is sex-specific)
+  # have raised an issue to deal with this after next release by making the sex
+  # classification part of the subseries column
+  
+  if (info$compartment == "biota") {
+    timeSeries <- dplyr::mutate(
+      timeSeries, 
+      subseries = dplyr::case_when(
+        .data$sex == "M" ~ "males",
+        .data$sex == "F" ~ "females",
+        .default = .data$subseries
+      )
+    )
+  }  
+
+  
+  # get relevant subset 
+  
   timeSeries <- apply_subset(timeSeries, subset, parent.frame())
   
   series_id <- row.names(timeSeries)
@@ -374,12 +392,13 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
   txt <- switch(compartment,
     Biota = {
       txt <- paste0(txt, " (", ctsm_get_info(info$species, series$species, "common_name"), " ")
+      # txt <- paste0(txt, " (", series$species_name, " ")
       if (length(matrixID) == 1) 
         paste0(txt, matrixNames) 
       else {
         out <- sapply(matrixID, function(i) {
-          seriesID <- names(info$matrix)[info$matrix == i]
-          detID <- unique(info$determinand[seriesID])
+          seriesID <- names(series$matrix)[series$matrix == i]
+          detID <- unique(series$determinand[seriesID])
           paste0("(", paste0(detID, collapse = ", "), ")")
         })
         out <- paste(matrixNames, out, sep = " ")
@@ -392,9 +411,7 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
       paste0(txt, " (", matrixNames[1])
     },
     Water = {
-      if (length(matrixID) > 1) 
-        warning('multiple matrices not supported for water in ctsm.web.getKey')
-      paste0(txt, " (", matrixNames[1])
+      paste0(txt, " (", series$filtration)
     }
   )
   
@@ -408,7 +425,8 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
   out <- list(media = txt)
 
   txt <- paste("Station: ", series$station_name, sep = "")
-  if (!is.na(series$station_longname)) {
+  if (!is.na(series$station_longname) && 
+      series$station_name != series$station_longname) {
     txt <- paste(txt, " (", series$station_longname, ")", sep = "")
   }
   
@@ -496,7 +514,7 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
   else {
     wk <- sapply(unitID, function(i) {
       seriesID <- names(unitText)[unitText == i]
-      detID <- unique(info$determinand[seriesID])
+      detID <- unique(series$determinand[seriesID])
       paste0('"', "(", paste0(detID, collapse = ", "), ")", '"')
     })
     wk <- paste(unitID, wk, sep = sep.html)
@@ -592,7 +610,7 @@ plot.AC <- function(AC, ylim, useLogs = TRUE) {
 
 plot_data <- function(
     data, assessment, series, info, type = c("data", "assessment"), 
-    xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = FALSE, ...) {
+    xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = TRUE, ...) {
 
   # silence non-standard evaluation warnings
   .data <- year <- censoring <- NULL
@@ -608,12 +626,6 @@ plot_data <- function(
 
   # make data types compatible - i.e. raw data or assessment indices
  
-  if (series$determinand %in% c("MNC")) {
-    warning("remember to fix distribution changes")
-    distribution <- "normal"
-  }
-  
-  
   useLogs <- series$distribution %in% "lognormal"
 
   data <- switch(type, 
@@ -1008,11 +1020,6 @@ plot_auxiliary <- function(
   #   water = not specified yet
   # otherwise must contain four relevant variables
   
-  if (series$determinand %in% "MNC") {
-    warning("remember to fix distribution changes")
-    distribution <- "normal"
-  }
-  
   useLogs <- series$distribution %in% "lognormal"
   
   data <- dplyr::mutate(
@@ -1194,16 +1201,16 @@ plot_auxiliary <- function(
               info$compartment, 
               sep = "_"
             )
-            paste(
+            paste0(
               "Mean ", 
               switch(
                 family, 
-                Fish = "fish", 
-                Bivalve = "shell", 
-                Gastropod = "shell", 
+                Fish = "fish ", 
+                Bivalve = "shell ", 
+                Gastropod = "shell ", 
                 ""
               ), 
-              " length (", unit, ")", 
+              "length (", unit, ")", 
               sep = ""
             )
           },
@@ -1310,11 +1317,6 @@ plot_multiassessment <- function(data, assessment, series, info, ...) {
     series$determinand, 
     "distribution"
   )
-  
-  if (any(info$determinand %in% "MNC")) {
-    warning("remember to fix distribution changes")
-    series_distribution[info$determinand %in% "MNC"] <- "normal"
-  }
   
   useLogs <- series_distribution %in% "lognormal"
   
@@ -1557,11 +1559,6 @@ plot_multidata <- function(data, series, info,  ...) {
   data <- subset(data, !is.na(concentration))
 
   series_distribution <- ctsm_get_info(info$determinand, data$determinand, "distribution")
-  
-  if (any(data$determinand %in% "MNC")) {
-    warning("remember to fix distribution changes")
-    series_distribution[data$determinand %in% "MNC"] <- "normal"
-  }
   
   useLogs <- series_distribution %in% "lognormal"
   
