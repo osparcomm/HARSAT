@@ -79,7 +79,7 @@ plot_assessment <- function(
     auxiliary = "default") {
 
   # silence non-standard evaluation warnings
-  seriesID <- NULL
+  .data <- NULL
   
   # graphics_functions.R
 
@@ -224,7 +224,7 @@ plot_assessment <- function(
   
   lapply(series_id, function(id) {
     
-    data <- dplyr::filter(assessment_obj$data, seriesID == id)
+    data <- dplyr::filter(assessment_obj$data, .data$seriesID == id)
     
     assessment <- assessment_obj$assessment[[id]]
 
@@ -1011,7 +1011,7 @@ plot_auxiliary <- function(
     xykey.cex = 1.0, ntick.x = 3, ntick.y = 3, newPage = TRUE, ...) {
 
   # silence non-standard evaluation warnings
-  info.imposex <- NULL
+  .data <- info.imposex <- NULL
 
   # auxiliary specifies the choice of 'auxiliary' variables to plot: 
   # default:

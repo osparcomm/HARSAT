@@ -2866,7 +2866,7 @@ assess_negativebinomial <- function(
     output$reference.values <- lapply(AC, function(i) {
       ctsm.lmm.refvalue(
         output, 
-        year = max(data$year), 
+        yearID = max(data$year), 
         refvalue = log(i),
         lower.tail = switch(good_status, low = TRUE, high = FALSE)
       )

@@ -48,7 +48,7 @@ ctsm_uncrt_workup <- function(harsat_obj) {
     paste0("LOIGN", id_aux)
   )
   
-  data <- dplyr::select(data, any_of(id))
+  data <- dplyr::select(data, dplyr::any_of(id))
   
   
 
@@ -198,8 +198,10 @@ ctsm_uncrt_estimate <- function(data) {
 
   # remove data that is way off
   
-  data <- data %>% 
-    dplyr::filter(dplyr::between(relative_u, 1, 100)) 
+  data <- dplyr::filter(
+    data, 
+    dplyr::between(.data$relative_u, 1, 100)
+  ) 
   
   
   # relative error
@@ -250,6 +252,9 @@ ctsm_uncrt_estimate <- function(data) {
 #' @export
 ctsm_uncrt_plot_estimates <- function(uncrt_obj, group_id) {
 
+  # silence non-standard evaluation warnings
+  .data <- NULL
+  
   data <- dplyr::filter(uncrt_obj$data, .data$group %in% group_id)
   
   data <- dplyr::arrange(data, .data$determinand, .data$concentration)

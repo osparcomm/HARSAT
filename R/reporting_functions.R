@@ -634,14 +634,14 @@ write_summary_table <- function(
     "shape", "colour"
   ) 
   
-  summary <- dplyr::relocate(summary, any_of(wk))
+  summary <- dplyr::relocate(summary, dplyr::any_of(wk))
   
   if ("dtrend_obs" %in% names(summary)) {
     wk <- c(
       "dtrend_obs", "dtrend_seq", "dtrend_ten", "nyear_seq", 
       "power_obs", "power_seq", "power_ten"
     )
-    summary <- dplyr::relocate(summary, all_of(wk), .after = "dtrend") 
+    summary <- dplyr::relocate(summary, dplyr::all_of(wk), .after = "dtrend") 
   }
   
   sortID <- intersect(
