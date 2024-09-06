@@ -2301,7 +2301,8 @@ create_timeseries <- function(
 
   # silence non-standard evaluation warnings
   .data <- .month <- .not_ok <- group <- value <- NULL
-  determinand <- uncertainty <- uncertainty_sd <- uncertainty_rel <- species_group <- NULL
+  determinand <- uncertainty <- uncertainty_sd <- uncertainty_rel <- NULL
+  concentration <- distribution <- species_group <- NULL
 
   # arguments
   
@@ -3925,6 +3926,11 @@ check_uncertainty <- function(data, info, type = c("reported", "calculated")) {
   # type = reported is used for submitted data
   # type = calculated is used to check whether implausible uncertainties have
   #   been created in e.g. the normalisation process
+  
+  # silence non-standard evaluation warnings
+  
+  .data <- reason <- NULL
+  
   
   type <- match.arg(type)
   

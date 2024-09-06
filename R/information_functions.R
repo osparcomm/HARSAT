@@ -2649,14 +2649,15 @@ get.info.imposex <- function(
 #' 2024. The 2022 world health organization reevaluation of human and mammalian 
 #' toxic equivalency factors for polychlorinated dioxins, dibenzofurans and 
 #' biphenyls. Regulatory Toxicology and Pharmacology 146; 
-#' [https://doi.org/10.1016/j.yrtph.2023.105525]
+#' [https://doi.org/10.1016/j.yrtph.2023.105525](https://doi.org/10.1016/j.yrtph.2023.105525)
 #' 
 #' Van den Berg M, Birnbaum LS, Denison M, De Vito M, Farland W, Feeley M, 
 #' Fiedler H, Hakansson H, Hanberg A, Haws L, Rose M, Safe S, Schrenk D, 
 #' Tohyama C, Tritscher A, Tuomisto J, Tysklind M, Walker N, Peterson RE, 2006.
 #' The 2005 World Health Organization reevaluation of human and mammalian toxic 
 #' equivalency factors for dioxins and dioxin-like compounds. Toxicological 
-#' Sciences 93 223–241; [https://doi.org/10.1093/toxsci/kfl055]
+#' Sciences 93 223–241; 
+#' [https://doi.org/10.1093/toxsci/kfl055](https://doi.org/10.1093/toxsci/kfl055)
 #' 
 #' @export 
 info_TEF <- list(

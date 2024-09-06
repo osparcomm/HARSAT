@@ -454,7 +454,7 @@ ctsm.check.sex.biota <- function(data, info) {
   # extra checks for imposex determinands and EROD 
 
   # silence non-standard evaluation warnings
-  sex <- NULL
+  .data <- sex <- NULL
 
   
   # global check of ICES codes 

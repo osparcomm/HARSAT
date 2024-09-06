@@ -39,13 +39,14 @@ Rose M, Safe S, Schrenk D, Wheeler MW, Wikoff DS, Zhao B, van den Berg M,
 2024. The 2022 world health organization reevaluation of human and mammalian
 toxic equivalency factors for polychlorinated dioxins, dibenzofurans and
 biphenyls. Regulatory Toxicology and Pharmacology 146;
-\link{https://doi.org/10.1016/j.yrtph.2023.105525}
+\url{https://doi.org/10.1016/j.yrtph.2023.105525}
 
 Van den Berg M, Birnbaum LS, Denison M, De Vito M, Farland W, Feeley M,
 Fiedler H, Hakansson H, Hanberg A, Haws L, Rose M, Safe S, Schrenk D,
 Tohyama C, Tritscher A, Tuomisto J, Tysklind M, Walker N, Peterson RE, 2006.
 The 2005 World Health Organization reevaluation of human and mammalian toxic
 equivalency factors for dioxins and dioxin-like compounds. Toxicological
-Sciences 93 223–241; \link{https://doi.org/10.1093/toxsci/kfl055}
+Sciences 93 223–241;
+\url{https://doi.org/10.1093/toxsci/kfl055}
 }
 \keyword{datasets}
