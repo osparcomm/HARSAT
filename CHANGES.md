@@ -1,5 +1,54 @@
 ## Change log
 
+### Version 1.0.2
+
+This release is that used to run the OSPAR 2024 CEMP assessment.
+
+#### Weighted sums for TEQs etc.
+
+Weighted sums of concentrations are now calculated using `determinand.link.sum`. The weights are supplied using the `weights` argument. This function supersedes `determinand.link.TEQDFP` which is now deprecated and will be removed at the next release.
+
+Updated and corrected World Health Organisation TEFs for dioxins, furans and planar PCBs are now available in the data object `info_TEF`: there are four versions available:  
+
+* DFP_2005; the 2005 values  
+* DFP_2022; the 2022 values  
+* DFP_HOLAS3; the values used in the HOLAS3 assessment; these are the 2005 values excluding three PCBs and are included for backward compatibility  
+* DFP_CEMP; the values used in CEMP assessments <= 2024; these are the 2005 values excluding three PCBs and with the TEF for CDFO ten times too small; they are included for backward compatibility  
+
+DFP_2005 and DFP_2022 use determinand OCDF (the correct code) rather than CDFO (which is a grouped determinand code). 
+
+#### Auxiliary variables
+
+Key auxiliary variables can now be plotted in `plot_assessment`. The default variables are:  
+
+* biota: concentration, LNMEA, DRYWT%, LIPIDWT%  
+* sediment: non-normalised concentration, normalised concentration, AL, CORG  
+* water: no plots are currently produced  
+
+The choice of auxiliary variables can be altered using the `auxiliary` argument, although the options here are still limited.
+
+The merging of auxiliary variables with the data is now controlled using the `control` argument of `read_data`. `control$auxiliary$by_matrix` is a list which determines which auxiliary variables are merged by sample and matrix and which are just merged by sample. The default values are `c("DRYWT%", "LIPIDWT%)` for biota and `"all"` for sediment and water. Thus, by default, dry weight and lipid weight measurements are matched with chemical concentrations in the same tissue (matrix). but all other auxiliary variables in biota are matched at the sample level. For sediment (and water) all auxiliary variables (e.g. aluminium and organic carbon measurements) are matched with chemical concentrations in the same grain size fraction.
+
+#### Reporting
+
+`report_assessment` now has the full functionality required for the OSPAR CEMP assessment. This includes:  
+
+* scatterplot matrices of concentrations of related compounds using the non-exported function `plot_multidata`  
+* plots of assessments of related compounds using the non-exported function `plot_multiassessment`  
+* plots of contaminant ratios using the non-exported function `plot_ratio`  
+
+There is still some work required to make `report_assessment` suitable for all purposes.
+
+#### Minor bug fixes  
+
+* ensures that if `uncertainty` column is present in external data then so is `unit_uncertainty` and vice versa
+* `plot_assessment` now correctly plots the 90% two-sided confidence intervals on VDSI estimates from imposex assessments 
+* correct treatment of censoring data in `determinand.link.sum`
+* `ctsm.check.sex.biota` now works for any auxiliary variable
+* `get_timeseries` now always shows the series identifier for each timeseries
+* `estimate_uncertainties` now traps for the case then `DRYWT%` and `LIPIDWT%` are not specified as auxiliary variables
+
+
 ### Version 1.0.1
 
 Updates (mostly) required to run the OSPAR 2024 CEMP assessment. 
