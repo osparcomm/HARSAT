@@ -203,28 +203,28 @@ the following lines:
 
 ```r
 get_timeseries(water_timeseries) |> head(10) 
-#>    station_code station_name   country determinand filtration subseries basis
-#> 1         11241         64A2 Lithuania          CD   filtered      <NA>     W
-#> 2         11241         64A2 Lithuania          PB   filtered      <NA>     W
-#> 3         11241         64A2 Lithuania        PFOS unfiltered      <NA>     W
-#> 4         11241         64A2 Lithuania       TBSN+ unfiltered      <NA>     W
-#> 5         12896         AUDF   Estonia          CD   filtered      <NA>     W
-#> 6         12896         AUDF   Estonia          PB   filtered      <NA>     W
-#> 7         12896         AUDF   Estonia        PFOS unfiltered      <NA>     W
-#> 8         12896         AUDF   Estonia       TBSN+ unfiltered      <NA>     W
-#> 9          2144      OMMVUW4   Germany          CD   filtered      <NA>     W
-#> 10         2144      OMMVUW4   Germany          PB   filtered      <NA>     W
-#>    unit
-#> 1  ug/l
-#> 2  ug/l
-#> 3  ng/l
-#> 4  ng/l
-#> 5  ug/l
-#> 6  ug/l
-#> 7  ng/l
-#> 8  ng/l
-#> 9  ug/l
-#> 10 ug/l
+#>                    series station_code station_name   country determinand
+#> 1       11241 CD filtered        11241         64A2 Lithuania          CD
+#> 2       11241 PB filtered        11241         64A2 Lithuania          PB
+#> 3   11241 PFOS unfiltered        11241         64A2 Lithuania        PFOS
+#> 4  11241 TBSN+ unfiltered        11241         64A2 Lithuania       TBSN+
+#> 5       12896 CD filtered        12896         AUDF   Estonia          CD
+#> 6       12896 PB filtered        12896         AUDF   Estonia          PB
+#> 7   12896 PFOS unfiltered        12896         AUDF   Estonia        PFOS
+#> 8  12896 TBSN+ unfiltered        12896         AUDF   Estonia       TBSN+
+#> 9        2144 CD filtered         2144      OMMVUW4   Germany          CD
+#> 10       2144 PB filtered         2144      OMMVUW4   Germany          PB
+#>    filtration subseries basis unit
+#> 1    filtered      <NA>     W ug/l
+#> 2    filtered      <NA>     W ug/l
+#> 3  unfiltered      <NA>     W ng/l
+#> 4  unfiltered      <NA>     W ng/l
+#> 5    filtered      <NA>     W ug/l
+#> 6    filtered      <NA>     W ug/l
+#> 7  unfiltered      <NA>     W ng/l
+#> 8  unfiltered      <NA>     W ng/l
+#> 9    filtered      <NA>     W ug/l
+#> 10   filtered      <NA>     W ug/l
 ```
 
 
@@ -590,19 +590,25 @@ measurements of a single determinand in a single matrix (tissue type; e.g.
 'EH', `LI' or `SB`) in a single species at a single monitoring station. PAH
 metabolite data are further grouped by `method_analysis`.
 
-The `determinands.control` argument does rather more here. There are four summed
-variables: PFOS, SBDE6, HBCD and SCB6. There is also one variable CB138+163
-which needs to be relabeled as (replaced by) CB138. For the purposes of the
-assessment, the contribution of CB163 is regarded as small. Similarly CB138+163 
-is taken to be a good proxy for CB138. Note that the replacements must be done
-before the six PCBs are summed to give SCB6 in order for them to be included
-in the sum.
+The `determinands.control` argument does rather more here. There are five summed
+variables: PFOS, SBDE6, HBCD, SCB6 and TEQDFP. There is also one variable 
+CB138+163 which needs to be relabeled as (replaced by) CB138. For the purposes 
+of the assessment, the contribution of CB163 is regarded as small. Similarly 
+CB138+163 is taken to be a good proxy for CB138. Note that the replacements must 
+be done before the six PCBs are summed to give SCB6 in order for them to be 
+included in the sum.
 
-There are also two 'bespoke' actions in `determinands.control`. These are
-customised functions that do more complicated things. One of them computes the 
-WHO TEQ for dioxins, furans and planar PCBS (labelled TEQDFP) using the TEFs 
-for the human health QS. The other deals with the three different ways in
-which lipid weight measurements can be submitted.
+The calculation of TEQDFP is more complex than that of the other summed variables.
+TEQDFP is the label used for the World Health Organisation Toxic Equivalent sum
+for dioxins, furans and planar polychlorinated biphenyls. This is calculated 
+using the Toxic Equivalency Factors (TEFs) stored in `info_TEQ$HOLAS3`, with the 
+TEFS identified as `weights`. Note that the weights used in the example below
+are those used in the HELCOM HOLAS 3 assessment, but have been superseeded; see
+`help("info_TEQ")` for more details. 
+
+There is also one 'bespoke' action in `determinands.control`. This triggers a 
+customised functions that does more complicated things. Here it deals with the  
+three different ways in which lipid weight measurements can be submitted.
 
 Finally, `normalise_biota_HELCOM()` is a customised function that determines which
 measurements are normalised to 5% lipid in a HELCOM assessment. Again, the 
@@ -632,9 +638,9 @@ biota_timeseries <- create_timeseries(
       action = "sum"
     ),
     TEQDFP = list(
-      det = names(info_TEF$DFP_human_health), 
-      action = "bespoke", 
-      weights = info_TEF$DFP_human_health
+      det = names(info_TEF$DFP_HOLAS3),
+      action = "sum",
+      weights = info_TEF$DFP_HOLAS3
     ),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
   ),
@@ -671,7 +677,7 @@ biota_timeseries <- create_timeseries(
 #>    Data submitted as CB28, CB52, CB101, CB138, CB153, CB180 summed to give SCB6
 #>      22 of 925 samples lost due to incomplete submissions
 #>    Data submitted as 
-#> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1, TCDD 
+#> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, TCDD, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1 
 #> summed to give TEQDFP
 #>      907 of 945 samples lost due to incomplete submissions
 #>    Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT% 
