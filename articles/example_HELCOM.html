@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1.1006</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
       <h1>HELCOM example usage</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/develop/vignettes/example_HELCOM.Rmd" class="external-link"><code>vignettes/example_HELCOM.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/main/vignettes/example_HELCOM.Rmd" class="external-link"><code>vignettes/example_HELCOM.Rmd</code></a></small>
       <div class="d-none name"><code>example_HELCOM.Rmd</code></div>
     </div>
 
@@ -264,28 +264,28 @@ examples below.</p>
 code along the following lines:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_timeseries.html">get_timeseries</a></span><span class="op">(</span><span class="va">water_timeseries</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> </span>
-<span><span class="co">#&gt;    station_code station_name   country determinand filtration subseries basis</span></span>
-<span><span class="co">#&gt; 1         11241         64A2 Lithuania          CD   filtered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 2         11241         64A2 Lithuania          PB   filtered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 3         11241         64A2 Lithuania        PFOS unfiltered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 4         11241         64A2 Lithuania       TBSN+ unfiltered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 5         12896         AUDF   Estonia          CD   filtered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 6         12896         AUDF   Estonia          PB   filtered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 7         12896         AUDF   Estonia        PFOS unfiltered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 8         12896         AUDF   Estonia       TBSN+ unfiltered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 9          2144      OMMVUW4   Germany          CD   filtered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt; 10         2144      OMMVUW4   Germany          PB   filtered      &lt;NA&gt;     W</span></span>
-<span><span class="co">#&gt;    unit</span></span>
-<span><span class="co">#&gt; 1  ug/l</span></span>
-<span><span class="co">#&gt; 2  ug/l</span></span>
-<span><span class="co">#&gt; 3  ng/l</span></span>
-<span><span class="co">#&gt; 4  ng/l</span></span>
-<span><span class="co">#&gt; 5  ug/l</span></span>
-<span><span class="co">#&gt; 6  ug/l</span></span>
-<span><span class="co">#&gt; 7  ng/l</span></span>
-<span><span class="co">#&gt; 8  ng/l</span></span>
-<span><span class="co">#&gt; 9  ug/l</span></span>
-<span><span class="co">#&gt; 10 ug/l</span></span></code></pre></div>
+<span><span class="co">#&gt;                    series station_code station_name   country determinand</span></span>
+<span><span class="co">#&gt; 1       11241 CD filtered        11241         64A2 Lithuania          CD</span></span>
+<span><span class="co">#&gt; 2       11241 PB filtered        11241         64A2 Lithuania          PB</span></span>
+<span><span class="co">#&gt; 3   11241 PFOS unfiltered        11241         64A2 Lithuania        PFOS</span></span>
+<span><span class="co">#&gt; 4  11241 TBSN+ unfiltered        11241         64A2 Lithuania       TBSN+</span></span>
+<span><span class="co">#&gt; 5       12896 CD filtered        12896         AUDF   Estonia          CD</span></span>
+<span><span class="co">#&gt; 6       12896 PB filtered        12896         AUDF   Estonia          PB</span></span>
+<span><span class="co">#&gt; 7   12896 PFOS unfiltered        12896         AUDF   Estonia        PFOS</span></span>
+<span><span class="co">#&gt; 8  12896 TBSN+ unfiltered        12896         AUDF   Estonia       TBSN+</span></span>
+<span><span class="co">#&gt; 9        2144 CD filtered         2144      OMMVUW4   Germany          CD</span></span>
+<span><span class="co">#&gt; 10       2144 PB filtered         2144      OMMVUW4   Germany          PB</span></span>
+<span><span class="co">#&gt;    filtration subseries basis unit</span></span>
+<span><span class="co">#&gt; 1    filtered      &lt;NA&gt;     W ug/l</span></span>
+<span><span class="co">#&gt; 2    filtered      &lt;NA&gt;     W ug/l</span></span>
+<span><span class="co">#&gt; 3  unfiltered      &lt;NA&gt;     W ng/l</span></span>
+<span><span class="co">#&gt; 4  unfiltered      &lt;NA&gt;     W ng/l</span></span>
+<span><span class="co">#&gt; 5    filtered      &lt;NA&gt;     W ug/l</span></span>
+<span><span class="co">#&gt; 6    filtered      &lt;NA&gt;     W ug/l</span></span>
+<span><span class="co">#&gt; 7  unfiltered      &lt;NA&gt;     W ng/l</span></span>
+<span><span class="co">#&gt; 8  unfiltered      &lt;NA&gt;     W ng/l</span></span>
+<span><span class="co">#&gt; 9    filtered      &lt;NA&gt;     W ug/l</span></span>
+<span><span class="co">#&gt; 10   filtered      &lt;NA&gt;     W ug/l</span></span></code></pre></div>
 <p>At last it is time to run the assessment. You need to specify which
 thresholds to use, otherwise the code will not use any of them. For
 water there is only the EQS, but you still need to specify it. Look at
@@ -609,18 +609,27 @@ measurements of a single determinand in a single matrix (tissue type;
 e.g.  ‘EH’,
 <code>LI' or</code>SB<code>) in a single species at a single monitoring station. PAH metabolite data are further grouped by</code>method_analysis`.</p>
 <p>The <code>determinands.control</code> argument does rather more here.
-There are four summed variables: PFOS, SBDE6, HBCD and SCB6. There is
-also one variable CB138+163 which needs to be relabeled as (replaced by)
-CB138. For the purposes of the assessment, the contribution of CB163 is
-regarded as small. Similarly CB138+163 is taken to be a good proxy for
-CB138. Note that the replacements must be done before the six PCBs are
-summed to give SCB6 in order for them to be included in the sum.</p>
-<p>There are also two ‘bespoke’ actions in
-<code>determinands.control</code>. These are customised functions that
-do more complicated things. One of them computes the WHO TEQ for
-dioxins, furans and planar PCBS (labelled TEQDFP) using the TEFs for the
-human health QS. The other deals with the three different ways in which
-lipid weight measurements can be submitted.</p>
+There are five summed variables: PFOS, SBDE6, HBCD, SCB6 and TEQDFP.
+There is also one variable CB138+163 which needs to be relabeled as
+(replaced by) CB138. For the purposes of the assessment, the
+contribution of CB163 is regarded as small. Similarly CB138+163 is taken
+to be a good proxy for CB138. Note that the replacements must be done
+before the six PCBs are summed to give SCB6 in order for them to be
+included in the sum.</p>
+<p>The calculation of TEQDFP is more complex than that of the other
+summed variables. TEQDFP is the label used for the World Health
+Organisation Toxic Equivalent sum for dioxins, furans and planar
+polychlorinated biphenyls. This is calculated using the Toxic
+Equivalency Factors (TEFs) stored in <code>info_TEQ$HOLAS3</code>, with
+the TEFS identified as <code>weights</code>. Note that the weights used
+in the example below are those used in the HELCOM HOLAS 3 assessment,
+but have been superseeded; see <code>help("info_TEQ")</code> for more
+details.</p>
+<p>There is also one ‘bespoke’ action in
+<code>determinands.control</code>. This triggers a customised functions
+that does more complicated things. Here it deals with the<br>
+three different ways in which lipid weight measurements can be
+submitted.</p>
 <p>Finally, <code><a href="../reference/normalise_biota_HELCOM.html">normalise_biota_HELCOM()</a></code> is a customised
 function that determines which measurements are normalised to 5% lipid
 in a HELCOM assessment. Again, the normalisation functions are under
@@ -648,9 +657,9 @@ changed.</p>
 <span>      action <span class="op">=</span> <span class="st">"sum"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    TEQDFP <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_human_health</span><span class="op">)</span>, </span>
-<span>      action <span class="op">=</span> <span class="st">"bespoke"</span>, </span>
-<span>      weights <span class="op">=</span> <span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_human_health</span></span>
+<span>      det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_HOLAS3</span><span class="op">)</span>,</span>
+<span>      action <span class="op">=</span> <span class="st">"sum"</span>,</span>
+<span>      weights <span class="op">=</span> <span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_HOLAS3</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    <span class="st">"LIPIDWT%"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EXLIP%"</span>, <span class="st">"FATWT%"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"bespoke"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
@@ -687,7 +696,7 @@ changed.</p>
 <span><span class="co">#&gt;    Data submitted as CB28, CB52, CB101, CB138, CB153, CB180 summed to give SCB6</span></span>
 <span><span class="co">#&gt;      22 of 925 samples lost due to incomplete submissions</span></span>
 <span><span class="co">#&gt;    Data submitted as </span></span>
-<span><span class="co">#&gt; CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1, TCDD </span></span>
+<span><span class="co">#&gt; CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, TCDD, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1 </span></span>
 <span><span class="co">#&gt; summed to give TEQDFP</span></span>
 <span><span class="co">#&gt;      907 of 945 samples lost due to incomplete submissions</span></span>
 <span><span class="co">#&gt;    Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT% </span></span>

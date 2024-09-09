@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1.1006</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
       <h1>External data</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/develop/vignettes/example_external_data.Rmd" class="external-link"><code>vignettes/example_external_data.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/main/vignettes/example_external_data.Rmd" class="external-link"><code>vignettes/example_external_data.Rmd</code></a></small>
       <div class="d-none name"><code>example_external_data.Rmd</code></div>
     </div>
 
@@ -93,7 +93,7 @@ We usually do this by putting our data files in a directory
 <div class="section level2">
 <h2 id="read-data">Read data<a class="anchor" aria-label="anchor" href="#read-data"></a>
 </h2>
-<p>Mercury data with supporting variables and station dictionary</p>
+<p>Contaminant data with supporting variables and station dictionary</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_data.html">read_data</a></span><span class="op">(</span></span>
 <span>  compartment <span class="op">=</span> <span class="st">"biota"</span>,</span>
@@ -432,8 +432,11 @@ lognormally distributed data will be exported.</p>
 <div class="section level2">
 <h2 id="graphics-output">Graphics output<a class="anchor" aria-label="anchor" href="#graphics-output"></a>
 </h2>
-<p>Plots assessment with either data (file_type = “data”) or annual
-index (file_type = “index”) or both (default)</p>
+<p>Plots the fitted trend with pointwise 90% confidence bands and either
+the data (<code>file_type = "data"</code>) or the annual index
+(<code>file_type = "index"</code>) or plots the raw data with key
+auxiliary variables (<code>file_type = "auxiliary"</code>). The default
+is to plot all three.</p>
 <p>The plot function writes output to <code>output_dir</code> directory
 (must exist); with these settings all plots are output as .png formatted
 graphics; function can be omitted to avoid graphical output; changing
@@ -456,9 +459,10 @@ plotted (can take some time)</p>
 <span><span class="fu"><a href="../reference/plot_assessment.html">plot_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
 <span>  subset <span class="op">=</span> <span class="cn">NULL</span> ,</span>
-<span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span>,</span>
-<span>  file_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"data"</span>, <span class="st">"index"</span><span class="op">)</span>,</span>
-<span>  file_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"png"</span> <span class="op">)</span></span>
+<span>  output_dir <span class="op">=</span> <span class="va">graphics.dir</span>,</span>
+<span>  file_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"data"</span>, <span class="st">"index"</span>, <span class="st">"auxiliary"</span><span class="op">)</span>,</span>
+<span>  file_format <span class="op">=</span> <span class="st">"png"</span>,</span>
+<span>  auxiliary <span class="op">=</span> <span class="st">"default"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The above code will write a summary file for the run concerned.
 Checksums for the four runs described in this example are as

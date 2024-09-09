@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1.1006</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
       <h1>OSPAR example usage</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/develop/vignettes/example_OSPAR.Rmd" class="external-link"><code>vignettes/example_OSPAR.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/main/vignettes/example_OSPAR.Rmd" class="external-link"><code>vignettes/example_OSPAR.Rmd</code></a></small>
       <div class="d-none name"><code>example_OSPAR.Rmd</code></div>
     </div>
 
@@ -157,7 +157,8 @@ that <code>determinands.control</code> needs to do more work in
 <span></span>
 <span><span class="va">water_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">water_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Oddities will be written to 'oddities/water'</span></span>
+<span><span class="co">#&gt; Oddities will be written to 'oddities/water' with previous oddities backed up to</span></span>
+<span><span class="co">#&gt;  'oddities/water_backup'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dropping 411 records from data flagged for deletion. Possible reasons are:</span></span>
 <span><span class="co">#&gt;  - vflag = suspect</span></span>
@@ -7690,7 +7691,7 @@ NA
 0.0901546
 </td>
 <td style="text-align:right;">
-0.1212222
+0.1212221
 </td>
 <td style="text-align:left;">
 EQS
@@ -7699,7 +7700,7 @@ EQS
 2.0e+00
 </td>
 <td style="text-align:right;">
--1.8787778
+-1.8787779
 </td>
 <td style="text-align:right;">
 2017
@@ -15121,7 +15122,8 @@ of multiple thresholds in <code><a href="../reference/run_assessment.html">run_a
 <span><span class="co">#&gt; Argument max_year taken to be the maximum year in the data: 2021</span></span>
 <span><span class="va">sediment_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">sediment_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Oddities will be written to 'oddities/sediment'</span></span>
+<span><span class="co">#&gt; Oddities will be written to 'oddities/sediment' with previous oddities backed up to</span></span>
+<span><span class="co">#&gt;  'oddities/sediment_backup'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dropping 75 records from data flagged for deletion. Possible reasons are:</span></span>
 <span><span class="co">#&gt;  - vflag = suspect</span></span>
@@ -15144,7 +15146,9 @@ metals are normalised to 5% aluminium and all organics are normalised to
 or Gulf of Cadiz OSPAR subregions, in which case the concentrations are
 not normalised.</p>
 <p>The TEFs for the WHO TEQ for dioxins, furans and planar PCBs
-(labelled TEQDFP) are the values for the secondary poisoning QS.</p>
+(labelled TEQDFP) are those used in the OSPAR CEMP assessment up to
+2024. Note that these have been superseeded; see
+<code>help("info_TEQ")</code> for more details.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sediment_timeseries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_timeseries.html">create_timeseries</a></span><span class="op">(</span></span>
 <span>  <span class="va">sediment_data</span>,</span>
@@ -15157,9 +15161,9 @@ not normalised.</p>
 <span>    CB138 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CB138+163"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"replace"</span><span class="op">)</span>,</span>
 <span>    CB156 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CB156+172"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"replace"</span><span class="op">)</span>,</span>
 <span>    TEQDFP <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_environmental</span><span class="op">)</span>, </span>
-<span>      action <span class="op">=</span> <span class="st">"bespoke"</span>, </span>
-<span>      weights <span class="op">=</span> <span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_environmental</span></span>
+<span>      det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_CEMP</span><span class="op">)</span>, </span>
+<span>      action <span class="op">=</span> <span class="st">"sum"</span>, </span>
+<span>      weights <span class="op">=</span> <span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_CEMP</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    HCEPX <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HCEPC"</span>, <span class="st">"HCEPT"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
@@ -15192,7 +15196,7 @@ not normalised.</p>
 <span><span class="co">#&gt;      104 of 104 samples lost due to incomplete submissions</span></span>
 <span><span class="co">#&gt;    Data submitted as NAP1M, NAP2M summed to give NAPC1</span></span>
 <span><span class="co">#&gt;    Data submitted as </span></span>
-<span><span class="co">#&gt; CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1, TCDD </span></span>
+<span><span class="co">#&gt; CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, TCDD, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1 </span></span>
 <span><span class="co">#&gt; summed to give TEQDFP</span></span>
 <span><span class="co">#&gt;      17 of 17 samples lost due to incomplete submissions</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -38589,7 +38593,8 @@ actively worked on.</p>
 <span><span class="co">#&gt; Argument max_year taken to be the maximum year in the data: 2022</span></span>
 <span><span class="va">biota_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tidy_data.html">tidy_data</a></span><span class="op">(</span><span class="va">biota_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Oddities will be written to 'oddities/biota'</span></span>
+<span><span class="co">#&gt; Oddities will be written to 'oddities/biota' with previous oddities backed up to</span></span>
+<span><span class="co">#&gt;  'oddities/biota_backup'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dropping 11 records from data flagged for deletion. Possible reasons are:</span></span>
 <span><span class="co">#&gt;  - vflag = suspect</span></span>
@@ -38635,9 +38640,9 @@ using the customised function <code><a href="../reference/get_basis_biota_OSPAR.
 <span>      action <span class="op">=</span> <span class="st">"sum"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    TEQDFP <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_environmental</span><span class="op">)</span>, </span>
-<span>      action <span class="op">=</span> <span class="st">"bespoke"</span>, </span>
-<span>      weights <span class="op">=</span> <span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_environmental</span></span>
+<span>      det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_CEMP</span><span class="op">)</span>, </span>
+<span>      action <span class="op">=</span> <span class="st">"sum"</span>, </span>
+<span>      weights <span class="op">=</span> <span class="va">info_TEF</span><span class="op">$</span><span class="va">DFP_CEMP</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    HCEPX <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HCEPC"</span>, <span class="st">"HCEPT"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
 <span>    HCH <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>det <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HCHA"</span>, <span class="st">"HCHB"</span>, <span class="st">"HCHG"</span><span class="op">)</span>, action <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span>,</span>
@@ -38652,7 +38657,6 @@ using the customised function <code><a href="../reference/get_basis_biota_OSPAR.
 <span><span class="co">#&gt; Cleaning data</span></span>
 <span><span class="co">#&gt;    Dropping stations with no data between 2017 and 2022 </span></span>
 <span><span class="co">#&gt;    Dropping samples with only auxiliary variables</span></span>
-<span><span class="co">#&gt;    Unexpected or missing values for 'sex': see sex_queries.csv</span></span>
 <span><span class="co">#&gt;    Unexpected or missing values for 'matrix': see matrix_queries.csv</span></span>
 <span><span class="co">#&gt;    Unexpected or missing values for 'basis': see basis_queries.csv</span></span>
 <span><span class="co">#&gt;    Bile metabolite units changed from 'ng/g' to 'ng/ml' and from 'ug/kg' to 'ug/l'</span></span>
@@ -38683,7 +38687,7 @@ using the customised function <code><a href="../reference/get_basis_biota_OSPAR.
 <span><span class="co">#&gt; summed to give SCB7</span></span>
 <span><span class="co">#&gt;      26 of 97 samples lost due to incomplete submissions</span></span>
 <span><span class="co">#&gt;    Data submitted as </span></span>
-<span><span class="co">#&gt; CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1, TCDD </span></span>
+<span><span class="co">#&gt; CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, TCDD, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1 </span></span>
 <span><span class="co">#&gt; summed to give TEQDFP</span></span>
 <span><span class="co">#&gt;      114 of 114 samples lost due to incomplete submissions</span></span>
 <span><span class="co">#&gt;    Data submitted as HCHA, HCHB, HCHG summed to give HCH</span></span>
