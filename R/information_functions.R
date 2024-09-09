@@ -647,6 +647,26 @@ ctsm_read_determinand <- function(
   })
   
 
+  # warn about deprecated TEQ units
+  
+  not_ok <- sapply(compartment, function(id) {
+    unit_id <- paste0(id, "_unit")
+    any(grepl("^TEQ ", data[[unit_id]]))
+  })
+
+  if (any(not_ok)) {
+    lifecycle::deprecate_warn(
+      "1.0.2", 
+      I("use of units such as 'TEQ ug/kg' and 'TEQ pg/g'"),
+      details = c(
+        i = "use e.g. 'ug/kg' instead of 'TEQ ug/kg'", 
+        i = "you might need to update the determinand reference table"
+      ),
+      env = rlang::caller_env(2), 
+      user_env = rlang::caller_env(3)
+    )
+  }  
+  
 
   # tidy up for output
   
@@ -1976,6 +1996,20 @@ convert_units_workup <- function(units) {
     
   # could add in more units but those below cover all the ones needed to date
   
+  if (any(c("TEQ ug/kg", "TEQ pg/g") %in% units)) {
+    lifecycle::deprecate_warn(
+      "1.0.2", 
+      I("conversion between units 'TEQ ug/kg' and 'TEQ pg/g'"),
+      details = c(
+        i = "use e.g. 'ug/kg' instead of 'TEQ ug/kg'", 
+        i = "you might need to update the determinand reference table"
+      ),
+      env = rlang::caller_env(3), 
+      user_env = rlang::caller_env(4)
+    )
+  }  
+  
+  
   unit_group <- list(
     "length" = c("km", "m", "cm", "mm"), 
     "weight" = c("kg", "g", "mg"), 
@@ -2577,35 +2611,99 @@ get.info.imposex <- function(
 
 # TEF values ----
 
-#' TEF values for selected groups of compounds
+#' TEFs for selected groups of compounds
 #' 
-#' A list of named vectors which currently provide the TEFs for the WHO TEQ for 
-#' dioxins, furans and dioxin-like (planar) polychlorinated biphenyls.
-#' DFP_environmental and DFP_human_health provide the TEFs appropriate for 
-#' testing against the environmental and human health standards respectively.
+#' A list of named vectors which provide Toxic Equivalency Factors (TEFs) for
+#' calculating Toxic EQuivalent (TEQ) sums.   
 #' 
-#' Adding further TEFs will require more development to the relevant 
-#' determinand_link function 
+#' @usage 
+#' 
+#' info_TEF$DFP_2005
+#' info_TEF$DFP_2022
+#' 
+#' @format 
+#' 
+#' A list of named vectors:  
+#' 
+#' * `DFP_2005` gives the 2005 World Health Organisation TEFs for dioxins, 
+#' furans and dioxin-like (planar) polychlorinated biphenyls 
+#' ([Van den Berg et al. 2006](https://doi.org/10.1093/toxsci/kfl055))  
+#' * `DFP_2022` gives the 2022 World Health Organisation TEFs for dioxins, 
+#' furans and dioxin-like (planar) polychlorinated biphenyls 
+#' ([DeVito et al. 2024](https://doi.org/10.1016/j.yrtph.2023.105525))  
+#' * `DFP_HOLAS3` is a superseded version of `DFP_2005` that was used in the 
+#' HELCOM HOLAS3 assessment. It excludes CB114, CB123 and CB189 and uses code 
+#' CDFO instead of OCDF. It is included for reproducibility, but might be 
+#' removed in the future. 
+#' * `DFP_CEMP` is a superseded version of `DFP_2005` that was used in the 
+#' OSPAR CEMP assessments up to and including 2024. It excludes CB114, CB123 and 
+#' CB189, uses code CDFO instead of OCDF, and has a TEF for CDFO of 0.00003 
+#' rather than 0.0003. It is included for reproducibility, but might be removed 
+#' in the future.
+#'
+#' @references
+#' 
+#' DeVito M, Bokkers B, van Duursen MBM, van Ede K, Feeley M, Gáspár EAF, 
+#' Haws L, Kennedy S, Peterson RE, Hoogenboom R, Nohara K, Petersen K, Rider C, 
+#' Rose M, Safe S, Schrenk D, Wheeler MW, Wikoff DS, Zhao B, van den Berg M, 
+#' 2024. The 2022 world health organization reevaluation of human and mammalian 
+#' toxic equivalency factors for polychlorinated dioxins, dibenzofurans and 
+#' biphenyls. Regulatory Toxicology and Pharmacology 146; 
+#' [https://doi.org/10.1016/j.yrtph.2023.105525](https://doi.org/10.1016/j.yrtph.2023.105525)
+#' 
+#' Van den Berg M, Birnbaum LS, Denison M, De Vito M, Farland W, Feeley M, 
+#' Fiedler H, Hakansson H, Hanberg A, Haws L, Rose M, Safe S, Schrenk D, 
+#' Tohyama C, Tritscher A, Tuomisto J, Tysklind M, Walker N, Peterson RE, 2006.
+#' The 2005 World Health Organization reevaluation of human and mammalian toxic 
+#' equivalency factors for dioxins and dioxin-like compounds. Toxicological 
+#' Sciences 93 223–241; 
+#' [https://doi.org/10.1093/toxsci/kfl055](https://doi.org/10.1093/toxsci/kfl055)
 #' 
 #' @export 
 info_TEF <- list(
-  DFP_environmental = c(
+  DFP_2005 = c(    
+    "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB114" = 0.00003, 
+    "CB118" = 0.00003, "CB123" = 0.00003, "CB126" = 0.1, "CB156" = 0.00003, 
+    "CB157" = 0.00003, "CB167" = 0.00003, "CB169" = 0.03, "CB189" = 0.00003,
+    "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+    "CDD9X" = 0.1, "CDDO" = 0.0003, "TCDD" = 1, 
+    "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, "CDF6P" = 0.01, 
+    "CDF6X" = 0.1, "CDF9P" = 0.01, "CDF9X" = 0.1,  
+    "CDFP2" = 0.03, "CDFX1" = 0.1, "OCDF" = 0.0003
+  ),  
+  DFP_2022 = c(    
+    "CB77" = 0.0003, "CB81" = 0.006, "CB105" = 0.00003, "CB114" = 0.00003,
+    "CB118" = 0.00003, "CB123" = 0.00003, "CB126" = 0.05, "CB156" = 0.00003, 
+    "CB157" = 0.00003, "CB167" = 0.00003, "CB169" = 0.005, "CB189" = 0.00003,
+    "CDD1N" = 0.4, "CDD4X" = 0.09, "CDD6P" = 0.05, "CDD6X" = 0.07, 
+    "CDD9X" = 0.05, "CDDO" = 0.001, "TCDD" = 1,
+    "CDF2N" = 0.1, "CDF2T" = 0.07, "CDF4X" = 0.1, "CDF6P" = 0.02, 
+    "CDF6X" = 0.09, "CDF9P" = 0.1, "CDF9X" = 0.2,  
+    "CDFP2" = 0.01, "CDFX1" = 0.3, "OCDF" = 0.002
+  ),  
+  DFP_CEMP = c(
     "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
     "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-    "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-    "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-    "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-    "CDF9X" = 0.1, "CDFO" = 0.00003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+    "CB169" = 0.03, 
+    "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+    "CDD9X" = 0.1, "CDDO" = 0.0003, "TCDD" = 1, 
+    "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, "CDF6P" = 0.01, 
+    "CDF6X" = 0.1, "CDF9P" = 0.01, "CDF9X" = 0.1, "CDFO" = 0.00003, 
+    "CDFP2" = 0.03, "CDFX1" = 0.1
   ), 
-  DFP_human_health = c(
+  DFP_HOLAS3 = c(
     "CB77" = 0.0001, "CB81" = 0.0003, "CB105" = 0.00003, "CB118" = 0.00003, 
     "CB126" = 0.1, "CB156" = 0.00003, "CB157" = 0.00003, "CB167" = 0.00003, 
-    "CB169" = 0.03, "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
-    "CDD9X" = 0.1, "CDDO" = 0.0003, "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, 
-    "CDF6P" = 0.01, "CDF6X" = 0.1, "CDF9P" = 0.01,
-    "CDF9X" = 0.1, "CDFO" = 0.0003, "CDFP2" = 0.03, "CDFX1" = 0.1, "TCDD" = 1
+    "CB169" = 0.03, 
+    "CDD1N" = 1, "CDD4X" = 0.1, "CDD6P" = 0.01, "CDD6X" = 0.1, 
+    "CDD9X" = 0.1, "CDDO" = 0.0003, "TCDD" = 1, 
+    "CDF2N" = 0.3, "CDF2T" = 0.1, "CDF4X" = 0.1, "CDF6P" = 0.01, 
+    "CDF6X" = 0.1, "CDF9P" = 0.01, "CDF9X" = 0.1, "CDFO" = 0.0003, 
+    "CDFP2" = 0.03, "CDFX1" = 0.1
   )
 )
+
+
 
 
 

@@ -31,7 +31,7 @@ working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 
 # Read data
 
-Mercury data with supporting variables and station dictionary
+Contaminant data with supporting variables and station dictionary
 
 
 ```r
@@ -383,8 +383,10 @@ write_summary_table(
 
 # Graphics output
 
-Plots assessment with either data (file_type = "data") or annual index 
-(file_type = "index") or both (default)
+Plots the fitted trend with pointwise 90% confidence bands and either the data 
+(`file_type = "data"`) or the annual index (`file_type = "index"`) or plots the 
+raw data with key auxiliary variables (`file_type = "auxiliary"`). The default 
+is to plot all three.
 
 The plot function writes output to `output_dir` directory (must exist); with these
 settings all plots are output as .png formatted graphics; function can be omitted to 
@@ -409,9 +411,10 @@ if (!dir.exists(graphics.dir)) {
 plot_assessment(
   biota_assessment,
   subset = NULL ,
-  output_dir = summary.dir,
-  file_type = c("data", "index"),
-  file_format = c("png" )
+  output_dir = graphics.dir,
+  file_type = c("data", "index", "auxiliary"),
+  file_format = "png",
+  auxiliary = "default"
 )
 ```
 

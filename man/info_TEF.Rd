@@ -3,21 +3,50 @@
 \docType{data}
 \name{info_TEF}
 \alias{info_TEF}
-\title{TEF values for selected groups of compounds}
+\title{TEFs for selected groups of compounds}
 \format{
-An object of class \code{list} of length 2.
+A list of named vectors:
+\itemize{
+\item \code{DFP_2005} gives the 2005 World Health Organisation TEFs for dioxins,
+furans and dioxin-like (planar) polychlorinated biphenyls
+(\href{https://doi.org/10.1093/toxsci/kfl055}{Van den Berg et al. 2006})
+\item \code{DFP_2022} gives the 2022 World Health Organisation TEFs for dioxins,
+furans and dioxin-like (planar) polychlorinated biphenyls
+(\href{https://doi.org/10.1016/j.yrtph.2023.105525}{DeVito et al. 2024})
+\item \code{DFP_HOLAS3} is a superseded version of \code{DFP_2005} that was used in the
+HELCOM HOLAS3 assessment. It excludes CB114, CB123 and CB189 and uses code
+CDFO instead of OCDF. It is included for reproducibility, but might be
+removed in the future.
+\item \code{DFP_CEMP} is a superseded version of \code{DFP_2005} that was used in the
+OSPAR CEMP assessments up to and including 2024. It excludes CB114, CB123 and
+CB189, uses code CDFO instead of OCDF, and has a TEF for CDFO of 0.00003
+rather than 0.0003. It is included for reproducibility, but might be removed
+in the future.
+}
 }
 \usage{
-info_TEF
+info_TEF$DFP_2005
+info_TEF$DFP_2022
 }
 \description{
-A list of named vectors which currently provide the TEFs for the WHO TEQ for
-dioxins, furans and dioxin-like (planar) polychlorinated biphenyls.
-DFP_environmental and DFP_human_health provide the TEFs appropriate for
-testing against the environmental and human health standards respectively.
+A list of named vectors which provide Toxic Equivalency Factors (TEFs) for
+calculating Toxic EQuivalent (TEQ) sums.
 }
-\details{
-Adding further TEFs will require more development to the relevant
-determinand_link function
+\references{
+DeVito M, Bokkers B, van Duursen MBM, van Ede K, Feeley M, Gáspár EAF,
+Haws L, Kennedy S, Peterson RE, Hoogenboom R, Nohara K, Petersen K, Rider C,
+Rose M, Safe S, Schrenk D, Wheeler MW, Wikoff DS, Zhao B, van den Berg M,
+2024. The 2022 world health organization reevaluation of human and mammalian
+toxic equivalency factors for polychlorinated dioxins, dibenzofurans and
+biphenyls. Regulatory Toxicology and Pharmacology 146;
+\url{https://doi.org/10.1016/j.yrtph.2023.105525}
+
+Van den Berg M, Birnbaum LS, Denison M, De Vito M, Farland W, Feeley M,
+Fiedler H, Hakansson H, Hanberg A, Haws L, Rose M, Safe S, Schrenk D,
+Tohyama C, Tritscher A, Tuomisto J, Tysklind M, Walker N, Peterson RE, 2006.
+The 2005 World Health Organization reevaluation of human and mammalian toxic
+equivalency factors for dioxins and dioxin-like compounds. Toxicological
+Sciences 93 223–241;
+\url{https://doi.org/10.1093/toxsci/kfl055}
 }
 \keyword{datasets}

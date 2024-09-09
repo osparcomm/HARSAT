@@ -77,9 +77,10 @@ if (assessment_object$info$compartment == "biota") {
   group_id <- assessment_object$timeSeries[params$series, "detGroup"]
   if (!group_id  %in% c("Effects", "Imposex", "Metabolites"))
     var_id <- c(var_id, "matrix")
-  species_id <- assessment_object$timeSeries[params$series, "species"]
-  if (ctsm_get_info(assessment_object$info$species, species_id, "species_group") %in% "Mammal")
+  subseries_id <- assessment_object$timeSeries[params$series, "subseries"]
+  if (!is.na(subseries_id)) { 
     var_id <- c(var_id, "subseries")
+  }
 }
 
 assessment_object <- within(assessment_object, {
@@ -154,7 +155,12 @@ if (info$compartment %in% "biota") {
 if (info$compartment %in% "biota") {
   info$subseries <- gsub("_", " ", info$subseries)
   if (is.na(info$subseries)) {
-    info$subseries <- "all individuals"
+    info$subseries <- switch(
+      info$sex,
+      M = "males",
+      F = "females", 
+      NA_character_
+    )
   }
 }
 
@@ -339,17 +345,24 @@ info_multi <- within(info_multi, {
   names(determinand) <- seriesID
 })
 
-# get series names for labelling plots - usually just determinand, but could be more complex if e.g.
-# measured in multiple tissues, or when dealing with biological effects
+# get series names for labelling plots - usually just determinand, but could be more complex if 
+# e.g. dealing with biological effects - currently only works for EROD and males and females
 
 info_multi$plotNames <- with(info_multi, list(data = determinand, assessment = determinand))
 
 if (any(duplicated(info_multi$plotNames))) {
-  dups <- with(info_multi, duplicated(determinand) | duplicated(determinand, fromLast = TRUE))
-  info_multi$plotNames$data[dups] <- paste(
-    info_multi$determinand, assessment_object$timeSeries$level6name, sep = "\n")[dups]
-  info_multi$plotNames$assessment[dups] <- paste(
-    info_multi$determinand, assessment_object$timeSeries$level6name)[dups]
+  dups <- with(info_multi, duplicated(determinand) | duplicated(determinand, fromLast = TRUE)) 
+  if (info$compartment == "biota") {
+    sex_names <- dplyr::case_match(
+      assessment_object$timeSeries$sex, 
+      "M" ~ "males",
+      "F" ~ "females"
+    )
+    info_multi$plotNames$data[dups] <- paste(
+      info_multi$determinand, sex_names, sep = "\n")[dups]
+    info_multi$plotNames$assessment[dups] <- paste(
+      info_multi$determinand, sex_names)[dups]
+  }
   if (any(duplicated(info_multi$plotNames$data))) 
     cat("Error: duplicate plotting names - need to extend coding")
 }
@@ -394,7 +407,14 @@ is_ratio <- switch(
 intro_txt <- switch(
   info$compartment, 
   biota = paste(info$species_name, info$matrix_name), 
-  info$compartment
+  sediment = switch(
+    info$matrix, 
+    SEDTOT = "unsieved sediment",
+    SED63 = "sediment (< 63 micron fraction)",
+    SED20 = "sediment (< 20 micron fraction)",
+    paste0("sediment (", info$matrix, ")")
+  ),
+  water = paste(info$filtration, "water")
 )
 
 if (info$compartment %in% "biota" && info$species_group %in% "Mammal" && !is.na(info$subseries)) 
@@ -586,6 +606,11 @@ txt <- if (anova_ok) "Finally, the tab" else "The tab also"
 <li>OSPAR subregion: `r info$ospar_subregion`</li>
 <li>Station code: `r info$station_code`</li>
 <li>Station name: `r info$station_name`</li>
+
+```{asis, eval = !is.na(info$station_longname) && info$station_longname != info$station_name}
+<li>Station longname: `r info$station_longname`</li>
+```
+
 <li>Station latitude: `r format(info$station_latitude, digits = 2, nsmall = 2)`</li>
 <li class = "gap">Station longitude: `r format(info$station_longitude, digits = 2, nsmall = 2)`</li>
 <li>Compartment: `r info$compartment`</li>
@@ -595,7 +620,7 @@ txt <- if (anova_ok) "Finally, the tab" else "The tab also"
 <li>Species common name: `r info$species_name`</li>  
 ```
 
-```{asis, eval = info$compartment %in% "biota" && info$species_group %in% "Mammal" && !is.na(info$subseries)}
+```{asis, eval = info$compartment %in% "biota" && !is.na(info$subseries) && !info$determinand %in% "EROD"}
 <li>Sex / age group: `r tolower(info$subseries)`</li>
 ```
 
@@ -627,35 +652,41 @@ txt <- if (anova_ok) "Finally, the tab" else "The tab also"
 #### Assessment plot
 
 ```{r assessment_plot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
-plot.data(data, assessment, info, assessment_object$info, type = "assessment", xykey.cex = 1.4)
+plot_data(data, assessment, info, assessment_object$info, type = "assessment", xykey.cex = 1.4)
 ```
 
 
 #### Trend with data
 
 ```{r data_plot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
-plot.data(data, assessment, info, assessment_object$info, type = "data", xykey.cex = 1.4)
+plot_data(data, assessment, info, assessment_object$info, type = "data", xykey.cex = 1.4)
 ```
 
 
-<!-- #### Auxiliary data -->
+#### Auxiliary data
 
-<!-- ```{r, include = FALSE} -->
-<!-- ok <- params$compartment %in% c("biota", "sediment") -->
-<!-- ``` -->
+```{r, include = FALSE}
+ok <- info$compartment %in% c("biota", "sediment")
+```
 
-<!-- ```{asis, eval = !ok} -->
-<!-- <br>  -->
-<!-- No auxiliary variables currently plotted. -->
-<!-- ``` -->
+```{asis, eval = !ok}
+<br>
+No auxiliary variables currently plotted.
+```
 
-<!-- ```{r auxiliary_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7} -->
-<!-- auxiliary_id <- "default" -->
-<!-- if (info$compartment %in% "sediment" & info$group %in% "Metals")  -->
-<!--   auxiliary_id <- c("value", "concentration", "AL", "LI") -->
+```{r auxiliary_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+auxiliary_id <- switch(
+  info$compartment, 
+  biota = c("concentration", "LNMEA", "DRYWT%", "LIPIDWT%"), 
+  sediment = {
+    out <- c("value", "concentration", "AL")
+    if (info$group %in% "Metals") out <- c(out, "LI") else out <- c(out, "CORG")
+    out
+  }
+)
 
-<!-- plot.auxiliary(data, info, auxiliary_id = auxiliary_id, xykey.cex = 1.2) -->
-<!-- ``` -->
+plot_auxiliary(data, assessment, info, assessment_object$info, auxiliary = auxiliary_id, xykey.cex = 1.2)
+```
 
 
 
@@ -668,46 +699,50 @@ plot.data(data, assessment, info, assessment_object$info, type = "data", xykey.c
 
 
 
-<!-- #### Assessments (related `r txt_compounds`) -->
+#### Assessments (related `r txt_compounds`)
 
-<!-- ```{r, include = FALSE} -->
-<!-- ok <- ! info$detGroup %in% "Imposex" -->
-<!-- ``` -->
+```{r, include = FALSE}
+ok <- ! info$detGroup %in% "Imposex"
+if (info$determinand == "EROD") {
+  info_multi$subseries <- NA_character_
+}
+```
 
-<!-- ```{asis, eval = !ok} -->
-<!-- <br> -->
-<!-- No related responses assessed. -->
-<!-- ``` -->
+```{asis, eval = !ok}
+<br>
+No related responses assessed.
+```
 
-<!-- ```{r multi_assessment, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7} -->
-<!-- plot.multiassessment( -->
-<!--   assessment_object$data, assessment_object$assessment, info_multi, type = "assessment") -->
-<!-- ``` -->
-
-
-<!-- #### Data (related `r txt_compounds`) -->
-
-<!-- ```{r, include = FALSE} -->
-<!-- ok <- ! info$detGroup %in% "Imposex" -->
-<!-- ``` -->
-
-<!-- ```{asis, eval = !ok} -->
-<!-- <br> -->
-<!-- No related responses assessed. -->
-<!-- ``` -->
-
-<!-- ```{r multi_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7} -->
-<!-- plot.multidata(assessment_object$data, info_multi) -->
-<!-- ``` -->
+```{r multi_assessment, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+plot_multiassessment(
+  assessment_object$data, assessment_object$assessment, info_multi, assessment_object$info
+)
+```
 
 
-<!-- ```{asis, eval = is_ratio} -->
-<!-- #### Contaminant ratios -->
-<!-- ``` -->
+#### Data (related `r txt_compounds`)
 
-<!-- ```{r ratio_plot, eval = is_ratio, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7} -->
-<!-- plot.ratio(assessment_object$data, info_multi) -->
-<!-- ``` -->
+```{r, include = FALSE}
+ok <- ! info$detGroup %in% "Imposex"
+```
+
+```{asis, eval = !ok}
+<br>
+No related responses assessed.
+```
+
+```{r multi_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+plot_multidata(assessment_object$data, info_multi, assessment_object$info)
+```
+
+
+```{asis, eval = is_ratio}
+#### Contaminant ratios
+```
+
+```{r ratio_plot, eval = is_ratio, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+plot_ratio(assessment_object$data, info_multi, assessment_object$info)
+```
 
 
 #### Statistical analysis

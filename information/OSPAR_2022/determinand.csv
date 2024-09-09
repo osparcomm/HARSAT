@@ -75,7 +75,9 @@ CB99,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug
 CB101,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,TRUE,TRUE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.033333,0.15,0.033333,0.151854,0,0.175,lognormal,low
 CB105,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,TRUE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.00541,0.175,0.016333,0.180065,,,lognormal,low
 CB110,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
+CB114,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
 CB118,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,TRUE,TRUE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.033333,0.151458,0.03,0.165,0,0.2,lognormal,low
+CB123,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
 CB126,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,3.00E-05,0.164144,,,,,lognormal,low
 CB128,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
 CB132,,OC-CB,Chlorobiphenyls,Chlorobiphenyls,Chlorobiphenyls,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
@@ -170,7 +172,8 @@ CDFDN,,OC-DX,Dioxins,Dioxins,,FALSE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYW
 CDFO,,OC-DX,Dioxins,Dioxins,,FALSE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
 CDFP2,,OC-DX,Dioxins,Dioxins,,FALSE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
 CDFX1,,OC-DX,Dioxins,Dioxins,,FALSE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
-TEQDFP,WHO-TEQ (DFP),OC-DX,Dioxins,Dioxins,,TRUE,TRUE,FALSE,TEQ ug/kg,TEQ ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,1.80E-05,0.1375,3.90E-05,0.237592,,,lognormal,low
+OCDF,,OC-DX,Dioxins,Dioxins,,FALSE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,,,,,lognormal,low
+TEQDFP,WHO-TEQ (DFP),OC-DX,Dioxins,Dioxins,,TRUE,TRUE,FALSE,ug/kg,ug/kg,,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,1.80E-05,0.1375,3.90E-05,0.237592,,,lognormal,low
 PFOA,,O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.075,0.178,,,,,lognormal,low
 PFNA,,O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.05,0.25,,,,,lognormal,low
 PFDA,,O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,0.043333,0.249459,,,,,lognormal,low

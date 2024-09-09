@@ -2,39 +2,84 @@
 
 #' Graphical summaries of an assessment
 #'
-#' Generates a series of assessment plots with the raw data, or the annual
-#' indices, or both. The plots are exported as either png or pdf files.
+#' Generates a series of assessment plots for each time series. The plots are 
+#' exported as either png or pdf files.
 #'
 #' @param assessment_obj An assessment object resulting from a call to
 #'   run_assessment
 #' @param subset An optional vector specifying which timeseries are to be
 #'   plotted. An expression will be evaluated in the timeSeries component of
-#'   assessment_obj; use 'series' to identify individual timeseries.
+#'   assessment_obj; use `series` to identify individual timeseries.
 #' @param output_dir The output directory for the assessment plots (possibly
-#'   supplied using 'file.path'). The default is the working directory. The
+#'   supplied using `file.path`). The default is the working directory. The
 #'   output directory must already exist.
-#' @param file_type Specifies whether the plots show the raw data ('file_type =
-#'   "data"'), annual indices summarising the data for each year ('file_type =
-#'   "index"'), or (the default) whether two files should be produced for each
-#'   time series, one with the raw data and one with the annual indices.
-#' @param file_format Whether the files should be png (the default) or pdf.
+#' @param file_type A character vector specifying the types of assessment plot. 
+#'   The default `c("data", "index", "auxiliary")` produces three plots for 
+#'   each time series. See details 
+#' @param file_format A character string specifying Whether the files should be 
+#'   png (the default) or pdf.
+#' @param auxiliary A character string specifying the auxiliary variables 
+#'   plotted if `file_type = "auxiliary"`. See details
 #'
 #' @returns A series of png or pdf files with graphical summaries of an
-#'   assessment. The plots show the fitted trends with pointwise two-sided 90%
-#'   confidence limits and either the raw data, or indices summarising the data
-#'   for each year.
-#'
+#'   assessment. 
+#'   
+#' @details
+#' 
+#'   ## Types of assessment plots 
+#' 
+#'   * `file_type = "data"` shows the raw data with the fitted trend and 
+#'   pointwise two-sided 90% confidence bands   
+#'   * `file_type = "index"` shows annual indices that summarise the data for 
+#'   each year with the fitted trend and pointwise two-sided 90% confidence 
+#'   bands   
+#'   * `file_type = "auxiliary"` shows the raw data and key auxiliary variables 
+#'   see below)
+#'   
+#'   ## Auxiliary variables
+#' 
+#'   The default (`auxiliary = "default"`) is to plot the following variables:  
+#'   
+#'   * biota: determinand concentration, LNMEA (mean length), DRYWT% (dry weight 
+#'   content), LIPIDWT% (lipi weight content)
+#'   * sediment: non-normalised determinand concentration, normalised 
+#'   determinand concentration, AL (aluminium concentration), CORG (organic 
+#'   carbon content)
+#'   * water: no plots are generated at present
+#'   
+#'   For biota, the determinand concentration will always be plotted, but it is 
+#'   possible to change the three auxiliary variables. For example, to plot 
+#'   WTMEA (mean weight) instead of LIPIDWT% you would set `auxiliary = 
+#'   c("LNMEA", "WTMEA", "DRYWT%)`. For this to work, WTMEA must previously have
+#'   been specified as an auxiliary variable for the determinand in question 
+#'   using the `biota_auxliary` column in the determinand reference table. At 
+#'   present, there must always be three auxiliary variables for biota.
+#'   
+#'   For sediment, the non-normalised determinand concentration and the 
+#'   normalised determinand concentration will always be plotted, but it is 
+#'   possible to change the two auxiliary variables. For example, for metals in 
+#'   sediment, you might set `auxiliary = c("AL", "LI")` to plot aluminium
+#'   and lithium concentrations instead of aluminium and organic carbon 
+#'   concentrations. Again, for this to work, LI must previously have been 
+#'   specified as an auxiliary variable for the determinand in question using 
+#'   the `sediment_auxliary` column in the determinand reference table. 
+#'   At present, there must always be two auxiliary variables for sediment.
+#'   
+#'   At present, plots for only a limited range of auxiliary variables are 
+#'   supported. More flexibility in these plots, such as changing the number of 
+#'   auxiliary variables, is desirable and will emerge in due course.
 #'
 #' @export
 plot_assessment <- function(
     assessment_obj, 
     subset = NULL, 
     output_dir = ".",
-    file_type = c("data", "index"),
-    file_format = c("png", "pdf")) {
+    file_type = c("data", "index", "auxiliary"),
+    file_format = c("png", "pdf"), 
+    auxiliary = "default") {
 
   # silence non-standard evaluation warnings
-  seriesID <- NULL
+  .data <- NULL
   
   # graphics_functions.R
 
@@ -42,13 +87,27 @@ plot_assessment <- function(
   
   file_format = match.arg(file_format)
   
-  if (!all(file_type %in% c("data", "index"))) {
+
+  if (!all(file_type %in% c("data", "index", "auxiliary"))) {
     stop(
       "\nArgument 'file_type' is invalid: ", 
-      "must be 'data' or 'index' or both of them", 
+      "must be 'data','index', 'auxiliary' or some combination of these", 
       call. = FALSE
     )
   }
+  
+  if ("auxiliary" %in% file_type && assessment_obj$info$compartment == "water") {
+    warning(
+      "Auxiliary plots are not currently generated for water assessments",
+      call. = FALSE
+    )
+    file_type <- setdiff(file_type, "auxiliary")
+    
+    if (length(file_type) == 0L) {
+      return(invisible())
+    }
+  }  
+
   
   if (!dir.exists(output_dir)) {
     stop(
@@ -60,9 +119,6 @@ plot_assessment <- function(
   }
 
   
-  
-  
-
   info <- assessment_obj$info
   timeSeries <- assessment_obj$timeSeries 
   
@@ -98,16 +154,77 @@ plot_assessment <- function(
     timeSeries$matrix <- "WT"
   }
 
+  # ad-hoc fix to deal with EROD labelling (which is sex-specific)
+  # have raised an issue to deal with this after next release by making the sex
+  # classification part of the subseries column
+  
+  if (info$compartment == "biota") {
+    timeSeries <- dplyr::mutate(
+      timeSeries, 
+      subseries = dplyr::case_when(
+        .data$sex == "M" ~ "males",
+        .data$sex == "F" ~ "females",
+        .default = .data$subseries
+      )
+    )
+  }  
+
+  
+  # get relevant subset 
+  
   timeSeries <- apply_subset(timeSeries, subset, parent.frame())
   
   series_id <- row.names(timeSeries)
 
 
+  # identify variables for auxiliary plots - only applies to biota and 
+  # sediment at present
+  
+  if ("auxiliary" %in% file_type) {
+
+    if (length(auxiliary) == 1 && auxiliary == "default") {
+      auxiliary <- switch(
+        info$compartment, 
+        sediment = c("AL", "CORG"), 
+        biota = c("LNMEA", "DRYWT%", "LIPIDWT%")
+      )
+    } 
+    
+    ok_length <- switch(info$compartment, sediment = 2, biota = 3)
+
+    if (length(auxiliary) != ok_length) {
+      stop(
+        "\nArgument 'auxiliary' is invalid: ", 
+        "must be either 'default' or a length-", ok_length, 
+        " character vector\nspecifying the auxiliary variables to be plotted",  
+        call. = FALSE
+      )
+    }
+
+    ok <- auxiliary %in% names(assessment_obj$data)    
+    if (!all(ok)) {
+      stop(
+        "\nArgument 'auxiliary' is invalid: ",
+        "the following variables are not in the data:\n", 
+        paste(auxiliary[!ok], collapse = ", "),   
+        call. = FALSE
+      )
+    }
+    
+    auxiliary_id <- switch(
+      info$compartment,
+      sediment = c("value", "concentration", auxiliary),
+      biota = c("concentration", auxiliary)
+    ) 
+
+  }
+
+  
   # plot each timeSeries
   
   lapply(series_id, function(id) {
     
-    data <- dplyr::filter(assessment_obj$data, seriesID == id)
+    data <- dplyr::filter(assessment_obj$data, .data$seriesID == id)
     
     assessment <- assessment_obj$assessment[[id]]
 
@@ -116,7 +233,7 @@ plot_assessment <- function(
         
     series <- timeSeries[id, ]
     
-    
+
     # get file name from id, and add country and station name 
     # for easier identification
     
@@ -150,7 +267,7 @@ plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot.data(data, assessment, series, info, type = "assessment", xykey.cex = 1.4) 
+      plot_data(data, assessment, series, info, type = "assessment", xykey.cex = 1.4) 
       dev.off()
       
     }    
@@ -169,10 +286,29 @@ plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot.data(data, assessment, series, info, type = "data", xykey.cex = 1.4)
+      plot_data(data, assessment, series, info, type = "data", xykey.cex = 1.4)
       dev.off()
       
     }  
+
+    
+    # plot data with auxiliary variables
+    
+    if ("auxiliary" %in% file_type) {
+      
+      output_file <- paste0(output_id, " auxiliary.", file_format)
+      output_file <- file.path(output_dir, output_file)
+      
+      switch(
+        file_format, 
+        png = png(output_file, width = 680, height = 480), 
+        pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
+      )
+     
+      plot_auxiliary(data, assessment, series, info, auxiliary_id, xykey.cex = 1.4) 
+      dev.off()
+      
+    }    
     
   })
   
@@ -256,12 +392,13 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
   txt <- switch(compartment,
     Biota = {
       txt <- paste0(txt, " (", ctsm_get_info(info$species, series$species, "common_name"), " ")
+      # txt <- paste0(txt, " (", series$species_name, " ")
       if (length(matrixID) == 1) 
         paste0(txt, matrixNames) 
       else {
         out <- sapply(matrixID, function(i) {
-          seriesID <- names(info$matrix)[info$matrix == i]
-          detID <- unique(info$determinand[seriesID])
+          seriesID <- names(series$matrix)[series$matrix == i]
+          detID <- unique(series$determinand[seriesID])
           paste0("(", paste0(detID, collapse = ", "), ")")
         })
         out <- paste(matrixNames, out, sep = " ")
@@ -274,9 +411,7 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
       paste0(txt, " (", matrixNames[1])
     },
     Water = {
-      if (length(matrixID) > 1) 
-        warning('multiple matrices not supported for water in ctsm.web.getKey')
-      paste0(txt, " (", matrixNames[1])
+      paste0(txt, " (", series$filtration)
     }
   )
   
@@ -290,7 +425,8 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
   out <- list(media = txt)
 
   txt <- paste("Station: ", series$station_name, sep = "")
-  if (!is.na(series$station_longname)) {
+  if (!is.na(series$station_longname) && 
+      series$station_name != series$station_longname) {
     txt <- paste(txt, " (", series$station_longname, ")", sep = "")
   }
   
@@ -318,7 +454,7 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
   if (auxiliary.plot) { 
     start.text <- paste(
       switch(
-        info$group, 
+        series$group, 
         Effects = "Effect", 
         Imposex = "Imposex", 
         "Concentration"
@@ -364,7 +500,7 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
     MoreArgs = list(html = html, compartment = info$compartment)
   )
   
-  names(unitText) <- info$seriesID
+  names(unitText) <- series$seriesID
   
   unitID <- unique(unitText)
   
@@ -378,7 +514,7 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
   else {
     wk <- sapply(unitID, function(i) {
       seriesID <- names(unitText)[unitText == i]
-      detID <- unique(info$determinand[seriesID])
+      detID <- unique(series$determinand[seriesID])
       paste0('"', "(", paste0(detID, collapse = ", "), ")", '"')
     })
     wk <- paste(unitID, wk, sep = sep.html)
@@ -472,9 +608,9 @@ plot.AC <- function(AC, ylim, useLogs = TRUE) {
 
 
 
-plot.data <- function(
+plot_data <- function(
     data, assessment, series, info, type = c("data", "assessment"), 
-    xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = FALSE, ...) {
+    xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, newPage = TRUE, ...) {
 
   # silence non-standard evaluation warnings
   .data <- year <- censoring <- NULL
@@ -490,12 +626,6 @@ plot.data <- function(
 
   # make data types compatible - i.e. raw data or assessment indices
  
-  if (series$determinand %in% c("MNC")) {
-    warning("remember to fix distribution changes")
-    distribution <- "normal"
-  }
-  
-  
   useLogs <- series$distribution %in% "lognormal"
 
   data <- switch(type, 
@@ -844,7 +974,7 @@ plot.panel <- function(
   censoring[is_censoring] <- tolower(censoring[is_censoring])
   
   if (any(is_censoring)) {
-    lpoints(
+    lattice::lpoints(
       x[is_censoring], 
       y[is_censoring], 
       pch = censoring[is_censoring], 
@@ -854,7 +984,7 @@ plot.panel <- function(
   }
     
   if (any(!is_censoring)) {
-    lpoints(
+    lattice::lpoints(
       x[!is_censoring], 
       y[!is_censoring], 
       pch = wk.pch, 
@@ -864,74 +994,71 @@ plot.panel <- function(
   }
 
   if (!missing(type) && type == "assessment" && "lower" %in% names(indiCL)) {
-    with(indiCL, lsegments(year, lower, year, upper, lwd = 2, col = "black"))
+    lattice::lsegments(
+      indiCL$year, 
+      indiCL$lower, 
+      indiCL$year, 
+      indiCL$upper, 
+      lwd = 2, 
+      col = "black"
+    )
   }
 }
 
 
-plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0, ntick.x = 3, ntick.y = 3, 
-                           newPage = TRUE, ...) {
+plot_auxiliary <- function(
+    data, assessment, series, info, auxiliary,  
+    xykey.cex = 1.0, ntick.x = 3, ntick.y = 3, newPage = TRUE, ...) {
 
   # silence non-standard evaluation warnings
-  censoring <- concOriginal <- censoringOriginal <- info.imposex <- series <- NULL
+  .data <- info.imposex <- NULL
 
-  # auxiliary_id specifies the choice of 'auxiliary' variables to plot: 
+  # auxiliary specifies the choice of 'auxiliary' variables to plot: 
   # default:
   #   sediment = value, concentration, AL, CORG
   #   biota = concentration, LNMEA, DRYWT%, LIPIDWT%
   #   water = not specified yet
   # otherwise must contain four relevant variables
   
-  distribution <- ctsm_get_info("determinand", info$determinand, "distribution")
+  useLogs <- series$distribution %in% "lognormal"
   
-  if (info$determinand %in% "MNC") {
-    warning("remember to fix distribution changes")
-    distribution <- "normal"
-  }
-  
-  useLogs <- distribution %in% "lognormal"
-  
-
-  data <- within(data, {
-    if (useLogs) concentration <- log(concentration)
-    concentration.censoring <- censoring
-
-    if (exists("concOriginal")) {
-      if (useLogs) value <- log(concOriginal)
-      value.censoring <- censoringOriginal
-    }
-  })
-
-  
-  stopifnot(
-    is.character(auxiliary_id),
-    length(auxiliary_id) %in% c(1, 4)
+  data <- dplyr::mutate(
+    data, 
+    concentration = if (useLogs) log(.data$concentration) else .data$concentration,
+    concentration.censoring = .data$censoring
   )
   
-  if (length(auxiliary_id) == 1 && auxiliary_id == "default") {
-    auxiliary <- switch(
-      info$compartment, 
-      sediment = c("value", "concentration", "AL", "CORG"), 
-      biota = c("concentration", "LNMEA", "DRYWT%", "LIPIDWT%")
+  if ("concOriginal" %in% names(data)) {
+    data <- dplyr::mutate(
+      data, 
+      value = if (useLogs) log(.data$concOriginal) else .data$concOriginal,
+      value.censoring = .data$censoringOriginal
     )
-  } else {
-    auxiliary <- auxiliary_id
   }
-    
+
+
   auxiliary.censoring <- paste(auxiliary, "censoring", sep = ".")
   
   # not all auxiliary variables have censorings, so create dummy columns
   
   ok <- auxiliary.censoring %in% names(data)
-  if (!all(ok))
-    data[auxiliary.censoring[!ok]] <- lapply(data[auxiliary[!ok]], function(x) ifelse(is.na(x), NA, ""))
-    
+  if (!all(ok)) {
+    data[auxiliary.censoring[!ok]] <- lapply(
+      data[auxiliary[!ok]], 
+      function(x) ifelse(is.na(x), NA, "")
+    )
+  }
   data <- data[c("year", auxiliary, auxiliary.censoring)]
 
 
   data <- reshape(
-    data, varying = list(auxiliary, auxiliary.censoring), v.names = c("value", "censoring"), direction = "long", 
-    timevar = "type", times = auxiliary)
+    data, 
+    varying = list(auxiliary, auxiliary.censoring), 
+    v.names = c("value", "censoring"), 
+    direction = "long", 
+    timevar = "type", 
+    times = auxiliary
+  )
   
   data <- within(data, type <- ordered(type, levels = auxiliary))
 
@@ -940,45 +1067,52 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
   is.data <- unlist(with(data, tapply(value, type, function(i) !all(is.na(i)))))
   data <- within(data, value[type %in% names(is.data[!is.data])] <- 0)
 
-  ylim <- with(data, tapply(value, type, extendrange, f = 0.07))        # this is what R will use in xyplot
-  if (info$compartment == "sediment")
-  {
-    ylim$value <- with(subset(data, type %in% c("value", "concentration")), extendrange(value, f = 0.07))
+  # this is what R will use in xyplot
+  ylim <- with(data, tapply(value, type, extendrange, f = 0.07))        
+  if (info$compartment == "sediment") {
+    ylim$value <- with(
+      subset(data, type %in% c("value", "concentration")), 
+      extendrange(value, f = 0.07)
+    )
     ylim$concentration <- ylim$value
   }
   
-  if (info$determinand %in% c("VDS", "IMPS", "INTS")) 
-  {
-    wk <- info.imposex[
-      info.imposex$species %in% info$species & info.imposex$determinand %in% info$determinand, "max_value"]
-    ylim$concentration <- extendrange(c(0, wk), f = 0.07)
+  if (series$determinand %in% c("VDS", "IMPS", "INTS")) {
+    wk <- dplyr::filter(
+      info$imposex, 
+      .data$species == series$species,
+      .data$determinand == series$determinand
+    )
+    imposex_max_value <- wk$max_value
+    ylim$concentration <- extendrange(c(0, imposex_max_value), f = 0.07)
   }            
   
   
-  ykey <- sapply(levels(data$type), function(i)
-  {
-    if (is.data[i])
-    {  
+  ykey <- sapply(levels(data$type), function(i) {
+    if (is.data[i]) {
       wk <- plot.scales(
-        ylim[[i]], n = ntick.y, logData = (useLogs & i %in% c("value", "concentration")))
+        ylim[[i]], 
+        n = ntick.y, 
+        logData = (useLogs & i %in% c("value", "concentration"))
+      )
       max(nchar(format(wk)))
     }
     else 0
   })
   key.ylab.padding <- max(ykey[c(1, 3)])
   
-  ylim <- with(data, tapply(value, type, range, na.rm = TRUE))          # but this is what must get passed in!
-  if (info$compartment == "sediment")
-  {
-    ylim$value <- with(subset(data, type %in% c("value", "concentration")), range(value, na.rm = TRUE))
+  # but this is what must get passed in!
+  ylim <- with(data, tapply(value, type, range, na.rm = TRUE))          
+  if (info$compartment == "sediment") {
+    ylim$value <- with(
+      subset(data, type %in% c("value", "concentration")), 
+      range(value, na.rm = TRUE)
+    )
     ylim$concentration <- ylim$value
   }
 
-  if (info$determinand %in% c("VDS", "IMPS", "INTS")) 
-  {
-    wk <- info.imposex[
-      info.imposex$species %in% info$species & info.imposex$determinand %in% info$determinand, "max_value"]
-    ylim$concentration <- c(0, wk)
+  if (series$determinand %in% c("VDS", "IMPS", "INTS")) {
+    ylim$concentration <- c(0, imposex_max_value)
   }            
   
   # not perfect, but it does the job without plotting everything in their own viewport
@@ -1010,26 +1144,33 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
         layout.widths = list(
           left.padding = 2, axis.left = 0, ylab.axis.padding = 0, ylab = 0, 
           key.ylab.padding = key.ylab.padding * xykey.cex, 
-          right.padding = 0, key.right = 0, axis.key.padding = 0, axis.right = 0, strip.left = 0, 
-          key.left = 0, axis.panel = 0
+          right.padding = 0, key.right = 0, axis.key.padding = 0, 
+          axis.right = 0, strip.left = 0, key.left = 0, axis.panel = 0
         ),
         layout.heights = list(
           axis.bottom = 0, bottom.padding = 2, axis.xlab.padding = 0, xlab = 0, 
           xlab.key.padding = xykey.cex, key.sub.padding = 0, 
-          axis.top = 0, top.padding = 0, main = 0, main.key.padding = 0, key.top = 0, 
-          key.axis.padding = 0, axis.panel = 0)
+          axis.top = 0, top.padding = 0, main = 0, main.key.padding = 0, 
+          key.top = 0, key.axis.padding = 0, axis.panel = 0)
       ), 
       axis = function(side, ...) 
-        plot.axis(side, ntick.x = ntick.x, ntick.y = ntick.y, xykey.cex = xykey.cex, 
-                  plot.type = "auxiliary", is.data = is.data, useLogs = useLogs, ...),
+        plot.axis(
+          side, ntick.x = ntick.x, ntick.y = ntick.y, xykey.cex = xykey.cex, 
+          plot.type = "auxiliary", is.data = is.data, useLogs = useLogs, ...
+        ),
       panel = function(x, y, subscripts) {
         type.id <- levels(type)[which.packet()]
         
-        if (info$compartment == "sediment" && "country" %in% names(info) && 
-            info$country == "Spain" && type.id == "concentration")
+        if (info$compartment == "sediment" && 
+            "country" %in% names(series) && 
+            series$country == "Spain" && 
+            type.id == "concentration"
+        ) {
           grid.text("data not-normalised", 0.5, 0.5, gp = gpar(cex = xykey.cex))
-        else {
-          if (any(duplicated(x))) x <- jitter(x, amount = 0.1)
+        } else {
+          if (any(duplicated(x))) {
+            x <- jitter(x, amount = 0.1)
+          }
           censoring <- tolower(as.character(censoring[subscripts]))
           censoring <- ifelse(censoring %in% "", "+", censoring)
           lpoints(x, y, pch = censoring, cex = 2.5, col = "black")
@@ -1041,41 +1182,48 @@ plot.auxiliary <- function(data, info, auxiliary_id = "default", xykey.cex = 1.0
           concentration = switch(
             info$compartment, 
             biota = paste(
-              info$determinand, 
+              series$determinand, 
               dplyr::case_when(
-                info$group %in% "Effects"               ~ "",
-                info$determinand %in% "VDS"             ~ "stage",
-                info$determinand %in% c("IMPS", "INTS") ~ "",
-                TRUE                                    ~ "concentration"
+                series$group %in% "Effects"               ~ "",
+                series$determinand %in% "VDS"             ~ "stage",
+                series$determinand %in% c("IMPS", "INTS") ~ "",
+                TRUE                                      ~ "concentration"
               )
             ),
-            sediment = paste(info$determinand, "normalised")
+            sediment = paste(series$determinand, "normalised")
           ),
-          value = paste(info$determinand, "non-normalised"),
+          value = paste(series$determinand, "non-normalised"),
           LNMEA = {
-            family <- as.character(ctsm_get_info("species", info$species, "family"))
+            family <- ctsm_get_info(info$species, series$species, "species_group")
             unit <- ctsm_get_info(
-              "determinand", type.id, "unit", info$compartment, sep = "_"
+              info$determinand, 
+              type.id, "unit", 
+              info$compartment, 
+              sep = "_"
             )
-            paste(
+            paste0(
               "Mean ", 
               switch(
                 family, 
-                Fish = "fish", 
-                Bivalve = "shell", 
-                Gastropod = "shell", 
+                Fish = "fish ", 
+                Bivalve = "shell ", 
+                Gastropod = "shell ", 
                 ""
               ), 
-              " length (", unit, ")", 
+              "length (", unit, ")", 
               sep = ""
             )
           },
           {
             unit <- ctsm_get_info(
-              "determinand", type.id, "unit", info$compartment, sep = "_"
+              info$determinand, 
+              type.id, 
+              "unit", 
+              info$compartment, 
+              sep = "_"
             )
             paste0(
-              ctsm_get_info("determinand", type.id, "common_name"), 
+              ctsm_get_info(info$determinand, type.id, "common_name"), 
               " (", unit, ")"
             )
           }
@@ -1154,37 +1302,40 @@ plot.scales <- function(x, n = 5, min.n = 3, logData = FALSE, f = 0.05) {
 
 
 
-plot.multiassessment <- function(data, assessment, info, ...) {
+plot_multiassessment <- function(data, assessment, series, info, ...) {
 
   # silence non-standard evaluation warnings
-  .data <- series <- NULL
+  .data <- NULL
 
   is.data <- sapply(assessment, function(i) !is.null(i))
   
   is.pred <- sapply(assessment, function(i) !is.null(i) && !is.null(i$pred))
   is.AC <- sapply(assessment, function(i) !is.null(i) && !all(is.na(i$AC)))
   
-  series_distribution <- ctsm_get_info("determinand", info$determinand, "distribution")
-  
-  if (any(info$determinand %in% "MNC")) {
-    warning("remember to fix distribution changes")
-    series_distribution[info$determinand %in% "MNC"] <- "normal"
-  }
+  series_distribution <- ctsm_get_info(
+    info$determinand, 
+    series$determinand, 
+    "distribution"
+  )
   
   useLogs <- series_distribution %in% "lognormal"
   
-  names(useLogs) <- info$seriesID
+  names(useLogs) <- series$seriesID
   
-  
+
   # make data types compatible - i.e. raw data or assessment indices
 
-  data <- sapply(info$seriesID, simplify = FALSE, function(i) {
+  data <- sapply(series$seriesID, simplify = FALSE, function(i) {
     if (is.data[i]) {
       out <- assessment[[i]]$annualIndex
       names(out)[2] <- "concentration"
       out
     }
-    else data.frame(year = info$max.year, concentration = 0, censoring = factor("", levels = c("", "<")))
+    else data.frame(
+      year = info$max_year, 
+      concentration = 0, 
+      censoring = factor("", levels = c("", "<"))
+    )
   })  
     
 
@@ -1207,13 +1358,24 @@ plot.multiassessment <- function(data, assessment, info, ...) {
 
   # set up graphical structures
 
-  ylim <- sapply(info$seriesID, simplify = FALSE, function(i) {
-    args.list <- list(data[[i]]$concentration)         # NB have taken logs above, so this is log concentration
-    if (is.pred[[i]]) args.list <- c(args.list, assessment[[i]]$pred$ci.lower, assessment[[i]]$pred$ci.upper)
+  ylim <- sapply(series$seriesID, simplify = FALSE, function(i) {
+    # NB have taken logs above, so this is log concentration
+    args.list <- list(data[[i]]$concentration)         
+    if (is.pred[[i]]) {
+      args.list <- c(
+        args.list, 
+        assessment[[i]]$pred$ci.lower, 
+        assessment[[i]]$pred$ci.upper
+      )
+    }
     do.call("plot.data.ylim", args.list)
   })
 
-  args.list <- sapply(info$seriesID[is.data], simplify = FALSE, function(i) data[[i]]$year)
+  args.list <- sapply(
+    series$seriesID[is.data], 
+    simplify = FALSE, 
+    function(i) data[[i]]$year
+  )
   args.list <- c(args.list, info$recent_years)
   xlim <- do.call("plot.data.xlim", args.list)
 
@@ -1223,17 +1385,17 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   # ensures ylabels are formatted correctly and fit into viewport
 
   ntick.y <- ntick.x <- 3
-  ykey <- sapply(info$seriesID, simplify = FALSE, function(i) 
+  ykey <- sapply(series$seriesID, simplify = FALSE, function(i) 
     format(plot.scales(ylim[[i]], n = ntick.y, logData = useLogs[i])))
   key.ylab.padding <- max(sapply(ykey, function(i) max(nchar(i))))
   
 
-  ndet <- length(info$seriesID)
+  ndet <- length(series$seriesID)
   layout.row <- ceiling(sqrt(ndet))
   layout.col <- ceiling(ndet / layout.row)
 
   add.xlab = 1:ndet <= layout.col
-  names(add.xlab) <- info$seriesID
+  names(add.xlab) <- series$seriesID
 
   xykey.cex <- switch(layout.row, 1.4, 1.1, 0.9, 0.7, 0.6)
 
@@ -1242,7 +1404,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   
   xAC <- 0.5
 
-  AC.width <- sapply(info$seriesID[is.data], simplify = FALSE, function(i) {
+  AC.width <- sapply(series$seriesID[is.data], simplify = FALSE, function(i) {
     
     if (!is.AC[[i]]) return(unit(0, "npc"))
 
@@ -1284,7 +1446,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
   AC.width <- do.call("max", AC.width)
 
 
-  data.plot <- sapply(info$seriesID, simplify = FALSE, function(i) {
+  data.plot <- sapply(series$seriesID, simplify = FALSE, function(i) {
     xyplot(
       data[[i]]$concentration ~ data[[i]]$year, 
       ylim = ylim[[i]], 
@@ -1356,7 +1518,7 @@ plot.multiassessment <- function(data, assessment, info, ...) {
         }
 
         pushViewport(viewport(clip = "off"))
-        grid.text(info$plotNames$assessment[i], 0, unit(1, "npc") + unit(1, "char"), 
+        grid.text(series$plotNames$assessment[i], 0, unit(1, "npc") + unit(1, "char"), 
                   just = c("left", "bottom"), gp = gpar(cex = xykey.cex))
         upViewport()
       })
@@ -1392,19 +1554,11 @@ plot.multiassessment <- function(data, assessment, info, ...) {
 
 
 
-plot.multidata <- function(data, info,  ...) {
-
-  # silence non-standard evaluation warnings
-  series <- NULL
+plot_multidata <- function(data, series, info,  ...) {
 
   data <- subset(data, !is.na(concentration))
 
-  series_distribution <- ctsm_get_info("determinand", data$determinand, "distribution")
-  
-  if (any(data$determinand %in% "MNC")) {
-    warning("remember to fix distribution changes")
-    series_distribution[data$determinand %in% "MNC"] <- "normal"
-  }
+  series_distribution <- ctsm_get_info(info$determinand, data$determinand, "distribution")
   
   useLogs <- series_distribution %in% "lognormal"
   
@@ -1428,10 +1582,10 @@ plot.multidata <- function(data, info,  ...) {
   # varnames doesn't appear to work in splom, so make sure we give the columns the names
   # we want printed
   
-  plot.data <- data[c("year", paste("concentration", info$seriesID, sep = "."))]
-  names(plot.data) <- varnames <- c("year", info$plotNames$data)
+  plot.data <- data[c("year", paste("concentration", series$seriesID, sep = "."))]
+  names(plot.data) <- varnames <- c("year", series$plotNames$data)
   
-  colID <- c("year", info$seriesID)
+  colID <- c("year", series$seriesID)
 
 
   pscales <- lapply(names(plot.data), function(i) {
@@ -1459,10 +1613,19 @@ plot.multidata <- function(data, info,  ...) {
     varnames = varnames, varname.cex = varname.cex,  
     superpanel = function(z, panel, ...) ctsm.panel.pairs(z, panel = panel, ...),
     par.settings = list(
-      layout.heights = list(bottom.padding = 0, axis.bottom = 0, axis.xlab.padding = 0, xlab = 0)),
+      layout.heights = list(
+        bottom.padding = 0, axis.bottom = 0, axis.xlab.padding = 0, xlab = 0
+      )
+    ),
     panel = function(x, y, i, j) {
-      censoring <- if (i > 1) data[paste("censoring", colID[i], sep = ".")] else rep("", length(x))
-      lpoints(x, y, col = "black", pch = ifelse(censoring == "", "+", "<"), cex = 1.1)
+      censoring <- if (i > 1) {
+        data[paste("censoring", colID[i], sep = ".")]
+      } else {
+        rep("", length(x))
+      }
+      lpoints(
+        x, y, col = "black", pch = ifelse(censoring == "", "+", "<"), cex = 1.1
+      )
     }  
   )
 
@@ -1616,7 +1779,7 @@ plot.info <- function(series, info, plot.type = c("data", "auxiliary"), ...) {
 
 
 
-plot.ratio.data <- function(data, numerator, denominator, type = c("logistic", "log")) {
+plot_ratio_data <- function(data, numerator, denominator, type = c("logistic", "log")) {
 
   # silence non-standard evaluation warnings
   .data <- NULL
@@ -1657,7 +1820,7 @@ plot.ratio.data <- function(data, numerator, denominator, type = c("logistic", "
 }
 
 
-plot.ratio.pred <- function(
+plot_ratio_pred <- function(
   data, 
   type = c("logistic", "log"), 
   control = list(nyear = 5, prop_censoring = 0.1)
@@ -1736,11 +1899,8 @@ plot.ratio.pred <- function(
 
 
 
-plot.ratio <- function(data, info, ...) {
+plot_ratio <- function(data, series, info, ...) {
   
-  # silence non-standard evaluation warnings
-  series <- NULL
-
   # get working data 
   # sediment - use non-normalised concentrations
   # biota - could use values before conversion to target bases, but would need to 
@@ -1755,7 +1915,7 @@ plot.ratio <- function(data, info, ...) {
   # set up ratios
   
   det_id <- switch(
-    info$group, 
+    series$group, 
     Metals = c("SE", "HG"),
     PAH_parent = c("ANT", "PA", "FLU", "PYR", "ICDP", "BGHIP", "BAA", "CHR"), 
     PBDEs = c("BDE47", "BD153"), 
@@ -1764,7 +1924,7 @@ plot.ratio <- function(data, info, ...) {
   )
   
   ratio_id <- switch(
-    info$group, 
+    series$group, 
     Metals = "SE / HG",
     PAH_parent = c(
       "ANT / (ANT + PA)", "FLU / (FLU + PYR)", "ICDP / (ICDP + BGHIP)", 
@@ -1777,7 +1937,7 @@ plot.ratio <- function(data, info, ...) {
   
   
   numerator_id <- switch(
-    info$group,
+    series$group,
     Metals = "SE",
     PAH_parent = c("ANT", "FLU", "ICDP", "BAA"), 
     PBDEs = "BDE47",
@@ -1786,7 +1946,7 @@ plot.ratio <- function(data, info, ...) {
   )
   
   denominator_id <- switch(
-    info$group,
+    series$group,
     Metals = "HG",
     PAH_parent = c("PA", "PYR", "BGHIP", "CHR"),
     PBDEs = "BD153",
@@ -1795,7 +1955,7 @@ plot.ratio <- function(data, info, ...) {
   )
   
   ratio_type <- switch(
-    info$group,
+    series$group,
     PAH_parent = "logistic",
     "log"
   )
@@ -1803,7 +1963,7 @@ plot.ratio <- function(data, info, ...) {
   use_logs <- ratio_type %in% "log"
   
   ref_lines <- switch(
-    info$group, 
+    series$group, 
     Metals = list(78.96 / 200.59),
     PAH_parent = list(0.1, c(0.4, 0.5), c(0.2, 0.5), c(0.2, 0.35)),
     PBDEs = list(NA), 
@@ -1812,7 +1972,7 @@ plot.ratio <- function(data, info, ...) {
   )
   
   ref_txt <- switch(
-    info$group, 
+    series$group, 
     Metals = list(c("no mediation", "possible mediation")),
     PAH_parent = list(
       c("petrogenic", "pyrolitic"), 
@@ -1871,7 +2031,7 @@ plot.ratio <- function(data, info, ...) {
   data <- mapply(
     numerator = numerator_id, 
     denominator = denominator_id, 
-    FUN = plot.ratio.data,
+    FUN = plot_ratio_data,
     MoreArgs = list(data = data, type = ratio_type), 
     SIMPLIFY = FALSE
   )
@@ -1889,7 +2049,7 @@ plot.ratio <- function(data, info, ...) {
   }
   
   
-  pred <- lapply(data, plot.ratio.pred, type = ratio_type)
+  pred <- lapply(data, plot_ratio_pred, type = ratio_type)
   
   names(data) <- names(pred) <- names(is_data) <- ratio_id  
   

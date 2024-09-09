@@ -68,10 +68,36 @@ library(readxl)
 #'
 #'   ## Control parameters
 #'
-#'   Many aspects of the assessment process can be controlled through the
-#'   parameters stored in `info$control`. This is a list populated with default
-#'   values which can then be overwritten, if required, using the `control`
-#'   argument.
+#'   Many aspects of the assessment process can be controlled using parameters 
+#'   which are stored in the `info` component of the harsat data object. The 
+#'   default control values can be overwritten using the `control` argument.  
+#'   
+#'   * `reporting_window` A scalar (default 6) which determines whether 
+#'   timeseries are excluded because they have no 'recent' data. Formally, 
+#'   timeseries are excluded if they have no data in the period 
+#'   `max_year - reporting_window + 1` and `max_year`, so the default approach
+#'   is to exclude timeseries if they have no dat in the most recent six 
+#'   monitoring years. The value of 6 is chosen to match with Marine Strategy 
+#'   Framework Directive reporting periods. 
+#'   * `region`  
+#'   * `add_stations`
+#'   * `bivalve_spawning_season`
+#'   * `use_stage`
+#'   * `relative_uncertainty`
+#'   * `auxiliary` A list which allows flexibility in the treatment of auxiliary 
+#'   variables. At present, there is just one component `by_matrix`, a 
+#'   character vector that determines which auxiliary variables are matched to 
+#'   the contaminant data by `sample` and `matrix` as opposed to just `sample`. 
+#'   For sediment and water, the default is `all`; i.e. all variables are 
+#'   matched by `sample` and `matrix`. This ensures, for example, that 
+#'   sediment normalisers such as aluminium and organic carbon content are 
+#'   matched to chemical measurements in the same grain fraction. For biota, the 
+#'   default is `c("DRYWT%", "LIPIDWT%)`, so these variables are matched by 
+#'   `sample` and `matrix` and all other variables (e.g. LNMEA or %FEMALEPOP) 
+#'   are matched by `sample`. Thus, dry weight and lipid weight contents are 
+#'   matched to chemical measurements in the same tissue. However, mean length 
+#'   (which is usually the lenght of the whole organism) is matched to all 
+#'   tissue types. 
 #'
 #'   ## External data
 #'
@@ -272,7 +298,7 @@ safe_read_file <- function(file, header=TRUE, sep=",", quote="\"", dec=".", fill
 
 control_default <- function(purpose, compartment) {
   
-  # import functions
+  # import_functions.R
   # sets up default values that control the assessment
   
   # reporting_window is set to 6 to match the MSFD reporting cycle
@@ -295,6 +321,12 @@ control_default <- function(purpose, compartment) {
   # relative uncertainties for log-normally distributed data; the default is
   # to accept relative uncertainties greater than (but not equal) to 1% and 
   # less than (but not equal to) 100%
+
+  # auxiliary is a list (to be extended) that allows flexibility in the 
+  # treatment of auxiliary variables
+  # by_matrix determines which variables are merged by matrix in addition to 
+  # by sample; default is DRYWT% and LIPIDWT% for biota and everything for 
+  # sediment and water
   
   region <- list()
   
@@ -373,14 +405,22 @@ control_default <- function(purpose, compartment) {
     )
   )
     
-
+  auxiliary = list(
+    by_matrix = switch(
+      compartment, 
+      biota = c("DRYWT%", "LIPIDWT%"), 
+      "all"
+    )
+  ) 
+  
   list(
     reporting_window = 6L, 
     region = region,
     add_stations = add_stations,
     bivalve_spawning_season = bivalve_spawning_season,
     use_stage = use_stage,
-    relative_uncertainty = relative_uncertainty
+    relative_uncertainty = relative_uncertainty,
+    auxiliary = auxiliary
   )
 }
 
@@ -942,6 +982,16 @@ read_contaminants <- function(file, data_dir = ".", info) {
   
   if (info$data_format == "external") {
   
+    ok1 <- "uncertainty" %in% names(data)
+    ok2 <- "unit_uncertainty" %in% names(data)
+    
+    if   ((ok1 & !ok2) | (!ok1 & ok2)){
+      stop(
+        "If including uncertainty, both 'uncertainty' and 'unit_uncertainty' ",
+        "columns need to be included. One of these is missing."
+      )
+    }
+    
     # numeric (non-integer) variables
       
     id <- c(
@@ -2217,7 +2267,7 @@ tidy_contaminants <- function(data, info) {
 
 
 
-
+# create timeseries ----
 
 #' Create a time series
 #' 
@@ -2251,7 +2301,8 @@ create_timeseries <- function(
 
   # silence non-standard evaluation warnings
   .data <- .month <- .not_ok <- group <- value <- NULL
-  determinand <- uncertainty <- uncertainty_sd <- uncertainty_rel <- species_group <- NULL
+  determinand <- uncertainty <- uncertainty_sd <- uncertainty_rel <- NULL
+  concentration <- distribution <- species_group <- NULL
 
   # arguments
   
@@ -2590,7 +2641,7 @@ create_timeseries <- function(
 
   # merge auxiliary data with determinand data
 
-  data <- ctsm_merge_auxiliary(data, info)
+  data <- merge_auxiliary(data, info)
   
 
   # impute %femalepop when missing and sex = 1 - write out remaining
@@ -2603,7 +2654,7 @@ create_timeseries <- function(
 
   # convert data to basis of assessment
   
-  data <- ctsm_convert_to_target_basis(data, info, get_basis)
+  data <- convert_to_target_basis(data, info, get_basis)
   
 
   if (return_early) {
@@ -2618,7 +2669,7 @@ create_timeseries <- function(
 
   # estimate missing uncertainties
 
-  data$uncertainty <- ctsm_estimate_uncertainty(data, "concentration", info)
+  data$uncertainty <- estimate_uncertainty(data, "concentration", info)
 
   if (info$compartment == "sediment") {
     
@@ -2626,7 +2677,7 @@ create_timeseries <- function(
       
       if (norm_id %in% names(data)) {
         norm_uncrt <- paste0(norm_id, ".uncertainty")
-        data[[norm_uncrt]] <- ctsm_estimate_uncertainty(data, norm_id, info)
+        data[[norm_uncrt]] <- estimate_uncertainty(data, norm_id, info)
       }    
     }
     
@@ -2744,15 +2795,18 @@ create_timeseries <- function(
 
 #' Extracts timeSeries
 #'
-#' Gets the timeSeries component of a `harsat` object, optionally having added
-#' extra information about each station
+#' Gets the `timeSeries` component of a `harsat` object, optionally adding extra 
+#' information about each station
 #'
-#' @param harsat_obj A `harsat` object following a call to [`create_timeseries`]`.
-#' @param add logical (default `TRUE`), if `TRUE`, adds extra information 
-#'   about each station; if `FALSE`, simply returns the existing timeseries,
-#'
-#' @return A data.frame containing the timeSeries component with (optionally)
-#'   extra information about each station.
+#' @param harsat_obj A `harsat` object following a call to 
+#'   [`create_timeseries`]
+#' @param add logical (default `TRUE`); `TRUE` adds the `station_name` and 
+#'   `country` associated with each station; `FALSE` simply returns the 
+#'   existing timeseries information
+#'   
+#' @return A data.frame containing the `timeSeries` component with (optionally)
+#'   extra information about each station. The `series` column is the identifier 
+#'   of each timeseries. 
 #' @export
 get_timeseries <- function(harsat_obj, add = TRUE) {
   
@@ -2760,14 +2814,19 @@ get_timeseries <- function(harsat_obj, add = TRUE) {
     stop("the time series have not yet been created")
   }
   
+  out <- harsat_obj$timeSeries
+  
+  out <- tibble::rownames_to_column(out, "series")
+  
   if (!add) {
-    return(harsat_obj$timeSeries)
+    return(out)
   }
   
   out <- dplyr::left_join(
-    harsat_obj$timeSeries, 
+    out, 
     harsat_obj$stations[c("station_code", "station_name", "country")], 
-    by = "station_code") 
+    by = "station_code"
+  ) 
   
   out <- dplyr::relocate(
     out, 
@@ -3431,13 +3490,25 @@ assign("determinand.link.LIPIDWT%", function(data, info, keep, drop, ...) {
 })  
 
 
-determinand.link.sum <- function(data, info, keep, drop, ...) {
-  
+
+
+determinand.link.sum <- function(data, info, keep, drop, weights = NULL) {
+
   stopifnot(length(keep) == 1, length(drop) > 1)
   
   if (!any(data$determinand %in% drop)) 
     return(data)
-
+  
+  
+  if (!is.null(weights))     {
+    if (!identical(sort(drop), sort(names(weights)))) {
+      stop(
+        "error in weights list",
+        call. = FALSE
+      )
+    }     
+  }
+  
   
   # identify samples with drop and not keep, which are the ones that will be summed
   # if keep already exists, then don't need to do anything
@@ -3449,47 +3520,52 @@ determinand.link.sum <- function(data, info, keep, drop, ...) {
   keepID <- data$determinand %in% keep
   
   sum_ID <- ID %in% setdiff(ID[dropID], ID[keepID])
-
+  
   if (sum(sum_ID) == 0L)
     return(data)
   
   
   dropTxt <- paste(drop, collapse = ", ")
   cat("   Data submitted as", dropTxt, "summed to give", keep, fill = TRUE)
-
-
+  
+  
   # get relevant sample matrix combinations
   
   data <- split(data, with(data, determinand %in% drop & sum_ID))
   
   ID <- with(data[["TRUE"]], paste(sample, matrix))
-
+  
   summed_data <- by(data[["TRUE"]], ID, function(x) {
     
     # check all bases are the same 
-
-    stopifnot(dplyr::n_distinct(x$basis) == 1)
     
     if (!all(drop %in% x$determinand)) return(NULL)
 
-    
-    # adjust values if units vary
-    # ideally use unit in info$determinand, but makes it more awkward because
-    # have to pass in compartment
-    
-    if (dplyr::n_distinct(x$unit) > 1) {
+    if (dplyr::n_distinct(x$basis) != 1) {
+      stop(
+        "the determinands in `drop` are reported in different bases within ", 
+        "the same sample;\ncode to deal with this has not yet been written so ", 
+        "please raise an issue with the harsat\ndevelopment team",
+        call. = FALSE
+      )  
+    }
 
-      # get modal value of unit
+    
+    # extract unit and weights information      
       
-      unit_values <- unique(x$unit)
-      target_unit <- unit_values[which.max(tabulate(match(x$unit, unit_values)))]
-           
-      id <- c("value", "uncertainty", "limit_detection", "limit_quantification")
+    id <- c("value", "uncertainty", "limit_detection", "limit_quantification")
       
-      x[id] <- lapply(x[id], convert_units, from = x$unit, to = target_unit)
-
-      x$unit <- target_unit
-    }      
+    target_unit = ctsm_get_info(info$determinand, keep, "unit", info$compartment, sep="_")
+      
+    x[id] <- lapply(x[id], convert_units, from = x$unit, to = target_unit)
+      
+    if(!is.null(weights)){
+    
+      TEQ <- weights[as.character(x$determinand)]
+      
+      x[id] <- lapply(x[id], "*", TEQ)
+    
+    }
     
     
     # make output row have all the information from the largest determinand (ad-hoc) 
@@ -3498,6 +3574,9 @@ determinand.link.sum <- function(data, info, keep, drop, ...) {
     out <- x[which.max(x$value), ]
     
     out$determinand <- keep
+    out$unit <- target_unit 
+    out$group <- ctsm_get_info(info$determinand, keep, "group", info$compartment, sep="_")
+    out$pargroup <- ctsm_get_info(info$determinand, keep, "pargroup")
     
     # sum value and limit_detection, make it a less-than if all are less-thans, and take 
     # proportional uncertainty from maximum value (for which uncertainty is reported)
@@ -3512,7 +3591,7 @@ determinand.link.sum <- function(data, info, keep, drop, ...) {
       out$censoring <- unique(x$censoring) 
     else 
       out$censoring <- "<"
-
+    
     if (all(is.na(x$uncertainty))) 
       out$uncertainty <- NA
     else {
@@ -3521,38 +3600,52 @@ determinand.link.sum <- function(data, info, keep, drop, ...) {
       upct <- with(wk, uncertainty / value)[pos]
       out$uncertainty <- out$value * upct
     }
-
+    
     out
     
   })
-
+  
   summed_data <- do.call(rbind, summed_data)
-
+  
   
   # see how many samples have been lost due to incomplete submissions
   # need a trap for no summed_data
-
+  
   nTotal <- length(unique(ID))
   nSummed <- if (is.null(summed_data)) 0 else nrow(summed_data)
   nLost <- nTotal - nSummed
   
   if (nLost > 0) 
     message("     ", nLost, " of ", nTotal, " samples lost due to incomplete submissions")
-
+  
   
   # combine data for both drop and keep and then add back into main data set
   
   data[["TRUE"]] <- rbind(data[["TRUE"]], summed_data)
-    
+  
   data <- do.call(rbind, data)
   
   data
-}  
+} 
 
 
 
 
 determinand.link.TEQDFP <- function(data, info, keep, drop, weights) {
+  
+  lifecycle::deprecate_warn(
+    "1.0.2", 
+    "determinand.link.TEQDFP()", 
+    details = c(
+      i = paste(
+        "use `determinand.link.sum()` with the TEFs supplied in the weights",
+        "argument"
+      ), 
+      i = 'see `vignette("example_HELCOM")` for further details'
+    ),
+    env = rlang::caller_env(), 
+    user_env = rlang::caller_env(2)
+  )
 
   stopifnot(length(keep) == 1, length(drop) > 1)
   
@@ -3612,7 +3705,13 @@ determinand.link.TEQDFP <- function(data, info, keep, drop, weights) {
     out <- x[which.max(x$value), ]
     
     out$determinand <- keep
-    out$unit <- "TEQ ug/kg"
+    
+    target_unit <- ctsm_get_info(info$determinand, keep, "unit", info$compartment, sep="_")
+    if (grepl("TEQ", target_unit)) {
+      out$unit <- "TEQ ug/kg"
+    } else {
+      out$unit <- "ug/kg"
+    }
     out$group <- "Dioxins"
     out$pargroup <- "OC-DX"
     
@@ -3667,6 +3766,8 @@ determinand.link.TEQDFP <- function(data, info, keep, drop, weights) {
   
   data
 }  
+
+
 
 
 check_censoring <- function(data, info, print_code_warnings) {
@@ -3826,6 +3927,11 @@ check_uncertainty <- function(data, info, type = c("reported", "calculated")) {
   # type = calculated is used to check whether implausible uncertainties have
   #   been created in e.g. the normalisation process
   
+  # silence non-standard evaluation warnings
+  
+  .data <- reason <- NULL
+  
+  
   type <- match.arg(type)
   
   
@@ -3954,15 +4060,18 @@ check_subseries <- function(data, info) {
 }
 
 
-ctsm_merge_auxiliary <- function(data, info) {
+merge_auxiliary <- function(data, info) {
 
   # import_functions.R
   # merge auxiliary variables with data
 
+  control <- info$auxiliary
+  
+  
   # identify auxiliary variables and split data set accordingly
-    
+  
   auxiliary_var <- ctsm_get_auxiliary(data$determinand, info)
-
+  
   id <- data$determinand %in% auxiliary_var
     
   auxiliary <- data[id, ]
@@ -3980,9 +4089,14 @@ ctsm_merge_auxiliary <- function(data, info) {
   auxiliary <- split(auxiliary, auxiliary$determinand)
   
   
-  # catch for LNMEA measured in WO and ES for birds - probably shouldn't happen because the 
-  # sample will differ?  need to check
+  # update control 
+
+  if (length(control$by_matrix) == 1L && control$by_matrix == "all") {
+    control$by_matrix <- auxiliary_var
+  }
+
   
+  # merge auxiliary variables one at a time
   
   for (aux_id in names(auxiliary)) {
 
@@ -3997,7 +4111,7 @@ ctsm_merge_auxiliary <- function(data, info) {
     # additional variables for some auxiliaries
     # need to make this more flexible - issue raised
     
-    if (aux_id %in% c("DRYWT%", "LIPIDWT%", "CORG", "LOIGN", "AL", "LI")) {
+    if (aux_id %in% control$by_matrix) {
       
       merge_id <- c(merge_id, "matrix")
       
@@ -4058,7 +4172,8 @@ ctsm_merge_auxiliary <- function(data, info) {
   data <- droplevels(data)
 }
 
-ctsm_convert_to_target_basis <- function(data, info, get_basis) {
+
+convert_to_target_basis <- function(data, info, get_basis) {
 
   # location: import_functions.R
   # purpose:  convert data and auxiliary variables to their target basis as 
@@ -5057,14 +5172,14 @@ ctsm_normalise_calculate <- function(Cm, Nm, Nss, var_Cm, var_Nm, Cx, Nx, var_Cx
 
 
 
-ctsm_estimate_uncertainty <- function(data, response_id, info) {
+estimate_uncertainty <- function(data, response_id, info) {
 
   # silence non-standard evaluation warnings
   .data <- NULL
 
   # import_functions.R
   
-  # estimating missing uncertainties
+  # estimates missing uncertainties
   
   # only returns uncertainty so can modify data object at will
   
@@ -5128,12 +5243,28 @@ ctsm_estimate_uncertainty <- function(data, response_id, info) {
   # a dry or lipid weight
 
   if (info$compartment == "biota") {
+    
+    # ensure lipidwt and drywt columns are present (if they haven't been supplied)
+    
+    is_lipid <- "LIPIDWT%" %in% names(data)
+    is_dry <- "DRYWT%" %in% names(data)
+    
+    if (!is_lipid) {
+      data[["LIPIDWT%"]] <- NA_real_
+      data[["LIPIDWT%.censoring"]] <- NA_character_
+    }
+    
+    if (!is_dry) {
+      data[["DRYWT%"]] <- NA_real_
+      data[["DRYWT%.censoring"]] <- NA_character_
+    }
+
     data$sd_constant <- ctsm_convert_basis(
       data$sd_constant, 
       "W", 
       data$new.basis, 
-      data[["DRYWT%"]], 
-      data[["LIPIDWT%"]], 
+      drywt = data[["DRYWT%"]],  
+      lipidwt = data[["LIPIDWT%"]],
       drywt_censoring = data[["DRYWT%.censoring"]], 
       lipidwt_censoring = data[["LIPIDWT%.censoring"]], 
       exclude = data$group %in% c("Imposex", "Effects", "Metabolites"),

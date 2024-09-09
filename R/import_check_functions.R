@@ -155,7 +155,7 @@ ctsm.check.basis.biota <- function(data, info) {
       new[!ok] <- "W"
     })
 
-  id <- data$determinand %in% c("EXLIP%", "FATWT%", "LIPIDWT%")
+  id <- data$determinand %in% c("EXLIP%", "FATWT%", "LIPIDWT%", "WTMEA")
   if (any(id))
     data[id,] <- within(data[id,], {    
       ok <- basis %in% c("W", "D")
@@ -164,8 +164,8 @@ ctsm.check.basis.biota <- function(data, info) {
     })
 
   id <- data$determinand %in% c(
-    "VDS", "IMPS", "INTS", "VDSI", "PCI", "INTSI", "%FEMALEPOP", "SURVT", "NRR", "LP", "%DNATAIL", 
-    "MNC", "CMT-QC-NR", "MNC-QC-NR")
+    "VDS", "IMPS", "INTS", "VDSI", "PCI", "INTSI", "%FEMALEPOP", "SURVT", "NRR", 
+    "LP", "%DNATAIL", "MNC", "CMT-QC-NR", "MNC-QC-NR")
   if (any(id))
     data[id,] <- within(data[id,], {    
       ok <- is.na(basis)
@@ -250,7 +250,7 @@ ctsm.check.matrix.biota <- function(data, info) {
   # actually LNMEA could be feather length (but have not allowed for this at present)
   # NB procedures for merging with LNMEA are similary complicated for birds
 
-  id <- data$determinand %in% "LNMEA"
+  id <- data$determinand %in% c("LNMEA", "WTMEA")
   if (any(id))
     data[id,] <- within(data[id,], {
       ok <- (species_group %in% c("Fish", "Mammal") & matrix %in% "WO") |
@@ -450,25 +450,25 @@ ctsm.check.species_group.biota <- function(data, info) {
 
 ctsm.check.sex.biota <- function(data, info) {
 
+  # check sex has valid ICES codes 
+  # extra checks for imposex determinands and EROD 
+
   # silence non-standard evaluation warnings
-  sex <- NULL
+  .data <- sex <- NULL
 
-  # NB any changes should really be made at the sub-sample level
   
-  id <- ctsm_is_contaminant(data$pargroup) | 
-    data$group %in% "Metabolites" | 
-    data$determinand %in% c("AGMEA", "LNMEA", "DRYWT%", "EXLIP%", "FATWT%", "LIPIDWT%") | 
-    data$determinand %in% c("ALAD", "SFG", "ACHE", "GST", "SURVT", "NRR", "LP", "%DNATAIL", 
-                            "MNC", "CMT-QC-NR", "MNC-QC-NR")
+  # global check of ICES codes 
+  
+  data <- dplyr::mutate(
+    data, 
+    ok = .data$sex %in% c("F", "H", "I", "M", "T", "U", "X", NA),
+    action = dplyr::if_else(ok, "none", "warning"),
+    new[!ok] <- NA
+  )
+  
 
-  if (any(id))
-    data[id,] <- within(data[id,], {
-      ok <- sex %in% c("F", "I", "M", "U", "X", NA)
-      action <- ifelse(ok, "none", "warning")
-      new[!ok] <- NA
-    })
-
-
+  # imposex
+  
   id <- data$determinand %in% c("VDS", "IMPS", "INTS")
   if (any(id))
     data[id,] <- within(data[id,], {
@@ -476,7 +476,7 @@ ctsm.check.sex.biota <- function(data, info) {
       action <- ifelse(ok, "none", ifelse(sex %in% NA, "warning", "error"))
       new[sex %in% NA] <- "F"
     })
-  
+
   id <- data$determinand %in% c("VDSI", "PCI", "INTSI", "%FEMALEPOP")
   if (any(id))
     data[id,] <- within(data[id,], {
@@ -485,15 +485,26 @@ ctsm.check.sex.biota <- function(data, info) {
       new[sex %in% NA] <- "X"
     })
 
+  
+  # EROD
+  
   id <- data$determinand %in% "EROD"
   if (any(id))
     data[id,] <- within(data[id,], {    
       ok <- sex %in% c("F", "M")
-      ok.delete <- sex %in% c("U", "I", "X")
+      ok.delete <- sex %in% c("H", "I", "T", "U", "X")
       action <- ifelse(ok, "none", ifelse(ok.delete, "delete", "error"))
       if (any(ok.delete))
         cat("   Dropping EROD data with immature or unidentifiable sex\n")
     })
+
+  # id <- is.na(data$ok)
+  # if (any(id)) 
+  #   data[id,] <- within(data[id,], {
+  #     ok <- sex %in% c("F", "I", "M", "T", "U", "X", NA)
+  #     action <- ifelse(ok, "none", "warning")
+  #     new[!ok] <- NA
+  #   })
 
   data             
 }             
@@ -502,8 +513,8 @@ ctsm.check.sex.biota <- function(data, info) {
 ctsm.check.unit.biota <- function(data, info) {
 
   standard_unit <- c(
-    "g/g", "mg/mg", "ug/ug", "ng/ng", "pg/pg", "mg/g", "ug/g", "ng/g", "pg/g", "g/kg", "mg/kg", 
-    "ug/kg", "ng/kg", "pg/kg")
+    "g/g", "mg/mg", "ug/ug", "ng/ng", "pg/pg", "mg/g", "ug/g", "ng/g", "pg/g", 
+    "g/kg", "mg/kg", "ug/kg", "ng/kg", "pg/kg")
   
   id <- ctsm_is_contaminant(data$pargroup, exclude = "I-RNC") & data$determinand != "TEQDFP"
   if (any(id))
@@ -513,11 +524,29 @@ ctsm.check.unit.biota <- function(data, info) {
     })
     
   id <- data$determinand %in% "TEQDFP"
-  if (any(id))
+  if (any(id)) {
+    
+    TEQ_unit <- paste("TEQ", standard_unit)
+    
     data[id,] <- within(data[id,], {
-      ok <- unit %in% paste("TEQ", standard_unit)
+      ok <- unit %in% c(standard_unit, TEQ_unit)
       action <- ifelse(ok, "none", "error")
+      
+      if (any(TEQ_unit %in% unit)) {
+        lifecycle::deprecate_warn(
+          "1.0.2", 
+          I("use of units of the form 'TEQ ug/kg' or 'TEQ pg/g'"),
+          details = c(
+            i = "use e.g. 'ug/kg' instead of 'TEQ ug/kg'", 
+            i = "you might need to update the determinand reference table"
+          ),
+          env = rlang::caller_env(), 
+          user_env = rlang::caller_env(2)
+        )
+      }  
+    
     })
+  }
 
   id <- data$determinand %in% c("LNMEA")
   if (any(id))
@@ -530,6 +559,13 @@ ctsm.check.unit.biota <- function(data, info) {
   if (any(id))
     data[id,] <- within(data[id,], {
       ok <- unit %in% "y"
+      action <- ifelse(ok, "none", "error")
+    })
+  
+  id <- data$determinand %in% c("WTMEA")
+  if (any(id))
+    data[id,] <- within(data[id,], {
+      ok <- unit %in% c("kg", "g", "mg")
       action <- ifelse(ok, "none", "error")
     })
   
@@ -757,7 +793,7 @@ ctsm.check.value.biota <- function(data, info) {
   
   id <- ctsm_is_contaminant(data$pargroup, exclude = "I-MTC") | 
     data$group %in% "Metabolites" | 
-    data$determinand %in% c("EROD", "ALAD", "ACHE", "GST", "AGMEA", "LNMEA")
+    data$determinand %in% c("EROD", "ALAD", "ACHE", "GST", "AGMEA", "LNMEA", "WTMEA")
 
   if (any(id))
     data[id,] <- within(data[id,], {

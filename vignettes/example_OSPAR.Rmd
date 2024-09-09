@@ -93,7 +93,8 @@ water_data <- read_data(
 
 water_data <- tidy_data(water_data)
 #> 
-#> Oddities will be written to 'oddities/water'
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
 #> 
 #> Dropping 411 records from data flagged for deletion. Possible reasons are:
 #>  - vflag = suspect
@@ -2800,10 +2801,10 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> -11.6 </td>
    <td style="text-align:right;"> 11.1 </td>
    <td style="text-align:right;"> 0.0901546 </td>
-   <td style="text-align:right;"> 0.1212222 </td>
+   <td style="text-align:right;"> 0.1212221 </td>
    <td style="text-align:left;"> EQS </td>
    <td style="text-align:right;"> 2.0e+00 </td>
-   <td style="text-align:right;"> -1.8787778 </td>
+   <td style="text-align:right;"> -1.8787779 </td>
    <td style="text-align:right;"> 2017 </td>
    <td style="text-align:left;"> below </td>
   </tr>
@@ -5426,7 +5427,8 @@ sediment_data <- read_data(
 #> Argument max_year taken to be the maximum year in the data: 2021
 sediment_data <- tidy_data(sediment_data)
 #> 
-#> Oddities will be written to 'oddities/sediment'
+#> Oddities will be written to 'oddities/sediment' with previous oddities backed up to
+#>  'oddities/sediment_backup'
 #> 
 #> Dropping 75 records from data flagged for deletion. Possible reasons are:
 #>  - vflag = suspect
@@ -5451,7 +5453,8 @@ Coast or Gulf of Cadiz OSPAR subregions, in which case the concentrations are
 not normalised.
 
 The TEFs for the WHO TEQ for dioxins, furans and planar PCBs (labelled TEQDFP) 
-are the values for the secondary poisoning QS. 
+are those used in the OSPAR CEMP assessment up to 2024. Note that these have 
+been superseeded; see `help("info_TEQ")` for more details. 
 
 
 ```r
@@ -5466,9 +5469,9 @@ sediment_timeseries <- create_timeseries(
     CB138 = list(det = c("CB138+163"), action = "replace"),
     CB156 = list(det = c("CB156+172"), action = "replace"),
     TEQDFP = list(
-      det = names(info_TEF$DFP_environmental), 
-      action = "bespoke", 
-      weights = info_TEF$DFP_environmental
+      det = names(info_TEF$DFP_CEMP), 
+      action = "sum", 
+      weights = info_TEF$DFP_CEMP
     ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum")
   ),
@@ -5501,7 +5504,7 @@ sediment_timeseries <- create_timeseries(
 #>      104 of 104 samples lost due to incomplete submissions
 #>    Data submitted as NAP1M, NAP2M summed to give NAPC1
 #>    Data submitted as 
-#> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1, TCDD 
+#> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, TCDD, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1 
 #> summed to give TEQDFP
 #>      17 of 17 samples lost due to incomplete submissions
 #> 
@@ -13775,7 +13778,8 @@ biota_data <- read_data(
 #> Argument max_year taken to be the maximum year in the data: 2022
 biota_data <- tidy_data(biota_data)
 #> 
-#> Oddities will be written to 'oddities/biota'
+#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
+#>  'oddities/biota_backup'
 #> 
 #> Dropping 11 records from data flagged for deletion. Possible reasons are:
 #>  - vflag = suspect
@@ -13826,9 +13830,9 @@ biota_timeseries <- create_timeseries(
       action = "sum"
     ),
     TEQDFP = list(
-      det = names(info_TEF$DFP_environmental), 
-      action = "bespoke", 
-      weights = info_TEF$DFP_environmental
+      det = names(info_TEF$DFP_CEMP), 
+      action = "sum", 
+      weights = info_TEF$DFP_CEMP
     ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"),
     HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum"),
@@ -13843,7 +13847,6 @@ biota_timeseries <- create_timeseries(
 #> Cleaning data
 #>    Dropping stations with no data between 2017 and 2022 
 #>    Dropping samples with only auxiliary variables
-#>    Unexpected or missing values for 'sex': see sex_queries.csv
 #>    Unexpected or missing values for 'matrix': see matrix_queries.csv
 #>    Unexpected or missing values for 'basis': see basis_queries.csv
 #>    Bile metabolite units changed from 'ng/g' to 'ng/ml' and from 'ug/kg' to 'ug/l'
@@ -13874,7 +13877,7 @@ biota_timeseries <- create_timeseries(
 #> summed to give SCB7
 #>      26 of 97 samples lost due to incomplete submissions
 #>    Data submitted as 
-#> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1, TCDD 
+#> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, TCDD, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1 
 #> summed to give TEQDFP
 #>      114 of 114 samples lost due to incomplete submissions
 #>    Data submitted as HCHA, HCHB, HCHG summed to give HCH

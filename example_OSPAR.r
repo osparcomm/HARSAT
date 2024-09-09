@@ -101,9 +101,9 @@ sediment_timeseries <- create_timeseries(
     CB138 = list(det = c("CB138+163"), action = "replace"),
     CB156 = list(det = c("CB156+172"), action = "replace"),
     TEQDFP = list(
-      det = names(info_TEF$DFP_environmental), 
-      action = "bespoke", 
-      weights = info_TEF$DFP_environmental
+      det = names(info_TEF$DFP_CEMP), 
+      action = "sum", 
+      weights = info_TEF$DFP_CEMP
     ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum")
   ),
@@ -214,9 +214,9 @@ biota_timeseries <- create_timeseries(
       action = "sum"
     ),
     TEQDFP = list(
-      det = names(info_TEF$DFP_environmental), 
-      action = "bespoke", 
-      weights = info_TEF$DFP_environmental
+      det = names(info_TEF$DFP_CEMP), 
+      action = "sum", 
+      weights = info_TEF$DFP_CEMP
     ),
     HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"),
     HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum"),

@@ -7,16 +7,19 @@
 get_timeseries(harsat_obj, add = TRUE)
 }
 \arguments{
-\item{harsat_obj}{A \code{harsat} object following a call to \code{\link{create_timeseries}}`.}
+\item{harsat_obj}{A \code{harsat} object following a call to
+\code{\link{create_timeseries}}}
 
-\item{add}{logical (default \code{TRUE}), if \code{TRUE}, adds extra information
-about each station; if \code{FALSE}, simply returns the existing timeseries,}
+\item{add}{logical (default \code{TRUE}); \code{TRUE} adds the \code{station_name} and
+\code{country} associated with each station; \code{FALSE} simply returns the
+existing timeseries information}
 }
 \value{
-A data.frame containing the timeSeries component with (optionally)
-extra information about each station.
+A data.frame containing the \code{timeSeries} component with (optionally)
+extra information about each station. The \code{series} column is the identifier
+of each timeseries.
 }
 \description{
-Gets the timeSeries component of a \code{harsat} object, optionally having added
-extra information about each station
+Gets the \code{timeSeries} component of a \code{harsat} object, optionally adding extra
+information about each station
 }
