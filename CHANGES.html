@@ -51,6 +51,52 @@
 <div class="section level2">
 <h2 id="change-log">Change log<a class="anchor" aria-label="anchor" href="#change-log"></a></h2>
 <div class="section level3">
+<h3 id="version-102">Version 1.0.2<a class="anchor" aria-label="anchor" href="#version-102"></a></h3>
+<p>This release is that used to run the OSPAR 2024 CEMP assessment.</p>
+<div class="section level4">
+<h4 id="weighted-sums-for-teqs-etc">Weighted sums for TEQs etc.<a class="anchor" aria-label="anchor" href="#weighted-sums-for-teqs-etc"></a></h4>
+<p>Weighted sums of concentrations are now calculated using <code>determinand.link.sum</code>. The weights are supplied using the <code>weights</code> argument. This function supersedes <code>determinand.link.TEQDFP</code> which is now deprecated and will be removed at the next release.</p>
+<p>Updated and corrected World Health Organisation TEFs for dioxins, furans and planar PCBs are now available in the data object <code>info_TEF</code>: there are four versions available:</p>
+<ul><li>DFP_2005; the 2005 values<br></li>
+<li>DFP_2022; the 2022 values<br></li>
+<li>DFP_HOLAS3; the values used in the HOLAS3 assessment; these are the 2005 values excluding three PCBs and are included for backward compatibility<br></li>
+<li>DFP_CEMP; the values used in CEMP assessments &lt;= 2024; these are the 2005 values excluding three PCBs and with the TEF for CDFO ten times too small; they are included for backward compatibility</li>
+</ul><p>DFP_2005 and DFP_2022 use determinand OCDF (the correct code) rather than CDFO (which is a grouped determinand code).</p>
+</div>
+<div class="section level4">
+<h4 id="auxiliary-variables">Auxiliary variables<a class="anchor" aria-label="anchor" href="#auxiliary-variables"></a></h4>
+<p>Key auxiliary variables can now be plotted in <code>plot_assessment</code>. The default variables are:</p>
+<ul><li>biota: concentration, LNMEA, DRYWT%, LIPIDWT%<br></li>
+<li>sediment: non-normalised concentration, normalised concentration, AL, CORG<br></li>
+<li>water: no plots are currently produced</li>
+</ul><p>The choice of auxiliary variables can be altered using the <code>auxiliary</code> argument, although the options here are still limited.</p>
+<p>The merging of auxiliary variables with the data is now controlled using the <code>control</code> argument of <code>read_data</code>. <code>control$auxiliary$by_matrix</code> is a list which determines which auxiliary variables are merged by sample and matrix and which are just merged by sample. The default values are <code>c("DRYWT%", "LIPIDWT%)</code> for biota and <code>"all"</code> for sediment and water. Thus, by default, dry weight and lipid weight measurements are matched with chemical concentrations in the same tissue (matrix). but all other auxiliary variables in biota are matched at the sample level. For sediment (and water) all auxiliary variables (e.g. aluminium and organic carbon measurements) are matched with chemical concentrations in the same grain size fraction.</p>
+</div>
+<div class="section level4">
+<h4 id="reporting">Reporting<a class="anchor" aria-label="anchor" href="#reporting"></a></h4>
+<p><code>report_assessment</code> now has the full functionality required for the OSPAR CEMP assessment. This includes:</p>
+<ul><li>scatterplot matrices of concentrations of related compounds using the non-exported function <code>plot_multidata</code><br></li>
+<li>plots of assessments of related compounds using the non-exported function <code>plot_multiassessment</code><br></li>
+<li>plots of contaminant ratios using the non-exported function <code>plot_ratio</code>
+</li>
+</ul><p>There is still some work required to make <code>report_assessment</code> suitable for all purposes.</p>
+</div>
+<div class="section level4">
+<h4 id="minor-bug-fixes">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes"></a></h4>
+<ul><li>ensures that if <code>uncertainty</code> column is present in external data then so is <code>unit_uncertainty</code> and vice versa</li>
+<li>
+<code>plot_assessment</code> now correctly plots the 90% two-sided confidence intervals on VDSI estimates from imposex assessments</li>
+<li>correct treatment of censoring data in <code>determinand.link.sum</code>
+</li>
+<li>
+<code>ctsm.check.sex.biota</code> now works for any auxiliary variable</li>
+<li>
+<code>get_timeseries</code> now always shows the series identifier for each timeseries</li>
+<li>
+<code>estimate_uncertainties</code> now traps for the case then <code>DRYWT%</code> and <code>LIPIDWT%</code> are not specified as auxiliary variables</li>
+</ul></div>
+</div>
+<div class="section level3">
 <h3 id="version-101">Version 1.0.1<a class="anchor" aria-label="anchor" href="#version-101"></a></h3>
 <p>Updates (mostly) required to run the OSPAR 2024 CEMP assessment.</p>
 <div class="section level4">
@@ -79,7 +125,7 @@
 <p>Assessment functions for negative binomial data have been added. Negative binomial data includes MNC - the number of micronucleated cells.</p>
 </div>
 <div class="section level4">
-<h4 id="reporting">Reporting<a class="anchor" aria-label="anchor" href="#reporting"></a></h4>
+<h4 id="reporting-1">Reporting<a class="anchor" aria-label="anchor" href="#reporting-1"></a></h4>
 <p><code>report_assessment</code> generates default file names. These are based on the series identifier with additional station information. It is now possible to override this behaviour for a single report by providing a different file name using the <code>output_file</code> argument.</p>
 </div>
 <div class="section level4">
@@ -87,7 +133,7 @@
 <ul><li>new values added to method_extraction table</li>
 </ul></div>
 <div class="section level4">
-<h4 id="minor-bug-fixes">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes"></a></h4>
+<h4 id="minor-bug-fixes-1">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-1"></a></h4>
 <ul><li>correct behaviour of argument <code>return_early</code> in <code>create_timeseries</code><br></li>
 <li>pass <code>info</code> component of the harsat object to <code>determinand.link.sum</code>, <code>determinand.link.replace</code>, and <code>determinand.link.imposex</code><br></li>
 <li>ensure early return from <code>ctsm_convert_basis</code> when there is nothing to convert (avoids issues e.g. when all the data are biological effects)<br></li>
