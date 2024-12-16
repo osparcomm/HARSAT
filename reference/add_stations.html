@@ -94,53 +94,87 @@ containing the station code and the station name</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>info$add_stations</code> is a list of control parameters that modify the
-station matching process:</p><ul><li><p>method: a string specifying whether the stations are matched by <code>"name"</code>,
+station matching process. The default values depend on <code>info$purpose</code> and
+are given at the end of this section. The elements of <code>info$add_stations</code>
+are:</p><ul><li><p><code>method</code>: a string specifying whether the stations are matched by <code>"name"</code>,
 <code>"coordinates"</code>, or <code>"both"</code>. If <code>info$purpose</code> is <code>"custom"</code>, <code>method</code> is
-restricted to either <code>"name"</code> (the default) or <code>"coordinates"</code>. If
-<code>info$purpose</code> is <code>"OSPAR"</code>, <code>"HELCOM"</code> or <code>"AMAP"</code>, then method is set to
-<code>"both"</code> by default and stations are matched by name or coordinates
+restricted to either <code>"name"</code> (the default) or <code>"coordinates"</code>.
+If <code>info$purpose</code> is <code>"OSPAR"</code>, <code>"HELCOM"</code> or <code>"AMAP"</code>, then method is set
+to <code>"both"</code> by default and stations are matched by name or coordinates
 according to rules specified by OSPAR, HELCOM or AMAP data providers.
-Specifically, stations are matched by name for Denmark, France (biota and
-water - all years; sediment 2009 onwards), Ireland, Norway, Portugal, Spain
-(2005 onwards), Sweden, The Netherlands (2007 onwards), United Kingdom. All
-other stations are matched by coordinates.</p></li>
-<li><p>area: a vector of strings containing one or more of <code>"OSPAR"</code>, <code>"HELCOM"</code>
+Currently, stations are matched by name for Denmark, France (biota and
+water - all years; sediment 2009 onwards), Germany (biota HELCOM - all
+years; biota OSPAR, biota AMAP, sediment, water 2023 onwards), Ireland,
+Norway, Portugal, Spain (2005 onwards), Sweden, The Netherlands (2007
+onwards), United Kingdom. All other stations are matched by coordinates.</p></li>
+<li><p><code>area</code>: a vector of strings containing one or more of <code>"OSPAR"</code>, <code>"HELCOM"</code>
 and <code>"AMAP"</code>; this restricts the stations to those in the corresponding
-convention area(s); NULL matches to all stations in the station dictionary</p></li>
-<li><p>datatype: a logical specifying whether the stations should be restricted
+convention area(s); <code>NULL</code> matches to all stations in the station dictionary</p></li>
+<li><p><code>datatype</code>: a logical specifying whether the stations should be restricted
 to those with an appropriate datatype. If <code>TRUE</code>, a contaminant measurement
 in biota (for example) will only be matched to stations with
 <code>station_datatype</code> containing the string <code>"CF"</code>. Similarly, a biological
 effect measurement in biota will only be matched to stations with
 <code>station_datatype</code> containing the string <code>"EF"</code></p></li>
-<li><p>temporal: a logical with <code>TRUE</code> indicating that stations should be
+<li><p><code>temporal</code>: a logical with <code>TRUE</code> indicating that stations should be
 restricted to those with <code>station_purpm</code> containing the string <code>"T"</code></p></li>
-<li><p>governance_type: a string: <code>"none"</code>, <code>"data"</code>, <code>"stations"</code> or <code>"both"</code>.
-<code>"none"</code> means data and station governance are both ignored. <code>"data"</code> means
-that matching will be restricted by data governance but not station
-governance; for example if <code>governance_id == c("OSPAR", "AMAP")</code>, then data
-will only be matched to a station if one of <code>is_ospar_monitoring</code> and
-<code>is_amap_monitoring</code> is <code>TRUE</code>, with all stations considered regardless of
-station governance. <code>"stations"</code> mean that matching will be restricted by
-station governance but not by data governance; for example if
-<code>governance_id == c("OSPAR", "AMAP")</code>, then the stations will be restricted
-to those where <code>station_programgovernance</code> contains either <code>"OSPAR"</code> or
-<code>"AMAP"</code>, with all data considered regardless of data governance. <code>both</code>
-uses both data and station governance. If <code>governance_id</code> contains a single
-value, then the matching is strict. However, if <code>governance_id</code> contains
-multiple values, then the matching is more complicated. For example, if
-<code>governance_id == c("OSPAR", "AMAP")</code>, then measurements with
-<code>is_ospar_monitoring == TRUE</code> and <code>"is_amap_monitoring == FALSE"</code> are
-matched to stations where <code>station_programgovernance</code> contains <code>"OSPAR"; measurements with </code>is_ospar_monitoring == FALSE<code>and</code>is_amap_monitoring ==
-TRUE<code>are matched with stations where</code>station_programgovernance<code>contains</code>"AMAP"<code>; but measurements where </code>is_ospar_monitoring == TRUE<code>and</code>is_amap_monitoring == TRUE<code>are matched to stations where</code>station_programgovernance<code>contains either</code>"OSPAR"<code>or</code>"AMAP"`.</p></li>
-<li><p>governance_id: a vector of strings containing one or more of <code>"OSPAR"</code>,
-<code>"HELCOM"</code> and <code>"AMAP"</code>.</p></li>
-<li><p>grouping: a logical with <code>TRUE</code> indicating that stations will be grouped
-into meta-stations as specified by <code>station_asmtmimeparent</code> in the station
-dictionary. Defaults to <code>FALSE</code> apart from when <code>info$purpose == "OSPAR"</code>.</p></li>
-<li><p>check_coordinates: a logical with <code>TRUE</code> indicating that, when
+<li><p><code>governance_type</code>: a string: <code>"none"</code>, <code>"data"</code>, <code>"stations"</code> or <code>"both"</code>
+which controls how data and station governance are used in station matching.
+Data governance information is found in
+<code>data$is_amap_monitoring</code>, <code>data$is_helcom_monitoring</code> and
+<code>data$is_ospar_monitoring</code> which are based on the monitoring programme
+(MPROG) information provided in submissions to the ICES data base.
+Station governance information is found in
+<code>stations$station_programgovernance</code> which
+is provided by data submitters to the ICES station dictionary.
+<code>governance_type</code> is used in
+conjunction with <code>governance_id</code> (see below) as follows:</p><ul><li><p><code>"none"</code> means that data and station governance are both ignored</p></li>
+<li><p><code>"data"</code> means that matching will be restricted by data governance but
+not station governance. For example, if <code>governance_id == "HELCOM"</code>, then
+data will only be matched to a station if <code>is_helcom_monitoring == TRUE</code>
+(with all stations considered regardless of station governance). If
+<code>governance_id</code> takes multiple values, e.g. <code>c("OSPAR", "AMAP")</code>, then
+data will only be matched to a station if e.g. either
+<code>is_ospar_monitoring == TRUE</code> or <code>is_amap_monitoring == TRUE</code>.</p></li>
+<li><p><code>"stations"</code> means that matching will be restricted by
+station governance but not by data governance. For example, if
+<code>governance_id == "HELCOM"</code>, then the stations will be restricted to those
+where <code>station_programgovernance</code> contains <code>"HELCOM"</code> (with all data
+considered regardless of data governance). If
+<code>governance_id</code> takes mulitple values, e.g. <code>c("OSPAR", "AMAP")</code>, then
+the stations will be restricted
+to those where <code>station_programgovernance</code> contains e.g. either <code>"OSPAR"</code>
+or <code>"AMAP"</code>.</p></li>
+<li><p><code>"both"</code> uses both data and station governance. For example, if
+<code>governance_id == "HELCOM"</code> then data will only be matched if
+<code>is_helcom_monitoring == TRUE</code> and the candidate stations will be
+restricted to those where <code>station_programmegovernance</code> contains
+<code>"HELCOM"</code>. If <code>governance_id</code> contains multiple values, e.g.
+<code>c("OSPAR", "AMAP")</code>, then data with
+<code>is_ospar_monitoring == TRUE</code> and <code>is_amap_monitoring == FALSE</code> are
+matched to stations where <code>station_programgovernance</code> contains <code>"OSPAR"</code>;
+data with <code>is_ospar_monitoring == FALSE</code> and
+<code>is_amap_monitoring == TRUE</code> are matched with stations where
+<code>station_programgovernance</code> contains
+<code>"AMAP"</code>; but measurements where <code>is_ospar_monitoring == TRUE</code> and
+<code>is_amap_monitoring == TRUE</code> are matched to stations where
+<code>station_programgovernance</code> contains either <code>"OSPAR"</code> or <code>"AMAP"</code>.</p></li>
+</ul></li>
+<li><p><code>governance_id</code>: used in conjunction with <code>governance_type</code>. If
+<code>governance_type == "none"</code>, then <code>governance_id</code> should be set to <code>NULL</code>.
+Otherwise, <code>governance_id</code> must be a vector of strings
+containing one or more of <code>"AMAP"</code>, <code>"HELCOM"</code> and <code>"OSPAR"</code>.</p></li>
+<li><p><code>grouping</code>: a logical with <code>TRUE</code> indicating that stations will be grouped
+into meta-stations as specified by <code>stations$station_asmtmimeparent</code> which
+is provided by data submitters to the ICES station dictionary.
+Defaults to <code>FALSE</code> apart from when <code>info$purpose == "OSPAR"</code>.</p></li>
+<li><p><code>check_coordinates</code>: a logical with <code>TRUE</code> indicating that, when
 stations are matched by name, the sample coordinates must also be within
-the station geometry. No implemented yet, so defaults ot <code>FALSE</code>.</p></li>
+the station geometry. Not implemented yet, so defaults to <code>FALSE</code>.</p></li>
+</ul><p>The default values of <code>info$add_stations</code> depend on <code>info$purpose</code> as follows:</p><ul><li><p><code>"AMAP"</code>: <code>list(method = "both", area = "AMAP",  datatype = FALSE, temporal = FALSE, governance_type = "none",  governance_id = NULL, group = FALSE, check_coordinates = FALSE)</code></p></li>
+<li><p><code>"HELCOM"</code>: <code>list(method = "both", area = "HELCOM",  datatype = FALSE, temporal = FALSE, governance_type = "none",  governance_id = NULL, group = FALSE, check_coordinates = FALSE)</code></p></li>
+<li><p><code>"OSPAR"</code>: <code>list(method = "both", area = "OSPAR",  datatype = TRUE, temporal = TRUE, governance_type = "both",  governance_id = c("OSPAR", "AMAP"), group = TRUE,  check_coordinates = FALSE)</code></p></li>
+<li><p><code>"custom"</code>: <code>list(method = "name", area = NULL,  datatype = FALSE, temporal = FALSE, governance_type = "none",  governance_id = NULL, group = FALSE, check_coordinates = FALSE)</code></p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
