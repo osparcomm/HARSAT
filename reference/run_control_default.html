@@ -76,6 +76,13 @@ percentages):</p><ul><li><p><code>target_power</code> default = 90%</p></li>
 The power calculations are currently only applied to log-normally
 distributed data, which is why the trend is expressed as a percentage.</p></li>
 </ul></li>
+<li><p><code>recent_change</code> A list with the following components:</p><ul><li><p><code>n_year_fit</code> default = 5L</p></li>
+<li><p><code>n_year_positive</code> default = 5L
+A recent change will only be computed if there are at least <code>n_year_fit</code>
+years of data in the recent period, of which at least <code>n_year_positive</code>
+contain at least one non-censored measurement. This only affects
+normally or log-normally distributed data.</p></li>
+</ul></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

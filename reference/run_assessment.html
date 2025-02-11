@@ -120,9 +120,9 @@ argument will be generalised in the near future, so expect it to change.</p></dd
 <dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
 <dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a> A list of control
 parameters that allow the user to modify the way the assessment is run.
-At present, these only include parameters involved in post-hoc power
-calculations, but it is intended to move other structures such as
-<code>recent_trend</code> here. See details (which need to be written).</p></dd>
+These currently include parameters for post-hoc power calculations and
+for the calculation of the 'recent_change' (in addition to the
+<code>recent_trend</code> argument above). See details.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -130,6 +130,49 @@ calculations, but it is intended to move other structures such as
 details (which need to be written).</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+
+<div class="section">
+<h3 id="control-parameters">Control parameters<a class="anchor" aria-label="anchor" href="#control-parameters"></a></h3>
+
+
+<p>Some aspects of the model output are controlled using parameters which
+can be modified using the <code>control</code> argument. The default parameter list
+is described below. The <code>control</code> argument only needs to specify any
+changes. For example, to change the target power from 90% (default) to 80%,
+use</p>
+<p><code>control = list(power = list(target_power = 80))</code></p>
+<p>The default parameters are a list with the following components:</p>
+<p><code>power</code></p>
+<p>A list with the following components (all expressed as
+percentages):</p><ul><li><p><code>target_power</code> default = 90</p></li>
+<li><p><code>target_trend</code> default = 5</p></li>
+<li><p><code>size</code> default = 5</p></li>
+</ul><p>These affect the post-how power calculations. Power is currently only
+calculated for time series of log-normally distributed data, which is why
+the trend is expressed as a percentage.
+  <br><br></p>
+
+<p><code>recent_change</code></p>
+<p>A list with the following components:</p><ul><li><p><code>n_year_fit</code> default = 5L</p></li>
+<li><p><code>n_year_positive</code> default = 5L</p></li>
+</ul><p>A recent change will only be computed if there are at least <code>n_year_fit</code>
+years of data in the recent period, of which at least <code>n_year_positive</code>
+contain at least one non-censored measurement. This only affects
+normally or log-normally distributed data.</p>
+<p>The default values of 5L mirror the requirements for calculating the
+change over the whole time series.</p>
+<p>Note that in harsat versions &lt;= 1.0.2, <code>n_year_positive</code> was hard-wired to
+0L which occasionally led to pathological behaviour in the estimation of
+the recent change. To replicate previous outputs as closely as possible,
+set <code>n_year_positive</code> to 2L (the smallest value allowed to avoid any
+pathologial behavour). The change is only likely to affect long time series
+with infrequent sampling where most measurements in the recent period are
+censored.</p>
+</div>
+
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
