@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2.1007</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
       <h1>OSPAR example usage</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/develop/vignettes/example_OSPAR.Rmd" class="external-link"><code>vignettes/example_OSPAR.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/main/vignettes/example_OSPAR.Rmd" class="external-link"><code>vignettes/example_OSPAR.Rmd</code></a></small>
       <div class="d-none name"><code>example_OSPAR.Rmd</code></div>
     </div>
 
@@ -137,10 +137,18 @@ that <code>determinands.control</code> needs to do more work in
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
 <span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'</span></span>
 <span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'</span></span>
+<span><span class="co">#&gt; Warning: the following columns are missing from the ICES extraction: </span></span>
+<span><span class="co">#&gt;   amap_arctic_lme</span></span>
+<span><span class="co">#&gt;   This might be because the extraction was made before 14 June 2024, in which case</span></span>
+<span><span class="co">#&gt;   take care if working with AMAP regions</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
 <span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt'</span></span>
 <span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt': '13d63b6161b671165b215b58f5e22469'</span></span>
+<span><span class="co">#&gt; Warning: the following columns are missing from the ICES extraction: </span></span>
+<span><span class="co">#&gt;   amap_arctic_lme, casenumber</span></span>
+<span><span class="co">#&gt;   This might be because the extraction was made before 14 June 2024, in which case</span></span>
+<span><span class="co">#&gt;   take care if working with AMAP regions</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matching data with station dictionary</span></span>
 <span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
@@ -327,25 +335,25 @@ first_year_fit
 last_year
 </th>
 <th style="text-align:right;">
-p_nonlinear
-</th>
-<th style="text-align:right;">
-p_linear
-</th>
-<th style="text-align:right;">
-p_overall
+p_nonlinear_trend
 </th>
 <th style="text-align:right;">
 p_linear_trend
 </th>
 <th style="text-align:right;">
-linear_trend
+p_overall_trend
 </th>
 <th style="text-align:right;">
-p_recent_trend
+p_overall_change
 </th>
 <th style="text-align:right;">
-recent_trend
+overall_change
+</th>
+<th style="text-align:right;">
+p_recent_change
+</th>
+<th style="text-align:right;">
+recent_change
 </th>
 <th style="text-align:right;">
 detectable_trend
@@ -15103,10 +15111,18 @@ of multiple thresholds in <code><a href="../reference/run_assessment.html">run_a
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
 <span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'</span></span>
 <span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'</span></span>
+<span><span class="co">#&gt; Warning: the following columns are missing from the ICES extraction: </span></span>
+<span><span class="co">#&gt;   amap_arctic_lme</span></span>
+<span><span class="co">#&gt;   This might be because the extraction was made before 14 June 2024, in which case</span></span>
+<span><span class="co">#&gt;   take care if working with AMAP regions</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
 <span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/sediment.txt'</span></span>
 <span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/sediment.txt': '0cb722db8f8ea4ed263e1cb8c8334665'</span></span>
+<span><span class="co">#&gt; Warning: the following columns are missing from the ICES extraction: </span></span>
+<span><span class="co">#&gt;   amap_arctic_lme, casenumber</span></span>
+<span><span class="co">#&gt;   This might be because the extraction was made before 14 June 2024, in which case</span></span>
+<span><span class="co">#&gt;   take care if working with AMAP regions</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matching data with station dictionary</span></span>
 <span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
@@ -15338,25 +15354,25 @@ first_year_fit
 last_year
 </th>
 <th style="text-align:right;">
-p_nonlinear
-</th>
-<th style="text-align:right;">
-p_linear
-</th>
-<th style="text-align:right;">
-p_overall
+p_nonlinear_trend
 </th>
 <th style="text-align:right;">
 p_linear_trend
 </th>
 <th style="text-align:right;">
-linear_trend
+p_overall_trend
 </th>
 <th style="text-align:right;">
-p_recent_trend
+p_overall_change
 </th>
 <th style="text-align:right;">
-recent_trend
+overall_change
+</th>
+<th style="text-align:right;">
+p_recent_change
+</th>
+<th style="text-align:right;">
+recent_change
 </th>
 <th style="text-align:right;">
 detectable_trend
@@ -25567,7 +25583,7 @@ ug/kg
 NA
 </td>
 <td style="text-align:left;">
-downward_triangle
+large_filled_circle
 </td>
 <td style="text-align:left;">
 green
@@ -25606,10 +25622,10 @@ NA
 -2.8
 </td>
 <td style="text-align:right;">
-0.0022
+NA
 </td>
 <td style="text-align:right;">
--1.9
+NA
 </td>
 <td style="text-align:right;">
 6.9
@@ -25630,7 +25646,7 @@ BAC
 0.1911775
 </td>
 <td style="text-align:right;">
-2057
+NA
 </td>
 <td style="text-align:left;">
 above
@@ -38574,10 +38590,18 @@ actively worked on.</p>
 <span><span class="co">#&gt; Reading station dictionary from:</span></span>
 <span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'</span></span>
 <span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'</span></span>
+<span><span class="co">#&gt; Warning: the following columns are missing from the ICES extraction: </span></span>
+<span><span class="co">#&gt;   amap_arctic_lme</span></span>
+<span><span class="co">#&gt;   This might be because the extraction was made before 14 June 2024, in which case</span></span>
+<span><span class="co">#&gt;   take care if working with AMAP regions</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Reading contaminant and effects data from:</span></span>
 <span><span class="co">#&gt;  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/biota.txt'</span></span>
 <span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/biota.txt': 'abfd256bda44cde5ed63693c75ec9024'</span></span>
+<span><span class="co">#&gt; Warning: the following columns are missing from the ICES extraction: </span></span>
+<span><span class="co">#&gt;   amap_arctic_lme, casenumber</span></span>
+<span><span class="co">#&gt;   This might be because the extraction was made before 14 June 2024, in which case</span></span>
+<span><span class="co">#&gt;   take care if working with AMAP regions</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matching data with station dictionary</span></span>
 <span><span class="co">#&gt;  - restricting to stations in these convention areas: OSPAR </span></span>
@@ -38749,8 +38773,7 @@ calculates the standard errors. Dealing with non-converged timeseries is
 a topic for a future vignette.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The following assessment models have not converged:</span></span>
-<span><span class="co">#&gt; 5031 BBKF Mytilus edulis SB</span></span>
+<span><span class="co">#&gt; All assessment models have converged</span></span>
 <span></span>
 <span><span class="va">biota_assessment</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_assessment.html">update_assessment</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>, </span>
@@ -38905,25 +38928,25 @@ first_year_fit
 last_year
 </th>
 <th style="text-align:right;">
-p_nonlinear
-</th>
-<th style="text-align:right;">
-p_linear
-</th>
-<th style="text-align:right;">
-p_overall
+p_nonlinear_trend
 </th>
 <th style="text-align:right;">
 p_linear_trend
 </th>
 <th style="text-align:right;">
-linear_trend
+p_overall_trend
 </th>
 <th style="text-align:right;">
-p_recent_trend
+p_overall_change
 </th>
 <th style="text-align:right;">
-recent_trend
+overall_change
+</th>
+<th style="text-align:right;">
+p_recent_change
+</th>
+<th style="text-align:right;">
+recent_change
 </th>
 <th style="text-align:right;">
 detectable_trend
@@ -59627,19 +59650,19 @@ black
 NA
 </td>
 <td style="text-align:right;">
-0.7728
+0.7707
 </td>
 <td style="text-align:right;">
-0.7728
+0.7707
 </td>
 <td style="text-align:right;">
-0.7728
+0.7707
 </td>
 <td style="text-align:right;">
 -0.8
 </td>
 <td style="text-align:right;">
-0.7728
+0.7707
 </td>
 <td style="text-align:right;">
 -0.8
@@ -59648,10 +59671,10 @@ NA
 40.0
 </td>
 <td style="text-align:right;">
-5.162003e+00
+5.144034e+00
 </td>
 <td style="text-align:right;">
-1.108761e+01
+1.058836e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -69276,10 +69299,10 @@ NA
 8.5
 </td>
 <td style="text-align:right;">
-8.113343e+00
+8.113322e+00
 </td>
 <td style="text-align:right;">
-1.155121e+01
+1.155105e+01
 </td>
 <td style="text-align:left;">
 </td>
@@ -69327,7 +69350,7 @@ MPC
 4.573171e+02
 </td>
 <td style="text-align:right;">
--4.457659e+02
+-4.457660e+02
 </td>
 <td style="text-align:right;">
 2017
@@ -69444,10 +69467,10 @@ NA
 8.4
 </td>
 <td style="text-align:right;">
-9.179996e+00
+9.179987e+00
 </td>
 <td style="text-align:right;">
-1.299293e+01
+1.299286e+01
 </td>
 <td style="text-align:left;">
 </td>

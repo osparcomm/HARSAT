@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2.1007</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
       <h1>External data</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/develop/vignettes/example_external_data.Rmd" class="external-link"><code>vignettes/example_external_data.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/main/vignettes/example_external_data.Rmd" class="external-link"><code>vignettes/example_external_data.Rmd</code></a></small>
       <div class="d-none name"><code>example_external_data.Rmd</code></div>
     </div>
 
@@ -103,6 +103,7 @@ We usually do this by putting our data files in a directory
 <span>  data_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"data"</span>, <span class="st">"example_external_data"</span><span class="op">)</span>,</span>
 <span>  data_format <span class="op">=</span> <span class="st">"external"</span>,</span>
 <span>  info_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">working.directory</span>, <span class="st">"information"</span>, <span class="st">"AMAP"</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>region <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"AMAP_region"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\AMAP\determinand.csv </span></span>
 <span><span class="co">#&gt; Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\AMAP\species.csv </span></span>
@@ -125,12 +126,19 @@ We usually do this by putting our data files in a directory
 <span><span class="co">#&gt; MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_external_data/EXTERNAL_FO_PW_DATA.csv': '9ade644c5bdb561f0c3bf4a3560a2c15'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Argument max_year taken to be the maximum year in the data: 2020</span></span></code></pre></div>
-<p>Note: in the above function, replace ‘control = list()’ with ‘control
-= list(use_stage = TRUE)’ to include subseries in ICES format data runs;
-for ‘external’ format runs, if the input data file includes a column
-named ‘subseries’, the data in this column will be used to define
-subseries, to exclude subseries runs this column can be omitted or
-renamed e.g. to ‘nosubseries’</p>
+<p>Notes:</p>
+<ul>
+<li>the control argument identifies the column in the station dictionary
+that contains AMAP regional information; this is only necessary here
+because the column identifier differs from the AMAP default which is
+<code>amap_arctic_lme</code><br>
+</li>
+<li>for ICES format data, use
+<code>control = list(use_stage = TRUE)</code> to include subseries based
+on the developmental <code>stage</code> of the monitoring organism; for
+external format data, a column called <code>subseries</code> in the data
+file can be used to define subseries</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="prepare-data-for-next-stage">Prepare data for next stage<a class="anchor" aria-label="anchor" href="#prepare-data-for-next-stage"></a>
