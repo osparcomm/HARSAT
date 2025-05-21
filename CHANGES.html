@@ -55,29 +55,30 @@
 <p>This release is that used to run the OSPAR 2025 CEMP assessment.</p>
 <div class="section level4">
 <h4 id="ices-data-extractions">ICES data extractions<a class="anchor" aria-label="anchor" href="#ices-data-extractions"></a></h4>
-<p><code>read_data</code> and <code>read_contaminants</code> now explicitly look for the variables <code>amap_arctic_lme</code> and <code>casenumber</code> in the contaminants data file when argument <code>data_format</code> is set to <code>"ICES"</code>. These variables were introduced in ICES extractions in mid-June 2024. A warning is printed if the variables are missing. <code>read_stations</code> also explicitly looks for <code>amap_arctic_lme</code> in the ICES station dictionary.</p>
+<p><code>read_data</code> and <code>read_contaminants</code> now expect to find the variables <code>amap_arctic_lme</code> and <code>casenumber</code> in the contaminants data file from an ICES extraction (when argument <code>data_format</code> is set to <code>"ICES"</code>). These variables were introduced in ICES extractions in mid-June 2024. A warning is printed if the variables are missing. <code>read_stations</code> also expects to fins <code>amap_arctic_lme</code> in the ICES station dictionary.</p>
 <ul><li>
 <code>amap_arctic_lme</code> contains AMAP large marine ecosystem regional information</li>
 <li>
-<code>casenumber</code> is the accession identification id in the AIMS (Accession Information Management System) system introduced in 2024; <code>casenumber</code> replaces accessionid from the now discontinued DAD system</li>
+<code>casenumber</code> is the accession identification id in the AIMS (Accession Information Management System) system introduced in 2024; it replaces accessionid from the now discontinued DAD system</li>
 </ul></div>
 <div class="section level4">
 <h4 id="amap-assessments">AMAP assessments<a class="anchor" aria-label="anchor" href="#amap-assessments"></a></h4>
 <p>There are two changes that affect data processing for AMAP assessments (when argument <code>purpose</code> in <code>read_data</code> is set to <code>"AMAP"</code>).</p>
-<p>First, the default behaviour by which <code>read_data</code> matches stations to data from an ICES extraction is now to restrict eligible stations in those in the AMAP area. Previously it didn’t matter where the stations were. The default behaviour can be changed using the <code>add_stations</code> element of the <code>control</code> argument of <code>read_data</code>. See the help file of <code>add_stations</code> for more information about station matching.</p>
-<p>Second, the default values for the elements of control$region are now</p>
-<ul><li>id: “amap_arctic_lme”</li>
-<li>names: “AMAP_arctic_lme”</li>
-<li>all: FALSE (this is because there are discrepancies between shape files for the AMAP area and the AMAP large marine ecosystems)</li>
-</ul><p>Users of external data should either rename the variable with regional information in the station dictionary to <code>amap_arctic_lme</code> or set <code>control$region</code> so that it picks up the existing name of this variable.</p>
+<p>First, the default behaviour by which <code>read_data</code> matches stations to data from an ICES extraction is now to restrict eligible stations in those in the AMAP area. Previously it didn’t matter where the stations were. The default behaviour can be changed using <code>control$add_stations</code> in <code>read_data</code>. See the help file of <code>add_stations</code> for more information about station matching.</p>
+<p>Second, the default values <code>control$region</code> are now</p>
+<ul><li><code>id = "amap_arctic_lme"</code></li>
+<li><code>names = "AMAP_arctic_lme"</code></li>
+<li>
+<code>all = FALSE</code> (because of discrepancies between shape files for the AMAP area and the AMAP large marine ecosystems)</li>
+</ul><p>Users of external data might need to rename the regional variable in the station dictionary to <code>amap_arctic_lme</code> or use <code>control$region</code> to pick up the existing variable name.</p>
 </div>
 <div class="section level4">
 <h4 id="summations-involving-censored-values">Summations involving censored values<a class="anchor" aria-label="anchor" href="#summations-involving-censored-values"></a></h4>
-<p>An argument <code>sum_censored</code> has been added to <code>determinand.link.sum</code> which allows the user to control whether censored values are included when computing a sum.</p>
+<p>An argument <code>sum_censored</code> has been added to <code>determinand.link.sum</code> which gives control over how censored values are treated when computing a summed concentration.</p>
 <p><code>sum_censored = TRUE</code> (default) maintains the previous behaviour where the sum is computed by adding all the non-censored measurements and the censored values of the censored measurements. If all the measurements are censored and all the censored values are equal to the limit of detection, then the sum will be the sum of the limits of detection.</p>
 <p><code>sum_censored = FALSE</code> typically treats each censored value as zero when calculating the sum. Usually, the output is the sum of the non-censored measurements. There are two exceptions:</p>
 <ul><li>when all measurements are censored, the output is the largest censored value (and is flagged as a censored measurement)</li>
-<li>when the sum of the non-censored measurements is less than the largest censored value, the output is the largest censored value (and is flagged as a censored measurement); this will be unusual and is most likely to occur when using weights (and small weights are applied to non-censored measurements and a large weight is applied to the censored measurements)</li>
+<li>when the sum of the non-censored measurements is less than the largest censored value, the output is the largest censored value (and is flagged as a censored measurement); this will be unusual and is most likely to occur when using weights (and small weights are applied to non-censored measurements and large weights are applied to the censored measurements)</li>
 </ul><p>The same argument has also been added to customised link functions such as <code>determinand.link.BBKF</code> which call <code>determinand.link.sum</code>.</p>
 <p>It is likely that most users will use <code>sum_censored = FALSE</code> since this is compatible with Marine Strategy advice on the treatment of censored values. If so, this might become the default option in a future release.</p>
 </div>
@@ -91,7 +92,8 @@
 <code>p_linear</code> –&gt; <code>p_linear_trend</code>
 </li>
 <li>
-<code>p_overall       --&gt;</code>p_overall_trend`</li>
+<code>p_overall</code> –&gt; <code>p_overall_trend</code>
+</li>
 <li>
 <code>p_linear_trend</code> –&gt; <code>p_overall_change</code>
 </li>
@@ -104,13 +106,13 @@
 <li>
 <code>recent_trend</code> –&gt; <code>recent_change</code>
 </li>
-</ul><p>The first three variables report evidence of systematic trends in the data. The remaining variables all relate to changes in concentration between the start and end of either the whole time series or the ‘recent’ part of the time series (typically the last 20 monitoring years). The renaming was prompted by confusion about the original names <code>p_linear_trend</code> and <code>linear_trend</code> which suggest linearity that is not always the case. The harsat team struggled to come up with suitable alternatives and hopes that the new names are less confusing (if not crystal clear).</p>
+</ul><p>The first three variables report evidence of systematic trends in the data. The remaining variables all relate to changes in concentration between the start and end of either the whole time series or the ‘recent’ part of the time series (typically the last 20 monitoring years). The renaming was prompted by confusion about the original names <code>p_linear_trend</code> and <code>linear_trend</code> which suggest linearity that is not always the case. The harsat team struggled to come up with suitable alternatives and hopes that the new names are at least less confusing, if not crystal clear.</p>
 </div>
 <div class="section level4">
 <h4 id="calculation-of-recent_change">Calculation of recent_change<a class="anchor" aria-label="anchor" href="#calculation-of-recent_change"></a></h4>
-<p>The <code>overall_change</code> is the change in concentration over the whole monitoring period. It is only calculated if there are at least five years of data with at least one non-censored measurement.</p>
-<p>The <code>recent_change</code> is the change in concentration in recent years, typically taken to be the last twenty monitoring years. In previous releases, <code>recent_change</code> was only calculated if <code>overall_change</code> had been calculated and there were at least five years of data in the recent period. However there was no requirement on the number of years with non-censored measurements in the recent period. This meant that the evidence base for <code>recent_change</code> could be weak (e.g. if only one or two years in the recent period had non-censored measurements). Occasionally, <code>recent_change</code> could be undefined for long time series with infrequent monitoring and many censored measurements.</p>
-<p>The user can now control the calculation of <code>recent_change</code> using the <code>control</code> argument of <code>run_assessment</code>. Specifically, <code>control$recent_change</code> has two components:</p>
+<p><code>overall_change</code> is the change in concentration over the whole monitoring period. It is only calculated if there are at least five years of data each with at least one non-censored measurement.</p>
+<p><code>recent_change</code> is the change in concentration in recent years, typically taken to be the last twenty monitoring years. In previous releases, <code>recent_change</code> was calculated if <code>overall_change</code> had been calculated and there were at least five years of data in the recent period. However there was no requirement on the number of years with non-censored measurements in the recent period. This meant that the evidence base for <code>recent_change</code> could be weak (e.g. if only one or two years in the recent period had non-censored measurements). Occasionally <code>recent_change</code> could be undefined for long time series with infrequent monitoring and many censored measurements.</p>
+<p>The calculation of <code>recent_change</code> can now be controlled using the <code>control</code> argument of <code>run_assessment</code>. Specifically, <code>control$recent_change</code> has two components:</p>
 <ul><li>
 <code>n_year_fit</code> - default 5L</li>
 <li>
@@ -122,7 +124,7 @@
 <div class="section level4">
 <h4 id="imposex-assessments---annual-indices-equal-to-zero">Imposex assessments - annual indices equal to zero<a class="anchor" aria-label="anchor" href="#imposex-assessments---annual-indices-equal-to-zero"></a></h4>
 <p>Imposex assessments (based on individual measurements) involve the estimation of cut-points that measure the transition from one imposex stage to the next on the latent odds scale. This estimation pools the data from several (often many) timeseries to improve the precision of the cut-point estimates and is done before the call to <code>run_assessment</code>.</p>
-<p>Data from timeseries / year combinations where all the individual measurements are zero (equivalently, the annual index is zero) contain no information on cut-points and are now removed from the estimation procedure. This improves convergence. The estimation routine has been renamed as <code>ordinal_theta_est</code> (previously `ctsm.VDS.index.opt )</p>
+<p>Data from timeseries / year combinations where all the individual measurements are zero (equivalently, the annual index is zero) contain no information on cut-points and are now removed from the estimation procedure. This improves convergence. The estimation routine has been renamed as <code>ordinal_theta_est</code> (previously <code>ctsm.VDS.index.opt</code>)</p>
 <p>Estimation of the cut-points is followed by estimation of confidence intervals for the annual indices. This is possible because the model output also includes estimates of each index. The confidence intervals are estimated from the posterior distribution of the parameter estimates. However, this does not work for zero indices whose fitted values would be infinite on the latent scale. A good solution would be to calculate likelihood intervals, but this is a challenging numerical problem and has been left for a future release. Instead, the previous very ad-hoc approach has been replaced by a moderately ad-hoc approach. Specifically, an infinite value for a zero index is replaced by a value larger than all the fitted values for positive indices. This is done by taking all the positive indices, fitting a linear model of fitted value against square root index, and predicting what the fitted value should be when the index is zero. The square root scale is based on the typical relationship between fitted values and indices observed in the OSPAR 2025 assessment. The associated standard error is taken to be the upper 90th quantile of the standard errors associated with positive indices (with a suitable adjustment for the number of measurements used in each), which is reasonable since standard errors increase as the number of zero measurements increase but not in a very predictable manner (at least not in the OSPAR 2025 assessment). The upper confidence limit on a zero index is then estimated by simulating from the posterior distribution of the parameter estimates as before. (The lower confidence limit is zero by definition.) The estimation routine has been renamed <code>ordinal_theta_cl</code> (previously <code>ctsm.VDS.index.cl</code>).</p>
 </div>
 <div class="section level4">
