@@ -369,7 +369,7 @@ ctsm.format <- function(x, y = x, nsig = 3) {
 }
 
 
-ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) {
+ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE) {
 
   compartment <- switch(info$compartment, biota = "Biota", sediment = "Sediment", water = "Water")
   
@@ -430,7 +430,6 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
     txt <- paste(txt, " (", series$station_longname, ")", sep = "")
   }
   
-  #out$station <- if (html) convert.html.characters(txt) else txt
   out$station <- txt
   
   out$determinand <- paste(
@@ -449,83 +448,71 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE, html = FALSE) 
 
   basis <- as.character(series$basis)
   
-  sep.html <- if (html) " " else "~"
+  # for units, need to construct an expression for sending to grid graphics
+  # this means that text should be separated by a tilde
+  # however need to put % in quotes because it is a special character!
+  # this also applies to determinands which might have a % in their name
   
   if (auxiliary.plot) { 
-    start.text <- paste(
-      switch(
-        series$group, 
-        Effects = "Effect", 
-        Imposex = "Imposex", 
-        "Concentration"
-      ),
-      "units:", 
-      sep = sep.html
+    start_text <- switch(
+      series$group, 
+      Effects = "Effect~units:", 
+      Imposex = "Imposex~units:", 
+      "Concentration~units:"
     )
   } else {
-    start.text <- "Units:"
+    start_text <- "Units:"
   }
 
 
-  # extra.text deals with normalised sediments
+  # extra_text deals with normalised sediments 
 
   is_extra <- info$compartment == "sediment" && 
     (is.null(series$country) || series$country != "Spain")
   
   if (is_extra) {
-    if (html) {
-      extra.text <- paste(
-        "normalised to", 
-        switch(groupID, Metals = "5% aluminium", "2.5% organic carbon")
-      )
-    } else {
-    extra.text <- paste(
-        '"normalised to"', 
-        switch(groupID, Metals = '"5% aluminium"', '"2.5% organic carbon"'), 
-        sep = "~"
-      )
-    }    
+    extra_text <- paste(
+      "normalised~to", 
+      switch(groupID, Metals = '"5% aluminium"', '"2.5% organic carbon"'), 
+      sep = "~"
+    )
     
     if (length(unitID) > 1L) {
-      extra.text <- paste("all", extra.text, sep = sep.html)
+      extra_text <- paste("all", extra_text, sep = "~")
     }
-    
   }  
 
 
-  unitText <- mapply(
-    label.units, 
+  unit_text <- mapply(
+    label_units, 
     units = unitID, 
     basis = basis, 
-    MoreArgs = list(html = html, compartment = info$compartment)
+    MoreArgs = list(html = FALSE, compartment = info$compartment)
   )
   
-  names(unitText) <- series$seriesID
+  unitID <- unique(unit_text)
   
-  unitID <- unique(unitText)
-  
-  # if (info$compartment == "sediment" & length(unitID) > 1)
-  #   stop("unsupported multiple units for sediment in ctsm.web.getKey")
-  
-  # out$units <- paste(start.text, do.call("label.units", args), sep = ifelse(html, " ", "~"))
-
-  if (length(unitID) == 1) 
-    out$units <- paste(start.text, unitID, sep = sep.html) 
-  else {
+  if (length(unitID) > 1L) {
     wk <- sapply(unitID, function(i) {
-      seriesID <- names(unitText)[unitText == i]
+      seriesID <- series$seriesID[unit_text == i]
       detID <- unique(series$determinand[seriesID])
-      paste0('"', "(", paste0(detID, collapse = ", "), ")", '"')
+      detID <- paste0(detID, collapse = ", ")
+      out <- paste0("(", detID, ")")
+      paste0('"', out, '"')
     })
-    wk <- paste(unitID, wk, sep = sep.html)
-    wk <- paste(wk, collapse = if (html) "; " else paste0('~', '"; "', "~"))
-    out$units <- paste(start.text, wk, sep = sep.html)
+    unit_text <- paste(unitID, wk, sep = "~")
+    unit_text <- paste(unit_text, collapse = paste0('~', '";"', "~"))
   }
+
+  out$units <- paste(start_text, unit_text, sep = "~")
   
   if (is_extra) {
-    out$units <- paste(out$units, extra.text, sep = sep.html)
+    out$units <- paste(out$units, extra_text, sep = "~")
   }
   
+  out$units <- parse(text = out$units)
+  
+
   out$extraction <- "Data extraction:"
   if (!is.null(info$extraction)) {
     out$extraction <- paste(out$extraction, format(info$extraction, "%d %B %Y"))
@@ -848,74 +835,120 @@ plot.setup <- function(newPage) {
 
 
 
-label.units <- function(
-  units = c("ug/kg", "mg/kg", "ng/ml", "pmol/min/mg protein", "ug/ml", "ug/l", 
-            "nmol/min/mg protein", "ng/min/mg protein", "stg", "j/h/g", "mins",
-            "d", "%", "nr/1000 cells", "ng/l"),
-  basis, html = FALSE, compartment, extra.text = NA) {
 
-  units <- match.arg(units)
-  
-  ok <- basis %in% c("W", "D", "L") |
-    (is.na(basis) & units %in% c(
-      "ng/ml", "ug/ml", "pmol/min/mg protein", "nmol/min/mg protein", "ng/min/mg protein", "stg", 
-      "j/h/g", "mins", "d", "%", "nr/1000 cells"))
-  
-  if (!ok)
-    stop("basis not recognised")
-  
-    
-  if (html)
-    units <- switch(
-      units, 
-      "ug/kg" = "&mu;g kg<sup>-1</sup>", 
-      "mg/kg" = "mg kg <sup>-1</sup>",
-      "ng/ml" = "ng ml <sup>-1</sup>",
-      "ug/ml" = "&mu;g ml<sup>-1</sup>", 
-      "ug/l" = "&mu;g l<sup>-1</sup>",
-      "ng/l" = "ng l<sup>-1</sup>",
-      "stg" = "stage",
-      "j/h/g" = "J h <sup>-1</sup> g <sup>-1</sup>",
-      "pmol/min/mg protein" = "pmol min <sup>-1</sup> mg protein <sup>-1</sup>",
-      "nmol/min/mg protein" = "nmol min <sup>-1</sup> mg protein <sup>-1</sup>",
-      "ng/min/mg protein" = "ng min <sup>-1</sup> mg protein <sup>-1</sup>", 
-      "mins" = "min",
-      "d" = "d",
-      "%" = "%", 
-      "nr/1000 cells" = "nr/1000 cells")
-  else
-    units <- switch(
-      units, 
-      "ug/kg" = 'paste(mu, "g") ~ "kg"^-1', 
-      "mg/kg" = '"mg kg"^-1',
-      "ng/ml" = '"ng ml"^-1',
-      "ug/ml" = 'paste(mu, "g") ~ "ml"^-1', 
-      "ug/l" = 'paste(mu, "g") ~ "l"^-1', 
-      "ng/l" = '"ng l"^-1', 
-      "stg" = '"stage"',
-      "j/h/g" = '"J h"^-1 ~ "g"^-1',
-      "pmol/min/mg protein" = '"pmol min"^-1 ~ "mg protein"^-1',
-      "nmol/min/mg protein" = '"nmol min"^-1 ~ "mg protein"^-1',
-      "ng/min/mg protein" = '"ng min"^-1 ~ "mg protein"^-1', 
-      "mins" = '"min"', 
-      "d" = '"d"',
-      "%" = '"%"',
-      "nr/1000 cells" = '"nr/1000 cells"')
-  
-  args <- list(units, sep = if (html) " " else "~")
-  
-  if(!is.na(basis) & compartment != "water") {
-    if (html)
-      basis <- switch(basis, D = "dry weight", W = "wet weight", L = "lipid weight")
-    else
-      basis <- switch(basis, D = '"dry weight"', W = '"wet weight"', L = '"lipid weight"')
 
-    args <- c(args, basis)
+
+#' Text representation of units for plots and reports
+#' 
+#' Utilty function for adding units to plots in e.g. `plot_assessment` or 
+#' html reports in e.g. `report_assessment`. Standard (recognised) units are 
+#' prettified, with non-standard units returned unchanged.
+#'
+#' @param units 
+#' @param basis 
+#' @param html A logical with TRUE returning an html representation for use in 
+#' markdown and FALSE (default) returning an text expression for use in lattice 
+#' (grid) graphics
+#' @param compartment 
+#' @param extra.text 
+#'
+#' @return 
+#' A character string that can be used in markdown (`html = TRUE`) or used in 
+#' grid graphics ('html = FALSE`). In the latter, need to turn the string into
+#' an expression by `parse(text = result)`.  
+#'
+#' @examples
+label_units <- function(units, basis, html = FALSE, compartment) {
+
+  if (!is.character(units) && length(units) == 1L) {
+    stop(
+      "argument 'units' must be a character scalar"
+    )
+  }  
+  
+  if (!is.character(basis) && length(basis) == 1L) {
+    stop(
+      "argument 'basis' must be a character scalar"
+    )
+  }  
+  
+  if (!(is.na(basis) || basis %in% c("W", "D", "L"))) {
+    stop(
+      "unrecognised basis"
+    )
   }
   
-  if (!is.na(extra.text)) 
-    args <- c(args, as.list(extra.text))
-  do.call("paste", args)
+
+  # when html = FALSE:
+  #  incorporate spaces by using ~ or by enclosing in quotes
+  #  need to ensure all special characters are encolsed in quotes
+    
+  if (html) {
+    units <- switch(
+      units, 
+      "mg/kg" = "mg kg<sup>-1</sup>",
+      "mg/g"  = "mg g<sup>-1</sup>",
+      "ug/kg" = "&mu;g kg<sup>-1</sup>", 
+      "ug/g"  = "&mu;g g<sup>-1</sup>", 
+      "ng/kg" = "ng kg<sup>-1</sup>",
+      "ng/g"  = "ng g<sup>-1</sup>",
+      "ug/l"  = "&mu;g l<sup>-1</sup>",
+      "ug/ml" = "&mu;g ml<sup>-1</sup>", 
+      "ng/l"  = "ng l<sup>-1</sup>",
+      "ng/ml" = "ng ml<sup>-1</sup>",
+      "mins"  = "min",
+      "stg"   = "stage",
+      "j/h/g" = "J h <sup>-1</sup> g <sup>-1</sup>",
+      "pmol/min/mg protein" = "pmol min<sup>-1</sup> mg protein<sup>-1</sup>",
+      "nmol/min/mg protein" = "nmol min<sup>-1</sup> mg protein<sup>-1</sup>",
+      "ng/min/mg protein"   = "ng min<sup>-1</sup> mg protein<sup>-1</sup>", 
+      units
+    )
+  } else {
+    units <- switch(
+      units, 
+      "mg/kg" = 'mg ~ kg^{-1}',
+      "mg/g"  = 'mg ~ g^{-1}',
+      "ug/kg" = 'paste(mu, "g") ~ kg^{-1}', 
+      "ug/g"  = 'paste(mu, "g") ~ g^{-1}', 
+      "ng/kg" = 'ng ~ kg^{-1}',
+      "ng/g"  = 'ng ~ g^{-1}',
+      "ug/l"  = 'paste(mu, "g") ~ l^{-1}', 
+      "ug/ml" = 'paste(mu, "g") ~ ml^{-1}', 
+      "ng/l"  = 'ng ~ l^{-1}', 
+      "ng/ml" = 'ng ~ ml^{-1}',
+      "mins"  = 'min', 
+      "stg"   = 'stage',
+      "j/h/g" = 'J ~ h^{-1} ~ g^{-1}',
+      "pmol/min/mg protein" = 'pmol ~ min^{-1} ~ "mg protein"^{-1}',
+      "nmol/min/mg protein" = 'nmol ~ min^{-1} ~ "mg protein"^{-1}',
+      "ng/min/mg protein"   = 'ng ~ min^{-1} ~ "mg protein"^{-1}', 
+      paste('"', units, '"')
+    )
+  }
+  
+
+  # append basis
+  
+  if(!is.na(basis) && compartment != "water") {
+
+    basis <- switch(
+      basis, 
+      D = "dry weight", 
+      W = "wet weight", 
+      L = "lipid weight"
+    )
+    
+    if (html) {
+      units <- paste(units, basis)
+    } else {
+      basis <- gsub(" ", "~", basis, fixed = TRUE)
+      units <- paste(units, basis, sep = "~")
+    }
+      
+  }
+  
+  units
 }
 
 
@@ -1768,7 +1801,7 @@ plot.info <- function(series, info, plot.type = c("data", "auxiliary"), ...) {
             just = c("left", "centre"))
   grid.text(key$station, x = unit(1, "char"), y = unit(3, "lines"), gp = gpar(cex = 0.8), 
             just = c("left", "centre"))
-  grid.text(parse(text = key$units), x = unit(1, "char"), y = unit(2, "lines"), gp = gpar(cex = 0.8), 
+  grid.text(key$units, x = unit(1, "char"), y = unit(2, "lines"), gp = gpar(cex = 0.8), 
             just = c("left", "centre"))
   grid.text(key$extraction, x = unit(1, "char"), y = unit(1, "lines"), gp = gpar(cex = 0.8), 
             just = c("left", "centre"))
