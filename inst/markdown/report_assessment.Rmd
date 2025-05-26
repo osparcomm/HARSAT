@@ -225,34 +225,43 @@ if (info$compartment == "biota")
   info$sex_name <- switch(as.character(info$sex), M = "male", F = "female")
 
 
-# units 
-
-args.list <- list(units = info$unit, basis = info$basis, html = TRUE, compartment = info$compartment)
+# normalisation info
 
 is_normalised <- FALSE
 
 if (info$compartment %in% "sediment" && info$purpose %in% "HELCOM") {
   is_normalised <- TRUE
-  extra.text <- paste(
-    "normalised to", 
-    switch(
-      info$determinand, 
-      CD = "5% aluminium", 
-      PB = "5% aluminium", 
-      "5% organic carbon"
-    ) 
-  )
-  args.list <- c(args.list, extra.text)
-}
+  normaliser <- switch(
+    info$determinand, 
+    CD = "5% aluminium", 
+    PB = "5% aluminium", 
+    "5% organic carbon"
+  ) 
+} 
 
 if (info$compartment %in% "sediment" && info$purpose %in% "OSPAR" &&
     !info$ospar_subregion %in% c("Iberian Coast", "Gulf of Cadiz")) {
   is_normalised <- TRUE
-  extra.text <- paste("normalised to", switch(info$group, Metals = "5% aluminium", "2.5% organic carbon")) 
-  args.list <- c(args.list, extra.text)
+  normaliser <- switch(
+    info$group, 
+    Metals = "5% aluminium", 
+    "2.5% organic carbon"
+  )
 }
+  
+  
+# units
 
-info$unit_text <- do.call(label.units, args.list)
+info$unit_text <- label_units(
+  units = info$unit, 
+  basis = info$basis, 
+  html = TRUE, 
+  compartment = info$compartment
+)
+
+if (is_normalised) {
+  info$unit_text <- paste(info$unit_text, "normalised to", normaliser) 
+}
 
 
 # assessment concentrations
@@ -442,7 +451,7 @@ if (info$compartment %in% "biota" && info$species_group %in% "Bird" && info$stat
 
 ### Assessment plots and statistical analysis {.tabset}
 
-This report provides details of the assessment of `r paste(info$det_name, txt_concentrations)` in `r intro_txt` at station `r info$station_name`. `r if (intro_AMAP) intro_txt2``r if (is_normalised) paste0("Concentrations are ", extra.text, " unless otherwise stated. ")`
+This report provides details of the assessment of `r paste(info$det_name, txt_concentrations)` in `r intro_txt` at station `r info$station_name`. `r if (intro_AMAP) intro_txt2``r if (is_normalised) paste0("Concentrations are normalised to ", normaliser, " unless otherwise stated. ")`
 
 <ul>
 <li class = "gap">Timeseries metadata.  Key information about the timeseries.</li>
@@ -497,7 +506,7 @@ txt_AC <- paste(
 ```
 
 ```{asis, eval = info$compartment %in% "sediment"}
-<li class = "gap">Auxiliary data.  The individual concentration measurements`r if (is_normalised) paste0(", both non-normalised and ", extra.text, ",")` with supporting information: aluminium content (%) of the sample; `r if (info$group %in% "Metals") "lithium" else "carbon"` content (%) of the sample.</li>
+<li class = "gap">Auxiliary data.  The individual concentration measurements`r if (is_normalised) paste0(", both non-normalised and normalised to ", normaliser, ",")` with supporting information: aluminium content (%) of the sample; `r if (info$group %in% "Metals") "lithium" else "carbon"` content (%) of the sample.</li>
 ```
 
 ```{asis, eval = info$compartment %in% "water"}
