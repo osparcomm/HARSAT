@@ -923,7 +923,11 @@ label_units <- function(units, basis, html = FALSE, compartment) {
       "pmol/min/mg protein" = 'pmol ~ min^{-1} ~ "mg protein"^{-1}',
       "nmol/min/mg protein" = 'nmol ~ min^{-1} ~ "mg protein"^{-1}',
       "ng/min/mg protein"   = 'ng ~ min^{-1} ~ "mg protein"^{-1}', 
+<<<<<<< HEAD
       paste0('"', units, '"')
+=======
+      paste('"', units, '"')
+>>>>>>> ff8ae780b36bef0f7bb8e3fb648b143c43a67dc6
     )
   }
   
