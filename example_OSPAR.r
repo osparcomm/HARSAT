@@ -34,6 +34,8 @@ water_timeseries <- create_timeseries(
 )
 
 
+# water_timeseries <- readRDS(file.path("RData", "water_timeseries_OSPAR.rds"))
+
 water_assessment <- run_assessment(
   water_timeseries, 
   AC = "EQS", 
@@ -115,6 +117,10 @@ sediment_timeseries <- create_timeseries(
   )
 )
 
+
+# sediment_timeseries <- readRDS(
+#   file.path("RData", "sediment_timeseries_OSPAR.rds")
+# )
 
 sediment_assessment <- run_assessment(
   sediment_timeseries, 
@@ -225,6 +231,10 @@ biota_timeseries <- create_timeseries(
   get_basis = get_basis_biota_OSPAR
 )
 
+
+
+
+# biota_timeseries <- readRDS(file.path("RData", "biota_timeseries_OSPAR.rds"))
 
 # biota_assessment <- run_assessment(
 #   biota_timeseries, 
