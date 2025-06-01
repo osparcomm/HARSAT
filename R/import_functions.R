@@ -2441,9 +2441,11 @@ create_timeseries <- function(
   }
 
 
-  # normalisation can either be a logical (TRUE uses default normalisation function)
-  # or a function
-  
+  # normalisation can either be a logical (TRUE uses default normalisation 
+  #   function) or a user-supplied function
+  # let info$normalise = TRUE / FALSE denote whether there has been any 
+  #   normalisation
+    
   if (length(normalise) != 1L) {
     stop("normalise should be a length 1 logical or a function")
   }
@@ -2452,7 +2454,9 @@ create_timeseries <- function(
     stop("normalise should be a length 1 logical or a function")
   }
   
-
+  ctsm.obj$info$normalise <- is.function(normalise) || normalise
+  
+  
   # get key data structures, and initialise output
 
   out <- list(call = match.call(), call.data = ctsm.obj$call, info = ctsm.obj$info)
@@ -3060,7 +3064,8 @@ output_timeseries <- function(data, station_dictionary, info, extra = NULL) {
     "method_analysis", "n_individual", 
     "concOriginal", "censoringOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "censoring",  
-    "limit_detection", "limit_quantification", "uncertainty"
+    "limit_detection", "limit_quantification", "uncertainty", 
+    "normaliser", "normaliser_value", "normaliser_unit"
   )
   
   if (!is.null(extra)) {
@@ -3144,6 +3149,14 @@ output_timeseries <- function(data, station_dictionary, info, extra = NULL) {
   timeSeries$unit <- data$new.unit
   
   data$new.basis <- data$new.unit <- NULL
+
+  
+  # add normalisation information to timeseries stucture
+  
+  if (info$normalise) {
+    id <- c("normaliser", "normaliser_value", "normaliser_unit")
+    timeSeries <- cbind(timeSeries, data[id])
+  }
   
 
   # timeSeries is now the unique rows of timeSeries
@@ -3153,12 +3166,6 @@ output_timeseries <- function(data, station_dictionary, info, extra = NULL) {
   # id <- setdiff(names(timeSeries), c("basis", "unit"))
   
   timeSeries <- tibble::column_to_rownames(timeSeries, "seriesID")
-
-  
-  # change timeSeries output columns to fit the levels of the xml requirements
-  # this is a legacy requirement and an issue has been raised to fix this
-  
-  # timeSeries <- changeToLevelsForXML(timeSeries, info)
 
   
   # check no replicate measurements within time series
@@ -4468,7 +4475,14 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
     uncrtOriginal = .data$uncertainty
   )
   
+
+  # add in normaliser variables
   
+  data$normaliser <- NA_character_
+  data$normaliser_value <- NA_real_
+  data$normaliser_unit <- NA_character_
+  
+    
   # exclude any data that do not need to be normalised 
   # can do this globally with method = "none", but useful e.g. in the OSPAR 
   #   assessment where sediments in the Iberian Sea and Gulf of Cadiz are not
@@ -4524,7 +4538,7 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
       }
       
       
-      # extract normaliser and print summary information
+      # extract normaliser information and print summary 
       
       normaliser <- control$normaliser
       
@@ -4532,6 +4546,28 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
         stop("Normaliser ", normaliser, " not found in data")
       }
       
+      normaliser_value <- switch(
+        control$method,
+        simple = control$value,
+        pivot = switch(normaliser, AL = 5, LI = 52),
+      )
+      
+      normaliser_unit <- ctsm_get_info(
+        info$determinand, normaliser, "unit", "sediment", sep = "_"
+      ) 
+      
+      message_txt <- paste0(
+        "   Normalising ", group, " to ", 
+        normaliser_value, normaliser_unit, " ", normaliser
+      )
+      switch(
+        control$method,
+        simple = message(message_txt), 
+        message(message_txt, " using pivot values")
+      )
+      
+      
+            
       switch(
         control$method,
         simple = {
@@ -4746,7 +4782,14 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
       
       data$concentration <- concentration
       data$uncertainty <- uncertainty
+
+      # add in normaliser information
+
+      data$normaliser <- normaliser
+      data$normaliser_value <- normaliser_value
+      data$normaliser_unit <- normaliser_unit
       
+            
       data
     })
   
@@ -4799,6 +4842,12 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
     uncrtOriginal = .data$uncertainty
   )
   
+  # add in normaliser variables
+  
+  data$normaliser <- NA_character_
+  data$normaliser_value <- NA_real_
+  data$normaliser_unit <- NA_character_
+  
   
   # exclude any data that do not need to be normalised 
   # can do this globally with method = "none", but useful e.g. in the OSPAR 
@@ -4814,7 +4863,11 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
     exclude_id <- station_dictionary[exclude_id, "station_code"]
     exclude_id <- data$station_code %in% exclude_id
   } else {
-    exclude_id <- FALSE
+    exclude_id <- rep(FALSE, nrow(data))
+  }
+  
+  if (all(exclude_id)) {
+    return(data)
   }
   
   if (any(exclude_id)) {
@@ -4879,24 +4932,33 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
       }
       
       
-      # extract normaliser and print summary information
+      # extract normaliser information and print summary 
       
       normaliser <- control$normaliser
-      
+
       if (! normaliser %in% names(data)) {
         stop("Normaliser ", normaliser, " not found in data")
       }
       
+      normaliser_value <- switch(
+        control$method,
+        simple = control$value,
+        hybrid = control$value,
+        pivot = switch(normaliser, AL = 5, LI = 52),
+      )
+      
+      normaliser_unit <- ctsm_get_info(
+        info$determinand, normaliser, "unit", "sediment", sep = "_"
+      ) 
+
+      message_txt <- paste0(
+        "   Normalising ", group, " to ", 
+        normaliser_value, normaliser_unit, " ", normaliser
+      )
       switch(
         control$method,
-        simple = {
-          unit <- ctsm_get_info(
-            info$determinand, normaliser, "unit", "sediment", sep = "_"
-          )
-          message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
-        },
-        pivot = message("   Normalising ", group, " to ", normaliser, " using pivot values"),
-        hybrid = message("   Normalising ", group, " to ", normaliser, " using pivot values")
+        simple = message(message_txt), 
+        message(message_txt, " using pivot values")
       )
       
       
@@ -5067,7 +5129,13 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
       
       data$concentration <- concentration
       data$uncertainty <- uncertainty
+
+      # add in normaliser information
       
+      data$normaliser <- normaliser
+      data$normaliser_value <- normaliser_value
+      data$normaliser_unit <- normaliser_unit
+
       data
     })
   
@@ -5130,6 +5198,13 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   )
   
   
+  # add in normaliser variables
+  
+  data$normaliser <- NA_character_
+  data$normaliser_value <- NA_real_
+  data$normaliser_unit <- NA_character_
+  
+  
   # exclude any data that do not need to be normalised 
   # can do this globally with method = "none", but useful e.g. in the OSPAR 
   #   assessment where sediments in the Iberian Sea and Gulf of Cadiz are not
@@ -5190,9 +5265,29 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
       
       # normalise to a specified value of lipid content
       # data are already on a lipid basis (i.e. 100% lipid)
-      
-      message("   Normalising ", group, " to ", control$value, "%")
 
+      # extract normaliser information and print summary 
+      
+      normaliser <- "LIPIDWT%"
+      
+      if (! normaliser %in% names(data)) {
+        stop("Normaliser ", normaliser, " not found in data")
+      }
+      
+      normaliser_value <- control$value
+
+      normaliser_unit <- ctsm_get_info(
+        info$determinand, normaliser, "unit", "biota", sep = "_"
+      ) 
+      
+      message_txt <- paste0(
+        "   Normalising ", group, " to ", 
+        normaliser_value, normaliser_unit, " ", normaliser
+      )
+
+      message(message_txt)
+
+      
       conversion <- dplyr::if_else(
         data[["LIPIDWT%.censoring"]] %in% "", 
         control$value / data[["LIPIDWT%"]],
@@ -5202,6 +5297,12 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
       data$concentration <- data$concentration * conversion
       data$uncertainty <- data$uncertainty * conversion
       
+      # add in normaliser information
+
+      data$normaliser <- normaliser
+      data$normaliser_value <- normaliser_value
+      data$normaliser_unit <- normaliser_unit
+
       data
     })
   
@@ -5214,7 +5315,6 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   data
 }
-
 
 
 

@@ -114,6 +114,8 @@ get_timeseries(water_timeseries) |> head(10)
 # speeds things up considerably. The assessment took about 1.5 minutes to run on
 # my laptop.
 
+# water_timeseries <- readRDS(file.path("RData", "water_timeseries_HELCOM.rds"))
+
 water_assessment <- run_assessment(
   water_timeseries, 
   AC = "EQS", 
@@ -217,6 +219,10 @@ sediment_timeseries <- create_timeseries(
 
 # Now run the assessment. Again there is only one threshold, the EQS.  This only
 # takes about a minute to run on my laptop.
+
+# sediment_timeseries <- readRDS(
+#   file.path("RData", "sediment_timeseries_HELCOM.rds")
+# )
 
 sediment_assessment <- run_assessment(
   sediment_timeseries, 
@@ -326,6 +332,8 @@ biota_timeseries <- create_timeseries(
 
 
 # The asssessment took about 3.5 minutes on my laptop
+
+# biota_timeseries <- readRDS(file.path("RData", "biota_timeseries_HELCOM.rds"))
 
 biota_assessment <- run_assessment(
   biota_timeseries, 
