@@ -41,7 +41,10 @@
 <url><loc>http://osparcomm.github.io/HARSAT/reference/harsat-package.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/index.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/info_TEF.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/label_normaliser.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/label_unit.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/locate_information_file.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/make_key.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_biota_HELCOM.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_sediment_HELCOM.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_sediment_OSPAR.html</loc></url>
@@ -49,6 +52,7 @@
 <url><loc>http://osparcomm.github.io/HARSAT/reference/ordinal_theta_est.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/parallel_objects.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/plot_assessment.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/pretty_unit.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/read_ICES_file.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/read_contaminants.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/read_data.html</loc></url>
