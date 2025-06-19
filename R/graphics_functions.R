@@ -1061,10 +1061,6 @@ plot.setup <- function(newPage) {
 #' grid graphics ('html = FALSE`). In the latter, need to turn the strings into
 #' an expression by `parse(text = result)`.  
 #'
-#' @examples
-#' label_unit("mg/kg", "D", "AL", 5, "%")
-#' label_unit("ug/kg", "L", "LIPIDWT%", 5, "%", html = TRUE)
-#' 
 label_unit <- function(
     unit, 
     basis = NA_character_, 
@@ -1162,10 +1158,6 @@ label_unit <- function(
 #' grid graphics ('html = FALSE`). In the latter, need to turn the string into
 #' an expression by `parse(text = result)`.  
 #' 
-#' @examples 
-#' label_normaliser("AL", 2.5, "%")
-#' label_normaliser("AL", 2.5, "%", html = TRUE)
-#' 
 label_normaliser <- function(normaliser, value, unit, html = FALSE) {
 
   # ideally want to get the translations from ICES code to text from 
@@ -1238,10 +1230,6 @@ label_normaliser <- function(normaliser, value, unit, html = FALSE) {
 #' A vector of character strings that can be used in markdown (`html = TRUE`) or 
 #' in grid graphics ('html = FALSE`). In the latter, need to turn the strings 
 #' into expressions by `parse(text = result)`.  
-#'
-#' @examples
-#' pretty_unit("ug/kg")
-#' pretty_unit("ug/kg", html = TRUE)
 #' 
 pretty_unit <- function(unit, html = FALSE) {
   

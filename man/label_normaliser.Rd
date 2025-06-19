@@ -27,8 +27,3 @@ Utilty function for providing inforamtion about normalistation to plots in
 e.g. \code{plot_assessment} (where it is used with \code{label_unit}) or
 html reports in e.g. \code{report_assessment}.
 }
-\examples{
-label_normaliser("AL", 2.5, "\%")
-label_normaliser("AL", 2.5, "\%", html = TRUE)
-
-}

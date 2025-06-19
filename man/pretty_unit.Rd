@@ -22,8 +22,3 @@ Utilty function for adding units to plots in e.g. \code{plot_assessment} or
 html reports in e.g. \code{report_assessment}. Standard (recognised) units are
 prettified, with non-standard units returned unchanged.
 }
-\examples{
-pretty_unit("ug/kg")
-pretty_unit("ug/kg", html = TRUE)
-
-}

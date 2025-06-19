@@ -41,8 +41,3 @@ Utilty function for adding units to plots in e.g. \code{plot_assessment} or
 html reports in e.g. \code{report_assessment}. Standard (recognised) units are
 prettified, with non-standard units returned unchanged.
 }
-\examples{
-label_unit("mg/kg", "D", "AL", 5, "\%")
-label_unit("ug/kg", "L", "LIPIDWT\%", 5, "\%", html = TRUE)
-
-}
