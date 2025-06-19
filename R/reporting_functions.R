@@ -946,12 +946,19 @@ report_assessment <- function(
     "distribution"
   )
   
-  if (info$compartment == "water") {
-    timeSeries$matrix <- "WT"
-  }
+  # if (info$compartment == "water") {
+  #   timeSeries$matrix <- "WT"
+  # }
   
   timeSeries <- apply_subset(timeSeries, subset, parent.frame())
-  
+
+  if (nrow(timeSeries) == 0L) {
+    warning(
+      "no timeseries were selected - nothing has been reported"
+    )
+    return(invisible())
+  }
+
   series_id <- row.names(timeSeries)
   
 
