@@ -106,7 +106,7 @@ assessment <- assessment_object$assessment[[params$series]]
 
 info <- assessment_object$info[c(
   "compartment", "purpose", "extraction", "max_year", "reporting_window", 
-  "recent_years", "recent.trend", "AC"
+  "recent_years", "recent.trend", "AC", "normalise"
 )]
   
 info <- c(info, assessment_object$timeSeries[params$series, ])
@@ -195,19 +195,12 @@ if (is.na(info$station_longname)) info$station_longname <- info$station_name
 
 # matrix info
 
-# can be multiple matrices for sediment, in which case take most common
-# should only be a single matrix for other compartments
+# matrix is not in the water timeSeries structure - all assumed to be WT
 
-info$matrix <- unique(as.character(data$matrix))
-
-if (assessment_object$info$compartment != "sediment" & length(info$matrix) > 1) 
-  cat("Error: multiple matrices - need to investigate")
-
-if (length(info$matrix > 1)) {
-  wk <- table(as.character(data$matrix))
-  info$matrix <- names(wk[which.max(wk)])
+if (info$compartment == "water") {
+  info$matrix <- "WT"
 }
- 
+
 info$matrix_name <- ctsm_get_info(assessment_object$info$matrix, info$matrix, "name")
 
 info$matrix_name <- switch(
@@ -225,43 +218,45 @@ if (info$compartment == "biota")
   info$sex_name <- switch(as.character(info$sex), M = "male", F = "female")
 
 
-# normalisation info
 
-is_normalised <- FALSE
+# units (and normalisation)
 
-if (info$compartment %in% "sediment" && info$purpose %in% "HELCOM") {
-  is_normalised <- TRUE
-  normaliser <- switch(
-    info$determinand, 
-    CD = "5% aluminium", 
-    PB = "5% aluminium", 
-    "5% organic carbon"
-  ) 
-} 
 
-if (info$compartment %in% "sediment" && info$purpose %in% "OSPAR" &&
-    !info$ospar_subregion %in% c("Iberian Coast", "Gulf of Cadiz")) {
-  is_normalised <- TRUE
-  normaliser <- switch(
-    info$group, 
-    Metals = "5% aluminium", 
-    "2.5% organic carbon"
-  )
-}
-  
-  
-# units
+wk_basis <- if (info$compartment == "water") NA_character_ else info$basis
 
-info$unit_text <- label_units(
-  units = info$unit, 
-  basis = info$basis, 
-  html = TRUE, 
-  compartment = info$compartment
+info$unit_text <- label_unit(
+  unit = info$unit, 
+  basis = wk_basis, 
+  html = TRUE
 )
 
-if (is_normalised) {
-  info$unit_text <- paste(info$unit_text, "normalised to", normaliser) 
+# this gets a bit clunky and can surely be streamlined
+#
+# info$normalise = TRUE means that there was some normalisation in the  
+# assesment
+# 
+# info$is_normalised = TRUE means that this timeseries was normalised
+# 
+# need to remember that also need to pass such information to multiplot where
+# there might be some normalisation, even if the timeseries of interest isn't
+# normalised (unlikely I know)
+
+info$is_normalised <- info$normalise && !is.na(info$normaliser)
+
+if (info$is_normalised) {
+  
+  info$normaliser_text <- label_normaliser(
+    info$normaliser, 
+    info$normaliser_value, 
+    info$normaliser_unit, 
+    html = TRUE
+  )
+  
+  info$normaliser_text <- paste("normalised to", info$normaliser_text)
+
+  info$unit_text <- paste(info$unit_text, info$normaliser_text)
 }
+ 
 
 
 # assessment concentrations
@@ -375,13 +370,39 @@ if (any(duplicated(info_multi$plotNames))) {
   if (any(duplicated(info_multi$plotNames$data))) 
     cat("Error: duplicate plotting names - need to extend coding")
 }
-  
-info_multi$matrix <- with(assessment_object$data, tapply(matrix, seriesID, function(x) {
-  out <- table(as.character(x))
-  names(out[which.max(out)])
-}))
 
-info_multi$group <- info$group
+
+multi_names <- row.names(assessment_object$timeSeries)
+
+info_multi$matrix <- switch(
+  info$compartment, 
+  biota = assessment_object$timeSeries$matrix,
+  sediment = assessment_object$timeSeries$matrix,
+  water = rep("WT", nrow(assessment_object$timeSeries))
+)
+names(info_multi$matrix) <- multi_names
+
+if (info$compartment == "water") {
+  info_multi$filtration <- assessment_object$timeSeries$filtration
+  names(info_multi$filtration) <- multi_names
+}  
+
+info_multi$basis <- assessment_object$timeSeries$basis
+names(info_multi$basis) <- multi_names
+
+if (info$normalise) {
+
+  info_multi$normaliser <- assessment_object$timeSeries$normaliser
+  names(info_multi$normaliser) <- multi_names
+  
+  info_multi$normaliser_value <- assessment_object$timeSeries$normaliser_value
+  names(info_multi$normaliser_value) <- multi_names
+  
+  info_multi$normaliser_unit <- assessment_object$timeSeries$normaliser_unit
+  names(info_multi$normaliser_unit) <- multi_names
+
+}
+
 
 is_ratio_dets <- function(det1, det2) all(c(det1, det2) %in% info_multi$determinand)
 
@@ -451,7 +472,7 @@ if (info$compartment %in% "biota" && info$species_group %in% "Bird" && info$stat
 
 ### Assessment plots and statistical analysis {.tabset}
 
-This report provides details of the assessment of `r paste(info$det_name, txt_concentrations)` in `r intro_txt` at station `r info$station_name`. `r if (intro_AMAP) intro_txt2``r if (is_normalised) paste0("Concentrations are normalised to ", normaliser, " unless otherwise stated. ")`
+This report provides details of the assessment of `r paste(info$det_name, txt_concentrations)` in `r intro_txt` at station `r info$station_name`. `r if (intro_AMAP) intro_txt2``r if (info$is_normalised) paste0("Concentrations are ", info$normaliser_text, " unless otherwise stated. ")`
 
 <ul>
 <li class = "gap">Timeseries metadata.  Key information about the timeseries.</li>
@@ -506,7 +527,7 @@ txt_AC <- paste(
 ```
 
 ```{asis, eval = info$compartment %in% "sediment"}
-<li class = "gap">Auxiliary data.  The individual concentration measurements`r if (is_normalised) paste0(", both non-normalised and normalised to ", normaliser, ",")` with supporting information: aluminium content (%) of the sample; `r if (info$group %in% "Metals") "lithium" else "carbon"` content (%) of the sample.</li>
+<li class = "gap">Auxiliary data.  The individual concentration measurements`r if (info$is_normalised) paste0(", both non-normalised and ", info$normaliser_text, ",")` with supporting information: aluminium content (%) of the sample; `r if (info$group %in% "Metals" && !(info$is_normalised && info$normaliser %in% "CORG")) "lithium" else "carbon"` content (%) of the sample.</li>
 ```
 
 ```{asis, eval = info$compartment %in% "water"}
@@ -661,7 +682,7 @@ txt <- if (anova_ok) "Finally, the tab" else "The tab also"
 #### Assessment plot
 
 ```{r assessment_plot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
-plot_data(data, assessment, info, assessment_object$info, type = "assessment", xykey.cex = 1.4)
+plot_data(data, assessment, info, assessment_object$info, type = "index", xykey.cex = 1.4)
 ```
 
 
@@ -689,7 +710,11 @@ auxiliary_id <- switch(
   biota = c("concentration", "LNMEA", "DRYWT%", "LIPIDWT%"), 
   sediment = {
     out <- c("value", "concentration", "AL")
-    if (info$group %in% "Metals") out <- c(out, "LI") else out <- c(out, "CORG")
+    if (info$group %in% "Metals" && !(info$is_normalised && info$normaliser %in% "CORG")) {
+      out <- c(out, "LI") 
+    } else {
+      out <- c(out, "CORG")
+    }
     out
   }
 )

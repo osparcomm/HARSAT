@@ -150,9 +150,6 @@ plot_assessment <- function(
     "distribution"
   )
 
-  if (info$compartment == "water") {
-    timeSeries$matrix <- "WT"
-  }
 
   # ad-hoc fix to deal with EROD labelling (which is sex-specific)
   # have raised an issue to deal with this after next release by making the sex
@@ -173,7 +170,14 @@ plot_assessment <- function(
   # get relevant subset 
   
   timeSeries <- apply_subset(timeSeries, subset, parent.frame())
-  
+
+  if (nrow(timeSeries) == 0L) {
+    warning(
+      "no timeseries were selected - nothing has been plotted"
+    )
+    return(invisible())
+  }
+    
   series_id <- row.names(timeSeries)
 
 
@@ -267,7 +271,7 @@ plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot_data(data, assessment, series, info, type = "assessment", xykey.cex = 1.4) 
+      plot_data(data, assessment, series, info, type = "index", xykey.cex = 1.4) 
       dev.off()
       
     }    
@@ -369,61 +373,144 @@ ctsm.format <- function(x, y = x, nsig = 3) {
 }
 
 
-ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE) {
+#' Make key for annotating assessment plots
+#' 
+#' Provides the meta-data that accompanies each plot in `plot_assessment`: 
+#' compartment, station, units and data extraction. It also provides extended 
+#' information for plots involving multiple timeseries e.g. in `plot_multidata`, 
+#' `plot_multiassessment` and `plot_ratio`. 
+#'
+#' @param series List describing the timeseries in the plot. If there are 
+#' multiple timeseries, then some entries of the list require multiple entries, 
+#' one for each timeseries. See details.
+#' @param info The standard `info` element of the harsat object.
+#' @param type Character scalar (default `"data"`) describing the type of plot:
+#' other options are `"index"`, `"auxiliary"`, `"data_splom"`, `"index_mp"`, 
+#' `"ratio_mp"`. 
+#'
+#' @details
+#' `series` is a list with giving information about a single timeseries 
+#' (when called by `plot_assessment`) or multiple related timeseries (when 
+#' called by `plot_multidata`, `plot_multiassessment`, and `plot_ratio`). It
+#' must contain the following (compartment-specific) elements:
+#' * `determinand` (all): a character vector giving the 
+#' determinand for each timeseries; if there are multiple timeseries, then the 
+#' vector must have names which are the corresponding series identifiers 
+#' * `matrix` (biota, sediment): a character vector giving the matrix for 
+#' each timeseries; if there are multiple timeseries, then the vector must have
+#' names which are the corresponding series identifiers; 
+#' the matrices might vary across timeseries, but this is currently likely only 
+#' for biological effects 
+#' * `filtration` (water): a character vector giving the filtration method for 
+#' each timeseries; if there are multiple timeseries, then the vector must have
+#' names which are the corresponding series identifiers; 
+#' the filtration methods might vary across timeseries, but this is currently 
+#' unlikely in practice
+#' * `basis` (all): a character vector giving the basis for 
+#' each timeseries; if there are multiple timeseries, then the vector must have
+#' names which are the corresponding series identifiers; 
+#' the bases might vary across timeseries, but this is currently likely only for 
+#' biological effects
+#' * `species` (biota): a character giving the species (common to all 
+#' timeseries)
+#' * `subseries` (all): a character giving the subseries (common to all 
+#' timeseries); can be `NA_character_`
+#' 
+#' In addition, if `info$normalise` is `TRUE`, then it must also contain:
+#' * `normaliser`, `normaliser_value` and `normaliser_unit`: character, numeric,
+#' and character vectors giving the normaliser, it's value and the unit on which
+#' it is expressed for each timeseries; missing values are allowed if there is 
+#' no normalisation for the timeseries involved
+#'
+#' @return a list with four text (or expression) elements:
+#' * `media`: compartment , species and matrix (biota), matrix (sediment), 
+#' filtration (water), subseries
+#' * `station`: station_name and station_longname
+#' * `units`: an expression giving the units including any normalisation
+#' * `extraction`: the extraction date
+#' 
+#' Both `media` and `units` can be complicated if there are multiple 
+#' timeseries, particularly if e.g. there are different normalisers (sediment) 
+#' or matrices (biological effects) involved 
+#'    `
+make_key <- function(series, info, type) {
 
-  compartment <- switch(info$compartment, biota = "Biota", sediment = "Sediment", water = "Water")
+  # type only affects the bahaviour of the unit element of the key (which 
+  # gets very messy)
   
-  txt <- paste("Compartment:", compartment)
-  
-  matrixID <- unique(na.omit(series$matrix))
-  matrixID <- sort(matrixID)
-  
-  if (length(matrixID) == 0) stop('no valid matrix information')
-  
-  matrixNames <- ctsm_get_info(info$matrix, matrixID, "name")
-  
-  # ad-hoc fix to make names consistent with markdown
-  
-  matrixNames[matrixNames %in% "erythrocytes (red blood cells in vertebrates)"] <- "red blood cells"
-  matrixNames[matrixNames %in% "egg homogenate of yolk and albumin"] <- "egg yolk and albumin"
-  matrixNames[matrixNames %in% "hair/fur"] <- "hair"
+  type <- match.arg(
+    type, 
+    c("data", "index", "auxiliary", "data_splom", "index_mp", "ratio_mp")
+  )
 
+  
+  # media
+  
+  # This combines: 
+  # - compartment  
+  # - species (biota)
+  # - matrix (biota and sediment); filtration (water) 
+  # - subseries
+  
+  compartment <- stringr::str_to_sentence(info$compartment)
+  
+  txt <- paste0("Compartment: ", compartment, " (") 
 
-  txt <- switch(compartment,
-    Biota = {
-      txt <- paste0(txt, " (", ctsm_get_info(info$species, series$species, "common_name"), " ")
-      # txt <- paste0(txt, " (", series$species_name, " ")
-      if (length(matrixID) == 1) 
-        paste0(txt, matrixNames) 
-      else {
-        out <- sapply(matrixID, function(i) {
-          seriesID <- names(series$matrix)[series$matrix == i]
-          detID <- unique(series$determinand[seriesID])
-          paste0("(", paste0(detID, collapse = ", "), ")")
-        })
-        out <- paste(matrixNames, out, sep = " ")
-        paste0(txt, paste(out, collapse = "; "))
-      }
-    },
-    Sediment = {
-      if (length(matrixID) > 1)
-        warning('multiple matrices not supported for sediment in ctsm.web.getKey')
-      paste0(txt, " (", matrixNames[1])
-    },
-    Water = {
-      paste0(txt, " (", series$filtration)
-    }
+  if (info$compartment == "biota") {
+    species <- ctsm_get_info(info$species, series$species, "common_name")
+    txt <- paste0(txt, species, " ")
+  }
+  
+  # for convenience in code below, think of filtration as a matrix
+
+  matrix_all <- switch(
+    compartment,
+    Biota = series$matrix,
+    Sediment = series$matrix,
+    Water = series$filtration
   )
   
+  matrix_id <- sort(unique(matrix_all))
+
+  matrix_name <- switch(
+    compartment,
+    Biota = ctsm_get_info(info$matrix, matrix_id, "name"),
+    Sediment = ctsm_get_info(info$matrix, matrix_id, "name"),
+    Water = matrix_id
+  )
+
+  # ad-hoc fix to make names consistent with markdown
+  
+  matrix_name[matrix_name %in% "erythrocytes (red blood cells in vertebrates)"] <- 
+    "red blood cells"
+  matrix_name[matrix_name %in% "egg homogenate of yolk and albumin"] <- 
+    "egg yolk and albumin"
+  matrix_name[matrix_name %in% "hair/fur"] <- "hair"
+  
+  if (length(matrix_id) == 1L) { 
+    txt <- paste0(txt, matrix_name) 
+  } else {
+    out <- sapply(matrix_id, function(i) {
+      series_id <- names(matrix_all)[matrix_all == i]
+      det_id <- unique(series$determinand[series_id])
+      det_id <- paste0(det_id, collapse = ", ")
+      paste0("(", det_id, ")")
+    })
+    out <- paste(matrix_name, out, sep = " ")
+    txt <- paste0(txt, paste(out, collapse = "; "))
+  }
+
   if (is.na(series$subseries)) {
     txt <- paste0(txt, ")")
   } else {
     txt <- paste0(txt, " - ", series$subseries, ")")
   }
     
-
   out <- list(media = txt)
 
+  
+  # station
+  
   txt <- paste("Station: ", series$station_name, sep = "")
   if (!is.na(series$station_longname) && 
       series$station_name != series$station_longname) {
@@ -432,87 +519,199 @@ ctsm.web.getKey <- function(series, info, auxiliary.plot = FALSE) {
   
   out$station <- txt
   
-  out$determinand <- paste(
-    "Determinand:", 
-    ctsm_get_info(info$determinand, series$determinand, "common_name")
-  )
-
-
-  unitID <- ctsm_get_info(
-    info$determinand, series$determinand, "unit", info$compartment, sep = "_"
-  )
-
-  groupID = unique(series$group)
-  if (length(groupID) > 1)
-    stop('multiple determinand groups not supported in ctsm.web.getKey')
-
-  basis <- as.character(series$basis)
   
-  # for units, need to construct an expression for sending to grid graphics
-  # this means that text should be separated by a tilde
+  # unit
+  # need an expression for sending to grid graphics to deal with superscripts 
+  # and greek characters (e.g. mg/kg)
+  # text should be separated by a tilde
   # however need to put % in quotes because it is a special character!
-  # this also applies to determinands which might have a % in their name
+  # this also applies to determinands which might e.g. have a % in their name
+  # things get very messy because of this - I'm sure it can be done better!
   
-  if (auxiliary.plot) { 
-    start_text <- switch(
-      series$group, 
-      Effects = "Effect~units:", 
-      Imposex = "Imposex~units:", 
-      "Concentration~units:"
-    )
-  } else {
-    start_text <- "Units:"
-  }
+  # there are many special cases!
+  # for water, the basis is just assumed to be wet weight
 
-
-  # extra_text deals with normalised sediments 
-
-  is_extra <- info$compartment == "sediment" && 
-    (is.null(series$country) || series$country != "Spain")
   
-  if (is_extra) {
-    extra_text <- paste(
-      "normalised~to", 
-      switch(groupID, Metals = '"5% aluminium"', '"2.5% organic carbon"'), 
-      sep = "~"
-    )
+  if (type == "ratio_mp") {
     
-    if (length(unitID) > 1L) {
-      extra_text <- paste("all", extra_text, sep = "~")
+    out$unit = "units:~dimensionless"
+  
+  } else {
+    
+    # set up basic structures used by everything
+    
+    unit_id <- ctsm_get_info(
+      info$determinand, 
+      series$determinand, 
+      "unit", 
+      info$compartment, 
+      sep = "_"
+    )
+
+    basis <- if (info$compartment == "water") {
+      NA_character_ 
+    } else {
+      series$basis
     }
-  }  
 
+    unit_txt <- label_unit(unit_id, basis)
+    
+    names(unit_txt) <- series$seriesID
+    
+    
+    is_normalised <- info$normalise && any(!is.na(series$normaliser))
+    
+    if (is_normalised) {
+      normaliser_txt <- label_normaliser( 
+        series$normaliser, 
+        series$normaliser_value, 
+        series$normaliser_unit
+      )
+      
+      names(normaliser_txt) <- series$seriesID
+    }
+    
 
-  unit_text <- mapply(
-    label_units, 
-    units = unitID, 
-    basis = basis, 
-    MoreArgs = list(html = FALSE, compartment = info$compartment)
-  )
-  
-  unitID <- unique(unit_text)
-  
-  if (length(unitID) > 1L) {
-    wk <- sapply(unitID, function(i) {
-      seriesID <- series$seriesID[unit_text == i]
-      detID <- unique(series$determinand[seriesID])
-      detID <- paste0(detID, collapse = ", ")
-      out <- paste0("(", detID, ")")
-      paste0('"', out, '"')
-    })
-    unit_text <- paste(unitID, wk, sep = "~")
-    unit_text <- paste(unit_text, collapse = paste0('~', '";"', "~"))
-  }
+    if (type %in% c("data", "index")) {
 
-  out$units <- paste(start_text, unit_text, sep = "~")
-  
-  if (is_extra) {
-    out$units <- paste(out$units, extra_text, sep = "~")
-  }
-  
-  out$units <- parse(text = out$units)
-  
+      out$unit <- paste("Units:", unit_txt, sep = "~")
+      
+      if (is_normalised) {
+        out$unit <- paste(out$unit, "normalised~to", normaliser_txt, sep = "~")
+      }
+      
+    } else if (type %in% "auxiliary") {
+    
+      group_id <- ctsm_get_info(
+        info$determinand, 
+        series$determinand, 
+        "group", 
+        info$compartment,
+        sep = "_"
+      )
+      
+      start_txt <- switch(
+        group_id, 
+        Effects = "Effect~units:", 
+        Imposex = "Imposex~units:", 
+        "Concentration~units:"
+      )
+      
+      out$unit <- paste(start_txt, unit_txt, sep = "~")
+      
+      if (is_normalised) {
+        
+        if (info$compartment %in% c("biota", "water")) {
+          out$unit <- paste(out$unit, "normalised~to", normaliser_txt, sep = "~")
+        } else {
+          n <- nchar(normaliser_txt)
+          normaliser_txt <- paste0(substring(normaliser_txt, 1, n-1), ')"')
+          out$unit <- paste(
+            out$unit, 
+            '"(normalised to"',
+            normaliser_txt, 
+            sep = "~"
+          )
+        }
+      } 
+      
+    } else {
+      
+      # multipanel index plots or splom data plots where all sorts of things can
+      # happen
+      
+      n_unit <- length(unique(unit_txt))
+      
+      n_normaliser <- 
+        if (is_normalised) {
+          length(unique(normaliser_txt))
+        } else {
+          0L
+        }
+      
+      
+      if (n_unit == 1L) {
+        
+        unit_txt <- unique(unit_txt)
+        
+        out$unit <- paste("Units:", unit_txt, sep = "~")
+        
+        if (n_normaliser == 1L) {
+          out$unit <- paste(out$unit, "normalised~to", normaliser_txt, sep = "~")
+        }
+        
+        if (n_normaliser > 1L) {
+          
+          normaliser_unique <- sort(unique(normaliser_txt), na.last = TRUE)
+          
+          # not everything might be normalised - sorting ensures the non-
+          # normalised items are listed last
+          
+          if (any(is.na(normaliser_txt))) {
+            normaliser_txt[is.na(normaliser_txt)] <- '"non-normalised"'
+            normaliser_unique[is.na(normaliser_unique)] <- '"non-normalised"'
+          }  
+          
+          txt <- sapply(normaliser_unique, function(i) {
+            series_id <- names(normaliser_txt)[normaliser_txt == i]
+            det_id <- unique(series$determinand[series_id])
+            det_id <- paste0(det_id, collapse = ", ")
+            paste0("(", det_id, ")")
+          })
+          
+          # can't simplify text below using collapse = ",~" because the , is  
+          # then adjacent to a quoted text leading to strange behaviour
+          
+          txt <- paste0(txt, c(rep(",", n_normaliser - 2), " or", ""))
+          txt <- paste0('"', txt, '"')
+          txt <- paste(normaliser_unique, txt, sep = "~")
+          txt <- paste(txt, collapse = "~")
+          
+          out$unit <- paste(out$unit, "normalised~to", txt, sep = "~")
+        }
+        
+      } else {
+        
+        if (is_normalised) {
+          # not everything might be normalised
+          ok <- !is.na(normaliser_txt)
+          unit_txt[ok] <- paste(
+            unit_txt[ok], 
+            "normalised~to", 
+            normaliser_txt[ok], 
+            sep = "~"
+          )
+        }
+        
+        unit_unique <- sort(unique(unit_txt))
+        
+        txt <- sapply(unit_unique, function(i) {
+          series_id <- names(unit_txt)[unit_txt == i]
+          det_id <- unique(series$determinand[series_id])
+          det_id <- paste0(det_id, collapse = ", ")
+          paste0("(", det_id, ")")
+        })
+        
+        # can't simplify text below by using collapse = ";~" because the ; is 
+        # then adjacent to a quoted text leading to strange behaviour
+        
+        txt <- paste0(txt, c(rep(";", n_unit - 1), ""))
+        txt <- paste0('"', txt, '"')
+        txt <- paste(unit_unique, txt, sep = "~")
+        txt <- paste(txt, collapse = "~")
+        
+        out$unit <- paste("Units:", txt, sep = "~")
+      }
+      
+    }    
 
+  }    
+        
+  out$unit <- parse(text = out$unit)
+    
+
+  # extraction
+  
   out$extraction <- "Data extraction:"
   if (!is.null(info$extraction)) {
     out$extraction <- paste(out$extraction, format(info$extraction, "%d %B %Y"))
@@ -596,7 +795,7 @@ plot.AC <- function(AC, ylim, useLogs = TRUE) {
 
 
 plot_data <- function(
-    data, assessment, series, info, type = c("data", "assessment"), 
+    data, assessment, series, info, type = c("data", "index"), 
     xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, ...) {
 
   # silence non-standard evaluation warnings
@@ -621,7 +820,7 @@ plot_data <- function(
       if (useLogs) out <- within(out, concentration <- log(concentration))
       out
     },
-    assessment = {
+    index = {
       out <- assessment$annualIndex
       names(out)[2] <- "concentration"
       if (series$determinand %in% c("VDS", "IMPS", "INTS")) {
@@ -821,7 +1020,7 @@ plot_data <- function(
   print(data.plot, newpage = FALSE)
   upViewport()
   upViewport()
-  plot.info(series, info, ...)
+  plot_key(series, info, type)
 }
 
 
@@ -844,111 +1043,249 @@ plot.setup <- function(newPage) {
 #' html reports in e.g. `report_assessment`. Standard (recognised) units are 
 #' prettified, with non-standard units returned unchanged.
 #'
-#' @param units 
-#' @param basis 
-#' @param html A logical with TRUE returning an html representation for use in 
+#' @param unit Character vector giving the units
+#' @param basis Character vector giving the bases. Must be one of "D", "L", 
+#' "W" or NA_character_
+#' @param normaliser Character vector giving the names of the normaliser (if 
+#' there are any)
+#' @param normaliser_value Numeric vector giving the values of the normaliser 
+#' (if there are any)
+#' @param normaliser_unit Character vector giving the units of the normaliser 
+#' (if there are any)
+#' @param html Logical with TRUE returning an html representation for use in 
 #' markdown and FALSE (default) returning an text expression for use in lattice 
 #' (grid) graphics
-#' @param compartment 
-#' @param extra.text 
 #'
 #' @return 
-#' A character string that can be used in markdown (`html = TRUE`) or used in 
-#' grid graphics ('html = FALSE`). In the latter, need to turn the string into
+#' A character vector that can be used in markdown (`html = TRUE`) or in 
+#' grid graphics ('html = FALSE`). In the latter, need to turn the strings into
 #' an expression by `parse(text = result)`.  
 #'
-#' @examples
-label_units <- function(units, basis, html = FALSE, compartment) {
-
-  if (!is.character(units) && length(units) == 1L) {
-    stop(
-      "argument 'units' must be a character scalar"
-    )
-  }  
-  
-  if (!is.character(basis) && length(basis) == 1L) {
-    stop(
-      "argument 'basis' must be a character scalar"
-    )
-  }  
-  
-  if (!(is.na(basis) || basis %in% c("W", "D", "L"))) {
-    stop(
-      "unrecognised basis"
-    )
-  }
-  
+label_unit <- function(
+    unit, 
+    basis = NA_character_, 
+    normaliser = NA_character_, 
+    normaliser_value = NA_real_, 
+    normaliser_unit = NA_character_,
+    html = FALSE) {
 
   # when html = FALSE:
   #  incorporate spaces by using ~ or by enclosing in quotes
-  #  need to ensure all special characters are encolsed in quotes
-    
-  if (html) {
-    units <- switch(
-      units, 
-      "mg/kg" = "mg kg<sup>-1</sup>",
-      "mg/g"  = "mg g<sup>-1</sup>",
-      "ug/kg" = "&mu;g kg<sup>-1</sup>", 
-      "ug/g"  = "&mu;g g<sup>-1</sup>", 
-      "ng/kg" = "ng kg<sup>-1</sup>",
-      "ng/g"  = "ng g<sup>-1</sup>",
-      "ug/l"  = "&mu;g l<sup>-1</sup>",
-      "ug/ml" = "&mu;g ml<sup>-1</sup>", 
-      "ng/l"  = "ng l<sup>-1</sup>",
-      "ng/ml" = "ng ml<sup>-1</sup>",
-      "mins"  = "min",
-      "stg"   = "stage",
-      "j/h/g" = "J h <sup>-1</sup> g <sup>-1</sup>",
-      "pmol/min/mg protein" = "pmol min<sup>-1</sup> mg protein<sup>-1</sup>",
-      "nmol/min/mg protein" = "nmol min<sup>-1</sup> mg protein<sup>-1</sup>",
-      "ng/min/mg protein"   = "ng min<sup>-1</sup> mg protein<sup>-1</sup>", 
-      units
-    )
-  } else {
-    units <- switch(
-      units, 
-      "mg/kg" = 'mg ~ kg^{-1}',
-      "mg/g"  = 'mg ~ g^{-1}',
-      "ug/kg" = 'paste(mu, "g") ~ kg^{-1}', 
-      "ug/g"  = 'paste(mu, "g") ~ g^{-1}', 
-      "ng/kg" = 'ng ~ kg^{-1}',
-      "ng/g"  = 'ng ~ g^{-1}',
-      "ug/l"  = 'paste(mu, "g") ~ l^{-1}', 
-      "ug/ml" = 'paste(mu, "g") ~ ml^{-1}', 
-      "ng/l"  = 'ng ~ l^{-1}', 
-      "ng/ml" = 'ng ~ ml^{-1}',
-      "mins"  = 'min', 
-      "stg"   = 'stage',
-      "j/h/g" = 'J ~ h^{-1} ~ g^{-1}',
-      "pmol/min/mg protein" = 'pmol ~ min^{-1} ~ "mg protein"^{-1}',
-      "nmol/min/mg protein" = 'nmol ~ min^{-1} ~ "mg protein"^{-1}',
-      "ng/min/mg protein"   = 'ng ~ min^{-1} ~ "mg protein"^{-1}', 
-      paste0('"', units, '"')
-    )
+  #  need to ensure all special characters are enclosed in quotes
+  
+  if (!is.character(unit)) {
+    stop("argument 'unit' must be a character")
+  }  
+  
+  if (!(is.character(basis))) {
+    stop("argument 'basis' must be a character")
+  }  
+  
+  if (!all(basis %in% c("W", "D", "L", NA_character_))) {
+    stop("unrecognised basis")
   }
+  
+
+  # make unit pretty
+  
+  out <- pretty_unit(unit, html)
   
 
   # append basis
-  
-  if(!is.na(basis) && compartment != "water") {
 
-    basis <- switch(
+  if(!all(is.na(basis))) {
+
+    b_txt <- dplyr::case_match(
       basis, 
-      D = "dry weight", 
-      W = "wet weight", 
-      L = "lipid weight"
+      "D" ~ "dry weight", 
+      "W" ~ "wet weight", 
+      "L" ~ "lipid weight", 
+      .default = NA_character_
     )
     
     if (html) {
-      units <- paste(units, basis)
+      out_txt <- paste(out, b_txt)
     } else {
-      basis <- gsub(" ", "~", basis, fixed = TRUE)
-      units <- paste(units, basis, sep = "~")
+      b_txt <- gsub(" ", "~", b_txt, fixed = TRUE)
+      out_txt <- paste(out, b_txt, sep = "~")
     }
-      
+    
+    out <- dplyr::if_else(is.na(basis), out, out_txt)
+    
   }
   
-  units
+
+  # append normaliser 
+  
+  if(!all(is.na(normaliser))) {
+
+    n_txt <- label_normaliser(
+      normaliser, 
+      normaliser_value, 
+      normaliser_unit, 
+      html = html
+    ) 
+      
+    if (html) {
+      out_txt <- paste(out, "normalised to", n_txt)
+    } else {
+      out_txt <- paste(out, "normalised~to", n_txt, sep = "~") 
+    }
+    
+    out <- dplyr::if_else(is.na(normaliser), out, out_txt)
+  }
+  
+  out
+}
+
+
+#' Text representation of normaliser information for plots and reports
+#'
+#' Utilty function for providing inforamtion about normalistation to plots in 
+#' e.g. `plot_assessment` (where it is used with `label_unit`) or 
+#' html reports in e.g. `report_assessment`. 
+#'
+#' @param normaliser Character vector giving the names of the normaliser (ICES 
+#' code rather than common name)
+#' @param value Numeric vector giving the value of the normaliser 
+#' @param unit Character vector giving the unit of the normaliser 
+#' @param html Logical with TRUE returning an html representation for use in 
+#' markdown and FALSE (default) returning an text expression for use in lattice 
+#' (grid) graphics
+#'
+#' @return
+#' A character string that can be used in markdown (`html = TRUE`) or used in 
+#' grid graphics ('html = FALSE`). In the latter, need to turn the string into
+#' an expression by `parse(text = result)`.  
+#' 
+label_normaliser <- function(normaliser, value, unit, html = FALSE) {
+
+  # ideally want to get the translations from ICES code to text from 
+  # info$determinand, but too many structures called info flying around -  
+  # deal with later
+
+  # when html = FALSE:
+  # incorporate spaces by using ~ or by enclosing in quotes
+  # need to ensure all special characters are enclosed in quotes
+
+  sep <- if (html) " " else "~"
+    
+  normaliser <- dplyr::case_match(
+    normaliser, 
+    "AL" ~ "aluminium",
+    "LI" ~ "lithium",
+    "CORG" ~ "organic carbon",
+    "LIPIDWT%" ~ "lipid",
+    .default = normaliser
+  )
+  
+  # put normaliser in quotes (when html = FALSE) in case any special characters 
+  # are carried through
+  
+  if (!html) {
+    normaliser <- dplyr::if_else(
+      is.na(normaliser), 
+      NA_character_, 
+      paste0('"', normaliser, '"')
+    )
+  }
+
+  
+  # no space between value and unit (used for % and %%)
+
+  out <- dplyr::case_when(
+    unit %in% c("%", "%%") ~ 
+      if (html) {
+        paste0(value, unit)
+      } else {
+        paste0('"', value, unit, '"')
+      },
+    !is.na(unit) ~ paste(value, pretty_unit(unit), sep = sep), 
+    .default = NA_character_
+  )
+    
+  out <- dplyr::if_else(
+    is.na(normaliser), 
+    NA_character_, 
+    paste(out, normaliser, sep = sep)
+  )
+  
+  out
+}
+
+
+
+#' Pretty representation of units for plots and reports
+#' 
+#' Utilty function for adding units to plots in e.g. `plot_assessment` or 
+#' html reports in e.g. `report_assessment`. Standard (recognised) units are 
+#' prettified, with non-standard units returned unchanged.
+#'
+#' @param unit 
+#' @param html A logical with TRUE returning an html representation for use in 
+#' markdown and FALSE (default) returning an text expression for use in lattice 
+#' (grid) graphics
+#'
+#' @return 
+#' A vector of character strings that can be used in markdown (`html = TRUE`) or 
+#' in grid graphics ('html = FALSE`). In the latter, need to turn the strings 
+#' into expressions by `parse(text = result)`.  
+#' 
+pretty_unit <- function(unit, html = FALSE) {
+  
+  if (!is.character(unit)) {
+    stop("argument 'unit' must be a character")
+  }
+    
+  # when html = FALSE:
+  # incorporate spaces by using ~ or by enclosing in quotes
+  # need to ensure all special characters are enclosed in quotes
+  
+  if (html) {
+    unit <- dplyr::case_match(
+      unit, 
+      "mg/kg" ~ "mg kg<sup>-1</sup>",
+      "mg/g"  ~ "mg g<sup>-1</sup>",
+      "ug/kg" ~ "&mu;g kg<sup>-1</sup>", 
+      "ug/g"  ~ "&mu;g g<sup>-1</sup>", 
+      "ng/kg" ~ "ng kg<sup>-1</sup>",
+      "ng/g"  ~ "ng g<sup>-1</sup>",
+      "ug/l"  ~ "&mu;g l<sup>-1</sup>",
+      "ug/ml" ~ "&mu;g ml<sup>-1</sup>", 
+      "ng/l"  ~ "ng l<sup>-1</sup>",
+      "ng/ml" ~ "ng ml<sup>-1</sup>",
+      "mins"  ~ "min",
+      "stg"   ~ "stage",
+      "j/h/g" ~ "J h <sup>-1</sup> g <sup>-1</sup>",
+      "pmol/min/mg protein" ~ "pmol min<sup>-1</sup> mg protein<sup>-1</sup>",
+      "nmol/min/mg protein" ~ "nmol min<sup>-1</sup> mg protein<sup>-1</sup>",
+      "ng/min/mg protein"   ~ "ng min<sup>-1</sup> mg protein<sup>-1</sup>", 
+      .default = unit
+    )
+  } else {
+    unit <- dplyr::case_match(
+      unit, 
+      "mg/kg" ~ 'mg ~ kg^{-1}',
+      "mg/g"  ~ 'mg ~ g^{-1}',
+      "ug/kg" ~ 'paste(mu, "g") ~ kg^{-1}', 
+      "ug/g"  ~ 'paste(mu, "g") ~ g^{-1}', 
+      "ng/kg" ~ 'ng ~ kg^{-1}',
+      "ng/g"  ~ 'ng ~ g^{-1}',
+      "ug/l"  ~ 'paste(mu, "g") ~ l^{-1}', 
+      "ug/ml" ~ 'paste(mu, "g") ~ ml^{-1}', 
+      "ng/l"  ~ 'ng ~ l^{-1}', 
+      "ng/ml" ~ 'ng ~ ml^{-1}',
+      "mins"  ~ 'min', 
+      "stg"   ~ 'stage',
+      "j/h/g" ~ 'J ~ h^{-1} ~ g^{-1}',
+      "pmol/min/mg protein" ~ 'pmol ~ min^{-1} ~ "mg protein"^{-1}',
+      "nmol/min/mg protein" ~ 'nmol ~ min^{-1} ~ "mg protein"^{-1}',
+      "ng/min/mg protein"   ~ 'ng ~ min^{-1} ~ "mg protein"^{-1}', 
+      .default = paste0('"', unit, '"')
+    )
+  }
+  
+  unit
 }
 
 
@@ -958,12 +1295,13 @@ plot.panel <- function(
   indiCL) {
 
   # type
-  # data is standard (single panel) data plot
-  # assessment is standard (single panel) assessment plot
-  # ratio is multipanel ratio plot (under development)
-  # multi_assessment is multipanel assessment plot of related compounds
+  # data is standard (single panel) data plot with (optional) assessment
+  # index is standard (single panel) index plot with (optional) assessment 
+  # ratio_mp is multipanel ratio plot (under development)
+  # index_mp is multipanel index plot of related compounds with (optional) 
+  #  assessment
   
-  type <- match.arg(type, c("data", "assessment", "ratio", "multi_assessment"))
+  type <- match.arg(type, c("data", "index", "ratio_mp", "index_mp"))
   
   if (!is.null(pred)) 
     lpolygon(c(pred$year, rev(pred$year)), c(pred$ci.lower, rev(pred$ci.upper)), 
@@ -982,17 +1320,17 @@ plot.panel <- function(
   wk.cex <- switch(
     type, 
     data = 2.5, 
-    assessment = 2,
-    ratio = switch(layout.row, 2.0, 1.4, 0.9, 0.7, 0.6), 
-    multi_assessment = switch(layout.row, 2.0, 1.4, 0.9, 0.7, 0.6) 
+    index = 2,
+    ratio_mp = switch(layout.row, 2.0, 1.4, 0.9, 0.7, 0.6), 
+    index_mp = switch(layout.row, 2.0, 1.4, 0.9, 0.7, 0.6) 
   )
   
   wk.pch <- switch(
     type, 
     data = "+", 
-    assessment = 16, 
-    ratio = "+", 
-    multi_assessment = 16
+    index = 16, 
+    ratio_mp = "+", 
+    index_mp = 16
   )
   
   wk.cex.censoring = if (wk.pch == "+") wk.cex * 0.8 else wk.cex
@@ -1025,7 +1363,7 @@ plot.panel <- function(
     )
   }
 
-  if (!missing(type) && type == "assessment" && "lower" %in% names(indiCL)) {
+  if (!missing(type) && type == "index" && "lower" %in% names(indiCL)) {
     lattice::lsegments(
       indiCL$year, 
       indiCL$lower, 
@@ -1194,8 +1532,7 @@ plot_auxiliary <- function(
         type.id <- levels(type)[which.packet()]
         
         if (info$compartment == "sediment" && 
-            "country" %in% names(series) && 
-            series$country == "Spain" && 
+            (!info$normalise || is.na(series$normaliser)) && 
             type.id == "concentration"
         ) {
           grid.text("data not-normalised", 0.5, 0.5, gp = gpar(cex = xykey.cex))
@@ -1274,7 +1611,7 @@ plot_auxiliary <- function(
   upViewport()
   upViewport()
 
-  plot.info(series, info, plot.type = "auxiliary", ...)
+  plot_key(series, info, "auxiliary")
 }
 
 
@@ -1506,7 +1843,7 @@ plot_multiassessment <- function(data, assessment, series, info, ...) {
         if (is.data[i]) {
           plot.panel(
             x, y, data[[i]]$censoring, 
-            type = "multi_assessment",
+            type = "index_mp",
             layout.row = layout.row, 
             AC = assessment[[i]]$AC, 
             pred = if (is.pred[[i]]) assessment[[i]]$pred else NULL, 
@@ -1581,7 +1918,7 @@ plot_multiassessment <- function(data, assessment, series, info, ...) {
    upViewport()
    upViewport()
    
-   plot.info(series, info, ...)
+   plot_key(series, info, "index_mp")
 }
 
 
@@ -1665,7 +2002,7 @@ plot_multidata <- function(data, series, info,  ...) {
   pushViewport(viewport(layout.pos.row = 1))
   print(data.plot, newpage = FALSE)
   upViewport()
-  plot.info(series, info, ...)
+  plot_key(series, info, "data_splom")
 }
 
 
@@ -1790,10 +2127,14 @@ ctsm.panel.pairs <- function (z, panel = lattice::lattice.getOption("panel.splom
 
 
 
-plot.info <- function(series, info, plot.type = c("data", "auxiliary"), ...) {
+plot_key <- function(series, info, type) {
 
-  plot.type <- match.arg(plot.type)
-  key <- ctsm.web.getKey(series, info, auxiliary.plot = plot.type == "auxiliary")
+  type <- match.arg(
+    type, 
+    c("data", "index", "auxiliary", "data_splom", "index_mp", "ratio_mp")
+  )
+  
+  key <- make_key(series, info, type)
   
   pushViewport(viewport(layout.pos.row = 2))
   
@@ -1801,7 +2142,7 @@ plot.info <- function(series, info, plot.type = c("data", "auxiliary"), ...) {
             just = c("left", "centre"))
   grid.text(key$station, x = unit(1, "char"), y = unit(3, "lines"), gp = gpar(cex = 0.8), 
             just = c("left", "centre"))
-  grid.text(key$units, x = unit(1, "char"), y = unit(2, "lines"), gp = gpar(cex = 0.8), 
+  grid.text(key$unit, x = unit(1, "char"), y = unit(2, "lines"), gp = gpar(cex = 0.8), 
             just = c("left", "centre"))
   grid.text(key$extraction, x = unit(1, "char"), y = unit(1, "lines"), gp = gpar(cex = 0.8), 
             just = c("left", "centre"))
@@ -2273,9 +2614,9 @@ plot_ratio <- function(data, series, info, ...) {
   upViewport()
   
   
-  # hack of plot.info to allow for dimensionless units
+  # hack of plot_key to allow for dimensionless units
   
-  key <- ctsm.web.getKey(series, info, auxiliary.plot = FALSE)
+  key <- make_key(series, info, type = "ratio_mp")
   
   plot_key <- function(txt, y_lines) {
     grid.text(
