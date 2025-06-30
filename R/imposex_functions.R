@@ -352,10 +352,19 @@ imposex.assess.index <- function(annualIndex, species, determinand, info.imposex
   if (nYear <= 2) {
     summary$meanLY <- max(value)
     summary$class = imposex_class(species, max(value))
-    return(list(summary = data.frame(summary)))
+    
+    output <- list(
+      method = "none",
+      summary = data.frame(summary)
+    )
+    
+    return(output)
   }
 
 
+  output$method <- if (nYear == 3) "mean" else "linear"
+  
+  
   # catch series in which all values are equal - very ad-hoc
 
   if (diff(range(value)) == 0) {

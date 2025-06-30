@@ -229,7 +229,13 @@ imposex_assess_clm <- function(
     summary$meanLY <- tail(annualIndex$index, 1)
     summary$clLY <- tail(annualIndex$upper, 1)
     summary$imposex_class = imposex_class(species, summary$clLY)
-    return(list(summary = data.frame(summary)))
+
+    output <- list(
+      method = "none",
+      summary = data.frame(summary)
+    )   
+    
+    return(output)
   }
   
   

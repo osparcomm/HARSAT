@@ -135,6 +135,7 @@ ctsm_summary_overview <- function(
       if ("power" %in% extra_output && !is.null(x$power)) {
         out <- cbind(out, x$power)
       }
+      out$method <- x$method
       out
     }, 
     simplify = FALSE
@@ -171,53 +172,53 @@ ctsm_summary_overview <- function(
 
   out <- ctsm_symbology_OSPAR(out, info, timeSeries, symbology)
 
+  out$method <- NULL
+  
   if (fullSummary) out else out[c("shape", "colour")]
 }
 
 
 #' @export
-ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0.05) {
-  
-  # reporting_functions.R
-  
-  summary$shape <- with(summary, {
-    
-    shape <- character(nrow(summary))
-    
-    # trend symbols 
-    # a trend is estimated if p_overall_change is present 
-    # default shape is a large filled circle
-    
-    trendFit <- !is.na(p_overall_change)
-    shape[trendFit] <- "large_filled_circle"
-    
-    # show a significant trend based on p_recent_change 
-    # note p_recent_change might not exist even if p_overall_change does, because 
-    # there are too few years of data in the recent window
-    
-    # isImposex <- timeSeries$detGroup %in% "Imposex"
-    
-    isTrend <- !is.na(p_recent_change) & p_recent_change < alpha
-    upTrend <- isTrend & recent_change > 0
-    downTrend <- isTrend & recent_change < 0
-    
-    shape[downTrend] <- "downward_triangle"
-    shape[upTrend] <- "upward_triangle"
-    
-    
-    # status based on upper confidence limit in last year, but for imposex, clLY available only with
-    # 1 or 2 years if individual data, so use nyfit instead
-    
-    # statusFit <- !trendFit & !is.na(clLY) 
-    statusFit <- !trendFit & nyfit >= 3
-    shape[statusFit] <- "small_filled_circle"
-    
-    shape[!trendFit & !statusFit] <- "small_open_circle"
-    
-    shape
-  })
+ctsm_symbology_OSPAR <- function(
+    summary, 
+    info, 
+    timeSeries, 
+    symbology, 
+    alpha = 0.05) {
 
+  # silence non-standard evaluation warnings
+  
+  .data <- NULL
+  
+    
+  # shape = trend 
+  
+  # a trend is estimated unless method is "none" or "mean"
+  # note, method is inconsistently applied apart from "none" and "mean"; look 
+  #   at imposex assessments 
+  
+  # focus on 'recent' trends, based p_recent_change 
+  # note p_recent_change might not exist even if a trend has been fitted to the 
+  #   whole time series if there are too few years of data in the recent window
+  
+  # would be better to do all the calculations here so that folk can 
+  # choose the reporting window that they want
+  
+  summary <- dplyr::mutate(
+    summary,
+    shape = dplyr::case_when(
+      .data$method %in% "none"       ~ "small_open_circle",
+      .data$method %in% "mean"       ~ "small_filled_circle",
+      is.na(.data$p_recent_change)   ~ "large_filled_circle",
+      .data$p_recent_change >= alpha ~ "large_filled_circle",
+      .data$recent_change > 0        ~ "upward_triangle",
+      .data$recent_change < 0        ~ "downward_triangle"
+    )
+  )
+  
 
+  # colour = status
+    
   # colour based on 
   # - upper confidence limit (nyfit > 2 or, for VDS, individual measurements) 
   # - meanly (nyfit <= 2)
@@ -234,15 +235,20 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0
     ACdiff <- paste(AC, "diff", sep = "")
     
     
-    # when goodStatus is indicated by low concentrations, negative ACdiff is good
-    # since ACdiff = clLY - AC < 0
-    # when indicated by high concentrations, positive ACdiff is good
-    # to make colour calculation 'simple' change sign on ACdiff when goodStatus == high
+    # when good_status equates to low concentrations, negative ACdiff is good
+    #   since ACdiff = clLY - AC < 0
+    # when good status equates to high concentrations, positive ACdiff is good
+    # to make colour calculation 'simple' change sign on ACdiff when 
+    #    goodStatus == high
     
-    goodStatus <- ctsm_get_info(info$determinand, timeSeries$determinand, "good_status")
+    good_status <- ctsm_get_info(
+      info$determinand, 
+      timeSeries$determinand, 
+      "good_status"
+    )
     
     wk <- summary[ACdiff]
-    wk[] <- lapply(wk, "*", ifelse(goodStatus == "low", 1, -1))
+    wk[] <- lapply(wk, "*", ifelse(good_status == "low", 1, -1))
     
     summary$colour <- apply(wk, 1, function(x) {
       
@@ -257,7 +263,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0
     
     # need to adjust for null summaries
     
-    summary <- within(summary, colour[is.na(shape)] <- NA)
+    # summary <- within(summary, colour[is.na(shape)] <- NA)
     
   } else {
     
@@ -266,10 +272,8 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0
   }
   
   
-  # adjust shape and colour for nonparametric test if nyfit <= 2 and nyall > 2
-  # need to check whether the non-parametric test has been done (e.g. only 
-  #   imposex assessment) 
-  
+  # adjust shape and colour for nonparametric test method = "none" 
+
   if (!is.null(symbology)) {
 
     # get the names of the variables which contain the result of the 
@@ -282,7 +286,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0
       wk <- summary[ACbelow]
       wk[] <- lapply(wk, function(x) {
         
-        ok <- !is.na(x) & goodStatus == "high"
+        ok <- !is.na(x) & good_status == "high"
         if (any(ok))
           x[ok] <- ifelse(x[ok] == "below", "above", "below")
         x
@@ -290,7 +294,7 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0
       
       wk <- apply(wk, 1, function(x) {
         
-        if (all(is.na(x))) return(NA)
+        if (all(is.na(x))) return(NA_character_)
         
         AC <- AC[!is.na(x)]
         x <- x[!is.na(x)]
@@ -299,7 +303,8 @@ ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0
         else classColour$above[AC[length(x)]]
       })  
       
-      id <- with(summary, nyfit <= 2 & nyall > 2 & !is.na(wk))
+      # id <- with(summary, nyfit <= 2 & nyall > 2 & !is.na(wk))
+      id <- summary$method %in% "none" & !is.na(wk)
       summary$colour[id] <- wk[id]
       summary$shape[id] <- "small_filled_circle"
     }
