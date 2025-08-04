@@ -5,7 +5,7 @@
 \title{Write assessment summary to a csv file}
 \usage{
 write_summary_table(
-  assessment_obj,
+  harsat_obj,
   output_file = NULL,
   output_dir = ".",
   export = TRUE,
@@ -17,8 +17,7 @@ write_summary_table(
 )
 }
 \arguments{
-\item{assessment_obj}{An assessment object resulting from a call to
-run_assessment.}
+\item{harsat_obj}{A harsat object following a call to \code{run_assessment}.}
 
 \item{output_file}{The name of the output csv file. If using NULL, the file
 will be called \code{biota_summary.csv}, \code{sediment_summary.csv} or \code{water_summary.csv}
@@ -50,7 +49,7 @@ assumes the thresholds are presented in increasing magnitude of
 environmental risk.}
 
 \item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
-to label the determinands}
+to label the determinands. The life of this argument is limited.}
 
 \item{append}{Logical. \code{FALSE} (the default) overwrites any existing summary
 file. \code{TRUE} appends data to it, creating it if it does not yet exist.}
