@@ -86,7 +86,7 @@ of each time series. This is experimental.</p></li>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">write_summary_table</span><span class="op">(</span></span>
-<span>  <span class="va">assessment_obj</span>,</span>
+<span>  <span class="va">harsat_obj</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="st">"."</span>,</span>
 <span>  export <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -102,9 +102,8 @@ of each time series. This is experimental.</p></li>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-assessment-obj">assessment_obj<a class="anchor" aria-label="anchor" href="#arg-assessment-obj"></a></dt>
-<dd><p>An assessment object resulting from a call to
-run_assessment.</p></dd>
+<dl><dt id="arg-harsat-obj">harsat_obj<a class="anchor" aria-label="anchor" href="#arg-harsat-obj"></a></dt>
+<dd><p>A harsat object following a call to <code>run_assessment</code>.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
@@ -150,7 +149,7 @@ environmental risk.</p></dd>
 
 <dt id="arg-determinandgroups">determinandGroups<a class="anchor" aria-label="anchor" href="#arg-determinandgroups"></a></dt>
 <dd><p>optional, a list specifying <code>labels</code> and <code>levels</code>
-to label the determinands</p></dd>
+to label the determinands. The life of this argument is limited.</p></dd>
 
 
 <dt id="arg-append">append<a class="anchor" aria-label="anchor" href="#arg-append"></a></dt>
