@@ -112,207 +112,6 @@ subset_assessment <- function(assessment_obj, subset) {
 }  
 
 
-#' @export
-ctsm_summary_overview <- function(
-    assessment, timeSeries, info, symbology, extra_output, fullSummary = FALSE) {
-  
-  # reporting_functions.R
-  
-  # gets shape and colour for each time series
-  
-  # first get list of assessment summaries 
-  # summary structures differ between detGroups, so need to be careful
-  
-  # order assessment so that it is compatible with timeSeries - 
-  # need to resolve this
-
-  assessment <- assessment[row.names(timeSeries)]
-  
-  summaryList <- sapply(
-    assessment, 
-    function(x) {
-      out <- x$summary 
-      if ("power" %in% extra_output && !is.null(x$power)) {
-        out <- cbind(out, x$power)
-      }
-      out$method <- x$method
-      out
-    }, 
-    simplify = FALSE
-  )
-  
-  if (any(is.null(summaryList)) | (length(summaryList) != nrow(timeSeries))) {
-    stop("coding error - contact HARSAT development team")
-  }
-    
-  
-  # get combined summary names across detGroups
-  
-  summaryNames <- unique(do.call("c", lapply(summaryList, names)))
-  
-  # create enlarged structure to hold summaries
-  
-  summaryObject <- do.call(
-    "data.frame", 
-    sapply(summaryNames, USE.NAMES = TRUE, simplify = FALSE, FUN = function (i) NA)
-  )
-  
-  # now write each summary to the enlarged structure
-  
-  out <- do.call("rbind", sapply(summaryList, USE.NAMES = TRUE, simplify = FALSE, FUN = function(x)
-  {
-    if (is.null(x)) return(summaryObject)
-    out <- summaryObject
-    out[names(x)] <- x
-    out
-  }))
-  
-  
-  # get shape and colour of plotting symbols
-
-  out <- ctsm_symbology_OSPAR(out, info, timeSeries, symbology)
-
-  out$method <- NULL
-  
-  if (fullSummary) out else out[c("shape", "colour")]
-}
-
-
-#' @export
-ctsm_symbology_OSPAR <- function(
-    summary, 
-    info, 
-    timeSeries, 
-    symbology, 
-    alpha = 0.05) {
-
-  # silence non-standard evaluation warnings
-  
-  .data <- NULL
-  
-    
-  # shape = trend 
-  
-  # a trend is estimated unless method is "none" or "mean"
-  # note, method is inconsistently applied apart from "none" and "mean"; look 
-  #   at imposex assessments 
-  
-  # focus on 'recent' trends, based p_recent_change 
-  # note p_recent_change might not exist even if a trend has been fitted to the 
-  #   whole time series if there are too few years of data in the recent window
-  
-  # would be better to do all the calculations here so that folk can 
-  # choose the reporting window that they want
-  
-  summary <- dplyr::mutate(
-    summary,
-    shape = dplyr::case_when(
-      .data$method %in% "none"       ~ "small_open_circle",
-      .data$method %in% "mean"       ~ "small_filled_circle",
-      is.na(.data$p_recent_change)   ~ "large_filled_circle",
-      .data$p_recent_change >= alpha ~ "large_filled_circle",
-      .data$recent_change > 0        ~ "upward_triangle",
-      .data$recent_change < 0        ~ "downward_triangle"
-    )
-  )
-  
-
-  # colour = status
-    
-  # colour based on 
-  # - upper confidence limit (nyfit > 2 or, for VDS, individual measurements) 
-  # - meanly (nyfit <= 2)
-  
-  # get the names of the variables which contain the difference between the 
-  # meanly and the AC
-  
-  if (!is.null(symbology)) {
-    
-    classColour <- symbology$colour
-    
-    AC <- names(classColour$below)
-    
-    ACdiff <- paste(AC, "diff", sep = "")
-    
-    
-    # when good_status equates to low concentrations, negative ACdiff is good
-    #   since ACdiff = clLY - AC < 0
-    # when good status equates to high concentrations, positive ACdiff is good
-    # to make colour calculation 'simple' change sign on ACdiff when 
-    #    goodStatus == high
-    
-    good_status <- ctsm_get_info(
-      info$determinand, 
-      timeSeries$determinand, 
-      "good_status"
-    )
-    
-    wk <- summary[ACdiff]
-    wk[] <- lapply(wk, "*", ifelse(good_status == "low", 1, -1))
-    
-    summary$colour <- apply(wk, 1, function(x) {
-      
-      if (all(is.na(x))) return(classColour$none)
-      
-      AC <- AC[!is.na(x)]
-      x <- x[!is.na(x)]
-      
-      if (any(x < 0)) classColour$below[AC[which.max(x < 0)]]
-      else classColour$above[AC[length(x)]]
-    })  
-    
-    # need to adjust for null summaries
-    
-    # summary <- within(summary, colour[is.na(shape)] <- NA)
-    
-  } else {
-    
-    summary$colour <- NA_character_
-    
-  }
-  
-  
-  # adjust shape and colour for nonparametric test method = "none" 
-
-  if (!is.null(symbology)) {
-
-    # get the names of the variables which contain the result of the 
-    # non-parametric test for each AC
-    
-    ACbelow <- paste(AC, "below", sep = "")
-    
-    if (any(ACbelow %in% names(summary))) {    
-    
-      wk <- summary[ACbelow]
-      wk[] <- lapply(wk, function(x) {
-        
-        ok <- !is.na(x) & good_status == "high"
-        if (any(ok))
-          x[ok] <- ifelse(x[ok] == "below", "above", "below")
-        x
-      })
-      
-      wk <- apply(wk, 1, function(x) {
-        
-        if (all(is.na(x))) return(NA_character_)
-        
-        AC <- AC[!is.na(x)]
-        x <- x[!is.na(x)]
-        
-        if (any(x == "below")) classColour$below[AC[which.max(x == "below")]]
-        else classColour$above[AC[length(x)]]
-      })  
-      
-      # id <- with(summary, nyfit <= 2 & nyall > 2 & !is.na(wk))
-      id <- summary$method %in% "none" & !is.na(wk)
-      summary$colour[id] <- wk[id]
-      summary$shape[id] <- "small_filled_circle"
-    }
-    
-  }
-  
-  summary
-}
 
 
 ctsm.web.AC <- function(assessment_ob, classification) {
@@ -399,8 +198,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' * (optionally) a symbology summarising the trend (shape) and status (colour)
 #' of each time series. This is experimental. 
 #'
-#' @param assessment_obj An assessment object resulting from a call to
-#'   run_assessment.
+#' @param harsat_obj A harsat object following a call to `run_assessment`.
 #' @param output_file The name of the output csv file. If using NULL, the file
 #'   will be called `biota_summary.csv`, `sediment_summary.csv` or `water_summary.csv`
 #'   as appropriate. By default the file will be written to the working
@@ -425,7 +223,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #'   assumes the thresholds are presented in increasing magnitude of 
 #'   environmental risk.
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
-#'   to label the determinands
+#'   to label the determinands. The life of this argument is limited.
 #' @param append Logical. `FALSE` (the default) overwrites any existing summary
 #'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
@@ -433,59 +231,18 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #'
 #' @export
 write_summary_table <- function(
-  assessment_obj, 
-  output_file = NULL, output_dir = ".", export = TRUE,
-  collapse_AC = NULL, extra_output = NULL, 
+  harsat_obj, 
+  output_file = NULL, 
+  output_dir = ".", 
+  export = TRUE,
+  collapse_AC = NULL, 
+  extra_output = NULL, 
   symbology = NULL, 
-  determinandGroups = NULL, append = FALSE) {
+  determinandGroups = NULL, 
+  append = FALSE) {
 
-  # silence non-standard evaluation warnings
-  climit_last_year <- NULL
 
-  # reporting_functions.R
-  
-  assessment <- assessment_obj$assessment
-  timeSeries <- assessment_obj$timeSeries
-  info <- assessment_obj$info
-  
-  
-  # output information
-  # check valid extension and path
-  # merge output_file and output_dir to give final output destination
-  
-  if (export) {
-
-    # get default output_file 
-    
-    if (is.null(output_file)) {
-      output_file <- paste0(info$compartment, "_summary.csv")
-    } 
-    
-    # check output_file has valid extension
-    
-    if (!endsWith(output_file, ".csv")) {
-      stop(
-        "\nThe output file '", output_file, "' does not have a .csv extension.\n", 
-        "Check the information supplied to argument 'output_file'.",
-        call. = FALSE
-      )
-    }    
-    
-    # combine output_file and output_dir and check output directory exists
-    
-    output_file <- file.path(output_dir, output_file)
-
-    wk <- dirname(output_file)
-    if (!dir.exists(wk)) {
-      stop(
-        "\nThe output directory '", wk, "' does not exist.\n", 
-        "Create it or check the information supplied to argument 'output_dir'",
-        " is correct.",
-        call. = FALSE
-      )
-    }
-
-  }
+  info <- harsat_obj$info
   
     
   # assessment criteria that are used in the symbology must have an appropriate 
@@ -515,7 +272,7 @@ write_summary_table <- function(
     
     if (is.null(names(collapse_AC))) {
       stop(
-        "collapse_AC must be a names list of valid assessment criterion", 
+        "collapse_AC must be a named list of valid assessment criterion", 
         call. = FALSE
       )
     }
@@ -568,140 +325,19 @@ write_summary_table <- function(
   }
       
 
-  ## augment timeSeries structure
+  # get summary from assessment, combine with timeseries object, and rename
+  # variables into more reader_friendly form
+  
+  summary <- make_summary_table(harsat_obj, extra_output, determinandGroups)
 
-  # get determinand group
-  # NB detGroup is currently a character if determinandGroups is null and a 
-  # factor otherwise - the use of the factor assists with ordering, but probably
-  # not needed here as this is primarily an OHAT requirement - have raised
-  # an issue to tidy this up
-  
-  timeSeries <- tibble::rownames_to_column(timeSeries, ".series")
-  
-  timeSeries$detGroup <- ctsm_get_info(
-    info$determinand, 
-    timeSeries$determinand, 
-    "group", 
-    info$compartment, 
-    sep = "_"
-  )
 
-  if (!is.null(determinandGroups)) {
-    
-    if (!all(timeSeries$detGroup %in% determinandGroups$levels)) {
-      stop('some determinand groups present in data, but not in groups argument')
-    }
-    
-    timeSeries$detGroup <- factor(
-      timeSeries$detGroup, 
-      levels = determinandGroups$levels, 
-      labels = determinandGroups$labels, 
-      ordered = TRUE
-    )
+  # apply symbology - shape and colour of plotting symbols
 
-    timeSeries$detGroup <-   timeSeries$detGroup[, drop = TRUE]
-  }  
-    
-  
-  # merge stations with timeSeries
-  
-  timeSeries <- dplyr::left_join(
-    timeSeries, 
-    assessment_obj$stations,
-    by = "station_code"
-  )
-  
-  timeSeries <- tibble::column_to_rownames(timeSeries, ".series")
+  summary <- symbology_OSPAR(summary, info, symbology)
+
+  summary$method <- NULL
   
 
-  ## get summary from assessment 
-  
-  summary <- ctsm_summary_overview(
-    assessment, timeSeries, info, symbology, extra_output, 
-    fullSummary = TRUE
-  )
-
-  summary <- cbind(timeSeries, summary)
-    
-  summary$series <- row.names(summary)
-    
-
-  # double check no legacy data 
-  
-  if (any(is.na(summary$shape))) {
-    stop('some legacy data have crept through')
-  }
-    
-
-  ## tidy up output
-  
-  # reorder variables 
-  
-  wk <- c(
-    "series", 
-    info$region$id,  
-    "country", "CMA", 
-    "station_code", "station_name", "station_longname", 
-    "station_latitude", "station_longitude", "station_type", "waterbody_type", 
-    "determinand", "detGroup", "species", "filtration",
-    "submedia", "matrix", "basis", "unit", "sex", "method_analysis", 
-    "normaliser", "normaliser_value", "normaliser_unit",
-    "subseries", 
-    "shape", "colour"
-  ) 
-  
-  summary <- dplyr::relocate(summary, dplyr::any_of(wk))
-  
-  if ("dtrend_obs" %in% names(summary)) {
-    wk <- c(
-      "dtrend_obs", "dtrend_seq", "dtrend_ten", "nyear_seq", 
-      "power_obs", "power_seq", "power_ten"
-    )
-    summary <- dplyr::relocate(summary, dplyr::all_of(wk), .after = "dtrend") 
-  }
-  
-  sortID <- intersect(
-    c(info$region$id, "country", "CMA", "station_name", 
-      "species", "detGroup", "determinand", "matrix"), 
-    names(summary)
-  )
-  summary <- summary[do.call(order, summary[sortID]), ]
-  
-  
-  # rename variables
-  
-  summary <- dplyr::rename(
-    summary, 
-    determinand_group = "detGroup", 
-    n_year_all = "nyall",
-    n_year_fit = "nyfit",
-    n_year_positive = "nypos",
-    first_year_all = "firstYearAll",
-    first_year_fit = "firstYearFit",
-    last_year = "lastyear",
-    detectable_trend = "dtrend",
-    mean_last_year = "meanLY",
-    climit_last_year = "clLY"
-  )
-  
-  if ("dtrend_obs" %in% names(summary)) {
-    summary <- dplyr::rename(
-      summary, 
-      power_dt_obs = "dtrend_obs",
-      power_dt_seq = "dtrend_seq",
-      power_dt_ten = "dtrend_ten",
-      power_ny_seq = "nyear_seq",
-      power_pw_obs = "power_obs",
-      power_pw_seq = "power_seq",
-      power_pw_ten = "power_ten",
-    )
-  }
-
-  names(summary) <- gsub("diff$", "_diff", names(summary))
-  names(summary) <- gsub("achieved$", "_achieved", names(summary))
-  names(summary) <- gsub("below$", "_below", names(summary))
-  
-  
   ## simplify (collapse) AC output if required
   
   if (is_AC && !is.null(collapse_AC)) {
@@ -793,25 +429,50 @@ write_summary_table <- function(
   }
   
   
-  # rename region variables if required
-  
-  if (!identical(info$region$id, info$region$names)) {
-    pos <- match(info$region$id, names(summary))
-    names(summary)[pos] <- info$region$names
-  }
   
 
   # results
   
   # if export = FALSE return summary data frame
-  
+
   if (!export) {
     return(summary)
   }
+  
+
+  # otherwise write to .csv file
     
+  # get default output_file 
   
-  # otherwise write to output_file
+  if (is.null(output_file)) {
+    output_file <- paste0(info$compartment, "_summary.csv")
+  } 
   
+  # check output_file has valid extension
+  
+  if (!endsWith(output_file, ".csv")) {
+    stop(
+      "\nThe output file '", output_file, "' does not have a .csv extension.\n", 
+      "Check the information supplied to argument 'output_file'.",
+      call. = FALSE
+    )
+  }    
+    
+  # combine output_file and output_dir and check output directory exists
+  
+  output_file <- file.path(output_dir, output_file)
+  
+  wk <- dirname(output_file)
+  if (!dir.exists(wk)) {
+    stop(
+      "\nThe output directory '", wk, "' does not exist.\n", 
+      "Create it or check the information supplied to argument 'output_dir'",
+      " is correct.",
+      call. = FALSE
+    )
+  }
+  
+
   # headers on a new file aren't created if append = TRUE
   
   if (!file.exists(output_file)) {
@@ -825,7 +486,7 @@ write_summary_table <- function(
     old_summary <- safe_read_file(output_file)
     if (!identical(names(old_summary), names(summary))) {
       stop(
-        "\nCannot append because the names of the new summary output differ ",
+        "\nCannot append because the names of the new summary table differ ",
         "from those of the\n", 
         "existing summary file.",
         call. = FALSE
@@ -834,7 +495,7 @@ write_summary_table <- function(
     
     if (any(summary$series %in% old_summary$series)) {
       warning(
-        "Some time series in the new summary output are already reported in ",
+        "Some time series in the new summary table are already reported in ",
         "the existing\n", 
         "summary file: you should check what is going on.",
         call. = FALSE
@@ -842,11 +503,322 @@ write_summary_table <- function(
     }
   }
   
-  
-  
   readr::write_excel_csv(summary, output_file, na = "", append = append)
+  
   return(invisible())
 }
+
+
+#' @export
+make_summary_table <- function(harsat_obj, extra_output, determinandGroups) {
+  
+  # gets summary from each assessment, augments this with anything in 
+  # extra_output, and merges with timeseries 
+
+  info <- harsat_obj$info
+  
+  
+  # merge stations with timeseries
+
+  # get determinand group
+  # NB detGroup is currently a character if determinandGroups is null and a 
+  # factor otherwise - the use of the factor assists with ordering, but probably
+  # not needed here as this is primarily an OHAT requirement - have raised
+  # an issue to tidy this up
+
+  # NB Use of determinandGroups has a limited life expectancy.
+  
+  timeseries <- harsat_obj$timeSeries
+  
+  timeseries <- tibble::rownames_to_column(timeseries, "series")
+  
+  timeseries$detGroup <- ctsm_get_info(
+    info$determinand, 
+    timeseries$determinand, 
+    "group", 
+    info$compartment, 
+    sep = "_"
+  )
+  
+  if (!is.null(determinandGroups)) {
+    
+    if (!all(timeseries$detGroup %in% determinandGroups$levels)) {
+      stop('some determinand groups present in data, but not in groups argument')
+    }
+    
+    timeseries$detGroup <- factor(
+      timeseries$detGroup, 
+      levels = determinandGroups$levels, 
+      labels = determinandGroups$labels, 
+      ordered = TRUE
+    )
+    
+    timeseries$detGroup <-   timeseries$detGroup[, drop = TRUE]
+  }  
+  
+
+  # join with stations
+
+  timeseries <- dplyr::left_join(
+    timeseries, 
+    harsat_obj$stations,
+    by = "station_code"
+  )
+  
+
+  # order assessment so that it is compatible with timeseries - 
+
+  assessment <- harsat_obj$assessment
+  
+  assessment <- assessment[timeseries$series]
+  
+  summary <- sapply(
+    assessment, 
+    function(x) {
+      out <- x$summary 
+      if ("power" %in% extra_output && !is.null(x$power)) {
+        out <- cbind(out, x$power)
+      }
+      out$method <- x$method
+      out
+    }, 
+    simplify = FALSE
+  )
+  
+  if (any(is.null(summary)) | (length(summary) != nrow(timeseries))) {
+    stop("coding error - contact harsat development team")
+  }
+  
+  summary <- dplyr::bind_rows(summary)
+  
+  summary <- cbind(timeseries, summary)
+
+  
+  # rename variables 
+  # much of this can be simplified by keeping these names consistent throughout 
+  # the code
+  
+  summary <- dplyr::rename(
+    summary, 
+    determinand_group = "detGroup", 
+    n_year_all = "nyall",
+    n_year_fit = "nyfit",
+    n_year_positive = "nypos",
+    first_year_all = "firstYearAll",
+    first_year_fit = "firstYearFit",
+    last_year = "lastyear",
+    detectable_trend = "dtrend",
+    mean_last_year = "meanLY",
+    climit_last_year = "clLY"
+  )
+  
+  if ("power" %in% extra_output) {
+    summary <- dplyr::rename(
+      summary, 
+      power_dt_obs = "dtrend_obs",
+      power_dt_seq = "dtrend_seq",
+      power_dt_ten = "dtrend_ten",
+      power_ny_seq = "nyear_seq",
+      power_pw_obs = "power_obs",
+      power_pw_seq = "power_seq",
+      power_pw_ten = "power_ten",
+    )
+  }
+  
+  names(summary) <- gsub("diff$", "_diff", names(summary))
+  names(summary) <- gsub("achieved$", "_achieved", names(summary))
+  names(summary) <- gsub("below$", "_below", names(summary))
+
+  
+  # reorder variables and sort 
+  
+  var_id <- c(
+    "series", 
+    info$region$id,  
+    "country", 
+    "station_code", "station_name", "station_longname", 
+    "station_latitude", "station_longitude", "station_type", "waterbody_type", 
+    "determinand", "determinand_group", "species", "filtration",
+    "matrix", "basis", "unit", "sex", "method_analysis", 
+    "normaliser", "normaliser_value", "normaliser_unit",
+    "subseries"
+  ) 
+  
+  summary <- dplyr::relocate(summary, dplyr::any_of(var_id))
+  
+  if ("power" %in% extra_output) {
+    var_id <- c(
+      "power_dt_obs", "power_dt_seq", "power_dt_ten", 
+      "power_ny_seq", 
+      "power_pw_obs", "power_pw_seq", "power_pw_ten"
+    )
+    summary <- dplyr::relocate(
+      summary, 
+      dplyr::all_of(var_id), .after = "detectable_trend") 
+  }
+  
+  
+  var_id <- c(
+    info$region$id, "country", "station_name", "species", "determinand_group", 
+    "determinand", "matrix", "filtration"
+  )
+  
+  summary <- dplyr::arrange(
+    summary, 
+    dplyr::pick(dplyr::any_of(var_id))
+  )
+
+  
+  # rename region variables if required
+  
+  if (!identical(info$region$id, info$region$names)) {
+    pos <- match(info$region$id, names(summary))
+    names(summary)[pos] <- info$region$names
+  }
+  
+
+  summary
+}
+
+
+#' @export
+symbology_OSPAR <- function(
+    summary, 
+    info, 
+    symbology, 
+    alpha = 0.05) {
+  
+  # silence non-standard evaluation warnings
+  
+  .data <- NULL
+  
+  
+  # shape = trend 
+  
+  # a trend is estimated unless method is "none" or "mean"
+  # note, method is inconsistently applied apart from "none" and "mean"; look 
+  #   at imposex assessments 
+  
+  # focus on 'recent' trends, based p_recent_change 
+  # note p_recent_change might not exist even if a trend has been fitted to the 
+  #   whole time series if there are too few years of data in the recent window
+  
+  # would be better to do all the calculations here so that folk can 
+  # choose the reporting window that they want
+  
+  summary <- dplyr::mutate(
+    summary,
+    shape = dplyr::case_when(
+      .data$method %in% "none"       ~ "small_open_circle",
+      .data$method %in% "mean"       ~ "small_filled_circle",
+      is.na(.data$p_recent_change)   ~ "large_filled_circle",
+      .data$p_recent_change >= alpha ~ "large_filled_circle",
+      .data$recent_change > 0        ~ "upward_triangle",
+      .data$recent_change < 0        ~ "downward_triangle"
+    )
+  )
+  
+  
+  # colour = status
+  
+  # colour based on 
+  # - upper confidence limit (nyfit > 2 or, for VDS, individual measurements) 
+  # - meanly (nyfit <= 2)
+  
+  # get the names of the variables which contain the difference between the 
+  # meanly and the AC
+  
+  if (!is.null(symbology)) {
+    
+    classColour <- symbology$colour
+    
+    AC <- names(classColour$below)
+    
+    ACdiff <- paste0(AC, "_diff")
+    
+    
+    # when good_status equates to low concentrations, negative ACdiff is good
+    #   since ACdiff = clLY - AC < 0
+    # when good status equates to high concentrations, positive ACdiff is good
+    # to make colour calculation 'simple' change sign on ACdiff when 
+    #    goodStatus == high
+    
+    good_status <- ctsm_get_info(
+      info$determinand, 
+      summary$determinand, 
+      "good_status"
+    )
+    
+    wk <- summary[ACdiff]
+    wk[] <- lapply(wk, "*", ifelse(good_status == "low", 1, -1))
+    
+    summary$colour <- apply(wk, 1, function(x) {
+      
+      if (all(is.na(x))) return(classColour$none)
+      
+      AC <- AC[!is.na(x)]
+      x <- x[!is.na(x)]
+      
+      if (any(x < 0)) classColour$below[AC[which.max(x < 0)]]
+      else classColour$above[AC[length(x)]]
+    })  
+    
+
+  } else {
+    
+    summary$colour <- NA_character_
+    
+  }
+  
+  
+  # adjust shape and colour for nonparametric test method = "none" 
+  
+  if (!is.null(symbology)) {
+    
+    # get the names of the variables which contain the result of the 
+    # non-parametric test for each AC
+    
+    ACbelow <- paste0(AC, "_below")
+    
+    if (any(ACbelow %in% names(summary))) {    
+      
+      wk <- summary[ACbelow]
+      wk[] <- lapply(wk, function(x) {
+        
+        ok <- !is.na(x) & good_status == "high"
+        if (any(ok))
+          x[ok] <- ifelse(x[ok] == "below", "above", "below")
+        x
+      })
+      
+      wk <- apply(wk, 1, function(x) {
+        
+        if (all(is.na(x))) return(NA_character_)
+        
+        AC <- AC[!is.na(x)]
+        x <- x[!is.na(x)]
+        
+        if (any(x == "below")) classColour$below[AC[which.max(x == "below")]]
+        else classColour$above[AC[length(x)]]
+      })  
+      
+      # id <- with(summary, nyfit <= 2 & nyall > 2 & !is.na(wk))
+      id <- summary$method %in% "none" & !is.na(wk)
+      summary$colour[id] <- wk[id]
+      summary$shape[id] <- "small_filled_circle"
+    }
+    
+  }
+
+  summary <- dplyr::relocate(
+    summary, 
+    dplyr::all_of(c("shape", "colour")), 
+    .before = "n_year_all"
+  )
+    
+  summary
+}
+
 
 
 ctsm_collapse_AC <- function(x, type = c("real", "character")) {
