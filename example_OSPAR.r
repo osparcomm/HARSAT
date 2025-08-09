@@ -59,12 +59,11 @@ write_summary_table(
   ),
   symbology = list(
     colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
+      below = c(EQS = "green"), 
+      above = c(EQS = "red"), 
       none = "black"
     )
   ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_OSPAR")
 )
 
@@ -147,26 +146,17 @@ write_summary_table(
       "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)"
     )
   ),
+  threshold_groups = list(
+    BAC = "BAC", 
+    EAC = c("EAC", "ERL", "EQS", "FEQG")
+  ),
   symbology = list(
     colour = list(
-      below = c(
-        "BAC" = "blue", 
-        "ERL" = "green", 
-        "EAC" = "green", 
-        "EQS" = "green", 
-        "FEQG" = "green"
-      ),
-      above = c(
-        "BAC" = "orange", 
-        "ERL" = "red", 
-        "EAC" = "red", 
-        "EQS" = "red", 
-        "FEQG" = "red"
-      ),
+      below = c(BAC = "blue", EAC = "green"), 
+      above = c(BAC = "orange", EAC = "red"), 
       none = "black"
     )
   ),
-  collapse_AC = list(BAC = "BAC", EAC = c("EAC", "ERL", "EQS", "FEQG")),
   output_dir = file.path("output", "example_OSPAR")
 )
 
@@ -296,31 +286,17 @@ wk_groups <- list(
 write_summary_table(
   biota_assessment,
   determinandGroups = wk_groups,
-  symbology = list(
-    colour = list(
-      below = c(
-        "BAC" = "blue",
-        "NRC" = "blue",
-        "EAC" = "green", 
-        "FEQG" = "green",
-        "LRC" = "green", 
-        "QSsp" = "green"
-      ),
-      above = c(
-        "BAC" = "orange", 
-        "NRC" = "orange", 
-        "EAC" = "red", 
-        "FEQG" = "red",
-        "LRC" = "red", 
-        "QSsp" = "red"
-      ),
-      none = "black"
-    )
-  ),
-  collapse_AC = list(
+  threshold_groups = list(
     BAC = c("BAC", "NRC"),
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
+  ),
+  symbology = list(
+    colour = list(
+      below = c(BAC = "blue", EAC = "green"), 
+      above = c(BAC = "orange", EAC = "red"), 
+      none = "black"
+    )
   ),
   output_file = "biota_summary_env.csv",
   output_dir = file.path("output", "example_OSPAR")
@@ -332,23 +308,17 @@ write_summary_table(
 write_summary_table(
   biota_assessment,
   determinandGroups = wk_groups,
-  symbology = list(
-    colour = list(
-      below = c(
-        "MPC" = "green", 
-        "QShh" = "green"
-      ),
-      above = c(
-        "MPC" = "red", 
-        "QShh" = "red"
-      ),
-      none = "black"
-    )
-  ),
-  collapse_AC = list(
+  threshold_groups = list(
     BAC = c("BAC", "NRC"),
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
+  ),
+  symbology = list(
+    colour = list(
+      below = c(HQS = "green"),
+      above = c(HQS = "red"),
+      none = "black"
+    )
   ),
   output_file = "biota_summary_health.csv",
   output_dir = file.path("output", "example_OSPAR")

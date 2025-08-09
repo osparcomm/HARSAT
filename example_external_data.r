@@ -79,8 +79,8 @@ write_summary_table(
   output_dir = file.path("output", "example_external_data"), 
   symbology = list(
     colour = list(
-      below = c("NRC" = "blue", "LRC" = "green", "MRC" = "orange", "HRC" = "darkorange"),
-      above = c("NRC" = "red", "LRC" = "red", "MRC" = "red", "HRC" = "red"),
+      below = c(NRC = "blue", LRC = "green", MRC = "orange", HRC = "darkorange"),
+      above = c(NRC = "red", LRC = "red", MRC = "red", HRC = "red"),
       none = "black"
     )
   )

@@ -222,12 +222,11 @@ write_summary_table(
   ),
   symbology = list(
     colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
+      below = c(EQS = "green"), 
+      above = c(EQS = "red"), 
       none = "black"
     )
   ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
 )
 ```
@@ -326,12 +325,11 @@ write_summary_table(
   ),
   symbology = list(
     colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
+      below = c(EQS = "green"), 
+      above = c(EQS = "red"), 
       none = "black"
     )
   ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
 )
 ```
@@ -477,14 +475,14 @@ write_summary_table(
       "PCBs and dioxins", "PCBs and dioxins"
     )
   ),
+  threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),
   symbology = list(
     colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
+      below = c(EQS = "green"),
+      above = c(EQS = "red"),
       none = "black"
     )
-  ),
-  collapse_AC = list(EAC = c("EAC", "EQS", "MPC")),
+  ),  
   output_dir = summary.dir
 )
 ```

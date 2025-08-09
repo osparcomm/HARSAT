@@ -158,12 +158,11 @@ write_summary_table(
   ),
   symbology = list(
     colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
+      below = c(EQS = "green"), 
+      above = c(EQS = "red"), 
       none = "black"
     )
   ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
 )
 
@@ -249,12 +248,11 @@ write_summary_table(
   ),
   symbology = list(
     colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
+      below = c(EQS = "green"), 
+      above = c(EQS = "red"), 
       none = "black"
     )
   ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
 )
 
@@ -368,14 +366,14 @@ write_summary_table(
       "PCBs and dioxins", "PCBs and dioxins"
     )
   ),
+  threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),
   symbology = list(
     colour = list(
-      below = c("BAC" = "green", "EAC" = "green", "EQS" = "green", "MPC" = "green"),
-      above = c("BAC" = "red", "EAC" = "red", "EQS" = "red", "MPC" = "red"),
+      below = c(EQS = "green"),
+      above = c(EQS = "red"),
       none = "black"
     )
   ),
-  collapse_AC = list(EAC = c("EAC", "EQS", "MPC")),
   output_dir = file.path("output", "example_HELCOM")
 )
 
