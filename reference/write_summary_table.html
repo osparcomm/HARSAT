@@ -90,7 +90,8 @@ of each time series. This is experimental.</p></li>
 <span>  output_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="st">"."</span>,</span>
 <span>  export <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  collapse_AC <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  threshold_groups <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  collapse_AC <span class="op">=</span> <span class="fu">lifecycle</span><span class="fu">::</span><span class="fu"><a href="https://lifecycle.r-lib.org/reference/deprecated.html" class="external-link">deprecated</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  extra_output <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  symbology <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  determinandGroups <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -128,10 +129,14 @@ file. <code>FALSE</code> returns the summary table as an R object (and does not 
 a csv file).</p></dd>
 
 
+<dt id="arg-threshold-groups">threshold_groups<a class="anchor" aria-label="anchor" href="#arg-threshold-groups"></a></dt>
+<dd><p>A names list of valid thresholds that allows
+thresholds of the same 'type' to be reported together. See details.</p></dd>
+
+
 <dt id="arg-collapse-ac">collapse_AC<a class="anchor" aria-label="anchor" href="#arg-collapse-ac"></a></dt>
-<dd><p>A names list of valid assessment criteria that allows
-assessment criteria of the same 'type' to be reported together. See
-details.</p></dd>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> Use <code>threshold_groups</code>
+instead.</p></dd>
 
 
 <dt id="arg-extra-output">extra_output<a class="anchor" aria-label="anchor" href="#arg-extra-output"></a></dt>
