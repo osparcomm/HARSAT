@@ -9,7 +9,8 @@ write_summary_table(
   output_file = NULL,
   output_dir = ".",
   export = TRUE,
-  collapse_AC = NULL,
+  threshold_groups = NULL,
+  collapse_AC = lifecycle::deprecated(),
   extra_output = NULL,
   symbology = NULL,
   determinandGroups = NULL,
@@ -35,9 +36,11 @@ exist.}
 file. \code{FALSE} returns the summary table as an R object (and does not write to
 a csv file).}
 
-\item{collapse_AC}{A names list of valid assessment criteria that allows
-assessment criteria of the same 'type' to be reported together. See
-details.}
+\item{threshold_groups}{A names list of valid thresholds that allows
+thresholds of the same 'type' to be reported together. See details.}
+
+\item{collapse_AC}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{threshold_groups}
+instead.}
 
 \item{extra_output}{A character vector specifying extra summary metrics
 to be included in the output. Currently only recognises "power" to give the

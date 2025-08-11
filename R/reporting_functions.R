@@ -212,9 +212,10 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @param export Logical. `TRUE` (the default) writes the summary table to a csv
 #'   file. `FALSE` returns the summary table as an R object (and does not write to
 #'   a csv file).
-#' @param collapse_AC A names list of valid assessment criteria that allows
-#'   assessment criteria of the same 'type' to be reported together. See 
-#'   details.
+#' @param threshold_groups A names list of valid thresholds that allows 
+#'   thresholds of the same 'type' to be reported together. See details.
+#' @param collapse_AC `r lifecycle::badge("deprecated")` Use `threshold_groups` 
+#'   instead.  
 #' @param extra_output A character vector specifying extra summary metrics 
 #'   to be included in the output. Currently only recognises "power" to give the 
 #'   seven power metrics computed for lognormally distributed data. Defaults to 
@@ -235,202 +236,60 @@ write_summary_table <- function(
   output_file = NULL, 
   output_dir = ".", 
   export = TRUE,
-  collapse_AC = NULL, 
+  threshold_groups = NULL, 
+  collapse_AC = lifecycle::deprecated(), 
   extra_output = NULL, 
   symbology = NULL, 
   determinandGroups = NULL, 
   append = FALSE) {
 
 
-  info <- harsat_obj$info
-  
-    
-  # assessment criteria that are used in the symbology must have an appropriate 
-  # class colour
-    
-  is_AC <- !is.null(info$AC)
-  
-  if (is_AC) {
-    AC <- info$AC
+  if (lifecycle::is_present(collapse_AC)) {
+    lifecycle::deprecate_warn(
+      "1.0.4", 
+      "write_summary_table(collapse_AC)", 
+      "write_summary_table(threshold_groups)")
+      threshold_groups <- collapse_AC
   }
   
-  if (!is.null(symbology) && is_AC) {
-    stopifnot(
-      !is.null(symbology$colour),
-      sort(names(symbology$colour$below)) == sort(names(symbology$colour$above)), 
-      names(symbology$colour$below) %in% AC, 
-      "none" %in% names(symbology$colour)
-    )
-  }
-
-
-  # assessment criteria in collapse_AC must be present in the data
-  # can turn some of these errors into warnings by creating extra variables 
-  # later on - have raised an issue 
   
-  if (!is.null(collapse_AC)) {
-    
-    if (is.null(names(collapse_AC))) {
-      stop(
-        "collapse_AC must be a named list of valid assessment criterion", 
-        call. = FALSE
-      )
-    }
-    
-    if (is_AC) {
-
-      id <- unlist(collapse_AC)
-      if (any(duplicated(id))) {
-        stop(
-          "cannot specify the same assessment criterion more than once in ", 
-          "collapse_AC", 
-          call. = FALSE
-        )
-      }
-      
-      ok <- id %in% AC
-      if (!all(ok)) {
-        id <- id[!ok]
-        stop(
-          "these assessment criteria are specified in collapse_AC but were not ",
-          "used in the\n", 
-          "in the assessment: ",
-          paste(id, collapse = ", "), 
-          call. = FALSE
-        )
-      }
-      
-      other_AC <- !AC %in% unlist(collapse_AC)
-      if (any(other_AC)) {
-        id <- AC[other_AC]
-        if (any(id %in% names(collapse_AC))) {
-          stop(
-            "cannot use the name of another assessment criterion in the names of \n", 
-            "collapse_AC",
-            .call = FALSE
-          )
-        }
-      }
-      
-      
-    } else {
-
-      stop(
-        "collapse_AC specified, but no assessment criteria were used in the assessment", 
-        call. = FALSE
-      )
-      
-    }
-
-  }
-      
-
   # get summary from assessment, combine with timeseries object, and rename
   # variables into more reader_friendly form
   
   summary <- make_summary_table(harsat_obj, extra_output, determinandGroups)
 
 
+  # group thresholds to simplify summary table
+  # also updates list of thresholds to work with in the symbology stage
+
+  thresholds <- harsat_obj$info$AC
+
+  if (!is.null(threshold_groups)) {
+    tmp <- group_thresholds(summary, threshold_groups, thresholds)
+    summary <- tmp$summary
+    thresholds <- tmp$thresholds
+  }
+  
+    
   # apply symbology - shape and colour of plotting symbols
 
-  summary <- symbology_OSPAR(summary, info, symbology)
+  # thresholds that are used in the symbology must have an appropriate 
+  # class colour
+  
+  if (!is.null(symbology) && !is.null(thresholds)) {
+    stopifnot(
+      !is.null(symbology$colour),
+      sort(names(symbology$colour$below)) == sort(names(symbology$colour$above)), 
+      names(symbology$colour$below) %in% thresholds, 
+      "none" %in% names(symbology$colour)
+    )
+  }
+  
+  summary <- symbology_OSPAR(summary, harsat_obj$info, symbology)
 
   summary$method <- NULL
   
-
-  ## simplify (collapse) AC output if required
   
-  if (is_AC && !is.null(collapse_AC)) {
-
-    # augment collapse_AC with unspecified AC
-    
-    other_AC <- !AC %in% unlist(collapse_AC)
-
-    if (any(other_AC)) {
-      other_AC <- AC[other_AC]
-      
-      extra <- as.list(other_AC)
-      names(extra) <- other_AC
-      
-      collapse_AC <- c(collapse_AC, extra)
-      
-      collapse_AC <- collapse_AC[sort(names(collapse_AC))]
-    }
-    
-
-    # set up type and value variables for each AC
-
-    id <- paste0(AC, "_type")
-    summary[id] <- lapply(AC, function(x) {
-      ifelse(!is.na(summary[[x]]), x, NA_character_)
-    })
-    
-    id <- match(AC, names(summary))
-    names(summary)[id] <- paste0(AC, "_value")
-    
-
-    var_id <- c("type", "value", "diff", "achieved", "below") 
-
-        
-    for (group_id in names(collapse_AC)) {
-      
-      AC_id <- collapse_AC[[group_id]]
-      
-      # if only one AC and it has a different name, then rename
-      
-      if (length(AC_id) == 1 && group_id != AC_id) {
-        pos <- match(paste(AC_id, var_id, sep = "_"), names(summary))
-        names(summary)[pos] <- paste(group_id, var_id, sep = "_")
-      }
-      
-      if (length(AC_id) > 1) {
-      
-        in_id <- paste0(AC_id, "_type")
-        out_id <- paste0(group_id, "_type")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "character")
-        
-        in_id <- paste0(AC_id, "_value")
-        out_id <- paste0(group_id, "_value")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
-        
-        in_id <- paste0(AC_id, "_diff")
-        out_id <- paste0(group_id, "_diff")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
-        
-        in_id <- paste0(AC_id, "_achieved")
-        out_id <- paste0(group_id, "_achieved")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
-        
-        in_id <- paste0(AC_id, "_below")
-        out_id <- paste0(group_id, "_below")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "character")
-      }
-      
-      # remove unwanted columns
-      
-      id <- setdiff(AC_id, group_id)
-      id <- paste(rep(id, each = 5), var_id, sep = "_")
-    
-      id <- setdiff(names(summary), id)
-    
-      summary <- summary[id]
-    }    
-    
-    # reorder column names 
-    
-    id <- paste(rep(names(collapse_AC), each = 5), var_id, sep = "_")
-    
-    summary <- dplyr::relocate(
-      summary, 
-      dplyr::all_of(id), 
-      .after = climit_last_year
-    )
-    
-  }
-  
-  
-  
-
   # results
   
   # if export = FALSE return summary data frame
@@ -445,7 +304,7 @@ write_summary_table <- function(
   # get default output_file 
   
   if (is.null(output_file)) {
-    output_file <- paste0(info$compartment, "_summary.csv")
+    output_file <- paste0(harsat_obj$info$compartment, "_summary.csv")
   } 
   
   # check output_file has valid extension
@@ -624,12 +483,23 @@ make_summary_table <- function(harsat_obj, extra_output, determinandGroups) {
       power_pw_ten = "power_ten",
     )
   }
-  
-  names(summary) <- gsub("diff$", "_diff", names(summary))
-  names(summary) <- gsub("achieved$", "_achieved", names(summary))
-  names(summary) <- gsub("below$", "_below", names(summary))
 
-  
+  if (!is.null(info$AC)) {
+    thresholds <- info$AC
+
+    pos <- match(thresholds, names(summary))
+    names(summary)[pos] <- paste0(thresholds, "_value")
+    
+    for (suffix in c("diff", "achieved", "below")) {
+      in_id <- paste0(thresholds, suffix)
+      out_id <- paste0(thresholds, "_", suffix)
+    
+      pos <- match(in_id, names(summary))
+      names(summary)[pos] <- out_id
+    }
+  }
+    
+
   # reorder variables and sort 
   
   var_id <- c(
@@ -821,18 +691,199 @@ symbology_OSPAR <- function(
 
 
 
-ctsm_collapse_AC <- function(x, type = c("real", "character")) {
-  type = match.arg(type)
+group_thresholds <- function(summary, threshold_groups, thresholds) {
+
+  # NB not all thresholds need to be specified in threshold_groups; only those
+  # where some grouping is going on
+    
+  # lots of error trapping to catch anything stupid!
+    
+  if (is.null(thresholds)) {
+    stop(
+      "threshold_groups specified but no thresholds used in the assessment", 
+      call. = FALSE
+    )
+  }    
+
+  if (is.null(names(threshold_groups))) {
+    stop(
+      "threshold_groups must be a named list", 
+      call. = FALSE
+    )
+  }
+
+  id <- names(threshold_groups) 
+  ok <- !duplicated(id)
+  if (!all(ok)) {
+    stop(
+      "cannot give different threshold_groups the same name",
+      call. = FALSE
+    )
+  }
+    
+  id <- unlist(threshold_groups)
+  ok <- !duplicated(id)
+  if (!all(ok)) {
+    id <- id[!ok]
+    id <- sort(unique(id))
+    stop(
+      "these thresholds are specified more than once in threshold_groups:\n",
+      paste(id, collapse = "; "),
+      call. = FALSE
+    )
+  }
+  
+  id <- unlist(threshold_groups)
+  ok <- id %in% thresholds
+  if (!all(ok)) {
+    id <- id[!ok]
+    stop(
+      "these thresholds are specified in threshold_groups but not ",
+      "used in the assessment:\n", 
+      paste(id, collapse = ", "), 
+      call. = FALSE
+    )
+  }
+  
+  
+  # check that no threshold is used as a group name for a 'different' group
+  # i.e. one that does not contain that threshold
+  
+  ok <- sapply(
+    names(threshold_groups), 
+    function(id) {
+      !id %in% thresholds || id %in% threshold_groups[[id]]
+    }  
+  )
+    
+  if (!all(ok)) {
+    id <- names(threshold_groups)[!ok]
+    stop(
+      "these threshold groups do not contain the threshold of the same name:\n ", 
+      paste(id, collapse = ", "), 
+      call. = FALSE
+    )
+  }
+  
+  
+  # add ungrouped thresholds to threshold_groups to keep everything simple!
+
+  ok <- thresholds %in% unlist(threshold_groups)
+  if (!all(ok)) {
+    extra <- thresholds[!ok]
+    names(extra) <- extra
+    extra <- as.list(extra)
+
+    threshold_groups <- c(threshold_groups, extra)
+  }
+
+
+  threshold_groups <- threshold_groups[sort(names(threshold_groups))]
+
+  
+  # set up type variables for each threshold
+
+  id <- paste0(thresholds, "_type")
+  summary[id] <- lapply(thresholds, function(x) {
+    x_id <- paste0(x, "_value")
+    dplyr::if_else(is.na(summary[[x_id]]), NA_character_, x)
+  })
+
+
+  suffix <- c("_type", "_value", "_diff", "_achieved", "_below") 
+  
+  for (group_id in names(threshold_groups)) {
+    
+    threshold_id <- threshold_groups[[group_id]]
+    
+    # if only one threshold, then the only thing to do is rename it if it
+    # has a different name to the group name
+    
+    if (length(threshold_id) == 1L && threshold_id != group_id) {
+      old_names <- paste0(threshold_id, suffix) 
+      new_names <- paste0(group_id, suffix)
+      
+      pos <- match(old_names, names(summary))
+      names(summary)[pos] <- new_names
+    }
+    
+    
+    if (length(threshold_id) > 1L) {
+
+      # check multiple thresholds in the group haven't been applied to the same
+      # time series
+      
+      id <- paste0(threshold_id, "_type")
+      ok <- apply(summary[id], 1, function(x) {sum(!is.na(x)) <= 1L})
+      if (!all(ok)) {
+        series_id <- summary$series[which.min(ok)]
+        stop(
+          "cannot create the ", group_id, " threshold group because more than ", 
+          "one component threshold\n", 
+          "has been applied to the same series. For example, see ",
+          "series:\n", series_id, 
+          call. = FALSE
+        )
+      }
+      
+      in_id <- paste0(threshold_id, "_type")
+      out_id <- paste0(group_id, "_type")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+      
+      in_id <- paste0(threshold_id, "_value")
+      out_id <- paste0(group_id, "_value")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+      
+      in_id <- paste0(threshold_id, "_diff")
+      out_id <- paste0(group_id, "_diff")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+      
+      in_id <- paste0(threshold_id, "_achieved")
+      out_id <- paste0(group_id, "_achieved")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+      
+      in_id <- paste0(threshold_id, "_below")
+      out_id <- paste0(group_id, "_below")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+
+      # remove redundant columns
+      
+      id <- setdiff(threshold_id, group_id)
+      if (length(id) >= 1L) {
+        id <- paste0(rep(id, each = length(suffix)), suffix)
+        summary <- dplyr::select(summary, - dplyr::all_of(id))
+      }
+      
+    }
+  }    
+  
+  # reorder column names 
+  
+  id <- paste0(rep(names(threshold_groups), each = length(suffix)), suffix)
+  
+  summary <- dplyr::relocate(
+    summary, 
+    dplyr::all_of(id), 
+    .after = climit_last_year
+  )
+
+  list(summary = summary, thresholds = names(threshold_groups))
+}
+  
+  
+group_thresholds_engine <- function(x) {
   if (all(is.na(x))) {
     out <- switch(
-      type, 
-      real = NA_real_, 
+      class(x), 
+      numeric = NA_real_, 
       character = NA_character_
     )
     return(out)
   }
   x <- x[!is.na(x)]
-  if (length(x) > 1) stop("multiple values not allowed")
+  if (length(x) > 1L) {
+    stop("multiple values not allowed")
+  }
   x
 }
 
