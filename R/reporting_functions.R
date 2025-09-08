@@ -1076,6 +1076,644 @@ report_assessment <- function(
 
 # OHAT ----
 
+write_hat <- function(assessments) {
+  
+  output_path <- file.path("output", "example_OSPAR", "hat")
+  
+  assessment_id <- names(assessments)
+  
+  wk <- lapply(assessment_id, function(id) {
+
+    assessment <- assessments[[id]]
+
+    out <- read.csv(
+      file.path("output", "example_OSPAR", paste0(id, "_summary.csv")), 
+      na.strings = "", 
+      fileEncoding = "UTF-8-BOM"
+    )
+    
+    var_id <- c(
+      "series", 
+      assessment$info$region$names, 
+      "country",           
+      "station_code", "station_name", "station_longname", 
+      "station_latitude", "station_longitude", 
+      "species", 
+      "determinand_group", "determinand", 
+      "filtration", "matrix", "basis", "unit", 
+      "sex", "method_analysis", "subseries", 
+      "shape", "colour", "shape_env", "colour_env", 
+      "shape_health", "colour_health"
+    )
+    
+    out <- dplyr::select(out, dplyr::any_of(var_id))
+    
+    out <- dplyr::rename(
+      out, 
+      # region = "OSPAR_region",
+      # subregion = "OSPAR_subregion",
+      latitude = "station_latitude",
+      longitude = "station_longitude",
+      measurement_type = "determinand_group"
+    )
+    
+    out <- dplyr::mutate(
+      out,
+      measurement_type = factor(
+        measurement_type, 
+        levels = c(
+          "Metals", "Organotins", 
+          "PAH parent compounds", "PAH alkylated compounds", "PAH metabolites", 
+          "Polybrominated diphenyl ethers", "Organobromines (other)", 
+          "Organofluorines", 
+          "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)",
+          "Pesticides", 
+          "Imposex", "Biological effects (other)"
+        )
+      ), 
+      # determinand = factor(determinand, levels = determinand_order)
+      determinand = factor(determinand)
+    )
+    
+    if (any(is.na(out$determinand))) {
+      stop("missing some determinand - investigate")
+    }
+    
+    out$measurement <- ctsm_get_info(
+      assessment$info$determinand, out$determinand, "common_name"
+    )
+    
+    if (id %in% "biota") {
+      out <- dplyr::mutate(
+        out,
+        species_latin = species,
+        family = ctsm_get_info(
+          assessment$info$species, species_latin, "species_group"
+        ), 
+        species = ctsm_get_info(
+          assessment$info$species, species_latin, "common_name"
+        ),
+        family = dplyr::recode(
+          family, 
+          Crustacean = "Shellfish", 
+          Bivalve = "Shellfish",
+          Gastropod = "Shellfish"
+        )
+      )
+    }
+    
+    if (id %in% "water") {
+      out <- dplyr::mutate(
+        out,
+        menu1_title = "Filtration",
+        menu1_entry = stringr::str_to_sentence(filtration),
+        menu2_title = NA_character_,
+        menu2_entry = NA_character_
+      )
+    }
+    
+    if (id %in% "sediment") {
+      out <- dplyr::mutate(
+        out,
+        menu1_title = "Sediment fraction",
+        menu1_entry = dplyr::recode(
+          matrix, 
+          SED20 = "<20 micron",
+          SED63 = "<63 micron",
+          SEDTOT = "Total sediment"
+        ),
+        menu2_title = NA_character_,
+        menu2_entry = NA_character_
+      )
+    }
+    
+    if (id %in% "biota") {
+      
+      out <- dplyr::mutate(
+        out,
+        menu1_title = dplyr::case_when(
+          measurement_type %in% "PAH metabolites" ~ "Chemical analysis",
+          determinand %in% "EROD" ~ "Tissue",
+          !(measurement_type %in% c("Imposex", "Biological effects (other)")) ~ 
+            "Tissue",
+          TRUE ~ NA_character_
+        ), 
+        menu1_entry = dplyr::case_when(
+          measurement_type %in% "PAH metabolites" ~ method_analysis,
+          determinand %in% "EROD" ~ matrix,
+          !(measurement_type %in% c("Imposex", "Biological effects (other)")) ~ 
+            matrix,
+          TRUE ~ NA_character_
+        ), 
+        menu2_title = dplyr::case_when(
+          determinand %in% "EROD" ~ "Sex",
+          !(measurement_type %in% 
+              c("PAH metabolites", "Imposex", "Biological effects (other)")) ~ 
+            "Animal grouping",
+          TRUE ~ NA_character_
+        ), 
+        menu2_entry = dplyr::case_when(
+          determinand %in% "EROD" ~ sex,
+          !(measurement_type %in% 
+              c("PAH metabolites", "Imposex", "Biological effects (other)")) ~ 
+            subseries,
+          TRUE ~ NA_character_
+        ), 
+        .matrix = ctsm_get_info(assessment$info$matrix, matrix, "name"), 
+        .matrix = stringr::str_to_sentence(.matrix),  
+        .matrix = dplyr::recode(
+          .matrix,
+          "Erythrocytes (red blood cells in vertebrates)" = "Red blood cells",
+          "Egg homogenate of yolk and albumin" = "Egg yolk & albumin", 
+          "Liver s9 fraction" = "Liver S9 fraction"
+        ), 
+        menu1_entry = dplyr::if_else(
+          menu1_title %in% "Tissue", 
+          .matrix, 
+          menu1_entry
+        ),
+        menu2_entry = dplyr::case_when(
+          menu2_title %in% "Sex" ~ dplyr::recode(
+            menu2_entry, "F" = "Female", "M" = "Male"
+          ),
+          menu2_title %in% "Animal grouping" & is.na(menu2_entry) ~ "All",
+          TRUE ~ menu2_entry
+        ),
+        menu2_entry = sub("_", " ", menu2_entry, fixed = TRUE),
+        .matrix = NULL
+      )
+      
+      
+      # only keep menu2_title and menu2_entry values for mammal_group
+      # if there is a mammal time series for that determinand
+      
+      det_id <- out |> 
+        dplyr::filter(
+          menu2_title %in% "Animal grouping",
+          ! menu2_entry %in% "All"
+        ) |> 
+        dplyr::pull(determinand) |> 
+        as.character() |> 
+        unique()
+      
+      det_id <- c(det_id, "EROD")
+      
+      out <- dplyr::mutate(
+        out, 
+        .change = determinand %in% det_id,
+        menu2_title = dplyr::if_else(.change, menu2_title, NA_character_),
+        menu2_entry = dplyr::if_else(.change, menu2_entry, NA_character_),
+        .change = NULL
+      )
+      
+    }
+    
+    
+    col_id = c(
+      "series", 
+      assessment$info$region$names, 
+      "country", 
+      "station_code", "station_name", "station_longname", "latitude", "longitude", 
+      "family", "species_latin", "species",
+      "measurement_type", "determinand", "measurement", 
+      "filtration", "matrix", "basis", "unit", 
+      "sex", "method_analysis", "subseries", 
+      "menu1_title", "menu1_entry", "menu2_title", "menu2_entry", 
+      "shape", "colour", "shape_env", "colour_env", "shape_health", "colour_health"
+    )
+    
+    col_id <- intersect(col_id, names(out))
+    
+    out <- out[col_id]
+    
+    
+    # order shape and colour so that less important time series are plotted first 
+    # (to avoid masking)
+    
+    if (id %in% c("biota", "water", "sediment")) {
+      
+      out <- out |> 
+        dplyr::mutate(
+          .shape = dplyr::recode(
+            shape, 
+            upward_triangle = "up", 
+            downward_triangle = "down",
+            large_filled_circle = "flat",
+            small_filled_circle = "mean",
+            small_open_circle = "other"
+          )
+        ) |> 
+        tidyr::unite(".ord", .shape, colour, remove = FALSE) |> 
+        dplyr::mutate(
+          .shape = NULL,
+          .ord = factor(
+            .ord,
+            levels = c(
+              paste("other", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              "mean_black", "flat_black", 
+              paste("mean", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("flat", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("down", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              paste("up", c("black", "blue", "orange", "green", "red"), sep = "_")
+            ), 
+            ordered = TRUE
+          )
+        )
+      
+      # out <- dplyr::arrange(
+      #   out, measurement_type, determinand, region, subregion, .ord, station_code)
+      
+      out <- dplyr::arrange(
+        out, measurement_type, determinand, .ord, station_code)
+      
+      out <- dplyr::mutate(out, .ord = NULL)
+      
+      out$order <- 1:nrow(out)
+      
+    }
+    
+    
+    if (id %in% "biota_env") {
+      
+      out <- out |> 
+        dplyr::mutate(
+          .shape = dplyr::recode(
+            shape_env, 
+            upward_triangle = "up", 
+            downward_triangle = "down",
+            large_filled_circle = "flat",
+            small_filled_circle = "mean",
+            small_open_circle = "other"
+          )
+        ) |> 
+        tidyr::unite(".ord", .shape, colour_env, remove = FALSE) |> 
+        dplyr::mutate(
+          .shape = NULL,
+          .ord = factor(
+            .ord,
+            levels = c(
+              paste("other", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              "mean_black", "flat_black", 
+              paste("mean", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("flat", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("down", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              paste("up", c("black", "blue", "orange", "green", "red"), sep = "_")
+            ), 
+            ordered = TRUE
+          )
+        )
+      
+      # out <- dplyr::arrange(
+      #   out, measurement_type, determinand, region, subregion, .ord, station_code)
+      
+      out <- dplyr::arrange(
+        out, measurement_type, determinand, .ord, station_code)
+
+      out <- dplyr::mutate(out, .ord = NULL)
+      
+      out$order_env <- 1:nrow(out)
+      
+      
+      out <- out |> 
+        dplyr::mutate(
+          .shape = dplyr::recode(
+            shape_health, 
+            upward_triangle = "up", 
+            downward_triangle = "down",
+            large_filled_circle = "flat",
+            small_filled_circle = "mean",
+            small_open_circle = "other"
+          )
+        ) |> 
+        tidyr::unite(".ord", .shape, colour_health, remove = FALSE) |> 
+        dplyr::mutate(
+          .shape = NULL,
+          .ord = factor(
+            .ord,
+            levels = c(
+              paste("other", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              "mean_black", "flat_black", 
+              paste("mean", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("flat", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("down", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              paste("up", c("black", "blue", "orange", "green", "red"), sep = "_")
+            ), 
+            ordered = TRUE
+          )
+        )
+      
+      # out <- dplyr::arrange(
+      #   out, measurement_type, determinand, region, subregion, .ord, station_code)
+      
+      out <- dplyr::arrange(
+        out, measurement_type, determinand, .ord, station_code)
+      
+      out <- dplyr::mutate(out, .ord = NULL)
+      
+      out$order_health <- 1:nrow(out)
+      
+      # out <- dplyr::arrange(
+      #   out, measurement_type, determinand, region, subregion, order_env, station_code)
+      
+      out <- dplyr::arrange(
+        out, measurement_type, determinand, order_env, station_code)
+
+      out <- dplyr::relocate(out, order_env, .after = colour_env)
+    }
+    
+    
+    outfile <- file.path(output_path, paste0(id, "_summary.csv"))
+    
+    readr::write_excel_csv(out, outfile, na = "")
+    
+    out
+  })
+  
+  names(wk) <- stringr::str_to_sentence(assessment_id)  
+
+  
+  # OHAT schema
+  
+  # measurement_type, menu1_title, menu2_title, health, order
+  
+  # identify health determinands with no AC
+  
+  # wk_id <- wk$Biota |>
+  #   group_by(determinand) |>
+  #   summarise(all_black = all(colour_health %in% "black"), .groups = "drop_last") |>
+  #   dplyr::filter(!all_black) |>
+  #   pull(determinand) |>
+  #   as.character()
+   
+  # get animal grouping in 'correct' order
+  
+  if ("biota" %in% assessment_id) {
+    wk_ag <- unique(wk$Biota$menu2_entry) |> na.omit() |> c()
+    wk_ag <- sort(wk_ag)
+    wk_ag <- c(setdiff(wk_ag, "All"), "All")
+    wk$Biota <- dplyr::mutate(
+      wk$Biota, 
+      menu2_entry = factor(menu2_entry, levels = wk_ag)
+    )
+  }
+    
+      
+  wk2 <- wk |> 
+    lapply(function(ls) {
+      if ("colour_health" %in% names(ls)) {
+        ls <- dplyr::mutate(
+          ls, 
+          health = if_else(determinand %in% wk_id, "TRUE", NA_character_)
+        )
+      }
+      id <- c("measurement_type", "measurement", "menu1_title", "menu2_title", "health")
+      ls |> 
+        dplyr::distinct(dplyr::across(any_of(id))) |> 
+        dplyr::mutate_if(is.factor, as.character) |> 
+        dplyr::mutate(order = 1:dplyr::n())
+    }) |> 
+    dplyr::bind_rows(.id = "compartment")
+  
+  readr::write_excel_csv(
+    wk2, 
+    file.path(output_path, "schema_1.csv"), 
+    na = ""
+  )
+  
+  # additionally determinand, menu1_entry, menu2_entry
+  
+  wk2 <- wk |> 
+    lapply(function(ls) {
+      if ("colour_health" %in% names(ls)) {
+        ls <- dplyr::mutate(ls, health = if_else(determinand %in% wk_id, "TRUE", NA_character_))
+      }
+      id <- c(
+        "measurement_type", "determinand", "measurement", "menu1_title", "menu1_entry",
+        "menu2_title", "menu2_entry", "health")
+      ls |> 
+        dplyr::distinct(across(any_of(id))) |> 
+        dplyr::arrange(
+          measurement_type, determinand, 
+          menu1_title, menu1_entry, menu2_title, menu2_entry
+        ) |> 
+        dplyr::mutate(
+          determinand = NULL, 
+          order = 1:dplyr::n()) |> 
+        dplyr::mutate_if(is.factor, as.character)
+    }) |> 
+    dplyr::bind_rows(.id = "compartment")
+  
+  readr::write_excel_csv(
+    wk2, 
+    file.path(output_path, "schema_2.csv"), 
+    na = ""
+  )
+  
+  
+  # biota gives species groups
+  # redefining family as a factor allows us to ge the ordering as desired
+  # - trouble with using foracts::fct_relevel is that it issues a warning if
+  # a level doesn't exist in the data
+
+  if ("biota" %in% assessment_id) {
+    
+    wk2 <- wk$Biota |> 
+      dplyr::distinct(measurement_type, family) |> 
+      dplyr::mutate(
+        family = factor(
+          as.character(family), 
+          c("Shellfish", "Fish", "Bird", "Mammal")
+        )
+      )  |> 
+      dplyr::arrange(measurement_type, family) |> 
+      dplyr::mutate_if(is.factor, as.character) |> 
+      dplyr::mutate(order = 1:dplyr::n())
+    
+    readr::write_excel_csv(
+      wk2, 
+      file.path(output_path, "schema_3.csv"), 
+      na = ""
+    )
+
+  }    
+  
+  
+  # legends and categories
+  
+  # determinand_order is used to order determinands how you want them to appear
+  # the code below is a hack to get things to work
+  
+  determinand_order <- lapply(assessments, function(x) {
+    unique(x$data$determinand)
+  })
+  
+  determinand_order <- unlist(determinand_order)
+  determinand_order <- sort(unique(determinand_order))
+
+  determinand_groups <- list(
+    levels = c(
+      "Metals", "Organotins", 
+      "PAH_parent", "PAH_alkylated", "Metabolites", 
+      "PBDEs", "Organobromines", 
+      "Organofluorines", 
+      "Chlorobiphenyls", "Dioxins", "Organochlorines",
+      "Effects"
+    ),  
+    labels = c(
+      "Metals", "Organotins", 
+      "PAH parent compounds", "PAH alkylated compounds", "PAH metabolites", 
+      "Polybrominated diphenyl ethers", "Organobromines (other)", 
+      "Organofluorines", 
+      "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)",
+      "Biological effects (other)"
+    )
+  )
+  
+    
+  
+  wk <- ctsm_OHAT_legends(
+    assessments = assessments,
+    determinandGroups = determinand_groups,
+    determinands = determinand_order,
+    symbology = list(
+      biota = list(
+        below = c(
+          "BAC" = "blue", "NRC" = "blue", "EAC" = "green", "FEQG" = "green",
+          "LRC" = "green", "QSsp" = "green"
+        ),
+        above = c(
+          "BAC" = "orange", "NRC" = "orange", "EAC" = "red", "FEQG" = "red",
+          "LRC" = "red", "QSsp" = "red"
+        ),
+        none = "black"
+      ),
+      sediment = list(
+        below = c(
+          "BAC" = "blue", "ERL" = "green", "EAC" = "green", "EQS" = "green", 
+          "FEQG" = "green"
+        ),
+        above = c(
+          "BAC" = "orange", "ERL" = "red", "EAC" = "red", "EQS" = "red", 
+          "FEQG" = "red"
+        ),
+        none = "black"
+      ),
+      water = list(
+        below = c("EQS" = "green"), 
+        above = c("EQS" = "red"), 
+        none = "black"
+      )
+    ),    
+    regionalGroups = list(
+      biota = c(
+        "Metals", "PAH parent compounds", "PAH metabolites", "Polychlorinated biphenyls", 
+        "Polybrominated diphenyl ethers", "Imposex"
+      ),
+      sediment = c(
+        "Metals", "PAH parent compounds", "Polychlorinated biphenyls", 
+        "Polybrominated diphenyl ethers", "Organotins"
+      )
+    ),
+    distanceGroups = list(
+      biota = c("Metals", "PAH parent compounds"),
+      sediment = c("Metals", "PAH parent compounds")
+    ),
+    path = output_path
+  )
+  
+  
+  # wk_health <- ctsm_OHAT_legends(
+  #   assessments = list(biota = biota_assessment),
+  #   determinandGroups = determinand_groups,
+  #   determinands = determinand_order, 
+  #   symbology = list(
+  #     biota = list(
+  #       below = c("MPC" = "green", "QShh" = "green"),
+  #       above = c("MPC" = "red", "QShh" = "red"),
+  #       none = "black"
+  #     )
+  #   ),
+  #   regionalGroups = list(
+  #     Biota = c(
+  #       "Metals", "PAH parent compounds", "PAH metabolites", "Polychlorinated biphenyls", 
+  #       "Polybrominated diphenyl ethers", "Imposex"
+  #     ),
+  #     Sediment = c(
+  #       "Metals", "PAH parent compounds", "Polychlorinated biphenyls", 
+  #       "Polybrominated diphenyl ethers", "Organotins"
+  #     )
+  #   ),
+  #   distanceGroups = list(
+  #     Biota = c("Metals", "PAH parent compounds"),
+  #     Sediment = c("Metals", "PAH parent compounds")
+  #   ),
+  #   path = output_path
+  # )
+  
+  
+  # ad-hoc corrections
+  
+  wk$legends <- wk$legends |> 
+    dplyr::mutate(
+      .biota_HG = Compartment == "Biota" & Determinand_code == "HG",
+      Label = dplyr::case_when(
+        .biota_HG & Label == "below BAC"  ~ "below BAC or NRC",
+        .biota_HG & Label == "below QSsp" ~ "below QSsp or LRC",
+        .biota_HG & Label == "above QSsp" ~ "above QSsp or LRC",
+        TRUE                              ~ Label
+      ),
+      Tooltip = dplyr::if_else(
+        .biota_HG & Label == "below BAC or NRC", 
+        "background or no-risk concentrations", 
+        Tooltip
+      )
+    ) |>
+    dplyr::select(- .biota_HG)
+  
+  
+  # wk$legends <- dplyr::bind_rows(
+  #   list("Environmental" = wk$legends, "Human health" = wk_health$legends),
+  #   .id = "Threshold"
+  # )
+  
+  # wk$legends <- wk$legends |> 
+  #   dplyr::mutate(
+  #     Determinand_code = factor(Determinand_code) |> forcats::fct_inorder()
+  #   ) |> 
+  #   dplyr::arrange(Compartment, Determinand_code, Threshold) 
+  
+  wk$legends <- wk$legends |> 
+    dplyr::mutate(
+      Determinand_code = factor(Determinand_code) |> forcats::fct_inorder()
+    ) |> 
+    dplyr::arrange(Compartment, Determinand_code) 
+
+  wk$legends <- dplyr::select(wk$legends, Compartment, everything())
+  
+  wk$legends$order <- 1:nrow(wk$legends)
+  
+  names(wk$legends) <- tolower(names(wk$legends))
+  
+  readr::write_excel_csv(
+    wk$legends, 
+    file.path(output_path, "legends.csv"), 
+    na = ""
+  )
+  
+  names(wk$help) <- tolower(names(wk$help))
+  
+  readr::write_excel_csv(
+    wk$help, 
+    file.path(output_path, "help_and_information.csv"), 
+    na = ""
+  )
+  
+  invisible()
+  
+}
+
+
+
 #' @export
 ctsm_OHAT_legends <- function(
   assessments, determinandGroups, determinands, symbology, 
@@ -1118,10 +1756,10 @@ ctsm_OHAT_legends <- function(
     ctsm_OHAT_add_legends(legends, classColour, regionalGroups, distanceGroups, assessment$info)
   })
   
-  legends <- lapply(out, "[[", "legends") %>% 
+  legends <- lapply(out, "[[", "legends") |> 
     dplyr::bind_rows(.id = "Compartment")
   
-  help <- lapply(out, "[[", "help") %>% 
+  help <- lapply(out, "[[", "help") |> 
     dplyr::bind_rows(.id = "Compartment")
   
   list(legends = legends, help = help)
@@ -1175,8 +1813,8 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
     )
   )
 
-  standard_shape <- standard_shape %>% 
-    dplyr::bind_rows() %>% 
+  standard_shape <- standard_shape |> 
+    dplyr::bind_rows() |> 
     as.data.frame()
   
   standard_shape <- list(low = standard_shape, high = standard_shape)
