@@ -223,6 +223,9 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @param symbology Experimental. Specifies the output symbology. Currently
 #'   assumes the thresholds are presented in increasing magnitude of 
 #'   environmental risk.
+#' @param symbology_control Experimental. Specifies the output symbology. 
+#'   Currently assumes the thresholds are presented in increasing magnitude of 
+#'   environmental risk.
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
 #'   to label the determinands. The life of this argument is limited.
 #' @param append Logical. `FALSE` (the default) overwrites any existing summary
@@ -240,6 +243,7 @@ write_summary_table <- function(
   collapse_AC = lifecycle::deprecated(), 
   extra_output = NULL, 
   symbology = NULL, 
+  symbology_control = list(),
   determinandGroups = NULL, 
   append = FALSE) {
 
@@ -261,6 +265,8 @@ write_summary_table <- function(
 
   # group thresholds to simplify summary table
   # also updates list of thresholds to work with in the symbology stage
+  # note that the names of the thresholds might have changed so can no longer
+  #   be picked up from info$AC
 
   thresholds <- harsat_obj$info$AC
 
@@ -270,22 +276,25 @@ write_summary_table <- function(
     thresholds <- tmp$thresholds
   }
   
-    
+
   # apply symbology - shape and colour of plotting symbols
 
-  # thresholds that are used in the symbology must have an appropriate 
-  # class colour
-  
-  if (!is.null(symbology) && !is.null(thresholds)) {
-    stopifnot(
-      !is.null(symbology$colour),
-      sort(names(symbology$colour$below)) == sort(names(symbology$colour$above)), 
-      names(symbology$colour$below) %in% thresholds, 
-      "none" %in% names(symbology$colour)
-    )
+  if (!is.null(symbology)) {
+    
+    # add thresholds to control structure 
+    # safer approach than picking up (guessing) them from the summary names
+    
+    if ("threshold_id" %in% names(symbology_control)) {
+      stop(
+        "\nsymbology control: threshold_id must not be specified by user", 
+        call. = FALSE
+      )
+    }
+    
+    symbology_control$threshold_id <- thresholds
+    
+    summary <- symbology_default(summary, harsat_obj$info, symbology_control)
   }
-  
-  summary <- symbology_OSPAR(summary, harsat_obj$info, symbology)
 
   summary$method <- NULL
   
@@ -551,113 +560,149 @@ make_summary_table <- function(harsat_obj, extra_output, determinandGroups) {
 }
 
 
-#' @export
-symbology_OSPAR <- function(
+symbology_default <- function(
     summary, 
     info, 
-    symbology, 
-    alpha = 0.05) {
+    control = list()) {
   
   # silence non-standard evaluation warnings
-  
+
   .data <- NULL
   
+
+  # set up and modify control structures
+  
+  control = symbology_default_cntrl(control)
+    
   
   # shape = trend 
   
   # a trend is estimated unless method is "none" or "mean"
   # note, method is inconsistently applied apart from "none" and "mean"; look 
-  #   at imposex assessments 
+  #   at imposex assessments - this needs to be resolved
   
-  # focus on 'recent' trends, based p_recent_change 
+  # trend can either be 'overall', based on p_overal_change, or 'recent', based
+  #   on 'p_recent_change' 
   # note p_recent_change might not exist even if a trend has been fitted to the 
   #   whole time series if there are too few years of data in the recent window
-  
-  # would be better to do all the calculations here so that folk can 
-  # choose the reporting window that they want
-  
+
+  trend_id <- paste0(control$change, "_change")
+  trend_p <- paste0("p_", trend_id)
+    
   summary <- dplyr::mutate(
     summary,
     shape = dplyr::case_when(
-      .data$method %in% "none"       ~ "small_open_circle",
-      .data$method %in% "mean"       ~ "small_filled_circle",
-      is.na(.data$p_recent_change)   ~ "large_filled_circle",
-      .data$p_recent_change >= alpha ~ "large_filled_circle",
-      .data$recent_change > 0        ~ "upward_triangle",
-      .data$recent_change < 0        ~ "downward_triangle"
+      .data$method %in% "none"           ~ control$shape$none,
+      .data$method %in% "mean"           ~ control$shape$mean,
+      is.na(.data[[trend_p]])            ~ control$shape$flat,
+      .data[[trend_p]] >= control$alpha  ~ control$shape$flat,
+      .data[[trend_id]] > 0              ~ control$shape$up,
+      .data[[trend_id]] < 0              ~ control$shape$down
     )
   )
   
   
   # colour = status
   
-  # colour based on 
-  # - upper confidence limit (nyfit > 2 or, for VDS, individual measurements) 
-  # - meanly (nyfit <= 2)
+  # status is based on  
+  # - upper confidence limit (if a parametric model has been fitted) 
+  # - mean_last_year (otherwise)
   
-  # get the names of the variables which contain the difference between the 
-  # meanly and the AC
-  
-  if (!is.null(symbology)) {
+  if (!is.null(control$colour)) {
     
-    classColour <- symbology$colour
+    thresholds <- names(control$colour)
     
-    AC <- names(classColour$below)
-    
-    ACdiff <- paste0(AC, "_diff")
-    
-    
-    # when good_status equates to low concentrations, negative ACdiff is good
-    #   since ACdiff = clLY - AC < 0
-    # when good status equates to high concentrations, positive ACdiff is good
-    # to make colour calculation 'simple' change sign on ACdiff when 
-    #    goodStatus == high
-    
+    # need to ensure thresholds are ordered correctly from best to worst status
+    # gets complicated if good_status equates to high concentrations for some
+    #   determinands; to get around this simply change sign on the value of the 
+    #   threshold when good_status = high
+
     good_status <- ctsm_get_info(
       info$determinand, 
       summary$determinand, 
       "good_status"
     )
     
-    wk <- summary[ACdiff]
-    wk[] <- lapply(wk, "*", ifelse(good_status == "low", 1, -1))
+    t_value <- paste0(thresholds, "_value")    
+    
+    wk <- summary[t_value]
+    wk[] <- lapply(wk, "*", dplyr::if_else(good_status == "low", 1, -1))
+    
+    ok <- apply(wk, 1, function(x) {
+      if (all(is.na(x))) return(TRUE)
+      x <- x[!is.na(x)]
+      length(x) == 1L || all(diff(x) > 0) 
+    }) 
+    
+    if (!all(ok)) {
+      stop(
+        "/nsymbology control:\n",
+        "to specify the colour correctly, the thresholds must be ordered from\n",
+        "best to worst status;\n",
+        "if this has already been done, then this error suggests there are\n",
+        "inconsistencies in the threshold values applied to this assessment",
+        call. = FALSE
+      )
+    }   
+    
+    # when good_status equates to low concentrations, negative t_diff is good
+    #   since t_diff = clLY - threshold < 0
+    # when good status equates to high concentrations, positive t_diff is good
+    # to make colour calculation 'simple' change sign on t_diff when 
+    #    goodStatus == high
+    
+    t_diff <- paste0(thresholds, "_diff")
+    
+    wk <- summary[t_diff]
+    wk[] <- lapply(wk, "*", dplyr::if_else(good_status == "low", 1, -1))
     
     summary$colour <- apply(wk, 1, function(x) {
       
-      if (all(is.na(x))) return(classColour$none)
+      if (all(is.na(x))) return(control$no_threshold)
       
-      AC <- AC[!is.na(x)]
+      thresholds <- thresholds[!is.na(x)]
       x <- x[!is.na(x)]
       
-      if (any(x < 0)) classColour$below[AC[which.max(x < 0)]]
-      else classColour$above[AC[length(x)]]
+      if (any(x < 0)) {
+        id <- thresholds[which.max(x < 0)]
+        control$colour[[id]]$below
+      } else {  
+        id <- thresholds[length(x)]
+        control$colour[[id]]$above
+      }
+      
     })  
-    
 
   } else {
     
-    summary$colour <- NA_character_
+    summary$colour <- control$no_threshold
     
   }
   
   
   # adjust shape and colour for nonparametric test method = "none" 
   
-  if (!is.null(symbology)) {
+  if (control$adjust_nonparam & !is.null(control$colour)) {
     
-    # get the names of the variables which contain the result of the 
-    # non-parametric test for each AC
+    # get the variables that contain the non-parametric test result 
+    # note these might not exist if e.g. only biological effects have been
+    # assessed
+
+    t_below <- paste0(thresholds, "_below")
     
-    ACbelow <- paste0(AC, "_below")
+    ok <- t_below %in% names(summary)
     
-    if (any(ACbelow %in% names(summary))) {    
+    if (any(ok)) {
       
-      wk <- summary[ACbelow]
+      wk <- dplyr::select(summary, dplyr::any_of(t_below))
+      
+      # adjust good_status = high as before
+      
       wk[] <- lapply(wk, function(x) {
-        
-        ok <- !is.na(x) & good_status == "high"
-        if (any(ok))
-          x[ok] <- ifelse(x[ok] == "below", "above", "below")
+        id <- !is.na(x) & good_status == "high"
+        if (any(id)) {
+          x[id] <- dplyr::if_else(x[id] == "below", "above", "below")
+        }
         x
       })
       
@@ -665,17 +710,23 @@ symbology_OSPAR <- function(
         
         if (all(is.na(x))) return(NA_character_)
         
-        AC <- AC[!is.na(x)]
+        thresholds <- thresholds[!is.na(x)]
         x <- x[!is.na(x)]
         
-        if (any(x == "below")) classColour$below[AC[which.max(x == "below")]]
-        else classColour$above[AC[length(x)]]
+        if (any(x == "below")) {
+          id <- thresholds[which.max(x == "below")]
+          control$colour[[id]]$below
+        } else {
+          id <- thresholds[length(x)]
+          control$colour[[id]]$above
+        }
       })  
       
-      # id <- with(summary, nyfit <= 2 & nyall > 2 & !is.na(wk))
+      # only apply this where method = "none" - i.e. no parametric model
+      
       id <- summary$method %in% "none" & !is.na(wk)
       summary$colour[id] <- wk[id]
-      summary$shape[id] <- "small_filled_circle"
+      summary$shape[id] <- control$shape$mean
     }
     
   }
@@ -687,6 +738,132 @@ symbology_OSPAR <- function(
   )
     
   summary
+}
+
+
+symbology_default_cntrl <- function(control) {
+
+  default <- list(
+    # trends
+    shape = list(
+      none = "small_open_circle", 
+      mean = "small_filled_circle", 
+      flat = "large_filled_circle", 
+      up = "upward_triangle", 
+      down = "downward_triangle"
+    ),
+    change = "recent", 
+    alpha = 0.05,
+
+    # status
+    colour = NULL,
+    threshold_id = NULL,
+    no_threshold = "black",
+    
+    # other
+    adjust_nonparam = TRUE
+  )
+  
+  control <- modifyList(default, control, keep.null = TRUE)
+
+  
+  # trend  
+
+  ok <- length(control$change) == 1L && 
+    control$change %in% c("recent", "overall")
+  if (!ok) {
+    stop(
+      "\nsymbology_control - change:\n", 
+      "change must be either 'recent' or 'overall'", 
+      call. = FALSE
+    )
+  }
+  
+  ok <- length(control$shape) == 5L &&
+    all(c("none", "mean", "flat", "up", "down") %in% names(control$shape))
+  if (!ok ) {
+    stop(
+      "\nsymbology_control - shape:\n", 
+      "shape must be a list of 5 elements with names 'none', 'mean', 'flat'\n", 
+      "'up', 'down'; each element of the list must be a character string", 
+      call. = FALSE
+    )
+  }
+
+  
+  if (control$alpha <= 0 || control$alpha > 0.5) {
+    stop(
+      "\nsymbology_control - alpha:\n", 
+      "alpha must be numeric and between 0 and 0.5; \n", 
+      "typically it would be 0.1, 0.05 or 0.01", 
+      call. = FALSE
+    )
+  }  
+  
+  
+  # status
+
+  ok <- length(control$no_threshold) == 1L && is.character(control$no_threshold)
+  if (!ok) {
+    stop(
+      "\nsymbology_control - no_threshold:\n", 
+      "no_threshold must be a character string giving the colour used for time\n",
+      "series with no thresholds; to omit these time series from the colour\n", 
+      "symbology, use 'no_threshold = NA_character_'", 
+      call. = FALSE
+    )
+  }
+  
+  
+  if (!is.null(control$colour)) {
+    
+    if (is.null(control$threshold_id)) {
+      stop(
+        "\nsymbology_control - colour:\n", 
+        "colour has been specified, but no thresholds were used", 
+        call. = FALSE
+      )
+    }
+    
+    ok <- all(names(control$colour) %in% control$threshold_id)
+    if (!ok) {
+      stop(
+        "\nsymbology_control - colour:\n", 
+        "the thresholds are not all recognised; if the thresholds have been \n",
+        "grouped (using argument 'threshold_group'), then check the \n",
+        "thresholds specified in colour match the group names",
+        call. = FALSE
+      )
+    }
+    
+    ok <- sapply(
+      control$colour, 
+      function(x) identical(sort(names(x)), c("above", "below"))
+    )
+    if (!all(ok)) {
+      stop(
+        "\nsymbology_control - colour:\n", 
+        "each threshold must have two colours specified as a vector with \n",
+        "names `below` and `above` (in either order)",
+        call. = FALSE
+      )
+    }
+
+    
+    not_ok <- control$no_threshold %in% unlist(control$colour)
+    if (not_ok) {
+      stop(
+        "\nsymbology_control - no_threshold and colour:\n", 
+        "no_threshold must be different to the colours specified for each \n", 
+        "threshold", 
+        call. = FALSE
+      )
+    }
+
+  }
+
+
+  control
 }
 
 

@@ -13,6 +13,7 @@ write_summary_table(
   collapse_AC = lifecycle::deprecated(),
   extra_output = NULL,
   symbology = NULL,
+  symbology_control = list(),
   determinandGroups = NULL,
   append = FALSE
 )
@@ -49,6 +50,10 @@ seven power metrics computed for lognormally distributed data. Defaults to
 
 \item{symbology}{Experimental. Specifies the output symbology. Currently
 assumes the thresholds are presented in increasing magnitude of
+environmental risk.}
+
+\item{symbology_control}{Experimental. Specifies the output symbology.
+Currently assumes the thresholds are presented in increasing magnitude of
 environmental risk.}
 
 \item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}

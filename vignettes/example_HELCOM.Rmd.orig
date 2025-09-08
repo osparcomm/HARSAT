@@ -216,15 +216,10 @@ likely to evolve, so we'll leave their explanation for the next release.
 ```{r helcom-water-summary}
 write_summary_table(
   water_assessment,
-  determinandGroups = list(
-    levels = c("Metals", "Organotins", "Organofluorines"), 
-    labels = c("Metals", "Organotins", "Organofluorines")
-  ),
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c(EQS = "green"), 
-      above = c(EQS = "red"), 
-      none = "black"
+      EQS = list(below = "green", above = "red")
     )
   ),
   output_dir = summary.dir
@@ -316,18 +311,17 @@ external data) or print out the summary table
 ```{r helcom-sediment-summary}
 write_summary_table(
   sediment_assessment,
+  symbology = "default",
+  symbology_control = list(
+    colour = list(
+      EQS = list(below = "green", above = "red")
+    )
+  ),
   determinandGroups = webGroups <- list(
     levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines"),  
     labels = c(
       "Metals", "Organotins", "Polycyclic aromatic hydrocarbons",  
       "Organobromines", "Organobromines" 
-    )
-  ),
-  symbology = list(
-    colour = list(
-      below = c(EQS = "green"), 
-      above = c(EQS = "red"), 
-      none = "black"
     )
   ),
   output_dir = summary.dir
@@ -464,6 +458,13 @@ And that's it :)
 ```{r helcom-biota-summary}
 write_summary_table(
   biota_assessment,
+  threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),
+  symbology = "default",
+  symbology_control = list(
+    colour = list(
+      EQS = list(below = "green", above = "red")
+    )
+  ),
   determinandGroups = list(
     levels = c(
       "Metals", "PAH_parent", "Metabolites", "PBDEs", "Organobromines", 
@@ -475,14 +476,6 @@ write_summary_table(
       "PCBs and dioxins", "PCBs and dioxins"
     )
   ),
-  threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),
-  symbology = list(
-    colour = list(
-      below = c(EQS = "green"),
-      above = c(EQS = "red"),
-      none = "black"
-    )
-  ),  
   output_dir = summary.dir
 )
 ```

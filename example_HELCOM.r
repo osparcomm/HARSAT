@@ -152,16 +152,9 @@ check_assessment(water_assessment)
 
 write_summary_table(
   water_assessment,
-  determinandGroups = list(
-    levels = c("Metals", "Organotins", "Organofluorines"), 
-    labels = c("Metals", "Organotins", "Organofluorines")
-  ),
-  symbology = list(
-    colour = list(
-      below = c(EQS = "green"), 
-      above = c(EQS = "red"), 
-      none = "black"
-    )
+  symbology = "default",
+  symbology_control = list(
+    colour = list(EQS = list(below = "green", above = "red"))
   ),
   output_dir = file.path("output", "example_HELCOM")
 )
@@ -246,12 +239,9 @@ write_summary_table(
       "Organobromines", "Organobromines" 
     )
   ),
-  symbology = list(
-    colour = list(
-      below = c(EQS = "green"), 
-      above = c(EQS = "red"), 
-      none = "black"
-    )
+  symbology = "default",
+  symbology_control = list(
+    colour = list(EQS = list(below = "green", above = "red"))
   ),
   output_dir = file.path("output", "example_HELCOM")
 )
@@ -355,6 +345,13 @@ check_assessment(biota_assessment)
 
 write_summary_table(
   biota_assessment,
+  threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),
+  symbology = "default",
+  symbology_control = list(
+    colour = list(
+      EQS = list(below = "green", above = "red")
+    )
+  ),
   determinandGroups = list(
     levels = c(
       "Metals", "PAH_parent", "Metabolites", "PBDEs", "Organobromines", 
@@ -364,14 +361,6 @@ write_summary_table(
       "Metals", "PAH compounds and metabolites", "PAH compounds and metabolites",
       "Organobromines", "Organobromines", "Organofluorines", 
       "PCBs and dioxins", "PCBs and dioxins"
-    )
-  ),
-  threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),
-  symbology = list(
-    colour = list(
-      below = c(EQS = "green"),
-      above = c(EQS = "red"),
-      none = "black"
     )
   ),
   output_dir = file.path("output", "example_HELCOM")

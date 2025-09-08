@@ -116,11 +116,10 @@ write_summary_table(
       "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
     )
   ),
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c(EQS = "green"), 
-      above = c(EQS = "red"), 
-      none = "black"
+      EQS = list(below = "green", above = "red")
     )
   ),
   output_dir = summary.dir
@@ -228,11 +227,11 @@ write_summary_table(
     BAC = "BAC", 
     EAC = c("EAC", "ERL", "EQS", "FEQG")
   ),
-  symbology = list(
+  symbology = "default", 
+  symbology_control = list(
     colour = list(
-      below = c(BAC = "blue", EAC = "green"), 
-      above = c(BAC = "orange", EAC = "red"), 
-      none = "black"
+      BAC = list(below = "blue", above = "orange"),
+      EAC = list(below = "green", above = "red")
     )
   ),
   output_dir = summary.dir
@@ -409,11 +408,11 @@ write_summary_table(
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
   ),
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c(BAC = "blue", EAC = "green"), 
-      above = c(BAC = "orange", EAC = "red"), 
-      none = "black"
+      BAC = list(below = "blue", above = "orange"),
+      EAC = list(below = "green", above = "red")
     )
   ),
   output_dir = summary.dir

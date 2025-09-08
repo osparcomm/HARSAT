@@ -57,11 +57,10 @@ write_summary_table(
       "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
     )
   ),
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c(EQS = "green"), 
-      above = c(EQS = "red"), 
-      none = "black"
+      EQS = list(below = "green", above = "red")
     )
   ),
   output_dir = file.path("output", "example_OSPAR")
@@ -150,11 +149,11 @@ write_summary_table(
     BAC = "BAC", 
     EAC = c("EAC", "ERL", "EQS", "FEQG")
   ),
-  symbology = list(
+  symbology = "default", 
+  symbology_control = list(
     colour = list(
-      below = c(BAC = "blue", EAC = "green"), 
-      above = c(BAC = "orange", EAC = "red"), 
-      none = "black"
+      BAC = list(below = "blue", above = "orange"),
+      EAC = list(below = "green", above = "red")
     )
   ),
   output_dir = file.path("output", "example_OSPAR")
@@ -291,11 +290,11 @@ write_summary_table(
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
   ),
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c(BAC = "blue", EAC = "green"), 
-      above = c(BAC = "orange", EAC = "red"), 
-      none = "black"
+      BAC = list(below = "blue", above = "orange"),
+      EAC = list(below = "green", above = "red")
     )
   ),
   output_file = "biota_summary_env.csv",
@@ -313,11 +312,10 @@ write_summary_table(
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
   ),
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c(HQS = "green"),
-      above = c(HQS = "red"),
-      none = "black"
+      HQS = list(below = "green", above = "red")
     )
   ),
   output_file = "biota_summary_health.csv",
