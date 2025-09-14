@@ -154,7 +154,7 @@ write_summary_table(
     colour = list(
       BAC = list(below = "blue", above = "orange"),
       EAC = list(below = "green", above = "red")
-    )
+    ), 
   ),
   output_dir = file.path("output", "example_OSPAR")
 )
@@ -290,14 +290,20 @@ write_summary_table(
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
   ),
-  symbology = "default",
+  symbology = list(env = "default", health = "default"), 
   symbology_control = list(
-    colour = list(
-      BAC = list(below = "blue", above = "orange"),
-      EAC = list(below = "green", above = "red")
+    env = list(
+      colour = list(
+        BAC = list(below = "blue", above = "orange"),
+        EAC = list(below = "green", above = "red")
+      ), 
+      names = list(shape = "shape_env", colour = "colour_env")
+    ),
+    health = list(
+      colour = list(HQS = list(below = "green", above = "red")), 
+      names = list(shape = "shape_health", colour = "colour_health")
     )
   ),
-  output_file = "biota_summary_env.csv",
   output_dir = file.path("output", "example_OSPAR")
 )
 
