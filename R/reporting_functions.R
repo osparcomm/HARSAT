@@ -220,18 +220,219 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #'   to be included in the output. Currently only recognises "power" to give the 
 #'   seven power metrics computed for lognormally distributed data. Defaults to 
 #'   `NULL`; i.e. no extra output. 
-#' @param symbology Experimental. Specifies the output symbology. Currently
-#'   assumes the thresholds are presented in increasing magnitude of 
-#'   environmental risk.
-#' @param symbology_control Experimental. Specifies the output symbology. 
-#'   Currently assumes the thresholds are presented in increasing magnitude of 
-#'   environmental risk.
+#' @param symbology Experimental. A character string "default" or a user-defined 
+#'   function that specifies a symbology typically used to characterise the 
+#'   patterns of change in and the status of each time series. Defaults to 
+#'   `NULL`; i.e. no symbology. Multiple symbologies can be applied. See 
+#'   details.
+#' @param symbology_control Experimental. A named list of control options for 
+#'   the symbology. See details.
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
-#'   to label the determinands. The life of this argument is limited.
+#'   to rename the existing determinand groups. The life of this argument is 
+#'   limited.
 #' @param append Logical. `FALSE` (the default) overwrites any existing summary
 #'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
 #' @returns a summary object, when `export` is `FALSE`
+#' 
+#' @section Default symbology:
+#' 
+#' `symbology = "default"` calls a pre-defined symbology that generates a 
+#' 'shape' and a 'colour' to characterise the status of each time series. Its
+#' behaviour is controlled using `symbology_control`, a named list with the 
+#' following elements:
+#'
+#' * `shape`: a list with names `none`, `mean`, `flat`, `up`, `down` giving the
+#' shape associated with each pattern of change. Here, `none` corresponds to 
+#' insufficient data to fit a parametric model; `mean` to sufficient data to fit
+#' a parametric model but not to assess for trends; `flat` to no significant 
+#' change in level (concentration) over time; `up` to a #' significant increase 
+#' in level over time; `down` to a significant decrease in level over time. 
+#' Their default values are `"small_open_circle"`, 
+#' `"small_filled_circle"`, `"large_filled_circle"`, `"upward_triangle"`,
+#' `"downward_triangle"`
+#' * `alpha` is the size of the test for change; default = `0.05`
+#' * `change` determines whether the change is based on the recent time window 
+#' (typically the last twenty years) or the whole time series; options 
+#' `"recent"` (default) and `"overall"` 
+#' * `colour` (default `NULL`) is a named list that characterises the status of
+#' a time series based on specified thresholds. The list names must match 
+#' (a subset of) the names of the thresholds used in the assessment or, if the 
+#' thresholds have been grouped, the group names. Each threshold must have two 
+#' elements: `below` gives the colour if the time series is 
+#' significantly below the threshold (p < 0.05); `above` gives the colour 
+#' otherwise. If multiple thresholds are used, they must be ordered from best
+#' to worst status. See examples
+#' * `no_threshold` (default `"black"`) is the colour used when no thresholds are
+#' applied to a time series. Another option might be to use `NA_character_`
+#' * `adjust_nonparam` (default `TRUE`) is a logical that allows the symbology
+#' to be adjusted for short time series (often dominated by less-than values)
+#' where a non-parametric test for status can be applied
+#' * `names` (default `list(colour = "colour", shape = "shape")`) allows the 
+#' names of the symbology columns in the summary table to be adjusted; this can
+#' be important if multiple symbologies are applied
+#' 
+#' @section Custom symbologies:
+#' 
+#' Users can apply custom symbologies by letting `symbology` be a user-supplied
+#' function of the form `fn(summary, info, control)` where:
+#' 
+#' * `summary` is the summary table before applying the symbology; for 
+#' convenience, there is an additional column `method` which doesn't 
+#' appear in the final summary table but takes, in particular, values `"none"` 
+#' and `"mean"` corresponding respectively to no parametric model and 
+#' insufficient data to fit a trend (see `shape` above)
+#' * `info` contains the contents of `harsat_obj$info`; i.e. all the reference
+#' tables and additional information about the assessment. For convenience,
+#' it also contains a temporary element `.threshold_group` which has the names
+#' of the threshold groups (which can differ from the thresholds themselves)
+#' * `control` contains `symbology_control` and allows the user to pass 
+#' additional information to the function
+#' 
+#' The output of the function must be a data frame with one column called
+#' `series` that contains the series identifier of each time series 
+#' (not necessarily in the same order as the summary table) and  
+#` the remaining columns giving the symbology. There can be any number of 
+#' symbology columns, but they must not share any of the existing names in the 
+#' summary table.
+#' 
+#' See the examples for more inspiration.
+#' 
+#' @section Multiple symbologies:
+#' 
+#' Multiple symbologies can be applied by specifying a named list whch can be 
+#' a mixture of default symbologies and custom symbologies. `symbology_control`
+#' must then be a named list (with the same names) giving control information 
+#' for each symbology. It is important to ensure that each symbology gives 
+#' output columns with different names. See examples.
+#' 
+#' @examples
+#' 
+#' # Default symbology with one threshold: the EQS. The colour will be "green"
+#' # if the time series is significantly below the EQS in the last monitoring
+#' # year and "red" otherwise 
+#' \dontrun{
+#' write_summary_table(
+#'   water_assessment,
+#'   symbology = "default",
+#'   symbology_control = list(
+#'     colour = list(EQS = list(below = "green", above = "red"))
+#'   )
+#' )
+#' }
+#'
+#' # Now applied using the overall change instead of the recent change.
+#' \dontrun{
+#' write_summary_table(
+#'   water_assessment,
+#'   symbology = "default",
+#'   symbology_control = list(
+#'     colour = list(EQS = list(below = "green", above = "red")),
+#'     change = "overall"
+#'   )
+#' )
+#' }
+#' 
+#' # If we only want to change one shape, then we only need to specify that one
+#' \dontrun{
+#' write_summary_table(
+#'   water_assessment,
+#'   symbology = "default",
+#'   symbology_control = list(
+#'     colour = list(EQS = list(below = "green", above = "red")),
+#'     shape = list(flat = "square")
+#'   )
+#' )
+#' }
+#'
+#' # Assessment thresholds grouped into BAC and EAC equivalents.
+#' # Symbology now has two thresholds giving:
+#' # "blue" if significantly below the BAC
+#' # "orange" if not significantly below the BAC and there is no EAC
+#' # "green" if significantly below the EAC but not the BAC
+#' # "red" otherwise  
+#' \dontrun{
+#' write_summary_table(
+#'   sediment_assessment,
+#'   threshold_groups = list(
+#'     BAC = "BAC", 
+#'     EAC = c("EAC", "ERL", "EQS", "FEQG")
+#'   ),
+#'   symbology = "default", 
+#'   symbology_control = list(
+#'     colour = list(
+#'       BAC = list(below = "blue", above = "orange"),
+#'       EAC = list(below = "green", above = "red")
+#'     ), 
+#'   )
+#' )
+#' }
+#' 
+#' # Assessment thresholds grouped into BAC and EAC equivalents. Human health
+#' # thresholds grouped as HQS
+#' # Two symbologies applied, one for environmental thresholds, the other for
+#' # health thresholds
+#' # Note the named lists and that the output names are specified 
+#' \dontrun{
+#' write_summary_table(
+#'   biota_assessment,
+#'   threshold_groups = list(
+#'     BAC = c("BAC", "NRC"),
+#'     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
+#'     HQS = c("MPC", "QShh")
+#'   ),
+#'   symbology = list(env = "default", health = "default"), 
+#'   symbology_control = list(
+#'     env = list(
+#'       colour = list(
+#'         BAC = list(below = "blue", above = "orange"),
+#'         EAC = list(below = "green", above = "red")
+#'       ), 
+#'       names = list(shape = "shape_env", colour = "colour_env")
+#'     ),
+#'     health = list(
+#'       colour = list(HQS = list(below = "green", above = "red")), 
+#'       names = list(shape = "shape_health", colour = "colour_health")
+#'     )
+#'   )
+#' )
+#' }
+#' 
+#' # Custom symbology that only reports time series where there is sufficient
+#' # information to assess trends and which colours the time series by whether, 
+#' # for each determinand, mean concentrations in the last monitoring year are 
+#' # below or above the median concentration observed across time series 
+#' \dontrun{
+#' symbology_user <- function(summary, info, control) {
+#'   summary <- dplyr::mutate(
+#'     summary,
+#'     shape = dplyr::case_when(
+#'       is.na(p_overall_change)   ~ NA_character_,
+#'       p_overall_change > 0.05   ~ "circle",
+#'       overall_change > 0        ~ "upward_triangle",
+#'       overall_change < 0        ~ "downward_triangle"
+#'     )
+#'   )
+#'   summary <- summary |> 
+#'     dplyr::group_by(determinand) |>
+#'     dplyr::mutate(
+#'       .shape = !is.na(shape),
+#'       colour = dplyr::case_when(
+#'         !.shape                                          ~ NA_character_,
+#'         mean_last_year <= median(mean_last_year[.shape]) ~ "blue",
+#'        mean_last_year > median(mean_last_year[.shape])  ~ "red"
+#'       )
+#'     ) |>
+#'     dplyr::ungroup()
+#'   summary[c("series", "shape", "colour")]
+#' }
+#'
+#' write_summary_table(
+#'   biota_assessment,
+#'   symbology = symbology_user
+#' )
+#' }
+#' 
 #'
 #' @export
 write_summary_table <- function(
@@ -246,7 +447,6 @@ write_summary_table <- function(
   symbology_control = list(),
   determinandGroups = NULL, 
   append = FALSE) {
-
 
   if (lifecycle::is_present(collapse_AC)) {
     lifecycle::deprecate_warn(
@@ -280,22 +480,19 @@ write_summary_table <- function(
   # apply symbology - shape and colour of plotting symbols
 
   if (!is.null(symbology)) {
-    
-    # add thresholds to control structure 
-    # safer approach than picking up (guessing) them from the summary names
-    
-    if ("threshold_id" %in% names(symbology_control)) {
-      stop(
-        "\nsymbology control: threshold_id must not be specified by user", 
-        call. = FALSE
-      )
-    }
-    
-    symbology_control$threshold_id <- thresholds
-    
-    summary <- symbology_default(summary, harsat_obj$info, symbology_control)
+    summary <- make_symbology(
+      summary, 
+      harsat_obj$info, 
+      symbology, 
+      symbology_control, 
+      thresholds
+    )
   }
 
+  
+  # remove 'method', a convenience variable for constructing symbologies, from 
+  # summary table
+  
   summary$method <- NULL
   
   
@@ -560,6 +757,135 @@ make_summary_table <- function(harsat_obj, extra_output, determinandGroups) {
 }
 
 
+make_symbology <- function(
+    summary, info, symbology, symbology_control, thresholds) {
+  
+
+  # add thresholds to info 
+  # safer approach than picking up (guessing) them from the summary names 
+  # means that they can be accessed by user-defined symbologies
+  # thresholds might have been grouped so existing information in info might 
+  #   not be sufficient
+  
+  if (".threshold_group" %in% names(info)) {
+    stop(
+      "\nwrite_summary_table wants to create .threshold_group in\n", 
+      "harsat_obj$info but it already exists; this is unexpected, so check\n",
+      "your script and then contact the harsat development team", 
+      call. = FALSE
+    )
+  }
+  
+  info$.threshold_group <- thresholds
+  
+
+  # symbology can either be a single character string, a single function, 
+  # or a named list of the above
+
+  if (!is.list(symbology)) {
+    
+    symbology <- list(only = symbology)
+    symbology_control <- list(only = symbology_control)
+    
+  } else {
+    
+    if (is.null(names(symbology))) {
+      stop(
+        "\nsymbology - multiple symbologies must be specified by a named ",
+        "list",
+        call. = FALSE
+      )
+    }
+    
+    if (is.null(names(symbology_control)) || 
+        !identical(sort(names(symbology_control)), sort(names(symbology)))) {
+      stop(
+        "\nsymbology_control - multiple symbologies have been specified, so\n",
+        "symbology_control must be a named list with the same names as ",
+        "symbology",
+        call. = FALSE
+      )
+    }
+    
+  }
+  
+  for (i in names(symbology)) {
+    
+    if (is.character(symbology[[i]])) {
+      
+      if (symbology[[i]] != "default") {
+        stop(
+          "\nsymbology: currently the only pre-defined symbology is \"default\"",
+          call. = FALSE
+        )
+      }
+      symbology_fn <- symbology_default
+      
+    } else if (is.function(symbology[[i]])) {
+      
+      id <- formalArgs(symbology[[i]])
+      if (!identical(id, c("summary", "info", "control"))) {
+        stop(
+          "\nsymbology: user-defined function arguments should be 'summary'",
+          " 'info' and\n'control'",
+          call. = FALSE
+        )
+      }
+      
+      symbology_fn <- symbology[[i]]
+      
+    } else {
+      
+      stop(
+        "\nsymbology: symbology is not a recognised character string or a\n", 
+        "user-defined function",
+        call. = FALSE
+      )
+      
+    }
+    
+    result <- symbology_fn(summary, info, symbology_control[[i]])
+    
+    if (!("series" %in% names(result))) {
+      stop(
+        "\nerror in applying symbology: series not in result",
+        call. = FALSE
+      )
+    }
+    
+    id <- setdiff(names(result), "series")
+    
+    if (any(id %in% names(summary))) {
+      stop(
+        "\nsymbology: the names of the symbology variables already exist;\n",
+        "if applying the default symbology, adjust control$names;\n", 
+        "if applying a user-defined symbology, adjust the output names;\n",
+        "if applying multiple symbologies, check you are not using the same\n",
+        "names twice", 
+        call. = FALSE
+      )
+    }
+    
+    summary <- dplyr::left_join(
+      summary, 
+      result, 
+      by = "series", 
+      relationship = "one-to-one"
+    )
+    
+    summary <- dplyr::relocate(
+      summary, 
+      dplyr::all_of(id), 
+      .before = "n_year_all"
+    )
+    
+  }    
+  
+  summary
+}
+
+
+
 symbology_default <- function(
     summary, 
     info, 
@@ -572,7 +898,7 @@ symbology_default <- function(
 
   # set up and modify control structures
   
-  control = symbology_default_cntrl(control)
+  control = symbology_default_cntrl(control, info)
     
   
   # shape = trend 
@@ -731,17 +1057,15 @@ symbology_default <- function(
     
   }
 
-  summary <- dplyr::relocate(
-    summary, 
-    dplyr::all_of(c("shape", "colour")), 
-    .before = "n_year_all"
-  )
+  out <- summary[c("series", "shape", "colour")]
+
+  names(out)[2:3] <- c(control$names$shape, control$names$colour)
     
-  summary
+  out
 }
 
 
-symbology_default_cntrl <- function(control) {
+symbology_default_cntrl <- function(control, info) {
 
   default <- list(
     # trends
@@ -757,11 +1081,14 @@ symbology_default_cntrl <- function(control) {
 
     # status
     colour = NULL,
-    threshold_id = NULL,
     no_threshold = "black",
     
     # other
-    adjust_nonparam = TRUE
+    adjust_nonparam = TRUE,
+    names = list(
+      colour = "colour",
+      shape = "shape"
+    )
   )
   
   control <- modifyList(default, control, keep.null = TRUE)
@@ -817,7 +1144,7 @@ symbology_default_cntrl <- function(control) {
   
   if (!is.null(control$colour)) {
     
-    if (is.null(control$threshold_id)) {
+    if (is.null(info$.threshold_group)) {
       stop(
         "\nsymbology_control - colour:\n", 
         "colour has been specified, but no thresholds were used", 
@@ -825,12 +1152,13 @@ symbology_default_cntrl <- function(control) {
       )
     }
     
-    ok <- all(names(control$colour) %in% control$threshold_id)
+    ok <- all(names(control$colour) %in% info$.threshold_group)
     if (!ok) {
       stop(
         "\nsymbology_control - colour:\n", 
-        "the thresholds are not all recognised; if the thresholds have been \n",
-        "grouped (using argument 'threshold_group'), then check the \n",
+        "the thresholds are not all recognised;\n",
+        "if the thresholds have been grouped (using argument ", 
+        "'threshold_group'),\nthen check the ",
         "thresholds specified in colour match the group names",
         call. = FALSE
       )
