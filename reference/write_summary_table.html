@@ -148,20 +148,22 @@ seven power metrics computed for lognormally distributed data. Defaults to
 
 
 <dt id="arg-symbology">symbology<a class="anchor" aria-label="anchor" href="#arg-symbology"></a></dt>
-<dd><p>Experimental. Specifies the output symbology. Currently
-assumes the thresholds are presented in increasing magnitude of
-environmental risk.</p></dd>
+<dd><p>Experimental. A character string "default" or a user-defined
+function that specifies a symbology typically used to characterise the
+patterns of change in and the status of each time series. Defaults to
+<code>NULL</code>; i.e. no symbology. Multiple symbologies can be applied. See
+details.</p></dd>
 
 
 <dt id="arg-symbology-control">symbology_control<a class="anchor" aria-label="anchor" href="#arg-symbology-control"></a></dt>
-<dd><p>Experimental. Specifies the output symbology.
-Currently assumes the thresholds are presented in increasing magnitude of
-environmental risk.</p></dd>
+<dd><p>Experimental. A named list of control options for
+the symbology. See details.</p></dd>
 
 
 <dt id="arg-determinandgroups">determinandGroups<a class="anchor" aria-label="anchor" href="#arg-determinandgroups"></a></dt>
 <dd><p>optional, a list specifying <code>labels</code> and <code>levels</code>
-to label the determinands. The life of this argument is limited.</p></dd>
+to rename the existing determinand groups. The life of this argument is
+limited.</p></dd>
 
 
 <dt id="arg-append">append<a class="anchor" aria-label="anchor" href="#arg-append"></a></dt>
@@ -173,7 +175,211 @@ file. <code>TRUE</code> appends data to it, creating it if it does not yet exist
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a summary object, when <code>export</code> is <code>FALSE</code></p>
     </div>
+    <div class="section level2">
+    <h2 id="default-symbology">Default symbology<a class="anchor" aria-label="anchor" href="#default-symbology"></a></h2>
 
+
+
+<p><code>symbology = "default"</code> calls a pre-defined symbology that generates a
+'shape' and a 'colour' to characterise the status of each time series. Its
+behaviour is controlled using <code>symbology_control</code>, a named list with the
+following elements:</p><ul><li><p><code>shape</code>: a list with names <code>none</code>, <code>mean</code>, <code>flat</code>, <code>up</code>, <code>down</code> giving the
+shape associated with each pattern of change. Here, <code>none</code> corresponds to
+insufficient data to fit a parametric model; <code>mean</code> to sufficient data to fit
+a parametric model but not to assess for trends; <code>flat</code> to no significant
+change in level (concentration) over time; <code>up</code> to a #' significant increase
+in level over time; <code>down</code> to a significant decrease in level over time.
+Their default values are <code>"small_open_circle"</code>,
+<code>"small_filled_circle"</code>, <code>"large_filled_circle"</code>, <code>"upward_triangle"</code>,
+<code>"downward_triangle"</code></p></li>
+<li><p><code>alpha</code> is the size of the test for change; default = <code>0.05</code></p></li>
+<li><p><code>change</code> determines whether the change is based on the recent time window
+(typically the last twenty years) or the whole time series; options
+<code>"recent"</code> (default) and <code>"overall"</code></p></li>
+<li><p><code>colour</code> (default <code>NULL</code>) is a named list that characterises the status of
+a time series based on specified thresholds. The list names must match
+(a subset of) the names of the thresholds used in the assessment or, if the
+thresholds have been grouped, the group names. Each threshold must have two
+elements: <code>below</code> gives the colour if the time series is
+significantly below the threshold (p &lt; 0.05); <code>above</code> gives the colour
+otherwise. If multiple thresholds are used, they must be ordered from best
+to worst status. See examples</p></li>
+<li><p><code>no_threshold</code> (default <code>"black"</code>) is the colour used when no thresholds are
+applied to a time series. Another option might be to use <code>NA_character_</code></p></li>
+<li><p><code>adjust_nonparam</code> (default <code>TRUE</code>) is a logical that allows the symbology
+to be adjusted for short time series (often dominated by less-than values)
+where a non-parametric test for status can be applied</p></li>
+<li><p><code>names</code> (default <code>list(colour = "colour", shape = "shape")</code>) allows the
+names of the symbology columns in the summary table to be adjusted; this can
+be important if multiple symbologies are applied</p></li>
+</ul></div>
+    <div class="section level2">
+    <h2 id="custom-symbologies">Custom symbologies<a class="anchor" aria-label="anchor" href="#custom-symbologies"></a></h2>
+
+
+
+<p>Users can apply custom symbologies by letting <code>symbology</code> be a user-supplied
+function of the form <code>fn(summary, info, control)</code> where:</p><ul><li><p><code>summary</code> is the summary table before applying the symbology; for
+convenience, there is an additional column <code>method</code> which doesn't
+appear in the final summary table but takes, in particular, values <code>"none"</code>
+and <code>"mean"</code> corresponding respectively to no parametric model and
+insufficient data to fit a trend (see <code>shape</code> above)</p></li>
+<li><p><code>info</code> contains the contents of <code>harsat_obj$info</code>; i.e. all the reference
+tables and additional information about the assessment. For convenience,
+it also contains a temporary element <code>.threshold_group</code> which has the names
+of the threshold groups (which can differ from the thresholds themselves)</p></li>
+<li><p><code>control</code> contains <code>symbology_control</code> and allows the user to pass
+additional information to the function</p></li>
+</ul><p>The output of the function must be a data frame with one column called
+<code>series</code> that contains the series identifier of each time series
+(not necessarily in the same order as the summary table) and
+symbology columns, but they must not share any of the existing names in the
+summary table.</p>
+<p>See the examples for more inspiration.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="multiple-symbologies">Multiple symbologies<a class="anchor" aria-label="anchor" href="#multiple-symbologies"></a></h2>
+
+
+
+<p>Multiple symbologies can be applied by specifying a named list whch can be
+a mixture of default symbologies and custom symbologies. <code>symbology_control</code>
+must then be a named list (with the same names) giving control information
+for each symbology. It is important to ensure that each symbology gives
+output columns with different names. See examples.</p>
+    </div>
+
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Default symbology with one threshold: the EQS. The colour will be "green"</span></span></span>
+<span class="r-in"><span><span class="co"># if the time series is significantly below the EQS in the last monitoring</span></span></span>
+<span class="r-in"><span><span class="co"># year and "red" otherwise </span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">write_summary_table</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">water_assessment</span>,</span></span>
+<span class="r-in"><span>  symbology <span class="op">=</span> <span class="st">"default"</span>,</span></span>
+<span class="r-in"><span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now applied using the overall change instead of the recent change.</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">write_summary_table</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">water_assessment</span>,</span></span>
+<span class="r-in"><span>  symbology <span class="op">=</span> <span class="st">"default"</span>,</span></span>
+<span class="r-in"><span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    change <span class="op">=</span> <span class="st">"overall"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># If we only want to change one shape, then we only need to specify that one</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">write_summary_table</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">water_assessment</span>,</span></span>
+<span class="r-in"><span>  symbology <span class="op">=</span> <span class="st">"default"</span>,</span></span>
+<span class="r-in"><span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>flat <span class="op">=</span> <span class="st">"square"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Assessment thresholds grouped into BAC and EAC equivalents.</span></span></span>
+<span class="r-in"><span><span class="co"># Symbology now has two thresholds giving:</span></span></span>
+<span class="r-in"><span><span class="co"># "blue" if significantly below the BAC</span></span></span>
+<span class="r-in"><span><span class="co"># "orange" if not significantly below the BAC and there is no EAC</span></span></span>
+<span class="r-in"><span><span class="co"># "green" if significantly below the EAC but not the BAC</span></span></span>
+<span class="r-in"><span><span class="co"># "red" otherwise  </span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">write_summary_table</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">sediment_assessment</span>,</span></span>
+<span class="r-in"><span>  threshold_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    BAC <span class="op">=</span> <span class="st">"BAC"</span>, </span></span>
+<span class="r-in"><span>    EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAC"</span>, <span class="st">"ERL"</span>, <span class="st">"EQS"</span>, <span class="st">"FEQG"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  symbology <span class="op">=</span> <span class="st">"default"</span>, </span></span>
+<span class="r-in"><span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      BAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"blue"</span>, above <span class="op">=</span> <span class="st">"orange"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>, </span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Assessment thresholds grouped into BAC and EAC equivalents. Human health</span></span></span>
+<span class="r-in"><span><span class="co"># thresholds grouped as HQS</span></span></span>
+<span class="r-in"><span><span class="co"># Two symbologies applied, one for environmental thresholds, the other for</span></span></span>
+<span class="r-in"><span><span class="co"># health thresholds</span></span></span>
+<span class="r-in"><span><span class="co"># Note the named lists and that the output names are specified </span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">write_summary_table</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">biota_assessment</span>,</span></span>
+<span class="r-in"><span>  threshold_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    BAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span>, <span class="st">"NRC"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAC"</span>, <span class="st">"FEQG"</span>, <span class="st">"LRC"</span>, <span class="st">"QSsp"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    HQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MPC"</span>, <span class="st">"QShh"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>env <span class="op">=</span> <span class="st">"default"</span>, health <span class="op">=</span> <span class="st">"default"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        BAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"blue"</span>, above <span class="op">=</span> <span class="st">"orange"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>, </span></span>
+<span class="r-in"><span>      names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"shape_env"</span>, colour <span class="op">=</span> <span class="st">"colour_env"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    health <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>HQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>      names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="st">"shape_health"</span>, colour <span class="op">=</span> <span class="st">"colour_health"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Custom symbology that only reports time series where there is sufficient</span></span></span>
+<span class="r-in"><span><span class="co"># information to assess trends and which colours the time series by whether, </span></span></span>
+<span class="r-in"><span><span class="co"># for each determinand, mean concentrations in the last monitoring year are </span></span></span>
+<span class="r-in"><span><span class="co"># below or above the median concentration observed across time series </span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="va">symbology_user</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">summary</span>, <span class="va">info</span>, <span class="va">control</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">summary</span>,</span></span>
+<span class="r-in"><span>    shape <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">p_overall_change</span><span class="op">)</span>   <span class="op">~</span> <span class="cn">NA_character_</span>,</span></span>
+<span class="r-in"><span>      <span class="va">p_overall_change</span> <span class="op">&gt;</span> <span class="fl">0.05</span>   <span class="op">~</span> <span class="st">"circle"</span>,</span></span>
+<span class="r-in"><span>      <span class="va">overall_change</span> <span class="op">&gt;</span> <span class="fl">0</span>        <span class="op">~</span> <span class="st">"upward_triangle"</span>,</span></span>
+<span class="r-in"><span>      <span class="va">overall_change</span> <span class="op">&lt;</span> <span class="fl">0</span>        <span class="op">~</span> <span class="st">"downward_triangle"</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">summary</span> <span class="op">&lt;-</span> <span class="va">summary</span> <span class="op">|&gt;</span> </span></span>
+<span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">determinand</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      .shape <span class="op">=</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">shape</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      colour <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="op">!</span><span class="va">.shape</span>                                          <span class="op">~</span> <span class="cn">NA_character_</span>,</span></span>
+<span class="r-in"><span>        <span class="va">mean_last_year</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">mean_last_year</span><span class="op">[</span><span class="va">.shape</span><span class="op">]</span><span class="op">)</span> <span class="op">~</span> <span class="st">"blue"</span>,</span></span>
+<span class="r-in"><span>       <span class="va">mean_last_year</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">mean_last_year</span><span class="op">[</span><span class="va">.shape</span><span class="op">]</span><span class="op">)</span>  <span class="op">~</span> <span class="st">"red"</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">summary</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"series"</span>, <span class="st">"shape"</span>, <span class="st">"colour"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">write_summary_table</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">biota_assessment</span>,</span></span>
+<span class="r-in"><span>  symbology <span class="op">=</span> <span class="va">symbology_user</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
