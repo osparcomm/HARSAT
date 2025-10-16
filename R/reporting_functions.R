@@ -582,7 +582,6 @@ make_summary_table <- function(harsat_obj, extra_output, determinandGroups) {
 
   info <- harsat_obj$info
   
-  
   # merge stations with timeseries
 
   # get determinand group
@@ -707,7 +706,7 @@ make_summary_table <- function(harsat_obj, extra_output, determinandGroups) {
     
 
   # reorder variables and sort 
-  
+
   var_id <- c(
     "series", 
     info$region$id,  
@@ -1202,7 +1201,7 @@ group_thresholds <- function(summary, threshold_groups, thresholds) {
   # where some grouping is going on
     
   # lots of error trapping to catch anything stupid!
-    
+
   if (is.null(thresholds)) {
     stop(
       "threshold_groups specified but no thresholds used in the assessment", 

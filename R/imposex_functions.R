@@ -270,21 +270,36 @@ assess_imposex <- function(
   }  
             
   
-  # now add on the comparison to ACs - common to both methods  
+  # now add on the comparison to ACs - common to both methods 
   
   summary[names(assessment$summary)] <- assessment$summary
   assessment$summary <- NULL
     
   ACsummary <- lapply(names(AC), function(i) {
+    value <- AC[i] 
     upperLimit <- with(summary, if (!is.na(clLY)) clLY else meanLY) 
-    diff <- upperLimit - AC[i]
-    setNames(data.frame(AC[i], diff), paste0(i, c("", "diff")))
+    diff <- upperLimit - value
+    
+    out <- data.frame(value, diff, achieved = NA_real_, below = NA_character_)
+    names(out) <- paste0(i, c("", "diff", "achieved", "below"))
+    out
   })
   
   ACsummary <- do.call(cbind, ACsummary)
   
   summary <- cbind(summary, ACsummary) 
-
+  
+  # move imposex class to end for consistency with other assessments
+  # create if it doesn't exist for completeness - this could be tidied up in a 
+  #   much needed general overhaul of imposex functions
+  
+  if ("imposex_class" %in% names(summary)) {
+    summary <- dplyr::relocate(summary, imposex_class, .after = last_col())
+  } else {
+    summary$imposex_class <- NA_character_
+  }
+    
+  
   output <- c(output, list(summary = summary), assessment)
 
   return(output)
