@@ -4439,7 +4439,7 @@ convert_to_target_basis <- function(data, info, get_basis) {
 }
 
 
-#' Normalises sediment concentrations, OSPAR vwersion
+#' Normalises sediment concentrations, OSPAR version
 #' 
 #' @param data the data object
 #' @param station_dictionary the station dictionary
@@ -4717,7 +4717,7 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
             "France" %in% station_dictionary$country) {
           
           station_id <- station_dictionary$country %in% "France" & 
-            station_dictionary$OSPAR_region %in% "2"
+            station_dictionary$ospar_region %in% "2"
           station_id <- station_dictionary[station_id, "station_code"]
           id <- data$station_code %in% station_id
           

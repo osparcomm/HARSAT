@@ -2,7 +2,7 @@
 % Please edit documentation in R/import_functions.R
 \name{normalise_sediment_OSPAR}
 \alias{normalise_sediment_OSPAR}
-\title{Normalises sediment concentrations, OSPAR vwersion}
+\title{Normalises sediment concentrations, OSPAR version}
 \usage{
 normalise_sediment_OSPAR(data, station_dictionary, info, control)
 }
@@ -16,5 +16,5 @@ normalise_sediment_OSPAR(data, station_dictionary, info, control)
 \item{control}{control values}
 }
 \description{
-Normalises sediment concentrations, OSPAR vwersion
+Normalises sediment concentrations, OSPAR version
 }
