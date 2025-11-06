@@ -106,6 +106,12 @@ if (!dir.exists(summary.dir)) {
 ```{r ospar-water-summary}
 write_summary_table(
   water_assessment,
+  symbology = "default",
+  symbology_control = list(
+    colour = list(
+      EQS = list(below = "green", above = "red")
+    )
+  ),
   determinandGroups = list(
     levels = c(
       "Metals", "Organotins", "PAH_parent",  "Organofluorines", 
@@ -114,12 +120,6 @@ write_summary_table(
     labels = c(
       "Metals", "Organotins", "PAH parent compounds", "Organofluorines", 
       "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
-    )
-  ),
-  symbology = "default",
-  symbology_control = list(
-    colour = list(
-      EQS = list(below = "green", above = "red")
     )
   ),
   output_dir = summary.dir
@@ -207,10 +207,36 @@ sediment_assessment <- run_assessment(
 check_assessment(water_assessment)
 ```
 
+The summary table groups the thresholds into the BAC and a set of EAC 
+equivalents. The thresholds are then listed  from best 
+to worst status in `symbology_control` and each timeseries is characterised as:  
+
+- blue: mean concentration (in the most recent year) significantly below the BAC 
+  (p < 0.05)
+- orange: mean concentration not significantly below the BAC (p > 0.05) and no
+  EAC
+- green: mean concentration significantly below the EAC (p < 0.05)
+- red: mean concenctration not significantly below the EAC (p > 0.05)
+
+Timeseries are characterised as black if there are no applicable thresholds, 
+although this behaviour can be modified using `symbology_control`.
+
+
 
 ```{r ospar-sediment-summary}
 write_summary_table(
   sediment_assessment,
+  threshold_groups = list(
+    BAC = "BAC", 
+    EAC = c("EAC", "ERL", "EQS", "FEQG")
+  ),
+  symbology = "default", 
+  symbology_control = list(
+    colour = list(
+      BAC = list(below = "blue", above = "orange"),
+      EAC = list(below = "green", above = "red")
+    )
+  ),
   determinandGroups = list(
     levels = c(
       "Metals", "Organotins", "PAH_parent", "PAH_alkylated",  
@@ -221,17 +247,6 @@ write_summary_table(
       "Metals", "Organotins", "PAH parent compounds", "PAH alkylated compounds", 
       "Polybrominated diphenyl ethers", "Organobromines (other)", 
       "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)"
-    )
-  ),
-  threshold_groups = list(
-    BAC = "BAC", 
-    EAC = c("EAC", "ERL", "EQS", "FEQG")
-  ),
-  symbology = "default", 
-  symbology_control = list(
-    colour = list(
-      BAC = list(below = "blue", above = "orange"),
-      EAC = list(below = "green", above = "red")
     )
   ),
   output_dir = summary.dir
@@ -376,15 +391,38 @@ check_assessment(biota_assessment)
 
 
 
-We now write the summary table. Here the symbology is based on environmental 
-thresholds. A separate call would be needed to get the symbology based on health 
-thresholds. The symbology functionality is still under development and it is 
-intended to allow both sets of symbologies to be calculated with a single call.
+We now write the summary table. There are now three groups of thresholds: BAC 
+equivalents, EAC equivalents and HQS (human health quality standard) equivalents. 
+Two symbologies are produced, one using the environmental thresholds (BAC and 
+EAC), the other using the health threshold (HQS). The `symbology` argument
+says that they are both based on the default symbology function and assigns 
+names to each to link to the `symbology_control` argument. This then specifices
+which thresholds and colours are to be used in each symbology and gives names
+to the symbology variables so that are do not get confused in the summary table.
 
 
 ```{r ospar-biota-summary}
 write_summary_table(
   biota_assessment,
+  threshold_groups = list(
+    BAC = c("BAC", "NRC"),
+    EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
+    HQS = c("MPC", "QShh")
+  ),
+  symbology = list(env = "default", health = "default"), 
+  symbology_control = list(
+    env = list(
+      colour = list(
+        BAC = list(below = "blue", above = "orange"),
+        EAC = list(below = "green", above = "red")
+      ), 
+      names = list(shape = "shape_env", colour = "colour_env")
+    ),
+    health = list(
+      colour = list(HQS = list(below = "green", above = "red")), 
+      names = list(shape = "shape_health", colour = "colour_health")
+    )
+  ),
   determinandGroups = list(
     levels = c(
       "Metals", "Organotins",
@@ -401,18 +439,6 @@ write_summary_table(
       "Organofluorines",
       "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)",
       "Biological effects (other)"
-    )
-  ),
-  threshold_groups = list(
-    BAC = c("BAC", "NRC"),
-    EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
-    HQS = c("MPC", "QShh")
-  ),
-  symbology = "default",
-  symbology_control = list(
-    colour = list(
-      BAC = list(below = "blue", above = "orange"),
-      EAC = list(below = "green", above = "red")
     )
   ),
   output_dir = summary.dir

@@ -154,7 +154,7 @@ write_summary_table(
   export = TRUE,
   determinandGroups = NULL,
   symbology = NULL,
-  collapse_AC = NULL, 
+  threshold_goups = NULL, 
   extra_output = "power"
 )
 ```
