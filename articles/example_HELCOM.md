@@ -1,0 +1,770 @@
+# HELCOM example usage
+
+## Introduction
+
+This vignette shows how to do an assessment (mostly) following the
+approach taken in HELCOM HOLAS3.
+
+The data were extracted from the ICES data base using the XHAT
+facilities on the [ICES
+webservice](https://dome.ices.dk/api/swagger/index.html). The data were
+extracted on 28 August 2023 and were filtered using is_helcom_area =
+TRUE anad maxYear = 2020. The data were subsequently reduced in size to
+make them more manageable for this example. **The data have not been
+scrutinised by data assessors so their use, and the results below, must
+be treated as illustrative only; in particular, they should not be used
+for any formal reporting**.
+
+There are two exceptions to the HOLAS3 approach. First, imposex data are
+not assessed here - these have an additional level of complexity that
+will be explained in a subsequent vignette (not written yet). Second,
+the method for dealing with ‘initial’ data, unique to HELCOM, has not
+been implemented (this is not yet available in harsat).
+
+We’ll begin with contaminants in water which are the simplest data to
+assess. We’ll then move on to sediment and biota which have more
+features to consider.
+
+But before we get to any of that, we need to set up the environment.
+First, load the `harsat` library (let’s assume that you have already
+installed it, as covered in the [Getting
+Started](http://osparcomm.github.io/harsat.md) guide).
+
+``` r
+library(harsat)
+```
+
+We set up our main directory to find the data files. If you use your own
+data files, you will need to point to a directory containing a copy. We
+usually do this by putting our data files in a directory `data`, and
+information files in a directory `information`, but you can use any
+directory for these.
+
+``` r
+working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
+```
+
+## Water assessment
+
+First, we use
+[`read_data()`](http://osparcomm.github.io/HARSAT/reference/read_data.md)
+to read in the contaminant data, the station dictionary, and two
+important reference tables: the determinand and threshold reference
+tables. There are several things to note about the function call:
+
+- `purpose = "HELCOM"` means that the assessment configuration is set to
+  mirror that of the HOLAS3 assessment. You can change the assessment
+  configuration in many ways using the control argument, but that is not
+  explained here.  
+- `data_dir` identifies the directory storing the contaminant data
+  (`water.txt`) and station dictionary (`stations.txt`). Using
+  `file.path` prevents any difficulties using forward or backward
+  slashes when writing file paths.
+- `info_dir` identifies the directory storing the reference tables.
+  These must be named `determinand.csv` and `thresholds_water.csv`. The
+  determinand table identifies which determinands are going to be
+  assessed. If there are no thresholds, then there doesn’t need to be a
+  file called `thresholds_water.csv`.
+- you don’t have to specify the extraction date, but it can help to keep
+  track of things.
+
+As well as reading in the contaminant data and station dictionary, the
+function matches each record in the contaminant data to a station in the
+station dictionary. The process for doing this is quite complicated (and
+it can take a few minutes to run) and we don’t go into details here.
+
+Finally, a message is printed saying that the argument `max_year` is set
+to 2020. (This is as it should be since we set `maxYear` to be 2020 in
+the data extraction.) But an important consequence is that a contaminant
+time series will only be assessed if it has some data in the period 2015
+to 2020 (i.e. in the last six monitoring years).
+
+``` r
+water_data <- read_data(
+  compartment = "water", 
+  purpose = "HELCOM",                               
+  contaminants = "water.txt", 
+  stations = "stations.txt", 
+  data_dir = file.path(working.directory, "data", "example_HELCOM"),
+  info_dir = file.path(working.directory, "information", "HELCOM_2023"), 
+  extraction = "2023/08/23"
+)
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\species.csv 
+#> Found in path thresholds_water.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_water.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv': '4b48cbec9c71380f4b464779e643cab2'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_water.csv': '7e9487630022c11b0c3dd6d553a9955b'
+#> Reading station dictionary from:
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt': 'd229a1c984d507537840e73080f3773c'
+#> Warning: the following columns are missing from the ICES extraction: 
+#>   amap_arctic_lme
+#>   This might be because the extraction was made before 14 June 2024, in which case
+#>   take care if working with AMAP regions
+#> 
+#> Reading contaminant and effects data from:
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/water.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/water.txt': 'b18b0556f6f78378c6f0a77682f51988'
+#> Warning: the following columns are missing from the ICES extraction: 
+#>   amap_arctic_lme, casenumber
+#>   This might be because the extraction was made before 14 June 2024, in which case
+#>   take care if working with AMAP regions
+#> 
+#> Matching data with station dictionary
+#>  - restricting to stations in these convention areas: HELCOM 
+#>  - no restriction of stations by data type
+#>  - no restriction of stations by purpose of monitoring
+#>  - no restriction of data by program governance
+#>  - no restriction of stations by program governance
+#>  - matching 10846 records by coordinates
+#>  - matching 0 records by station name
+#>  - 10746 of 10846 records have been matched to a station
+#> 
+#> Argument max_year taken to be the maximum year in the data: 2020
+```
+
+We next simplify the data so that they are in the correct format for
+running the assessment. This also involves deleting some data that do
+not meet the conditions for the assessment.
+
+Notice that a message appears about ‘oddities’. Both tidy_data and
+create_timeseries (the next function call) do a lot of checking of the
+data and strange values are written to the oddities folder for you to
+have a look at. This is in the hope that, if there are errors, they will
+get corrected and resubmitted to the ICES database. It turns out there
+are no strange value at this stage, but there are in the step that
+follows.
+
+``` r
+water_data <- tidy_data(water_data)
+#> 
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
+#> 
+#> Dropping 4071 records from data flagged for deletion. Possible reasons are:
+#>  - vflag = suspect
+#>  - upper depth >5.5m
+#>  - filtration missing
+#>  - matrix = 'SPM'
+#> 
+#> Dropping 88 records from data that have no valid station code
+#> 
+#> Dropping 13667 stations that are not associated with any data
+#> 
+#> Cleaning station dictionary
+#> 
+#> Cleaning contaminant and biological effects data
+```
+
+We now do some more data cleaning and then group the data into time
+series. Each time series consists of measurements of a single
+determinand at a single monitoring station. Measurements in filtered and
+unfiltered samples are split into different time series.
+
+The `determinands.control` argument in important to know about since it
+allows related determinands to be processed in various ways. Here, it is
+just used for PFOS and its linear and branched components N-PFOS and
+BR-PFOS. PFOS measurements can be sumbitted as PFOS (the sum of the two
+components) or as N-PFOS and BR-PFOs (the individual components). The
+`determinands.control` argument below tells the code to sum records of
+N-PFOS and BR-PFOS from the same sample and relabel them as PFOS. There
+are more complicated examples of the use of `determinands.control` in
+the sediment and biota examples below.
+
+``` r
+water_timeseries <- create_timeseries(
+  water_data,
+  determinands.control = list(
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum")
+  )
+)
+#> 
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
+#> 
+#> Cleaning data
+#>    Dropping stations with no data between 2015 and 2020
+#>    Unexpected or missing values for 'basis': see basis_queries.csv
+#>    Unexpected or missing values for 'unit': see unit_queries.csv
+#>    Unexpected or missing values for 'value': see value_queries.csv
+#>    Non-positive detection limits: see non_positive_det_limits.csv
+#>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
+#>    Detection limit higher than data: see detection_limit_high.csv
+#> 
+#> Creating time series data
+#>    Converting data to appropriate basis for statistical analysis
+#>    Dropping groups of compounds / stations with no data between 2015 and 2020
+```
+
+If you want to see a list of all the time series, then you can run code
+along the following lines:
+
+``` r
+get_timeseries(water_timeseries) |> head(10) 
+#>                    series station_code station_name   country determinand
+#> 1       11241 CD filtered        11241         64A2 Lithuania          CD
+#> 2       11241 PB filtered        11241         64A2 Lithuania          PB
+#> 3   11241 PFOS unfiltered        11241         64A2 Lithuania        PFOS
+#> 4  11241 TBSN+ unfiltered        11241         64A2 Lithuania       TBSN+
+#> 5       12896 CD filtered        12896         AUDF   Estonia          CD
+#> 6       12896 PB filtered        12896         AUDF   Estonia          PB
+#> 7   12896 PFOS unfiltered        12896         AUDF   Estonia        PFOS
+#> 8  12896 TBSN+ unfiltered        12896         AUDF   Estonia       TBSN+
+#> 9        2144 CD filtered         2144      OMMVUW4   Germany          CD
+#> 10       2144 PB filtered         2144      OMMVUW4   Germany          PB
+#>    filtration subseries basis unit
+#> 1    filtered      <NA>     W ug/l
+#> 2    filtered      <NA>     W ug/l
+#> 3  unfiltered      <NA>     W ng/l
+#> 4  unfiltered      <NA>     W ng/l
+#> 5    filtered      <NA>     W ug/l
+#> 6    filtered      <NA>     W ug/l
+#> 7  unfiltered      <NA>     W ng/l
+#> 8  unfiltered      <NA>     W ng/l
+#> 9    filtered      <NA>     W ug/l
+#> 10   filtered      <NA>     W ug/l
+```
+
+At last it is time to run the assessment. You need to specify which
+thresholds to use, otherwise the code will not use any of them. For
+water there is only the EQS, but you still need to specify it. Look at
+the threshold reference table to see what is available if you are
+unsure. Note that AC stands for Assessment Criteria which is what
+thresholds are often called. The parallel argument tells the code to use
+parallel processing. This usually speeds things up considerably. The
+assessment took about 1.5 minutes to run on my laptop.
+
+``` r
+water_assessment <- run_assessment(
+  water_timeseries, 
+  AC = "EQS", 
+  parallel = TRUE
+)
+#> Setting up clusters: be patient, it can take a while!
+```
+
+We now need to check whether there were any convergence issues. Lack of
+convergence only rarely occurs, but when it does it is typically because
+there are errors in the data (e.g. reported in incorrect units) or
+because there are outliers, so the best thing to do is first check your
+data. However, convergence can also be difficult if there are a lot of
+less-than measurements in the time series. Describing how to tweak the
+control arguments to get convergence is beyond the scope of this
+vignette (need to write another vignette to discuss this). Fortunately,
+there were no convergence issues here.
+
+``` r
+check_assessment(water_assessment)
+#> All assessment models have converged
+```
+
+It is time to look at the results! We can plot the data for each time
+series along with the fitted model (see vignette for external data) or
+print a table giving summary information about the assessment of each
+time series. But first, we may need to create an output directory.
+
+``` r
+summary.dir <- file.path(working.directory, "output", "example_HELCOM")
+if (!dir.exists(summary.dir)) {
+  dir.create(summary.dir, recursive = TRUE)
+}
+```
+
+Now that we have an output directory, we can write the summary table to
+that directory. Of course, you can choose any directory to write to
+here, so long as you are sure it exists.
+
+The code below prints out a CSV file giving summary information about
+the assessment of each time series. This includes:
+
+- meta-data such as the monitoring location and number of years of data
+  for each time series
+- the fitted values in the last monitoring year with associated upper
+  one-sided 95% confidence limits
+- the trend assessments (p-values and trend estimates)
+- the status assessments (if there any thresholds)
+- (optionally) a symbology summarising the trend (shape) and status
+  (colour) of each time series
+
+This function is being actively developed and the function arguments are
+likely to evolve, so we’ll leave their explanation for the next release.
+
+``` r
+write_summary_table(
+  water_assessment,
+  determinandGroups = list(
+    levels = c("Metals", "Organotins", "Organofluorines"), 
+    labels = c("Metals", "Organotins", "Organofluorines")
+  ),
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
+  ),
+  collapse_AC = list(EAC = "EQS"),
+  output_dir = summary.dir
+)
+```
+
+## Sediment assessment
+
+The sediment assessment is very similar, but has a few extra features
+related to normalisation (to account for differences in grain size)
+which are described below
+
+``` r
+sediment_data <- read_data(
+  compartment = "sediment",
+  purpose = "HELCOM",
+  contaminants = "sediment.txt",
+  stations = "stations.txt",
+  data_dir = file.path(working.directory, "data", "example_HELCOM"),
+  info_dir = file.path(working.directory, "information", "HELCOM_2023"),
+  extraction = "2023/08/23"
+)
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\species.csv 
+#> Found in path thresholds_sediment.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_sediment.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv': '4b48cbec9c71380f4b464779e643cab2'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv': '28e38bdd0b9e735643c60026dcda8a78'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv': '23ca1799017bfea360d586b1a70bffd4'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_sediment.csv': '41c686160bc8e0877477239eec0f0b1b'
+#> Reading station dictionary from:
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt': 'd229a1c984d507537840e73080f3773c'
+#> Warning: the following columns are missing from the ICES extraction: 
+#>   amap_arctic_lme
+#>   This might be because the extraction was made before 14 June 2024, in which case
+#>   take care if working with AMAP regions
+#> 
+#> Reading contaminant and effects data from:
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/sediment.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/sediment.txt': 'a5635836e9a69f3dd8be42d5078cad6b'
+#> Warning: the following columns are missing from the ICES extraction: 
+#>   amap_arctic_lme, casenumber
+#>   This might be because the extraction was made before 14 June 2024, in which case
+#>   take care if working with AMAP regions
+#> 
+#> Matching data with station dictionary
+#>  - restricting to stations in these convention areas: HELCOM 
+#>  - no restriction of stations by data type
+#>  - no restriction of stations by purpose of monitoring
+#>  - no restriction of data by program governance
+#>  - no restriction of stations by program governance
+#>  - matching 6995 records by coordinates
+#>  - matching 9365 records by station name
+#>  - 15721 of 16360 records have been matched to a station
+#> 
+#> Argument max_year taken to be the maximum year in the data: 2020
+
+sediment_data <- tidy_data(sediment_data)
+#> 
+#> Oddities will be written to 'oddities/sediment' with previous oddities backed up to
+#>  'oddities/sediment_backup'
+#> 
+#> Dropping 2176 records from data flagged for deletion. Possible reasons are:
+#>  - vflag = suspect
+#>  - upper depth > 0m
+#>  - unusual matrix
+#> 
+#> Dropping 523 records from data that have no valid station code
+#> 
+#> Dropping 13326 stations that are not associated with any data
+#> 
+#> Cleaning station dictionary
+#> 
+#> Cleaning contaminant and biological effects data
+```
+
+The sediment data are grouped into time series which consist of the
+measurements of single determinand in a single matrix (the fraction the
+sample has been sieved to; e.g. `SED63` or `SEDTOT`) at a single
+monitoring station.
+
+The
+[`create_timeseries()`](http://osparcomm.github.io/HARSAT/reference/create_timeseries.md)
+call for sediment differs from that for water in two ways. First,
+`determinands.control` identifies two groups of determinands that need
+to be summed. Second, the arguments `normalise` and `normalise.control`
+specify how the normalisation for grain size should be carried out.
+There are default functions for normalisation that will work in many
+cases. However, the process for HELCOM is more complicated (because
+unlike other metals, copper is normalised to organic carbon rather than
+aluminium) so a customised function
+[`normalise_sediment_HELCOM()`](http://osparcomm.github.io/HARSAT/reference/normalise_sediment_HELCOM.md)
+is provided. The argument `normalise.control` specifies that metals
+(apart from copper) will be normalised to 5% aluminium and copper and
+organics will be normalised to 5% organic carbon. The normalise
+functions need a bit of work, so expect them to change.
+
+All contaminant time series in sediment are assessed on a dry weight
+basis. The few measurements submitted on a wet weight basis are
+converted to a dry weight basis using `DRYWT%` supporting information
+(also submitted with the data).
+
+``` r
+sediment_timeseries <- create_timeseries(
+  sediment_data,
+  determinands.control = list(
+    SBDE6 = list(
+      det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
+      action = "sum"
+    ),
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum")
+  ),
+  normalise = normalise_sediment_HELCOM,
+  normalise.control = list(
+    metals = list(method = "pivot", normaliser = "AL", value = 5), 
+    copper = list(method = "hybrid", normaliser = "CORG", value = 5),
+    organics = list(method = "simple", normaliser = "CORG", value = 5) 
+  )
+)
+#> 
+#> Oddities will be written to 'oddities/sediment' with previous oddities backed up to
+#>  'oddities/sediment_backup'
+#> 
+#> Cleaning data
+#>    Dropping stations with no data between 2015 and 2020 
+#>    Dropping samples with only auxiliary variables
+#>    Relabelling matrix SED62 as SED63 and SED500, SED1000, SED2000 as SEDTOT
+#>    Unexpected or missing values for 'basis': see basis_queries.csv
+#>    Unexpected or missing values for 'unit': see unit_queries.csv
+#>    Unexpected or missing values for 'value': see value_queries.csv
+#>    Replicate measurements, only first retained: see replicate_measurements.csv
+#>    Non-positive detection limits: see non_positive_det_limits.csv
+#>    Non-positive quantification limits: see non_positive_quant_limits.csv
+#>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
+#>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
+#>    Detection limit higher than data: see detection_limit_high.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
+#>    Data submitted as BDE28, BDE47, BDE99, BD100, BD153, BD154 summed to give 
+#> SBDE6
+#>      61 of 124 samples lost due to incomplete submissions
+#>    Data submitted as HBCDA, HBCDB, HBCDG summed to give HBCD
+#> 
+#> Creating time series data
+#>    Converting data to appropriate basis for statistical analysis
+#>    Losing 6 out of 3282 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Normalising copper to CORG using pivot values
+#>    Removing sediment data where normaliser is a less than
+#>    Normalising metals to AL using pivot values
+#>    Normalising organics to 5% CORG
+#>    Removing sediment data where normaliser is a less than
+#>    Implausible uncertainties calculated in data processing: see implausible_uncertainties_calculated.csv
+#>    Dropping groups of compounds / stations with no data between 2015 and 2020
+```
+
+Now run the assessment. Again there is only one threshold, the EQS. This
+only takes about a minute to run on my laptop.
+
+``` r
+sediment_assessment <- run_assessment(
+  sediment_timeseries, 
+  AC = "EQS",
+  parallel = TRUE
+)
+#> Setting up clusters: be patient, it can take a while!
+```
+
+Everything has converged.
+
+``` r
+check_assessment(sediment_assessment)
+#> All assessment models have converged
+```
+
+Finally, we can plot individual time series assessments (see vignette
+for external data) or print out the summary table
+
+``` r
+write_summary_table(
+  sediment_assessment,
+  determinandGroups = webGroups <- list(
+    levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines"),  
+    labels = c(
+      "Metals", "Organotins", "Polycyclic aromatic hydrocarbons",  
+      "Organobromines", "Organobromines" 
+    )
+  ),
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
+  ),
+  collapse_AC = list(EAC = "EQS"),
+  output_dir = summary.dir
+)
+```
+
+## Biota assessment
+
+The main difference in the biota assessment is the inclusion of effects
+data. This example has some PAH metabolite time series, but all imposex
+data have been excluded to keep things relatively simple. Imposex
+assessments have an additional modelling stage and this will be
+described in another vignette (not yet available).
+
+The first two stages are just as before
+
+``` r
+biota_data <- read_data(
+  compartment = "biota", 
+  purpose = "HELCOM",                               
+  contaminants = "biota.txt", 
+  stations = "stations.txt", 
+  data_dir = file.path(working.directory, "data", "example_HELCOM"),
+  info_dir = file.path(working.directory, "information", "HELCOM_2023"), 
+  extraction = "2023/08/23"
+)
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\species.csv 
+#> Found in path thresholds_biota.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_biota.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\determinand.csv': '4b48cbec9c71380f4b464779e643cab2'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\species.csv': '769328e51065226809c91944b6d8fe79'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv': 'b602a882d4783085c896bcf130c8f848'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\HELCOM_2023\thresholds_biota.csv': '9af82cd9730c0b135edd4a003724e8a6'
+#> Reading station dictionary from:
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/stations.txt': 'd229a1c984d507537840e73080f3773c'
+#> Warning: the following columns are missing from the ICES extraction: 
+#>   amap_arctic_lme
+#>   This might be because the extraction was made before 14 June 2024, in which case
+#>   take care if working with AMAP regions
+#> 
+#> Reading contaminant and effects data from:
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/biota.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_HELCOM/biota.txt': '0a1a33c4e668e63c97a6d50cdc644d22'
+#> Warning: the following columns are missing from the ICES extraction: 
+#>   amap_arctic_lme, casenumber
+#>   This might be because the extraction was made before 14 June 2024, in which case
+#>   take care if working with AMAP regions
+#> 
+#> Matching data with station dictionary
+#>  - restricting to stations in these convention areas: HELCOM 
+#>  - no restriction of stations by data type
+#>  - no restriction of stations by purpose of monitoring
+#>  - no restriction of data by program governance
+#>  - no restriction of stations by program governance
+#>  - matching 8644 records by coordinates
+#>  - matching 19893 records by station name
+#>  - 28437 of 28537 records have been matched to a station
+#> 
+#> Argument max_year taken to be the maximum year in the data: 2020
+
+biota_data <- tidy_data(biota_data)
+#> 
+#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
+#>  'oddities/biota_backup'
+#> 
+#> Dropping 32 records from data flagged for deletion. Possible reasons are:
+#>  - vflag = suspect
+#>  - species missing
+#> 
+#> Dropping 99 records from data that have no valid station code
+#> 
+#> Dropping 13664 stations that are not associated with any data
+#> 
+#> Cleaning station dictionary
+#> 
+#> Cleaning contaminant and biological effects data
+```
+
+The construction of the time series has a few more features. However,
+first we need to provide the individual TEQs to allow the construction
+of the WHO TEQ for dioxins, furans and planar PCBS (labelled TEQDFP).
+These are the values for the human health QS. This stage won’t be
+necessary in later releases.
+
+The biota data are grouped into time series which consist of the
+measurements of a single determinand in a single matrix (tissue type;
+e.g.  ‘EH’,
+`LI' or`SB`) in a single species at a single monitoring station. PAH metabolite data are further grouped by`method_analysis\`.
+
+The `determinands.control` argument does rather more here. There are
+five summed variables: PFOS, SBDE6, HBCD, SCB6 and TEQDFP. There is also
+one variable CB138+163 which needs to be relabeled as (replaced by)
+CB138. For the purposes of the assessment, the contribution of CB163 is
+regarded as small. Similarly CB138+163 is taken to be a good proxy for
+CB138. Note that the replacements must be done before the six PCBs are
+summed to give SCB6 in order for them to be included in the sum.
+
+The calculation of TEQDFP is more complex than that of the other summed
+variables. TEQDFP is the label used for the World Health Organisation
+Toxic Equivalent sum for dioxins, furans and planar polychlorinated
+biphenyls. This is calculated using the Toxic Equivalency Factors (TEFs)
+stored in `info_TEQ$HOLAS3`, with the TEFS identified as `weights`. Note
+that the weights used in the example below are those used in the HELCOM
+HOLAS 3 assessment, but have been superseeded; see `help("info_TEQ")`
+for more details.
+
+There is also one ‘bespoke’ action in `determinands.control`. This
+triggers a customised functions that does more complicated things. Here
+it deals with the  
+three different ways in which lipid weight measurements can be
+submitted.
+
+Finally,
+[`normalise_biota_HELCOM()`](http://osparcomm.github.io/HARSAT/reference/normalise_biota_HELCOM.md)
+is a customised function that determines which measurements are
+normalised to 5% lipid in a HELCOM assessment. Again, the normalisation
+functions are under active development and might well change before the
+next release.
+
+One thing that is not obvious from the function call is the choice of
+basis. By default, contaminant time series in biota are assessed on a
+wet weight basis, with measurements submitted on a dry or lipid weight
+basis transformed to a wet weight basis using supporting `DRYWT%` and
+`LIPIDWT%` information. Look at the OSPAR or external data examples to
+see how the choice of basis can be changed.
+
+``` r
+biota_timeseries <- create_timeseries(
+  biota_data,
+  determinands.control = list(
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
+    SBDE6 = list(
+      det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
+      action = "sum"
+    ),
+    HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum"),
+    CB138 = list(det = "CB138+163", action = "replace"),
+    SCB6 = list(
+      det = c("CB28", "CB52", "CB101", "CB138", "CB153", "CB180"), 
+      action = "sum"
+    ),
+    TEQDFP = list(
+      det = names(info_TEF$DFP_HOLAS3),
+      action = "sum",
+      weights = info_TEF$DFP_HOLAS3
+    ),
+    "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
+  ),
+  normalise = normalise_biota_HELCOM,
+  normalise.control = list(
+    lipid = list(method = "simple", value = 5), 
+    other = list(method = "none") 
+  )
+)
+#> 
+#> Oddities will be written to 'oddities/biota' with previous oddities backed up to
+#>  'oddities/biota_backup'
+#> 
+#> Cleaning data
+#>    Dropping stations with no data between 2015 and 2020
+#>    Unexpected or missing values for 'species_group': see species_group_queries.csv
+#>    Unexpected or missing values for 'matrix': see matrix_queries.csv
+#>    Unexpected or missing values for 'basis': see basis_queries.csv
+#>    Bile metabolite units changed from 'ng/g' to 'ng/ml' and from 'ug/kg' to 'ug/l'
+#>    Unexpected or missing values for 'unit': see unit_queries.csv
+#>    Unexpected or missing values for 'value': see value_queries.csv
+#>    Replicate measurements, only first retained: see replicate_measurements.csv
+#>    Non-positive detection limits: see non_positive_det_limits.csv
+#>    Non-positive quantification limits: see non_positive_quant_limits.csv
+#>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
+#>    Detection limit higher than data: see detection_limit_high.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
+#>    Data submitted as BDE28, BDE47, BDE99, BD100, BD153, BD154 summed to give 
+#> SBDE6
+#>      257 of 497 samples lost due to incomplete submissions
+#>    Data submitted as HBCDA, HBCDB, HBCDG summed to give HBCD
+#>      5 of 42 samples lost due to incomplete submissions
+#>    Data submitted as CB138+163 relabelled as CB138 
+#>    Data submitted as CB28, CB52, CB101, CB138, CB153, CB180 summed to give SCB6
+#>      22 of 925 samples lost due to incomplete submissions
+#>    Data submitted as 
+#> CB77, CB81, CB105, CB118, CB126, CB156, CB157, CB167, CB169, CDD1N, CDD4X, CDD6P, CDD6X, CDD9X, CDDO, TCDD, CDF2N, CDF2T, CDF4X, CDF6P, CDF6X, CDF9P, CDF9X, CDFO, CDFP2, CDFX1 
+#> summed to give TEQDFP
+#>      907 of 945 samples lost due to incomplete submissions
+#>    Data submitted as EXLIP% or FATWT% relabelled as LIPIDWT% 
+#> 
+#> Creating time series data
+#>    Converting data to appropriate basis for statistical analysis
+#>    Losing 63 out of 5737 records in basis conversion due to missing, censored
+#>    or zero drywt or lipidwt values.
+#>    Normalising lipid to 5%
+#>    No normalisation for other
+#>    Dropping groups of compounds / stations with no data between 2015 and 2020
+```
+
+The asssessment took about 4.3 minutes on my laptop
+
+``` r
+biota_assessment <- run_assessment(
+  biota_timeseries, 
+  AC = c("BAC", "EAC", "EQS", "MPC"),
+  parallel = TRUE
+)
+#> Setting up clusters: be patient, it can take a while!
+```
+
+One time series has not converged. (The parameter estimates are fine,
+but the standard errors are implausibly tight - if you look at the data,
+you will see why the routines struggle with this time series.) The code
+below tweaks the arguments of the numerical differencing routine that
+calculates the standard errors. Dealing with non-converged timeseries is
+a topic for a future vignette.
+
+``` r
+check_assessment(biota_assessment)
+#> The following assessment models have not converged:
+#> 2299 PYR1OH Limanda limanda BI HPLC-FD
+
+biota_assessment <- update_assessment(
+  biota_assessment, 
+  subset = series == "2299 PYR1OH Limanda limanda BI HPLC-FD",
+  hess.d = 0.0001, hess.r = 8
+)
+#> 
+#> assessing series:  station_code 2299; determinand PYR1OH; species Limanda limanda; matrix BI; method_analysis HPLC-FD; unit ng/ml
+
+check_assessment(biota_assessment)
+#> All assessment models have converged
+```
+
+And that’s it :)
+
+``` r
+write_summary_table(
+  biota_assessment,
+  determinandGroups = list(
+    levels = c(
+      "Metals", "PAH_parent", "Metabolites", "PBDEs", "Organobromines", 
+      "Organofluorines", "Chlorobiphenyls", "Dioxins"
+    ),  
+    labels = c(
+      "Metals", "PAH compounds and metabolites", "PAH compounds and metabolites",
+      "Organobromines", "Organobromines", "Organofluorines", 
+      "PCBs and dioxins", "PCBs and dioxins"
+    )
+  ),
+  symbology = list(
+    colour = list(
+      below = c("EQS" = "green"), 
+      above = c("EQS" = "red"), 
+      none = "black"
+    )
+  ),
+  collapse_AC = list(EAC = c("EAC", "EQS", "MPC")),
+  output_dir = summary.dir
+)
+```

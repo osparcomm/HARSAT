@@ -1,0 +1,334 @@
+# Getting started
+
+For now, we will assume that you are familiar with running basic R
+scripts and so on. We will focus on what the structure of a typical what
+the code looks like in a typical analysis.
+
+## Installing `harsat` from a bundled package
+
+If you have a downloaded copy of the bundled package, whch will be a
+file named something like `harsat_0.1.2.tar.gz` or `harsat_0.1.2.tar`,
+you can install that directly, and R will still take care of making sure
+you have all the right dependencies.
+
+### In RStudio
+
+From the `Packages` tab, choose `Install`, make sure you have selected
+to install from a Package Archive File, then press the `Browse...`
+button and locate your bundled package file. Then finally press the
+`Install` button.
+
+### From the R command line
+
+Use a command:
+
+``` r
+install.packages(remotes) -- if needed
+library(remotes)
+remotes::install_local("~/Downloads/harsat_0.1.2.tar")
+```
+
+Use the right file for the downloaded package file, press enter, and
+away you go.
+
+## Installing `harsat` directly from GitHub
+
+To install the latest version, use the `remotes` package:
+
+``` r
+# install.packages(remotes) -- if needed
+library(remotes)
+remotes::install_github("osparcomm/harsat@main") 
+```
+
+The development version is similar:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("osparcomm/HARSAT@develop")
+```
+
+> Note: many of the functions currently have a `cstm` prefix. When the
+> code was originally developed, we thought of it as “contaminant time
+> series modelling”, which is why you get all these `cstm` prefixes.
+> These will be removed in the near future.
+
+## Loading the code
+
+Now, within R, you can load the library in the usual way
+
+``` r
+library(harsat)
+```
+
+## Accessing files
+
+How you organize your files is up to you. We set up our main directory
+to find the data files. If you use your own data files, you will need to
+point to a directory containing a copy. We usually do this by putting
+our data files in a directory `data`, and information files in a
+directory `information`, but you can use any directory for these.
+
+``` r
+working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
+```
+
+## Reading in the data
+
+The first step is to read in the data that we’ve got, using
+[`read_data()`](http://osparcomm.github.io/HARSAT/reference/read_data.md).
+We will go through some of these arguments.
+
+``` r
+water_data <- read_data(
+  compartment = "water",
+  purpose = "OSPAR",
+  contaminants = "water.txt",
+  stations = "stations.txt",
+  data_dir = file.path(working.directory, "data", "example_OSPAR"),
+  info_dir = file.path(working.directory, "information", "OSPAR_2022"),
+  extraction = "2023/08/23"
+)
+#> Found in path determinand.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv 
+#> Found in path species.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\species.csv 
+#> Found in path thresholds_water.csv C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv 
+#> Found in package method_extraction.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/method_extraction.csv 
+#> Found in package pivot_values.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/pivot_values.csv 
+#> Found in package matrix.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv 
+#> Found in package imposex.csv C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/imposex.csv 
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\determinand.csv': '6b36346446c0ac04a52b3f1347829f6b'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/inst/information/matrix.csv': '4b4fb3814bb84cfbf9b37f7b59d45eb9'
+#> MD5 digest for: 'C:\Users\robfr\Documents\HARSAT\HARSAT\information\OSPAR_2022\thresholds_water.csv': '615ef96f716ef1d43c01ab67f383c881'
+#> Reading station dictionary from:
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/stations.txt': '58b9e90f314e89f637c60558c06755f4'
+#> Warning: the following columns are missing from the ICES extraction: 
+#>   amap_arctic_lme
+#>   This might be because the extraction was made before 14 June 2024, in which case
+#>   take care if working with AMAP regions
+#> 
+#> Reading contaminant and effects data from:
+#>  'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt'
+#> MD5 digest for: 'C:/Users/robfr/Documents/HARSAT/HARSAT/data/example_OSPAR/water.txt': '13d63b6161b671165b215b58f5e22469'
+#> Warning: the following columns are missing from the ICES extraction: 
+#>   amap_arctic_lme, casenumber
+#>   This might be because the extraction was made before 14 June 2024, in which case
+#>   take care if working with AMAP regions
+#> 
+#> Matching data with station dictionary
+#>  - restricting to stations in these convention areas: OSPAR 
+#>  - restricting to station with data types CW or EW 
+#>  - restricting to stations marked for temporal monitoring
+#>  - restricting to data with program governance: OSPAR, AMAP 
+#>  - restricting to stations with program governance: OSPAR, AMAP 
+#>  - matching 2768 records by coordinates
+#>  - matching 1583 records by station name
+#>  - grouping stations using station_asmtmimegovernance
+#>  - 4251 of 4351 records have been matched to a station
+#> 
+#> Argument max_year taken to be the maximum year in the data: 2022
+```
+
+The main arguments here are as follows:
+
+- `compartment` is an argument which specifies whether we’re dealing
+  with a biota assessment, a sediment assessment, or a water assessment.
+- `purpose` means we can mirror an `OSPAR` style assessment, a `HELCOM`
+  style assessment, an `AMAP`-style assessment, or `other` which means
+  you can basically tailor it yourself and the idea is that the code
+  will be sufficiently flexible that you can do a lot of tailoring to
+  suit your own needs.
+- `contaminants` is a data file which has all the chemical measurements
+  in it.
+- `stations` is the station file which is directly related to the
+  station dictionary that we get out at from ICES.
+- `info_dir` is your directory for reference tables – we will come back
+  to that.
+
+This reads in the three data sets, but does no more than that at this
+stage.
+
+Once you get to this point, you can look at the data if you want to, or
+do anything else that you need with the data before proceeding.
+Essentially the files that come in at this point are unchanged from the
+files that we are reading them in from. This is basically just reading
+in the data and setting things up.
+
+At this point we might want to do a whole lot of *ad hoc* corrections to
+these data, as is done with the OSPAR estimates.
+
+## Tidying the data
+
+The next step is to clean the data to prepare for analysis, using
+[`tidy_data()`](http://osparcomm.github.io/HARSAT/reference/tidy_data.md).
+This step tidies up the data structures that we’ve got there. It does
+filtering so that we get data in the form that we want for say, an OSPAR
+assessment or a HELCOM assessment. It also streamlines some of the data
+files.
+
+This may generate warnings. For example, when we’re cleaning the station
+dictionary, we’ve may find some issues with duplicate stations.
+Similarly, when it comes to cleaning the contaminant and biological
+effects data, we’ve may find some data from stations which are
+unrecognized by the station dictionary. Sometimes that’s fine and
+sometimes that’s not. Warnings are supported by output files which allow
+you to come in and have a look and see which values are affected, so you
+can go and check them out in more detail.
+
+``` r
+water_data <- tidy_data(water_data)
+#> 
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
+#> 
+#> Dropping 411 records from data flagged for deletion. Possible reasons are:
+#>  - vflag = suspect
+#>  - upper depth >5.5m
+#>  - filtration missing
+#>  - matrix = 'SPM'
+#> 
+#> Dropping 94 records from data that have no valid station code
+#> 
+#> Dropping 13633 stations that are not associated with any data
+#> 
+#> Cleaning station dictionary
+#> 
+#> Cleaning contaminant and biological effects data
+```
+
+To this point, we’ve still not done anything with the datasets.
+
+## Create a time series
+
+Now we can group the data into time series, using
+[`create_timeseries()`](http://osparcomm.github.io/HARSAT/reference/create_timeseries.md).
+This means identifying which data points belong to the same time series,
+and then set it up as a structure which then allows us to do the
+assessments.
+
+There are various different ways in which we can specify which
+determinants we actually want to assess. In this case, the
+`determinands` parameter specifies CHR, BBKF, PFOS, CB138, HCEPX, and
+HCH. There are various other arguments which allow you to control just
+how the data are manipulated.
+
+``` r
+water_timeseries <- create_timeseries(
+  water_data,
+  determinands.control = list(
+    CHR = list(det = "CHRTR", action = "replace"),
+    BBKF = list(det = c("BBF", "BKF", "BBJF", "BBJKF"), action = "bespoke"),
+    PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
+    CB138 = list(det = c("CB138+163"), action = "replace"),
+    HCEPX = list(det = c("HCEPC", "HCEPT"), action = "sum"), 
+    HCH = list(det = c("HCHA", "HCHB", "HCHG"), action = "sum")
+  )
+)
+#> 
+#> Oddities will be written to 'oddities/water' with previous oddities backed up to
+#>  'oddities/water_backup'
+#> 
+#> Cleaning data
+#>    Dropping stations with no data between 2017 and 2022
+#>    Unexpected or missing values for 'basis': see basis_queries.csv
+#>    Replicate measurements, only first retained: see replicate_measurements.csv
+#>    Non-positive detection limits: see non_positive_det_limits.csv
+#>    Limit of quantification less than limit of detection: see limits_inconsistent.csv
+#>    Censoring codes D and Q inconsistent with respective limits: see censoring_codes_inconsistent.csv
+#>    Detection limit higher than data: see detection_limit_high.csv
+#>    Implausible uncertainties reported with data: see implausible_uncertainties_reported.csv
+#>    Data submitted as CHRTR relabelled as CHR 
+#>    Data submitted as BBF, BKF summed to give BBKF
+#>      1 of 71 samples lost due to incomplete submissions
+#>    Data submitted as BBJF, BKF summed to give BBJKF
+#>      99 of 99 samples lost due to incomplete submissions
+#>    Data submitted as HCEPC, HCEPT summed to give HCEPX
+#>    Data submitted as HCHA, HCHB, HCHG summed to give HCH
+#>      190 of 234 samples lost due to incomplete submissions
+#> 
+#> Creating time series data
+#>    Converting data to appropriate basis for statistical analysis
+#>    Dropping groups of compounds / stations with no data between 2017 and 2022
+```
+
+## Assessment
+
+The next the next stage is to do the assessment, using
+[`run_assessment()`](http://osparcomm.github.io/HARSAT/reference/run_assessment.md).
+
+We’ve created a time series object, and pass that into this call. We
+have to say which thresholds we’re going to use when we do the
+assessment and there are other options which we can put in here. But
+this will just run. You can see that it tells you which time series
+we’re actually assessing as it progresses. This gives you an idea of how
+how many cups of tea you can drink before it’s all finished.
+
+``` r
+water_assessment <- run_assessment(
+  water_timeseries, 
+  AC = "EQS", 
+  parallel = TRUE
+)
+#> Setting up clusters: be patient, it can take a while!
+```
+
+There are various little warnings: these ones are nothing to worry
+about.
+
+We can then check that everything is converged, using
+[`check_assessment()`](http://osparcomm.github.io/HARSAT/reference/check_assessment.md).
+
+``` r
+check_assessment(water_assessment)
+#> All assessment models have converged
+```
+
+## Reporting
+
+We can then get a summary table of our results. We want a directory
+where we can put it. And `harsat` won’t create a directory if there’s
+nothing there, so let’s make a new directory, `./output/tutorial`, and
+put the full path into `summary.dir`, so we can tell `harsat` where to
+write to.
+
+``` r
+summary.dir <- file.path(working.directory, "output", "tutorial")
+
+if (!dir.exists(summary.dir)) {
+  dir.create(summary.dir, recursive = TRUE)
+}
+```
+
+And then we can generate the summary proper, using
+[`write_summary_table()`](http://osparcomm.github.io/HARSAT/reference/write_summary_table.md).
+The summary file which will be very familiar to those who have been
+involved in the OSPAR and the HELCOM assessments. The summary files have
+information about each time series, what the time series represents
+(which is the first set of columns), followed by statistical results,
+such as p values, and summary values such as the number of years in the
+data set, when it starts and finishes. And towards the end, we’ve got
+comparisons against various different threshold values.
+
+``` r
+write_summary_table(
+  water_assessment,
+  determinandGroups = list(
+    levels = c(
+      "Metals", "Organotins", "PAH_parent",  "Organofluorines", 
+      "Chlorobiphenyls", "Organochlorines", "Pesticides"
+    ),  
+    labels = c(
+      "Metals", "Organotins", "PAH parent compounds", "Organofluorines", 
+      "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
+    )
+  ),
+  classColour = list(
+    below = c("EQS" = "green"), 
+    above = c("EQS" = "red"), 
+    none = "black"
+  ),
+  collapse_AC = list(EAC = "EQS"),
+  output_dir = summary.dir
+)
+#> Error in write_summary_table(water_assessment, determinandGroups = list(levels = c("Metals", : unused argument (classColour = list(below = c(EQS = "green"), above = c(EQS = "red"), none = "black"))
+```
