@@ -51,6 +51,52 @@
 <div class="section level2">
 <h2 id="change-log">Change log<a class="anchor" aria-label="anchor" href="#change-log"></a></h2>
 <div class="section level3">
+<h3 id="version-104">Version 1.0.4<a class="anchor" aria-label="anchor" href="#version-104"></a></h3>
+<p>This is an intermediate release to coincide with the 2025 harsat user group meeting.</p>
+<div class="section level4">
+<h4 id="summary-tables">Summary tables<a class="anchor" aria-label="anchor" href="#summary-tables"></a></h4>
+<p>There have been several enhancements to <code>write_summary_table</code>. The most important of these involves the construction of symbologies to characterise summary features of each time series, such as its trend and status using a shape and a colour.</p>
+<p>The default symbology, used by OSPAR and HELCOM, has been made more flexible through the argument <code>symbology_control</code>. As well as specifying the colours for each threshold, the user can specify:</p>
+<ul><li>the shape used for each type of trend<br></li>
+<li>the p-value that a trend must attain to be treated as significant<br></li>
+<li>whether the trends (shapes) are based on the recent change or the overall change</li>
+</ul><p>The formulation for specifying colours has changed slightly. It is now a list of thresholds each with a ‘below’ colour and an ‘above’ colour (rather than a list with ‘below’ colours for each threshold and a list of ‘above’ colours for each threshold). The colour used for timeseries when there are no thresholds is now black by default, but this can be changed using <code>symbology_control</code></p>
+<p>In addition:</p>
+<ul><li>custom symbologies can be applied with a user-supplied function<br></li>
+<li>multiple symbologies can be applied, for example to assess against both environmental and human health standards<br></li>
+<li>mutliple symbologies can be a mixture of the default symbologies and custom symbologies<br></li>
+<li>names of the symbology columns can be changed / specified</li>
+</ul><p>There are lots of examples in the function documentation.</p>
+<p>The other enhancements involve normalisation (see a later topic) and the grouping of thresholds (e.g. where several thresholds such as the EAC and EQS represent the same boundary between good and poor status). The latter now has more checks and is implemented before any symbology is applied. This means that any symbology should be defined using the threshold groups, rather than their constituent thresholds. The argument <code>collapse_AC</code> has been deprecated and replaced with the argument <code>threshold_groups</code> which is more intuitive and consistent with the use of threshold in most places through the code.</p>
+</div>
+<div class="section level4">
+<h4 id="units">Units<a class="anchor" aria-label="anchor" href="#units"></a></h4>
+<p>Previous versions of <code>plot_assessment</code> and <code>report_assessment</code> only worked with a pre-defined set of units, some of which were formatted to look nice (e.g. with greek characters or superscripts). This restriction has now been relaxed so that any unit supplied in the determinand reference table can be used. A pre-defined set of units will still undergo special formatting with all other units reported without special formatting.</p>
+<p>It is now easier (coding-wise) to add units to the pre-defined set. However, doing so will require an issue to be raised and a subsequent update to the harsat code.</p>
+</div>
+<div class="section level4">
+<h4 id="normalisation">Normalisation<a class="anchor" aria-label="anchor" href="#normalisation"></a></h4>
+<p>Contaminant time series can be normalised in <code>create_timeseries</code>, for example to 5% aluminium or 5% lipid. The way in which each time series is normalised is now passed forwards in the timeseries object so that it can be accessed in <code>plot_assessment</code>, <code>report_assessment</code>, and <code>write_summary_table</code>. Specifically, if there is any normalisation, then info$normalise is set to <code>TRUE</code> and three extra variables are created in the timeseries object:</p>
+<ul><li>
+<code>normaliser</code> - the name of the normaliser for each timeseries; e.g. “AL”<br></li>
+<li>
+<code>normaliser_value</code> - the value that concentrations are normalised to; e.g. 5<br></li>
+<li>
+<code>normalise_unit</code> - the unit that <code>normaliser_value</code> is expressed as; e.g. “%”</li>
+</ul><p>These variables are also output in <code>write_summary_table</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="hat">HAT<a class="anchor" aria-label="anchor" href="#hat"></a></h4>
+<p>Experimental code for sending output to the XHAT has been uploaded. This still needs a lot of work so please hold your breath until a later release!</p>
+</div>
+<div class="section level4">
+<h4 id="minor-bug-fixes">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes"></a></h4>
+<ul><li>French pivot values used in sediment normalisation for OSPAR are now picked up correctly</li>
+<li>
+<code>read_data</code> now repairs invalid station geometries in ICES station dictionary extractions</li>
+</ul></div>
+</div>
+<div class="section level3">
 <h3 id="version-103">Version 1.0.3<a class="anchor" aria-label="anchor" href="#version-103"></a></h3>
 <p>This release is that used to run the OSPAR 2025 CEMP assessment.</p>
 <div class="section level4">
@@ -139,7 +185,7 @@
 <code>determinand.link.TEQDFP</code> was deprecated in release 1.0.2 and is now deleted; use <code>determinand.link.sum</code> instead.</li>
 </ul></div>
 <div class="section level4">
-<h4 id="minor-bug-fixes">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes"></a></h4>
+<h4 id="minor-bug-fixes-1">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-1"></a></h4>
 <ul><li>
 <code>write_summary_table</code> now works for biological effects assessments with non-standard summary variables (e.g. imposex_class)</li>
 <li>
@@ -184,7 +230,7 @@
 </ul><p>There is still some work required to make <code>report_assessment</code> suitable for all purposes.</p>
 </div>
 <div class="section level4">
-<h4 id="minor-bug-fixes-1">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-1"></a></h4>
+<h4 id="minor-bug-fixes-2">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-2"></a></h4>
 <ul><li>ensures that if <code>uncertainty</code> column is present in external data then so is <code>unit_uncertainty</code> and vice versa</li>
 <li>
 <code>plot_assessment</code> now correctly plots the 90% two-sided confidence intervals on VDSI estimates from imposex assessments</li>
@@ -235,7 +281,7 @@
 <ul><li>new values added to method_extraction table</li>
 </ul></div>
 <div class="section level4">
-<h4 id="minor-bug-fixes-2">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-2"></a></h4>
+<h4 id="minor-bug-fixes-3">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-3"></a></h4>
 <ul><li>correct behaviour of argument <code>return_early</code> in <code>create_timeseries</code><br></li>
 <li>pass <code>info</code> component of the harsat object to <code>determinand.link.sum</code>, <code>determinand.link.replace</code>, and <code>determinand.link.imposex</code><br></li>
 <li>ensure early return from <code>ctsm_convert_basis</code> when there is nothing to convert (avoids issues e.g. when all the data are biological effects)<br></li>

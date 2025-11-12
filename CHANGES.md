@@ -2,6 +2,101 @@
 
 ## Change log
 
+### Version 1.0.4
+
+This is an intermediate release to coincide with the 2025 harsat user
+group meeting.
+
+#### Summary tables
+
+There have been several enhancements to `write_summary_table`. The most
+important of these involves the construction of symbologies to
+characterise summary features of each time series, such as its trend and
+status using a shape and a colour.
+
+The default symbology, used by OSPAR and HELCOM, has been made more
+flexible through the argument `symbology_control`. As well as specifying
+the colours for each threshold, the user can specify:
+
+- the shape used for each type of trend  
+- the p-value that a trend must attain to be treated as significant  
+- whether the trends (shapes) are based on the recent change or the
+  overall change
+
+The formulation for specifying colours has changed slightly. It is now a
+list of thresholds each with a ‘below’ colour and an ‘above’ colour
+(rather than a list with ‘below’ colours for each threshold and a list
+of ‘above’ colours for each threshold). The colour used for timeseries
+when there are no thresholds is now black by default, but this can be
+changed using `symbology_control`
+
+In addition:
+
+- custom symbologies can be applied with a user-supplied function  
+- multiple symbologies can be applied, for example to assess against
+  both environmental and human health standards  
+- mutliple symbologies can be a mixture of the default symbologies and
+  custom symbologies  
+- names of the symbology columns can be changed / specified
+
+There are lots of examples in the function documentation.
+
+The other enhancements involve normalisation (see a later topic) and the
+grouping of thresholds (e.g. where several thresholds such as the EAC
+and EQS represent the same boundary between good and poor status). The
+latter now has more checks and is implemented before any symbology is
+applied. This means that any symbology should be defined using the
+threshold groups, rather than their constituent thresholds. The argument
+`collapse_AC` has been deprecated and replaced with the argument
+`threshold_groups` which is more intuitive and consistent with the use
+of threshold in most places through the code.
+
+#### Units
+
+Previous versions of `plot_assessment` and `report_assessment` only
+worked with a pre-defined set of units, some of which were formatted to
+look nice (e.g. with greek characters or superscripts). This restriction
+has now been relaxed so that any unit supplied in the determinand
+reference table can be used. A pre-defined set of units will still
+undergo special formatting with all other units reported without special
+formatting.
+
+It is now easier (coding-wise) to add units to the pre-defined set.
+However, doing so will require an issue to be raised and a subsequent
+update to the harsat code.
+
+#### Normalisation
+
+Contaminant time series can be normalised in `create_timeseries`, for
+example to 5% aluminium or 5% lipid. The way in which each time series
+is normalised is now passed forwards in the timeseries object so that it
+can be accessed in `plot_assessment`, `report_assessment`, and
+`write_summary_table`. Specifically, if there is any normalisation, then
+info\$normalise is set to `TRUE` and three extra variables are created
+in the timeseries object:
+
+- `normaliser` - the name of the normaliser for each timeseries;
+  e.g. “AL”  
+- `normaliser_value` - the value that concentrations are normalised to;
+  e.g. 5  
+- `normalise_unit` - the unit that `normaliser_value` is expressed as;
+  e.g. “%”
+
+These variables are also output in `write_summary_table`.
+
+#### HAT
+
+Experimental code for sending output to the XHAT has been uploaded. This
+still needs a lot of work so please hold your breath until a later
+release!
+
+#### Minor bug fixes
+
+- French pivot values used in sediment normalisation for OSPAR are now
+  picked up correctly
+- `read_data` now repairs invalid station geometries in ICES station
+  dictionary extractions
+
 ### Version 1.0.3
 
 This release is that used to run the OSPAR 2025 CEMP assessment.
