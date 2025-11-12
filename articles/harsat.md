@@ -120,7 +120,11 @@ water_data <- read_data(
 #>  - restricting to station with data types CW or EW 
 #>  - restricting to stations marked for temporal monitoring
 #>  - restricting to data with program governance: OSPAR, AMAP 
-#>  - restricting to stations with program governance: OSPAR, AMAP 
+#>  - restricting to stations with program governance: OSPAR, AMAP
+#> Warning: these stations have invalid shape file polygons:
+#> 2185
+#> the code has 'repaired' the polygons, but please inform ICES so that they
+#> can be fixed at source
 #>  - matching 2768 records by coordinates
 #>  - matching 1583 records by station name
 #>  - grouping stations using station_asmtmimegovernance

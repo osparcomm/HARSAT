@@ -25,13 +25,13 @@ Source:
 Arctic Monitoring and Assessment Programme (AMAP), Helsinki Commission
 (HELCOM), OSPAR Commission (OSPAR), International Council for the
 Exploration of the Sea (ICES), AmbieSense Ltd (2025). *harsat:
-Harmonized Regional Seas Assessment Tool*. R package version 1.0.3.1008,
+Harmonized Regional Seas Assessment Tool*. R package version 1.0.4.1009,
 <https://github.com/osparcomm/HARSAT>.
 
     @Manual{,
       title = {harsat: Harmonized Regional Seas Assessment Tool},
       author = {{Arctic Monitoring and Assessment Programme (AMAP)} and {Helsinki Commission (HELCOM)} and {OSPAR Commission (OSPAR)} and {International Council for the Exploration of the Sea (ICES)} and {AmbieSense Ltd}},
       year = {2025},
-      note = {R package version 1.0.3.1008},
+      note = {R package version 1.0.4.1009},
       url = {https://github.com/osparcomm/HARSAT},
     }

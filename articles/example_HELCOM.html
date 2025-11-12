@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3.1008</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.4.1009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -345,24 +345,38 @@ one-sided 95% confidence limits</li>
 <li>(optionally) a symbology summarising the trend (shape) and status
 (colour) of each time series</li>
 </ul>
-<p>This function is being actively developed and the function arguments
-are likely to evolve, so we’ll leave their explanation for the next
-release.</p>
+<p>The default symbology is used here which summarises the trend as:</p>
+<ul>
+<li>small_open_circle: one or two years of data (no model fitted)<br>
+</li>
+<li>small_filled_circle: three or four years of data, so only the mean
+concentration is estimated (no trend fitted)</li>
+<li>large_filled_circle: no significant change in concentration in the
+last twenty years (p &gt; 0.05)</li>
+<li>upward_triangle: significant increase in concentration in the last
+twenty years (p &lt; 0.05)</li>
+<li>downward_triangle: significant decrease in concentration in the last
+twenty years (p &lt; 0.05)</li>
+</ul>
+<p>The status is summarised as:</p>
+<ul>
+<li>green: the mean concentration in the most recent year is
+significantly below the EQS (p &lt; 0.05)</li>
+<li>red: the mean concentration in the most recent year is not
+significantly below the EQS (p &gt; 0.05)</li>
+</ul>
+<p>Many aspects of the symbology can be controlled using the
+<code>symbology_control</code> argument. Users can also supply their own
+function to customise the symbology to suit their needs.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">water_assessment</span>,</span>
-<span>  determinandGroups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Metals"</span>, <span class="st">"Organotins"</span>, <span class="st">"Organofluorines"</span><span class="op">)</span>, </span>
-<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Metals"</span>, <span class="st">"Organotins"</span>, <span class="st">"Organofluorines"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  symbology <span class="op">=</span> <span class="st">"default"</span>,</span>
+<span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
-<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
-<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
+<span>      EQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -434,7 +448,7 @@ which are described below</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dropping 523 records from data that have no valid station code</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Dropping 13326 stations that are not associated with any data</span></span>
+<span><span class="co">#&gt; Dropping 13327 stations that are not associated with any data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Cleaning station dictionary</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -505,9 +519,9 @@ information (also submitted with the data).</p>
 <span><span class="co">#&gt;    Converting data to appropriate basis for statistical analysis</span></span>
 <span><span class="co">#&gt;    Losing 6 out of 3282 records in basis conversion due to missing, censored</span></span>
 <span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
-<span><span class="co">#&gt;    Normalising copper to CORG using pivot values</span></span>
+<span><span class="co">#&gt;    Normalising copper to 5% CORG using pivot values</span></span>
 <span><span class="co">#&gt;    Removing sediment data where normaliser is a less than</span></span>
-<span><span class="co">#&gt;    Normalising metals to AL using pivot values</span></span>
+<span><span class="co">#&gt;    Normalising metals to 5% AL using pivot values</span></span>
 <span><span class="co">#&gt;    Normalising organics to 5% CORG</span></span>
 <span><span class="co">#&gt;    Removing sediment data where normaliser is a less than</span></span>
 <span><span class="co">#&gt;    Implausible uncertainties calculated in data processing: see implausible_uncertainties_calculated.csv</span></span>
@@ -526,25 +540,27 @@ This only takes about a minute to run on my laptop.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">sediment_assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All assessment models have converged</span></span></code></pre></div>
 <p>Finally, we can plot individual time series assessments (see vignette
-for external data) or print out the summary table</p>
+for external data) or print out the summary table. The
+<code>determinandGroups</code> argument allows the determinand groupings
+(as defined in the determinand reference table) to be renamed in the
+summary table. Below both the PBDEs and Organobromines groups would
+appear as Organobromines in the summary table.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">sediment_assessment</span>,</span>
-<span>  determinandGroups <span class="op">=</span> <span class="va">webGroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  symbology <span class="op">=</span> <span class="st">"default"</span>,</span>
+<span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      EQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  determinandGroups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Metals"</span>, <span class="st">"Organotins"</span>, <span class="st">"PAH_parent"</span>, <span class="st">"PBDEs"</span>, <span class="st">"Organobromines"</span><span class="op">)</span>,  </span>
 <span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>      <span class="st">"Metals"</span>, <span class="st">"Organotins"</span>, <span class="st">"Polycyclic aromatic hydrocarbons"</span>,  </span>
 <span>      <span class="st">"Organobromines"</span>, <span class="st">"Organobromines"</span> </span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
-<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
-<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -729,7 +745,7 @@ changed.</p>
 <span><span class="co">#&gt;    Converting data to appropriate basis for statistical analysis</span></span>
 <span><span class="co">#&gt;    Losing 63 out of 5737 records in basis conversion due to missing, censored</span></span>
 <span><span class="co">#&gt;    or zero drywt or lipidwt values.</span></span>
-<span><span class="co">#&gt;    Normalising lipid to 5%</span></span>
+<span><span class="co">#&gt;    Normalising lipid to 5% LIPIDWT%</span></span>
 <span><span class="co">#&gt;    No normalisation for other</span></span>
 <span><span class="co">#&gt;    Dropping groups of compounds / stations with no data between 2015 and 2020</span></span></code></pre></div>
 <p>The asssessment took about 4.3 minutes on my laptop</p>
@@ -761,10 +777,24 @@ a topic for a future vignette.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/check_assessment.html">check_assessment</a></span><span class="op">(</span><span class="va">biota_assessment</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All assessment models have converged</span></span></code></pre></div>
-<p>And that’s it :)</p>
+<p>The assessment uses four types of thresholds (BAC, EAC, EQS and MPC),
+but only one of them is applied to each timeseries, and they are all
+used to delineate between good and poor status. The summary table can
+therefore be simplified by grouping the thresholds together using the
+<code>threshold_groups</code> argument and labelling them as an EQS
+(equivalent). The symbology then knows that, whichever threshold is
+applied, the status will be green if significantly below the threshold
+and red otherwise.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_summary_table.html">write_summary_table</a></span><span class="op">(</span></span>
 <span>  <span class="va">biota_assessment</span>,</span>
+<span>  threshold_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BAC"</span>, <span class="st">"EAC"</span>, <span class="st">"EQS"</span>, <span class="st">"MPC"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  symbology <span class="op">=</span> <span class="st">"default"</span>,</span>
+<span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      EQS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>below <span class="op">=</span> <span class="st">"green"</span>, above <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  determinandGroups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>      <span class="st">"Metals"</span>, <span class="st">"PAH_parent"</span>, <span class="st">"Metabolites"</span>, <span class="st">"PBDEs"</span>, <span class="st">"Organobromines"</span>, </span>
@@ -776,14 +806,6 @@ a topic for a future vignette.</p>
 <span>      <span class="st">"PCBs and dioxins"</span>, <span class="st">"PCBs and dioxins"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  symbology <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      below <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span>, </span>
-<span>      above <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EQS"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>, </span>
-<span>      none <span class="op">=</span> <span class="st">"black"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAC"</span>, <span class="st">"EQS"</span>, <span class="st">"MPC"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">

@@ -291,24 +291,38 @@ the assessment of each time series. This includes:
 - (optionally) a symbology summarising the trend (shape) and status
   (colour) of each time series
 
-This function is being actively developed and the function arguments are
-likely to evolve, so we’ll leave their explanation for the next release.
+The default symbology is used here which summarises the trend as:
+
+- small_open_circle: one or two years of data (no model fitted)  
+- small_filled_circle: three or four years of data, so only the mean
+  concentration is estimated (no trend fitted)
+- large_filled_circle: no significant change in concentration in the
+  last twenty years (p \> 0.05)
+- upward_triangle: significant increase in concentration in the last
+  twenty years (p \< 0.05)
+- downward_triangle: significant decrease in concentration in the last
+  twenty years (p \< 0.05)
+
+The status is summarised as:
+
+- green: the mean concentration in the most recent year is significantly
+  below the EQS (p \< 0.05)
+- red: the mean concentration in the most recent year is not
+  significantly below the EQS (p \> 0.05)
+
+Many aspects of the symbology can be controlled using the
+`symbology_control` argument. Users can also supply their own function
+to customise the symbology to suit their needs.
 
 ``` r
 write_summary_table(
   water_assessment,
-  determinandGroups = list(
-    levels = c("Metals", "Organotins", "Organofluorines"), 
-    labels = c("Metals", "Organotins", "Organofluorines")
-  ),
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
-      none = "black"
+      EQS = list(below = "green", above = "red")
     )
   ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
 )
 ```
@@ -381,7 +395,7 @@ sediment_data <- tidy_data(sediment_data)
 #> 
 #> Dropping 523 records from data that have no valid station code
 #> 
-#> Dropping 13326 stations that are not associated with any data
+#> Dropping 13327 stations that are not associated with any data
 #> 
 #> Cleaning station dictionary
 #> 
@@ -458,9 +472,9 @@ sediment_timeseries <- create_timeseries(
 #>    Converting data to appropriate basis for statistical analysis
 #>    Losing 6 out of 3282 records in basis conversion due to missing, censored
 #>    or zero drywt or lipidwt values.
-#>    Normalising copper to CORG using pivot values
+#>    Normalising copper to 5% CORG using pivot values
 #>    Removing sediment data where normaliser is a less than
-#>    Normalising metals to AL using pivot values
+#>    Normalising metals to 5% AL using pivot values
 #>    Normalising organics to 5% CORG
 #>    Removing sediment data where normaliser is a less than
 #>    Implausible uncertainties calculated in data processing: see implausible_uncertainties_calculated.csv
@@ -487,26 +501,28 @@ check_assessment(sediment_assessment)
 ```
 
 Finally, we can plot individual time series assessments (see vignette
-for external data) or print out the summary table
+for external data) or print out the summary table. The
+`determinandGroups` argument allows the determinand groupings (as
+defined in the determinand reference table) to be renamed in the summary
+table. Below both the PBDEs and Organobromines groups would appear as
+Organobromines in the summary table.
 
 ``` r
 write_summary_table(
   sediment_assessment,
-  determinandGroups = webGroups <- list(
+  symbology = "default",
+  symbology_control = list(
+    colour = list(
+      EQS = list(below = "green", above = "red")
+    )
+  ),
+  determinandGroups = list(
     levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines"),  
     labels = c(
       "Metals", "Organotins", "Polycyclic aromatic hydrocarbons",  
       "Organobromines", "Organobromines" 
     )
   ),
-  symbology = list(
-    colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
-      none = "black"
-    )
-  ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
 )
 ```
@@ -701,7 +717,7 @@ biota_timeseries <- create_timeseries(
 #>    Converting data to appropriate basis for statistical analysis
 #>    Losing 63 out of 5737 records in basis conversion due to missing, censored
 #>    or zero drywt or lipidwt values.
-#>    Normalising lipid to 5%
+#>    Normalising lipid to 5% LIPIDWT%
 #>    No normalisation for other
 #>    Dropping groups of compounds / stations with no data between 2015 and 2020
 ```
@@ -741,11 +757,25 @@ check_assessment(biota_assessment)
 #> All assessment models have converged
 ```
 
-And that’s it :)
+The assessment uses four types of thresholds (BAC, EAC, EQS and MPC),
+but only one of them is applied to each timeseries, and they are all
+used to delineate between good and poor status. The summary table can
+therefore be simplified by grouping the thresholds together using the
+`threshold_groups` argument and labelling them as an EQS (equivalent).
+The symbology then knows that, whichever threshold is applied, the
+status will be green if significantly below the threshold and red
+otherwise.
 
 ``` r
 write_summary_table(
   biota_assessment,
+  threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),
+  symbology = "default",
+  symbology_control = list(
+    colour = list(
+      EQS = list(below = "green", above = "red")
+    )
+  ),
   determinandGroups = list(
     levels = c(
       "Metals", "PAH_parent", "Metabolites", "PBDEs", "Organobromines", 
@@ -757,14 +787,6 @@ write_summary_table(
       "PCBs and dioxins", "PCBs and dioxins"
     )
   ),
-  symbology = list(
-    colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
-      none = "black"
-    )
-  ),
-  collapse_AC = list(EAC = c("EAC", "EQS", "MPC")),
   output_dir = summary.dir
 )
 ```
