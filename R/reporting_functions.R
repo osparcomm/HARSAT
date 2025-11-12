@@ -112,202 +112,6 @@ subset_assessment <- function(assessment_obj, subset) {
 }  
 
 
-#' @export
-ctsm_summary_overview <- function(
-    assessment, timeSeries, info, symbology, extra_output, fullSummary = FALSE) {
-  
-  # reporting_functions.R
-  
-  # gets shape and colour for each time series
-  
-  # first get list of assessment summaries 
-  # summary structures differ between detGroups, so need to be careful
-  
-  # order assessment so that it is compatible with timeSeries - 
-  # need to resolve this
-
-  assessment <- assessment[row.names(timeSeries)]
-  
-  summaryList <- sapply(
-    assessment, 
-    function(x) {
-      out <- x$summary 
-      if ("power" %in% extra_output && !is.null(x$power)) {
-        out <- cbind(out, x$power)
-      }
-      out
-    }, 
-    simplify = FALSE
-  )
-  
-  if (any(is.null(summaryList)) | (length(summaryList) != nrow(timeSeries))) {
-    stop("coding error - contact HARSAT development team")
-  }
-    
-  
-  # get combined summary names across detGroups
-  
-  summaryNames <- unique(do.call("c", lapply(summaryList, names)))
-  
-  # create enlarged structure to hold summaries
-  
-  summaryObject <- do.call(
-    "data.frame", 
-    sapply(summaryNames, USE.NAMES = TRUE, simplify = FALSE, FUN = function (i) NA)
-  )
-  
-  # now write each summary to the enlarged structure
-  
-  out <- do.call("rbind", sapply(summaryList, USE.NAMES = TRUE, simplify = FALSE, FUN = function(x)
-  {
-    if (is.null(x)) return(summaryObject)
-    out <- summaryObject
-    out[names(x)] <- x
-    out
-  }))
-  
-  
-  # get shape and colour of plotting symbols
-
-  out <- ctsm_symbology_OSPAR(out, info, timeSeries, symbology)
-
-  if (fullSummary) out else out[c("shape", "colour")]
-}
-
-
-#' @export
-ctsm_symbology_OSPAR <- function(summary, info, timeSeries, symbology, alpha = 0.05) {
-  
-  # reporting_functions.R
-  
-  summary$shape <- with(summary, {
-    
-    shape <- character(nrow(summary))
-    
-    # trend symbols 
-    # a trend is estimated if p_overall_change is present 
-    # default shape is a large filled circle
-    
-    trendFit <- !is.na(p_overall_change)
-    shape[trendFit] <- "large_filled_circle"
-    
-    # show a significant trend based on p_recent_change 
-    # note p_recent_change might not exist even if p_overall_change does, because 
-    # there are too few years of data in the recent window
-    
-    # isImposex <- timeSeries$detGroup %in% "Imposex"
-    
-    isTrend <- !is.na(p_recent_change) & p_recent_change < alpha
-    upTrend <- isTrend & recent_change > 0
-    downTrend <- isTrend & recent_change < 0
-    
-    shape[downTrend] <- "downward_triangle"
-    shape[upTrend] <- "upward_triangle"
-    
-    
-    # status based on upper confidence limit in last year, but for imposex, clLY available only with
-    # 1 or 2 years if individual data, so use nyfit instead
-    
-    # statusFit <- !trendFit & !is.na(clLY) 
-    statusFit <- !trendFit & nyfit >= 3
-    shape[statusFit] <- "small_filled_circle"
-    
-    shape[!trendFit & !statusFit] <- "small_open_circle"
-    
-    shape
-  })
-
-
-  # colour based on 
-  # - upper confidence limit (nyfit > 2 or, for VDS, individual measurements) 
-  # - meanly (nyfit <= 2)
-  
-  # get the names of the variables which contain the difference between the 
-  # meanly and the AC
-  
-  if (!is.null(symbology)) {
-    
-    classColour <- symbology$colour
-    
-    AC <- names(classColour$below)
-    
-    ACdiff <- paste(AC, "diff", sep = "")
-    
-    
-    # when goodStatus is indicated by low concentrations, negative ACdiff is good
-    # since ACdiff = clLY - AC < 0
-    # when indicated by high concentrations, positive ACdiff is good
-    # to make colour calculation 'simple' change sign on ACdiff when goodStatus == high
-    
-    goodStatus <- ctsm_get_info(info$determinand, timeSeries$determinand, "good_status")
-    
-    wk <- summary[ACdiff]
-    wk[] <- lapply(wk, "*", ifelse(goodStatus == "low", 1, -1))
-    
-    summary$colour <- apply(wk, 1, function(x) {
-      
-      if (all(is.na(x))) return(classColour$none)
-      
-      AC <- AC[!is.na(x)]
-      x <- x[!is.na(x)]
-      
-      if (any(x < 0)) classColour$below[AC[which.max(x < 0)]]
-      else classColour$above[AC[length(x)]]
-    })  
-    
-    # need to adjust for null summaries
-    
-    summary <- within(summary, colour[is.na(shape)] <- NA)
-    
-  } else {
-    
-    summary$colour <- NA_character_
-    
-  }
-  
-  
-  # adjust shape and colour for nonparametric test if nyfit <= 2 and nyall > 2
-  # need to check whether the non-parametric test has been done (e.g. only 
-  #   imposex assessment) 
-  
-  if (!is.null(symbology)) {
-
-    # get the names of the variables which contain the result of the 
-    # non-parametric test for each AC
-    
-    ACbelow <- paste(AC, "below", sep = "")
-    
-    if (any(ACbelow %in% names(summary))) {    
-    
-      wk <- summary[ACbelow]
-      wk[] <- lapply(wk, function(x) {
-        
-        ok <- !is.na(x) & goodStatus == "high"
-        if (any(ok))
-          x[ok] <- ifelse(x[ok] == "below", "above", "below")
-        x
-      })
-      
-      wk <- apply(wk, 1, function(x) {
-        
-        if (all(is.na(x))) return(NA)
-        
-        AC <- AC[!is.na(x)]
-        x <- x[!is.na(x)]
-        
-        if (any(x == "below")) classColour$below[AC[which.max(x == "below")]]
-        else classColour$above[AC[length(x)]]
-      })  
-      
-      id <- with(summary, nyfit <= 2 & nyall > 2 & !is.na(wk))
-      summary$colour[id] <- wk[id]
-      summary$shape[id] <- "small_filled_circle"
-    }
-    
-  }
-  
-  summary
-}
 
 
 ctsm.web.AC <- function(assessment_ob, classification) {
@@ -394,8 +198,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' * (optionally) a symbology summarising the trend (shape) and status (colour)
 #' of each time series. This is experimental. 
 #'
-#' @param assessment_obj An assessment object resulting from a call to
-#'   run_assessment.
+#' @param harsat_obj A harsat object following a call to `run_assessment`.
 #' @param output_file The name of the output csv file. If using NULL, the file
 #'   will be called `biota_summary.csv`, `sediment_summary.csv` or `water_summary.csv`
 #'   as appropriate. By default the file will be written to the working
@@ -409,259 +212,455 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @param export Logical. `TRUE` (the default) writes the summary table to a csv
 #'   file. `FALSE` returns the summary table as an R object (and does not write to
 #'   a csv file).
-#' @param collapse_AC A names list of valid assessment criteria that allows
-#'   assessment criteria of the same 'type' to be reported together. See 
-#'   details.
+#' @param threshold_groups A names list of valid thresholds that allows 
+#'   thresholds of the same 'type' to be reported together. See details.
+#' @param collapse_AC `r lifecycle::badge("deprecated")` Use `threshold_groups` 
+#'   instead.  
 #' @param extra_output A character vector specifying extra summary metrics 
 #'   to be included in the output. Currently only recognises "power" to give the 
 #'   seven power metrics computed for lognormally distributed data. Defaults to 
 #'   `NULL`; i.e. no extra output. 
-#' @param symbology Experimental. Specifies the output symbology. Currently
-#'   assumes the thresholds are presented in increasing magnitude of 
-#'   environmental risk.
+#' @param symbology Experimental. A character string "default" or a user-defined 
+#'   function that specifies a symbology typically used to characterise the 
+#'   patterns of change in and the status of each time series. Defaults to 
+#'   `NULL`; i.e. no symbology. Multiple symbologies can be applied. See 
+#'   details.
+#' @param symbology_control Experimental. A named list of control options for 
+#'   the symbology. See details.
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
-#'   to label the determinands
+#'   to rename the existing determinand groups. The life of this argument is 
+#'   limited.
 #' @param append Logical. `FALSE` (the default) overwrites any existing summary
 #'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
 #' @returns a summary object, when `export` is `FALSE`
+#' 
+#' @section Default symbology:
+#' 
+#' `symbology = "default"` calls a pre-defined symbology that generates a 
+#' 'shape' and a 'colour' to characterise the status of each time series. Its
+#' behaviour is controlled using `symbology_control`, a named list with the 
+#' following elements:
+#'
+#' * `shape`: a list with names `none`, `mean`, `flat`, `up`, `down` giving the
+#' shape associated with each pattern of change. Here, `none` corresponds to 
+#' insufficient data to fit a parametric model; `mean` to sufficient data to fit
+#' a parametric model but not to assess for trends; `flat` to no significant 
+#' change in level (concentration) over time; `up` to a #' significant increase 
+#' in level over time; `down` to a significant decrease in level over time. 
+#' Their default values are `"small_open_circle"`, 
+#' `"small_filled_circle"`, `"large_filled_circle"`, `"upward_triangle"`,
+#' `"downward_triangle"`
+#' * `alpha` is the size of the test for change; default = `0.05`
+#' * `change` determines whether the change is based on the recent time window 
+#' (typically the last twenty years) or the whole time series; options 
+#' `"recent"` (default) and `"overall"` 
+#' * `colour` (default `NULL`) is a named list that characterises the status of
+#' a time series based on specified thresholds. The list names must match 
+#' (a subset of) the names of the thresholds used in the assessment or, if the 
+#' thresholds have been grouped, the group names. Each threshold must have two 
+#' elements: `below` gives the colour if the time series is 
+#' significantly below the threshold (p < 0.05); `above` gives the colour 
+#' otherwise. If multiple thresholds are used, they must be ordered from best
+#' to worst status. See examples
+#' * `no_threshold` (default `"black"`) is the colour used when no thresholds are
+#' applied to a time series. Another option might be to use `NA_character_`
+#' * `adjust_nonparam` (default `TRUE`) is a logical that allows the symbology
+#' to be adjusted for short time series (often dominated by less-than values)
+#' where a non-parametric test for status can be applied
+#' * `names` (default `list(colour = "colour", shape = "shape")`) allows the 
+#' names of the symbology columns in the summary table to be adjusted; this can
+#' be important if multiple symbologies are applied
+#' 
+#' @section Custom symbologies:
+#' 
+#' Users can apply custom symbologies by letting `symbology` be a user-supplied
+#' function of the form `fn(summary, info, control)` where:
+#' 
+#' * `summary` is the summary table before applying the symbology; for 
+#' convenience, there is an additional column `method` which doesn't 
+#' appear in the final summary table but takes, in particular, values `"none"` 
+#' and `"mean"` corresponding respectively to no parametric model and 
+#' insufficient data to fit a trend (see `shape` above)
+#' * `info` contains the contents of `harsat_obj$info`; i.e. all the reference
+#' tables and additional information about the assessment. For convenience,
+#' it also contains a temporary element `.threshold_group` which has the names
+#' of the threshold groups (which can differ from the thresholds themselves)
+#' * `control` contains `symbology_control` and allows the user to pass 
+#' additional information to the function
+#' 
+#' The output of the function must be a data frame with one column called
+#' `series` that contains the series identifier of each time series 
+#' (not necessarily in the same order as the summary table) and  
+#` the remaining columns giving the symbology. There can be any number of 
+#' symbology columns, but they must not share any of the existing names in the 
+#' summary table.
+#' 
+#' See the examples for more inspiration.
+#' 
+#' @section Multiple symbologies:
+#' 
+#' Multiple symbologies can be applied by specifying a named list whch can be 
+#' a mixture of default symbologies and custom symbologies. `symbology_control`
+#' must then be a named list (with the same names) giving control information 
+#' for each symbology. It is important to ensure that each symbology gives 
+#' output columns with different names. See examples.
+#' 
+#' @examples
+#' 
+#' # Default symbology with one threshold: the EQS. The colour will be "green"
+#' # if the time series is significantly below the EQS in the last monitoring
+#' # year and "red" otherwise 
+#' \dontrun{
+#' write_summary_table(
+#'   water_assessment,
+#'   symbology = "default",
+#'   symbology_control = list(
+#'     colour = list(EQS = list(below = "green", above = "red"))
+#'   )
+#' )
+#' }
+#'
+#' # Now applied using the overall change instead of the recent change.
+#' \dontrun{
+#' write_summary_table(
+#'   water_assessment,
+#'   symbology = "default",
+#'   symbology_control = list(
+#'     colour = list(EQS = list(below = "green", above = "red")),
+#'     change = "overall"
+#'   )
+#' )
+#' }
+#' 
+#' # If we only want to change one shape, then we only need to specify that one
+#' \dontrun{
+#' write_summary_table(
+#'   water_assessment,
+#'   symbology = "default",
+#'   symbology_control = list(
+#'     colour = list(EQS = list(below = "green", above = "red")),
+#'     shape = list(flat = "square")
+#'   )
+#' )
+#' }
+#'
+#' # Assessment thresholds grouped into BAC and EAC equivalents.
+#' # Symbology now has two thresholds giving:
+#' # "blue" if significantly below the BAC
+#' # "orange" if not significantly below the BAC and there is no EAC
+#' # "green" if significantly below the EAC but not the BAC
+#' # "red" otherwise  
+#' \dontrun{
+#' write_summary_table(
+#'   sediment_assessment,
+#'   threshold_groups = list(
+#'     BAC = "BAC", 
+#'     EAC = c("EAC", "ERL", "EQS", "FEQG")
+#'   ),
+#'   symbology = "default", 
+#'   symbology_control = list(
+#'     colour = list(
+#'       BAC = list(below = "blue", above = "orange"),
+#'       EAC = list(below = "green", above = "red")
+#'     ), 
+#'   )
+#' )
+#' }
+#' 
+#' # Assessment thresholds grouped into BAC and EAC equivalents. Human health
+#' # thresholds grouped as HQS
+#' # Two symbologies applied, one for environmental thresholds, the other for
+#' # health thresholds
+#' # Note the named lists and that the output names are specified 
+#' \dontrun{
+#' write_summary_table(
+#'   biota_assessment,
+#'   threshold_groups = list(
+#'     BAC = c("BAC", "NRC"),
+#'     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
+#'     HQS = c("MPC", "QShh")
+#'   ),
+#'   symbology = list(env = "default", health = "default"), 
+#'   symbology_control = list(
+#'     env = list(
+#'       colour = list(
+#'         BAC = list(below = "blue", above = "orange"),
+#'         EAC = list(below = "green", above = "red")
+#'       ), 
+#'       names = list(shape = "shape_env", colour = "colour_env")
+#'     ),
+#'     health = list(
+#'       colour = list(HQS = list(below = "green", above = "red")), 
+#'       names = list(shape = "shape_health", colour = "colour_health")
+#'     )
+#'   )
+#' )
+#' }
+#' 
+#' # Custom symbology that only reports time series where there is sufficient
+#' # information to assess trends and which colours the time series by whether, 
+#' # for each determinand, mean concentrations in the last monitoring year are 
+#' # below or above the median concentration observed across time series 
+#' \dontrun{
+#' symbology_user <- function(summary, info, control) {
+#'   summary <- dplyr::mutate(
+#'     summary,
+#'     shape = dplyr::case_when(
+#'       is.na(p_overall_change)   ~ NA_character_,
+#'       p_overall_change > 0.05   ~ "circle",
+#'       overall_change > 0        ~ "upward_triangle",
+#'       overall_change < 0        ~ "downward_triangle"
+#'     )
+#'   )
+#'   summary <- summary |> 
+#'     dplyr::group_by(determinand) |>
+#'     dplyr::mutate(
+#'       .shape = !is.na(shape),
+#'       colour = dplyr::case_when(
+#'         !.shape                                          ~ NA_character_,
+#'         mean_last_year <= median(mean_last_year[.shape]) ~ "blue",
+#'        mean_last_year > median(mean_last_year[.shape])  ~ "red"
+#'       )
+#'     ) |>
+#'     dplyr::ungroup()
+#'   summary[c("series", "shape", "colour")]
+#' }
+#'
+#' write_summary_table(
+#'   biota_assessment,
+#'   symbology = symbology_user
+#' )
+#' }
+#' 
 #'
 #' @export
 write_summary_table <- function(
-  assessment_obj, 
-  output_file = NULL, output_dir = ".", export = TRUE,
-  collapse_AC = NULL, extra_output = NULL, 
+  harsat_obj, 
+  output_file = NULL, 
+  output_dir = ".", 
+  export = TRUE,
+  threshold_groups = NULL, 
+  collapse_AC = lifecycle::deprecated(), 
+  extra_output = NULL, 
   symbology = NULL, 
-  determinandGroups = NULL, append = FALSE) {
+  symbology_control = list(),
+  determinandGroups = NULL, 
+  append = FALSE) {
 
-  # silence non-standard evaluation warnings
-  climit_last_year <- NULL
-
-  # reporting_functions.R
-  
-  assessment <- assessment_obj$assessment
-  timeSeries <- assessment_obj$timeSeries
-  info <- assessment_obj$info
-  
-  
-  # output information
-  # check valid extension and path
-  # merge output_file and output_dir to give final output destination
-  
-  if (export) {
-
-    # get default output_file 
-    
-    if (is.null(output_file)) {
-      output_file <- paste0(info$compartment, "_summary.csv")
-    } 
-    
-    # check output_file has valid extension
-    
-    if (!endsWith(output_file, ".csv")) {
-      stop(
-        "\nThe output file '", output_file, "' does not have a .csv extension.\n", 
-        "Check the information supplied to argument 'output_file'.",
-        call. = FALSE
-      )
-    }    
-    
-    # combine output_file and output_dir and check output directory exists
-    
-    output_file <- file.path(output_dir, output_file)
-
-    wk <- dirname(output_file)
-    if (!dir.exists(wk)) {
-      stop(
-        "\nThe output directory '", wk, "' does not exist.\n", 
-        "Create it or check the information supplied to argument 'output_dir'",
-        " is correct.",
-        call. = FALSE
-      )
-    }
-
+  if (lifecycle::is_present(collapse_AC)) {
+    lifecycle::deprecate_warn(
+      "1.0.4", 
+      "write_summary_table(collapse_AC)", 
+      "write_summary_table(threshold_groups)")
+      threshold_groups <- collapse_AC
   }
   
-    
-  # assessment criteria that are used in the symbology must have an appropriate 
-  # class colour
-    
-  is_AC <- !is.null(info$AC)
   
-  if (is_AC) {
-    AC <- info$AC
+  # get summary from assessment, combine with timeseries object, and rename
+  # variables into more reader_friendly form
+  
+  summary <- make_summary_table(harsat_obj, extra_output, determinandGroups)
+
+
+  # group thresholds to simplify summary table
+  # also updates list of thresholds to work with in the symbology stage
+  # note that the names of the thresholds might have changed so can no longer
+  #   be picked up from info$AC
+
+  thresholds <- harsat_obj$info$AC
+
+  if (!is.null(threshold_groups)) {
+    tmp <- group_thresholds(summary, threshold_groups, thresholds)
+    summary <- tmp$summary
+    thresholds <- tmp$thresholds
   }
   
-  if (!is.null(symbology) && is_AC) {
-    stopifnot(
-      !is.null(symbology$colour),
-      sort(names(symbology$colour$below)) == sort(names(symbology$colour$above)), 
-      names(symbology$colour$below) %in% AC, 
-      "none" %in% names(symbology$colour)
+
+  # apply symbology - shape and colour of plotting symbols
+
+  if (!is.null(symbology)) {
+    summary <- make_symbology(
+      summary, 
+      harsat_obj$info, 
+      symbology, 
+      symbology_control, 
+      thresholds
     )
   }
 
-
-  # assessment criteria in collapse_AC must be present in the data
-  # can turn some of these errors into warnings by creating extra variables 
-  # later on - have raised an issue 
   
-  if (!is.null(collapse_AC)) {
-    
-    if (is.null(names(collapse_AC))) {
-      stop(
-        "collapse_AC must be a names list of valid assessment criterion", 
-        call. = FALSE
-      )
-    }
-    
-    if (is_AC) {
+  # remove 'method', a convenience variable for constructing symbologies, from 
+  # summary table
+  
+  summary$method <- NULL
+  
+  
+  # results
+  
+  # if export = FALSE return summary data frame
 
-      id <- unlist(collapse_AC)
-      if (any(duplicated(id))) {
-        stop(
-          "cannot specify the same assessment criterion more than once in ", 
-          "collapse_AC", 
-          call. = FALSE
-        )
-      }
-      
-      ok <- id %in% AC
-      if (!all(ok)) {
-        id <- id[!ok]
-        stop(
-          "these assessment criteria are specified in collapse_AC but were not ",
-          "used in the\n", 
-          "in the assessment: ",
-          paste(id, collapse = ", "), 
-          call. = FALSE
-        )
-      }
-      
-      other_AC <- !AC %in% unlist(collapse_AC)
-      if (any(other_AC)) {
-        id <- AC[other_AC]
-        if (any(id %in% names(collapse_AC))) {
-          stop(
-            "cannot use the name of another assessment criterion in the names of \n", 
-            "collapse_AC",
-            .call = FALSE
-          )
-        }
-      }
-      
-      
-    } else {
-
-      stop(
-        "collapse_AC specified, but no assessment criteria were used in the assessment", 
-        call. = FALSE
-      )
-      
-    }
-
+  if (!export) {
+    return(summary)
   }
-      
+  
 
-  ## augment timeSeries structure
+  # otherwise write to .csv file
+    
+  # get default output_file 
+  
+  if (is.null(output_file)) {
+    output_file <- paste0(harsat_obj$info$compartment, "_summary.csv")
+  } 
+  
+  # check output_file has valid extension
+  
+  if (!endsWith(output_file, ".csv")) {
+    stop(
+      "\nThe output file '", output_file, "' does not have a .csv extension.\n", 
+      "Check the information supplied to argument 'output_file'.",
+      call. = FALSE
+    )
+  }    
+    
+  # combine output_file and output_dir and check output directory exists
+  
+  output_file <- file.path(output_dir, output_file)
+  
+  wk <- dirname(output_file)
+  if (!dir.exists(wk)) {
+    stop(
+      "\nThe output directory '", wk, "' does not exist.\n", 
+      "Create it or check the information supplied to argument 'output_dir'",
+      " is correct.",
+      call. = FALSE
+    )
+  }
+  
+
+  # headers on a new file aren't created if append = TRUE
+  
+  if (!file.exists(output_file)) {
+    append <- FALSE
+  }
+  
+  # if append = TRUE check that column names are identical and warn if there
+  # are series that are going to be repeated
+  
+  if (append) {
+    old_summary <- safe_read_file(output_file)
+    if (!identical(names(old_summary), names(summary))) {
+      stop(
+        "\nCannot append because the names of the new summary table differ ",
+        "from those of the\n", 
+        "existing summary file.",
+        call. = FALSE
+      )
+    }
+    
+    if (any(summary$series %in% old_summary$series)) {
+      warning(
+        "Some time series in the new summary table are already reported in ",
+        "the existing\n", 
+        "summary file: you should check what is going on.",
+        call. = FALSE
+      )
+    }
+  }
+  
+  readr::write_excel_csv(summary, output_file, na = "", append = append)
+  
+  return(invisible())
+}
+
+
+#' @export
+make_summary_table <- function(harsat_obj, extra_output, determinandGroups) {
+  
+  # gets summary from each assessment, augments this with anything in 
+  # extra_output, and merges with timeseries 
+
+  info <- harsat_obj$info
+  
+  # merge stations with timeseries
 
   # get determinand group
   # NB detGroup is currently a character if determinandGroups is null and a 
   # factor otherwise - the use of the factor assists with ordering, but probably
   # not needed here as this is primarily an OHAT requirement - have raised
   # an issue to tidy this up
+
+  # NB Use of determinandGroups has a limited life expectancy.
   
-  timeSeries <- tibble::rownames_to_column(timeSeries, ".series")
+  timeseries <- harsat_obj$timeSeries
   
-  timeSeries$detGroup <- ctsm_get_info(
+  timeseries <- tibble::rownames_to_column(timeseries, "series")
+  
+  timeseries$detGroup <- ctsm_get_info(
     info$determinand, 
-    timeSeries$determinand, 
+    timeseries$determinand, 
     "group", 
     info$compartment, 
     sep = "_"
   )
-
+  
   if (!is.null(determinandGroups)) {
     
-    if (!all(timeSeries$detGroup %in% determinandGroups$levels)) {
+    if (!all(timeseries$detGroup %in% determinandGroups$levels)) {
       stop('some determinand groups present in data, but not in groups argument')
     }
     
-    timeSeries$detGroup <- factor(
-      timeSeries$detGroup, 
+    timeseries$detGroup <- factor(
+      timeseries$detGroup, 
       levels = determinandGroups$levels, 
       labels = determinandGroups$labels, 
       ordered = TRUE
     )
-
-    timeSeries$detGroup <-   timeSeries$detGroup[, drop = TRUE]
-  }  
     
+    timeseries$detGroup <-   timeseries$detGroup[, drop = TRUE]
+  }  
   
-  # merge stations with timeSeries
-  
-  timeSeries <- dplyr::left_join(
-    timeSeries, 
-    assessment_obj$stations,
+
+  # join with stations
+
+  timeseries <- dplyr::left_join(
+    timeseries, 
+    harsat_obj$stations,
     by = "station_code"
   )
   
-  timeSeries <- tibble::column_to_rownames(timeSeries, ".series")
-  
 
-  ## get summary from assessment 
+  # order assessment so that it is compatible with timeseries - 
+
+  assessment <- harsat_obj$assessment
   
-  summary <- ctsm_summary_overview(
-    assessment, timeSeries, info, symbology, extra_output, 
-    fullSummary = TRUE
+  assessment <- assessment[timeseries$series]
+  
+  summary <- sapply(
+    assessment, 
+    function(x) {
+      out <- x$summary 
+      if ("power" %in% extra_output && !is.null(x$power)) {
+        out <- cbind(out, x$power)
+      }
+      out$method <- x$method
+      out
+    }, 
+    simplify = FALSE
   )
-
-  summary <- cbind(timeSeries, summary)
-    
-  summary$series <- row.names(summary)
-    
-
-  # double check no legacy data 
   
-  if (any(is.na(summary$shape))) {
-    stop('some legacy data have crept through')
-  }
-    
-
-  ## tidy up output
-  
-  # reorder variables 
-  
-  wk <- c(
-    "series", 
-    info$region$id,  
-    "country", "CMA", 
-    "station_code", "station_name", "station_longname", 
-    "station_latitude", "station_longitude", "station_type", "waterbody_type", 
-    "determinand", "detGroup", "species", "filtration",
-    "submedia", "matrix", "basis", "unit", "sex", "method_analysis", "subseries", 
-    "shape", "colour"
-  ) 
-  
-  summary <- dplyr::relocate(summary, dplyr::any_of(wk))
-  
-  if ("dtrend_obs" %in% names(summary)) {
-    wk <- c(
-      "dtrend_obs", "dtrend_seq", "dtrend_ten", "nyear_seq", 
-      "power_obs", "power_seq", "power_ten"
-    )
-    summary <- dplyr::relocate(summary, dplyr::all_of(wk), .after = "dtrend") 
+  if (any(is.null(summary)) | (length(summary) != nrow(timeseries))) {
+    stop("coding error - contact harsat development team")
   }
   
-  sortID <- intersect(
-    c(info$region$id, "country", "CMA", "station_name", 
-      "species", "detGroup", "determinand", "matrix"), 
-    names(summary)
-  )
-  summary <- summary[do.call(order, summary[sortID]), ]
+  summary <- dplyr::bind_rows(summary)
   
+  summary <- cbind(timeseries, summary)
+
   
-  # rename variables
+  # rename variables 
+  # much of this can be simplified by keeping these names consistent throughout 
+  # the code
   
   summary <- dplyr::rename(
     summary, 
@@ -677,7 +676,7 @@ write_summary_table <- function(
     climit_last_year = "clLY"
   )
   
-  if ("dtrend_obs" %in% names(summary)) {
+  if ("power" %in% extra_output) {
     summary <- dplyr::rename(
       summary, 
       power_dt_obs = "dtrend_obs",
@@ -690,101 +689,60 @@ write_summary_table <- function(
     )
   }
 
-  names(summary) <- gsub("diff$", "_diff", names(summary))
-  names(summary) <- gsub("achieved$", "_achieved", names(summary))
-  names(summary) <- gsub("below$", "_below", names(summary))
-  
-  
-  ## simplify (collapse) AC output if required
-  
-  if (is_AC && !is.null(collapse_AC)) {
+  if (!is.null(info$AC)) {
+    thresholds <- info$AC
 
-    # augment collapse_AC with unspecified AC
+    pos <- match(thresholds, names(summary))
+    names(summary)[pos] <- paste0(thresholds, "_value")
     
-    other_AC <- !AC %in% unlist(collapse_AC)
-
-    if (any(other_AC)) {
-      other_AC <- AC[other_AC]
-      
-      extra <- as.list(other_AC)
-      names(extra) <- other_AC
-      
-      collapse_AC <- c(collapse_AC, extra)
-      
-      collapse_AC <- collapse_AC[sort(names(collapse_AC))]
+    for (suffix in c("diff", "achieved", "below")) {
+      in_id <- paste0(thresholds, suffix)
+      out_id <- paste0(thresholds, "_", suffix)
+    
+      pos <- match(in_id, names(summary))
+      names(summary)[pos] <- out_id
     }
+  }
     
 
-    # set up type and value variables for each AC
+  # reorder variables and sort 
 
-    id <- paste0(AC, "_type")
-    summary[id] <- lapply(AC, function(x) {
-      ifelse(!is.na(summary[[x]]), x, NA_character_)
-    })
-    
-    id <- match(AC, names(summary))
-    names(summary)[id] <- paste0(AC, "_value")
-    
-
-    var_id <- c("type", "value", "diff", "achieved", "below") 
-
-        
-    for (group_id in names(collapse_AC)) {
-      
-      AC_id <- collapse_AC[[group_id]]
-      
-      # if only one AC and it has a different name, then rename
-      
-      if (length(AC_id) == 1 && group_id != AC_id) {
-        pos <- match(paste(AC_id, var_id, sep = "_"), names(summary))
-        names(summary)[pos] <- paste(group_id, var_id, sep = "_")
-      }
-      
-      if (length(AC_id) > 1) {
-      
-        in_id <- paste0(AC_id, "_type")
-        out_id <- paste0(group_id, "_type")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "character")
-        
-        in_id <- paste0(AC_id, "_value")
-        out_id <- paste0(group_id, "_value")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
-        
-        in_id <- paste0(AC_id, "_diff")
-        out_id <- paste0(group_id, "_diff")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
-        
-        in_id <- paste0(AC_id, "_achieved")
-        out_id <- paste0(group_id, "_achieved")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "real")
-        
-        in_id <- paste0(AC_id, "_below")
-        out_id <- paste0(group_id, "_below")
-        summary[out_id] <- apply(summary[in_id], 1, ctsm_collapse_AC, type = "character")
-      }
-      
-      # remove unwanted columns
-      
-      id <- setdiff(AC_id, group_id)
-      id <- paste(rep(id, each = 5), var_id, sep = "_")
-    
-      id <- setdiff(names(summary), id)
-    
-      summary <- summary[id]
-    }    
-    
-    # reorder column names 
-    
-    id <- paste(rep(names(collapse_AC), each = 5), var_id, sep = "_")
-    
+  var_id <- c(
+    "series", 
+    info$region$id,  
+    "country", 
+    "station_code", "station_name", "station_longname", 
+    "station_latitude", "station_longitude", "station_type", "waterbody_type", 
+    "determinand", "determinand_group", "species", "filtration",
+    "matrix", "basis", "unit", "sex", "method_analysis", 
+    "normaliser", "normaliser_value", "normaliser_unit",
+    "subseries"
+  ) 
+  
+  summary <- dplyr::relocate(summary, dplyr::any_of(var_id))
+  
+  if ("power" %in% extra_output) {
+    var_id <- c(
+      "power_dt_obs", "power_dt_seq", "power_dt_ten", 
+      "power_ny_seq", 
+      "power_pw_obs", "power_pw_seq", "power_pw_ten"
+    )
     summary <- dplyr::relocate(
       summary, 
-      dplyr::all_of(id), 
-      .after = climit_last_year
-    )
-    
+      dplyr::all_of(var_id), .after = "detectable_trend") 
   }
   
+  
+  var_id <- c(
+    info$region$id, "country", "station_name", "species", "determinand_group", 
+    "determinand", "matrix", "filtration"
+  )
+  
+  summary <- dplyr::arrange(
+    summary, 
+    dplyr::pick(dplyr::any_of(var_id))
+  )
+
   
   # rename region variables if required
   
@@ -794,66 +752,642 @@ write_summary_table <- function(
   }
   
 
-  # results
-  
-  # if export = FALSE return summary data frame
-  
-  if (!export) {
-    return(summary)
-  }
-    
-  
-  # otherwise write to output_file
-  
-  # headers on a new file aren't created if append = TRUE
-  
-  if (!file.exists(output_file)) {
-    append <- FALSE
-  }
-  
-  # if append = TRUE check that column names are identical and warn if there
-  # are series that are going to be repeated
-  
-  if (append) {
-    old_summary <- safe_read_file(output_file)
-    if (!identical(names(old_summary), names(summary))) {
-      stop(
-        "\nCannot append because the names of the new summary output differ ",
-        "from those of the\n", 
-        "existing summary file.",
-        call. = FALSE
-      )
-    }
-    
-    if (any(summary$series %in% old_summary$series)) {
-      warning(
-        "Some time series in the new summary output are already reported in ",
-        "the existing\n", 
-        "summary file: you should check what is going on.",
-        call. = FALSE
-      )
-    }
-  }
-  
-  
-  
-  readr::write_excel_csv(summary, output_file, na = "", append = append)
-  return(invisible())
+  summary
 }
 
 
-ctsm_collapse_AC <- function(x, type = c("real", "character")) {
-  type = match.arg(type)
+make_symbology <- function(
+    summary, info, symbology, symbology_control, thresholds) {
+  
+
+  # add thresholds to info 
+  # safer approach than picking up (guessing) them from the summary names 
+  # means that they can be accessed by user-defined symbologies
+  # thresholds might have been grouped so existing information in info might 
+  #   not be sufficient
+  
+  if (".threshold_group" %in% names(info)) {
+    stop(
+      "\nwrite_summary_table wants to create .threshold_group in\n", 
+      "harsat_obj$info but it already exists; this is unexpected, so check\n",
+      "your script and then contact the harsat development team", 
+      call. = FALSE
+    )
+  }
+  
+  info$.threshold_group <- thresholds
+  
+
+  # symbology can either be a single character string, a single function, 
+  # or a named list of the above
+
+  if (!is.list(symbology)) {
+    
+    symbology <- list(only = symbology)
+    symbology_control <- list(only = symbology_control)
+    
+  } else {
+    
+    if (is.null(names(symbology))) {
+      stop(
+        "\nsymbology - multiple symbologies must be specified by a named ",
+        "list",
+        call. = FALSE
+      )
+    }
+    
+    if (is.null(names(symbology_control)) || 
+        !identical(sort(names(symbology_control)), sort(names(symbology)))) {
+      stop(
+        "\nsymbology_control - multiple symbologies have been specified, so\n",
+        "symbology_control must be a named list with the same names as ",
+        "symbology",
+        call. = FALSE
+      )
+    }
+    
+  }
+  
+  for (i in names(symbology)) {
+    
+    if (is.character(symbology[[i]])) {
+      
+      if (symbology[[i]] != "default") {
+        stop(
+          "\nsymbology: currently the only pre-defined symbology is \"default\"",
+          call. = FALSE
+        )
+      }
+      symbology_fn <- symbology_default
+      
+    } else if (is.function(symbology[[i]])) {
+      
+      id <- formalArgs(symbology[[i]])
+      if (!identical(id, c("summary", "info", "control"))) {
+        stop(
+          "\nsymbology: user-defined function arguments should be 'summary'",
+          " 'info' and\n'control'",
+          call. = FALSE
+        )
+      }
+      
+      symbology_fn <- symbology[[i]]
+      
+    } else {
+      
+      stop(
+        "\nsymbology: symbology is not a recognised character string or a\n", 
+        "user-defined function",
+        call. = FALSE
+      )
+      
+    }
+    
+    result <- symbology_fn(summary, info, symbology_control[[i]])
+    
+    if (!("series" %in% names(result))) {
+      stop(
+        "\nerror in applying symbology: series not in result",
+        call. = FALSE
+      )
+    }
+    
+    id <- setdiff(names(result), "series")
+    
+    if (any(id %in% names(summary))) {
+      stop(
+        "\nsymbology: the names of the symbology variables already exist;\n",
+        "if applying the default symbology, adjust control$names;\n", 
+        "if applying a user-defined symbology, adjust the output names;\n",
+        "if applying multiple symbologies, check you are not using the same\n",
+        "names twice", 
+        call. = FALSE
+      )
+    }
+    
+    summary <- dplyr::left_join(
+      summary, 
+      result, 
+      by = "series", 
+      relationship = "one-to-one"
+    )
+    
+    summary <- dplyr::relocate(
+      summary, 
+      dplyr::all_of(id), 
+      .before = "n_year_all"
+    )
+    
+  }    
+  
+  summary
+}
+
+
+
+symbology_default <- function(
+    summary, 
+    info, 
+    control = list()) {
+  
+  # silence non-standard evaluation warnings
+
+  .data <- NULL
+  
+
+  # set up and modify control structures
+  
+  control = symbology_default_cntrl(control, info)
+    
+  
+  # shape = trend 
+  
+  # a trend is estimated unless method is "none" or "mean"
+  # note, method is inconsistently applied apart from "none" and "mean"; look 
+  #   at imposex assessments - this needs to be resolved
+  
+  # trend can either be 'overall', based on p_overal_change, or 'recent', based
+  #   on 'p_recent_change' 
+  # note p_recent_change might not exist even if a trend has been fitted to the 
+  #   whole time series if there are too few years of data in the recent window
+
+  trend_id <- paste0(control$change, "_change")
+  trend_p <- paste0("p_", trend_id)
+    
+  summary <- dplyr::mutate(
+    summary,
+    shape = dplyr::case_when(
+      .data$method %in% "none"           ~ control$shape$none,
+      .data$method %in% "mean"           ~ control$shape$mean,
+      is.na(.data[[trend_p]])            ~ control$shape$flat,
+      .data[[trend_p]] >= control$alpha  ~ control$shape$flat,
+      .data[[trend_id]] > 0              ~ control$shape$up,
+      .data[[trend_id]] < 0              ~ control$shape$down
+    )
+  )
+  
+  
+  # colour = status
+  
+  # status is based on  
+  # - upper confidence limit (if a parametric model has been fitted) 
+  # - mean_last_year (otherwise)
+  
+  if (!is.null(control$colour)) {
+    
+    thresholds <- names(control$colour)
+    
+    # need to ensure thresholds are ordered correctly from best to worst status
+    # gets complicated if good_status equates to high concentrations for some
+    #   determinands; to get around this simply change sign on the value of the 
+    #   threshold when good_status = high
+
+    good_status <- ctsm_get_info(
+      info$determinand, 
+      summary$determinand, 
+      "good_status"
+    )
+    
+    t_value <- paste0(thresholds, "_value")    
+    
+    wk <- summary[t_value]
+    wk[] <- lapply(wk, "*", dplyr::if_else(good_status == "low", 1, -1))
+    
+    ok <- apply(wk, 1, function(x) {
+      if (all(is.na(x))) return(TRUE)
+      x <- x[!is.na(x)]
+      length(x) == 1L || all(diff(x) > 0) 
+    }) 
+    
+    if (!all(ok)) {
+      stop(
+        "/nsymbology control:\n",
+        "to specify the colour correctly, the thresholds must be ordered from\n",
+        "best to worst status;\n",
+        "if this has already been done, then this error suggests there are\n",
+        "inconsistencies in the threshold values applied to this assessment",
+        call. = FALSE
+      )
+    }   
+    
+    # when good_status equates to low concentrations, negative t_diff is good
+    #   since t_diff = clLY - threshold < 0
+    # when good status equates to high concentrations, positive t_diff is good
+    # to make colour calculation 'simple' change sign on t_diff when 
+    #    goodStatus == high
+    
+    t_diff <- paste0(thresholds, "_diff")
+    
+    wk <- summary[t_diff]
+    wk[] <- lapply(wk, "*", dplyr::if_else(good_status == "low", 1, -1))
+    
+    summary$colour <- apply(wk, 1, function(x) {
+      
+      if (all(is.na(x))) return(control$no_threshold)
+      
+      thresholds <- thresholds[!is.na(x)]
+      x <- x[!is.na(x)]
+      
+      if (any(x < 0)) {
+        id <- thresholds[which.max(x < 0)]
+        control$colour[[id]]$below
+      } else {  
+        id <- thresholds[length(x)]
+        control$colour[[id]]$above
+      }
+      
+    })  
+
+  } else {
+    
+    summary$colour <- control$no_threshold
+    
+  }
+  
+  
+  # adjust shape and colour for nonparametric test method = "none" 
+  
+  if (control$adjust_nonparam & !is.null(control$colour)) {
+    
+    # get the variables that contain the non-parametric test result 
+    # note these might not exist if e.g. only biological effects have been
+    # assessed
+
+    t_below <- paste0(thresholds, "_below")
+    
+    ok <- t_below %in% names(summary)
+    
+    if (any(ok)) {
+      
+      wk <- dplyr::select(summary, dplyr::any_of(t_below))
+      
+      # adjust good_status = high as before
+      
+      wk[] <- lapply(wk, function(x) {
+        id <- !is.na(x) & good_status == "high"
+        if (any(id)) {
+          x[id] <- dplyr::if_else(x[id] == "below", "above", "below")
+        }
+        x
+      })
+      
+      wk <- apply(wk, 1, function(x) {
+        
+        if (all(is.na(x))) return(NA_character_)
+        
+        thresholds <- thresholds[!is.na(x)]
+        x <- x[!is.na(x)]
+        
+        if (any(x == "below")) {
+          id <- thresholds[which.max(x == "below")]
+          control$colour[[id]]$below
+        } else {
+          id <- thresholds[length(x)]
+          control$colour[[id]]$above
+        }
+      })  
+      
+      # only apply this where method = "none" - i.e. no parametric model
+      
+      id <- summary$method %in% "none" & !is.na(wk)
+      summary$colour[id] <- wk[id]
+      summary$shape[id] <- control$shape$mean
+    }
+    
+  }
+
+  out <- summary[c("series", "shape", "colour")]
+
+  names(out)[2:3] <- c(control$names$shape, control$names$colour)
+    
+  out
+}
+
+
+symbology_default_cntrl <- function(control, info) {
+
+  default <- list(
+    # trends
+    shape = list(
+      none = "small_open_circle", 
+      mean = "small_filled_circle", 
+      flat = "large_filled_circle", 
+      up = "upward_triangle", 
+      down = "downward_triangle"
+    ),
+    change = "recent", 
+    alpha = 0.05,
+
+    # status
+    colour = NULL,
+    no_threshold = "black",
+    
+    # other
+    adjust_nonparam = TRUE,
+    names = list(
+      colour = "colour",
+      shape = "shape"
+    )
+  )
+  
+  control <- modifyList(default, control, keep.null = TRUE)
+
+  
+  # trend  
+
+  ok <- length(control$change) == 1L && 
+    control$change %in% c("recent", "overall")
+  if (!ok) {
+    stop(
+      "\nsymbology_control - change:\n", 
+      "change must be either 'recent' or 'overall'", 
+      call. = FALSE
+    )
+  }
+  
+  ok <- length(control$shape) == 5L &&
+    all(c("none", "mean", "flat", "up", "down") %in% names(control$shape))
+  if (!ok ) {
+    stop(
+      "\nsymbology_control - shape:\n", 
+      "shape must be a list of 5 elements with names 'none', 'mean', 'flat'\n", 
+      "'up', 'down'; each element of the list must be a character string", 
+      call. = FALSE
+    )
+  }
+
+  
+  if (control$alpha <= 0 || control$alpha > 0.5) {
+    stop(
+      "\nsymbology_control - alpha:\n", 
+      "alpha must be numeric and between 0 and 0.5; \n", 
+      "typically it would be 0.1, 0.05 or 0.01", 
+      call. = FALSE
+    )
+  }  
+  
+  
+  # status
+
+  ok <- length(control$no_threshold) == 1L && is.character(control$no_threshold)
+  if (!ok) {
+    stop(
+      "\nsymbology_control - no_threshold:\n", 
+      "no_threshold must be a character string giving the colour used for time\n",
+      "series with no thresholds; to omit these time series from the colour\n", 
+      "symbology, use 'no_threshold = NA_character_'", 
+      call. = FALSE
+    )
+  }
+  
+  
+  if (!is.null(control$colour)) {
+    
+    if (is.null(info$.threshold_group)) {
+      stop(
+        "\nsymbology_control - colour:\n", 
+        "colour has been specified, but no thresholds were used", 
+        call. = FALSE
+      )
+    }
+    
+    ok <- all(names(control$colour) %in% info$.threshold_group)
+    if (!ok) {
+      stop(
+        "\nsymbology_control - colour:\n", 
+        "the thresholds are not all recognised;\n",
+        "if the thresholds have been grouped (using argument ", 
+        "'threshold_group'),\nthen check the ",
+        "thresholds specified in colour match the group names",
+        call. = FALSE
+      )
+    }
+    
+    ok <- sapply(
+      control$colour, 
+      function(x) identical(sort(names(x)), c("above", "below"))
+    )
+    if (!all(ok)) {
+      stop(
+        "\nsymbology_control - colour:\n", 
+        "each threshold must have two colours specified as a vector with \n",
+        "names `below` and `above` (in either order)",
+        call. = FALSE
+      )
+    }
+
+    
+    not_ok <- control$no_threshold %in% unlist(control$colour)
+    if (not_ok) {
+      stop(
+        "\nsymbology_control - no_threshold and colour:\n", 
+        "no_threshold must be different to the colours specified for each \n", 
+        "threshold", 
+        call. = FALSE
+      )
+    }
+
+  }
+
+
+  control
+}
+
+
+
+group_thresholds <- function(summary, threshold_groups, thresholds) {
+
+  # NB not all thresholds need to be specified in threshold_groups; only those
+  # where some grouping is going on
+    
+  # lots of error trapping to catch anything stupid!
+
+  if (is.null(thresholds)) {
+    stop(
+      "threshold_groups specified but no thresholds used in the assessment", 
+      call. = FALSE
+    )
+  }    
+
+  if (is.null(names(threshold_groups))) {
+    stop(
+      "threshold_groups must be a named list", 
+      call. = FALSE
+    )
+  }
+
+  id <- names(threshold_groups) 
+  ok <- !duplicated(id)
+  if (!all(ok)) {
+    stop(
+      "cannot give different threshold_groups the same name",
+      call. = FALSE
+    )
+  }
+    
+  id <- unlist(threshold_groups)
+  ok <- !duplicated(id)
+  if (!all(ok)) {
+    id <- id[!ok]
+    id <- sort(unique(id))
+    stop(
+      "these thresholds are specified more than once in threshold_groups:\n",
+      paste(id, collapse = "; "),
+      call. = FALSE
+    )
+  }
+  
+  id <- unlist(threshold_groups)
+  ok <- id %in% thresholds
+  if (!all(ok)) {
+    id <- id[!ok]
+    stop(
+      "these thresholds are specified in threshold_groups but not ",
+      "used in the assessment:\n", 
+      paste(id, collapse = ", "), 
+      call. = FALSE
+    )
+  }
+  
+  
+  # check that no threshold is used as a group name for a 'different' group
+  # i.e. one that does not contain that threshold
+  
+  ok <- sapply(
+    names(threshold_groups), 
+    function(id) {
+      !id %in% thresholds || id %in% threshold_groups[[id]]
+    }  
+  )
+    
+  if (!all(ok)) {
+    id <- names(threshold_groups)[!ok]
+    stop(
+      "these threshold groups do not contain the threshold of the same name:\n ", 
+      paste(id, collapse = ", "), 
+      call. = FALSE
+    )
+  }
+  
+  
+  # add ungrouped thresholds to threshold_groups to keep everything simple!
+
+  ok <- thresholds %in% unlist(threshold_groups)
+  if (!all(ok)) {
+    extra <- thresholds[!ok]
+    names(extra) <- extra
+    extra <- as.list(extra)
+
+    threshold_groups <- c(threshold_groups, extra)
+  }
+
+
+  threshold_groups <- threshold_groups[sort(names(threshold_groups))]
+
+  
+  # set up type variables for each threshold
+
+  id <- paste0(thresholds, "_type")
+  summary[id] <- lapply(thresholds, function(x) {
+    x_id <- paste0(x, "_value")
+    dplyr::if_else(is.na(summary[[x_id]]), NA_character_, x)
+  })
+
+
+  suffix <- c("_type", "_value", "_diff", "_achieved", "_below") 
+  
+  for (group_id in names(threshold_groups)) {
+    
+    threshold_id <- threshold_groups[[group_id]]
+    
+    # if only one threshold, then the only thing to do is rename it if it
+    # has a different name to the group name
+    
+    if (length(threshold_id) == 1L && threshold_id != group_id) {
+      old_names <- paste0(threshold_id, suffix) 
+      new_names <- paste0(group_id, suffix)
+      
+      pos <- match(old_names, names(summary))
+      names(summary)[pos] <- new_names
+    }
+    
+    
+    if (length(threshold_id) > 1L) {
+
+      # check multiple thresholds in the group haven't been applied to the same
+      # time series
+      
+      id <- paste0(threshold_id, "_type")
+      ok <- apply(summary[id], 1, function(x) {sum(!is.na(x)) <= 1L})
+      if (!all(ok)) {
+        series_id <- summary$series[which.min(ok)]
+        stop(
+          "cannot create the ", group_id, " threshold group because more than ", 
+          "one component threshold\n", 
+          "has been applied to the same series. For example, see ",
+          "series:\n", series_id, 
+          call. = FALSE
+        )
+      }
+      
+      in_id <- paste0(threshold_id, "_type")
+      out_id <- paste0(group_id, "_type")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+      
+      in_id <- paste0(threshold_id, "_value")
+      out_id <- paste0(group_id, "_value")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+      
+      in_id <- paste0(threshold_id, "_diff")
+      out_id <- paste0(group_id, "_diff")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+      
+      in_id <- paste0(threshold_id, "_achieved")
+      out_id <- paste0(group_id, "_achieved")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+      
+      in_id <- paste0(threshold_id, "_below")
+      out_id <- paste0(group_id, "_below")
+      summary[out_id] <- apply(summary[in_id], 1, group_thresholds_engine)
+
+      # remove redundant columns
+      
+      id <- setdiff(threshold_id, group_id)
+      if (length(id) >= 1L) {
+        id <- paste0(rep(id, each = length(suffix)), suffix)
+        summary <- dplyr::select(summary, - dplyr::all_of(id))
+      }
+      
+    }
+  }    
+  
+  # reorder column names 
+  
+  id <- paste0(rep(names(threshold_groups), each = length(suffix)), suffix)
+  
+  summary <- dplyr::relocate(
+    summary, 
+    dplyr::all_of(id), 
+    .after = climit_last_year
+  )
+
+  list(summary = summary, thresholds = names(threshold_groups))
+}
+  
+  
+group_thresholds_engine <- function(x) {
   if (all(is.na(x))) {
     out <- switch(
-      type, 
-      real = NA_real_, 
+      class(x), 
+      numeric = NA_real_, 
       character = NA_character_
     )
     return(out)
   }
   x <- x[!is.na(x)]
-  if (length(x) > 1) stop("multiple values not allowed")
+  if (length(x) > 1L) {
+    stop("multiple values not allowed")
+  }
   x
 }
 
@@ -944,12 +1478,19 @@ report_assessment <- function(
     "distribution"
   )
   
-  if (info$compartment == "water") {
-    timeSeries$matrix <- "WT"
-  }
+  # if (info$compartment == "water") {
+  #   timeSeries$matrix <- "WT"
+  # }
   
   timeSeries <- apply_subset(timeSeries, subset, parent.frame())
-  
+
+  if (nrow(timeSeries) == 0L) {
+    warning(
+      "no timeseries were selected - nothing has been reported"
+    )
+    return(invisible())
+  }
+
   series_id <- row.names(timeSeries)
   
 
@@ -1039,6 +1580,644 @@ report_assessment <- function(
 
 # OHAT ----
 
+write_hat <- function(assessments) {
+  
+  output_path <- file.path("output", "example_OSPAR", "hat")
+  
+  assessment_id <- names(assessments)
+  
+  wk <- lapply(assessment_id, function(id) {
+
+    assessment <- assessments[[id]]
+
+    out <- read.csv(
+      file.path("output", "example_OSPAR", paste0(id, "_summary.csv")), 
+      na.strings = "", 
+      fileEncoding = "UTF-8-BOM"
+    )
+    
+    var_id <- c(
+      "series", 
+      assessment$info$region$names, 
+      "country",           
+      "station_code", "station_name", "station_longname", 
+      "station_latitude", "station_longitude", 
+      "species", 
+      "determinand_group", "determinand", 
+      "filtration", "matrix", "basis", "unit", 
+      "sex", "method_analysis", "subseries", 
+      "shape", "colour", "shape_env", "colour_env", 
+      "shape_health", "colour_health"
+    )
+    
+    out <- dplyr::select(out, dplyr::any_of(var_id))
+    
+    out <- dplyr::rename(
+      out, 
+      # region = "OSPAR_region",
+      # subregion = "OSPAR_subregion",
+      latitude = "station_latitude",
+      longitude = "station_longitude",
+      measurement_type = "determinand_group"
+    )
+    
+    out <- dplyr::mutate(
+      out,
+      measurement_type = factor(
+        measurement_type, 
+        levels = c(
+          "Metals", "Organotins", 
+          "PAH parent compounds", "PAH alkylated compounds", "PAH metabolites", 
+          "Polybrominated diphenyl ethers", "Organobromines (other)", 
+          "Organofluorines", 
+          "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)",
+          "Pesticides", 
+          "Imposex", "Biological effects (other)"
+        )
+      ), 
+      # determinand = factor(determinand, levels = determinand_order)
+      determinand = factor(determinand)
+    )
+    
+    if (any(is.na(out$determinand))) {
+      stop("missing some determinand - investigate")
+    }
+    
+    out$measurement <- ctsm_get_info(
+      assessment$info$determinand, out$determinand, "common_name"
+    )
+    
+    if (id %in% "biota") {
+      out <- dplyr::mutate(
+        out,
+        species_latin = species,
+        family = ctsm_get_info(
+          assessment$info$species, species_latin, "species_group"
+        ), 
+        species = ctsm_get_info(
+          assessment$info$species, species_latin, "common_name"
+        ),
+        family = dplyr::recode(
+          family, 
+          Crustacean = "Shellfish", 
+          Bivalve = "Shellfish",
+          Gastropod = "Shellfish"
+        )
+      )
+    }
+    
+    if (id %in% "water") {
+      out <- dplyr::mutate(
+        out,
+        menu1_title = "Filtration",
+        menu1_entry = stringr::str_to_sentence(filtration),
+        menu2_title = NA_character_,
+        menu2_entry = NA_character_
+      )
+    }
+    
+    if (id %in% "sediment") {
+      out <- dplyr::mutate(
+        out,
+        menu1_title = "Sediment fraction",
+        menu1_entry = dplyr::recode(
+          matrix, 
+          SED20 = "<20 micron",
+          SED63 = "<63 micron",
+          SEDTOT = "Total sediment"
+        ),
+        menu2_title = NA_character_,
+        menu2_entry = NA_character_
+      )
+    }
+    
+    if (id %in% "biota") {
+      
+      out <- dplyr::mutate(
+        out,
+        menu1_title = dplyr::case_when(
+          measurement_type %in% "PAH metabolites" ~ "Chemical analysis",
+          determinand %in% "EROD" ~ "Tissue",
+          !(measurement_type %in% c("Imposex", "Biological effects (other)")) ~ 
+            "Tissue",
+          TRUE ~ NA_character_
+        ), 
+        menu1_entry = dplyr::case_when(
+          measurement_type %in% "PAH metabolites" ~ method_analysis,
+          determinand %in% "EROD" ~ matrix,
+          !(measurement_type %in% c("Imposex", "Biological effects (other)")) ~ 
+            matrix,
+          TRUE ~ NA_character_
+        ), 
+        menu2_title = dplyr::case_when(
+          determinand %in% "EROD" ~ "Sex",
+          !(measurement_type %in% 
+              c("PAH metabolites", "Imposex", "Biological effects (other)")) ~ 
+            "Animal grouping",
+          TRUE ~ NA_character_
+        ), 
+        menu2_entry = dplyr::case_when(
+          determinand %in% "EROD" ~ sex,
+          !(measurement_type %in% 
+              c("PAH metabolites", "Imposex", "Biological effects (other)")) ~ 
+            subseries,
+          TRUE ~ NA_character_
+        ), 
+        .matrix = ctsm_get_info(assessment$info$matrix, matrix, "name"), 
+        .matrix = stringr::str_to_sentence(.matrix),  
+        .matrix = dplyr::recode(
+          .matrix,
+          "Erythrocytes (red blood cells in vertebrates)" = "Red blood cells",
+          "Egg homogenate of yolk and albumin" = "Egg yolk & albumin", 
+          "Liver s9 fraction" = "Liver S9 fraction"
+        ), 
+        menu1_entry = dplyr::if_else(
+          menu1_title %in% "Tissue", 
+          .matrix, 
+          menu1_entry
+        ),
+        menu2_entry = dplyr::case_when(
+          menu2_title %in% "Sex" ~ dplyr::recode(
+            menu2_entry, "F" = "Female", "M" = "Male"
+          ),
+          menu2_title %in% "Animal grouping" & is.na(menu2_entry) ~ "All",
+          TRUE ~ menu2_entry
+        ),
+        menu2_entry = sub("_", " ", menu2_entry, fixed = TRUE),
+        .matrix = NULL
+      )
+      
+      
+      # only keep menu2_title and menu2_entry values for mammal_group
+      # if there is a mammal time series for that determinand
+      
+      det_id <- out |> 
+        dplyr::filter(
+          menu2_title %in% "Animal grouping",
+          ! menu2_entry %in% "All"
+        ) |> 
+        dplyr::pull(determinand) |> 
+        as.character() |> 
+        unique()
+      
+      det_id <- c(det_id, "EROD")
+      
+      out <- dplyr::mutate(
+        out, 
+        .change = determinand %in% det_id,
+        menu2_title = dplyr::if_else(.change, menu2_title, NA_character_),
+        menu2_entry = dplyr::if_else(.change, menu2_entry, NA_character_),
+        .change = NULL
+      )
+      
+    }
+    
+    
+    col_id = c(
+      "series", 
+      assessment$info$region$names, 
+      "country", 
+      "station_code", "station_name", "station_longname", "latitude", "longitude", 
+      "family", "species_latin", "species",
+      "measurement_type", "determinand", "measurement", 
+      "filtration", "matrix", "basis", "unit", 
+      "sex", "method_analysis", "subseries", 
+      "menu1_title", "menu1_entry", "menu2_title", "menu2_entry", 
+      "shape", "colour", "shape_env", "colour_env", "shape_health", "colour_health"
+    )
+    
+    col_id <- intersect(col_id, names(out))
+    
+    out <- out[col_id]
+    
+    
+    # order shape and colour so that less important time series are plotted first 
+    # (to avoid masking)
+    
+    if (id %in% c("biota", "water", "sediment")) {
+      
+      out <- out |> 
+        dplyr::mutate(
+          .shape = dplyr::recode(
+            shape, 
+            upward_triangle = "up", 
+            downward_triangle = "down",
+            large_filled_circle = "flat",
+            small_filled_circle = "mean",
+            small_open_circle = "other"
+          )
+        ) |> 
+        tidyr::unite(".ord", .shape, colour, remove = FALSE) |> 
+        dplyr::mutate(
+          .shape = NULL,
+          .ord = factor(
+            .ord,
+            levels = c(
+              paste("other", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              "mean_black", "flat_black", 
+              paste("mean", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("flat", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("down", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              paste("up", c("black", "blue", "orange", "green", "red"), sep = "_")
+            ), 
+            ordered = TRUE
+          )
+        )
+      
+      # out <- dplyr::arrange(
+      #   out, measurement_type, determinand, region, subregion, .ord, station_code)
+      
+      out <- dplyr::arrange(
+        out, measurement_type, determinand, .ord, station_code)
+      
+      out <- dplyr::mutate(out, .ord = NULL)
+      
+      out$order <- 1:nrow(out)
+      
+    }
+    
+    
+    if (id %in% "biota_env") {
+      
+      out <- out |> 
+        dplyr::mutate(
+          .shape = dplyr::recode(
+            shape_env, 
+            upward_triangle = "up", 
+            downward_triangle = "down",
+            large_filled_circle = "flat",
+            small_filled_circle = "mean",
+            small_open_circle = "other"
+          )
+        ) |> 
+        tidyr::unite(".ord", .shape, colour_env, remove = FALSE) |> 
+        dplyr::mutate(
+          .shape = NULL,
+          .ord = factor(
+            .ord,
+            levels = c(
+              paste("other", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              "mean_black", "flat_black", 
+              paste("mean", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("flat", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("down", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              paste("up", c("black", "blue", "orange", "green", "red"), sep = "_")
+            ), 
+            ordered = TRUE
+          )
+        )
+      
+      # out <- dplyr::arrange(
+      #   out, measurement_type, determinand, region, subregion, .ord, station_code)
+      
+      out <- dplyr::arrange(
+        out, measurement_type, determinand, .ord, station_code)
+
+      out <- dplyr::mutate(out, .ord = NULL)
+      
+      out$order_env <- 1:nrow(out)
+      
+      
+      out <- out |> 
+        dplyr::mutate(
+          .shape = dplyr::recode(
+            shape_health, 
+            upward_triangle = "up", 
+            downward_triangle = "down",
+            large_filled_circle = "flat",
+            small_filled_circle = "mean",
+            small_open_circle = "other"
+          )
+        ) |> 
+        tidyr::unite(".ord", .shape, colour_health, remove = FALSE) |> 
+        dplyr::mutate(
+          .shape = NULL,
+          .ord = factor(
+            .ord,
+            levels = c(
+              paste("other", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              "mean_black", "flat_black", 
+              paste("mean", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("flat", c("blue", "orange", "green", "red"), sep = "_"),
+              paste("down", c("black", "blue", "orange", "green", "red"), sep = "_"),
+              paste("up", c("black", "blue", "orange", "green", "red"), sep = "_")
+            ), 
+            ordered = TRUE
+          )
+        )
+      
+      # out <- dplyr::arrange(
+      #   out, measurement_type, determinand, region, subregion, .ord, station_code)
+      
+      out <- dplyr::arrange(
+        out, measurement_type, determinand, .ord, station_code)
+      
+      out <- dplyr::mutate(out, .ord = NULL)
+      
+      out$order_health <- 1:nrow(out)
+      
+      # out <- dplyr::arrange(
+      #   out, measurement_type, determinand, region, subregion, order_env, station_code)
+      
+      out <- dplyr::arrange(
+        out, measurement_type, determinand, order_env, station_code)
+
+      out <- dplyr::relocate(out, order_env, .after = colour_env)
+    }
+    
+    
+    outfile <- file.path(output_path, paste0(id, "_summary.csv"))
+    
+    readr::write_excel_csv(out, outfile, na = "")
+    
+    out
+  })
+  
+  names(wk) <- stringr::str_to_sentence(assessment_id)  
+
+  
+  # OHAT schema
+  
+  # measurement_type, menu1_title, menu2_title, health, order
+  
+  # identify health determinands with no AC
+  
+  # wk_id <- wk$Biota |>
+  #   group_by(determinand) |>
+  #   summarise(all_black = all(colour_health %in% "black"), .groups = "drop_last") |>
+  #   dplyr::filter(!all_black) |>
+  #   pull(determinand) |>
+  #   as.character()
+   
+  # get animal grouping in 'correct' order
+  
+  if ("biota" %in% assessment_id) {
+    wk_ag <- unique(wk$Biota$menu2_entry) |> na.omit() |> c()
+    wk_ag <- sort(wk_ag)
+    wk_ag <- c(setdiff(wk_ag, "All"), "All")
+    wk$Biota <- dplyr::mutate(
+      wk$Biota, 
+      menu2_entry = factor(menu2_entry, levels = wk_ag)
+    )
+  }
+    
+      
+  wk2 <- wk |> 
+    lapply(function(ls) {
+      if ("colour_health" %in% names(ls)) {
+        ls <- dplyr::mutate(
+          ls, 
+          health = if_else(determinand %in% wk_id, "TRUE", NA_character_)
+        )
+      }
+      id <- c("measurement_type", "measurement", "menu1_title", "menu2_title", "health")
+      ls |> 
+        dplyr::distinct(dplyr::across(any_of(id))) |> 
+        dplyr::mutate_if(is.factor, as.character) |> 
+        dplyr::mutate(order = 1:dplyr::n())
+    }) |> 
+    dplyr::bind_rows(.id = "compartment")
+  
+  readr::write_excel_csv(
+    wk2, 
+    file.path(output_path, "schema_1.csv"), 
+    na = ""
+  )
+  
+  # additionally determinand, menu1_entry, menu2_entry
+  
+  wk2 <- wk |> 
+    lapply(function(ls) {
+      if ("colour_health" %in% names(ls)) {
+        ls <- dplyr::mutate(ls, health = if_else(determinand %in% wk_id, "TRUE", NA_character_))
+      }
+      id <- c(
+        "measurement_type", "determinand", "measurement", "menu1_title", "menu1_entry",
+        "menu2_title", "menu2_entry", "health")
+      ls |> 
+        dplyr::distinct(across(any_of(id))) |> 
+        dplyr::arrange(
+          measurement_type, determinand, 
+          menu1_title, menu1_entry, menu2_title, menu2_entry
+        ) |> 
+        dplyr::mutate(
+          determinand = NULL, 
+          order = 1:dplyr::n()) |> 
+        dplyr::mutate_if(is.factor, as.character)
+    }) |> 
+    dplyr::bind_rows(.id = "compartment")
+  
+  readr::write_excel_csv(
+    wk2, 
+    file.path(output_path, "schema_2.csv"), 
+    na = ""
+  )
+  
+  
+  # biota gives species groups
+  # redefining family as a factor allows us to ge the ordering as desired
+  # - trouble with using foracts::fct_relevel is that it issues a warning if
+  # a level doesn't exist in the data
+
+  if ("biota" %in% assessment_id) {
+    
+    wk2 <- wk$Biota |> 
+      dplyr::distinct(measurement_type, family) |> 
+      dplyr::mutate(
+        family = factor(
+          as.character(family), 
+          c("Shellfish", "Fish", "Bird", "Mammal")
+        )
+      )  |> 
+      dplyr::arrange(measurement_type, family) |> 
+      dplyr::mutate_if(is.factor, as.character) |> 
+      dplyr::mutate(order = 1:dplyr::n())
+    
+    readr::write_excel_csv(
+      wk2, 
+      file.path(output_path, "schema_3.csv"), 
+      na = ""
+    )
+
+  }    
+  
+  
+  # legends and categories
+  
+  # determinand_order is used to order determinands how you want them to appear
+  # the code below is a hack to get things to work
+  
+  determinand_order <- lapply(assessments, function(x) {
+    unique(x$data$determinand)
+  })
+  
+  determinand_order <- unlist(determinand_order)
+  determinand_order <- sort(unique(determinand_order))
+
+  determinand_groups <- list(
+    levels = c(
+      "Metals", "Organotins", 
+      "PAH_parent", "PAH_alkylated", "Metabolites", 
+      "PBDEs", "Organobromines", 
+      "Organofluorines", 
+      "Chlorobiphenyls", "Dioxins", "Organochlorines",
+      "Effects"
+    ),  
+    labels = c(
+      "Metals", "Organotins", 
+      "PAH parent compounds", "PAH alkylated compounds", "PAH metabolites", 
+      "Polybrominated diphenyl ethers", "Organobromines (other)", 
+      "Organofluorines", 
+      "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)",
+      "Biological effects (other)"
+    )
+  )
+  
+    
+  
+  wk <- ctsm_OHAT_legends(
+    assessments = assessments,
+    determinandGroups = determinand_groups,
+    determinands = determinand_order,
+    symbology = list(
+      biota = list(
+        below = c(
+          "BAC" = "blue", "NRC" = "blue", "EAC" = "green", "FEQG" = "green",
+          "LRC" = "green", "QSsp" = "green"
+        ),
+        above = c(
+          "BAC" = "orange", "NRC" = "orange", "EAC" = "red", "FEQG" = "red",
+          "LRC" = "red", "QSsp" = "red"
+        ),
+        none = "black"
+      ),
+      sediment = list(
+        below = c(
+          "BAC" = "blue", "ERL" = "green", "EAC" = "green", "EQS" = "green", 
+          "FEQG" = "green"
+        ),
+        above = c(
+          "BAC" = "orange", "ERL" = "red", "EAC" = "red", "EQS" = "red", 
+          "FEQG" = "red"
+        ),
+        none = "black"
+      ),
+      water = list(
+        below = c("EQS" = "green"), 
+        above = c("EQS" = "red"), 
+        none = "black"
+      )
+    ),    
+    regionalGroups = list(
+      biota = c(
+        "Metals", "PAH parent compounds", "PAH metabolites", "Polychlorinated biphenyls", 
+        "Polybrominated diphenyl ethers", "Imposex"
+      ),
+      sediment = c(
+        "Metals", "PAH parent compounds", "Polychlorinated biphenyls", 
+        "Polybrominated diphenyl ethers", "Organotins"
+      )
+    ),
+    distanceGroups = list(
+      biota = c("Metals", "PAH parent compounds"),
+      sediment = c("Metals", "PAH parent compounds")
+    ),
+    path = output_path
+  )
+  
+  
+  # wk_health <- ctsm_OHAT_legends(
+  #   assessments = list(biota = biota_assessment),
+  #   determinandGroups = determinand_groups,
+  #   determinands = determinand_order, 
+  #   symbology = list(
+  #     biota = list(
+  #       below = c("MPC" = "green", "QShh" = "green"),
+  #       above = c("MPC" = "red", "QShh" = "red"),
+  #       none = "black"
+  #     )
+  #   ),
+  #   regionalGroups = list(
+  #     Biota = c(
+  #       "Metals", "PAH parent compounds", "PAH metabolites", "Polychlorinated biphenyls", 
+  #       "Polybrominated diphenyl ethers", "Imposex"
+  #     ),
+  #     Sediment = c(
+  #       "Metals", "PAH parent compounds", "Polychlorinated biphenyls", 
+  #       "Polybrominated diphenyl ethers", "Organotins"
+  #     )
+  #   ),
+  #   distanceGroups = list(
+  #     Biota = c("Metals", "PAH parent compounds"),
+  #     Sediment = c("Metals", "PAH parent compounds")
+  #   ),
+  #   path = output_path
+  # )
+  
+  
+  # ad-hoc corrections
+  
+  wk$legends <- wk$legends |> 
+    dplyr::mutate(
+      .biota_HG = Compartment == "Biota" & Determinand_code == "HG",
+      Label = dplyr::case_when(
+        .biota_HG & Label == "below BAC"  ~ "below BAC or NRC",
+        .biota_HG & Label == "below QSsp" ~ "below QSsp or LRC",
+        .biota_HG & Label == "above QSsp" ~ "above QSsp or LRC",
+        TRUE                              ~ Label
+      ),
+      Tooltip = dplyr::if_else(
+        .biota_HG & Label == "below BAC or NRC", 
+        "background or no-risk concentrations", 
+        Tooltip
+      )
+    ) |>
+    dplyr::select(- .biota_HG)
+  
+  
+  # wk$legends <- dplyr::bind_rows(
+  #   list("Environmental" = wk$legends, "Human health" = wk_health$legends),
+  #   .id = "Threshold"
+  # )
+  
+  # wk$legends <- wk$legends |> 
+  #   dplyr::mutate(
+  #     Determinand_code = factor(Determinand_code) |> forcats::fct_inorder()
+  #   ) |> 
+  #   dplyr::arrange(Compartment, Determinand_code, Threshold) 
+  
+  wk$legends <- wk$legends |> 
+    dplyr::mutate(
+      Determinand_code = factor(Determinand_code) |> forcats::fct_inorder()
+    ) |> 
+    dplyr::arrange(Compartment, Determinand_code) 
+
+  wk$legends <- dplyr::select(wk$legends, Compartment, everything())
+  
+  wk$legends$order <- 1:nrow(wk$legends)
+  
+  names(wk$legends) <- tolower(names(wk$legends))
+  
+  readr::write_excel_csv(
+    wk$legends, 
+    file.path(output_path, "legends.csv"), 
+    na = ""
+  )
+  
+  names(wk$help) <- tolower(names(wk$help))
+  
+  readr::write_excel_csv(
+    wk$help, 
+    file.path(output_path, "help_and_information.csv"), 
+    na = ""
+  )
+  
+  invisible()
+  
+}
+
+
+
 #' @export
 ctsm_OHAT_legends <- function(
   assessments, determinandGroups, determinands, symbology, 
@@ -1081,10 +2260,10 @@ ctsm_OHAT_legends <- function(
     ctsm_OHAT_add_legends(legends, classColour, regionalGroups, distanceGroups, assessment$info)
   })
   
-  legends <- lapply(out, "[[", "legends") %>% 
+  legends <- lapply(out, "[[", "legends") |> 
     dplyr::bind_rows(.id = "Compartment")
   
-  help <- lapply(out, "[[", "help") %>% 
+  help <- lapply(out, "[[", "help") |> 
     dplyr::bind_rows(.id = "Compartment")
   
   list(legends = legends, help = help)
@@ -1138,8 +2317,8 @@ ctsm_OHAT_add_legends <- function(legends, classColour, regionalGroups, distance
     )
   )
 
-  standard_shape <- standard_shape %>% 
-    dplyr::bind_rows() %>% 
+  standard_shape <- standard_shape |> 
+    dplyr::bind_rows() |> 
     as.data.frame()
   
   standard_shape <- list(low = standard_shape, high = standard_shape)

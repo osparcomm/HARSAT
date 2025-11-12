@@ -34,6 +34,8 @@ water_timeseries <- create_timeseries(
 )
 
 
+# water_timeseries <- readRDS(file.path("RData", "water_timeseries_OSPAR.rds"))
+
 water_assessment <- run_assessment(
   water_timeseries, 
   AC = "EQS", 
@@ -55,14 +57,12 @@ write_summary_table(
       "Polychlorinated biphenyls", "Organochlorines (other)", "Pesticides"
     )
   ),
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
-      none = "black"
+      EQS = list(below = "green", above = "red")
     )
   ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_OSPAR")
 )
 
@@ -116,6 +116,10 @@ sediment_timeseries <- create_timeseries(
 )
 
 
+# sediment_timeseries <- readRDS(
+#   file.path("RData", "sediment_timeseries_OSPAR.rds")
+# )
+
 sediment_assessment <- run_assessment(
   sediment_timeseries, 
   AC = c("BAC", "EAC", "EQS", "ERL", "FEQG"),
@@ -141,26 +145,17 @@ write_summary_table(
       "Polychlorinated biphenyls", "Dioxins", "Organochlorines (other)"
     )
   ),
-  symbology = list(
-    colour = list(
-      below = c(
-        "BAC" = "blue", 
-        "ERL" = "green", 
-        "EAC" = "green", 
-        "EQS" = "green", 
-        "FEQG" = "green"
-      ),
-      above = c(
-        "BAC" = "orange", 
-        "ERL" = "red", 
-        "EAC" = "red", 
-        "EQS" = "red", 
-        "FEQG" = "red"
-      ),
-      none = "black"
-    )
+  threshold_groups = list(
+    BAC = "BAC", 
+    EAC = c("EAC", "ERL", "EQS", "FEQG")
   ),
-  collapse_AC = list(BAC = "BAC", EAC = c("EAC", "ERL", "EQS", "FEQG")),
+  symbology = "default", 
+  symbology_control = list(
+    colour = list(
+      BAC = list(below = "blue", above = "orange"),
+      EAC = list(below = "green", above = "red")
+    ), 
+  ),
   output_dir = file.path("output", "example_OSPAR")
 )
 
@@ -226,6 +221,10 @@ biota_timeseries <- create_timeseries(
 )
 
 
+
+
+# biota_timeseries <- readRDS(file.path("RData", "biota_timeseries_OSPAR.rds"))
+
 # biota_assessment <- run_assessment(
 #   biota_timeseries, 
 #   AC = c("BAC", "EAC", "EQS", "HQS"),
@@ -286,33 +285,25 @@ wk_groups <- list(
 write_summary_table(
   biota_assessment,
   determinandGroups = wk_groups,
-  symbology = list(
-    colour = list(
-      below = c(
-        "BAC" = "blue",
-        "NRC" = "blue",
-        "EAC" = "green", 
-        "FEQG" = "green",
-        "LRC" = "green", 
-        "QSsp" = "green"
-      ),
-      above = c(
-        "BAC" = "orange", 
-        "NRC" = "orange", 
-        "EAC" = "red", 
-        "FEQG" = "red",
-        "LRC" = "red", 
-        "QSsp" = "red"
-      ),
-      none = "black"
-    )
-  ),
-  collapse_AC = list(
+  threshold_groups = list(
     BAC = c("BAC", "NRC"),
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
   ),
-  output_file = "biota_summary_env.csv",
+  symbology = list(env = "default", health = "default"), 
+  symbology_control = list(
+    env = list(
+      colour = list(
+        BAC = list(below = "blue", above = "orange"),
+        EAC = list(below = "green", above = "red")
+      ), 
+      names = list(shape = "shape_env", colour = "colour_env")
+    ),
+    health = list(
+      colour = list(HQS = list(below = "green", above = "red")), 
+      names = list(shape = "shape_health", colour = "colour_health")
+    )
+  ),
   output_dir = file.path("output", "example_OSPAR")
 )
 
@@ -322,23 +313,16 @@ write_summary_table(
 write_summary_table(
   biota_assessment,
   determinandGroups = wk_groups,
-  symbology = list(
-    colour = list(
-      below = c(
-        "MPC" = "green", 
-        "QShh" = "green"
-      ),
-      above = c(
-        "MPC" = "red", 
-        "QShh" = "red"
-      ),
-      none = "black"
-    )
-  ),
-  collapse_AC = list(
+  threshold_groups = list(
     BAC = c("BAC", "NRC"),
     EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
     HQS = c("MPC", "QShh")
+  ),
+  symbology = "default",
+  symbology_control = list(
+    colour = list(
+      HQS = list(below = "green", above = "red")
+    )
   ),
   output_file = "biota_summary_health.csv",
   output_dir = file.path("output", "example_OSPAR")

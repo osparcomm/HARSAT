@@ -5,20 +5,21 @@
 \title{Write assessment summary to a csv file}
 \usage{
 write_summary_table(
-  assessment_obj,
+  harsat_obj,
   output_file = NULL,
   output_dir = ".",
   export = TRUE,
-  collapse_AC = NULL,
+  threshold_groups = NULL,
+  collapse_AC = lifecycle::deprecated(),
   extra_output = NULL,
   symbology = NULL,
+  symbology_control = list(),
   determinandGroups = NULL,
   append = FALSE
 )
 }
 \arguments{
-\item{assessment_obj}{An assessment object resulting from a call to
-run_assessment.}
+\item{harsat_obj}{A harsat object following a call to \code{run_assessment}.}
 
 \item{output_file}{The name of the output csv file. If using NULL, the file
 will be called \code{biota_summary.csv}, \code{sediment_summary.csv} or \code{water_summary.csv}
@@ -36,21 +37,29 @@ exist.}
 file. \code{FALSE} returns the summary table as an R object (and does not write to
 a csv file).}
 
-\item{collapse_AC}{A names list of valid assessment criteria that allows
-assessment criteria of the same 'type' to be reported together. See
-details.}
+\item{threshold_groups}{A names list of valid thresholds that allows
+thresholds of the same 'type' to be reported together. See details.}
+
+\item{collapse_AC}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{threshold_groups}
+instead.}
 
 \item{extra_output}{A character vector specifying extra summary metrics
 to be included in the output. Currently only recognises "power" to give the
 seven power metrics computed for lognormally distributed data. Defaults to
 \code{NULL}; i.e. no extra output.}
 
-\item{symbology}{Experimental. Specifies the output symbology. Currently
-assumes the thresholds are presented in increasing magnitude of
-environmental risk.}
+\item{symbology}{Experimental. A character string "default" or a user-defined
+function that specifies a symbology typically used to characterise the
+patterns of change in and the status of each time series. Defaults to
+\code{NULL}; i.e. no symbology. Multiple symbologies can be applied. See
+details.}
+
+\item{symbology_control}{Experimental. A named list of control options for
+the symbology. See details.}
 
 \item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
-to label the determinands}
+to rename the existing determinand groups. The life of this argument is
+limited.}
 
 \item{append}{Logical. \code{FALSE} (the default) overwrites any existing summary
 file. \code{TRUE} appends data to it, creating it if it does not yet exist.}
@@ -71,4 +80,211 @@ one-sided 95\% confidence limits
 \item (optionally) a symbology summarising the trend (shape) and status (colour)
 of each time series. This is experimental.
 }
+}
+\section{Default symbology}{
+
+
+\code{symbology = "default"} calls a pre-defined symbology that generates a
+'shape' and a 'colour' to characterise the status of each time series. Its
+behaviour is controlled using \code{symbology_control}, a named list with the
+following elements:
+\itemize{
+\item \code{shape}: a list with names \code{none}, \code{mean}, \code{flat}, \code{up}, \code{down} giving the
+shape associated with each pattern of change. Here, \code{none} corresponds to
+insufficient data to fit a parametric model; \code{mean} to sufficient data to fit
+a parametric model but not to assess for trends; \code{flat} to no significant
+change in level (concentration) over time; \code{up} to a #' significant increase
+in level over time; \code{down} to a significant decrease in level over time.
+Their default values are \code{"small_open_circle"},
+\code{"small_filled_circle"}, \code{"large_filled_circle"}, \code{"upward_triangle"},
+\code{"downward_triangle"}
+\item \code{alpha} is the size of the test for change; default = \code{0.05}
+\item \code{change} determines whether the change is based on the recent time window
+(typically the last twenty years) or the whole time series; options
+\code{"recent"} (default) and \code{"overall"}
+\item \code{colour} (default \code{NULL}) is a named list that characterises the status of
+a time series based on specified thresholds. The list names must match
+(a subset of) the names of the thresholds used in the assessment or, if the
+thresholds have been grouped, the group names. Each threshold must have two
+elements: \code{below} gives the colour if the time series is
+significantly below the threshold (p < 0.05); \code{above} gives the colour
+otherwise. If multiple thresholds are used, they must be ordered from best
+to worst status. See examples
+\item \code{no_threshold} (default \code{"black"}) is the colour used when no thresholds are
+applied to a time series. Another option might be to use \code{NA_character_}
+\item \code{adjust_nonparam} (default \code{TRUE}) is a logical that allows the symbology
+to be adjusted for short time series (often dominated by less-than values)
+where a non-parametric test for status can be applied
+\item \code{names} (default \code{list(colour = "colour", shape = "shape")}) allows the
+names of the symbology columns in the summary table to be adjusted; this can
+be important if multiple symbologies are applied
+}
+}
+
+\section{Custom symbologies}{
+
+
+Users can apply custom symbologies by letting \code{symbology} be a user-supplied
+function of the form \code{fn(summary, info, control)} where:
+\itemize{
+\item \code{summary} is the summary table before applying the symbology; for
+convenience, there is an additional column \code{method} which doesn't
+appear in the final summary table but takes, in particular, values \code{"none"}
+and \code{"mean"} corresponding respectively to no parametric model and
+insufficient data to fit a trend (see \code{shape} above)
+\item \code{info} contains the contents of \code{harsat_obj$info}; i.e. all the reference
+tables and additional information about the assessment. For convenience,
+it also contains a temporary element \code{.threshold_group} which has the names
+of the threshold groups (which can differ from the thresholds themselves)
+\item \code{control} contains \code{symbology_control} and allows the user to pass
+additional information to the function
+}
+
+The output of the function must be a data frame with one column called
+\code{series} that contains the series identifier of each time series
+(not necessarily in the same order as the summary table) and
+symbology columns, but they must not share any of the existing names in the
+summary table.
+
+See the examples for more inspiration.
+}
+
+\section{Multiple symbologies}{
+
+
+Multiple symbologies can be applied by specifying a named list whch can be
+a mixture of default symbologies and custom symbologies. \code{symbology_control}
+must then be a named list (with the same names) giving control information
+for each symbology. It is important to ensure that each symbology gives
+output columns with different names. See examples.
+}
+
+\examples{
+
+# Default symbology with one threshold: the EQS. The colour will be "green"
+# if the time series is significantly below the EQS in the last monitoring
+# year and "red" otherwise 
+\dontrun{
+write_summary_table(
+  water_assessment,
+  symbology = "default",
+  symbology_control = list(
+    colour = list(EQS = list(below = "green", above = "red"))
+  )
+)
+}
+
+# Now applied using the overall change instead of the recent change.
+\dontrun{
+write_summary_table(
+  water_assessment,
+  symbology = "default",
+  symbology_control = list(
+    colour = list(EQS = list(below = "green", above = "red")),
+    change = "overall"
+  )
+)
+}
+
+# If we only want to change one shape, then we only need to specify that one
+\dontrun{
+write_summary_table(
+  water_assessment,
+  symbology = "default",
+  symbology_control = list(
+    colour = list(EQS = list(below = "green", above = "red")),
+    shape = list(flat = "square")
+  )
+)
+}
+
+# Assessment thresholds grouped into BAC and EAC equivalents.
+# Symbology now has two thresholds giving:
+# "blue" if significantly below the BAC
+# "orange" if not significantly below the BAC and there is no EAC
+# "green" if significantly below the EAC but not the BAC
+# "red" otherwise  
+\dontrun{
+write_summary_table(
+  sediment_assessment,
+  threshold_groups = list(
+    BAC = "BAC", 
+    EAC = c("EAC", "ERL", "EQS", "FEQG")
+  ),
+  symbology = "default", 
+  symbology_control = list(
+    colour = list(
+      BAC = list(below = "blue", above = "orange"),
+      EAC = list(below = "green", above = "red")
+    ), 
+  )
+)
+}
+
+# Assessment thresholds grouped into BAC and EAC equivalents. Human health
+# thresholds grouped as HQS
+# Two symbologies applied, one for environmental thresholds, the other for
+# health thresholds
+# Note the named lists and that the output names are specified 
+\dontrun{
+write_summary_table(
+  biota_assessment,
+  threshold_groups = list(
+    BAC = c("BAC", "NRC"),
+    EAC = c("EAC", "FEQG", "LRC", "QSsp"), 
+    HQS = c("MPC", "QShh")
+  ),
+  symbology = list(env = "default", health = "default"), 
+  symbology_control = list(
+    env = list(
+      colour = list(
+        BAC = list(below = "blue", above = "orange"),
+        EAC = list(below = "green", above = "red")
+      ), 
+      names = list(shape = "shape_env", colour = "colour_env")
+    ),
+    health = list(
+      colour = list(HQS = list(below = "green", above = "red")), 
+      names = list(shape = "shape_health", colour = "colour_health")
+    )
+  )
+)
+}
+
+# Custom symbology that only reports time series where there is sufficient
+# information to assess trends and which colours the time series by whether, 
+# for each determinand, mean concentrations in the last monitoring year are 
+# below or above the median concentration observed across time series 
+\dontrun{
+symbology_user <- function(summary, info, control) {
+  summary <- dplyr::mutate(
+    summary,
+    shape = dplyr::case_when(
+      is.na(p_overall_change)   ~ NA_character_,
+      p_overall_change > 0.05   ~ "circle",
+      overall_change > 0        ~ "upward_triangle",
+      overall_change < 0        ~ "downward_triangle"
+    )
+  )
+  summary <- summary |> 
+    dplyr::group_by(determinand) |>
+    dplyr::mutate(
+      .shape = !is.na(shape),
+      colour = dplyr::case_when(
+        !.shape                                          ~ NA_character_,
+        mean_last_year <= median(mean_last_year[.shape]) ~ "blue",
+       mean_last_year > median(mean_last_year[.shape])  ~ "red"
+      )
+    ) |>
+    dplyr::ungroup()
+  summary[c("series", "shape", "colour")]
+}
+
+write_summary_table(
+  biota_assessment,
+  symbology = symbology_user
+)
+}
+
+
 }

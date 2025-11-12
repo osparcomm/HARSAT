@@ -1362,46 +1362,81 @@ add_stations <- function(data, stations, info){
   
   # deal with degenerate case where station_longituderange or 
   # station_latituderange equals zero (so polygon collapses to a line)
+  
+  # 11/11/25 
+  # now working with station geometries directly, rather than trusting 
+  # latitude and longitude ranges (which are derived from the geometries, but
+  # reported with fewer dp)
+  # have commmented out the code in case it will be of use lated to with 
+  # stations such as 13771 (see below) which condense to a point
 
-  ok <- stations$station_longituderange > 0 & stations$station_latituderange > 0
-  if (!all(ok)) {
+  # ok <- stations$station_longituderange > 0 & stations$station_latituderange > 0
+  # if (!all(ok)) {
+  #   stations <- split(stations, ok)
+  #   stations[["FALSE"]] <- dplyr::mutate(
+  #     stations[["FALSE"]], 
+  #     station_longituderange = pmax(.data$station_longituderange, 0.000001),
+  #     station_latituderange = pmax(.data$station_latituderange, 0.000001)
+  #   )
+  #   stations[["FALSE"]]$station_geometry <- mapply(
+  #     FUN = function(longitude, latitude, longituderange, latituderange) {
+  #       point <- c(longitude, latitude)
+  #       range <- c(longituderange, latituderange)
+  #       mult <- c(1, 1, -1, 1, -1, -1, 1, -1, 1, 1)
+  #       polygon <- rep(point, 5) + rep(range, 5) * mult
+  #       polygon <- matrix(polygon, ncol = 2, byrow = TRUE)
+  #       geom <- sf::st_geometrycollection(
+  #         c(sf::st_point(point), sf::st_polygon(list(outer = polygon)))
+  #       )  
+  #       sf::st_as_text(geom)
+  #     },
+  #     longitude = stations[["FALSE"]]$station_longitude,
+  #     latitude = stations[["FALSE"]]$station_latitude,
+  #     longituderange = stations[["FALSE"]]$station_longituderange,
+  #     latituderange = stations[["FALSE"]]$station_latituderange,
+  #     USE.NAMES = FALSE
+  #   )
+  #   stations <- unsplit(stations, ok)      
+  # }
+  
+  
+  # check station geometries are valid (for matching by co-ordinates)
+  # 
+  # 11/11/25 four invalid polygons
+  # one of these (station_code = 13771) is an underwater noise station, which 
+  # arguably should be just a point
+  # for some reason, which I can't fathom, the nominal station latitude and 
+  # longitude don't intersect with the repaired geometry which has condensed 
+  # into a point; the nominal co-ordinates and repaired geometry are all.equal
+  # but not identical
+  # have left this for now, as very unlikely to be an issue
+  
+  stations <- sf::st_as_sf(
+    stations,
+    wkt = "station_geometry",
+    crs = sf::st_crs(4326)
+    # 4326 is the EPSG code for the datum/projection used (https://epsg.io/4326). 
+    # It needs to be specified so that the spatial functions know what 
+    # coordinate system should be used when calculating distance/area etc. 
+    # The 4326 is the WGS84 system used by most GPS systems        
+  )
 
-    stations <- split(stations, ok)
-
-    stations[["FALSE"]] <- dplyr::mutate(
-      stations[["FALSE"]], 
-      station_longituderange = pmax(.data$station_longituderange, 0.000001),
-      station_latituderange = pmax(.data$station_latituderange, 0.000001)
+  ok <- sf::st_is_valid(stations)
+  if (any(!ok)) {
+    id <- stations$station_code[!ok]
+    warning(
+      "these stations have invalid shape file polygons:\n",
+      paste(id, collapse = ", "), 
+      "\nthe code has 'repaired' the polygons, but please inform ICES so that ",
+      "they\ncan be fixed at source",
+      call. = FALSE, 
+      immediate. = TRUE
     )
-     
-    stations[["FALSE"]]$station_geometry <- mapply(
-      FUN = function(longitude, latitude, longituderange, latituderange) {
-        point <- c(longitude, latitude)
-        
-        range <- c(longituderange, latituderange)
-        mult <- c(1, 1, -1, 1, -1, -1, 1, -1, 1, 1)
-        
-        polygon <- rep(point, 5) + rep(range, 5) * mult
-        polygon <- matrix(polygon, ncol = 2, byrow = TRUE)
-      
-        geom <- sf::st_geometrycollection(
-          c(sf::st_point(point), sf::st_polygon(list(outer = polygon)))
-        )  
-      
-        sf::st_as_text(geom)
-      },
-      longitude = stations[["FALSE"]]$station_longitude,
-      latitude = stations[["FALSE"]]$station_latitude,
-      longituderange = stations[["FALSE"]]$station_longituderange,
-      latituderange = stations[["FALSE"]]$station_latituderange,
-      USE.NAMES = FALSE
-    )
-      
-    stations <- unsplit(stations, ok)      
-
   }
   
-  
+  stations <- sf::st_make_valid(stations)
+
+
   # create the datatype variable for matching (if required) 
 
   wk <- switch(info$compartment, biota = "F", sediment = "S", water = "W")
@@ -1562,23 +1597,23 @@ add_stations <- function(data, stations, info){
         
       } 
       
-      sd <- sf::st_as_sf(
-        stations_subset,
-        wkt = "station_geometry",
-        crs = sf::st_crs(4326)
-        # 4326 is the EPSG code for the datum/projection used (https://epsg.io/4326). 
-        # It needs to be specified so that the spatial functions know what 
-        # coordinate system should be used when calculating distance/area etc. 
-        # The 4326 is the WGS84 system used by most GPS systems        
-      )
+      # sd <- sf::st_as_sf(
+      #   stations_subset,
+      #   wkt = "station_geometry",
+      #   crs = sf::st_crs(4326)
+      #   # 4326 is the EPSG code for the datum/projection used (https://epsg.io/4326). 
+      #   # It needs to be specified so that the spatial functions know what 
+      #   # coordinate system should be used when calculating distance/area etc. 
+      #   # The 4326 is the WGS84 system used by most GPS systems        
+      # )
       
       dpoint <- sf::st_point(c(file$longitude,file$latitude))
       dpoint_sfc <- sf::st_sfc(dpoint)
       dpoint_sfc_4326 <- sf::st_set_crs(dpoint_sfc, 4326)
       
-      sd1 <- sd[dpoint_sfc_4326, op = sf::st_intersects]
+      sd1 <- stations_subset[dpoint_sfc_4326, op = sf::st_intersects]
       
-      if(nrow(sd1)> 1){
+      if (nrow(sd1) > 1) {
         
         part <- data.frame()
         for(i in 1:nrow(sd1)) {
@@ -1605,7 +1640,7 @@ add_stations <- function(data, stations, info){
         result <- dplyr::mutate(file, station_code = sd1$station_code)
         res <- rbind(res, result)
         
-      } else if(nrow(sd1)==1) {
+      } else if (nrow(sd1) == 1) {
         
         result <- dplyr::mutate(file, station_code = sd1$station_code)
         res <- rbind(res, result)
@@ -1640,6 +1675,17 @@ add_stations <- function(data, stations, info){
   
   cat(" - matching", nrow(x_name), "records by station name\n")
 
+  
+  # remove geometry here as it speeds up code (not needed when matching by name)
+  
+  wkt_geometry <- sf::st_geometry(stations)
+  wkt_geometry <- sf::st_as_text(wkt_geometry)
+  
+  stations <- sf::st_drop_geometry(stations)
+  
+  stations$station_geometry <- wkt_geometry
+  
+  
   if (nrow(x_name) > 0L) {
   
     id <- c(
@@ -2441,9 +2487,11 @@ create_timeseries <- function(
   }
 
 
-  # normalisation can either be a logical (TRUE uses default normalisation function)
-  # or a function
-  
+  # normalisation can either be a logical (TRUE uses default normalisation 
+  #   function) or a user-supplied function
+  # let info$normalise = TRUE / FALSE denote whether there has been any 
+  #   normalisation
+    
   if (length(normalise) != 1L) {
     stop("normalise should be a length 1 logical or a function")
   }
@@ -2452,7 +2500,9 @@ create_timeseries <- function(
     stop("normalise should be a length 1 logical or a function")
   }
   
-
+  ctsm.obj$info$normalise <- is.function(normalise) || normalise
+  
+  
   # get key data structures, and initialise output
 
   out <- list(call = match.call(), call.data = ctsm.obj$call, info = ctsm.obj$info)
@@ -3060,7 +3110,8 @@ output_timeseries <- function(data, station_dictionary, info, extra = NULL) {
     "method_analysis", "n_individual", 
     "concOriginal", "censoringOriginal", "uncrtOriginal", 
     "concentration", "new.basis", "new.unit", "censoring",  
-    "limit_detection", "limit_quantification", "uncertainty"
+    "limit_detection", "limit_quantification", "uncertainty", 
+    "normaliser", "normaliser_value", "normaliser_unit"
   )
   
   if (!is.null(extra)) {
@@ -3144,6 +3195,14 @@ output_timeseries <- function(data, station_dictionary, info, extra = NULL) {
   timeSeries$unit <- data$new.unit
   
   data$new.basis <- data$new.unit <- NULL
+
+  
+  # add normalisation information to timeseries stucture
+  
+  if (info$normalise) {
+    id <- c("normaliser", "normaliser_value", "normaliser_unit")
+    timeSeries <- cbind(timeSeries, data[id])
+  }
   
 
   # timeSeries is now the unique rows of timeSeries
@@ -3153,12 +3212,6 @@ output_timeseries <- function(data, station_dictionary, info, extra = NULL) {
   # id <- setdiff(names(timeSeries), c("basis", "unit"))
   
   timeSeries <- tibble::column_to_rownames(timeSeries, "seriesID")
-
-  
-  # change timeSeries output columns to fit the levels of the xml requirements
-  # this is a legacy requirement and an issue has been raised to fix this
-  
-  # timeSeries <- changeToLevelsForXML(timeSeries, info)
 
   
   # check no replicate measurements within time series
@@ -4432,7 +4485,7 @@ convert_to_target_basis <- function(data, info, get_basis) {
 }
 
 
-#' Normalises sediment concentrations, OSPAR vwersion
+#' Normalises sediment concentrations, OSPAR version
 #' 
 #' @param data the data object
 #' @param station_dictionary the station dictionary
@@ -4468,7 +4521,14 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
     uncrtOriginal = .data$uncertainty
   )
   
+
+  # add in normaliser variables
   
+  data$normaliser <- NA_character_
+  data$normaliser_value <- NA_real_
+  data$normaliser_unit <- NA_character_
+  
+    
   # exclude any data that do not need to be normalised 
   # can do this globally with method = "none", but useful e.g. in the OSPAR 
   #   assessment where sediments in the Iberian Sea and Gulf of Cadiz are not
@@ -4524,7 +4584,7 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
       }
       
       
-      # extract normaliser and print summary information
+      # extract normaliser information and print summary 
       
       normaliser <- control$normaliser
       
@@ -4532,6 +4592,28 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
         stop("Normaliser ", normaliser, " not found in data")
       }
       
+      normaliser_value <- switch(
+        control$method,
+        simple = control$value,
+        pivot = switch(normaliser, AL = 5, LI = 52),
+      )
+      
+      normaliser_unit <- ctsm_get_info(
+        info$determinand, normaliser, "unit", "sediment", sep = "_"
+      ) 
+      
+      message_txt <- paste0(
+        "   Normalising ", group, " to ", 
+        normaliser_value, normaliser_unit, " ", normaliser
+      )
+      switch(
+        control$method,
+        simple = message(message_txt), 
+        message(message_txt, " using pivot values")
+      )
+      
+      
+            
       switch(
         control$method,
         simple = {
@@ -4681,7 +4763,7 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
             "France" %in% station_dictionary$country) {
           
           station_id <- station_dictionary$country %in% "France" & 
-            station_dictionary$OSPAR_region %in% "2"
+            station_dictionary$ospar_region %in% "2"
           station_id <- station_dictionary[station_id, "station_code"]
           id <- data$station_code %in% station_id
           
@@ -4746,7 +4828,14 @@ normalise_sediment_OSPAR <- function(data, station_dictionary, info, control) {
       
       data$concentration <- concentration
       data$uncertainty <- uncertainty
+
+      # add in normaliser information
+
+      data$normaliser <- normaliser
+      data$normaliser_value <- normaliser_value
+      data$normaliser_unit <- normaliser_unit
       
+            
       data
     })
   
@@ -4799,6 +4888,12 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
     uncrtOriginal = .data$uncertainty
   )
   
+  # add in normaliser variables
+  
+  data$normaliser <- NA_character_
+  data$normaliser_value <- NA_real_
+  data$normaliser_unit <- NA_character_
+  
   
   # exclude any data that do not need to be normalised 
   # can do this globally with method = "none", but useful e.g. in the OSPAR 
@@ -4814,7 +4909,11 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
     exclude_id <- station_dictionary[exclude_id, "station_code"]
     exclude_id <- data$station_code %in% exclude_id
   } else {
-    exclude_id <- FALSE
+    exclude_id <- rep(FALSE, nrow(data))
+  }
+  
+  if (all(exclude_id)) {
+    return(data)
   }
   
   if (any(exclude_id)) {
@@ -4879,24 +4978,33 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
       }
       
       
-      # extract normaliser and print summary information
+      # extract normaliser information and print summary 
       
       normaliser <- control$normaliser
-      
+
       if (! normaliser %in% names(data)) {
         stop("Normaliser ", normaliser, " not found in data")
       }
       
+      normaliser_value <- switch(
+        control$method,
+        simple = control$value,
+        hybrid = control$value,
+        pivot = switch(normaliser, AL = 5, LI = 52),
+      )
+      
+      normaliser_unit <- ctsm_get_info(
+        info$determinand, normaliser, "unit", "sediment", sep = "_"
+      ) 
+
+      message_txt <- paste0(
+        "   Normalising ", group, " to ", 
+        normaliser_value, normaliser_unit, " ", normaliser
+      )
       switch(
         control$method,
-        simple = {
-          unit <- ctsm_get_info(
-            info$determinand, normaliser, "unit", "sediment", sep = "_"
-          )
-          message("   Normalising ", group, " to ", control$value, unit, " ", normaliser)
-        },
-        pivot = message("   Normalising ", group, " to ", normaliser, " using pivot values"),
-        hybrid = message("   Normalising ", group, " to ", normaliser, " using pivot values")
+        simple = message(message_txt), 
+        message(message_txt, " using pivot values")
       )
       
       
@@ -5067,7 +5175,13 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
       
       data$concentration <- concentration
       data$uncertainty <- uncertainty
+
+      # add in normaliser information
       
+      data$normaliser <- normaliser
+      data$normaliser_value <- normaliser_value
+      data$normaliser_unit <- normaliser_unit
+
       data
     })
   
@@ -5130,6 +5244,13 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   )
   
   
+  # add in normaliser variables
+  
+  data$normaliser <- NA_character_
+  data$normaliser_value <- NA_real_
+  data$normaliser_unit <- NA_character_
+  
+  
   # exclude any data that do not need to be normalised 
   # can do this globally with method = "none", but useful e.g. in the OSPAR 
   #   assessment where sediments in the Iberian Sea and Gulf of Cadiz are not
@@ -5190,9 +5311,29 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
       
       # normalise to a specified value of lipid content
       # data are already on a lipid basis (i.e. 100% lipid)
-      
-      message("   Normalising ", group, " to ", control$value, "%")
 
+      # extract normaliser information and print summary 
+      
+      normaliser <- "LIPIDWT%"
+      
+      if (! normaliser %in% names(data)) {
+        stop("Normaliser ", normaliser, " not found in data")
+      }
+      
+      normaliser_value <- control$value
+
+      normaliser_unit <- ctsm_get_info(
+        info$determinand, normaliser, "unit", "biota", sep = "_"
+      ) 
+      
+      message_txt <- paste0(
+        "   Normalising ", group, " to ", 
+        normaliser_value, normaliser_unit, " ", normaliser
+      )
+
+      message(message_txt)
+
+      
       conversion <- dplyr::if_else(
         data[["LIPIDWT%.censoring"]] %in% "", 
         control$value / data[["LIPIDWT%"]],
@@ -5202,6 +5343,12 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
       data$concentration <- data$concentration * conversion
       data$uncertainty <- data$uncertainty * conversion
       
+      # add in normaliser information
+
+      data$normaliser <- normaliser
+      data$normaliser_value <- normaliser_value
+      data$normaliser_unit <- normaliser_unit
+
       data
     })
   
@@ -5214,7 +5361,6 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   data
 }
-
 
 
 

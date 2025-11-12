@@ -114,6 +114,8 @@ get_timeseries(water_timeseries) |> head(10)
 # speeds things up considerably. The assessment took about 1.5 minutes to run on
 # my laptop.
 
+# water_timeseries <- readRDS(file.path("RData", "water_timeseries_HELCOM.rds"))
+
 water_assessment <- run_assessment(
   water_timeseries, 
   AC = "EQS", 
@@ -150,18 +152,10 @@ check_assessment(water_assessment)
 
 write_summary_table(
   water_assessment,
-  determinandGroups = list(
-    levels = c("Metals", "Organotins", "Organofluorines"), 
-    labels = c("Metals", "Organotins", "Organofluorines")
+  symbology = "default",
+  symbology_control = list(
+    colour = list(EQS = list(below = "green", above = "red"))
   ),
-  symbology = list(
-    colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
-      none = "black"
-    )
-  ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
 )
 
@@ -218,6 +212,10 @@ sediment_timeseries <- create_timeseries(
 # Now run the assessment. Again there is only one threshold, the EQS.  This only
 # takes about a minute to run on my laptop.
 
+# sediment_timeseries <- readRDS(
+#   file.path("RData", "sediment_timeseries_HELCOM.rds")
+# )
+
 sediment_assessment <- run_assessment(
   sediment_timeseries, 
   AC = "EQS",
@@ -241,14 +239,10 @@ write_summary_table(
       "Organobromines", "Organobromines" 
     )
   ),
-  symbology = list(
-    colour = list(
-      below = c("EQS" = "green"), 
-      above = c("EQS" = "red"), 
-      none = "black"
-    )
+  symbology = "default",
+  symbology_control = list(
+    colour = list(EQS = list(below = "green", above = "red"))
   ),
-  collapse_AC = list(EAC = "EQS"),
   output_dir = file.path("output", "example_HELCOM")
 )
 
@@ -327,6 +321,8 @@ biota_timeseries <- create_timeseries(
 
 # The asssessment took about 3.5 minutes on my laptop
 
+# biota_timeseries <- readRDS(file.path("RData", "biota_timeseries_HELCOM.rds"))
+
 biota_assessment <- run_assessment(
   biota_timeseries, 
   AC = c("BAC", "EAC", "EQS", "MPC"),
@@ -349,6 +345,13 @@ check_assessment(biota_assessment)
 
 write_summary_table(
   biota_assessment,
+  threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),
+  symbology = "default",
+  symbology_control = list(
+    colour = list(
+      EQS = list(below = "green", above = "red")
+    )
+  ),
   determinandGroups = list(
     levels = c(
       "Metals", "PAH_parent", "Metabolites", "PBDEs", "Organobromines", 
@@ -360,14 +363,6 @@ write_summary_table(
       "PCBs and dioxins", "PCBs and dioxins"
     )
   ),
-  symbology = list(
-    colour = list(
-      below = c("BAC" = "green", "EAC" = "green", "EQS" = "green", "MPC" = "green"),
-      above = c("BAC" = "red", "EAC" = "red", "EQS" = "red", "MPC" = "red"),
-      none = "black"
-    )
-  ),
-  collapse_AC = list(EAC = c("EAC", "EQS", "MPC")),
   output_dir = file.path("output", "example_HELCOM")
 )
 

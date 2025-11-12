@@ -77,11 +77,13 @@ check_assessment(biota_assessment)
 write_summary_table(
   biota_assessment,
   output_dir = file.path("output", "example_external_data"), 
-  symbology = list(
+  symbology = "default",
+  symbology_control = list(
     colour = list(
-      below = c("NRC" = "blue", "LRC" = "green", "MRC" = "orange", "HRC" = "darkorange"),
-      above = c("NRC" = "red", "LRC" = "red", "MRC" = "red", "HRC" = "red"),
-      none = "black"
+      NRC = list(below = "blue", above = "red"),
+      LRC = list(below = "green", above = "red"),
+      MRC = list(below = "orange", above = "red"),
+      HRC = list(below = "darkorange", above = "red")
     )
   )
 )
