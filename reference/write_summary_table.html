@@ -29,7 +29,7 @@ of each time series. This is experimental.
 
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.4.1009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@ of each time series. This is experimental.
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Write assessment summary to a csv file</h1>
-      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/1.0.4/R/reporting_functions.R" class="external-link"><code>R/reporting_functions.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/develop/R/reporting_functions.R" class="external-link"><code>R/reporting_functions.R</code></a></small>
       <div class="d-none name"><code>write_summary_table.Rd</code></div>
     </div>
 
@@ -350,7 +350,7 @@ output columns with different names. See examples.</p>
 <span class="r-in"><span><span class="va">symbology_user</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">summary</span>, <span class="va">info</span>, <span class="va">control</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">summary</span>,</span></span>
-<span class="r-in"><span>    shape <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    shape <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">p_overall_change</span><span class="op">)</span>   <span class="op">~</span> <span class="cn">NA_character_</span>,</span></span>
 <span class="r-in"><span>      <span class="va">p_overall_change</span> <span class="op">&gt;</span> <span class="fl">0.05</span>   <span class="op">~</span> <span class="st">"circle"</span>,</span></span>
 <span class="r-in"><span>      <span class="va">overall_change</span> <span class="op">&gt;</span> <span class="fl">0</span>        <span class="op">~</span> <span class="st">"upward_triangle"</span>,</span></span>
@@ -361,7 +361,7 @@ output columns with different names. See examples.</p>
 <span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">determinand</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>      .shape <span class="op">=</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">shape</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>      colour <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      colour <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        <span class="op">!</span><span class="va">.shape</span>                                          <span class="op">~</span> <span class="cn">NA_character_</span>,</span></span>
 <span class="r-in"><span>        <span class="va">mean_last_year</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">mean_last_year</span><span class="op">[</span><span class="va">.shape</span><span class="op">]</span><span class="op">)</span> <span class="op">~</span> <span class="st">"blue"</span>,</span></span>
 <span class="r-in"><span>       <span class="va">mean_last_year</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">mean_last_year</span><span class="op">[</span><span class="va">.shape</span><span class="op">]</span><span class="op">)</span>  <span class="op">~</span> <span class="st">"red"</span></span></span>
