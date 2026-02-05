@@ -1367,7 +1367,7 @@ add_stations <- function(data, stations, info){
   # now working with station geometries directly, rather than trusting 
   # latitude and longitude ranges (which are derived from the geometries, but
   # reported with fewer dp)
-  # have commmented out the code in case it will be of use lated to with 
+  # have commmented out the code in case it will be of use later for  
   # stations such as 13771 (see below) which condense to a point
 
   # ok <- stations$station_longituderange > 0 & stations$station_latituderange > 0
@@ -1411,6 +1411,16 @@ add_stations <- function(data, stations, info){
   # but not identical
   # have left this for now, as very unlikely to be an issue
   
+  # 04/02/26
+  # 
+  # st_make_valid only works on a structure with Geometry type: GEOMETRY; not on
+  # one with Geometry type: GEOMETRYCOLLECTION.
+  # The Geometry type is determined by sf in the call to st_as_sf
+  # I think (but am not sure) that a GEOMETRYCOLLECTION will only be created
+  # if all the individual geometries are valid
+  # Given the uncertainty, have trapped for failure of st_make_valid below, and 
+  # if this fails, will just delete the invalid stations 
+
   stations <- sf::st_as_sf(
     stations,
     wkt = "station_geometry",
@@ -1421,21 +1431,32 @@ add_stations <- function(data, stations, info){
     # The 4326 is the WGS84 system used by most GPS systems        
   )
 
+
   ok <- sf::st_is_valid(stations)
   if (any(!ok)) {
     id <- stations$station_code[!ok]
+    make_valid <- try(sf::st_make_valid(stations))
+    
+    if ("try_error" %in% class(make_valid)) {
+      stations <- stations[ok, ]
+      error_txt <- paste(
+        "\nthe code could not 'repair' the polygons and the stations have been", 
+        "excluded;"
+      )
+    } else{
+      stations <- make_valid
+      error_txt <- c("\nthe code 'repaired' these polgyons;")
+    }
     warning(
       "these stations have invalid shape file polygons:\n",
       paste(id, collapse = ", "), 
-      "\nthe code has 'repaired' the polygons, but please inform ICES so that ",
-      "they\ncan be fixed at source",
+      error_txt, 
+      "\nplease inform ICES so they can be fixed at source",
       call. = FALSE, 
       immediate. = TRUE
     )
   }
   
-  stations <- sf::st_make_valid(stations)
-
 
   # create the datatype variable for matching (if required) 
 
