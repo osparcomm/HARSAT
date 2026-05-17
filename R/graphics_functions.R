@@ -15,11 +15,13 @@
 #'   output directory must already exist.
 #' @param file_type A character vector specifying the types of assessment plot. 
 #'   The default `c("data", "index", "auxiliary")` produces three plots for 
-#'   each time series. See details 
+#'   each time series. See details. 
 #' @param file_format A character string specifying Whether the files should be 
 #'   png (the default) or pdf.
 #' @param auxiliary A character string specifying the auxiliary variables 
 #'   plotted if `file_type = "auxiliary"`. See details
+#' @param control A list that can be used to modify the appearance of the plots.
+#'   See details.
 #'
 #' @returns A series of png or pdf files with graphical summaries of an
 #'   assessment. 
@@ -69,6 +71,13 @@
 #'   supported. More flexibility in these plots, such as changing the number of 
 #'   auxiliary variables, is desirable and will emerge in due course.
 #'
+#'   ## Control
+#'   
+#'   At present the only aspect of the plots that can be changed is the range of
+#'   years that are shown on the x axis, for example by setting  
+#'   `control = list(xlim = c(2010, 2025)`. When multiple plots are produced, 
+#'   specifying `control$xlim` will affect every plot.
+#'   
 #' @export
 plot_assessment <- function(
     assessment_obj, 
@@ -76,7 +85,8 @@ plot_assessment <- function(
     output_dir = ".",
     file_type = c("data", "index", "auxiliary"),
     file_format = c("png", "pdf"), 
-    auxiliary = "default") {
+    auxiliary = "default",
+    control = list()) {
 
   # silence non-standard evaluation warnings
   .data <- NULL
@@ -271,7 +281,12 @@ plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot_data(data, assessment, series, info, type = "index", xykey.cex = 1.4) 
+      plot_data(
+        data, assessment, series, info, 
+        type = "index", 
+        control = control, 
+        xykey.cex = 1.4
+      ) 
       dev.off()
       
     }    
@@ -290,7 +305,12 @@ plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
       
-      plot_data(data, assessment, series, info, type = "data", xykey.cex = 1.4)
+      plot_data(
+        data, assessment, series, info, 
+        type = "data", 
+        control = control, 
+        xykey.cex = 1.4
+      )
       dev.off()
       
     }  
@@ -309,7 +329,12 @@ plot_assessment <- function(
         pdf = pdf(output_file, width = 7, height = 7 * 12 / 17)
       )
      
-      plot_auxiliary(data, assessment, series, info, auxiliary_id, xykey.cex = 1.4) 
+      plot_auxiliary(
+        data, assessment, series, info, 
+        auxiliary_id, 
+        control = control, 
+        xykey.cex = 1.2
+      ) 
       dev.off()
       
     }    
@@ -732,10 +757,16 @@ plot.data.ylim <- function(...) {
 }
 
 plot.data.xlim <- function(...) {
-
-  xrange <- range(..., na.rm = T)
-  xlim <- extendrange(xrange, f = 0.04)
-  xlim[2] <- min(xlim[2], xrange[2] + 0.99)  # ensures maximum tick mark is last possible data year
+  
+  x_range <- range(..., na.rm = TRUE)
+  xlim <- extendrange(x_range, f = 0.04)
+  
+  # for long timeseries extendrange can extend too far on the right hand side
+  #   resulting in tick marks that are beyond the last possible data year
+  # the following ensures that the extension is always less than one year
+  
+  xlim[2] <- min(xlim[2], x_range[2] + 0.99) 
+  
   xlim
 }
 
@@ -796,13 +827,28 @@ plot.AC <- function(AC, ylim, useLogs = TRUE) {
 
 plot_data <- function(
     data, assessment, series, info, type = c("data", "index"), 
+    control = list(),
     xykey.cex = 1.0, ntick.x = 4, ntick.y = 3, ...) {
 
   # silence non-standard evaluation warnings
   .data <- year <- censoring <- NULL
 
-  type <- match.arg(type) 
+  type <- match.arg(type)
+  
+  # control structure
+  
+  # xlim = "default" corresponds to:
+  #   xlim[1] = minimum of data$year or info$recent_years, whichever is lower
+  #   xlim[2] = maximum of info$recent_years
+  #   with a suitable extension of the range
+  #   ensures there is always a sensible span of years in the plot
+  
+  control_default = list(
+    xlim = "default"
+  )
 
+  control = modifyList(control_default, control)
+  
   is.pred <- "pred" %in% names(assessment)
   #   if (is.pred & info$determinand %in% c("VDS", "IMPS", "INTS")) 
   #     assessment$pred <- swap.names(assessment$pred, c("lower", "upper"), 
@@ -863,8 +909,12 @@ plot_data <- function(
     ylim <- c(do.call("plot.data.ylim", args.list))
   }
 
-  xlim <- plot.data.xlim(data$year, info$recent_years)
-
+  if (identical(control$xlim, "default")) {
+    xlim <- plot.data.xlim(data$year, info$recent_years)
+  } else {
+    xlim <- control$xlim
+  }
+    
   plot.formula <- data$concentration ~ data$year
 
   
@@ -1377,7 +1427,8 @@ plot.panel <- function(
 
 
 plot_auxiliary <- function(
-    data, assessment, series, info, auxiliary,  
+    data, assessment, series, info, auxiliary,
+    control = list(),
     xykey.cex = 1.0, ntick.x = 3, ntick.y = 3, newPage = TRUE, ...) {
 
   # silence non-standard evaluation warnings
@@ -1389,7 +1440,16 @@ plot_auxiliary <- function(
   #   biota = concentration, LNMEA, DRYWT%, LIPIDWT%
   #   water = not specified yet
   # otherwise must contain four relevant variables
+
+  # for description of control_default, see plot_data
   
+  control_default = list(
+    xlim = "default"
+  )
+  
+  control = modifyList(control_default, control)
+  
+    
   useLogs <- series$distribution %in% "lognormal"
   
   data <- dplyr::mutate(
@@ -1432,8 +1492,12 @@ plot_auxiliary <- function(
   
   data <- within(data, type <- ordered(type, levels = auxiliary))
 
-  xlim <- range(data$year, info$recent_years)
-
+  if (identical(control$xlim, "default")) {
+    xlim <- plot.data.xlim(data$year, info$recent_years)
+  } else {
+    xlim <- control$xlim
+  }
+  
   is.data <- unlist(with(data, tapply(value, type, function(i) !all(is.na(i)))))
   data <- within(data, value[type %in% names(is.data[!is.data])] <- 0)
 
