@@ -10,7 +10,8 @@ plot_assessment(
   output_dir = ".",
   file_type = c("data", "index", "auxiliary"),
   file_format = c("png", "pdf"),
-  auxiliary = "default"
+  auxiliary = "default",
+  control = list()
 )
 }
 \arguments{
@@ -27,13 +28,16 @@ output directory must already exist.}
 
 \item{file_type}{A character vector specifying the types of assessment plot.
 The default \code{c("data", "index", "auxiliary")} produces three plots for
-each time series. See details}
+each time series. See details.}
 
 \item{file_format}{A character string specifying Whether the files should be
 png (the default) or pdf.}
 
 \item{auxiliary}{A character string specifying the auxiliary variables
 plotted if \code{file_type = "auxiliary"}. See details}
+
+\item{control}{A list that can be used to modify the appearance of the plots.
+See details.}
 }
 \value{
 A series of png or pdf files with graphical summaries of an
@@ -88,5 +92,13 @@ At present, there must always be two auxiliary variables for sediment.
 At present, plots for only a limited range of auxiliary variables are
 supported. More flexibility in these plots, such as changing the number of
 auxiliary variables, is desirable and will emerge in due course.
+}
+
+\subsection{Control}{
+
+At present the only aspect of the plots that can be changed is the range of
+years that are shown on the x axis, for example by setting
+\verb{control = list(xlim = c(2010, 2025)}. When multiple plots are produced,
+specifying \code{control$xlim} will affect every plot.
 }
 }
