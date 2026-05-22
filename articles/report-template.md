@@ -13,6 +13,7 @@ You can use this report tempate in two different ways:
 The easiest way to generate reports is in bulk, as follows:
 
 ``` r
+
 ## Do whatever you need to get the assessment object
 ...
 assessment <- run_assessment(timeseries)
@@ -34,6 +35,7 @@ into the given output directory.
 In this case, your usage will typically look a bit like this:
 
 ``` r
+
 library(rmarkdown)
 
 

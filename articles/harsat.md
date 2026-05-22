@@ -36,6 +36,7 @@ away you go.
 To install the latest version, use the `remotes` package:
 
 ``` r
+
 # install.packages(remotes) -- if needed
 library(remotes)
 remotes::install_github("osparcomm/harsat@main") 
@@ -44,6 +45,7 @@ remotes::install_github("osparcomm/harsat@main")
 The development version is similar:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("osparcomm/HARSAT@develop")
 ```
@@ -58,6 +60,7 @@ devtools::install_github("osparcomm/HARSAT@develop")
 Now, within R, you can load the library in the usual way
 
 ``` r
+
 library(harsat)
 ```
 
@@ -70,6 +73,7 @@ our data files in a directory `data`, and information files in a
 directory `information`, but you can use any directory for these.
 
 ``` r
+
 working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 ```
 
@@ -80,6 +84,7 @@ The first step is to read in the data that we’ve got, using
 We will go through some of these arguments.
 
 ``` r
+
 water_data <- read_data(
   compartment = "water",
   purpose = "OSPAR",
@@ -180,6 +185,7 @@ you to come in and have a look and see which values are affected, so you
 can go and check them out in more detail.
 
 ``` r
+
 water_data <- tidy_data(water_data)
 #> 
 #> Oddities will be written to 'oddities/water' with previous oddities backed up to
@@ -217,6 +223,7 @@ HCH. There are various other arguments which allow you to control just
 how the data are manipulated.
 
 ``` r
+
 water_timeseries <- create_timeseries(
   water_data,
   determinands.control = list(
@@ -268,6 +275,7 @@ we’re actually assessing as it progresses. This gives you an idea of how
 how many cups of tea you can drink before it’s all finished.
 
 ``` r
+
 water_assessment <- run_assessment(
   water_timeseries, 
   AC = "EQS", 
@@ -283,6 +291,7 @@ We can then check that everything is converged, using
 [`check_assessment()`](http://osparcomm.github.io/HARSAT/reference/check_assessment.md).
 
 ``` r
+
 check_assessment(water_assessment)
 #> All assessment models have converged
 ```
@@ -296,6 +305,7 @@ put the full path into `summary.dir`, so we can tell `harsat` where to
 write to.
 
 ``` r
+
 summary.dir <- file.path(working.directory, "output", "tutorial")
 
 if (!dir.exists(summary.dir)) {
@@ -314,6 +324,7 @@ data set, when it starts and finishes. And towards the end, we’ve got
 comparisons against various different threshold values.
 
 ``` r
+
 write_summary_table(
   water_assessment,
   determinandGroups = list(

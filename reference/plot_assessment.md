@@ -12,7 +12,8 @@ plot_assessment(
   output_dir = ".",
   file_type = c("data", "index", "auxiliary"),
   file_format = c("png", "pdf"),
-  auxiliary = "default"
+  auxiliary = "default",
+  control = list()
 )
 ```
 
@@ -38,7 +39,7 @@ plot_assessment(
 
   A character vector specifying the types of assessment plot. The
   default `c("data", "index", "auxiliary")` produces three plots for
-  each time series. See details
+  each time series. See details.
 
 - file_format:
 
@@ -49,6 +50,11 @@ plot_assessment(
 
   A character string specifying the auxiliary variables plotted if
   `file_type = "auxiliary"`. See details
+
+- control:
+
+  A list that can be used to modify the appearance of the plots. See
+  details.
 
 ## Value
 
@@ -104,3 +110,10 @@ present, there must always be two auxiliary variables for sediment.
 At present, plots for only a limited range of auxiliary variables are
 supported. More flexibility in these plots, such as changing the number
 of auxiliary variables, is desirable and will emerge in due course.
+
+### Control
+
+At present the only aspect of the plots that can be changed is the range
+of years that are shown on the x axis, for example by setting
+`control = list(xlim = c(2010, 2025)`. When multiple plots are produced,
+specifying `control$xlim` will affect every plot.

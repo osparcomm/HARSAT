@@ -31,6 +31,7 @@ installed it, as covered in the [Getting
 Started](http://osparcomm.github.io/harsat.md) guide).
 
 ``` r
+
 library(harsat)
 ```
 
@@ -41,6 +42,7 @@ information files in a directory `information`, but you can use any
 directory for these.
 
 ``` r
+
 working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 ```
 
@@ -80,6 +82,7 @@ time series will only be assessed if it has some data in the period 2015
 to 2020 (i.e. in the last six monitoring years).
 
 ``` r
+
 water_data <- read_data(
   compartment = "water", 
   purpose = "HELCOM",                               
@@ -141,6 +144,7 @@ are no strange value at this stage, but there are in the step that
 follows.
 
 ``` r
+
 water_data <- tidy_data(water_data)
 #> 
 #> Oddities will be written to 'oddities/water' with previous oddities backed up to
@@ -177,6 +181,7 @@ are more complicated examples of the use of `determinands.control` in
 the sediment and biota examples below.
 
 ``` r
+
 water_timeseries <- create_timeseries(
   water_data,
   determinands.control = list(
@@ -205,6 +210,7 @@ If you want to see a list of all the time series, then you can run code
 along the following lines:
 
 ``` r
+
 get_timeseries(water_timeseries) |> head(10) 
 #>                    series station_code station_name   country determinand
 #> 1       11241 CD filtered        11241         64A2 Lithuania          CD
@@ -240,6 +246,7 @@ parallel processing. This usually speeds things up considerably. The
 assessment took about 1.5 minutes to run on my laptop.
 
 ``` r
+
 water_assessment <- run_assessment(
   water_timeseries, 
   AC = "EQS", 
@@ -259,6 +266,7 @@ vignette (need to write another vignette to discuss this). Fortunately,
 there were no convergence issues here.
 
 ``` r
+
 check_assessment(water_assessment)
 #> All assessment models have converged
 ```
@@ -269,6 +277,7 @@ print a table giving summary information about the assessment of each
 time series. But first, we may need to create an output directory.
 
 ``` r
+
 summary.dir <- file.path(working.directory, "output", "example_HELCOM")
 if (!dir.exists(summary.dir)) {
   dir.create(summary.dir, recursive = TRUE)
@@ -315,6 +324,7 @@ Many aspects of the symbology can be controlled using the
 to customise the symbology to suit their needs.
 
 ``` r
+
 write_summary_table(
   water_assessment,
   symbology = "default",
@@ -334,6 +344,7 @@ related to normalisation (to account for differences in grain size)
 which are described below
 
 ``` r
+
 sediment_data <- read_data(
   compartment = "sediment",
   purpose = "HELCOM",
@@ -429,6 +440,7 @@ converted to a dry weight basis using `DRYWT%` supporting information
 (also submitted with the data).
 
 ``` r
+
 sediment_timeseries <- create_timeseries(
   sediment_data,
   determinands.control = list(
@@ -485,6 +497,7 @@ Now run the assessment. Again there is only one threshold, the EQS. This
 only takes about a minute to run on my laptop.
 
 ``` r
+
 sediment_assessment <- run_assessment(
   sediment_timeseries, 
   AC = "EQS",
@@ -496,6 +509,7 @@ sediment_assessment <- run_assessment(
 Everything has converged.
 
 ``` r
+
 check_assessment(sediment_assessment)
 #> All assessment models have converged
 ```
@@ -508,6 +522,7 @@ table. Below both the PBDEs and Organobromines groups would appear as
 Organobromines in the summary table.
 
 ``` r
+
 write_summary_table(
   sediment_assessment,
   symbology = "default",
@@ -538,6 +553,7 @@ described in another vignette (not yet available).
 The first two stages are just as before
 
 ``` r
+
 biota_data <- read_data(
   compartment = "biota", 
   purpose = "HELCOM",                               
@@ -654,6 +670,7 @@ basis transformed to a wet weight basis using supporting `DRYWT%` and
 see how the choice of basis can be changed.
 
 ``` r
+
 biota_timeseries <- create_timeseries(
   biota_data,
   determinands.control = list(
@@ -725,6 +742,7 @@ biota_timeseries <- create_timeseries(
 The asssessment took about 4.3 minutes on my laptop
 
 ``` r
+
 biota_assessment <- run_assessment(
   biota_timeseries, 
   AC = c("BAC", "EAC", "EQS", "MPC"),
@@ -741,6 +759,7 @@ calculates the standard errors. Dealing with non-converged timeseries is
 a topic for a future vignette.
 
 ``` r
+
 check_assessment(biota_assessment)
 #> The following assessment models have not converged:
 #> 2299 PYR1OH Limanda limanda BI HPLC-FD
@@ -767,6 +786,7 @@ status will be green if significantly below the threshold and red
 otherwise.
 
 ``` r
+
 write_summary_table(
   biota_assessment,
   threshold_groups = list(EQS = c("BAC", "EAC", "EQS", "MPC")),

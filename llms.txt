@@ -70,6 +70,7 @@ remotes::install_local("~/Downloads/harsat_0.1.2.tar")
 Alternatively, you can also install `harsat` directly from GitHub.
 
 ``` r
+
 library(remotes)
 remotes::install_github("osparcomm/HARSAT@main")
 ```
@@ -78,6 +79,7 @@ The development version is similar, but changes more often, so we only
 recommend this if you enjoy a more exciting time for your analysis.
 
 ``` r
+
 library(remotes)
 remotes::install_github("osparcomm/HARSAT@develop")
 ```
@@ -109,6 +111,7 @@ look at [the full OSPAR
 example](http://osparcomm.github.io/HARSAT/articles/example_OSPAR.md)):
 
 ``` r
+
 water_data <- read_data(
   compartment = "water", 
   purpose = "OSPAR",                               

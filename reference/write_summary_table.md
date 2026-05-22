@@ -189,6 +189,7 @@ examples.
 ## Examples
 
 ``` r
+
 # Default symbology with one threshold: the EQS. The colour will be "green"
 # if the time series is significantly below the EQS in the last monitoring
 # year and "red" otherwise 

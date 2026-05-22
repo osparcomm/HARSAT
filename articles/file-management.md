@@ -143,6 +143,7 @@ function. Let’s suppose your R working directory (or R Project) is
 like this:
 
 ``` r
+
 biota_data <- read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
@@ -158,6 +159,7 @@ working directory. If you have called them something else, then you can
 use the `data_dir` and `analysis_dir` arguments. For example:
 
 ``` r
+
 biota_data <- read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               
@@ -172,6 +174,7 @@ biota_data <- read_data(
 You can also specify absolute path names
 
 ``` r
+
 biota_data <- read_data(
   compartment = "biota", 
   purpose = "OSPAR",                               

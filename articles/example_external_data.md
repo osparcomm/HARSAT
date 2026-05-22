@@ -5,6 +5,7 @@ This is a brief example of using the `harsat` with external data.
 First, load the `harsat` library
 
 ``` r
+
 library(harsat)
 ```
 
@@ -15,6 +16,7 @@ information files in a directory `information`, but you can use any
 directory for these.
 
 ``` r
+
 working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 ```
 
@@ -23,6 +25,7 @@ working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 Contaminant data with supporting variables and station dictionary
 
 ``` r
+
 biota_data <- read_data(
   compartment = "biota",
   purpose = "AMAP",
@@ -72,6 +75,7 @@ Notes:
 Get correct variables and streamline the data files
 
 ``` r
+
 biota_data <- tidy_data(biota_data)
 #> 
 #> Oddities will be written to 'oddities/biota' with previous oddities backed up to
@@ -90,6 +94,7 @@ For each timeseries, use the basis which is reported most often in the
 data
 
 ``` r
+
 biota_timeseries <- create_timeseries(
   biota_data,
   determinands = ctsm_get_determinands(biota_data$info),
@@ -124,6 +129,7 @@ will be based on a power of 80% and an annual percentage increase in
 concentration of 10%.
 
 ``` r
+
 biota_assessment <- run_assessment(
   biota_timeseries,
   subset = NULL,
@@ -327,6 +333,7 @@ biota_assessment <- run_assessment(
 Use the code below if it takes a long time to run
 
 ``` r
+
 biota_assessment <- run_assessment(
   biota_timeseries,
   subset = NULL,
@@ -342,6 +349,7 @@ biota_assessment <- run_assessment(
 ### Check convergence
 
 ``` r
+
 check_assessment(biota_assessment, save_result = FALSE)
 #> All assessment models have converged
 ```
@@ -354,6 +362,7 @@ ensures that the power metrics for lognormally distributed data will be
 exported.
 
 ``` r
+
 summary.dir <- file.path(working.directory, "output", "example_external_data")
 
 if (!dir.exists(summary.dir)) {
@@ -394,6 +403,7 @@ plotted (can take some time)
 Graphics plots are written to files in `output/graphics`.
 
 ``` r
+
 graphics.dir <- file.path(working.directory, "output", "graphics")
 
 if (!dir.exists(graphics.dir)) {

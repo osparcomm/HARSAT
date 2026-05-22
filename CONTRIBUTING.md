@@ -74,6 +74,7 @@ break. If so, create an issue.
 **Step 1. Run roxygen2**
 
 ``` r
+
 library(devtools)
 roxygen2::roxygenize()
 ```
@@ -91,6 +92,7 @@ R --quiet --vanilla < vignettes/precompile.R
 Back to R:
 
 ``` r
+
 library(devtools)
 devtools::check()
 ```

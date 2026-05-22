@@ -399,10 +399,10 @@ already matched by name for all years.
 
 #### Uncertainty processing
 
-harsat 1.0.0 replaced implausibly large relative uncertainties ($> =$
+harsat 1.0.0 replaced implausibly large relative uncertainties ($`>=`$
 100%) and replaced them with imputed values. However, implausibly small
 relative uncertainties were not changed. The code now replaces relative
-uncertainties $< =$ 1% with imputed values.
+uncertainties $`<=`$ 1% with imputed values.
 
 The defaults can be changed using `control$relative_uncertainty` in
 `read_data`. To replicate the defaults in harsat 1.0.0, set
