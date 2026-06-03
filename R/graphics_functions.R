@@ -1371,8 +1371,8 @@ plot.panel <- function(
     type, 
     data = 2.5, 
     index = 2,
-    ratio_mp = switch(layout.row, 2.0, 1.4, 0.9, 0.7, 0.6), 
-    index_mp = switch(layout.row, 2.0, 1.4, 0.9, 0.7, 0.6) 
+    ratio_mp = switch(layout.row, 2.0, 1.4, 0.9, 0.7, 0.6, 0.5, 0.4), 
+    index_mp = switch(layout.row, 2.0, 1.4, 0.9, 0.7, 0.6, 0.5, 0.4) 
   )
   
   wk.pch <- switch(
@@ -1740,6 +1740,13 @@ plot_multiassessment <- function(data, assessment, series, info, ...) {
   # silence non-standard evaluation warnings
   .data <- NULL
 
+  if (length(series$seriesID) >= 50L) {
+    stop(
+      "50 or more series are too many to show meaningfully in a single plot",
+      call. = FALSE
+    )
+  }
+  
   is.data <- sapply(assessment, function(i) !is.null(i))
   
   is.pred <- sapply(assessment, function(i) !is.null(i) && !is.null(i$pred))
@@ -1830,7 +1837,9 @@ plot_multiassessment <- function(data, assessment, series, info, ...) {
   add.xlab = 1:ndet <= layout.col
   names(add.xlab) <- series$seriesID
 
-  xykey.cex <- switch(layout.row, 1.4, 1.1, 0.9, 0.7, 0.6)
+  xykey.cex <- switch(
+    layout.row, 1.4, 1.1, 0.9, 0.7, 0.6, 0.5, 0.4
+  )
 
 
   # sets up viewport so that assessment concentrations and ylabel fit correctly
@@ -2372,6 +2381,12 @@ plot_ratio <- function(data, series, info, ...) {
     Organochlorines = c("DDEPP / DDTPP", "DDTOP / DDTPP")
   )
   
+  if (length(ratio_id) > 4L) {
+    stop(
+      "only 4 ratios can currently be plotted - contact harsat development team",
+      call. = FALSE
+    )
+  }
   
   numerator_id <- switch(
     series$group,
@@ -2526,7 +2541,7 @@ plot_ratio <- function(data, series, info, ...) {
   add.xlab = 1:ndet <= layout.col
   names(add.xlab) <- ratio_id
   
-  xykey.cex <- switch(layout.row, 1.4, 1.1, 0.9, 0.7, 0.6)
+  xykey.cex <- switch(layout.row, 1.4, 1.1, 0.9, 0.7, 0.6, 0.5, 0.4)
   ref.cex <- switch(layout.row, 1.2, 1.0)
   
   # get positions for plotting reference text  
