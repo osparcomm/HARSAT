@@ -629,9 +629,14 @@ txt <- if (anova_ok) "Finally, the tab" else "The tab also"
 <li class = "gap">Statistical analysis. This tab gives the results of a non-parametric status assessment.</li>
 ```
 
-
 </ul>
 
+<br>
+
+<!-- warning if the assessment has not converged -->
+
+```{asis, eval = assessment$convergence != 0L}
+<b>Warning: the assessment did not converge. The fitted values, standard errors, confidence bands and associated tests for trend and status are unreliable</b>
 
 <br>
 
@@ -946,7 +951,7 @@ format_p <- function(p) {
 ```
 
 
-```{r interpretation_trend, eval = anova_ok, include = FALSE}
+```{r interpretation_trend, eval = anova_ok & assessment$convergence == 0L, include = FALSE}
 wk <- assessment$summary
 wk_year <- unique(assessment$data$year)
 wk_n <- length(wk_year)
@@ -1127,7 +1132,7 @@ if (wk$p_overall_trend >= 0.05) {
 ```
 
 
-```{r interpretation_status, eval = status_ok, include = FALSE}
+```{r interpretation_status, eval = status_ok & assessment$convergence == 0L, include = FALSE}
 
 if (status_parametric && info$detGroup != "Imposex") {
 
@@ -1313,7 +1318,7 @@ if (is_HQS) {
 
 
 
-```{asis, eval = (anova_ok | status_ok)}
+```{asis, eval = (anova_ok | status_ok) & assessment$convergence == 0L}
 **Interpretation**
 
 `r if (anova_ok) trend_description`
@@ -1324,6 +1329,15 @@ if (is_HQS) {
 
 ```
 
+
+```{asis, eval = assessment$convergence != 0L}
+**Interpretation**
+
+No interpretation is provided because the assessment did not converge
+
+<br>
+
+```
 
 
 
