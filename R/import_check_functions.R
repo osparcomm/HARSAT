@@ -91,12 +91,17 @@ ctsm_check_variable <- function(data, var_id, info) {
 
 
 
-# NB I-RNC is for isotope ratios (used as an auxiliary) - check have correct pargroup
+# NB I-RNC is for isotope ratios (used as an auxiliary) - check have correct 
+# pargroup
 
 ctsm_is_contaminant <- function(pargroup, exclude = NULL) {
   ok <- c(
-    "I-MET", "I-RNC", "O-MET", "O-BR", "O-FL", "O-PAH", "OC-CB", "OC-CL", "OC-CP", 
-    "OC-DD", "OC-DN", "OC-DX", "OC-HC", "O-HER", "O-INS", "O-TRI"
+    "I-MET", "I-RNC", 
+    "O-AHC", "O-BR", "O-ES", "O-FL", "O-FUN", "O-GPT", "O-HER", "O-INS", 
+    "O-MAH", "O-MET", "O-NA", "O-OP", "O-PAH", "O-PFR", "O-PHC", "O-THC", 
+    "O-TRI", 
+    "OC-CB", "OC-CL", "OC-CP", "OC-DD", "OC-DN", "OC-DX", "OC-HC", "OC-TC", 
+    "OP-GN"
   )
   ok <- setdiff(ok, exclude)
   pargroup %in% ok
@@ -237,7 +242,7 @@ ctsm.check.matrix.biota <- function(data, info) {
         (species_group %in% c("Bivalve", "Gastropod") & matrix %in% "SB") |
         (species_group %in% "Crustacean" & matrix %in% "TM") | 
         (species_group %in% "Bird" & matrix %in% c("EH", "FE", "LI", "MU", "BL", "ER")) | 
-        (species_group %in% "Mammal" & matrix %in% c("BB", "HA", "KI", "LI", "MU", "EP"))
+        (species_group %in% "Mammal" & matrix %in% c("BB", "BL", "HA", "KI", "LI", "MU", "EP"))
       change <- species_group %in% "Bird" & matrix %in% "EG"
       action <- ifelse(ok, "none", ifelse(change, "warning", "error"))
       new[change] <- "EH"
