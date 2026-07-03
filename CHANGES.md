@@ -1,5 +1,48 @@
 ## Change log
 
+### Version 1.0.5
+
+This release is used to run the OSPAR 2026 assessment.
+
+#### Graphics - year range
+
+The year range on the x-axis in `plot_assessment` can now be specified by the 
+user. This could be used to make the year range consistent across a series of
+related plots. The year-range is adjusted using the `xlim` element of the new 
+`control` argument. For example by specifying 
+`control = list(xlim = c(1999, 2026))`. It will affect all the images produced 
+by `plot_assessment` in that call.
+
+#### Summary tables - timestamp
+
+A timestamp can now be added to the summary table produced by 
+`write_summary_table` if argument `timestamp` is set to TRUE. The default is not 
+to produce a timestamp.
+
+#### report_assessment 
+
+* the degrees of freedom used to add smoothers to the ratio plots have been 
+reduced to avoid overfitting and potential crashing   
+* a warning is now printed when a time series assessment has not converged and 
+no statistical interpretation is provided  
+* up to 49 related assessments can now be plotted in a 7x7 array (increased 
+from 25); more than 49 and a message says there are too many related 
+compounds to produce a meaningful plot  
+* the scatter plot data matrix is now restricted to at most 20 related 
+compounds; more than 20 and a message says there are too many related 
+compounds to produce a meaningful plot  
+
+#### Minor bug fixes  
+
+* `create_timeseries` now recognises all ICES parameter groups which relate to 
+chemicals in the checking function `ctsm.check.species_group.biota`  
+* `create_timeseries` now recognises `"BL"` (blood) as a valid matrix for 
+mammals in the checking function `ctsm.check.matrix.biota`  
+* `read_data`: if geometry errors in the ICES station dictionary can not be 
+fixed, the relevant stations are now deleted (currently only four stations 
+affected)  
+
+
 ### Version 1.0.4
 
 This is an intermediate release to coincide with the 2025 harsat user group meeting.
