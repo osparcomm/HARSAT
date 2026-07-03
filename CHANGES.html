@@ -51,6 +51,34 @@
 <div class="section level2">
 <h2 id="change-log">Change log<a class="anchor" aria-label="anchor" href="#change-log"></a></h2>
 <div class="section level3">
+<h3 id="version-105">Version 1.0.5<a class="anchor" aria-label="anchor" href="#version-105"></a></h3>
+<p>This release is used to run the OSPAR 2026 assessment.</p>
+<div class="section level4">
+<h4 id="graphics---year-range">Graphics - year range<a class="anchor" aria-label="anchor" href="#graphics---year-range"></a></h4>
+<p>The year range on the x-axis in <code>plot_assessment</code> can now be specified by the user. This could be used to make the year range consistent across a series of related plots. The year-range is adjusted using the <code>xlim</code> element of the new <code>control</code> argument. For example by specifying <code>control = list(xlim = c(1999, 2026))</code>. It will affect all the images produced by <code>plot_assessment</code> in that call.</p>
+</div>
+<div class="section level4">
+<h4 id="summary-tables---timestamp">Summary tables - timestamp<a class="anchor" aria-label="anchor" href="#summary-tables---timestamp"></a></h4>
+<p>A timestamp can now be added to the summary table produced by <code>write_summary_table</code> if argument <code>timestamp</code> is set to TRUE. The default is not to produce a timestamp.</p>
+</div>
+<div class="section level4">
+<h4 id="report_assessment">report_assessment<a class="anchor" aria-label="anchor" href="#report_assessment"></a></h4>
+<ul><li>the degrees of freedom used to add smoothers to the ratio plots have been reduced to avoid overfitting and potential crashing<br></li>
+<li>a warning is now printed when a time series assessment has not converged and no statistical interpretation is provided<br></li>
+<li>up to 49 related assessments can now be plotted in a 7x7 array (increased from 25); more than 49 and a message says there are too many related compounds to produce a meaningful plot<br></li>
+<li>the scatter plot data matrix is now restricted to at most 20 related compounds; more than 20 and a message says there are too many related compounds to produce a meaningful plot</li>
+</ul></div>
+<div class="section level4">
+<h4 id="minor-bug-fixes">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes"></a></h4>
+<ul><li>
+<code>create_timeseries</code> now recognises all ICES parameter groups which relate to chemicals in the checking function <code>ctsm.check.species_group.biota</code><br></li>
+<li>
+<code>create_timeseries</code> now recognises <code>"BL"</code> (blood) as a valid matrix for mammals in the checking function <code>ctsm.check.matrix.biota</code><br></li>
+<li>
+<code>read_data</code>: if geometry errors in the ICES station dictionary can not be fixed, the relevant stations are now deleted (currently only four stations affected)</li>
+</ul></div>
+</div>
+<div class="section level3">
 <h3 id="version-104">Version 1.0.4<a class="anchor" aria-label="anchor" href="#version-104"></a></h3>
 <p>This is an intermediate release to coincide with the 2025 harsat user group meeting.</p>
 <div class="section level4">
@@ -90,7 +118,7 @@
 <p>Experimental code for sending output to the XHAT has been uploaded. This still needs a lot of work so please hold your breath until a later release!</p>
 </div>
 <div class="section level4">
-<h4 id="minor-bug-fixes">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes"></a></h4>
+<h4 id="minor-bug-fixes-1">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-1"></a></h4>
 <ul><li>French pivot values used in sediment normalisation for OSPAR are now picked up correctly</li>
 <li>
 <code>read_data</code> now repairs invalid station geometries in ICES station dictionary extractions</li>
@@ -185,7 +213,7 @@
 <code>determinand.link.TEQDFP</code> was deprecated in release 1.0.2 and is now deleted; use <code>determinand.link.sum</code> instead.</li>
 </ul></div>
 <div class="section level4">
-<h4 id="minor-bug-fixes-1">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-1"></a></h4>
+<h4 id="minor-bug-fixes-2">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-2"></a></h4>
 <ul><li>
 <code>write_summary_table</code> now works for biological effects assessments with non-standard summary variables (e.g. imposex_class)</li>
 <li>
@@ -230,7 +258,7 @@
 </ul><p>There is still some work required to make <code>report_assessment</code> suitable for all purposes.</p>
 </div>
 <div class="section level4">
-<h4 id="minor-bug-fixes-2">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-2"></a></h4>
+<h4 id="minor-bug-fixes-3">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-3"></a></h4>
 <ul><li>ensures that if <code>uncertainty</code> column is present in external data then so is <code>unit_uncertainty</code> and vice versa</li>
 <li>
 <code>plot_assessment</code> now correctly plots the 90% two-sided confidence intervals on VDSI estimates from imposex assessments</li>
@@ -281,7 +309,7 @@
 <ul><li>new values added to method_extraction table</li>
 </ul></div>
 <div class="section level4">
-<h4 id="minor-bug-fixes-3">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-3"></a></h4>
+<h4 id="minor-bug-fixes-4">Minor bug fixes<a class="anchor" aria-label="anchor" href="#minor-bug-fixes-4"></a></h4>
 <ul><li>correct behaviour of argument <code>return_early</code> in <code>create_timeseries</code><br></li>
 <li>pass <code>info</code> component of the harsat object to <code>determinand.link.sum</code>, <code>determinand.link.replace</code>, and <code>determinand.link.imposex</code><br></li>
 <li>ensure early return from <code>ctsm_convert_basis</code> when there is nothing to convert (avoids issues e.g. when all the data are biological effects)<br></li>
