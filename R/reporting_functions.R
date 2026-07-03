@@ -230,6 +230,9 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
 #'   to rename the existing determinand groups. The life of this argument is 
 #'   limited.
+#' @param timestamp Logical. `FALSE` (the detault) does nothing. `TRUE` outputs
+#'   an extra column with the date and time that the summary file was created. 
+#'   Most likely only useful if you are using `append` (see below). 
 #' @param append Logical. `FALSE` (the default) overwrites any existing summary
 #'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
@@ -446,6 +449,7 @@ write_summary_table <- function(
   symbology = NULL, 
   symbology_control = list(),
   determinandGroups = NULL, 
+  timestamp = FALSE, 
   append = FALSE) {
 
   if (lifecycle::is_present(collapse_AC)) {
@@ -506,7 +510,7 @@ write_summary_table <- function(
   
 
   # otherwise write to .csv file
-    
+  
   # get default output_file 
   
   if (is.null(output_file)) {
@@ -536,7 +540,14 @@ write_summary_table <- function(
       call. = FALSE
     )
   }
+
   
+  # create timestamp if timestamp = TRUE
+
+  if (isTRUE(timestamp)) {  
+    summary$timestamp <- Sys.time()
+    summary <- dplyr::relocate(summary, timestamp)
+  }    
 
   # headers on a new file aren't created if append = TRUE
   
