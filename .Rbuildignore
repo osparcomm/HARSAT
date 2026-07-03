@@ -16,5 +16,5 @@
 ^index\.md$
 ^[^/]+\.[Rr]$
 ^information$
-^example_external_data_adjustments\.Rmd$
 ^data/example_[^/]+/?.*$
+^RData
