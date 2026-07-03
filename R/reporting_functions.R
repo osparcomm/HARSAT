@@ -544,7 +544,7 @@ write_summary_table <- function(
   
   # create timestamp if timestamp = TRUE
 
-  if (timestamp) {  
+  if (isTRUE(timestamp)) {  
     summary$timestamp <- Sys.time()
     summary <- dplyr::relocate(summary, timestamp)
   }    
