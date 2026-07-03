@@ -2291,8 +2291,12 @@ plot_ratio_pred <- function(
   
   
   # fit smoother with (optional) random year effect
+  # to avoid over fitting, make k = nyear - 3 with a minimum value of 
+  # 3 (2df modal response) and a maximum value of 10
+  
   # random effect in mgcv requires k <= number of replicated years
   # only fit random effect if 5 or more replicated years
+  # reduce k if the number of replicates is less than nyear - 3 
 
   data$yfac <- factor(data$year)
   
@@ -2305,11 +2309,14 @@ plot_ratio_pred <- function(
     nrep <- 0
   }
   
+  k_choice <- nyear - 3
+  k_choice <- min(10, k_choice)
+  k_choice <- max(3, k_choice)
+  
   if (nrep < 5) {
-    k_choice <- min(10, nyear)
     formula <- ratio ~ s(year, k = k_choice)
   } else {
-    k_choice <- min(10, nrep)
+    k_choice <- min(nrep, k_choice)
     formula <- ratio ~ s(year, k = k_choice) + s(yfac, bs = "re")
   }
 
