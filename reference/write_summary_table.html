@@ -96,6 +96,7 @@ of each time series. This is experimental.</p></li>
 <span>  symbology <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  symbology_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  determinandGroups <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  timestamp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  append <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -164,6 +165,12 @@ the symbology. See details.</p></dd>
 <dd><p>optional, a list specifying <code>labels</code> and <code>levels</code>
 to rename the existing determinand groups. The life of this argument is
 limited.</p></dd>
+
+
+<dt id="arg-timestamp">timestamp<a class="anchor" aria-label="anchor" href="#arg-timestamp"></a></dt>
+<dd><p>Logical. <code>FALSE</code> (the detault) does nothing. <code>TRUE</code> outputs
+an extra column with the date and time that the summary file was created.
+Most likely only useful if you are using <code>append</code> (see below).</p></dd>
 
 
 <dt id="arg-append">append<a class="anchor" aria-label="anchor" href="#arg-append"></a></dt>

@@ -30,6 +30,7 @@ write_summary_table(
   symbology = NULL,
   symbology_control = list(),
   determinandGroups = NULL,
+  timestamp = FALSE,
   append = FALSE
 )
 ```
@@ -94,6 +95,12 @@ write_summary_table(
 
   optional, a list specifying `labels` and `levels` to rename the
   existing determinand groups. The life of this argument is limited.
+
+- timestamp:
+
+  Logical. `FALSE` (the detault) does nothing. `TRUE` outputs an extra
+  column with the date and time that the summary file was created. Most
+  likely only useful if you are using `append` (see below).
 
 - append:
 
