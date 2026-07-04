@@ -15,7 +15,7 @@ data.
 First, load the `harsat` library
 
 
-```r
+``` r
 library(harsat)
 ```
 
@@ -34,7 +34,7 @@ working.directory <- 'C:/Users/robfr/Documents/HARSAT/HARSAT'
 Contaminant data with supporting variables and station dictionary
 
 
-```r
+``` r
 biota_data <- read_data(
   compartment = "biota",
   purpose = "AMAP",
@@ -84,7 +84,7 @@ to define subseries
 Get correct variables and streamline the data files
 
 
-```r
+``` r
 biota_data <- tidy_data(biota_data)
 #> 
 #> Oddities will be written to 'oddities/biota' with previous oddities backed up to
@@ -102,7 +102,7 @@ biota_data <- tidy_data(biota_data)
 For each timeseries, use the basis which is reported most often in the data
 
 
-```r
+``` r
 biota_timeseries <- create_timeseries(
   biota_data,
   determinands = ctsm_get_determinands(biota_data$info),
@@ -137,7 +137,7 @@ be based on a power of 80% and an annual percentage increase in concentration
 of 10%.
 
 
-```r
+``` r
 biota_assessment <- run_assessment(
   biota_timeseries,
   subset = NULL,
@@ -356,7 +356,7 @@ biota_assessment <- run_assessment(
 ## Check convergence
 
 
-```r
+``` r
 check_assessment(biota_assessment, save_result = FALSE)
 #> All assessment models have converged
 ```
@@ -368,7 +368,7 @@ argument `extra_output = "power"` ensures that the power metrics for
 lognormally distributed data will be exported. 
 
 
-```r
+``` r
 summary.dir <- file.path(working.directory, "output", "example_external_data")
 
 if (!dir.exists(summary.dir)) {
@@ -385,7 +385,8 @@ write_summary_table(
   threshold_goups = NULL, 
   extra_output = "power"
 )
-#> Error in write_summary_table(biota_assessment, output_file = "biota-FO-PW-test-output.csv", : unused argument (threshold_goups = NULL)
+#> Error in `write_summary_table()`:
+#> ! unused argument (threshold_goups = NULL)
 ```
 
 # Graphics output
@@ -408,7 +409,7 @@ if subset is NULL (default), all timeseries are plotted (can take some time)
 Graphics plots are written to files in `output/graphics`.
 
 
-```r
+``` r
 graphics.dir <- file.path(working.directory, "output", "graphics")
 
 if (!dir.exists(graphics.dir)) {
