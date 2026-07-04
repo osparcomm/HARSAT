@@ -379,7 +379,8 @@ write_summary_table(
   threshold_goups = NULL, 
   extra_output = "power"
 )
-#> Error in write_summary_table(biota_assessment, output_file = "biota-FO-PW-test-output.csv", : unused argument (threshold_goups = NULL)
+#> Error in `write_summary_table()`:
+#> ! unused argument (threshold_goups = NULL)
 ```
 
 ## Graphics output

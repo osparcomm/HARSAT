@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">harsat</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.4.1009</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
       <h1>Getting started</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/develop/vignettes/harsat.Rmd" class="external-link"><code>vignettes/harsat.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/osparcomm/HARSAT/blob/main/vignettes/harsat.Rmd" class="external-link"><code>vignettes/harsat.Rmd</code></a></small>
       <div class="d-none name"><code>harsat.Rmd</code></div>
     </div>
 
@@ -197,8 +197,8 @@ arguments.</p>
 <span><span class="co">#&gt;  - restricting to stations with program governance: OSPAR, AMAP</span></span>
 <span><span class="co">#&gt; Warning: these stations have invalid shape file polygons:</span></span>
 <span><span class="co">#&gt; 2185</span></span>
-<span><span class="co">#&gt; the code has 'repaired' the polygons, but please inform ICES so that they</span></span>
-<span><span class="co">#&gt; can be fixed at source</span></span>
+<span><span class="co">#&gt; the code 'repaired' these polgyons;</span></span>
+<span><span class="co">#&gt; please inform ICES so they can be fixed at source</span></span>
 <span><span class="co">#&gt;  - matching 2768 records by coordinates</span></span>
 <span><span class="co">#&gt;  - matching 1583 records by station name</span></span>
 <span><span class="co">#&gt;  - grouping stations using station_asmtmimegovernance</span></span>
@@ -396,7 +396,8 @@ different threshold values.</p>
 <span>  collapse_AC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EAC <span class="op">=</span> <span class="st">"EQS"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="va">summary.dir</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in write_summary_table(water_assessment, determinandGroups = list(levels = c("Metals", : unused argument (classColour = list(below = c(EQS = "green"), above = c(EQS = "red"), none = "black"))</span></span></code></pre></div>
+<span><span class="co">#&gt; Error in `write_summary_table()`:</span></span>
+<span><span class="co">#&gt; ! unused argument (classColour = list(below = c(EQS = "green"), above = c(EQS = "red"), none = "black"))</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

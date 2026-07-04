@@ -406,7 +406,7 @@ sediment_data <- tidy_data(sediment_data)
 #> 
 #> Dropping 523 records from data that have no valid station code
 #> 
-#> Dropping 13327 stations that are not associated with any data
+#> Dropping 13326 stations that are not associated with any data
 #> 
 #> Cleaning station dictionary
 #> 

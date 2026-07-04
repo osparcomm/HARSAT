@@ -128,8 +128,8 @@ water_data <- read_data(
 #>  - restricting to stations with program governance: OSPAR, AMAP
 #> Warning: these stations have invalid shape file polygons:
 #> 2185
-#> the code has 'repaired' the polygons, but please inform ICES so that they
-#> can be fixed at source
+#> the code 'repaired' these polgyons;
+#> please inform ICES so they can be fixed at source
 #>  - matching 2768 records by coordinates
 #>  - matching 1583 records by station name
 #>  - grouping stations using station_asmtmimegovernance
@@ -345,5 +345,6 @@ write_summary_table(
   collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
 )
-#> Error in write_summary_table(water_assessment, determinandGroups = list(levels = c("Metals", : unused argument (classColour = list(below = c(EQS = "green"), above = c(EQS = "red"), none = "black"))
+#> Error in `write_summary_table()`:
+#> ! unused argument (classColour = list(below = c(EQS = "green"), above = c(EQS = "red"), none = "black"))
 ```
