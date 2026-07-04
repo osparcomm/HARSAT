@@ -67,7 +67,7 @@ devtools::install_github("osparcomm/HARSAT@develop")
 Now, within R, you can load the library in the usual way
 
 
-```r
+``` r
 library(harsat)
 ```
 
@@ -90,7 +90,7 @@ The first step is to read in the data that we've got, using `read_data()`.
 We will go through some of these arguments.
 
 
-```r
+``` r
 water_data <- read_data(
   compartment = "water",
   purpose = "OSPAR",
@@ -134,8 +134,8 @@ water_data <- read_data(
 #>  - restricting to stations with program governance: OSPAR, AMAP
 #> Warning: these stations have invalid shape file polygons:
 #> 2185
-#> the code has 'repaired' the polygons, but please inform ICES so that they
-#> can be fixed at source
+#> the code 'repaired' these polgyons;
+#> please inform ICES so they can be fixed at source
 #>  - matching 2768 records by coordinates
 #>  - matching 1583 records by station name
 #>  - grouping stations using station_asmtmimegovernance
@@ -181,7 +181,7 @@ Warnings are supported by output files which allow you to come in and have a loo
 see which values are affected, so you can go and check them out in more detail.
 
 
-```r
+``` r
 water_data <- tidy_data(water_data)
 #> 
 #> Oddities will be written to 'oddities/water' with previous oddities backed up to
@@ -216,7 +216,7 @@ There are various other arguments which allow you to control
 just how the data are manipulated.
 
 
-```r
+``` r
 water_timeseries <- create_timeseries(
   water_data,
   determinands.control = list(
@@ -266,7 +266,7 @@ You can see that it tells you which time series we're actually assessing as it p
 This gives you an idea of how how many cups of tea you can drink before it's all finished.
 
 
-```r
+``` r
 water_assessment <- run_assessment(
   water_timeseries, 
   AC = "EQS", 
@@ -280,7 +280,7 @@ There are various little warnings: these ones are nothing to worry about.
 We can then check that everything is converged, using `check_assessment()`.
 
 
-```r
+``` r
 check_assessment(water_assessment)
 #> All assessment models have converged
 ```
@@ -293,7 +293,7 @@ there, so let's make a new directory, `./output/tutorial`, and put the full
 path into `summary.dir`, so we can tell `harsat` where to write to.
 
 
-```r
+``` r
 summary.dir <- file.path(working.directory, "output", "tutorial")
 
 if (!dir.exists(summary.dir)) {
@@ -309,7 +309,7 @@ by statistical results, such as p values, and summary values such as the number 
 when it starts and finishes. And towards the end, we've got comparisons against various different threshold values.
 
 
-```r
+``` r
 write_summary_table(
   water_assessment,
   determinandGroups = list(
@@ -330,6 +330,7 @@ write_summary_table(
   collapse_AC = list(EAC = "EQS"),
   output_dir = summary.dir
 )
-#> Error in write_summary_table(water_assessment, determinandGroups = list(levels = c("Metals", : unused argument (classColour = list(below = c(EQS = "green"), above = c(EQS = "red"), none = "black"))
+#> Error in `write_summary_table()`:
+#> ! unused argument (classColour = list(below = c(EQS = "green"), above = c(EQS = "red"), none = "black"))
 ```
 
