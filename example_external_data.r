@@ -132,3 +132,8 @@ plot_assessment(
   file_format = "pdf"
 )
 
+report_assessment(
+  biota_assessment, 
+  subset = series == "A902 PFOS Globicephala melas LI JV",
+  output_dir = file.path("output", "graphics")
+)

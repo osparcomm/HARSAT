@@ -15,6 +15,7 @@ write_summary_table(
   symbology = NULL,
   symbology_control = list(),
   determinandGroups = NULL,
+  timestamp = FALSE,
   append = FALSE
 )
 }
@@ -60,6 +61,10 @@ the symbology. See details.}
 \item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
 to rename the existing determinand groups. The life of this argument is
 limited.}
+
+\item{timestamp}{Logical. \code{FALSE} (the detault) does nothing. \code{TRUE} outputs
+an extra column with the date and time that the summary file was created.
+Most likely only useful if you are using \code{append} (see below).}
 
 \item{append}{Logical. \code{FALSE} (the default) overwrites any existing summary
 file. \code{TRUE} appends data to it, creating it if it does not yet exist.}

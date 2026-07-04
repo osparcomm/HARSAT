@@ -104,11 +104,19 @@ data <- assessment_object$data[ok, ]
 
 assessment <- assessment_object$assessment[[params$series]]
 
-info <- assessment_object$info[c(
+# the following ensures all the elements are present in info (perhaps as NULL)
+# even if not present in assessment_object$info
+# for example, AC might not be a named element of assessment_object$info
+
+info <- list()
+
+info_id <- c(
   "compartment", "purpose", "extraction", "max_year", "reporting_window", 
   "recent_years", "recent.trend", "AC", "normalise"
-)]
-  
+)
+
+info[info_id] <- assessment_object$info[info_id]
+
 info <- c(info, assessment_object$timeSeries[params$series, ])
 
 # determinand info
@@ -621,9 +629,14 @@ txt <- if (anova_ok) "Finally, the tab" else "The tab also"
 <li class = "gap">Statistical analysis. This tab gives the results of a non-parametric status assessment.</li>
 ```
 
-
 </ul>
 
+<br>
+
+<!-- warning if the assessment has not converged -->
+
+```{asis, eval = assessment$convergence != 0L}
+<b>Warning: the assessment did not converge. The fitted values, standard errors, confidence bands and associated tests for trend and status are unreliable</b>
 
 <br>
 
@@ -736,15 +749,27 @@ plot_auxiliary(data, assessment, info, assessment_object$info, auxiliary = auxil
 #### Assessments (related `r txt_compounds`)
 
 ```{r, include = FALSE}
-ok <- ! info$detGroup %in% "Imposex"
+not_ok1 <- length(info_multi$seriesID) == 1L
+not_ok2 <- length(info_multi$seriesID) >= 50L
+ok <- !not_ok1 & !not_ok2
+
 if (info$determinand == "EROD") {
   info_multi$subseries <- NA_character_
 }
 ```
 
-```{asis, eval = !ok}
+```{asis, eval = not_ok1}
 <br>
-No related responses assessed.
+No related `r txt_compounds` assessed.  
+<br>
+<br>
+```
+
+```{asis, eval = not_ok2}
+<br>
+Too many related `r txt_compounds` to show meaningfully in a single plot.  
+<br>
+<br>
 ```
 
 ```{r multi_assessment, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
@@ -757,12 +782,23 @@ plot_multiassessment(
 #### Data (related `r txt_compounds`)
 
 ```{r, include = FALSE}
-ok <- ! info$detGroup %in% "Imposex"
+not_ok1 <- length(info_multi$seriesID) == 1L
+not_ok2 <- length(info_multi$seriesID) > 20L
+ok <- !not_ok1 & !not_ok2
 ```
 
-```{asis, eval = !ok}
+```{asis, eval = not_ok1}
 <br>
-No related responses assessed.
+No related `r txt_compounds` assessed.  
+<br>
+<br>
+```
+
+```{asis, eval = not_ok2}
+<br>
+Too many related `r txt_compounds` to show meaningfully in a single plot.  
+<br>
+<br>
 ```
 
 ```{r multi_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
@@ -915,7 +951,7 @@ format_p <- function(p) {
 ```
 
 
-```{r interpretation_trend, eval = anova_ok, include = FALSE}
+```{r interpretation_trend, eval = anova_ok & assessment$convergence == 0L, include = FALSE}
 wk <- assessment$summary
 wk_year <- unique(assessment$data$year)
 wk_n <- length(wk_year)
@@ -1096,7 +1132,7 @@ if (wk$p_overall_trend >= 0.05) {
 ```
 
 
-```{r interpretation_status, eval = status_ok, include = FALSE}
+```{r interpretation_status, eval = status_ok & assessment$convergence == 0L, include = FALSE}
 
 if (status_parametric && info$detGroup != "Imposex") {
 
@@ -1282,7 +1318,7 @@ if (is_HQS) {
 
 
 
-```{asis, eval = (anova_ok | status_ok)}
+```{asis, eval = (anova_ok | status_ok) & assessment$convergence == 0L}
 **Interpretation**
 
 `r if (anova_ok) trend_description`
@@ -1293,6 +1329,15 @@ if (is_HQS) {
 
 ```
 
+
+```{asis, eval = assessment$convergence != 0L}
+**Interpretation**
+
+No interpretation is provided because the assessment did not converge
+
+<br>
+
+```
 
 
 
