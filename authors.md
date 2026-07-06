@@ -20,7 +20,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/osparcomm/HARSAT/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/osparcomm/HARSAT/blob/1.0.6/DESCRIPTION)
 
 Arctic Monitoring and Assessment Programme (AMAP), Helsinki Commission
 (HELCOM), OSPAR Commission (OSPAR), International Council for the
