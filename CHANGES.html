@@ -51,6 +51,15 @@
 <div class="section level2">
 <h2 id="change-log">Change log<a class="anchor" aria-label="anchor" href="#change-log"></a></h2>
 <div class="section level3">
+<h3 id="version-106">Version 1.0.6<a class="anchor" aria-label="anchor" href="#version-106"></a></h3>
+<div class="section level4">
+<h4 id="major-bug-fix---p_overall_trend">Major bug fix - p_overall_trend<a class="anchor" aria-label="anchor" href="#major-bug-fix---p_overall_trend"></a></h4>
+<p>For smooth models, the degrees of freedom used in the likelihood ratio test of an overall temporal trend are now correct. Previously, they were too small (by one) resulting in values of <code>p_overall_trend</code> that were too significant. Fortunately, this had no effect on model selection as the chosen model is based on AICc or AIC (depending on the distribution of the response) and the p-values are calculated after the model is chosen.</p>
+<p>The statistical interpretation of smooth models in <code>report_assessment</code> is now more nuanced. Smooth models chosen by AIC or AICc are not necessarily significant at the conventional 5% level. The significance of the final model is given by <code>p_overall_trend</code> which is based on a likelihood ratio test that compares the smooth model and the mean model (and essentially tests for any evidence of a change in concentrations over time). This degree of significance is now characterised as weak (p &gt;= 0.05), moderate (0.05 &lt; p &lt;= 0.01) and strong (p &lt; 0.01). In theory, a smooth model chosen by AICc could have a <code>p_overall_trend</code> as high as 0.135, but this can only happen when there are many years of data and the improvement in AICc between the smooth model and the mean model is marginal.</p>
+<p>Note that, for smooth models, the significance of the overall trend can be split into the significance of the nonlinear component (<code>p_nonlinear_trend</code> based on a likelihood ratio test that compares the smooth model with the linear model) and the linear component (<code>p_linear_trend</code> based on a likelihood ratio test that compares the linear model with the mean model). Both these p-values were calculated correctly in previous releases.</p>
+</div>
+</div>
+<div class="section level3">
 <h3 id="version-105">Version 1.0.5<a class="anchor" aria-label="anchor" href="#version-105"></a></h3>
 <p>This release is used to run the OSPAR 2026 assessment.</p>
 <div class="section level4">

@@ -2,6 +2,39 @@
 
 ## Change log
 
+### Version 1.0.6
+
+#### Major bug fix - p_overall_trend
+
+For smooth models, the degrees of freedom used in the likelihood ratio
+test of an overall temporal trend are now correct. Previously, they were
+too small (by one) resulting in values of `p_overall_trend` that were
+too significant. Fortunately, this had no effect on model selection as
+the chosen model is based on AICc or AIC (depending on the distribution
+of the response) and the p-values are calculated after the model is
+chosen.
+
+The statistical interpretation of smooth models in `report_assessment`
+is now more nuanced. Smooth models chosen by AIC or AICc are not
+necessarily significant at the conventional 5% level. The significance
+of the final model is given by `p_overall_trend` which is based on a
+likelihood ratio test that compares the smooth model and the mean model
+(and essentially tests for any evidence of a change in concentrations
+over time). This degree of significance is now characterised as weak (p
+\>= 0.05), moderate (0.05 \< p \<= 0.01) and strong (p \< 0.01). In
+theory, a smooth model chosen by AICc could have a `p_overall_trend` as
+high as 0.135, but this can only happen when there are many years of
+data and the improvement in AICc between the smooth model and the mean
+model is marginal.
+
+Note that, for smooth models, the significance of the overall trend can
+be split into the significance of the nonlinear component
+(`p_nonlinear_trend` based on a likelihood ratio test that compares the
+smooth model with the linear model) and the linear component
+(`p_linear_trend` based on a likelihood ratio test that compares the
+linear model with the mean model). Both these p-values were calculated
+correctly in previous releases.
+
 ### Version 1.0.5
 
 This release is used to run the OSPAR 2026 assessment.
