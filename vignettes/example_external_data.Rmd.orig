@@ -151,10 +151,6 @@ write_summary_table(
   biota_assessment,
   output_file = "biota-FO-PW-test-output.csv",   # NB, file will be overwritten so change name as appropriate to retain results
   output_dir = summary.dir,
-  export = TRUE,
-  determinandGroups = NULL,
-  symbology = NULL,
-  threshold_goups = NULL, 
   extra_output = "power"
 )
 ```
