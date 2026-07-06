@@ -1167,7 +1167,7 @@ assess_lmm <- function(
       p_overall_trend <- with(output, {
         smoothID <- paste0("smooth (df = ", dfSmooth, ")")
         diff <- anova[smoothID, "twiceLogLik"] - anova["mean", "twiceLogLik"]
-        pchisq(diff, dfSmooth - 1, lower.tail = FALSE)
+        pchisq(diff, dfSmooth, lower.tail = FALSE)
       })
       
     }
@@ -2199,7 +2199,7 @@ assess_survival <- function(
       p_overall_trend <- with(output, {
         smoothID <- paste0("smooth (df = ", dfSmooth, ")")
         diff <- anova[smoothID, "twiceLogLik"] - anova["mean", "twiceLogLik"]
-        pchisq(diff, dfSmooth - 1, lower.tail = FALSE)
+        pchisq(diff, dfSmooth, lower.tail = FALSE)
       })
 
     }
@@ -2662,7 +2662,7 @@ assess_beta <- function(
       p_overall_trend <- with(output, {
         smoothID <- paste0("smooth (df = ", dfSmooth, ")")
         diff <- anova[smoothID, "twiceLogLik"] - anova["mean", "twiceLogLik"]
-        pchisq(diff, dfSmooth - 1, lower.tail = FALSE)
+        pchisq(diff, dfSmooth, lower.tail = FALSE)
       })
       
     }
@@ -3063,7 +3063,7 @@ assess_negativebinomial <- function(
       p_overall_trend <- with(output, {
         smoothID <- paste0("smooth (df = ", dfSmooth, ")")
         diff <- anova[smoothID, "twiceLogLik"] - anova["mean", "twiceLogLik"]
-        pchisq(diff, dfSmooth - 1, lower.tail = FALSE)
+        pchisq(diff, dfSmooth, lower.tail = FALSE)
       })
       
     }
