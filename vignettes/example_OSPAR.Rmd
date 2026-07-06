@@ -283,7 +283,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 2017 </td>
    <td style="text-align:right;"> 0.0004 </td>
    <td style="text-align:right;"> 0.0122 </td>
-   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0001 </td>
    <td style="text-align:right;"> 0.0016 </td>
    <td style="text-align:right;"> -19.6 </td>
    <td style="text-align:right;"> 0.0016 </td>
@@ -1595,7 +1595,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 2017 </td>
    <td style="text-align:right;"> 0.0003 </td>
    <td style="text-align:right;"> 0.0157 </td>
-   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0001 </td>
    <td style="text-align:right;"> 0.0014 </td>
    <td style="text-align:right;"> -18.6 </td>
    <td style="text-align:right;"> 0.0014 </td>
@@ -3030,7 +3030,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 2017 </td>
    <td style="text-align:right;"> 0.0012 </td>
    <td style="text-align:right;"> 0.1922 </td>
-   <td style="text-align:right;"> 0.0005 </td>
+   <td style="text-align:right;"> 0.0023 </td>
    <td style="text-align:right;"> 0.0901 </td>
    <td style="text-align:right;"> 5.3 </td>
    <td style="text-align:right;"> 0.0901 </td>
@@ -3358,7 +3358,7 @@ Now let's look at the `water_summary.csv` file:
    <td style="text-align:right;"> 2022 </td>
    <td style="text-align:right;"> 0.0005 </td>
    <td style="text-align:right;"> 0.5607 </td>
-   <td style="text-align:right;"> 0.0004 </td>
+   <td style="text-align:right;"> 0.0020 </td>
    <td style="text-align:right;"> 0.4532 </td>
    <td style="text-align:right;"> 0.9 </td>
    <td style="text-align:right;"> 0.4532 </td>
@@ -8469,7 +8469,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:right;"> 0.0407 </td>
    <td style="text-align:right;"> 0.0135 </td>
-   <td style="text-align:right;"> 0.0013 </td>
+   <td style="text-align:right;"> 0.0058 </td>
    <td style="text-align:right;"> 0.0058 </td>
    <td style="text-align:right;"> -3.4 </td>
    <td style="text-align:right;"> 0.0028 </td>
@@ -9719,7 +9719,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0040 </td>
    <td style="text-align:right;"> 0.1123 </td>
-   <td style="text-align:right;"> 0.0011 </td>
+   <td style="text-align:right;"> 0.0036 </td>
    <td style="text-align:right;"> 0.0039 </td>
    <td style="text-align:right;"> 15.8 </td>
    <td style="text-align:right;"> 0.7289 </td>
@@ -10769,7 +10769,7 @@ Now let's look at the `sediment_summary.csv` file:
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0024 </td>
    <td style="text-align:right;"> 0.6454 </td>
-   <td style="text-align:right;"> 0.0021 </td>
+   <td style="text-align:right;"> 0.0055 </td>
    <td style="text-align:right;"> 0.7052 </td>
    <td style="text-align:right;"> 1.1 </td>
    <td style="text-align:right;"> 0.2600 </td>
@@ -16812,7 +16812,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0004 </td>
    <td style="text-align:right;"> 0.1610 </td>
-   <td style="text-align:right;"> 0.0001 </td>
+   <td style="text-align:right;"> 0.0007 </td>
    <td style="text-align:right;"> 0.0280 </td>
    <td style="text-align:right;"> 3.2 </td>
    <td style="text-align:right;"> 0.0280 </td>
@@ -17040,7 +17040,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0005 </td>
    <td style="text-align:right;"> 0.0121 </td>
-   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0001 </td>
    <td style="text-align:right;"> 0.0000 </td>
    <td style="text-align:right;"> -6.9 </td>
    <td style="text-align:right;"> 0.0000 </td>
@@ -17097,7 +17097,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0012 </td>
    <td style="text-align:right;"> 0.1024 </td>
-   <td style="text-align:right;"> 0.0003 </td>
+   <td style="text-align:right;"> 0.0011 </td>
    <td style="text-align:right;"> 0.0004 </td>
    <td style="text-align:right;"> -6.7 </td>
    <td style="text-align:right;"> 0.0004 </td>
@@ -17211,7 +17211,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0117 </td>
    <td style="text-align:right;"> 0.4365 </td>
-   <td style="text-align:right;"> 0.0083 </td>
+   <td style="text-align:right;"> 0.0307 </td>
    <td style="text-align:right;"> 0.3473 </td>
    <td style="text-align:right;"> -1.5 </td>
    <td style="text-align:right;"> 0.3473 </td>
@@ -18180,7 +18180,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0001 </td>
    <td style="text-align:right;"> 0.1506 </td>
-   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0001 </td>
    <td style="text-align:right;"> 0.0148 </td>
    <td style="text-align:right;"> -4.2 </td>
    <td style="text-align:right;"> 0.0148 </td>
@@ -19491,7 +19491,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:right;"> 0.0017 </td>
    <td style="text-align:right;"> 0.1473 </td>
-   <td style="text-align:right;"> 0.0006 </td>
+   <td style="text-align:right;"> 0.0019 </td>
    <td style="text-align:right;"> 0.5007 </td>
    <td style="text-align:right;"> 1.3 </td>
    <td style="text-align:right;"> 0.0751 </td>
@@ -19548,7 +19548,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0371 </td>
    <td style="text-align:right;"> 0.2674 </td>
-   <td style="text-align:right;"> 0.0182 </td>
+   <td style="text-align:right;"> 0.0615 </td>
    <td style="text-align:right;"> 0.2222 </td>
    <td style="text-align:right;"> -1.6 </td>
    <td style="text-align:right;"> 0.3285 </td>
@@ -21030,7 +21030,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:right;"> 0.0345 </td>
    <td style="text-align:right;"> 0.0176 </td>
-   <td style="text-align:right;"> 0.0015 </td>
+   <td style="text-align:right;"> 0.0064 </td>
    <td style="text-align:right;"> 0.0105 </td>
    <td style="text-align:right;"> -2.6 </td>
    <td style="text-align:right;"> 0.8943 </td>
@@ -21486,7 +21486,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0030 </td>
    <td style="text-align:right;"> 0.3076 </td>
-   <td style="text-align:right;"> 0.0018 </td>
+   <td style="text-align:right;"> 0.0047 </td>
    <td style="text-align:right;"> 0.4016 </td>
    <td style="text-align:right;"> -2.0 </td>
    <td style="text-align:right;"> 0.0975 </td>
@@ -21942,7 +21942,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:right;"> 0.0124 </td>
    <td style="text-align:right;"> 0.0102 </td>
-   <td style="text-align:right;"> 0.0003 </td>
+   <td style="text-align:right;"> 0.0016 </td>
    <td style="text-align:right;"> 0.0115 </td>
    <td style="text-align:right;"> 7.8 </td>
    <td style="text-align:right;"> 0.0006 </td>
@@ -21999,7 +21999,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2020 </td>
    <td style="text-align:right;"> 0.0379 </td>
    <td style="text-align:right;"> 0.0112 </td>
-   <td style="text-align:right;"> 0.0010 </td>
+   <td style="text-align:right;"> 0.0047 </td>
    <td style="text-align:right;"> 0.0159 </td>
    <td style="text-align:right;"> 9.1 </td>
    <td style="text-align:right;"> 0.0015 </td>
@@ -22854,7 +22854,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0050 </td>
    <td style="text-align:right;"> 0.7897 </td>
-   <td style="text-align:right;"> 0.0048 </td>
+   <td style="text-align:right;"> 0.0188 </td>
    <td style="text-align:right;"> 0.3831 </td>
    <td style="text-align:right;"> 1.0 </td>
    <td style="text-align:right;"> 0.9894 </td>
@@ -24222,7 +24222,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2022 </td>
    <td style="text-align:right;"> 0.0038 </td>
    <td style="text-align:right;"> 0.0050 </td>
-   <td style="text-align:right;"> 0.0001 </td>
+   <td style="text-align:right;"> 0.0003 </td>
    <td style="text-align:right;"> 0.0006 </td>
    <td style="text-align:right;"> -7.9 </td>
    <td style="text-align:right;"> 0.0006 </td>
@@ -25362,7 +25362,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2018 </td>
    <td style="text-align:right;"> 0.0203 </td>
    <td style="text-align:right;"> 0.0476 </td>
-   <td style="text-align:right;"> 0.0023 </td>
+   <td style="text-align:right;"> 0.0095 </td>
    <td style="text-align:right;"> 0.0169 </td>
    <td style="text-align:right;"> -1.4 </td>
    <td style="text-align:right;"> 0.0036 </td>
@@ -27528,7 +27528,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2017 </td>
    <td style="text-align:right;"> 0.0140 </td>
    <td style="text-align:right;"> 0.0004 </td>
-   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0001 </td>
    <td style="text-align:right;"> 0.0006 </td>
    <td style="text-align:right;"> 6.5 </td>
    <td style="text-align:right;"> 0.0045 </td>
@@ -30777,7 +30777,7 @@ And finally, let's take a look at the `biota_summary.csv` file.
    <td style="text-align:right;"> 2021 </td>
    <td style="text-align:right;"> 0.0008 </td>
    <td style="text-align:right;"> 0.3673 </td>
-   <td style="text-align:right;"> 0.0005 </td>
+   <td style="text-align:right;"> 0.0023 </td>
    <td style="text-align:right;"> 0.0886 </td>
    <td style="text-align:right;"> 1.1 </td>
    <td style="text-align:right;"> 0.0886 </td>
