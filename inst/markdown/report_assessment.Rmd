@@ -980,7 +980,15 @@ change_txt <- function(type = c("whole", "recent")) {
 }
 
 
-if (wk$p_overall_trend >= 0.05) {
+# identifies nonlinear models, either because they involve a smooth, or a step
+# change (imposex) or both
+
+is_nonlinear <- !is.na(wk$p_nonlinear_trend) || is_change
+
+
+if (!is_nonlinear && wk$p_overall_trend >= 0.05) {
+  
+  # linear model but no significant trend 
 
   trend_description <- paste0(
     "There is no significant temporal trend in the time series ",
@@ -988,8 +996,10 @@ if (wk$p_overall_trend >= 0.05) {
     "."
   )
 
-} else if (is.na(wk$p_nonlinear_trend)) {
+} else if (!is_nonlinear) {
 
+  # linear model with significant trend
+  
   if (!info$distribution %in% c("lognormal", "normal", "multinomial", "survival")) {
     stop("not coded for ", info$distribution, " distribution")
   }
@@ -1039,81 +1049,101 @@ if (wk$p_overall_trend >= 0.05) {
   )
 
 
-  if (!is_change) {
-
-    # not a change point model (currently only imposex)
-
-    trend_description <- paste0(
-      otrendtxt2,
-      stringr::str_to_sentence(txt_concentrations),
-      " have ",
-      if (wk$overall_change > 0) "increased" else "decreased",
-      otrendtxt3
+  trend_description <- paste0(
+    otrendtxt2,
+    stringr::str_to_sentence(txt_concentrations),
+    " have ",
+    if (wk$overall_change > 0) "increased" else "decreased",
+    otrendtxt3
+  )
+  
+  # qualify change for bioeffects where high values are good
+  
+  if (info$good.status == "high") {
+    trend_description <- paste(
+      trend_description,
+      "Higher values of",
+      info$det_name,
+      "indicate healthier organisms, so the trend suggests a",
+      if (wk$overall_change > 0) "improving" else "deteriorating",
+      "situation."
     )
-
-    if (info$good.status == "high") {
-      trend_description <- paste(
-        trend_description,
-        "Higher values of",
-        info$det_name,
-        "indicate healthier organisms, so the trend suggests a",
-        if (wk$overall_change > 0) "improving" else "deteriorating",
-        "situation."
-      )
-    }
-
-  } else {
-
-    # change point model with linear trend after change
-
-    trend_description <- paste0(
-      "There is a significant trend in the time series ",
-      format_p(wk$p_overall_trend),
-      " with levels stable until ",
-      modelID,
-      " and then ",
-      if (wk$overall_change > 0) "increasing" else "decreasing",
-      " linear logistically. ",
-      change_txt("whole"),
-      if (assessment$contrasts["whole", "start"] < wk_recent) change_txt("recent")
-    )
-
   }
 
 } else {
 
+  # these models have evidence of non-linearity (in one form or another) by
+  # virtue of being selected by AIC or AICc; however, the level of significance
+  # might be > 0.05
+  
+  # we could do the same with the linear models, but at this point in time, I 
+  # think it would confuse things because we present a linear model regardless 
+  # of whether the mean or linear model is selected
+  
+  if (wk$p_overall_trend < 0.01) {
+    sig_strength <- "strong"
+  } else if (wk$p_overall_trend < 0.05) {
+    sig_strength <- "moderate"
+  } else {
+    sig_strength <- "weak"
+  }
+
+  trend_description <- paste0(
+    "There is ", 
+    sig_strength, 
+    " evidence of a trend in the time series ",
+    format_p(wk$p_overall_trend),
+    ". "
+  )
+
+  
   if (!is_change) {
 
-    # not a change point model (currently only imposex)
+    # not a change point model 
 
     trend_description <- paste0(
-      "There is a significant trend in the time series ",
-      format_p(wk$p_overall_trend),
-      ". The trend is nonlinear ",
+      trend_description,
+      "The trend is nonlinear ",
       format_p(wk$p_nonlinear_trend),
       " so the shape of the trend must be assessed visually. ",
       change_txt("whole"),
       if (assessment$contrasts["whole", "start"] < wk_recent) change_txt("recent")
     )
+  
+  } else if (grepl("linear", assessment$method)) {
 
-  } else if (grepl("smooth", assessment$method)) {
+    # change point model followed by a linear trend
+      
+    trend_description <- paste0(
+      trend_description,
+      ". Levels were stable until ", 
+      modelID, 
+      " followed by a linear (logistic) ",
+      if (wk$overall_change > 0) "increase" else "decrease",
+      ", ",
+      change_txt("whole"),
+      if (assessment$contrasts["whole", "start"] < wk_recent) change_txt("recent")
+    )
 
-    # change point model with nonlinear trend after change
+  } else {
+
+    # change point model followed by a nonlinear trend
 
     trend_description <- paste0(
-      "There is a significant temporal trend in the time series ",
-      format_p(wk$p_overall_trend),
-      ". The trend is nonlinear ",
+      trend_description, 
+      ". Levels were stable until ", 
+      modelID, 
+      " followed by a nonlinear (logistic) pattern of change ", 
       format_p(wk$p_nonlinear_trend),
-      " with levels stable until ",
-      modelID,
-      " followed by a nonlinear pattern of change which must be assessed visually. ",
+      " which must be assessed visually. ",
       change_txt("whole"),
       if (assessment$contrasts["whole", "start"] < wk_recent) change_txt("recent")
     )
 
   }
 
+
+  # qualify change for bioeffects where high values are good
 
   if (info$good.status %in% "high") {
     trend_description <- paste(
