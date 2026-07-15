@@ -2472,6 +2472,7 @@ tidy_contaminants <- function(data, info) {
 #' @return a completed timeseries object, which can be used for assessments
 #' 
 #' @export
+
 create_timeseries <- function(
   ctsm.obj, 
   determinands = ctsm_get_determinands(ctsm.obj$info), 
@@ -2556,6 +2557,7 @@ create_timeseries <- function(
   # retains determinands of interest, including auxiliary determinands and those
   # required by determinands.control$variables 
   # checks all determinands of interest are recognised by info$determinand
+  
 
   wk <- ctsm_check_determinands(info, data, determinands, determinands.control)
   
@@ -2689,9 +2691,17 @@ create_timeseries <- function(
   )
   
   
-  # drop samples which only have auxiliary data
+  # identify samples with determinands (or control determinands) of interest
+  # all remaining samples will only have auxiliary variables that we do not want to assess 
+
+  all_dets <- c(determinands, get_control_dets(determinands.control))
+  sample_id <- data$sample[data$determinand %in% all_dets]
+  sample_id <- unique(sample_id)
+
   
-  ok <- with(data, sample %in% sample[group != "Auxiliary"])
+  # identity records that are in these samples - we want to keep all these
+  
+  ok <- data$sample %in% sample_id
   if (any(!ok)) {
     cat("   Dropping samples with only auxiliary variables\n")
     data <- data[ok, ]
@@ -3427,30 +3437,26 @@ ctsm.imposex.check.femalepop <- function(data, info) {
 }
 
 
+# utility function to get all determinand names from control structure
+
+get_control_dets <- function(control, .names = TRUE) {  
+  if (is.null(control)) 
+    return(NULL)
+  
+  out <- lapply(control, "[[", "det")
+  out <- unlist(out)
+  out <- unname(out)
+  
+  if (.names) {
+    return(c(names(control), out))
+  } else {
+    return(out)
+  }
+}
+
+
 ctsm_check_determinands <- function(info, data, determinands, control = NULL) {
 
-  # checks all determinands are recognised in info files
-  # checks determinands are not also in control (if they are to be replaced)
-  # reduces data file and determinand structures so that they only contain required values
-  
-  # utility function to get all determinand names from control structure
-  
-  get_control_dets <- function(control, .names = TRUE) {  
-    if (is.null(control)) 
-      return(NULL)
-    
-    out <- lapply(control, "[[", "det")
-    out <- unlist(out)
-    out <- unname(out)
-    
-    if (.names) {
-      return(c(names(control), out))
-    } else {
-      return(out)
-    }
-  }
-  
-  
   # check control values to be replaced are not also in determinands
   
   if (!is.null(control)) {
