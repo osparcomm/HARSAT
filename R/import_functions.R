@@ -2852,7 +2852,7 @@ create_timeseries <- function(
     data <- ctsm.imposex.check.femalepop(data, info)
   }
   
-
+  
   # convert data to basis of assessment
   
   data <- convert_to_target_basis(data, info, get_basis)
@@ -2971,7 +2971,7 @@ create_timeseries <- function(
       "contact HARSAT development team")
   }
   
-  
+
   # drop groups of data at stations with no data in recent years
 
   cat("   Dropping groups of compounds / stations with no data between", 
@@ -4223,15 +4223,22 @@ merge_auxiliary <- function(data, info) {
 
   control <- info$auxiliary
   
-  
   # identify auxiliary variables and split data set accordingly
   
   auxiliary_var <- ctsm_get_auxiliary(data$determinand, info)
   
-  id <- data$determinand %in% auxiliary_var
-    
-  auxiliary <- data[id, ]
-  data <- data[!id, ]
+  determinand_var <- ctsm_get_determinands(info) #als 260715
+  
+  # id <- data$determinand %in% auxiliary_var
+  #   
+  # auxiliary <- data[id, ]
+  # data <- data[!id, ]
+  
+  aux_id <- data$determinand %in% auxiliary_var  #als 260715
+  det_id <- data$determinand %in% determinand_var  #als 260715
+  
+  auxiliary <- data[aux_id, ] #als 260715
+  data <- data[det_id, ]     #als 260715
   
   
   # ensure all auxiliary variables are present in output, by creating a 
@@ -4319,12 +4326,12 @@ merge_auxiliary <- function(data, info) {
       
     }
     
-    
+
     # finally merge data
     
     data <- merge(data, auxiliary_data, all.x = TRUE)
   }
-  
+
   data <- droplevels(data)
 }
 
@@ -4974,6 +4981,7 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   groupID <- dplyr::case_when(
     data$determinand %in% c("CD", "PB") ~ "metals",
     data$determinand %in% "CU"          ~ "copper",
+    data$determinand %in% "CORG"        ~ "biological",    #als 260715
     TRUE                                ~ "organics"
   ) 
 
@@ -5306,7 +5314,8 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   groupID <- dplyr::if_else(
     data$species_group %in% "Fish" & 
-      !(data$group  %in% c("Metals", "Organofluorines", "Metabolites")), 
+      #!(data$group  %in% c("Metals", "Organofluorines", "Metabolites")), 
+      !(data$group  %in% c("Metals", "Organofluorines", "Metabolites", "Biological")), # als 260716
     "lipid", 
     "other"
   )

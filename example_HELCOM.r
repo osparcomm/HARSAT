@@ -204,7 +204,8 @@ sediment_timeseries <- create_timeseries(
   normalise.control = list(
     metals = list(method = "pivot", normaliser = "AL", value = 5), 
     copper = list(method = "hybrid", normaliser = "CORG", value = 5),
-    organics = list(method = "simple", normaliser = "CORG", value = 5) 
+    organics = list(method = "simple", normaliser = "CORG", value = 5),
+    biological = list(method = "none")  # als, 260715
   )
 )
 
@@ -233,10 +234,11 @@ check_assessment(sediment_assessment)
 write_summary_table(
   sediment_assessment,
   determinandGroups = webGroups <- list(
-    levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines"),  
+    levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines", 
+               "Biological"),  
     labels = c(
       "Metals", "Organotins", "Polycyclic aromatic hydrocarbons",  
-      "Organobromines", "Organobromines" 
+      "Organobromines", "Organobromines" , "Biological"
     )
   ),
   symbology = "default",
@@ -261,7 +263,7 @@ write_summary_table(
 
 biota_data <- read_data(
   compartment = "biota", 
-  purpose = "HELCOM",                               
+  purpose = "custom",#"HELCOM",                               
   contaminants = "biota.txt", 
   stations = "stations.txt", 
   data_dir = file.path("data", "example_HELCOM"),
@@ -310,11 +312,11 @@ biota_timeseries <- create_timeseries(
       weights = info_TEF$DFP_HOLAS3
     ),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  ),
-  normalise = normalise_biota_HELCOM,
-  normalise.control = list(
-    lipid = list(method = "simple", value = 5), 
-    other = list(method = "none") 
+  #),
+  #normalise = normalise_biota_HELCOM,
+  #normalise.control = list(
+  #  lipid = list(method = "simple", value = 5), 
+  #  other = list(method = "none") 
   )
 )
 
@@ -355,12 +357,12 @@ write_summary_table(
   determinandGroups = list(
     levels = c(
       "Metals", "PAH_parent", "Metabolites", "PBDEs", "Organobromines", 
-      "Organofluorines", "Chlorobiphenyls", "Dioxins"
+      "Organofluorines", "Chlorobiphenyls", "Dioxins", "Biological"
     ),  
     labels = c(
       "Metals", "PAH compounds and metabolites", "PAH compounds and metabolites",
       "Organobromines", "Organobromines", "Organofluorines", 
-      "PCBs and dioxins", "PCBs and dioxins"
+      "PCBs and dioxins", "PCBs and dioxins", "Biological"
     )
   ),
   output_dir = file.path("output", "example_HELCOM")

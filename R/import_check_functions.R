@@ -101,7 +101,8 @@ ctsm_is_contaminant <- function(pargroup, exclude = NULL) {
     "O-MAH", "O-MET", "O-NA", "O-OP", "O-PAH", "O-PFR", "O-PHC", "O-THC", 
     "O-TRI", 
     "OC-CB", "OC-CL", "OC-CP", "OC-DD", "OC-DN", "OC-DX", "OC-HC", "OC-TC", 
-    "OP-GN"
+    "OP-GN", 
+    "B-BIO"  #als 260715"
   )
   ok <- setdiff(ok, exclude)
   pargroup %in% ok

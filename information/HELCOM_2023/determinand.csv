@@ -81,9 +81,9 @@ TEQDFP,WHO-TEQ (DFP),OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~
 PFOS,,O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,TRUE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.066667,0.199772,,,0.003333,0.172725,lognormal,low
 N-PFOS,,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low
 BR-PFOS,,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low
-CORG,Organic Carbon,O-MAJ,,Auxiliary,,FALSE,FALSE,FALSE,,%,,,AL~DRYWT%~LOIGN,,,,0.01,0.1,,,,
+CORG,Organic Carbon,O-MAJ,,Biological,,FALSE,TRUE,FALSE,,%,,,AL~DRYWT%~LOIGN,,,,0.01,0.1,,,lognormal,low
 LOIGN,Loss on ignition,O-MAJ,,Auxiliary,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,0,0.1,,,,
-LNMEA,mean length,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,cm,,,,,,,,,,,,,
+LNMEA,mean length,B-BIO,Biological,,,TRUE,FALSE,FALSE,cm,,,,,,,,,,,,lognormal,low
 DRYWT%,dry weight,B-BIO,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,,
 EXLIP%,extractable lipid,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 LIPIDWT%,lipid weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,

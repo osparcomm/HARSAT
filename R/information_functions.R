@@ -594,28 +594,53 @@ ctsm_read_determinand <- function(
   })
   
   
-  # check no auxiliary variables are going to be assessed - this will be
-  # allowed in later releases
+  ## check no auxiliary variables are going to be assessed - this will be
+  ## allowed in later releases
+  
+  # check that no determinand to be assessed has itself as its auxiliary
 
   data[paste0(compartment, "_assess")] <- lapply(compartment, function(id) {
     
-    group_id <- paste0(id, "_group")
+    #group_id <- paste0(id, "_group")
     assess_id <- paste0(id, "_assess")
-
-    not_ok <- data[[group_id]] %in% "Auxiliary" & data[[assess_id]]
+    aux_id <- paste0(id, "_auxiliary")  #als 260715
+    det_id <- "determinand" #als 260715
     
-    if(any(not_ok)) {
-      det_id <- data$determinand[not_ok]
+    not_ok_det <- mapply(                      #als 260715
+      function(det, aux) det %in% strsplit(aux, "~", fixed = TRUE)[[1]],
+      data[[det_id]],
+      data[[aux_id]],
+      USE.NAMES = FALSE
+    )
+    
+    if(any(not_ok_det)) {                       #als 260715
+      det_id <- data$determinand[not_ok_det]
       det_id <- sort(det_id)
       message(
-        "The following auxiliary variables have assess = TRUE which is ", 
-        "currently not allowed.\nThese values of assess will be set to FALSE.\n",
+        "The following variables are set to be assessed and as auxiliary to ", 
+        "themselves, which is not allowed.\nThese values of assess will be set ",
+        "to FALSE.\n",
         "Compartment: ", id, "\n",
         "Variables: ", paste(det_id, collapse = ", ")
       )
-
-      data[not_ok, assess_id] <- FALSE
+      
+      data[not_ok_det, assess_id] <- FALSE
     }
+
+    # not_ok <- data[[group_id]] %in% "Auxiliary" & data[[assess_id]]
+    # 
+    # if(any(not_ok)) {
+    #   det_id <- data$determinand[not_ok]
+    #   det_id <- sort(det_id)
+    #   message(
+    #     "The following auxiliary variables have assess = TRUE which is ", 
+    #     "currently not allowed.\nThese values of assess will be set to FALSE.\n",
+    #     "Compartment: ", id, "\n",
+    #     "Variables: ", paste(det_id, collapse = ", ")
+    #   )
+    # 
+    #   data[not_ok, assess_id] <- FALSE
+    # }
     
     data[[assess_id]]
   })
