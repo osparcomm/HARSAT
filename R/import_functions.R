@@ -4228,6 +4228,7 @@ merge_auxiliary <- function(data, info) {
   auxiliary_var <- ctsm_get_auxiliary(data$determinand, info)
   
   # testing whether this works
+  # it does!!!
   
   determinand_var <- ctsm_get_determinands(info) #als 260715
   
