@@ -17,7 +17,7 @@ create_timeseries(
 )
 }
 \arguments{
-\item{ctsm.obj}{the CTSM object, as returned from \code{tidy_data}}
+\item{ctsm.obj}{the harsat object, as returned from \code{tidy_data}}
 
 \item{determinands}{the determinands to use, by default derived by
 calling \code{ctsm_get_determinands}, which takes values from

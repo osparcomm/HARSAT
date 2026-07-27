@@ -205,9 +205,26 @@ sediment_timeseries <- create_timeseries(
     metals = list(method = "pivot", normaliser = "AL", value = 5), 
     copper = list(method = "hybrid", normaliser = "CORG", value = 5),
     organics = list(method = "simple", normaliser = "CORG", value = 5),
-    biological = list(method = "none")  # als, 260715
+    normalisers = list(method = "none")  
   )
 )
+
+
+# Note that this can be written more simply as the following, because the 
+# specification of normalise.control is just the default specification for
+# HELCOM
+
+# sediment_timeseries <- create_timeseries(
+#   sediment_data,
+#   determinands.control = list(
+#     SBDE6 = list(
+#       det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
+#       action = "sum"
+#     ),
+#     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum")
+#   ),
+#   normalise = normalise_sediment_HELCOM
+# )
 
 
 # Now run the assessment. Again there is only one threshold, the EQS.  This only
@@ -235,10 +252,10 @@ write_summary_table(
   sediment_assessment,
   determinandGroups = webGroups <- list(
     levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines", 
-               "Biological"),  
+               "Organic_consituents"),  
     labels = c(
       "Metals", "Organotins", "Polycyclic aromatic hydrocarbons",  
-      "Organobromines", "Organobromines" , "Biological"
+      "Organobromines", "Organobromines" , "Organic constituents"
     )
   ),
   symbology = "default",

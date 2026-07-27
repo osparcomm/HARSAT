@@ -1,9 +1,9 @@
 ﻿determinand,common_name,pargroup,biota_group,sediment_group,water_group,biota_assess,sediment_assess,water_assess,biota_unit,sediment_unit,water_unit,biota_auxiliary,sediment_auxiliary,water_auxiliary,biota_sd_constant,biota_sd_variable,sediment_sd_constant,sediment_sd_variable,water_sd_constant,water_sd_variable,distribution,good_status
-AL,Aluminium,I-MET,Metals,Auxiliary,Metals,FALSE,FALSE,FALSE,ug/kg,%,ug/l,LNMEA~LIPIDWT%~DRYWT%,CORG~DRYWT%~LI,,,,0.000667,0.125644,,,lognormal,low
+AL,Aluminium,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,%,ug/l,LNMEA~LIPIDWT%~DRYWT%,CORG~DRYWT%~LI,,,,0.000667,0.125644,,,lognormal,low
 CD,Cadmium,I-MET,Metals,Metals,Metals,TRUE,TRUE,TRUE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,0.526867,0.07022,0.005,0.109988,0.002333,0.121905,lognormal,low
 CU,Copper,I-MET,Metals,Metals,Metals,FALSE,TRUE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,2,0.076316,0.158333,0.090478,0.025167,0.072003,lognormal,low
 HG,Mercury,I-MET,Metals,Metals,Metals,TRUE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,0.541,0.087966,0.002167,0.100382,,,lognormal,low
-LI,Lithium,I-MET,Metals,Auxiliary,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,0.033333,0.148842,,,lognormal,low
+LI,Lithium,I-MET,Metals,Metals,Metals,FALSE,FALSE,FALSE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%,,,,0.033333,0.148842,,,lognormal,low
 PB,Lead,I-MET,Metals,Metals,Metals,TRUE,TRUE,TRUE,ug/kg,mg/kg,ug/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LI,,2.333333,0.10368,0.283333,0.090517,0.0115,0.08951,lognormal,low
 ANT,Anthracene,O-PAH,PAH_parent,PAH_parent,PAH_parent,FALSE,TRUE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.066667,0.22,0.333333,0.170818,0.14445,0.1085,lognormal,low
 BAP,Benzo[a]pyrene,O-PAH,PAH_parent,PAH_parent,PAH_parent,TRUE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.053333,0.211934,0.333333,0.15,0.066667,0.14,lognormal,low
@@ -81,14 +81,14 @@ TEQDFP,WHO-TEQ (DFP),OC-DX,Dioxins,Dioxins,,TRUE,FALSE,FALSE,ug/kg,ug/kg,,LNMEA~
 PFOS,,O-FL,Organofluorines,Organofluorines,Organofluorines,TRUE,FALSE,TRUE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,0.066667,0.199772,,,0.003333,0.172725,lognormal,low
 N-PFOS,,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low
 BR-PFOS,,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,ug/kg,ug/kg,ng/l,LNMEA~LIPIDWT%~DRYWT%,AL~CORG~DRYWT%~LOIGN,,,,,,,,lognormal,low
-CORG,Organic Carbon,O-MAJ,,Biological,,FALSE,TRUE,FALSE,,%,,,AL~DRYWT%~LOIGN,,,,0.01,0.1,,,lognormal,low
-LOIGN,Loss on ignition,O-MAJ,,Auxiliary,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,0,0.1,,,,
+CORG,Organic Carbon,O-MAJ,,Organic_consituents,,FALSE,TRUE,FALSE,,%,,,AL~DRYWT%~LOIGN,,,,0.01,0.1,,,lognormal,low
+LOIGN,Loss on ignition,O-MAJ,,Organic_consituents,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,0,0.1,,,,
 LNMEA,mean length,B-BIO,Biological,,,TRUE,FALSE,FALSE,cm,,,,,,,,,,,,lognormal,low
-DRYWT%,dry weight,B-BIO,Auxiliary,Auxiliary,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,,
-EXLIP%,extractable lipid,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
-LIPIDWT%,lipid weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
-FATWT%,fat weight,B-BIO,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
-%FEMALEPOP,proportion of females in population,B-END,Auxiliary,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
+DRYWT%,dry weight,B-BIO,Biological,Biological,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,,
+EXLIP%,extractable lipid,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
+LIPIDWT%,lipid weight,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
+FATWT%,fat weight,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
+%FEMALEPOP,proportion of females in population,B-END,Imposex,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 PYR1OH,1-hydroxy pyrene,B-MBA,Metabolites,,,TRUE,FALSE,FALSE,ng/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.15,,,,,lognormal,low
 VDS,Vas Deferens Sequence,B-END,Imposex,,,TRUE,FALSE,FALSE,st,,,%FEMALEPOP~LNMEA,,,,,,,,,multinomial,low
 VDSI,Vas Deferens Sequence Index,B-END,Imposex,,,FALSE,FALSE,FALSE,idx,,,%FEMALEPOP~LNMEA,,,,,,,,,quasibinomial,low
