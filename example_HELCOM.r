@@ -252,7 +252,7 @@ write_summary_table(
   sediment_assessment,
   determinandGroups = webGroups <- list(
     levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines", 
-               "Organic_consituents"),  
+               "Organic_constituents"),  
     labels = c(
       "Metals", "Organotins", "Polycyclic aromatic hydrocarbons",  
       "Organobromines", "Organobromines" , "Organic constituents"
