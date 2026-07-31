@@ -3437,8 +3437,16 @@ ctsm.imposex.check.femalepop <- function(data, info) {
 }
 
 
-# utility function to get all determinand names from control structure
-
+#' extract determinands from control structure
+#' 
+#' gets the names of all determinands involved in argument `determinands.control`
+#'
+#' @param control list of control structures passed into `create_timeseries` by 
+#' argument `determinand.control`
+#' @param .names logical determining whether the names of the list are included
+#' (`TRUE` default) or not (`FALSE`)
+#'
+#' @returns charcater string of determinands
 get_control_dets <- function(control, .names = TRUE) {  
   if (is.null(control)) 
     return(NULL)
@@ -4409,7 +4417,7 @@ convert_to_target_basis <- function(data, info, get_basis) {
 
     }
           
-    
+
     # convert measurement data
     # print_warning gives the number of failures, which is the same for all id
     # so only print first time round
@@ -4428,7 +4436,7 @@ convert_to_target_basis <- function(data, info, get_basis) {
         drywt_censoring = data[["DRYWT%.censoring"]], 
         lipidwt = data[["LIPIDWT%"]], 
         lipidwt_censoring = data[["LIPIDWT%.censoring"]], 
-        exclude = data$group %in% c("Imposex", "Metabolites", "Effects")
+        exclude = data$group %in% c("Imposex", "Metabolites", "Effects") | data$determinand %in% c("LNMEA",'AGMEA')  #annesore 20260730
       ), 
       SIMPLIFY = FALSE
     )
@@ -5339,7 +5347,6 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   groupID <- dplyr::if_else(
     data$species_group %in% "Fish" & 
-      #!(data$group  %in% c("Metals", "Organofluorines", "Metabolites")), 
       !(data$group  %in% c("Metals", "Organofluorines", "Metabolites", "Biological")), # als 260716
     "lipid", 
     "other"

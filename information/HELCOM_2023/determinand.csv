@@ -84,7 +84,7 @@ BR-PFOS,,O-FL,Organofluorines,Organofluorines,Organofluorines,FALSE,FALSE,FALSE,
 CORG,Organic Carbon,O-MAJ,,Organic_constituents,,FALSE,FALSE,FALSE,,%,,,AL~DRYWT%~LOIGN,,,,0.01,0.1,,,lognormal,low
 LOIGN,Loss on ignition,O-MAJ,,Organic_constituents,,FALSE,FALSE,FALSE,,%,,,AL~CORG~DRYWT%,,,,0,0.1,,,lognormal,low
 LNMEA,mean length,B-BIO,Biological,,,TRUE,FALSE,FALSE,cm,,,,,,,,,,,,lognormal,low
-DRYWT%,dry weight,B-BIO,Biological,Biological,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,,
+DRYWT%,dry weight,B-BIO,Biological,Biological,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,lognormal,low
 EXLIP%,extractable lipid,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 LIPIDWT%,lipid weight,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 FATWT%,fat weight,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,

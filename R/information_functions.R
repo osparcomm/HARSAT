@@ -1130,7 +1130,7 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
 
   data$datatype <- ctsm_get_datatype(data$determinand, rt)
   
-  if (!all(data$datatype %in% c("contaminant", "effect"))) {
+  if (!all(data$datatype %in% c("contaminant", "effect",'auxiliary'))) {  #annesore 290730
     stop("unrecognised datatype")
   }
 
@@ -2350,7 +2350,7 @@ get_basis_default <- function(data, info) {
   
   # the exceptions are biological effects measurements where it is assumed the 
   # data are submitted on the correct basis (or where basis isn't relevant)
-  
+
   basis_id <- switch(
     info$compartment, 
     biota = "W", 
@@ -2359,7 +2359,7 @@ get_basis_default <- function(data, info) {
   )
   
   new_basis <- dplyr::if_else(
-    data$group %in% c("Imposex", "Metabolites", "Effects"), 
+    data$group %in% c("Imposex", "Metabolites", "Effects") | data$determinand %in% c('LNMEA','AGMEA'), #annesore 260731 
     NA_character_, 
     basis_id
   )
@@ -2397,6 +2397,12 @@ get_basis_most_common <- function(data, info) {
     # deal with e.g. biological effects which don't have a basis
     
     if (unique(x$group) %in% c("Metabolites", "Imposex", "Effects")) {
+      x$new_basis <- rep(NA_character_, nrow(x))
+      x <- x[c(".order", "new_basis")]
+      return(x)
+    }
+    
+    if (unique(x$determinand) %in% c('LNMEA','AGMEA')) { #annesore 260731
       x$new_basis <- rep(NA_character_, nrow(x))
       x <- x[c(".order", "new_basis")]
       return(x)
@@ -2489,6 +2495,7 @@ get_basis_biota_OSPAR <- function(data, info) {
     .lw = .data$group %in% lw_group & !(.data$determinand %in% c("MCCP", "SCCP")),
     new_basis = dplyr::case_when(
       .data$group %in% c("Imposex", "Effects", "Metabolites")            ~ NA_character_,
+      .data$determinand %in% c('LNMEA','AGMEA')                         ~ NA_character_,#annesore 260731
       .data$species_group %in% c("Bivalve", "Gastropod")               ~ "D",
       .data$species_group %in% c("Fish", "Crustacean") & 
         .lw &

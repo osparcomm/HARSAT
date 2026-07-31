@@ -156,7 +156,7 @@ run_assessment <- function(
 
   ctsm_ob$call.data <- NULL
 
-  
+
   # identify which series are to be assessed in this run - defaults to all
   
   series_id <- row.names(ctsm_ob$timeSeries)
@@ -276,7 +276,7 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
   stations <- tibble::column_to_rownames(ctsm.ob$stations, "station_code")
   stations <- stations[unique(timeSeries$station_code), ]
 
-  
+
   
   # set up parallel processing information 
   
@@ -305,7 +305,7 @@ assessment_engine <- function(ctsm.ob, series_id, parallel = FALSE, ...) {
   assessment <- pbapply::pblapply(data, ..., cl = cluster_id, FUN = function(x, ...) {
   
     # get info about the time series
-    
+
     seriesID <- x$seriesID[1]
     seriesInfo <- sapply(
       timeSeries[seriesID,], 

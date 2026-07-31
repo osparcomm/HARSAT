@@ -9,13 +9,13 @@ vignette: >
 
 # Introduction
 
-This vignette shows how to do an assessment (mostly) following the approach 
-taken in HELCOM HOLAS3. 
+This vignette shows how to do an assessment following the approach 
+taken in HELCOM HOLAS3 (with a few exceptions). 
 
-The data were extracted from the ICES data base using the XHAT facilities on
-the [ICES webservice](https://dome.ices.dk/api/swagger/index.html). The data
-were extracted on 28 August 2023 and were filtered using is_helcom_area = TRUE
-anad maxYear = 2020. The data were subsequently reduced in size to make them
+The data were extracted from the ICES database on 28 August 2023 using the XHAT 
+facilities on the [ICES webservice](https://dome.ices.dk/api/swagger/index.html). 
+The data were filtered using is_helcom_area = TRUE
+and maxYear = 2020. The data were subsequently reduced in size to make them
 more manageable for this example. **The data have not been scrutinised by data 
 assessors so their use, and the results below, must be treated as illustrative 
 only; in particular, they should not be used for any formal reporting**.
@@ -122,7 +122,7 @@ Each time series consists of measurements of a single determinand at a single
 monitoring station. Measurements in filtered and unfiltered samples are split 
 into different time series.
 
-The `determinands.control` argument in important to know about since it 
+The `determinands.control` argument is important to know about since it 
 allows related determinands to be processed in various ways. Here, it is just 
 used for PFOS and its linear and branched components N-PFOS and BR-PFOS. PFOS 
 measurements can be sumbitted as PFOS (the sum of the two components) or as 
@@ -149,10 +149,10 @@ get_timeseries(water_timeseries) |> head(10)
 ```
 
 
-At last it is time to run the assessment. You need to specify which thresholds
-to use, otherwise the code will not use any of them. For water there is
-only the EQS, but you still need to specify it. Look at the threshold
-reference table to see what is available if you are unsure. Note that AC
+At last it is time to run the assessment. You need to specify which thresholds 
+(AC) to use, otherwise the code will not use them. Look at the threshold
+reference table to see which types of tresholds are available if you are unsure. 
+For water there is only the EQS. AC
 stands for Assessment Criteria which is what thresholds are often called. The
 parallel argument tells the code to use parallel processing. This usually
 speeds things up considerably. The assessment took about 1.5 minutes to run on
