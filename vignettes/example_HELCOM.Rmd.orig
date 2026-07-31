@@ -36,6 +36,8 @@ is not yet available in harsat).
 
 We'll begin with contaminants in water which are the simplest data to assess.
 We'll then move on to sediment and biota which have more features to consider.
+For sediment and biota only deviations from the water example is explained, so
+look through this as well even if you are mainly interested in sediment or biota.
 
 But before we get to any of that, we need to set up the environment.
 First, load the `harsat` library (let's assume that you have already installed
@@ -150,10 +152,9 @@ get_timeseries(water_timeseries) |> head(10)
 
 
 At last it is time to run the assessment. You need to specify which thresholds 
-(AC) to use, otherwise the code will not use them. Look at the threshold
-reference table to see which types of tresholds are available if you are unsure. 
-For water there is only the EQS. AC
-stands for Assessment Criteria which is what thresholds are often called. The
+(AC - Assessment Criteria) to use, otherwise they will not be used. Look at the 
+threshold reference table to see which types of tresholds are available if you 
+are unsure. For water there is only the EQS. The
 parallel argument tells the code to use parallel processing. This usually
 speeds things up considerably. The assessment took about 1.5 minutes to run on
 my laptop.
@@ -167,15 +168,16 @@ water_assessment <- run_assessment(
 ```
 
 
-We now need to check whether there were any convergence issues. Lack of
-convergence only rarely occurs, but when it does it is typically because there
+We now need to check whether there were any convergence issues for the time 
+series analysis. Lack of convergence only rarely occurs, but when it does it is 
+typically because there
 are errors in the data (e.g. reported in incorrect units) or because there are 
 outliers, so the best thing to do is first check your data. However, 
 convergence can also be difficult if there are a lot of less-than measurements 
 in the time series. Describing how
 to tweak the control arguments to get convergence is beyond the scope of this
-vignette (need to write another vignette to discuss this). Fortunately, there
-were no convergence issues here.
+vignette but an example is given in the biota assessment below. Fortunately, 
+there were no convergence issues here.
 
 ```{r helcom-water-check-assessment}
 check_assessment(water_assessment)
@@ -184,7 +186,8 @@ check_assessment(water_assessment)
 It is time to look at the results! We can plot the data for each time series 
 along with the fitted model (see vignette for external data) or 
 print a table giving summary information about the assessment of each time 
-series. But first, we may need to create an output directory.
+series. But first, we may need to create an output directory (this code snippet 
+is not part of the example file).
 
 ```{r helcom-summary-directory}
 summary.dir <- file.path(working.directory, "output", "example_HELCOM")
@@ -249,7 +252,8 @@ write_summary_table(
 
 # Sediment assessment
 
-The sediment assessment is very similar, but has a few extra features related
+The sediment assessment is very similar to the water assessment, but includes a 
+few extra features related
 to normalisation (to account for differences in grain size) which are described
 below
 
@@ -268,7 +272,8 @@ sediment_data <- tidy_data(sediment_data)
 ```
 
 The sediment data are grouped into time series which consist of the 
-measurements of single determinand in a single matrix (the fraction the sample
+measurements of a single determinand in a single matrix (given as the fraction 
+the sample
 has been sieved to; e.g. `SED63` or `SEDTOT`) at a single monitoring station.
 
 The `create_timeseries()` call for sediment differs from that for water in two
@@ -307,8 +312,8 @@ sediment_timeseries <- create_timeseries(
 )
 ```
 
-Now run the assessment. Again there is only one threshold, the EQS.  This only
-takes about a minute to run on my laptop.
+Now run the assessment. Similar to water there is only one threshold (AC), the 
+EQS. This only takes about a minute to run on my laptop.
 
 ```{r helcom-sediment-assessment}
 sediment_assessment <- run_assessment(
@@ -318,7 +323,7 @@ sediment_assessment <- run_assessment(
 )
 ```
 
-Everything has converged.
+We see that everything has converged.
 
 
 ```{r helcom-sediment-convergence}
@@ -359,7 +364,7 @@ been excluded to keep things relatively simple. Imposex assessments have an
 additional modelling stage and this will be described in another vignette (not
 yet available). 
 
-The first two stages are just as before
+The first two stages mirrors that of water and sediment:
 
 ```{r helcom-biota-data}
 biota_data <- read_data(
@@ -375,40 +380,38 @@ biota_data <- read_data(
 biota_data <- tidy_data(biota_data)
 ```
 
-The construction of the time series has a few more features. However, first we
-need to provide the individual TEQs to allow the construction of the WHO TEQ
-for dioxins, furans and planar PCBS (labelled TEQDFP). These are the values
-for the human health QS. This stage won't be necessary in later releases.
+The construction of the biota time series has a few more features than for water 
+and sediment. 
 
 The biota data are grouped into time series which consist of the 
 measurements of a single determinand in a single matrix (tissue type; e.g. 
-'EH', `LI' or `SB`) in a single species at a single monitoring station. PAH
-metabolite data are further grouped by `method_analysis`.
+'EH', 'LI' or 'SB') in a single species at a single monitoring station. PAH
+metabolite data are further grouped by 'method_analysis'.
 
 The `determinands.control` argument does rather more here. There are five summed
 variables: PFOS, SBDE6, HBCD, SCB6 and TEQDFP. There is also one variable 
 CB138+163 which needs to be relabeled as (replaced by) CB138. For the purposes 
-of the assessment, the contribution of CB163 is regarded as small. Similarly 
+of the assessment, the contribution of CB163 is regarded as small and 
 CB138+163 is taken to be a good proxy for CB138. Note that the replacements must 
-be done before the six PCBs are summed to give SCB6 in order for them to be 
-included in the sum.
+be done before the six PCBs are summed to give SCB6.
 
 The calculation of TEQDFP is more complex than that of the other summed variables.
 TEQDFP is the label used for the World Health Organisation Toxic Equivalent sum
 for dioxins, furans and planar polychlorinated biphenyls. This is calculated 
-using the Toxic Equivalency Factors (TEFs) stored in `info_TEQ$HOLAS3`, with the 
+using individual Toxic Equivalency Factors (TEFs) for each substance stored in 
+`info_TEQ$HOLAS3`, with the 
 TEFS identified as `weights`. Note that the weights used in the example below
 are those used in the HELCOM HOLAS 3 assessment, but have been superseeded; see
 `help("info_TEQ")` for more details. 
 
-There is also one 'bespoke' action in `determinands.control`. This triggers a 
-customised functions that does more complicated things. Here it deals with the  
+The 'bespoke' action in `determinands.control` triggers a 
+customised functions that does more complicated things. Here it deals with the 
 three different ways in which lipid weight measurements can be submitted.
 
-Finally, `normalise_biota_HELCOM()` is a customised function that determines which
+The `normalise_biota_HELCOM()` is a customised function that determines which
 measurements are normalised to 5% lipid in a HELCOM assessment. Again, the 
-normalisation functions are under active development and might well change 
-before the next release.
+normalisation functions are under active development and might change 
+in future releases.
 
 One thing that is not obvious from the function call is the choice of basis. By
 default, contaminant time series in biota are assessed on a wet weight basis, 
@@ -475,7 +478,7 @@ biota_assessment <- update_assessment(
 check_assessment(biota_assessment)
 ```
 
-The assessment uses four types of thresholds (BAC, EAC, EQS and MPC), but 
+The biota assessment uses four types of thresholds (BAC, EAC, EQS and MPC), but 
 only one of them is applied to each timeseries, and they are all used to 
 delineate between good and poor status.  The summary table can therefore be 
 simplified by grouping the thresholds together using the `threshold_groups` 
