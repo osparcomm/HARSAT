@@ -329,11 +329,11 @@ biota_timeseries <- create_timeseries(
       weights = info_TEF$DFP_HOLAS3
     ),
     "LIPIDWT%" = list(det = c("EXLIP%", "FATWT%"), action = "bespoke")
-  #),
-  #normalise = normalise_biota_HELCOM,
-  #normalise.control = list(
-  #  lipid = list(method = "simple", value = 5), 
-  #  other = list(method = "none") 
+  ),
+  normalise = normalise_biota_HELCOM,
+  normalise.control = list(
+    lipid = list(method = "simple", value = 5), 
+    other = list(method = "none") 
   )
 )
 
@@ -344,8 +344,7 @@ biota_timeseries <- create_timeseries(
 
 biota_assessment <- run_assessment(
   biota_timeseries, 
-  AC = c("BAC", "EAC", "EQS", "MPC"),
-  parallel = TRUE
+  AC = c("BAC", "EAC", "EQS", "MPC")
 )
 
 check_assessment(biota_assessment)

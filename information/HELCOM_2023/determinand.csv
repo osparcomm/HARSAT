@@ -86,7 +86,7 @@ LOIGN,Loss on ignition,O-MAJ,,Organic_constituents,,FALSE,FALSE,FALSE,,%,,,AL~CO
 LNMEA,mean length,B-BIO,Biological,,,TRUE,FALSE,FALSE,cm,,,,,,,,,,,,lognormal,low
 DRYWT%,dry weight,B-BIO,Biological,Biological,,FALSE,FALSE,FALSE,%,%,,,,,,,,,,,lognormal,low
 EXLIP%,extractable lipid,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
-LIPIDWT%,lipid weight,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
+LIPIDWT%,lipid weight,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,lognormal,low
 FATWT%,fat weight,B-BIO,Biological,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 %FEMALEPOP,proportion of females in population,B-END,Imposex,,,FALSE,FALSE,FALSE,%,,,,,,,,,,,,,
 PYR1OH,1-hydroxy pyrene,B-MBA,Metabolites,,,TRUE,FALSE,FALSE,ng/ml,,,LNMEA~LIPIDWT%~DRYWT%,,,0.123333,0.15,,,,,lognormal,low
