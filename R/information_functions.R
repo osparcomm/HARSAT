@@ -601,19 +601,18 @@ ctsm_read_determinand <- function(
 
   data[paste0(compartment, "_assess")] <- lapply(compartment, function(id) {
     
-    #group_id <- paste0(id, "_group")
     assess_id <- paste0(id, "_assess")
-    aux_id <- paste0(id, "_auxiliary")  #als 260715
-    det_id <- "determinand" #als 260715
+    aux_id <- paste0(id, "_auxiliary") 
+    det_id <- "determinand" 
     
-    not_ok_det <- mapply(                      #als 260715
+    not_ok_det <- mapply(                  
       function(det, aux) det %in% strsplit(aux, "~", fixed = TRUE)[[1]],
       data[[det_id]],
       data[[aux_id]],
       USE.NAMES = FALSE
     )
     
-    if(any(not_ok_det)) {                       #als 260715
+    if(any(not_ok_det)) {                    
       det_id <- data$determinand[not_ok_det]
       det_id <- sort(det_id)
       message(
@@ -626,21 +625,6 @@ ctsm_read_determinand <- function(
       
       data[not_ok_det, assess_id] <- FALSE
     }
-
-    # not_ok <- data[[group_id]] %in% "Auxiliary" & data[[assess_id]]
-    # 
-    # if(any(not_ok)) {
-    #   det_id <- data$determinand[not_ok]
-    #   det_id <- sort(det_id)
-    #   message(
-    #     "The following auxiliary variables have assess = TRUE which is ", 
-    #     "currently not allowed.\nThese values of assess will be set to FALSE.\n",
-    #     "Compartment: ", id, "\n",
-    #     "Variables: ", paste(det_id, collapse = ", ")
-    #   )
-    # 
-    #   data[not_ok, assess_id] <- FALSE
-    # }
     
     data[[assess_id]]
   })
@@ -1130,7 +1114,7 @@ get_AC$biota <- function(data, AC, rt, export_all = FALSE) {
 
   data$datatype <- ctsm_get_datatype(data$determinand, rt)
   
-  if (!all(data$datatype %in% c("contaminant", "effect",'auxiliary'))) {  #annesore 290730
+  if (!all(data$datatype %in% c("contaminant", "effect",'auxiliary'))) {
     stop("unrecognised datatype")
   }
 
@@ -2359,7 +2343,7 @@ get_basis_default <- function(data, info) {
   )
   
   new_basis <- dplyr::if_else(
-    data$group %in% c("Imposex", "Metabolites", "Effects") | data$determinand %in% c('LNMEA','AGMEA'), #annesore 260731 
+    data$group %in% c("Imposex", "Metabolites", "Effects") | data$determinand %in% c('LNMEA','AGMEA'),
     NA_character_, 
     basis_id
   )
@@ -2402,7 +2386,7 @@ get_basis_most_common <- function(data, info) {
       return(x)
     }
     
-    if (unique(x$determinand) %in% c('LNMEA','AGMEA')) { #annesore 260731
+    if (unique(x$determinand) %in% c('LNMEA','AGMEA')) {
       x$new_basis <- rep(NA_character_, nrow(x))
       x <- x[c(".order", "new_basis")]
       return(x)
@@ -2494,8 +2478,8 @@ get_basis_biota_OSPAR <- function(data, info) {
     out,
     .lw = .data$group %in% lw_group & !(.data$determinand %in% c("MCCP", "SCCP")),
     new_basis = dplyr::case_when(
-      .data$group %in% c("Imposex", "Effects", "Metabolites")            ~ NA_character_,
-      .data$determinand %in% c('LNMEA','AGMEA')                         ~ NA_character_,#annesore 260731
+      .data$group %in% c("Imposex", "Effects", "Metabolites")   ~ NA_character_,
+      .data$determinand %in% c('LNMEA','AGMEA')                 ~ NA_character_,
       .data$species_group %in% c("Bivalve", "Gastropod")               ~ "D",
       .data$species_group %in% c("Fish", "Crustacean") & 
         .lw &

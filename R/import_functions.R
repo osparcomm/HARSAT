@@ -4436,7 +4436,7 @@ convert_to_target_basis <- function(data, info, get_basis) {
         drywt_censoring = data[["DRYWT%.censoring"]], 
         lipidwt = data[["LIPIDWT%"]], 
         lipidwt_censoring = data[["LIPIDWT%.censoring"]], 
-        exclude = data$group %in% c("Imposex", "Metabolites", "Effects") | data$determinand %in% c("LNMEA",'AGMEA')  #annesore 20260730
+        exclude = data$group %in% c("Imposex", "Metabolites", "Effects") | data$determinand %in% c("LNMEA",'AGMEA')
       ), 
       SIMPLIFY = FALSE
     )
@@ -5347,7 +5347,7 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   groupID <- dplyr::if_else(
     data$species_group %in% "Fish" & 
-      !(data$group  %in% c("Metals", "Organofluorines", "Metabolites", "Biological")), # als 260716
+      !(data$group  %in% c("Metals", "Organofluorines", "Metabolites", "Biological")),
     "lipid", 
     "other"
   )
