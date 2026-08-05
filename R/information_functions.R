@@ -2373,7 +2373,7 @@ get_basis_most_common <- function(data, info) {
   
   data$.order <- 1:nrow(data)
   
-  
+
   # get modal basis within each group
   
   out <- by(data, data$.id, function(x) {
@@ -2386,7 +2386,9 @@ get_basis_most_common <- function(data, info) {
       return(x)
     }
     
-    if (unique(x$determinand) %in% c('LNMEA','AGMEA')) {
+    # deals with auxiliary variables which don't have a basis
+
+    if (any(unique(x$determinand) %in% c('LNMEA','AGMEA'))) {
       x$new_basis <- rep(NA_character_, nrow(x))
       x <- x[c(".order", "new_basis")]
       return(x)

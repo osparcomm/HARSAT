@@ -280,7 +280,7 @@ write_summary_table(
 
 biota_data <- read_data(
   compartment = "biota", 
-  purpose = "custom",#"HELCOM",                               
+  purpose = "HELCOM", #"custom",                              
   contaminants = "biota.txt", 
   stations = "stations.txt", 
   data_dir = file.path("data", "example_HELCOM"),
@@ -311,6 +311,7 @@ biota_data <- tidy_data(biota_data)
 
 biota_timeseries <- create_timeseries(
   biota_data,
+  #get_basis = get_basis_most_common,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
     SBDE6 = list(
