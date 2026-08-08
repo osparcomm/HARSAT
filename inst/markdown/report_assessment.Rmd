@@ -717,7 +717,7 @@ ok <- info$compartment %in% c("biota", "sediment")
 No auxiliary variables currently plotted.
 ```
 
-```{r auxiliary_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
+```{r, eval = ok, include = FALSE}
 auxiliary_id <- switch(
   info$compartment, 
   biota = c("concentration", "LNMEA", "DRYWT%", "LIPIDWT%"), 
@@ -732,6 +732,16 @@ auxiliary_id <- switch(
   }
 )
 
+auxiliary_missing <- sapply(auxiliary_id, function(x) is.null(data[[x]]))
+ok <- ok & !any(auxiliary_missing)
+```
+
+```{asis, eval = !ok}
+<br>
+Not all required auxiliary variables are present. This is an area under development. Please contact the harsat development team.
+```
+
+```{r auxiliary_data, eval = ok, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7}
 plot_auxiliary(data, assessment, info, assessment_object$info, auxiliary = auxiliary_id, xykey.cex = 1.2)
 ```
 

@@ -2457,7 +2457,7 @@ tidy_contaminants <- function(data, info) {
 #' 
 #' Cleans the data and turns it into time series structures ready for assessment
 #' 
-#' @param ctsm.obj the CTSM object, as returned from `tidy_data`
+#' @param ctsm.obj the harsat object, as returned from `tidy_data`
 #' @param determinands the determinands to use, by default derived by
 #'   calling `ctsm_get_determinands`, which takes values from 
 #'   the determinand reference table
@@ -2842,7 +2842,7 @@ create_timeseries <- function(
 
   # merge auxiliary data with determinand data
 
-  data <- merge_auxiliary(data, info)
+  data <- merge_auxiliary(data, info, determinands)
   
 
   # impute %femalepop when missing and sex = 1 - write out remaining
@@ -2852,7 +2852,7 @@ create_timeseries <- function(
     data <- ctsm.imposex.check.femalepop(data, info)
   }
   
-
+  
   # convert data to basis of assessment
   
   data <- convert_to_target_basis(data, info, get_basis)
@@ -2971,7 +2971,7 @@ create_timeseries <- function(
       "contact HARSAT development team")
   }
   
-  
+
   # drop groups of data at stations with no data in recent years
 
   cat("   Dropping groups of compounds / stations with no data between", 
@@ -3437,8 +3437,16 @@ ctsm.imposex.check.femalepop <- function(data, info) {
 }
 
 
-# utility function to get all determinand names from control structure
-
+#' extract determinands from control structure
+#' 
+#' gets the names of all determinands involved in argument `determinands.control`
+#'
+#' @param control list of control structures passed into `create_timeseries` by 
+#' argument `determinand.control`
+#' @param .names logical determining whether the names of the list are included
+#' (`TRUE` default) or not (`FALSE`)
+#'
+#' @returns charcater string of determinands
 get_control_dets <- function(control, .names = TRUE) {  
   if (is.null(control)) 
     return(NULL)
@@ -4216,24 +4224,41 @@ check_subseries <- function(data, info) {
 }
 
 
-merge_auxiliary <- function(data, info) {
-
-  # import_functions.R
-  # merge auxiliary variables with data
+#' Merge auxiliary variables with data
+#'
+#' @param data a data frame containing the contaminant data in long format, both
+#' the contaminants to be assessed and their auxiliary variables
+#' @param info a harsat info object
+#' @param determinands a character string given the identifiers of the 
+#' determinands that are to be assessed
+#'
+#' @returns a data frame containing the contaminant data in wide format, with
+#' the auxiliary variables pivoted to match the determinands they are linked to
+#' 
+#' @details 
+#' 
+#' `info$determinand` identifies which auxiliary variables are linked to each
+#' determinand; `info$auxiliary` also allows the user (currently limited) some
+#' control over how the auxiliary variables are linked to the determinand data
+#' 
+#' Some variables can both be determinands to be assessed and auxiliary 
+#' variables (for example, CORG or DRYWT%)
+#' 
+merge_auxiliary <- function(data, info, determinands) {
 
   control <- info$auxiliary
   
-  
   # identify auxiliary variables and split data set accordingly
   
-  auxiliary_var <- ctsm_get_auxiliary(data$determinand, info)
+  auxiliary_var <- ctsm_get_auxiliary(determinands, info)
   
-  id <- data$determinand %in% auxiliary_var
-    
-  auxiliary <- data[id, ]
-  data <- data[!id, ]
+  aux_id <- data$determinand %in% auxiliary_var    
+  det_id <- data$determinand %in% determinands 
   
+  auxiliary <- data[aux_id, ] 
+  data <- data[det_id, ]     
   
+
   # ensure all auxiliary variables are present in output, by creating a 
   # factor with levels given by auxiliary_var, and then splitting by this factor
   
@@ -4319,12 +4344,12 @@ merge_auxiliary <- function(data, info) {
       
     }
     
-    
+
     # finally merge data
     
     data <- merge(data, auxiliary_data, all.x = TRUE)
   }
-  
+
   data <- droplevels(data)
 }
 
@@ -4392,7 +4417,7 @@ convert_to_target_basis <- function(data, info, get_basis) {
 
     }
           
-    
+
     # convert measurement data
     # print_warning gives the number of failures, which is the same for all id
     # so only print first time round
@@ -4411,7 +4436,7 @@ convert_to_target_basis <- function(data, info, get_basis) {
         drywt_censoring = data[["DRYWT%.censoring"]], 
         lipidwt = data[["LIPIDWT%"]], 
         lipidwt_censoring = data[["LIPIDWT%.censoring"]], 
-        exclude = data$group %in% c("Imposex", "Metabolites", "Effects")
+        exclude = data$group %in% c("Imposex", "Metabolites", "Effects") | data$determinand %in% c("LNMEA",'AGMEA')
       ), 
       SIMPLIFY = FALSE
     )
@@ -4892,12 +4917,15 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   
   # normalises sediment concentrations
   
-  # method supplied by control
+  # method supplied by control - note that the value element for metals is
+  # hardwired by the code below (5 for AL; 52 for LI) and cannot be changed
+  # by the user
   
   ctsm_normalise_default <- list(
     metals = list(method = "pivot", normaliser = "AL", extra = NULL), 
     copper = list(method = "hybrid", normaliser = "CORG", value = 5),
-    organics = list(method = "simple", normaliser = "CORG", value = 5), 
+    organics = list(method = "simple", normaliser = "CORG", value = 5),
+    normalisers = list(method = "none"),
     exclude = NULL
   )
   
@@ -4920,8 +4948,8 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   data$normaliser <- NA_character_
   data$normaliser_value <- NA_real_
   data$normaliser_unit <- NA_character_
-  
-  
+
+
   # exclude any data that do not need to be normalised 
   # can do this globally with method = "none", but useful e.g. in the OSPAR 
   #   assessment where sediments in the Iberian Sea and Gulf of Cadiz are not
@@ -4952,29 +4980,41 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   # make ad-hoc change to deal with LOIGN
   # must undo at the end of the code
 
-  data <- dplyr::mutate(
-    data, 
-    .tmp = CORG,
-    .tmp.censoring = CORG.censoring,
-    .tmp.uncertainty = CORG.uncertainty,
-    CORG = dplyr::if_else(is.na(.tmp), 0.35 * LOIGN, CORG),
-    CORG.censoring = dplyr::if_else(
-      is.na(.tmp), 
-      as.character(LOIGN.censoring), 
-      as.character(CORG.censoring)
-    ),
-    CORG.censoring = factor(CORG.censoring),
-    CORG.uncertainty = dplyr::if_else(is.na(.tmp), 0.35 * LOIGN.uncertainty, CORG.uncertainty)
-  )
-
+  adjust_loign <- !is.null(data$CORG) & !is.null(data$LOIGN)
+  if (adjust_loign) {
+    data <- dplyr::mutate(
+      data, 
+      .tmp = CORG,
+      .tmp.censoring = CORG.censoring,
+      .tmp.uncertainty = CORG.uncertainty,
+      CORG = dplyr::if_else(
+        is.na(.tmp), 
+        0.35 * LOIGN, 
+        CORG
+      ),
+      CORG.censoring = dplyr::if_else(
+        is.na(.tmp), 
+        as.character(LOIGN.censoring), 
+        as.character(CORG.censoring)
+      ),
+      CORG.censoring = factor(CORG.censoring),
+      CORG.uncertainty = dplyr::if_else(
+        is.na(.tmp), 
+        0.35 * LOIGN.uncertainty, 
+        CORG.uncertainty
+      )
+    )
+  }
+    
   
   # split into metals (CD, PB), copper and organics and then normalise each 
   # with AL, CORG (LOIGN) and CORG (LOIGN) respectively#
   
   groupID <- dplyr::case_when(
-    data$determinand %in% c("CD", "PB") ~ "metals",
-    data$determinand %in% "CU"          ~ "copper",
-    TRUE                                ~ "organics"
+    data$determinand %in% c("CD", "PB")   ~ "metals",
+    data$determinand %in% "CU"            ~ "copper",
+    data$determinand %in% c("CORG", "AL") ~ "normalisers",    
+    TRUE                                  ~ "organics"
   ) 
 
   groupID <- factor(groupID)
@@ -5214,16 +5254,17 @@ normalise_sediment_HELCOM <- function(data, station_dictionary, info, control) {
   
   data <- unsplit(data, groupID)
 
-
-  data <- dplyr::mutate(
-    data, 
-    CORG = .tmp,
-    CORG.censoring = .tmp.censoring,
-    CORG.uncertainty = .tmp.uncertainty,
-    .tmp = NULL,
-    .tmp.censoring = NULL,
-    .tmp.uncertainty = NULL
-  )
+  if (adjust_loign) {
+    data <- dplyr::mutate(
+      data, 
+      CORG = .tmp,
+      CORG.censoring = .tmp.censoring,
+      CORG.uncertainty = .tmp.uncertainty,
+      .tmp = NULL,
+      .tmp.censoring = NULL,
+      .tmp.uncertainty = NULL
+    )
+  }
 
   if (any(exclude_id)) {
     data <- dplyr::bind_rows(data, excluded_data)
@@ -5306,7 +5347,7 @@ normalise_biota_HELCOM <- function(data, station_dictionary, info, control) {
   
   groupID <- dplyr::if_else(
     data$species_group %in% "Fish" & 
-      !(data$group  %in% c("Metals", "Organofluorines", "Metabolites")), 
+      !(data$group  %in% c("Metals", "Organofluorines", "Metabolites", "Biological")),
     "lipid", 
     "other"
   )

@@ -26,6 +26,7 @@ SB,soft body
 SEDTOT,unsieved
 SED20,< 20 micron fraction
 SED63,< 63 micron fraction
+SH,shell
 SP,spleen
 TM,tail muscle
 UR,urine

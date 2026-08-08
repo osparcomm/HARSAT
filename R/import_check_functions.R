@@ -408,7 +408,7 @@ ctsm.check.species_group.biota <- function(data, info) {
 
   # check species_group appropriate for each determinand
   
-  id <- ctsm_is_contaminant(data$pargroup, exclude = "O-PAH") | data$group %in% "Auxiliary"
+  id <- ctsm_is_contaminant(data$pargroup, exclude = "O-PAH") | data$pargroup %in% "B-BIO"
   if (any(id))
     data[id,] <- within(data[id,], {
       ok <- TRUE

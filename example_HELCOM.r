@@ -204,9 +204,27 @@ sediment_timeseries <- create_timeseries(
   normalise.control = list(
     metals = list(method = "pivot", normaliser = "AL", value = 5), 
     copper = list(method = "hybrid", normaliser = "CORG", value = 5),
-    organics = list(method = "simple", normaliser = "CORG", value = 5) 
+    organics = list(method = "simple", normaliser = "CORG", value = 5),
+    normalisers = list(method = "none")  
   )
 )
+
+
+# Note that this can be written more simply as the following, because the 
+# specification of normalise.control is just the default specification for
+# HELCOM
+
+# sediment_timeseries <- create_timeseries(
+#   sediment_data,
+#   determinands.control = list(
+#     SBDE6 = list(
+#       det = c("BDE28", "BDE47", "BDE99", "BD100", "BD153", "BD154"), 
+#       action = "sum"
+#     ),
+#     HBCD = list(det = c("HBCDA", "HBCDB", "HBCDG"), action = "sum")
+#   ),
+#   normalise = normalise_sediment_HELCOM
+# )
 
 
 # Now run the assessment. Again there is only one threshold, the EQS.  This only
@@ -233,10 +251,11 @@ check_assessment(sediment_assessment)
 write_summary_table(
   sediment_assessment,
   determinandGroups = webGroups <- list(
-    levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines"),  
+    levels = c("Metals", "Organotins", "PAH_parent", "PBDEs", "Organobromines", 
+               "Organic_constituents"),  
     labels = c(
       "Metals", "Organotins", "Polycyclic aromatic hydrocarbons",  
-      "Organobromines", "Organobromines" 
+      "Organobromines", "Organobromines" , "Organic constituents"
     )
   ),
   symbology = "default",
@@ -261,7 +280,7 @@ write_summary_table(
 
 biota_data <- read_data(
   compartment = "biota", 
-  purpose = "HELCOM",                               
+  purpose = "HELCOM", #"custom",                              
   contaminants = "biota.txt", 
   stations = "stations.txt", 
   data_dir = file.path("data", "example_HELCOM"),
@@ -292,6 +311,7 @@ biota_data <- tidy_data(biota_data)
 
 biota_timeseries <- create_timeseries(
   biota_data,
+  #get_basis = get_basis_most_common,
   determinands.control = list(
     PFOS = list(det = c("N-PFOS", "BR-PFOS"), action = "sum"),
     SBDE6 = list(
@@ -325,8 +345,7 @@ biota_timeseries <- create_timeseries(
 
 biota_assessment <- run_assessment(
   biota_timeseries, 
-  AC = c("BAC", "EAC", "EQS", "MPC"),
-  parallel = TRUE
+  AC = c("BAC", "EAC", "EQS", "MPC")
 )
 
 check_assessment(biota_assessment)
@@ -355,12 +374,12 @@ write_summary_table(
   determinandGroups = list(
     levels = c(
       "Metals", "PAH_parent", "Metabolites", "PBDEs", "Organobromines", 
-      "Organofluorines", "Chlorobiphenyls", "Dioxins"
+      "Organofluorines", "Chlorobiphenyls", "Dioxins", "Biological"
     ),  
     labels = c(
       "Metals", "PAH compounds and metabolites", "PAH compounds and metabolites",
       "Organobromines", "Organobromines", "Organofluorines", 
-      "PCBs and dioxins", "PCBs and dioxins"
+      "PCBs and dioxins", "PCBs and dioxins", "Biological"
     )
   ),
   output_dir = file.path("output", "example_HELCOM")

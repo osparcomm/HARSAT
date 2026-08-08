@@ -9,13 +9,13 @@ vignette: >
 
 # Introduction
 
-This vignette shows how to do an assessment (mostly) following the approach 
-taken in HELCOM HOLAS3. 
+This vignette shows how to do an assessment following the approach 
+taken in HELCOM HOLAS3 (with a few exceptions). 
 
-The data were extracted from the ICES data base using the XHAT facilities on
-the [ICES webservice](https://dome.ices.dk/api/swagger/index.html). The data
-were extracted on 28 August 2023 and were filtered using is_helcom_area = TRUE
-anad maxYear = 2020. The data were subsequently reduced in size to make them
+The data were extracted from the ICES database on 28 August 2023 using the XHAT 
+facilities on the [ICES webservice](https://dome.ices.dk/api/swagger/index.html). 
+The data were filtered using is_helcom_area = TRUE
+and maxYear = 2020. The data were subsequently reduced in size to make them
 more manageable for this example. **The data have not been scrutinised by data 
 assessors so their use, and the results below, must be treated as illustrative 
 only; in particular, they should not be used for any formal reporting**.
@@ -34,22 +34,22 @@ explained in a subsequent vignette (not written yet). Second, the method for
 dealing with 'initial' data, unique to HELCOM, has not been implemented (this
 is not yet available in harsat).
 
-We'll begin with contaminants in water which are the simplest data to assess.
-We'll then move on to sediment and biota which have more features to consider.
-
-But before we get to any of that, we need to set up the environment.
-First, load the `harsat` library (let's assume that you have already installed
-it, as covered in the [Getting Started](/harsat.html) guide).
+Before we start the assessments, we need to set up the environment.
+First, we load the `harsat` library (if you do not have HARSAT installed go to
+the [Getting Started](/harsat.html) guide and install it first).
 
 ```{r}
 library(harsat)
 ```
 
-We set up our main directory to find
-the data files. If you use your own data files, you will need to point to
-a directory containing a copy. We usually do this by putting our data files
-in a directory `data`, and information files in a directory `information`,
-but you can use any directory for these.
+We then add the path to the main directory (the location of HARSAT, which 
+include the example folder) to 'working.directory', which allows us to point to 
+the data files used in this example (the path on Rob's computer is used as an 
+example). In assessments where you use your own data files, you will need to 
+point to the relevant directory. We usually put data files in a directory `data`, 
+and information files in a directory `information`, but you can use any directory 
+names you want. You will see the reference to 'working.directory', `data` and
+`information` show up in the functions below.
 
 ```{r, echo=FALSE,results='asis'}
 library(rprojroot)
@@ -59,16 +59,23 @@ cat("working.directory <- '", working.directory, "'\n", sep="");
 cat("```\n")
 ```
 
+We will begin by assessing contaminants in water, which are the simplest to 
+assess. We will then do assessments of contaminants in sediment and biota, 
+which have more features to consider.
+For sediment and biota only deviations from the water example is explained so
+look through this example as well even if you are mainly interested in sediment 
+or biota.
+
 # Water assessment
 
-First, we use `read_data()` to read in the contaminant data, the station
+We use the `read_data()` function to load the contaminant data, the station
 dictionary, and two important reference tables: the determinand and threshold
 reference tables. There are several things to note about the function call:  
 
 * `purpose = "HELCOM"` means that the assessment configuration is set to
 mirror that of the HOLAS3 assessment. You can change the assessment
-configuration in many ways using the control argument, but that is not
-explained here.  
+configuration in many ways using the control argument (not
+explained here).  
 * `data_dir` identifies the directory storing the contaminant data (`water.txt`)
   and station dictionary (`stations.txt`). Using `file.path` prevents any
   difficulties using forward or backward slashes when writing file paths.
@@ -79,14 +86,19 @@ explained here.
 * you don't have to specify the extraction date, but it can help to keep track 
   of things.
 
-As well as reading in the contaminant data and station dictionary, the
-function matches each record in the contaminant data to a station in the
-station dictionary. The process for doing this is quite complicated (and it
-can take a few minutes to run) and we don't go into details here.
+When the `read_data()` function is run, a number of comments are produced 
+indicating which data is being used, any warnings about the data, information on 
+station matching and max_year.
 
-Finally, a message is printed saying that the argument `max_year` is set to
-2020. (This is as it should be since we set `maxYear` to be 2020 in the data
-extraction.) But an important consequence is that a contaminant time series
+The "Matching data with station dictionary" comment indicate that in addition
+to loading the contaminant data and station dictionary, the
+`read_data()` function also matches each record in the contaminant data to a  
+station in the station dictionary (and indicate when this is not possible). The 
+process is complicated and can take a few minutes to run.
+
+The final comment indicates the `max_year` used for any observation in 
+the run. In this case it is 2020 as we set `maxYear` to be 2020 in the ICES
+data extraction. An important implication is that a contaminant time series
 will only be assessed if it has some data in the period 2015 to 2020 (i.e. in
 the last six monitoring years).
 
@@ -102,28 +114,32 @@ water_data <- read_data(
 )
 ```
 
-We next simplify the data so that they are in the correct format for running
-the assessment. This also involves deleting some data that do not meet the
-conditions for the assessment.
+The `tidy_data()` function simplifies the loaded data so that they are in the 
+correct format for running the assessment. This involves deleting data that 
+do not meet the conditions for the assessment as indicated by the printed
+"Dropping .." comments.
 
-Notice that a message appears about 'oddities'. Both tidy_data and
-create_timeseries (the next function call) do a lot of checking of the data
-and strange values are written to the oddities folder for you to have a look
-at. This is in the hope that, if there are errors, they will get corrected and
-resubmitted to the ICES database. It turns out there are no strange value at
-this stage, but there are in the step that follows.
+Notice that a message appears about 'oddities'. Both `tidy_data()` and
+`create_timeseries()` (the next function call) do a lot of checking of the data
+and strange values are written to excel files in the oddities folder. This allows
+you to exmine the data problems that are found. For ICES extractions, identified 
+errors can be corrected by resubmission to the ICES database. If you are 
+subsequntly assessing your own data you can check and, if needed, correct error 
+in those yourself before moving on. It turns out there are no strange value in 
+our HELCOM test data at this stage, but there are in the step that follows.
 
 ```{r helcom-tidy-water}
 water_data <- tidy_data(water_data)
 ```
 
-We now do some more data cleaning and then group the data into time series.
+The `create_timeseries()` function do some additional data cleaning and 
+group the data into time series.
 Each time series consists of measurements of a single determinand at a single
 monitoring station. Measurements in filtered and unfiltered samples are split 
 into different time series.
 
-The `determinands.control` argument in important to know about since it 
-allows related determinands to be processed in various ways. Here, it is just 
+The `determinands.control` argument 
+allows related determinands to be processed in various ways. Here, it is 
 used for PFOS and its linear and branched components N-PFOS and BR-PFOS. PFOS 
 measurements can be sumbitted as PFOS (the sum of the two components) or as 
 N-PFOS and BR-PFOs (the individual components). The `determinands.control`
@@ -149,14 +165,12 @@ get_timeseries(water_timeseries) |> head(10)
 ```
 
 
-At last it is time to run the assessment. You need to specify which thresholds
-to use, otherwise the code will not use any of them. For water there is
-only the EQS, but you still need to specify it. Look at the threshold
-reference table to see what is available if you are unsure. Note that AC
-stands for Assessment Criteria which is what thresholds are often called. The
+The `run_assessment()` function runs the assessment. You need to specify which 
+thresholds (AC - Assessment Criteria) to use. Look at the 
+threshold reference table to see which types of tresholds are available if you 
+are unsure. For water there is only the EQS available. The
 parallel argument tells the code to use parallel processing. This usually
-speeds things up considerably. The assessment took about 1.5 minutes to run on
-my laptop.
+speeds things up considerably.
 
 ```{r helcom-water-assessment}
 water_assessment <- run_assessment(
@@ -167,24 +181,29 @@ water_assessment <- run_assessment(
 ```
 
 
-We now need to check whether there were any convergence issues. Lack of
-convergence only rarely occurs, but when it does it is typically because there
-are errors in the data (e.g. reported in incorrect units) or because there are 
-outliers, so the best thing to do is first check your data. However, 
-convergence can also be difficult if there are a lot of less-than measurements 
-in the time series. Describing how
-to tweak the control arguments to get convergence is beyond the scope of this
-vignette (need to write another vignette to discuss this). Fortunately, there
-were no convergence issues here.
+The `check_assessment()` function checks for any convergence issues for the time 
+series analysis. Lack of convergence only rarely occurs, but when it does it is 
+typically because there are errors in the data (e.g. reported in incorrect 
+units). Therefore, the first thing to do if time series have not converged is to 
+check your data. However, convergence problems can also relate to the presence 
+of outliers or a lot of less-than measurements in the time
+series. Describing how to tweak the control arguments to get convergence is 
+beyond the scope of this vignette but an example is given in the biota 
+assessment below. Fortunately, there were no convergence issues here.
 
 ```{r helcom-water-check-assessment}
 check_assessment(water_assessment)
 ```
 
-It is time to look at the results! We can plot the data for each time series 
-along with the fitted model (see vignette for external data) or 
-print a table giving summary information about the assessment of each time 
-series. But first, we may need to create an output directory.
+It is time to look at the results! We can print a table giving summary 
+information about the assessment of each time series (see below) and we 
+can print plots for each time series along with the fitted model (see vignette 
+for external data). 
+
+We may need to create an output directory for these files if this does not 
+already exist. Here we create a sub-directory "example_HELCOM" under the 
+"output" folder to specify that this is a HELCOM assessment. You can create a 
+directory with any name you want for your assessment.
 
 ```{r helcom-summary-directory}
 summary.dir <- file.path(working.directory, "output", "example_HELCOM")
@@ -194,11 +213,10 @@ if (!dir.exists(summary.dir)) {
 ```
 
 Now that we have an output directory, we can write the summary table to
-that directory. Of course, you can choose any directory to write to 
-here, so long as you are sure it exists.
+that directory.
 
-The code below prints out a CSV file giving summary information about
-the assessment of each time series. This includes:
+The `write_summary_tablet()` function prints a CSV file giving summary 
+information about the assessment of each time series. This includes:
 
 - meta-data such as the monitoring location and number of years of data for
   each time series
@@ -230,7 +248,7 @@ The status is summarised as:
 
 Many aspects of the symbology can be controlled using the `symbology_control` 
 argument. Users can also supply their own function to customise the symbology
-to suit their needs. 
+to suit their needs (not explained here). 
 
 
 ```{r helcom-water-summary}
@@ -249,9 +267,9 @@ write_summary_table(
 
 # Sediment assessment
 
-The sediment assessment is very similar, but has a few extra features related
-to normalisation (to account for differences in grain size) which are described
-below
+The sediment assessment is very similar to the water assessment, but includes a 
+few extra features related to normalisation (to account for differences in grain 
+size) which are described below
 
 ```{r helcom-sediment-data}
 sediment_data <- read_data(
@@ -268,24 +286,26 @@ sediment_data <- tidy_data(sediment_data)
 ```
 
 The sediment data are grouped into time series which consist of the 
-measurements of single determinand in a single matrix (the fraction the sample
-has been sieved to; e.g. `SED63` or `SEDTOT`) at a single monitoring station.
+measurements of a single determinand in a single matrix (given as the fraction 
+the sample has been sieved to; e.g. `SED63` or `SEDTOT`) at a single monitoring 
+station.
 
 The `create_timeseries()` call for sediment differs from that for water in two
 ways. First, `determinands.control` identifies two groups of determinands that
 need to be summed. Second, the arguments `normalise` and `normalise.control`
 specify how the normalisation for grain size should be carried out. There are
 default functions for normalisation that will work in many cases. However, the
-process for HELCOM is more complicated (because unlike other metals, copper is
+process for HELCOM is more complicated (because, unlike other metals, copper is
 normalised to organic carbon rather than aluminium) so a customised function
 `normalise_sediment_HELCOM()` is provided. The argument `normalise.control`
 specifies that metals (apart from copper) will be normalised to 5% aluminium
 and copper and organics will be normalised to 5% organic carbon. The normalise
-functions need a bit of work, so expect them to change.
+functions need a bit of work, so they might change.
 
 All contaminant time series in sediment are assessed on a dry weight basis. The 
 few measurements submitted on a wet weight basis are converted to a dry weight 
-basis using `DRYWT%` supporting information (also submitted with the data).
+basis using `DRYWT%` supporting information (which needs to be submitted in 
+the data file).
 
 
 ```{r helcom-read-sediment}
@@ -307,8 +327,8 @@ sediment_timeseries <- create_timeseries(
 )
 ```
 
-Now run the assessment. Again there is only one threshold, the EQS.  This only
-takes about a minute to run on my laptop.
+Now run the assessment. Similar to water there is only one threshold (AC), the 
+EQS.
 
 ```{r helcom-sediment-assessment}
 sediment_assessment <- run_assessment(
@@ -318,18 +338,19 @@ sediment_assessment <- run_assessment(
 )
 ```
 
-Everything has converged.
+Using `check_assessment()` we see that everything has converged.
 
 
 ```{r helcom-sediment-convergence}
 check_assessment(sediment_assessment)
 ```
 
-Finally, we can plot individual time series assessments (see vignette for
-external data) or print out the summary table. The `determinandGroups` argument
+We print the table giving summary information for the assessment of each 
+time series. To print plots for each time series along with the fitted model see 
+vignette for external data. The `determinandGroups` argument
 allows the determinand groupings (as defined in the determinand reference table) 
 to be renamed in the summary table. Below both the PBDEs and Organobromines 
-groups would appear as Organobromines in the summary table. 
+groups will appear as Organobromines in the summary table. 
 
 ```{r helcom-sediment-summary}
 write_summary_table(
@@ -353,13 +374,14 @@ write_summary_table(
 
 # Biota assessment
 
-The main difference in the biota assessment is the inclusion of effects data.
-This example has some PAH metabolite time series, but all imposex data have
+The main difference between biota assessments and the other two assessments 
+is that they can include biological effects data in addition to contaminants.
+Our example includes PAH metabolite time series, but imposex data have
 been excluded to keep things relatively simple. Imposex assessments have an
-additional modelling stage and this will be described in another vignette (not
+additional modelling stage which will be described in another vignette (not
 yet available). 
 
-The first two stages are just as before
+The first two stages mirror that of water and sediment:
 
 ```{r helcom-biota-data}
 biota_data <- read_data(
@@ -375,46 +397,44 @@ biota_data <- read_data(
 biota_data <- tidy_data(biota_data)
 ```
 
-The construction of the time series has a few more features. However, first we
-need to provide the individual TEQs to allow the construction of the WHO TEQ
-for dioxins, furans and planar PCBS (labelled TEQDFP). These are the values
-for the human health QS. This stage won't be necessary in later releases.
+The construction of the biota time series has a few more features than for water 
+and sediment. 
 
-The biota data are grouped into time series which consist of the 
-measurements of a single determinand in a single matrix (tissue type; e.g. 
-'EH', `LI' or `SB`) in a single species at a single monitoring station. PAH
-metabolite data are further grouped by `method_analysis`.
+The biota data are divided into time series. Each time series consist of data 
+from a determinand in a single species and matrix (tissue type; 
+e.g. 'EH', 'LI' or 'SB') and from a single monitoring station. PAH
+metabolite data are further grouped by analysis method ('method_analysis').
 
-The `determinands.control` argument does rather more here. There are five summed
-variables: PFOS, SBDE6, HBCD, SCB6 and TEQDFP. There is also one variable 
-CB138+163 which needs to be relabeled as (replaced by) CB138. For the purposes 
-of the assessment, the contribution of CB163 is regarded as small. Similarly 
-CB138+163 is taken to be a good proxy for CB138. Note that the replacements must 
-be done before the six PCBs are summed to give SCB6 in order for them to be 
-included in the sum.
+The `determinands.control` argument contains more actions here than in the 
+water and sediment examples (sum, replace, bespoke). 
+
+There are five variables (PFOS, SBDE6, HBCD, SCB6 and TEQDFP) that are being 
+summed. There is further one variable (CB138+163) which is being relabeled 
+(action = replace) as CB138 (for the purposes of the assessment, the 
+contribution of CB163 is regarded as small and CB138+163 is taken to be a good 
+proxy for CB138). Note that the replacements must be done before the six PCBs 
+are summed to give SCB6. The 'bespoke' action triggers a customised functions 
+that does more complicated data manipulations. Here it deals with the three 
+different ways in which lipid weight measurements can be submitted.
 
 The calculation of TEQDFP is more complex than that of the other summed variables.
 TEQDFP is the label used for the World Health Organisation Toxic Equivalent sum
-for dioxins, furans and planar polychlorinated biphenyls. This is calculated 
-using the Toxic Equivalency Factors (TEFs) stored in `info_TEQ$HOLAS3`, with the 
-TEFS identified as `weights`. Note that the weights used in the example below
-are those used in the HELCOM HOLAS 3 assessment, but have been superseeded; see
-`help("info_TEQ")` for more details. 
+for dioxins, furans and planar polychlorinated biphenyls. It is calculated 
+using individual Toxic Equivalency Factors (TEFs) for each substance (stored in 
+`info_TEQ$HOLAS3`), with the TEFs identified as `weights`. Note that the weights 
+used in the example below are those used in the HELCOM HOLAS 3 assessment, but 
+have been superseeded; see `help("info_TEQ")` for more details. 
 
-There is also one 'bespoke' action in `determinands.control`. This triggers a 
-customised functions that does more complicated things. Here it deals with the  
-three different ways in which lipid weight measurements can be submitted.
-
-Finally, `normalise_biota_HELCOM()` is a customised function that determines which
-measurements are normalised to 5% lipid in a HELCOM assessment. Again, the 
-normalisation functions are under active development and might well change 
-before the next release.
+The `normalise_biota_HELCOM()` is a customised function that determines which
+measurements are normalised to 5% lipid in the HELCOM assessment. The 
+normalisation functions are under active development and might change 
+in future releases.
 
 One thing that is not obvious from the function call is the choice of basis. By
 default, contaminant time series in biota are assessed on a wet weight basis, 
-with measurements submitted on a dry or lipid weight basis transformed to a wet 
-weight basis using supporting `DRYWT%` and `LIPIDWT%` information. Look at the
-OSPAR or external data examples to see how the choice of basis can be changed.
+where measurements submitted on a dry or lipid weight basis are transformed to a 
+wet weight basis using supporting `DRYWT%` and `LIPIDWT%` information. Look at 
+the OSPAR or external data examples to see how the choice of basis can be changed.
 
 ```{r helcom-biota-timeseries}
 biota_timeseries <- create_timeseries(
@@ -446,7 +466,8 @@ biota_timeseries <- create_timeseries(
 )
 ```
 
-The asssessment took about 4.3 minutes on my laptop
+Now run the assessment. Where water and sediment had only an EQS threshold, 
+biota uses four different types of threshold for the assessment.
 
 ```{r helcom-biota-assessment}
 biota_assessment <- run_assessment(
@@ -456,11 +477,12 @@ biota_assessment <- run_assessment(
 )
 ```
 
-One time series has not converged. (The parameter estimates are fine, but the
-standard errors are implausibly tight - if you look at the data, you will see why
+When we run `check_assessment` we see that one time series has not converged. 
+(The parameter estimates are fine, but the standard errors are implausibly tight 
+- if you look at the data, you will see why
 the routines struggle with this time series.) The code below tweaks the 
 arguments of the numerical differencing routine that calculates the standard 
-errors. Dealing with non-converged timeseries is a topic for a future vignette.
+errors.
 
 
 ```{r helcom-biota-check-assessment}
@@ -475,9 +497,9 @@ biota_assessment <- update_assessment(
 check_assessment(biota_assessment)
 ```
 
-The assessment uses four types of thresholds (BAC, EAC, EQS and MPC), but 
+The biota assessment uses four types of thresholds (BAC, EAC, EQS and MPC), but 
 only one of them is applied to each timeseries, and they are all used to 
-delineate between good and poor status.  The summary table can therefore be 
+delineate between good and poor status. The summary table can therefore be 
 simplified by grouping the thresholds together using the `threshold_groups` 
 argument and labelling them as an EQS (equivalent). The symbology then 
 knows that, whichever threshold is applied, the status will be green if 
