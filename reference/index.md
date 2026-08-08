@@ -89,6 +89,9 @@ most standard assessments, these will be all you need.
 - [`get_basis_default()`](http://osparcomm.github.io/HARSAT/reference/get_basis_default.md)
   : The default function for generating a basis
 
+- [`get_control_dets()`](http://osparcomm.github.io/HARSAT/reference/get_control_dets.md)
+  : extract determinands from control structure
+
 - [`get_station_code()`](http://osparcomm.github.io/HARSAT/reference/get_station_code.md)
   : Get station code from station name
 
@@ -113,6 +116,9 @@ most standard assessments, these will be all you need.
 
 - [`make_key()`](http://osparcomm.github.io/HARSAT/reference/make_key.md)
   : Make key for annotating assessment plots
+
+- [`merge_auxiliary()`](http://osparcomm.github.io/HARSAT/reference/merge_auxiliary.md)
+  : Merge auxiliary variables with data
 
 - [`normalise_biota_HELCOM()`](http://osparcomm.github.io/HARSAT/reference/normalise_biota_HELCOM.md)
   : Normalises biota concentrations, HELCOM vwersion

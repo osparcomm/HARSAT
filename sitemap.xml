@@ -36,6 +36,7 @@
 <url><loc>http://osparcomm.github.io/HARSAT/reference/get_AC_biota_OSPAR.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/get_basis_biota_OSPAR.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/get_basis_default.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/get_control_dets.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/get_station_code.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/get_timeseries.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/harsat-package.html</loc></url>
@@ -45,6 +46,7 @@
 <url><loc>http://osparcomm.github.io/HARSAT/reference/label_unit.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/locate_information_file.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/make_key.html</loc></url>
+<url><loc>http://osparcomm.github.io/HARSAT/reference/merge_auxiliary.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_biota_HELCOM.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_sediment_HELCOM.html</loc></url>
 <url><loc>http://osparcomm.github.io/HARSAT/reference/normalise_sediment_OSPAR.html</loc></url>

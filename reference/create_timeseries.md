@@ -23,7 +23,7 @@ create_timeseries(
 
 - ctsm.obj:
 
-  the CTSM object, as returned from `tidy_data`
+  the harsat object, as returned from `tidy_data`
 
 - determinands:
 
