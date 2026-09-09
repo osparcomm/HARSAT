@@ -7,7 +7,3 @@ Access function map
 ``` r
 get_AC
 ```
-
-## Format
-
-An object of class `list` of length 3.

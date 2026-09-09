@@ -301,6 +301,9 @@ most standard assessments, these will be all you need.
 - [`read_data()`](http://osparcomm.github.io/HARSAT/reference/read_data.md)
   : Read HARSAT data
 
+- [`read_info_engine()`](http://osparcomm.github.io/HARSAT/reference/read_info_engine.md)
+  : Read a reference table
+
 - [`read_stations()`](http://osparcomm.github.io/HARSAT/reference/read_stations.md)
   : Reads station dictionary
 

@@ -1,28 +1,26 @@
 # Find the path for an information file
 
 Locates a requested information file, searching the information file
-path. If the requested file cannot be found and `required` is not false,
-stops with an error.
+path, and then looking in the package itself.
 
 ## Usage
 
 ``` r
-locate_information_file(name, path)
+locate_information_file(path, name)
 ```
 
 ## Arguments
+
+- path:
+
+  A string giving the directory to search. The information directory for
+  the package is automatically searched if we haven't found the file in
+  this directory
 
 - name:
 
   A string: the name of the file, e.g., `thresholds_biota.csv`
 
-- path:
-
-  A vector of strings, directories to search. The information directory
-  for the package is automatically searched if we haven't found the file
-  anywhere else
-
 ## Value
 
-A string, the absolute path for the file, or `NULL` if the file cannot
-be found anywhere.
+A string, the path to the file, or `""` if the file cannot be found.

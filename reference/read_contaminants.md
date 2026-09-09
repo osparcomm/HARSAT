@@ -6,7 +6,7 @@ do any station matching if `info$data_format == "ICES`).
 ## Usage
 
 ``` r
-read_contaminants(file, data_dir = ".", info)
+read_contaminants(file, data_dir = ".", info, file_diagnostics = FALSE)
 ```
 
 ## Arguments

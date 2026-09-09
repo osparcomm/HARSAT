@@ -23,6 +23,8 @@ holder, funder\]
 
 Authors:
 
+- OSPAR Commission (OSPAR) <data@ospar.org> \[copyright holder, funder\]
+
 - Arctic Monitoring and Assessment Programme (AMAP) <amap@amap.no>
   \[copyright holder, funder\]
 

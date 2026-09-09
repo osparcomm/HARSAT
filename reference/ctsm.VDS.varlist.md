@@ -8,7 +8,3 @@ prcesses for parallel computation
 ``` r
 ctsm.VDS.varlist
 ```
-
-## Format
-
-An object of class `character` of length 5.

@@ -12,8 +12,6 @@ pretty_unit(unit, html = FALSE)
 
 ## Arguments
 
-- unit:
-
 - html:
 
   A logical with TRUE returning an html representation for use in

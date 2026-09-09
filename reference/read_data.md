@@ -20,7 +20,8 @@ read_data(
   extraction = NULL,
   max_year = NULL,
   oddity_dir = "oddities",
-  control = list()
+  control = list(),
+  file_diagnostics = FALSE
 )
 ```
 
@@ -93,6 +94,11 @@ read_data(
   run the assessment. These include the reporting window; the way in
   which data are matched to stations following an ICES extraction;
   information about reporting regions, and so on. See Details.
+
+- file_diagnostics:
+
+  A logical which, when `TRUE`, prints out the MD5 digest for each input
+  file. Defaults to `FALSE`.
 
 ## Value
 

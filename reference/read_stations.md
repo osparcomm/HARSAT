@@ -5,7 +5,7 @@ Reads station dictionary
 ## Usage
 
 ``` r
-read_stations(file, data_dir = ".", info)
+read_stations(file, data_dir = ".", info, file_diagnostics = FALSE)
 ```
 
 ## Arguments
