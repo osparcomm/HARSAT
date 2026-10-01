@@ -224,9 +224,9 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #'   function that specifies a symbology typically used to characterise the 
 #'   patterns of change in and the status of each time series. Defaults to 
 #'   `NULL`; i.e. no symbology. Multiple symbologies can be applied. See 
-#'   details.
+#'   section on symbologies for more details.
 #' @param symbology_control Experimental. A named list of control options for 
-#'   the symbology. See details.
+#'   the symbology. See section on symbologies for more details.
 #' @param determinandGroups optional, a list specifying `labels` and `levels`
 #'   to rename the existing determinand groups. The life of this argument is 
 #'   limited.
@@ -236,14 +236,350 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' @param append Logical. `FALSE` (the default) overwrites any existing summary
 #'   file. `TRUE` appends data to it, creating it if it does not yet exist.
 #'
-#' @returns a summary object, when `export` is `FALSE`
+#' @returns A data frame (`export = FALSE`) or a csv file (`export = TRUE`) 
+#' summarising the assessment of each time series. The (compartment specific) 
+#' variables that are always present are described first. Other variables 
+#' related to regions, normalisation, thresholds, symbologies and power are
+#' described later. For simplicity, the statistical metrics assume the 
+#' data are concentrations that are assessed on the log-scale. Adjustments for 
+#' other types of measurement are described later. 
+#'
+#' ## Standard output
 #' 
-#' @section Default symbology:
+#' The following columns are always present \tabular{ll}{
+#'    `series` \tab Timeseries identifier. \cr
+#'    \tab \cr
+#'    `country` \tab Country that reported the data. \cr
+#'    \tab \cr
+#'    `station_code` \tab Identifier of the monitoring station.  \cr
+#'    \tab \cr
+#'    `station_name` \tab Name associated with the monitoring station. \cr
+#'    \tab \cr
+#'    `station_longname` \tab Long name associated with the monitoring station, 
+#'    often a more meaningful name for users. \cr 
+#'    \tab \cr
+#'    `station_latitude` \tab Station latitude, usually a nominal position
+#'    with sampling centred on this latitude. \cr
+#'    \tab \cr
+#'    `station_longitude` \tab Station longitude, usually a nominal position
+#'    with sampling centred on this longitude. \cr
+#'    \tab \cr
+#'    `station_type` \tab Station type, usually distinguishing baseline, 
+#'    reference and impacted stations; see 
+#'    [ICES reference codes for MSTAT](https://vocab.ices.dk/?ref=177). \cr
+#'    \tab \cr
+#'    `waterbody_type` \tab Station typography, usually distinguishing 
+#'    transitional (estuarine) waters, coastal waters and open sea; see 
+#'    [ICES reference codes for WLTYP](https://vocab.ices.dk/?ref=212). \cr
+#'    \tab \cr
+#'    `determinand` \tab Contaminant, biological effect, or other response; see 
+#'    the determinand reference table or 
+#'    [ICES reference codes for PARAM](http://vocab.ices.dk/?ref=37). \cr
+#'    \tab \cr
+#'    `determinand_group` \tab Typically a contaminant or biological effect 
+#'    group. \cr
+#'    \tab \cr
+#'    `species` \tab Species latin name (biota only). See the species reference 
+#'    table. \cr
+#'    \tab \cr
+#'    `matrix` \tab The tissue (biota) or sediment fraction (sediment) the 
+#'    measurements were made in; see the matrix reference table or 
+#'    [ICES reference codes for MATRX](http://vocab.ices.dk/?ref=55). \cr
+#'    \tab \cr
+#'    `filtration` \tab Whether the samples were filtered (water only). \cr
+#'    \tab \cr
+#'    `basis` \tab Basis on which the measurements were expressed; typically W
+#'    (wet), D (dry) or L (lipid). \cr
+#'    \tab \cr 
+#'    `unit` \tab Measurement unit; see 
+#'    [ICES reference codes for MUNIT](https://vocab.ices.dk/?ref=155). \cr
+#'    \tab \cr
+#'    `sex` \tab Sex of individuals (biota only); currently only provided for 
+#'    EROD time series which are assessed separately for males (M) and females 
+#'    (F). \cr 
+#'    \tab \cr
+#'    `method_analysis` \tab Method of chemical analysis (biota only); currently 
+#'    only provided for PAH metabolite data; see the method_analysis reference
+#'    table or [ICES reference codes for METOA](http://vocab.ices.dk/?ref=173). 
+#'    \cr
+#'    \tab \cr
+#'    `subseries` \tab A sub-division of a time series; e.g. by sex or age. \cr
+#'    \tab \cr
+#'    `n_year_all` \tab The number of years of data. \cr
+#'    \tab \cr
+#'    `n_year_fit` \tab The number of years included in the statistical 
+#'    analysis; some early years might be excluded because they are 
+#'    separated from the bulk of the data by large gaps in time, or because they 
+#'    are dominated by censored values. \cr
+#'    \tab \cr
+#'    `n_year_positive` \tab The number of years included in the statistical 
+#'    analysis that have at least one non-censored measurement (i.e. above the 
+#'    limit of detection or quantification). `n_year_positive` controls the 
+#'    complexity of the fitted model. In particular, a parametric model is 
+#'    only fitted if `n_year_positive` \eqn{\ge} 3 and trends are only assessed
+#'    if `n_year_positive` \eqn{\ge} 5. \cr
+#'    \tab \cr  
+#'    `first_year_all` \tab First year with data. \cr
+#'    \tab \cr
+#'    `n_year_fit` \tab First year included in the statistical analysis. \cr
+#'    \tab \cr
+#'    `last_year_fit` \tab Last year of data; this is always included in the 
+#'    statistical analysis. \cr
+#'    \tab \cr
+#'    `p_nonlinear_trend` \tab The significance of the nonlinear component of 
+#'    the trend. This assesses whether log concentrations changed nonlinearly 
+#'    over the monitoring period and is based on a likelihood ratio test 
+#'    that compares the smooth model with a linear model. It is only calculated 
+#'    if a smooth model is selected by AICc. \cr
+#'    \tab \cr
+#'    `p_linear_trend` \tab The significance of the linear component of the 
+#'    trend. This test only has a simple interpretation when the trend is linear 
+#'    (rather than smooth) in which case it assesses whether concentrations 
+#'    changed (log-)linearly over the monitoring period. It is based on a 
+#'    likelihood ratio test that compares the linear model with the null model 
+#'    (in which only an intercept if fitted). For smooth models, the variables
+#'    `p_overall_change` and `p_recent_change` are more relevant. \cr
+#'    \tab \cr
+#'    `p_overall_trend` \tab The overall significance of the trend. This 
+#'    assesses whether mean concentrations changed over the monitoring period 
+#'    and is based on a likelihood ratio test that compares the fitted model 
+#'    (smooth or linear) with the null model. For linear models 
+#'    `p_overall_trend` is identical to `p_linear_trend`. \cr
+#'    \tab \cr
+#'    `p_overall_change` \tab Significance test of whether the mean 
+#'    concentrations at the start and end of the monitoring period were the 
+#'    same. For smooth models, `p_overall_change` is 
+#'    based on a Wald test that compares the fitted values at the start and end 
+#'    of the monitoring period; it can be non-significant even if 
+#'    `p_overall_trend` is highly significant, for example if concentrations 
+#'    increased and then decreased by the same amount. For linear models 
+#'    `p_overall_change` is identical to `p_linear_trend` (and 
+#'    `p_overall_trend`). \cr
+#'    \tab \cr
+#'    `overall_change` \tab An estimate of the change in mean concentration 
+#'    between the start and end of the monitoring period. It is given by: 
+#'    \deqn{overall\_change = 100 (\hat y_N - \hat y_1) / (t_N - t_1)}
+#'    where \eqn{\hat y_1} and \eqn{\hat y_N} are the fitted mean log 
+#'    concentrations in `first_year_fit` and `last_year` and \eqn{t_1} and 
+#'    \eqn{t_N} are `first_year_fit` and `last_year` respectively. Loosely, 
+#'    `overall_change` can be interpreted as the percentage annual change in 
+#'    concentration between `first_year_fit` and `last_year` assuming the 
+#'    trend in concentration is log-linear. More formally, it corresponds to a 
+#'    percentage annual change of 
+#'    \deqn{100 (exp (overall\_change / 100) - 1))} \cr
+#'    \tab \cr
+#'    `p_recent_change` \tab This is similar to `p_overall_change`, but focuses 
+#'    on change in a 'recent' period rather than over the whole monitoring 
+#'    period. The definition of 'recent' comes from the argument `recent_trend` 
+#'    in `run_assessment` which has a default value of twenty years. If the 
+#'    maximum year of data in the whole assessment is, for example, 2026, then 
+#'    the recent period would default to the twenty year period from 2007 to 
+#'    2026. `p_recent_change` is the significance of a test which assesses 
+#'    whether the mean concentration at the start or the recent period (or 
+#'    `first_year_fit` whichever is later) and the end of the recent period (or 
+#'    `last_year` whichever is earlier) were the same. For smooth models, 
+#'    `p_recent_change` is based on Wald test that compares the fitted values at 
+#'    the start and end of the recent period. For linear models, 
+#'    `p_recent_change` is identical to `p_linear_trend` (and 
+#'    `p_overall_trend`). Occasionally `p_recent_change` is not calculated even
+#'    though a linear of smooth model has been fitted to the data; this occurs 
+#'    if there are too few years of data with non-censored measurements in the 
+#'    recent period. \cr
+#'    \tab \cr
+#'    `recent_change` \tab An estimate of the change in mean concentration 
+#'    in the recent period (see `p_recent_change`). Let \eqn{t_*} be the first 
+#'    year in the recent period (or `first_year_fit` whichever is later) and let
+#'    \eqn{t_N} be `last_year`. Then  
+#'    \deqn{recent\_change = 100 (\hat y_N - \hat y_*) / (t_N - t_*)}
+#'    where \eqn{\hat y_*} and \eqn{\hat y_N} are the fitted mean log 
+#'    concentrations in \eqn{t_*} and \eqn{t_N} respectively. Loosely, 
+#'    `recent_change` can be interpreted as the percentage annual change in 
+#'    concentration in the recent period assuming the trend in concentration is 
+#'    log-linear.  More formally, it corresponds to a percentage 
+#'    annual change of 
+#'    \deqn{100 (exp (recent\_change / 100) - 1))} \cr
+#'    \tab \cr
+#'    `detectable_trend` \tab A measure of the power of the time series to 
+#'    detect changes over time. This is the annual change in log concentration 
+#'    (multiplied by 100) that would be detected with 90% power based on a 
+#'    (two-sided) test at the 5% significance level given 10 years of annual 
+#'    monitoring and variability typical of the time series. Loosely, 
+#'    `detectable_trend` can be interpreted as the percentage annual change in 
+#'    concentration detectable with 90% power in 10 years of annual monitoring.  
+#'    More formally, it corresponds to an annual percentage 
+#'    increase or decrease detectable with 90% power of respectively
+#'    \deqn{100 exp (\pm detectable\_trend / 100) - 1))} \cr  
+#'    \tab \cr
+#'    `mean_last_year` \tab The fitted mean concentration in `last_year`. If 
+#'    a parametric model cannot be fitted (`n_year_positive` \eqn{\le} 2), then 
+#'    an ad-hoc metric of 'level' is provided by the 
+#'    maximum annual contaminant index (typically the back-transformed median
+#'    log-concentration) in the last two monitoring years. \cr
+#'    \tab \cr 
+#'    `climit_last_year` \tab The upper one-sided 95% confidence limit on the 
+#'    fitted mean concentration in `last_year`. \cr
+#' }
+#'
+#' ## Regions
+#'
+#' Regional variables are provided if they are supplied in the station input 
+#' file (and correctly picked up using the `control` argument of `read_data`). 
+#' The following columns appear by default for \tabular{ll}{
+#'   OSPAR assessments \cr
+#'   \tab \cr
+#'   `OSPAR_region` \tab 
+#'   [OSPAR region](https://odims.ospar.org/en/submissions/ospar_regions_2017_01/) 
+#'   where the monitoring station is located \cr
+#'   \tab \cr
+#'   `OSPAR_subregion` \tab 
+#'   [OSPAR MIME subregion](https://odims.ospar.org/en/submissions/ospar_assessment_areas_2017_05/) 
+#'   \cr
+#'   \tab \cr
+#'   \tab \cr
+#'   \tab \cr
+#'   HELCOM assessments \cr
+#'   \tab \cr
+#'   `HELCOM_subbasin` \tab HELCOM sub-basin where the monitoring station is 
+#'   located \cr
+#'   \tab \cr
+#'   `HELCOM_L3` \tab HELCOM L3 area \cr
+#'   \tab \cr
+#'   `HELCOM_L4` \tab HELCOM L4 area \cr
+#'   \tab \cr
+#'   \tab \cr
+#'   \tab \cr
+#'   AMAP assessments \cr
+#'   \tab \cr
+#'   `AMAP_arctic_lme` \tab AMAP Arctic large marine ecosystem where the 
+#'   monitoring station is located \cr
+#' }
+#' 
+#' ## Normalisation
+#' 
+#' Normalisation variables are provided if the data have been normalised 
+#' (e.g. adjusted to a specified sediment size fraction or lipid 
+#' content) using the `normalise` argument of `create_timeseries`. The variables
+#' are \tabular{ll}{
+#'   `normaliser` \tab The variable used to normalise concentrations; see the  
+#'    determinand reference table or 
+#'    [ICES reference codes for PARAM](http://vocab.ices.dk/?ref=37). \cr
+#'    \tab \cr
+#'    `normaliser_value` \tab The value of the normaliser that concentrations 
+#'    have been normalised to. \cr 
+#'    \tab \cr
+#'    `normaliser_unit` \tab The unit of `normaliser_value`; see 
+#'    [ICES reference codes for MUNIT](https://vocab.ices.dk/?ref=155). \cr
+#' }
+#'
+#' ## Thresholds
+#' 
+#' Four variables are provided for each threshold specified (in argument `AC` of 
+#' `run_assessment`). Specifying the `"EQS"` threshold, for example, would 
+#' produce the following variables: \tabular{ll}{
+#'   `EQS_value` \tab The value of the threshold (EQS) in the same basis and 
+#'   units (and normalised in the same way) as the concentration data. \cr
+#'   \tab \cr 
+#'   `EQS_diff` \tab The difference between `climit_last_year` and `EQS_value`. 
+#'   Negative values correspond to mean concentrations in the last monitoring 
+#'   year that were significantly (p < 0.05) below the threshold (EQS). If a 
+#'   parametric model cannot be fitted, then an ad-hoc comparison is made by 
+#'   calculating the difference between `mean_last_year` and `EQS_value`; 
+#'   however, no statistical significance can be inferred from this. \cr
+#'   \tab \cr
+#'   `EQS_achieved` \tab The first year (moving forward) in which the mean 
+#'   concentration is predicted to be below the threshold (EQS). 
+#'   This is only calculated if a parametric model has been fitted. Four cases
+#'   are considered. 1) If `mean_last_year` \eqn{\le} EQS, then concentrations 
+#'   are already below the EQS and `EQS_achieved` is set to `last_year`. 2) If 
+#'   `mean_last_year` > EQS and `recent_change` < 0 then concentrations are 
+#'   predicted to decrease and `EQS_achieved` is set to the first year that the 
+#'   predicted concentration is below the EQS assuming the rate of decrease is 
+#'   given by `recent_change`; the year is truncated at 3000 to prevent values 
+#'   getting silly. 3) If `mean_last_year` > EQS and `recent_change` \eqn{\ge} 0
+#'   then concentrations are predicted to increase and the mean concentration 
+#'   will never be below the EQS so `EQS_achieved` is arbitrarily set to 3000. 4) 
+#'   If `mean_last_year` > EQS and no trend is estimated then `EQS_achieved` 
+#'   is left blank. \cr
+#'   \tab \cr
+#'   `EQS_below` \tab The result of a non-parametric test of whether mean 
+#'   concentrations are below the threshold (EQS). This is a one-sided sign-test
+#'   using the last five monitoring years. It provides a non-parametric 
+#'   alternative to the parametric test of status based on *cl_last_year* and is 
+#'   particularly useful when the data are dominated by censored measurements
+#'   and a parametric model can't be fitted. \cr
+#' }
+#' 
+#' When thresholds have been grouped (using argument `threshold_groups`), a 
+#' fifth variable is produced. For example, suppose "EAC" is the name of a  
+#' group which comprises thresholds "EAC", "ERL", "EQS" and "FEQG" (see 
+#' examples). Then the fifth variable would be \tabular{ll}{
+#'   `EAC_type` \verb{   } \tab The name of the threshold used (e.g. "EAC", "ERL", "EQS" 
+#'   or "FEQG") \cr
+#' }
+#' 
+#' ## Symbologies
+#' 
+#' Symbology variables are provided if the `symbology` argument is used.  
+#' The symbology variables can be many and varied (depending on the 
+#' user-specification) and the options available are fully described in the main
+#' section on Symbologies further below. However, to illustrate, if the default 
+#' symbology is used (`symbology = "default"`) then there are two symbology 
+#' variables which will usually be  \tabular{ll}{
+#'   `shape` \tab A 'shape' categorising the fitted trend. \cr
+#'   \tab \cr
+#'   `colour` \tab A 'colour' categorising the status of the time series. \cr 
+#' }
+#'
+#' ## Power
+#'
+#' Power metrics are produced if `extra_output = "power"`. The power
+#' metrics depend on three parameters which can be set using the `control`
+#' argument of `run_assessment`. They are `target_power`, `target_trend` and
+#' `size` which have default values of 90%, 5% and 5% respectively. The metrics
+#' are \tabular{ll}{
+#'   `power_dt_obs` \tab The percentage annual increase in concentration 
+#'   detectable with `target_power` by a two-sided test at the `size`  
+#'   significance level given the observed pattern of monitoring (i.e. same 
+#'   years and number of samples per year as the time series) \cr
+#'   \tab \cr
+#'   `power_dt_seq` \tab The percentage annual increase in concentration 
+#'   detectable with `target_power` by a two-sided test at the `size`  
+#'   significance level assuming that any gaps in the time series have also been
+#'   monitored (i.e. sequential monitoring from `first_year_all` to `last_year`) 
+#'   \cr
+#'   \tab \cr
+#'   `power_dt_ten` \tab The percentage annual increase in concentration 
+#'   detectable with `target_power` by a two-sided test at the `size`  
+#'   significance level assuming ten years of sequential monitoring \cr
+#'   \tab \cr
+#'   `power_ny_seq` \tab The number of sequential years of monitoring required 
+#'   to detect a `target_trend` annual increase in concentration with  
+#'   `target_power` by a two-sided test at the `size` significance level \cr
+#'   \tab \cr
+#'   `power_pw_obs` \tab The power of detecting a `target_trend` annual increase 
+#'   in concentration using a two-sided test at the `size` significance level 
+#'   given the observed pattern of monitoring \cr
+#'   \tab \cr
+#'   `power_pw_seq` \tab The power of detecting a `target_trend` annual increase 
+#'   in concentration using a two-sided test at the `size` significance level 
+#'   assuming that any gaps in the time series have also been monitored \cr
+#'   \tab \cr
+#'   `power_pw_ten` \tab The power of detecting a `target_trend` annual increase 
+#'   in concentration using a two-sided test at the `size` significance level 
+#'   assuming ten years of sequential monitoring \cr
+#' }
+#' 
+#' 
+#' <br>
+#'  
+#' @section Symbologies:
+#' 
+#' ## Default symbology
 #' 
 #' `symbology = "default"` calls a pre-defined symbology that generates a 
-#' 'shape' and a 'colour' to characterise the status of each time series. Its
-#' behaviour is controlled using `symbology_control`, a named list with the 
-#' following elements:
+#' 'shape' and a 'colour' to characterise the trend and status of each time 
+#' series. Its behaviour is controlled using `symbology_control`, a named list 
+#' with the following elements:
 #'
 #' * `shape`: a list with names `none`, `mean`, `flat`, `up`, `down` giving the
 #' shape associated with each pattern of change. Here, `none` corresponds to 
@@ -275,7 +611,7 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' names of the symbology columns in the summary table to be adjusted; this can
 #' be important if multiple symbologies are applied
 #' 
-#' @section Custom symbologies:
+#' ## Custom symbologies:
 #' 
 #' Users can apply custom symbologies by letting `symbology` be a user-supplied
 #' function of the form `fn(summary, info, control)` where:
@@ -301,13 +637,15 @@ ctsm.web.AC <- function(assessment_ob, classification) {
 #' 
 #' See the examples for more inspiration.
 #' 
-#' @section Multiple symbologies:
+#' ## Multiple symbologies:
 #' 
 #' Multiple symbologies can be applied by specifying a named list whch can be 
 #' a mixture of default symbologies and custom symbologies. `symbology_control`
 #' must then be a named list (with the same names) giving control information 
 #' for each symbology. It is important to ensure that each symbology gives 
 #' output columns with different names. See examples.
+#' 
+#' <br>
 #' 
 #' @examples
 #' 

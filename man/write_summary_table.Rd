@@ -53,10 +53,10 @@ seven power metrics computed for lognormally distributed data. Defaults to
 function that specifies a symbology typically used to characterise the
 patterns of change in and the status of each time series. Defaults to
 \code{NULL}; i.e. no symbology. Multiple symbologies can be applied. See
-details.}
+section on symbologies for more details.}
 
 \item{symbology_control}{Experimental. A named list of control options for
-the symbology. See details.}
+the symbology. See section on symbologies for more details.}
 
 \item{determinandGroups}{optional, a list specifying \code{labels} and \code{levels}
 to rename the existing determinand groups. The life of this argument is
@@ -70,7 +70,346 @@ Most likely only useful if you are using \code{append} (see below).}
 file. \code{TRUE} appends data to it, creating it if it does not yet exist.}
 }
 \value{
-a summary object, when \code{export} is \code{FALSE}
+A data frame (\code{export = FALSE}) or a csv file (\code{export = TRUE})
+summarising the assessment of each time series. The (compartment specific)
+variables that are always present are described first. Other variables
+related to regions, normalisation, thresholds, symbologies and power are
+described later. For simplicity, the statistical metrics assume the
+data are concentrations that are assessed on the log-scale. Adjustments for
+other types of measurement are described later.
+\subsection{Standard output}{
+
+The following columns are always present \tabular{ll}{
+\code{series} \tab Timeseries identifier. \cr
+\tab \cr
+\code{country} \tab Country that reported the data. \cr
+\tab \cr
+\code{station_code} \tab Identifier of the monitoring station.  \cr
+\tab \cr
+\code{station_name} \tab Name associated with the monitoring station. \cr
+\tab \cr
+\code{station_longname} \tab Long name associated with the monitoring station,
+often a more meaningful name for users. \cr
+\tab \cr
+\code{station_latitude} \tab Station latitude, usually a nominal position
+with sampling centred on this latitude. \cr
+\tab \cr
+\code{station_longitude} \tab Station longitude, usually a nominal position
+with sampling centred on this longitude. \cr
+\tab \cr
+\code{station_type} \tab Station type, usually distinguishing baseline,
+reference and impacted stations; see
+\href{https://vocab.ices.dk/?ref=177}{ICES reference codes for MSTAT}. \cr
+\tab \cr
+\code{waterbody_type} \tab Station typography, usually distinguishing
+transitional (estuarine) waters, coastal waters and open sea; see
+\href{https://vocab.ices.dk/?ref=212}{ICES reference codes for WLTYP}. \cr
+\tab \cr
+\code{determinand} \tab Contaminant, biological effect, or other response; see
+the determinand reference table or
+\href{http://vocab.ices.dk/?ref=37}{ICES reference codes for PARAM}. \cr
+\tab \cr
+\code{determinand_group} \tab Typically a contaminant or biological effect
+group. \cr
+\tab \cr
+\code{species} \tab Species latin name (biota only). See the species reference
+table. \cr
+\tab \cr
+\code{matrix} \tab The tissue (biota) or sediment fraction (sediment) the
+measurements were made in; see the matrix reference table or
+\href{http://vocab.ices.dk/?ref=55}{ICES reference codes for MATRX}. \cr
+\tab \cr
+\code{filtration} \tab Whether the samples were filtered (water only). \cr
+\tab \cr
+\code{basis} \tab Basis on which the measurements were expressed; typically W
+(wet), D (dry) or L (lipid). \cr
+\tab \cr
+\code{unit} \tab Measurement unit; see
+\href{https://vocab.ices.dk/?ref=155}{ICES reference codes for MUNIT}. \cr
+\tab \cr
+\code{sex} \tab Sex of individuals (biota only); currently only provided for
+EROD time series which are assessed separately for males (M) and females
+(F). \cr
+\tab \cr
+\code{method_analysis} \tab Method of chemical analysis (biota only); currently
+only provided for PAH metabolite data; see the method_analysis reference
+table or \href{http://vocab.ices.dk/?ref=173}{ICES reference codes for METOA}.
+\cr
+\tab \cr
+\code{subseries} \tab A sub-division of a time series; e.g. by sex or age. \cr
+\tab \cr
+\code{n_year_all} \tab The number of years of data. \cr
+\tab \cr
+\code{n_year_fit} \tab The number of years included in the statistical
+analysis; some early years might be excluded because they are
+separated from the bulk of the data by large gaps in time, or because they
+are dominated by censored values. \cr
+\tab \cr
+\code{n_year_positive} \tab The number of years included in the statistical
+analysis that have at least one non-censored measurement (i.e. above the
+limit of detection or quantification). \code{n_year_positive} controls the
+complexity of the fitted model. In particular, a parametric model is
+only fitted if \code{n_year_positive} \eqn{\ge} 3 and trends are only assessed
+if \code{n_year_positive} \eqn{\ge} 5. \cr
+\tab \cr
+\code{first_year_all} \tab First year with data. \cr
+\tab \cr
+\code{n_year_fit} \tab First year included in the statistical analysis. \cr
+\tab \cr
+\code{last_year_fit} \tab Last year of data; this is always included in the
+statistical analysis. \cr
+\tab \cr
+\code{p_nonlinear_trend} \tab The significance of the nonlinear component of
+the trend. This assesses whether log concentrations changed nonlinearly
+over the monitoring period and is based on a likelihood ratio test
+that compares the smooth model with a linear model. It is only calculated
+if a smooth model is selected by AICc. \cr
+\tab \cr
+\code{p_linear_trend} \tab The significance of the linear component of the
+trend. This test only has a simple interpretation when the trend is linear
+(rather than smooth) in which case it assesses whether concentrations
+changed (log-)linearly over the monitoring period. It is based on a
+likelihood ratio test that compares the linear model with the null model
+(in which only an intercept if fitted). For smooth models, the variables
+\code{p_overall_change} and \code{p_recent_change} are more relevant. \cr
+\tab \cr
+\code{p_overall_trend} \tab The overall significance of the trend. This
+assesses whether mean concentrations changed over the monitoring period
+and is based on a likelihood ratio test that compares the fitted model
+(smooth or linear) with the null model. For linear models
+\code{p_overall_trend} is identical to \code{p_linear_trend}. \cr
+\tab \cr
+\code{p_overall_change} \tab Significance test of whether the mean
+concentrations at the start and end of the monitoring period were the
+same. For smooth models, \code{p_overall_change} is
+based on a Wald test that compares the fitted values at the start and end
+of the monitoring period; it can be non-significant even if
+\code{p_overall_trend} is highly significant, for example if concentrations
+increased and then decreased by the same amount. For linear models
+\code{p_overall_change} is identical to \code{p_linear_trend} (and
+\code{p_overall_trend}). \cr
+\tab \cr
+\code{overall_change} \tab An estimate of the change in mean concentration
+between the start and end of the monitoring period. It is given by:
+\deqn{overall\_change = 100 (\hat y_N - \hat y_1) / (t_N - t_1)}
+where \eqn{\hat y_1} and \eqn{\hat y_N} are the fitted mean log
+concentrations in \code{first_year_fit} and \code{last_year} and \eqn{t_1} and
+\eqn{t_N} are \code{first_year_fit} and \code{last_year} respectively. Loosely,
+\code{overall_change} can be interpreted as the percentage annual change in
+concentration between \code{first_year_fit} and \code{last_year} assuming the
+trend in concentration is log-linear. More formally, it corresponds to a
+percentage annual change of
+\deqn{100 (exp (overall\_change / 100) - 1))} \cr
+\tab \cr
+\code{p_recent_change} \tab This is similar to \code{p_overall_change}, but focuses
+on change in a 'recent' period rather than over the whole monitoring
+period. The definition of 'recent' comes from the argument \code{recent_trend}
+in \code{run_assessment} which has a default value of twenty years. If the
+maximum year of data in the whole assessment is, for example, 2026, then
+the recent period would default to the twenty year period from 2007 to
+2026. \code{p_recent_change} is the significance of a test which assesses
+whether the mean concentration at the start or the recent period (or
+\code{first_year_fit} whichever is later) and the end of the recent period (or
+\code{last_year} whichever is earlier) were the same. For smooth models,
+\code{p_recent_change} is based on Wald test that compares the fitted values at
+the start and end of the recent period. For linear models,
+\code{p_recent_change} is identical to \code{p_linear_trend} (and
+\code{p_overall_trend}). Occasionally \code{p_recent_change} is not calculated even
+though a linear of smooth model has been fitted to the data; this occurs
+if there are too few years of data with non-censored measurements in the
+recent period. \cr
+\tab \cr
+\code{recent_change} \tab An estimate of the change in mean concentration
+in the recent period (see \code{p_recent_change}). Let \eqn{t_*} be the first
+year in the recent period (or \code{first_year_fit} whichever is later) and let
+\eqn{t_N} be \code{last_year}. Then
+\deqn{recent\_change = 100 (\hat y_N - \hat y_*) / (t_N - t_*)}
+where \eqn{\hat y_*} and \eqn{\hat y_N} are the fitted mean log
+concentrations in \eqn{t_*} and \eqn{t_N} respectively. Loosely,
+\code{recent_change} can be interpreted as the percentage annual change in
+concentration in the recent period assuming the trend in concentration is
+log-linear.  More formally, it corresponds to a percentage
+annual change of
+\deqn{100 (exp (recent\_change / 100) - 1))} \cr
+\tab \cr
+\code{detectable_trend} \tab A measure of the power of the time series to
+detect changes over time. This is the annual change in log concentration
+(multiplied by 100) that would be detected with 90\% power based on a
+(two-sided) test at the 5\% significance level given 10 years of annual
+monitoring and variability typical of the time series. Loosely,
+\code{detectable_trend} can be interpreted as the percentage annual change in
+concentration detectable with 90\% power in 10 years of annual monitoring.
+More formally, it corresponds to an annual percentage
+increase or decrease detectable with 90\% power of respectively
+\deqn{100 exp (\pm detectable\_trend / 100) - 1))} \cr
+\tab \cr
+\code{mean_last_year} \tab The fitted mean concentration in \code{last_year}. If
+a parametric model cannot be fitted (\code{n_year_positive} \eqn{\le} 2), then
+an ad-hoc metric of 'level' is provided by the
+maximum annual contaminant index (typically the back-transformed median
+log-concentration) in the last two monitoring years. \cr
+\tab \cr
+\code{climit_last_year} \tab The upper one-sided 95\% confidence limit on the
+fitted mean concentration in \code{last_year}. \cr
+}
+}
+
+\subsection{Regions}{
+
+Regional variables are provided if they are supplied in the station input
+file (and correctly picked up using the \code{control} argument of \code{read_data}).
+The following columns appear by default for \tabular{ll}{
+OSPAR assessments \cr
+\tab \cr
+\code{OSPAR_region} \tab
+\href{https://odims.ospar.org/en/submissions/ospar_regions_2017_01/}{OSPAR region}
+where the monitoring station is located \cr
+\tab \cr
+\code{OSPAR_subregion} \tab
+\href{https://odims.ospar.org/en/submissions/ospar_assessment_areas_2017_05/}{OSPAR MIME subregion}
+\cr
+\tab \cr
+\tab \cr
+\tab \cr
+HELCOM assessments \cr
+\tab \cr
+\code{HELCOM_subbasin} \tab HELCOM sub-basin where the monitoring station is
+located \cr
+\tab \cr
+\code{HELCOM_L3} \tab HELCOM L3 area \cr
+\tab \cr
+\code{HELCOM_L4} \tab HELCOM L4 area \cr
+\tab \cr
+\tab \cr
+\tab \cr
+AMAP assessments \cr
+\tab \cr
+\code{AMAP_arctic_lme} \tab AMAP Arctic large marine ecosystem where the
+monitoring station is located \cr
+}
+}
+
+\subsection{Normalisation}{
+
+Normalisation variables are provided if the data have been normalised
+(e.g. adjusted to a specified sediment size fraction or lipid
+content) using the \code{normalise} argument of \code{create_timeseries}. The variables
+are \tabular{ll}{
+\code{normaliser} \tab The variable used to normalise concentrations; see the
+determinand reference table or
+\href{http://vocab.ices.dk/?ref=37}{ICES reference codes for PARAM}. \cr
+\tab \cr
+\code{normaliser_value} \tab The value of the normaliser that concentrations
+have been normalised to. \cr
+\tab \cr
+\code{normaliser_unit} \tab The unit of \code{normaliser_value}; see
+\href{https://vocab.ices.dk/?ref=155}{ICES reference codes for MUNIT}. \cr
+}
+}
+
+\subsection{Thresholds}{
+
+Four variables are provided for each threshold specified (in argument \code{AC} of
+\code{run_assessment}). Specifying the \code{"EQS"} threshold, for example, would
+produce the following variables: \tabular{ll}{
+\code{EQS_value} \tab The value of the threshold (EQS) in the same basis and
+units (and normalised in the same way) as the concentration data. \cr
+\tab \cr
+\code{EQS_diff} \tab The difference between \code{climit_last_year} and \code{EQS_value}.
+Negative values correspond to mean concentrations in the last monitoring
+year that were significantly (p < 0.05) below the threshold (EQS). If a
+parametric model cannot be fitted, then an ad-hoc comparison is made by
+calculating the difference between \code{mean_last_year} and \code{EQS_value};
+however, no statistical significance can be inferred from this. \cr
+\tab \cr
+\code{EQS_achieved} \tab The first year (moving forward) in which the mean
+concentration is predicted to be below the threshold (EQS).
+This is only calculated if a parametric model has been fitted. Four cases
+are considered. 1) If \code{mean_last_year} \eqn{\le} EQS, then concentrations
+are already below the EQS and \code{EQS_achieved} is set to \code{last_year}. 2) If
+\code{mean_last_year} > EQS and \code{recent_change} < 0 then concentrations are
+predicted to decrease and \code{EQS_achieved} is set to the first year that the
+predicted concentration is below the EQS assuming the rate of decrease is
+given by \code{recent_change}; the year is truncated at 3000 to prevent values
+getting silly. 3) If \code{mean_last_year} > EQS and \code{recent_change} \eqn{\ge} 0
+then concentrations are predicted to increase and the mean concentration
+will never be below the EQS so \code{EQS_achieved} is arbitrarily set to 3000. 4)
+If \code{mean_last_year} > EQS and no trend is estimated then \code{EQS_achieved}
+is left blank. \cr
+\tab \cr
+\code{EQS_below} \tab The result of a non-parametric test of whether mean
+concentrations are below the threshold (EQS). This is a one-sided sign-test
+using the last five monitoring years. It provides a non-parametric
+alternative to the parametric test of status based on \emph{cl_last_year} and is
+particularly useful when the data are dominated by censored measurements
+and a parametric model can't be fitted. \cr
+}
+
+When thresholds have been grouped (using argument \code{threshold_groups}), a
+fifth variable is produced. For example, suppose "EAC" is the name of a
+group which comprises thresholds "EAC", "ERL", "EQS" and "FEQG" (see
+examples). Then the fifth variable would be \tabular{ll}{
+\code{EAC_type} \verb{   } \tab The name of the threshold used (e.g. "EAC", "ERL", "EQS"
+or "FEQG") \cr
+}
+}
+
+\subsection{Symbologies}{
+
+Symbology variables are provided if the \code{symbology} argument is used.
+The symbology variables can be many and varied (depending on the
+user-specification) and the options available are fully described in the main
+section on Symbologies further below. However, to illustrate, if the default
+symbology is used (\code{symbology = "default"}) then there are two symbology
+variables which will usually be  \tabular{ll}{
+\code{shape} \tab A 'shape' categorising the fitted trend. \cr
+\tab \cr
+\code{colour} \tab A 'colour' categorising the status of the time series. \cr
+}
+}
+
+\subsection{Power}{
+
+Power metrics are produced if \code{extra_output = "power"}. The power
+metrics depend on three parameters which can be set using the \code{control}
+argument of \code{run_assessment}. They are \code{target_power}, \code{target_trend} and
+\code{size} which have default values of 90\%, 5\% and 5\% respectively. The metrics
+are \tabular{ll}{
+\code{power_dt_obs} \tab The percentage annual increase in concentration
+detectable with \code{target_power} by a two-sided test at the \code{size}
+significance level given the observed pattern of monitoring (i.e. same
+years and number of samples per year as the time series) \cr
+\tab \cr
+\code{power_dt_seq} \tab The percentage annual increase in concentration
+detectable with \code{target_power} by a two-sided test at the \code{size}
+significance level assuming that any gaps in the time series have also been
+monitored (i.e. sequential monitoring from \code{first_year_all} to \code{last_year})
+\cr
+\tab \cr
+\code{power_dt_ten} \tab The percentage annual increase in concentration
+detectable with \code{target_power} by a two-sided test at the \code{size}
+significance level assuming ten years of sequential monitoring \cr
+\tab \cr
+\code{power_ny_seq} \tab The number of sequential years of monitoring required
+to detect a \code{target_trend} annual increase in concentration with
+\code{target_power} by a two-sided test at the \code{size} significance level \cr
+\tab \cr
+\code{power_pw_obs} \tab The power of detecting a \code{target_trend} annual increase
+in concentration using a two-sided test at the \code{size} significance level
+given the observed pattern of monitoring \cr
+\tab \cr
+\code{power_pw_seq} \tab The power of detecting a \code{target_trend} annual increase
+in concentration using a two-sided test at the \code{size} significance level
+assuming that any gaps in the time series have also been monitored \cr
+\tab \cr
+\code{power_pw_ten} \tab The power of detecting a \code{target_trend} annual increase
+in concentration using a two-sided test at the \code{size} significance level
+assuming ten years of sequential monitoring \cr
+}\if{html}{\out{
+<br>
+}}
+
+}
 }
 \description{
 Creates a data frame summarising the assessment of each time series and
@@ -86,13 +425,14 @@ one-sided 95\% confidence limits
 of each time series. This is experimental.
 }
 }
-\section{Default symbology}{
+\section{Symbologies}{
 
+\subsection{Default symbology}{
 
 \code{symbology = "default"} calls a pre-defined symbology that generates a
-'shape' and a 'colour' to characterise the status of each time series. Its
-behaviour is controlled using \code{symbology_control}, a named list with the
-following elements:
+'shape' and a 'colour' to characterise the trend and status of each time
+series. Its behaviour is controlled using \code{symbology_control}, a named list
+with the following elements:
 \itemize{
 \item \code{shape}: a list with names \code{none}, \code{mean}, \code{flat}, \code{up}, \code{down} giving the
 shape associated with each pattern of change. Here, \code{none} corresponds to
@@ -126,8 +466,7 @@ be important if multiple symbologies are applied
 }
 }
 
-\section{Custom symbologies}{
-
+\subsection{Custom symbologies:}{
 
 Users can apply custom symbologies by letting \code{symbology} be a user-supplied
 function of the form \code{fn(summary, info, control)} where:
@@ -154,14 +493,17 @@ summary table.
 See the examples for more inspiration.
 }
 
-\section{Multiple symbologies}{
-
+\subsection{Multiple symbologies:}{
 
 Multiple symbologies can be applied by specifying a named list whch can be
 a mixture of default symbologies and custom symbologies. \code{symbology_control}
 must then be a named list (with the same names) giving control information
 for each symbology. It is important to ensure that each symbology gives
-output columns with different names. See examples.
+output columns with different names. See examples.\if{html}{\out{
+<br>
+}}
+
+}
 }
 
 \examples{
